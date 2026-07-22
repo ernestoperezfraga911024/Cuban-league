@@ -1,6 +1,6 @@
 {
   "league": "Cuban League",
-  "season": "2026/27",
+  "currentSeason": "2026/27",
   "lastUpdated": "Sin actualizar",
   "participants": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "id": 2,
-      "name": "Victor Manuel 🥉💪",
+      "name": "Victor Manuel",
       "shield": "team-02.png",
       "points": 0,
       "played": 0
@@ -40,7 +40,7 @@
     },
     {
       "id": 6,
-      "name": "ANDOBA THE BEST 🇨🇺🇺🇸💪🏽",
+      "name": "ANDOBA THE BEST",
       "shield": "team-06.png",
       "points": 0,
       "played": 0
@@ -61,7 +61,7 @@
     },
     {
       "id": 9,
-      "name": "Rivaldo 🍻🍻",
+      "name": "Rivaldo",
       "shield": "team-09.png",
       "points": 0,
       "played": 0
@@ -75,7 +75,7 @@
     },
     {
       "id": 11,
-      "name": "Viva🇨🇺Libre",
+      "name": "Viva Libre",
       "shield": "team-11.png",
       "points": 0,
       "played": 0
@@ -89,7 +89,7 @@
     },
     {
       "id": 13,
-      "name": "Roberto Piñeiro 🇨🇺",
+      "name": "Roberto Piñeiro",
       "shield": "team-13.png",
       "points": 0,
       "played": 0
@@ -117,7 +117,7 @@
     },
     {
       "id": 17,
-      "name": "Juventus 🥇",
+      "name": "Juventus",
       "shield": "team-17.png",
       "points": 0,
       "played": 0
@@ -144,186 +144,368 @@
       "played": 0
     }
   ],
-  "historical": [
+  "general": [
     {
       "name": "GNT D ZONA",
+      "label": "El Más Completo",
       "titles": 2,
+      "seconds": 1,
+      "thirds": 1,
       "podiums": 4,
       "top5": 6,
       "seasons": 6,
       "points": 11466,
-      "avg": 1911.0
+      "average": 1911.0,
+      "score": 100.0,
+      "description": "El terror de la liga: gana, queda en podio y casi nunca da una temporada mala."
     },
     {
-      "name": "ANDOBA THE BEST 🇨🇺🇺🇸💪🏽",
+      "name": "ANDOBA THE BEST",
+      "label": "El Volcán",
       "titles": 2,
+      "seconds": 1,
+      "thirds": 0,
       "podiums": 3,
       "top5": 3,
       "seasons": 7,
       "points": 12535,
-      "avg": 1790.7
+      "average": 1790.7,
+      "score": 76.4,
+      "description": "Tiene dos títulos, la mejor temporada individual y lidera en puntos acumulados."
     },
     {
       "name": "Yovany R9",
+      "label": "El Eterno Casi",
       "titles": 0,
+      "seconds": 2,
+      "thirds": 1,
       "podiums": 3,
       "top5": 3,
       "seasons": 6,
       "points": 10751,
-      "avg": 1791.8
+      "average": 1791.8,
+      "score": 59.2,
+      "description": "Tres podios y cero copas. Nivel de élite con la corona pendiente."
     },
     {
       "name": "Arian Mirandez Li",
+      "label": "El Maratonista",
       "titles": 0,
+      "seconds": 1,
+      "thirds": 0,
       "podiums": 1,
       "top5": 5,
       "seasons": 7,
       "points": 12456,
-      "avg": 1779.4
+      "average": 1779.4,
+      "score": 55.2,
+      "description": "Siete temporadas, muchísimos puntos y cinco top 5."
     },
     {
       "name": "Julio",
+      "label": "El Profesor del Top",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 2,
       "podiums": 2,
       "top5": 3,
       "seasons": 6,
       "points": 10802,
-      "avg": 1800.3
+      "average": 1800.3,
+      "score": 51.2,
+      "description": "Regular, serio y competitivo; le falta cerrar con una copa."
     },
     {
-      "name": "Rivaldo 🍻🍻",
+      "name": "Rivaldo",
+      "label": "Campeón de Resaca",
       "titles": 1,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 1,
       "top5": 2,
       "seasons": 5,
       "points": 8995,
-      "avg": 1799.0
+      "average": 1799.0,
+      "score": 48.9,
+      "description": "Tiene título y respeto ganado. Ya sabe lo que es levantar la copa."
     },
     {
       "name": "Ernesto",
+      "label": "El Podio Sin Copa",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 2,
       "podiums": 2,
       "top5": 2,
       "seasons": 6,
       "points": 10500,
-      "avg": 1750.0
+      "average": 1750.0,
+      "score": 39.2,
+      "description": "Dos podios y 10,500 puntos: historial real de candidato."
     },
     {
       "name": "Patria FC",
+      "label": "El Veterano Incómodo",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 1,
       "podiums": 1,
       "top5": 1,
       "seasons": 5,
       "points": 8574,
-      "avg": 1714.8
+      "average": 1714.8,
+      "score": 26.8,
+      "description": "Podio, experiencia y capacidad para arruinar quinielas."
     },
     {
-      "name": "Juventus 🥇",
+      "name": "Juventus",
+      "label": "Campeón Express",
       "titles": 1,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 1,
       "top5": 1,
       "seasons": 1,
       "points": 1938,
-      "avg": 1938.0
+      "average": 1938.0,
+      "score": 25.4,
+      "description": "Una temporada y un título. Falta saber si será dinastía."
     },
     {
-      "name": "Victor Manuel 🥉💪",
+      "name": "Victor Manuel",
+      "label": "El Ave Fénix",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 1,
       "seasons": 6,
       "points": 10094,
-      "avg": 1682.3
+      "average": 1682.3,
+      "score": 21.3,
+      "description": "Mucho acumulado y una presencia reciente en el top 5."
     },
     {
       "name": "MONEY MON$TER",
+      "label": "El Tiburón Reciente",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 1,
       "seasons": 3,
       "points": 5568,
-      "avg": 1856.0
+      "average": 1856.0,
+      "score": 19.5,
+      "description": "Pocas temporadas, buen promedio y pinta de peligro."
     },
     {
       "name": "Bayer Munich",
+      "label": "Nombre Grande, Presupuesto Corto",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 4,
       "points": 6868,
-      "avg": 1717.0
+      "average": 1717.0,
+      "score": 12.4,
+      "description": "Puntos decentes, pero sin podios ni top 5."
     },
     {
-      "name": "Viva🇨🇺Libre",
+      "name": "Viva Libre",
+      "label": "Libre... Demasiado Libre",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 4,
       "points": 6851,
-      "avg": 1712.8
+      "average": 1712.8,
+      "score": 11.6,
+      "description": "Continuidad y puntos, aunque todavía sin zonas de gloria."
     },
     {
-      "name": "Roberto Piñeiro 🇨🇺",
+      "name": "Roberto Piñeiro",
+      "label": "Diplomático de Media Tabla",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 3,
       "points": 5137,
-      "avg": 1712.3
+      "average": 1712.3,
+      "score": 8.3,
+      "description": "Correcto y estable, pero aún sin golpes de autoridad."
     },
     {
       "name": "Brian",
+      "label": "Modo Ascensor",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 2,
       "points": 3001,
-      "avg": 1500.5
-    },
-    {
-      "name": "@elministro",
-      "titles": 0,
-      "podiums": 0,
-      "top5": 0,
-      "seasons": 1,
-      "points": 1616,
-      "avg": 1616.0
-    },
-    {
-      "name": "Maykel Zuaznabar",
-      "titles": 0,
-      "podiums": 0,
-      "top5": 0,
-      "seasons": 1,
-      "points": 1557,
-      "avg": 1557.0
+      "average": 1500.5,
+      "score": 2.0,
+      "description": "Necesita continuidad para dejar de ser intermitente."
     },
     {
       "name": "Andy",
+      "label": "El Turista de Primera",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 1,
       "points": 1527,
-      "avg": 1527.0
+      "average": 1527.0,
+      "score": 0.7,
+      "description": "Una temporada visible; todavía en fase de presentación."
+    },
+    {
+      "name": "@elministro",
+      "label": "Ministerio de Salvación",
+      "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "podiums": 0,
+      "top5": 0,
+      "seasons": 1,
+      "points": 1616,
+      "average": 1616.0,
+      "score": -1.0,
+      "description": "El ranking pide reforma urgente."
+    },
+    {
+      "name": "Maykel Zuaznabar",
+      "label": "Jefe de la Zona Roja",
+      "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "podiums": 0,
+      "top5": 0,
+      "seasons": 1,
+      "points": 1557,
+      "average": 1557.0,
+      "score": -1.5,
+      "description": "Campaña complicada y necesidad de reinvención."
     },
     {
       "name": "Mario Fernandez",
+      "label": "Nuevo participante",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 0,
       "points": 0,
-      "avg": 0
+      "average": 0,
+      "score": 0,
+      "description": "Sin historial acumulado todavía."
     },
     {
       "name": "Esteban Dominguez",
+      "label": "Nuevo participante",
       "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
       "podiums": 0,
       "top5": 0,
       "seasons": 0,
       "points": 0,
-      "avg": 0
+      "average": 0,
+      "score": 0,
+      "description": "Sin historial acumulado todavía."
+    }
+  ],
+  "seasons": [
+    {
+      "id": "2019/20",
+      "label": "2019/20",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2020/21",
+      "label": "2020/21",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2021/22",
+      "label": "2021/22",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2022/23",
+      "label": "2022/23",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2023/24",
+      "label": "2023/24",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2024/25",
+      "label": "2024/25",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2025/26",
+      "label": "2025/26",
+      "status": "Pendiente de cargar",
+      "results": []
+    },
+    {
+      "id": "2026/27",
+      "label": "2026/27",
+      "status": "Pendiente de cargar",
+      "results": []
+    }
+  ],
+  "awards": [
+    {
+      "title": "Balón de Oro Histórico",
+      "player": "GNT D ZONA",
+      "text": "El más completo: títulos, podios, regularidad y miedo competitivo."
+    },
+    {
+      "title": "Destructor de Récords",
+      "player": "ANDOBA THE BEST",
+      "text": "Líder en puntos totales y dueño de una temporada de 2,105 puntos."
+    },
+    {
+      "title": "El Casi Campeón Oficial",
+      "player": "Yovany R9",
+      "text": "Tres podios y cero copas."
+    },
+    {
+      "title": "Reivindicación Histórica",
+      "player": "Ernesto",
+      "text": "Dos podios y 10,500 puntos pesan demasiado."
+    },
+    {
+      "title": "Campeón Relámpago",
+      "player": "Juventus",
+      "text": "Una temporada y un título."
+    },
+    {
+      "title": "Zona Roja Deluxe",
+      "player": "Maykel Zuaznabar",
+      "text": "La campaña que pide revancha inmediata."
     }
   ]
 }

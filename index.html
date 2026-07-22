@@ -1,5 +1,46 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f"><title>Cuban League</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"></head><body>
-<header class="hero"><nav><div class="brand"><div class="mark">CL</div><div><strong>CUBAN LEAGUE</strong><small>Fantasy Football</small></div></div><button id="shareButton">Compartir</button></nav><div class="hero-copy"><span>SITIO OFICIAL</span><h1>Historia, competencia y gloria.</h1><p>Temporada actual y rendimiento histórico de la liga.</p></div><div class="summary"><article><span>Líder actual</span><strong id="leader">—</strong></article><article><span>Más títulos</span><strong>GNT / Andoba</strong></article><article><span>Líder histórico</span><strong>Andoba · 12,535</strong></article></div></header>
-<main><div class="tabs"><button class="tab active" data-view="current">Temporada actual</button><button class="tab" data-view="history">Ranking histórico</button></div>
-<section id="currentView"><div class="section-head"><div><span class="eyebrow">TEMPORADA <b id="season"></b></span><h2>Tabla general</h2></div><small>Actualizado: <b id="updated">—</b></small></div><div class="card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>Puntos</span></div><div id="standings"></div></div></section>
-<section id="historyView" hidden><div class="section-head"><div><span class="eyebrow">2019/20–2025/26</span><h2>Ranking histórico</h2></div></div><div class="leaders"><article><span>Mejor palmarés</span><strong>GNT D ZONA</strong><small>2 títulos · 4 podios</small></article><article><span>Más puntos</span><strong>ANDOBA THE BEST</strong><small>12,535 puntos</small></article><article><span>Mejor sin título</span><strong>Yovany R9</strong><small>3 podios</small></article></div><div class="card scroll"><div class="thead hist-grid"><span>#</span><span>Participante</span><span>Tít.</span><span>Pod.</span><span>Temp.</span><span>Puntos</span><span>Prom.</span></div><div id="history"></div></div><p class="note">Resumen histórico de las temporadas visibles entre 2019/20 y 2025/26.</p></section></main><footer>Cuban League · Sitio oficial</footer><script src="app.js"></script></body></html>
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f"><title>Cuban League</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<header><nav><div class="brand"><div class="logo">CL</div><div><b>CUBAN LEAGUE</b><small>Archivo histórico oficial</small></div></div><button id="share">Compartir</button></nav>
+<div class="hero"><span class="eyebrow">2019/20 — ACTUALIDAD</span><h1>Una liga. Toda su historia.</h1><p>Temporadas, palmarés, puntos, promedios, récords y perfiles de cada participante.</p></div>
+<div class="kpis"><article><span>Mejor histórico</span><strong>GNT D ZONA</strong><small>2 títulos · 4 podios</small></article>
+<article><span>Líder de puntos</span><strong>ANDOBA THE BEST</strong><small>12,535 puntos</small></article>
+<article><span>Mayor promedio</span><strong>Juventus</strong><small>1,938.0 puntos</small></article></div></header>
+<main>
+<div class="navtabs">
+<button class="navtab active" data-section="current">Actual</button>
+<button class="navtab" data-section="seasons">Temporadas</button>
+<button class="navtab" data-section="general">General</button>
+<button class="navtab" data-section="palmares">Palmarés</button>
+<button class="navtab" data-section="awards">Premios</button></div>
+
+<section id="current" class="page active">
+<div class="section-head"><div><span class="eyebrow">TEMPORADA 2026/27</span><h2>Clasificación actual</h2></div><small>Actualizado: <b id="updated"></b></small></div>
+<div class="card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span></div><div id="currentRows"></div></div>
+</section>
+
+<section id="seasons" class="page">
+<div class="section-head"><div><span class="eyebrow">ARCHIVO ANUAL</span><h2>Resultados por temporada</h2></div>
+<label>Temporada<select id="seasonSelect"></select></label></div>
+<div id="seasonState" class="empty"></div><div id="seasonTable" class="card" hidden></div>
+</section>
+
+<section id="general" class="page">
+<div class="section-head"><div><span class="eyebrow">ESTADÍSTICAS COMPLETAS</span><h2>Ranking histórico general</h2></div>
+<select id="sortGeneral"><option value="ranking">Ranking premium</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></div>
+<div class="card scroll"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div>
+</section>
+
+<section id="palmares" class="page">
+<div class="section-head"><div><span class="eyebrow">GLORIA DE LA LIGA</span><h2>Palmarés puro</h2></div></div>
+<div id="palmaresCards" class="profile-grid"></div>
+</section>
+
+<section id="awards" class="page">
+<div class="section-head"><div><span class="eyebrow">PREMIOS ESPECIALES</span><h2>Salón de la fama</h2></div></div>
+<div id="awardCards" class="profile-grid"></div>
+</section>
+</main><footer>Cuban League · Registro histórico oficial</footer><script src="app.js"></script></body></html>
