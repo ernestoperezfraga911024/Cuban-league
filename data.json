@@ -8,140 +8,320 @@
       "name": "Ernesto",
       "shield": "team-01.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 2,
       "name": "Victor Manuel",
       "shield": "team-02.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 3,
       "name": "Brian",
       "shield": "team-03.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 4,
       "name": "Arian Mirandez Li",
       "shield": "team-04.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 5,
       "name": "GNT D ZONA",
       "shield": "team-05.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 6,
       "name": "ANDOBA THE BEST",
       "shield": "team-06.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 7,
       "name": "Julio",
       "shield": "team-07.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 8,
       "name": "Yovany R9",
       "shield": "team-08.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 9,
       "name": "Rivaldo",
       "shield": "team-09.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 10,
       "name": "Patria FC",
       "shield": "team-10.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 11,
       "name": "Viva Libre",
       "shield": "team-11.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 12,
       "name": "Bayer Munich",
       "shield": "team-12.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 13,
       "name": "Roberto Piñeiro",
       "shield": "team-13.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 14,
       "name": "MONEY MON$TER",
       "shield": "team-14.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 15,
       "name": "@elministro",
       "shield": "team-15.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 16,
       "name": "Maykel Zuaznabar",
       "shield": "team-16.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 17,
       "name": "Juventus",
       "shield": "team-17.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 18,
       "name": "Andy",
       "shield": "team-18.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 19,
       "name": "Mario Fernandez",
       "shield": "team-19.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     },
     {
       "id": 20,
       "name": "Esteban Dominguez",
       "shield": "team-20.png",
       "points": 0,
-      "played": 0
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": null
     }
   ],
   "general": [
@@ -507,5 +687,113 @@
       "player": "Maykel Zuaznabar",
       "text": "La campaña que pide revancha inmediata."
     }
-  ]
+  ],
+  "records": [
+    {
+      "title": "Más títulos",
+      "player": "GNT D ZONA / ANDOBA THE BEST",
+      "value": "2"
+    },
+    {
+      "title": "Más podios",
+      "player": "GNT D ZONA",
+      "value": "4"
+    },
+    {
+      "title": "Más puntos acumulados",
+      "player": "ANDOBA THE BEST",
+      "value": "12,535"
+    },
+    {
+      "title": "Mejor promedio",
+      "player": "Juventus",
+      "value": "1,938.0"
+    },
+    {
+      "title": "Más temporadas",
+      "player": "ANDOBA / Arian",
+      "value": "7"
+    },
+    {
+      "title": "Más Top 5",
+      "player": "GNT D ZONA",
+      "value": "6"
+    }
+  ],
+  "news": [
+    {
+      "date": "Próximamente",
+      "title": "Comienza la temporada 2026/27",
+      "text": "La Cuban League se prepara para una nueva temporada con 20 participantes."
+    },
+    {
+      "date": "Histórico",
+      "title": "GNT D ZONA lidera el ranking premium",
+      "text": "Dos títulos, cuatro podios y seis top 5 lo colocan como el más completo."
+    },
+    {
+      "date": "Récord",
+      "title": "ANDOBA THE BEST alcanza 12,535 puntos",
+      "text": "Se convierte en el líder histórico por puntos acumulados."
+    }
+  ],
+  "champions": {
+    "status": "Preparación",
+    "groups": [
+      {
+        "name": "Grupo A",
+        "teams": [
+          "Ernesto",
+          "Victor Manuel",
+          "Brian",
+          "Arian Mirandez Li",
+          "GNT D ZONA"
+        ]
+      },
+      {
+        "name": "Grupo B",
+        "teams": [
+          "ANDOBA THE BEST",
+          "Julio",
+          "Yovany R9",
+          "Rivaldo",
+          "Patria FC"
+        ]
+      },
+      {
+        "name": "Grupo C",
+        "teams": [
+          "Viva Libre",
+          "Bayer Munich",
+          "Roberto Piñeiro",
+          "MONEY MON$TER",
+          "@elministro"
+        ]
+      },
+      {
+        "name": "Grupo D",
+        "teams": [
+          "Maykel Zuaznabar",
+          "Juventus",
+          "Andy",
+          "Mario Fernandez",
+          "Esteban Dominguez"
+        ]
+      }
+    ],
+    "knockout": [
+      {
+        "round": "Cuartos",
+        "matches": []
+      },
+      {
+        "round": "Semifinales",
+        "matches": []
+      },
+      {
+        "round": "Final",
+        "matches": []
+      }
+    ]
+  }
 }

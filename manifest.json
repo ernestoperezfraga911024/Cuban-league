@@ -1,0 +1,15 @@
+{
+  "name": "Cuban League",
+  "short_name": "Cuban League",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#050d18",
+  "theme_color": "#07111f",
+  "icons": [
+    {
+      "src": "team-01.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
