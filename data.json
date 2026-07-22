@@ -1,0 +1,167 @@
+{
+  "league": "Cuban League",
+  "season": "2026/27",
+  "lastUpdated": "Sin actualizar",
+  "participants": [
+    {
+      "id": 1,
+      "name": "Ernesto",
+      "shield": "assets/team-01.png",
+      "points": 0,
+      "previousPosition": 1,
+      "played": 0
+    },
+    {
+      "id": 2,
+      "name": "Victor Manuel 🥉💪",
+      "shield": "assets/team-02.png",
+      "points": 0,
+      "previousPosition": 2,
+      "played": 0
+    },
+    {
+      "id": 3,
+      "name": "Brian",
+      "shield": "assets/team-03.png",
+      "points": 0,
+      "previousPosition": 3,
+      "played": 0
+    },
+    {
+      "id": 4,
+      "name": "Arian Mirandez Li",
+      "shield": "assets/team-04.png",
+      "points": 0,
+      "previousPosition": 4,
+      "played": 0
+    },
+    {
+      "id": 5,
+      "name": "GNT D ZONA",
+      "shield": "assets/team-05.png",
+      "points": 0,
+      "previousPosition": 5,
+      "played": 0
+    },
+    {
+      "id": 6,
+      "name": "ANDOBA THE BEST 🇨🇺🇺🇸💪🏽",
+      "shield": "assets/team-06.png",
+      "points": 0,
+      "previousPosition": 6,
+      "played": 0
+    },
+    {
+      "id": 7,
+      "name": "Julio",
+      "shield": "assets/team-07.png",
+      "points": 0,
+      "previousPosition": 7,
+      "played": 0
+    },
+    {
+      "id": 8,
+      "name": "Yovany R9",
+      "shield": "assets/team-08.png",
+      "points": 0,
+      "previousPosition": 8,
+      "played": 0
+    },
+    {
+      "id": 9,
+      "name": "Rivaldo 🍻🍻",
+      "shield": "assets/team-09.png",
+      "points": 0,
+      "previousPosition": 9,
+      "played": 0
+    },
+    {
+      "id": 10,
+      "name": "Patria FC",
+      "shield": "assets/team-10.png",
+      "points": 0,
+      "previousPosition": 10,
+      "played": 0
+    },
+    {
+      "id": 11,
+      "name": "Viva🇨🇺Libre",
+      "shield": "assets/team-11.png",
+      "points": 0,
+      "previousPosition": 11,
+      "played": 0
+    },
+    {
+      "id": 12,
+      "name": "Bayer Munich",
+      "shield": "assets/team-12.png",
+      "points": 0,
+      "previousPosition": 12,
+      "played": 0
+    },
+    {
+      "id": 13,
+      "name": "Roberto Piñeiro 🇨🇺",
+      "shield": "assets/team-13.png",
+      "points": 0,
+      "previousPosition": 13,
+      "played": 0
+    },
+    {
+      "id": 14,
+      "name": "MONEY MON$TER",
+      "shield": "assets/team-14.png",
+      "points": 0,
+      "previousPosition": 14,
+      "played": 0
+    },
+    {
+      "id": 15,
+      "name": "@elministro",
+      "shield": "assets/team-15.png",
+      "points": 0,
+      "previousPosition": 15,
+      "played": 0
+    },
+    {
+      "id": 16,
+      "name": "Maykel Zuaznabar",
+      "shield": "assets/team-16.png",
+      "points": 0,
+      "previousPosition": 16,
+      "played": 0
+    },
+    {
+      "id": 17,
+      "name": "Juventus 🥇",
+      "shield": "assets/team-17.png",
+      "points": 0,
+      "previousPosition": 17,
+      "played": 0
+    },
+    {
+      "id": 18,
+      "name": "Andy",
+      "shield": "assets/team-18.png",
+      "points": 0,
+      "previousPosition": 18,
+      "played": 0
+    },
+    {
+      "id": 19,
+      "name": "Mario Fernandez",
+      "shield": "assets/team-19.png",
+      "points": 0,
+      "previousPosition": 19,
+      "played": 0
+    },
+    {
+      "id": 20,
+      "name": "Esteban Dominguez",
+      "shield": "assets/team-20.png",
+      "points": 0,
+      "previousPosition": 20,
+      "played": 0
+    }
+  ]
+}

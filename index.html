@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <title>Cuban League</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav>
+      <div class="brand">
+        <div class="mark">CL</div>
+        <div><strong>CUBAN LEAGUE</strong><small>Fantasy Football</small></div>
+      </div>
+      <button id="shareButton" class="ghost">Compartir</button>
+    </nav>
+    <div class="hero-copy">
+      <span class="eyebrow">TEMPORADA <span id="season"></span></span>
+      <h1>La liga donde cada punto cuenta.</h1>
+      <p>Clasificación oficial, historial y estadísticas de la Cuban League.</p>
+    </div>
+    <div class="summary">
+      <article><span>Líder actual</span><strong id="leader">—</strong></article>
+      <article><span>Participantes</span><strong id="total">20</strong></article>
+      <article><span>Actualizado</span><strong id="updated">—</strong></article>
+    </div>
+  </header>
+
+  <main>
+    <section class="section-head">
+      <div>
+        <span class="eyebrow">CLASIFICACIÓN</span>
+        <h2>Tabla general</h2>
+      </div>
+      <label>
+        Temporada
+        <select id="seasonSelect"><option>2026/27</option></select>
+      </label>
+    </section>
+
+    <section class="table-card">
+      <div class="table-header">
+        <span>Pos.</span><span>Participante</span><span>J</span><span>Puntos</span>
+      </div>
+      <div id="standings"></div>
+    </section>
+
+    <section class="notice">
+      <strong>Próxima fase</strong>
+      <p>Conectaremos esta tabla a Google Sheets para que la actualización semanal sea automática.</p>
+    </section>
+  </main>
+
+  <footer>Cuban League · Sitio oficial de la liga</footer>
+  <script src="app.js"></script>
+</body>
+</html>
