@@ -5,64 +5,53 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css"></head><body>
-<div class="app-shell">
-<header class="topbar"><div class="brand"><div class="logo">CL</div><div><b>CUBAN LEAGUE</b><small>Competición oficial</small></div></div><button id="share">Compartir</button></header>
-<section class="hero">
-<div class="hero-overlay"></div><div class="hero-content"><span class="eyebrow">TEMPORADA 2026/27</span><h1>Donde nace la gloria.</h1><p>Resultados, historia, récords y Champions de la Cuban League.</p><div class="hero-actions"><button data-go="current">Ver clasificación</button><button class="secondary" data-go="champions">Ver Champions</button></div></div>
-<div class="hero-stats"><article><span>Mejor histórico</span><strong>GNT D ZONA</strong></article><article><span>Líder de puntos</span><strong>ANDOBA THE BEST</strong></article><article><span>Participantes</span><strong>20</strong></article></div></section>
+<header class="topbar"><div class="brand"><div class="logo">CL</div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><button id="share">Compartir</button></header>
+
+<section class="hero-photo">
+<div class="shade"></div><div class="hero-copy"><span class="eyebrow">TEMPORADA 2026/27</span><h1>Una liga.<br>Toda una historia.</h1><p>Clasificación, temporadas, perfiles, récords y Champions en una sola web.</p><div class="actions"><button data-go="current">Ver clasificación</button><button class="secondary" data-go="history">Museo histórico</button></div></div>
+<div class="hero-kpis"><article><span>Mejor histórico</span><b>GNT D ZONA</b><small>2 títulos · 4 podios</small></article><article><span>Líder de puntos</span><b>ANDOBA THE BEST</b><small>12,535 puntos</small></article><article><span>Participantes</span><b>20</b><small>Temporada 2026/27</small></article></div>
+</section>
 
 <nav class="main-nav">
-<button class="navtab active" data-section="home">Inicio</button>
-<button class="navtab" data-section="current">Clasificación</button>
-<button class="navtab" data-section="players">Participantes</button>
-<button class="navtab" data-section="general">Histórico</button>
-<button class="navtab" data-section="records">Récords</button>
-<button class="navtab" data-section="champions">Champions</button>
-<button class="navtab" data-section="news">Noticias</button>
+<button class="navtab active" data-section="home">Inicio</button><button class="navtab" data-section="current">Clasificación</button>
+<button class="navtab" data-section="seasons">Temporadas</button><button class="navtab" data-section="players">Participantes</button>
+<button class="navtab" data-section="history">Histórico</button><button class="navtab" data-section="records">Récords</button>
+<button class="navtab" data-section="champions">Champions</button><button class="navtab" data-section="news">Noticias</button>
 </nav>
 
 <main>
 <section id="home" class="page active">
-<div class="dashboard-grid">
-<article class="panel feature"><span class="eyebrow">ESTADO ACTUAL</span><h2>Temporada preparada</h2><p>La clasificación se actualizará desde tu panel de Google Sheets.</p><button data-go="current">Abrir tabla</button></article>
-<article class="panel"><span class="eyebrow">RÉCORD HISTÓRICO</span><h3>12,535 puntos</h3><p>ANDOBA THE BEST</p></article>
-<article class="panel"><span class="eyebrow">MÁS COMPLETO</span><h3>GNT D ZONA</h3><p>2 títulos · 4 podios · 6 top 5</p></article>
-</div>
-<div class="section-head"><div><span class="eyebrow">DESTACADOS</span><h2>Noticias de la liga</h2></div></div><div id="homeNews" class="news-grid"></div>
+<div class="football-split"><article class="photo-card mbappe"><div><span class="eyebrow">POTENCIA</span><h2>Competir hasta el final.</h2><p>La clasificación semanal, las rachas y los cambios de posición serán parte del seguimiento oficial.</p></div></article>
+<article class="photo-card yamal"><div><span class="eyebrow">FUTURO</span><h2>La nueva generación.</h2><p>Perfiles completos, evolución por jornada y estadísticas acumuladas.</p></div></article></div>
+<div class="section-head"><div><span class="eyebrow">RESUMEN</span><h2>Lo mejor de la Cuban League</h2></div></div>
+<div class="dashboard-grid"><article class="panel"><span>Más títulos</span><h3>2</h3><p>GNT D ZONA y ANDOBA THE BEST</p></article><article class="panel"><span>Más podios</span><h3>4</h3><p>GNT D ZONA</p></article><article class="panel"><span>Mayor promedio</span><h3>1,938.0</h3><p>Juventus</p></article></div>
 </section>
 
-<section id="current" class="page">
-<div class="section-head"><div><span class="eyebrow">TEMPORADA 2026/27</span><h2>Clasificación general</h2></div><small>Actualizado: <b id="updated"></b></small></div>
-<div class="card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span></div><div id="currentRows"></div></div>
+<section id="current" class="page"><div class="section-head"><div><span class="eyebrow">2026/27</span><h2>Clasificación actual</h2></div><small>Actualizado: <b id="updated"></b></small></div>
+<div class="card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span></div><div id="currentRows"></div></div></section>
+
+<section id="seasons" class="page"><div class="season-banner"><div><span class="eyebrow">ARCHIVO DE TEMPORADAS</span><h2>Consulta cada edición</h2><p>Selecciona una temporada para consultar su clasificación final.</p></div></div>
+<div class="section-head"><div><h2>Resultados por temporada</h2></div><select id="seasonSelect"></select></div><div id="seasonContent"></div></section>
+
+<section id="players" class="page"><div class="section-head"><div><span class="eyebrow">20 PARTICIPANTES</span><h2>Perfiles individuales</h2></div><input id="playerSearch" placeholder="Buscar participante"></div><div id="playerGrid" class="player-grid"></div></section>
+
+<section id="history" class="page">
+<div class="history-banner"><div><span class="eyebrow">MUSEO HISTÓRICO</span><h2>Todos los números de la liga</h2><p>Ranking premium, puntos acumulados, palmarés y estadísticas generales.</p></div></div>
+<div class="subtabs"><button class="subtab active" data-hist="premium">Ranking premium</button><button class="subtab" data-hist="points">Puntos acumulados</button><button class="subtab" data-hist="palmares">Palmarés puro</button></div>
+<div id="premiumTable" class="history-panel active"><div class="section-head"><div><h2>Ranking histórico completo</h2></div><select id="sortGeneral"><option value="ranking">Score histórico</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></div>
+<div class="card scroll"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div></div>
+<div id="pointsTable" class="history-panel"><div class="section-head"><h2>Ranking por puntos acumulados</h2></div><div class="card"><div class="thead points-grid"><span>#</span><span>Jugador</span><span>Temporadas</span><span>Puntos</span><span>Promedio</span></div><div id="pointsRows"></div></div></div>
+<div id="palmaresTable" class="history-panel"><div class="section-head"><h2>Palmarés puro</h2></div><div class="card"><div class="thead palmares-grid"><span>#</span><span>Jugador</span><span>Títulos</span><span>2º</span><span>3º</span><span>Podios</span></div><div id="palmaresRows"></div></div></div>
 </section>
 
-<section id="players" class="page">
-<div class="section-head"><div><span class="eyebrow">PLANTILLA COMPLETA</span><h2>Participantes</h2></div><input id="playerSearch" placeholder="Buscar participante"></div>
-<div id="playerGrid" class="player-grid"></div>
-</section>
+<section id="records" class="page"><div class="records-banner"><div><span class="eyebrow">LIBRO DE RÉCORDS</span><h2>Marcas históricas</h2></div></div><div id="recordGrid" class="record-grid"></div><div class="section-head lower"><div><span class="eyebrow">PREMIOS ESPECIALES</span><h2>Salón de la fama</h2></div></div><div id="awardGrid" class="record-grid"></div></section>
 
-<section id="general" class="page">
-<div class="section-head"><div><span class="eyebrow">2019/20 — 2025/26</span><h2>Ranking histórico</h2></div><select id="sortGeneral"><option value="ranking">Ranking premium</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></div>
-<div class="card scroll"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div>
-</section>
+<section id="champions" class="page"><div class="champions-banner"><div><span class="eyebrow">CUBAN LEAGUE CHAMPIONS</span><h2>El camino hacia la gloria</h2></div></div><div class="section-head"><h2>Fase de grupos</h2><span class="status">Preparación</span></div><div id="groupGrid" class="group-grid"></div><div class="section-head lower"><h2>Eliminatorias</h2></div><div id="bracket" class="bracket"></div></section>
 
-<section id="records" class="page">
-<div class="section-head"><div><span class="eyebrow">LIBRO DE RÉCORDS</span><h2>Marcas históricas</h2></div></div><div id="recordGrid" class="record-grid"></div>
-</section>
-
-<section id="champions" class="page">
-<div class="section-head"><div><span class="eyebrow">CUBAN LEAGUE CHAMPIONS</span><h2>Fase de grupos</h2></div><span class="status">Preparación</span></div>
-<div id="groupGrid" class="group-grid"></div>
-<div class="section-head lower"><div><span class="eyebrow">ELIMINATORIAS</span><h2>Camino a la final</h2></div></div>
-<div id="bracket" class="bracket"></div>
-</section>
-
-<section id="news" class="page">
-<div class="section-head"><div><span class="eyebrow">ACTUALIDAD</span><h2>Noticias y jornadas</h2></div></div><div id="newsGrid" class="news-grid"></div>
-</section>
+<section id="news" class="page"><div class="section-head"><div><span class="eyebrow">ACTUALIDAD</span><h2>Noticias y jornadas</h2></div></div><div id="newsGrid" class="news-grid"></div></section>
 </main>
-<nav class="bottom-nav"><button data-go="home">Inicio</button><button data-go="current">Tabla</button><button data-go="champions">Champions</button><button data-go="players">Jugadores</button></nav>
-</div>
 
+<nav class="bottom-nav"><button data-go="home">Inicio</button><button data-go="current">Tabla</button><button data-go="history">Histórico</button><button data-go="champions">Champions</button></nav>
 <div id="playerModal" class="modal" hidden><div class="modal-card"><button id="closeModal">✕</button><div id="modalContent"></div></div></div>
+<footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
 <script src="app.js"></script></body></html>
