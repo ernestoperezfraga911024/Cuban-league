@@ -312,3 +312,75 @@ img{
     padding-bottom:90px;
   }
 }
+
+
+/* ===== CUBAN LEAGUE V7 — TRUE MOBILE STATS ===== */
+@media(max-width:620px){
+  /* Historical/general table becomes stacked participant cards */
+  .scroll{overflow:visible!important}
+  .scroll>.thead.general-grid{display:none!important}
+  .scroll>#generalRows{min-width:0!important;display:block!important}
+  #generalRows .general-row{
+    min-width:0!important;width:100%!important;
+    display:grid!important;
+    grid-template-columns:34px minmax(0,1fr) repeat(3,auto)!important;
+    gap:8px 10px!important;
+    padding:14px 12px!important;
+    margin:0 0 10px!important;
+    border:1px solid var(--line)!important;
+    border-radius:16px!important;
+    background:linear-gradient(145deg,rgba(11,25,41,.98),rgba(8,19,32,.98))!important;
+    align-items:center!important;
+  }
+  #generalRows .general-row>*{min-width:0}
+  #generalRows .general-row .team{grid-column:2/-1}
+  #generalRows .general-row .pos{grid-column:1;grid-row:1}
+  #generalRows .general-row .team img{width:44px;height:44px}
+  #generalRows .general-row .center,
+  #generalRows .general-row .num{
+    text-align:center!important;
+    padding:7px 6px;
+    border-radius:10px;
+    background:rgba(255,255,255,.035);
+    font-size:.76rem;
+  }
+
+  /* Points history: mobile cards */
+  #pointsTable .card{overflow:visible!important;background:transparent;border:0}
+  #pointsTable .thead{display:none!important}
+  #pointsTable .points-row{
+    min-width:0!important;width:100%!important;
+    display:grid!important;
+    grid-template-columns:32px minmax(0,1fr) 1fr 1fr!important;
+    gap:8px!important;
+    padding:13px!important;margin-bottom:9px;
+    border:1px solid var(--line)!important;border-radius:15px!important;
+    background:var(--panel)!important;
+  }
+
+  /* Palmares: mobile cards */
+  #palmaresTable .card{overflow:visible!important;background:transparent;border:0}
+  #palmaresTable .thead{display:none!important}
+  #palmaresTable .palmares-row{
+    min-width:0!important;width:100%!important;
+    display:grid!important;
+    grid-template-columns:32px minmax(0,1fr) repeat(2,1fr)!important;
+    gap:8px!important;
+    padding:13px!important;margin-bottom:9px;
+    border:1px solid var(--line)!important;border-radius:15px!important;
+    background:var(--panel)!important;
+  }
+
+  /* Current standings stay fully visible */
+  .card:has(#currentRows){overflow:hidden}
+  #currentRows .row{width:100%;min-width:0}
+
+  /* Navigation has access to more content without landscape */
+  .subtabs{width:100%;gap:6px}
+  .subtab{padding:9px 11px;font-size:.78rem}
+
+  /* More compact content cards */
+  .panel,.record,.news-card{padding:16px}
+  .record h3,.panel h3{font-size:1.55rem}
+  .known-row{font-size:.88rem}
+}
