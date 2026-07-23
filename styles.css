@@ -1504,3 +1504,52 @@ img{
   .player-inline{gap:6px}
   .player-inline img{width:30px;height:30px;min-width:30px;border-radius:8px}
 }
+
+
+/* =========================================================
+   V21 — FOTOS EN EMPATES + HOME + JERARQUÍA MÁS COMPACTA
+   ========================================================= */
+.player-inline{
+  gap:10px;
+  font-size:1.06em;
+  font-weight:800;
+  color:var(--text);
+}
+.player-inline-photos{
+  display:inline-flex;
+  align-items:center;
+  flex:0 0 auto;
+}
+.player-inline-photos img{
+  width:40px;
+  height:40px;
+  min-width:40px;
+  border-radius:10px;
+  object-fit:cover;
+  border:2px solid #10263a;
+  background:#081522;
+}
+.player-inline-photos.multiple img+img{margin-left:-10px}
+.player-inline-photos.multiple img{box-shadow:0 0 0 2px #071522}
+.player-inline.compact .player-inline-photos img{width:31px;height:31px;min-width:31px}
+.player-inline.compact .player-inline-photos.multiple img+img{margin-left:-8px}
+
+/* Records: labels and giant values slightly smaller; holder more prominent */
+.record-card .label,.record .label,.record-card small,.record small{font-size:.82rem}
+.record-card .value,.record .value,.record-card h3,.record h3{font-size:clamp(1.8rem,5vw,2.55rem)}
+.record-card .player-inline,.record .player-inline{font-size:1rem}
+
+/* Home summary cards */
+.home-stat-card .player-inline,.hero-stat .player-inline,.home-highlight .player-inline{
+  font-size:1.05rem;
+}
+.home-stat-card .player-inline-photos img,.hero-stat .player-inline-photos img,.home-highlight .player-inline-photos img{
+  width:38px;height:38px;min-width:38px;
+}
+
+@media(max-width:700px){
+  .player-inline{font-size:1rem;gap:8px}
+  .player-inline-photos img{width:36px;height:36px;min-width:36px;border-radius:9px}
+  .record-card .value,.record .value,.record-card h3,.record h3{font-size:1.85rem}
+  .record-card .label,.record .label,.record-card small,.record small{font-size:.76rem}
+}
