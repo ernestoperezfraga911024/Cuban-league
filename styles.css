@@ -2450,6 +2450,24 @@ footer{
 
 
 /* =========================================================
+   V28 — SIN BARRA DE NAVEGACIÓN INFERIOR
+   ========================================================= */
+.bottom-nav{
+  display:none !important;
+}
+
+@media(max-width:620px){
+  body{
+    padding-bottom:0 !important;
+  }
+
+  footer{
+    padding-bottom:28px !important;
+  }
+}
+
+
+/* =========================================================
    V26 — ESCUDO DE FÚTBOL + INSTALACIÓN SIN CONFUSIONES
    ========================================================= */
 .logo{
