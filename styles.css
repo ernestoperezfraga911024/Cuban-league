@@ -17,37 +17,27 @@ footer{text-align:center;padding:28px 20px;color:var(--muted);border-top:1px sol
 @media(max-width:850px){.football-split{grid-template-columns:1fr}.photo-card{min-height:440px}.dashboard-grid,.record-grid,.news-grid{grid-template-columns:1fr 1fr}.player-grid{grid-template-columns:repeat(2,1fr)}.hero-kpis{grid-template-columns:1fr 1fr}.hero-kpis article:last-child{grid-column:1/-1}.group-grid{grid-template-columns:1fr}.bracket{grid-template-columns:1fr}}
 @media(max-width:620px){.topbar>button,.main-nav{display:none}.hero-photo{min-height:680px;padding-bottom:100px}.hero-copy h1{font-size:3.8rem}.hero-kpis{grid-template-columns:1fr}.hero-kpis article:last-child{grid-column:auto}.dashboard-grid,.record-grid,.news-grid{grid-template-columns:1fr}.player-grid{grid-template-columns:1fr 1fr}.bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:50;justify-content:space-around;padding:10px 8px calc(10px + env(safe-area-inset-bottom));background:rgba(5,12,22,.95);backdrop-filter:blur(16px);border-top:1px solid var(--line)}.bottom-nav button{background:transparent;border:0;font-size:.73rem}.section-head{align-items:center}.current-grid,.row{grid-template-columns:38px minmax(0,1fr) 32px 58px;padding-left:11px;padding-right:11px}.team img{width:43px;height:43px}.points-grid,.points-row{grid-template-columns:40px minmax(150px,1fr) 90px 90px 90px;min-width:650px}.palmares-grid,.palmares-row{grid-template-columns:40px minmax(150px,1fr) 75px 70px 70px 75px;min-width:600px}.profile-stats{grid-template-columns:1fr 1fr}}
 
+/* ===== CUBAN LEAGUE V6 - MOBILE RESPONSIVE ===== */
 html{
   -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
 }
-
 body{
   overflow-x:hidden;
-  padding-bottom:0;
 }
-
 img{
   max-width:100%;
+  height:auto;
 }
-
-.brand,
-.page,
-.player-card,
-.group,
-.group-team{
+.brand,.page,.player-card,.group,.group-team{
   min-width:0;
 }
-
-.main-nav,
-.subtabs,
-.scroll{
+.main-nav,.subtabs,.scroll{
   -webkit-overflow-scrolling:touch;
 }
-
 .main-nav{
   scrollbar-width:none;
 }
-
 .main-nav::-webkit-scrollbar{
   display:none;
 }
@@ -55,16 +45,16 @@ img{
 @media(max-width:620px){
 
   body{
-    padding-bottom:72px;
+    padding-bottom:78px;
   }
 
-  /* CABECERA */
   .topbar{
-    padding:10px 12px;
+    padding:9px 12px;
   }
 
-  .topbar>button{
-    display:none;
+  .topbar>button,
+  .main-nav{
+    display:none !important;
   }
 
   .brand small{
@@ -80,126 +70,96 @@ img{
   .logo{
     width:40px;
     height:40px;
+    flex:0 0 40px;
     border-radius:12px;
-    flex:0 0 auto;
   }
 
-  /* PORTADA */
   .hero-photo{
-    min-height:560px;
-    padding:42px 16px 105px;
+    min-height:auto;
+    padding:48px 15px 30px;
     background-position:center top;
   }
 
+  .hero-copy{
+    max-width:100%;
+  }
+
   .hero-copy h1{
-    font-size:clamp(2.65rem,13vw,4rem);
-    line-height:.93;
+    font-size:clamp(2.55rem,13vw,3.95rem);
+    line-height:.92;
   }
 
   .hero-copy p{
-    font-size:.95rem;
+    font-size:.94rem;
   }
 
   .actions{
-    display:flex;
-    flex-wrap:wrap;
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:8px;
   }
 
   .actions button{
-    flex:1 1 140px;
+    width:100%;
+    min-width:0;
+    padding:11px 8px;
   }
 
   .hero-kpis{
     grid-template-columns:1fr;
-    margin-top:30px;
+    margin-top:28px;
   }
 
-  .hero-kpis article{
-    padding:14px;
+  .hero-kpis article,
+  .hero-kpis article:last-child{
+    grid-column:auto;
+    padding:13px;
   }
 
-  /* CONTENIDO */
   main{
-    padding:24px 12px 95px;
+    padding:22px 11px 94px;
   }
 
-  .football-split{
-    grid-template-columns:1fr;
-    gap:12px;
-  }
-
-  .photo-card{
-    min-height:360px;
-    border-radius:18px;
-  }
-
-  .photo-card>div{
-    left:18px;
-    right:18px;
-    bottom:18px;
-  }
-
-  .photo-card h2{
-    font-size:1.65rem;
-  }
-
+  .football-split,
   .dashboard-grid,
   .record-grid,
   .news-grid,
   .group-grid,
   .bracket{
-    grid-template-columns:1fr;
+    grid-template-columns:1fr !important;
   }
 
-  /* CLASIFICACION */
-  .current-grid,
-  .row{
-    grid-template-columns:34px minmax(0,1fr) 30px 54px;
-    padding-left:10px;
-    padding-right:10px;
+  .photo-card{
+    min-height:340px;
+    border-radius:18px;
   }
 
-  .row{
-    padding-top:10px;
-    padding-bottom:10px;
+  .photo-card>div{
+    left:17px;
+    right:17px;
+    bottom:17px;
   }
 
-  .team{
-    gap:9px;
+  .photo-card h2{
+    font-size:1.6rem;
   }
 
-  .team img{
-    width:40px;
-    height:40px;
-    border-radius:11px;
-    flex:0 0 auto;
-  }
-
-  .name{
-    font-size:.88rem;
-  }
-
-  .thead{
-    font-size:.62rem;
-  }
-
-  /* PARTICIPANTES */
   .player-grid{
-    grid-template-columns:1fr;
+    grid-template-columns:1fr !important;
   }
 
   .player-card{
     display:grid;
-    grid-template-columns:64px minmax(0,1fr);
-    column-gap:12px;
+    grid-template-columns:62px minmax(0,1fr);
+    gap:3px 12px;
     align-items:center;
   }
 
   .player-card img{
-    width:64px;
-    height:64px;
+    width:62px;
+    height:62px;
     grid-row:1/4;
+    border-radius:15px;
   }
 
   .player-card h3,
@@ -210,41 +170,79 @@ img{
   }
 
   .player-card p{
-    margin-top:6px;
+    margin-top:5px;
+    font-size:.86rem;
   }
 
-  /* TITULOS Y SELECTORES */
   .section-head{
-    align-items:flex-start;
     flex-direction:column;
+    align-items:flex-start;
     gap:10px;
   }
 
-  .section-head select,
-  .section-head input{
+  .section-head input,
+  .section-head select{
     width:100%;
   }
 
-  /* BANNERS */
+  .current-grid,
+  .row{
+    grid-template-columns:30px minmax(0,1fr) 28px 50px;
+    padding-left:8px;
+    padding-right:8px;
+  }
+
+  .row{
+    padding-top:10px;
+    padding-bottom:10px;
+  }
+
+  .team{
+    gap:8px;
+    min-width:0;
+  }
+
+  .team img{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    flex:0 0 auto;
+  }
+
+  .name{
+    font-size:.86rem;
+  }
+
+  .thead{
+    font-size:.59rem;
+  }
+
   .season-banner,
   .history-banner,
   .records-banner,
   .champions-banner{
-    min-height:220px;
-    padding:20px;
-    border-radius:18px;
+    min-height:210px;
+    padding:18px;
+    border-radius:17px;
   }
 
   .season-banner h2,
   .history-banner h2,
   .records-banner h2,
   .champions-banner h2{
-    font-size:2rem;
+    font-size:1.9rem;
   }
 
-  /* TABLAS HISTORICAS */
-  .scroll{
+  .subtabs{
     overflow-x:auto;
+    padding-bottom:2px;
+  }
+
+  .scroll,
+  #pointsTable .card,
+  #palmaresTable .card{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
   }
 
   .general-grid,
@@ -254,27 +252,23 @@ img{
 
   .points-grid,
   .points-row{
-    grid-template-columns:
-      36px minmax(140px,1fr) 80px 90px 88px;
-    min-width:540px;
+    min-width:560px;
   }
 
   .palmares-grid,
   .palmares-row{
-    grid-template-columns:
-      36px minmax(140px,1fr) 70px 64px 64px 70px;
-    min-width:510px;
+    min-width:530px;
   }
 
-  /* PERFIL DE JUGADOR */
   .profile-head{
     align-items:flex-start;
+    gap:12px;
   }
 
   .profile-head img{
-    width:78px;
-    height:78px;
-    border-radius:18px;
+    width:76px;
+    height:76px;
+    border-radius:17px;
     flex:0 0 auto;
   }
 
@@ -283,38 +277,38 @@ img{
   }
 
   .modal{
-    padding:8px;
+    padding:7px;
   }
 
   .modal-card{
-    padding:18px 14px;
-    border-radius:18px;
     max-height:94vh;
+    padding:17px 13px;
+    border-radius:18px;
   }
 
-  /* MENU INFERIOR TIPO APP */
   .bottom-nav{
-    display:flex;
+    display:flex !important;
     position:fixed;
-    bottom:0;
     left:0;
     right:0;
-    z-index:50;
-    justify-content:space-around;
+    bottom:0;
+    z-index:70;
     gap:2px;
-    padding:
-      8px 6px
-      calc(8px + env(safe-area-inset-bottom));
-    background:rgba(5,12,22,.97);
-    backdrop-filter:blur(16px);
+    padding:7px 5px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(5,12,22,.98);
+    backdrop-filter:blur(18px);
     border-top:1px solid var(--line);
   }
 
   .bottom-nav button{
     flex:1;
-    background:transparent;
     border:0;
-    font-size:.71rem;
-    padding:8px 4px;
+    background:transparent;
+    padding:9px 3px;
+    font-size:.70rem;
+  }
+
+  footer{
+    padding-bottom:90px;
   }
 }
