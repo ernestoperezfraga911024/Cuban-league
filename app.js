@@ -386,7 +386,7 @@ function setupPWA(){
   syncConnection();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js?v=29-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=30-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
   }
 }
 
@@ -402,7 +402,7 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch('data.json?v=29-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch('data.json?v=30-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}

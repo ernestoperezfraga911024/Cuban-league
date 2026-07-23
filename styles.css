@@ -2450,6 +2450,29 @@ footer{
 
 
 /* =========================================================
+   V30 — NAVEGACIÓN PRINCIPAL EN LA PARTE SUPERIOR
+   ========================================================= */
+.topbar{
+  z-index:70;
+}
+
+.main-nav{
+  z-index:60;
+  border-top:0;
+  box-shadow:
+    0 16px 38px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+@media(max-width:700px){
+  .main-nav{
+    justify-content:flex-start;
+    scroll-padding-inline:10px;
+  }
+}
+
+
+/* =========================================================
    V28 — SIN BARRA DE NAVEGACIÓN INFERIOR
    ========================================================= */
 .bottom-nav{

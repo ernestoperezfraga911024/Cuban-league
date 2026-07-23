@@ -1,10 +1,10 @@
-const CACHE_NAME = 'cuban-league-v29-styled-icons-pwa';
+const CACHE_NAME = 'cuban-league-v30-top-navigation-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=29-20260723',
-  './app.js?v=29-20260723',
-  './data.json?v=29-20260723',
+  './styles.css?v=30-20260723',
+  './app.js?v=30-20260723',
+  './data.json?v=30-20260723',
   './manifest.json',
   './cuban-league-green-logo.svg',
   './icon-green-192.png',
@@ -93,7 +93,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=29-20260723'));
+    event.respondWith(networkFirst(request, './data.json?v=30-20260723'));
     return;
   }
 

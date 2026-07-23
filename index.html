@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=29-20260723"></head><body>
+<link rel="stylesheet" href="styles.css?v=30-20260723"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -25,6 +25,13 @@
 </svg>
 <header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-green-logo.svg" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
 
+<nav class="main-nav" aria-label="Navegación principal">
+<button type="button" class="navtab active" data-section="home"><svg class="ui-icon" aria-hidden="true"><use href="#icon-home"></use></svg><span>Inicio</span></button><button type="button" class="navtab" data-section="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Clasificación</span></button>
+<button type="button" class="navtab" data-section="seasons"><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Temporadas</span></button><button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
+<button type="button" class="navtab" data-section="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Histórico</span></button><button type="button" class="navtab" data-section="records"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Récords</span></button>
+<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
+</nav>
+
 <section class="hero-photo">
 <div class="shade"></div><div class="hero-copy"><span class="eyebrow">TEMPORADA 2026/27</span><h1>Una liga.<br>Toda una historia.</h1><p>Clasificación, temporadas, perfiles, récords y Champions en una sola web.</p><div class="actions"><button type="button" data-go="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>Ver clasificación</button><button type="button" class="secondary" data-go="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg>Museo histórico</button></div></div>
 <div class="hero-kpis">
@@ -33,13 +40,6 @@
   <article><div class="kpi-label"><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span>Participantes</span></div><b>20</b><small>Temporada 2026/27</small></article>
 </div>
 </section>
-
-<nav class="main-nav" aria-label="Navegación principal">
-<button type="button" class="navtab active" data-section="home"><svg class="ui-icon" aria-hidden="true"><use href="#icon-home"></use></svg><span>Inicio</span></button><button type="button" class="navtab" data-section="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Clasificación</span></button>
-<button type="button" class="navtab" data-section="seasons"><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Temporadas</span></button><button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
-<button type="button" class="navtab" data-section="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Histórico</span></button><button type="button" class="navtab" data-section="records"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Récords</span></button>
-<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
-</nav>
 
 <main>
 <section id="home" class="page active">
@@ -119,4 +119,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="app.js?v=29-20260723"></script></body></html>
+<script src="app.js?v=30-20260723"></script></body></html>
