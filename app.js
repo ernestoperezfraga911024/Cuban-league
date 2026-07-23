@@ -1,5 +1,12 @@
 let DATA;const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 function teamCell(name){return `<div class="team team-profile-link" data-profile-player="${name.replace(/"/g,'&quot;')}"><img src="${imageMap()[name]||''}" alt=""><span class="name">${name}</span></div>`}
+
+function playerInline(name,opts={}){
+  const p=DATA.participants.find(x=>x.name===name);
+  if(!p)return `<span class="player-inline-name">${name||'—'}</span>`;
+  const compact=opts.compact?' compact':'';
+  return `<span class="player-inline${compact} team-profile-link" data-profile-player="${name.replace(/"/g,'&quot;')}"><img src="${p.shield}" alt=""><span>${name}</span></span>`;
+}
 function go(id){document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.navtab[data-section="${id}"]`)?.classList.add('active');scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'})}
 function renderCurrent(){const rows=[...DATA.participants].sort((a,b)=>b.points-a.points||a.id-b.id);$('updated').textContent=DATA.lastUpdated;$('currentRows').innerHTML=rows.map((p,i)=>`<div class="row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.played}</span><span class="num">${p.points}</span></div>`).join('')}
 function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles);return x.sort((a,b)=>b.score-a.score)}
@@ -28,7 +35,7 @@ function renderSeasonChampions(){
 const list=DATA.historicalTables.seasonChampions||[];
 $('seasonChampions').innerHTML=list.map(c=>{
 const img=imageMap()[c.name];
-return `<article class="champion-history-card">${img?`<img src="${img}" alt="">`:`<div class="champion-placeholder">🏆</div>`}<div><span>${c.season}</span><h3>${c.name}</h3><p>${c.points?c.points.toLocaleString()+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div></article>`
+return `<article class="champion-history-card">${img?`<img src="${img}" alt="">`:`<div class="champion-placeholder">🏆</div>`}<div><span>${c.season}</span><h3>${playerInline(c.name)}</h3><p>${c.points?c.points.toLocaleString()+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div></article>`
 }).join('')
 }
 function renderPlayers(filter=''){const stats=statMap();$('playerGrid').innerHTML=DATA.participants.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())).map(p=>{const s=stats[p.name]||{};return `<article class="player-card" data-player="${p.name}"><img src="${p.shield}"><h3>${p.name}</h3><small>${s.label||'Participante'}</small><p>${s.points?.toLocaleString()||0} puntos · ${s.podiums||0} podios</p></article>`}).join('');document.querySelectorAll('.player-card').forEach(c=>c.onclick=()=>openPlayer(c.dataset.player))}
@@ -195,7 +202,7 @@ function renderHistoricalEvolutionChart(){
   const legend=evolutionSelected.map((name,idx)=>{
     const p=DATA.participants.find(x=>x.name===name);
     const color=EVOLUTION_COLORS[idx%EVOLUTION_COLORS.length];
-    return `<div class="hist-legend-item"><span class="hist-color" style="background:${color}"></span><img src="${p?.shield||''}" alt=""><b>${name}</b></div>`;
+    return `<div class="hist-legend-item"><span class="hist-color" style="background:${color}"></span><img src="${p?.shield||''}" alt=""><b>${playerInline(name)}</b></div>`;
   }).join('');
 
   host.innerHTML=`<div class="hist-legend">${legend}</div>
@@ -205,10 +212,10 @@ function renderHistoricalEvolutionChart(){
       </svg>
     </div>`;
 }
-function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record"><span>${r.title}</span><h3>${r.value}</h3><p>${r.player}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record"><span>${a.title}</span><h3>${a.player}</h3><p>${a.text}</p></article>`).join('')}
+function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record"><span>${r.title}</span><h3>${r.value}</h3><p>${playerInline(r.player)}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record"><span>${a.title}</span><h3>${a.player}</h3><p>${a.text}</p></article>`).join('')}
 function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3>${g.name}</h3>${g.teams.map((t,i)=>`<div class="group-team"><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}"><b>${t}</b></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3>${r.round}</h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card"><span>${n.date}</span><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
-async function init(){DATA=await(await fetch('data.json?v=19-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch('data.json?v=20-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}

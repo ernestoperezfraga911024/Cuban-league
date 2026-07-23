@@ -1469,3 +1469,38 @@ img{
  .hist-legend{flex-wrap:nowrap;overflow-x:auto}.hist-legend-item{flex:0 0 auto}
  .historical-svg{width:auto;min-height:360px}
 }
+
+
+/* =========================================================
+   V20 — ESCUDO/FOTO JUNTO AL NOMBRE DEL PARTICIPANTE
+   ========================================================= */
+.player-inline{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  max-width:100%;
+  vertical-align:middle;
+  cursor:pointer;
+}
+.player-inline img{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  border-radius:9px;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,.10);
+}
+.player-inline>span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.player-inline.compact{gap:6px}
+.player-inline.compact img{width:26px;height:26px;min-width:26px;border-radius:7px}
+.player-inline-name{display:inline-block}
+.record .player-inline{margin-top:7px}
+.record h3 .player-inline,.champion-history-card h3 .player-inline{font-size:inherit}
+@media(max-width:700px){
+  .player-inline{gap:6px}
+  .player-inline img{width:30px;height:30px;min-width:30px;border-radius:8px}
+}
