@@ -527,3 +527,157 @@ img{
     text-align:center;
   }
 }
+
+
+/* V12 — Ranking Premium móvil: tabla clara + scroll horizontal real */
+@media (max-width: 700px){
+
+  /* El contenedor es el único que hace scroll */
+  #generalTable{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:scroll !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:pan-x pan-y !important;
+    overscroll-behavior-x:contain;
+    scrollbar-width:auto;
+    padding:0 0 12px 0 !important;
+    position:relative;
+  }
+
+  /* Todo el contenido comparte el mismo ancho, por eso cabecera y filas quedan alineadas */
+  #generalTable .table-head,
+  #generalRows,
+  #generalRows .general-row{
+    box-sizing:border-box !important;
+    min-width:1120px !important;
+    width:1120px !important;
+    max-width:none !important;
+  }
+
+  #generalTable .table-head,
+  #generalRows .general-row{
+    display:grid !important;
+    grid-template-columns:52px 230px 72px 72px 72px 72px 72px 72px 118px 92px 92px !important;
+    align-items:center !important;
+  }
+
+  #generalTable .table-head{
+    position:relative !important;
+    top:auto !important;
+    z-index:2;
+    min-height:54px;
+    border:1px solid var(--line);
+    border-radius:16px 16px 0 0 !important;
+    overflow:hidden;
+  }
+
+  #generalTable .table-head span{
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    min-height:54px;
+    padding:0 7px !important;
+    white-space:normal !important;
+    line-height:1.12 !important;
+    font-size:11px !important;
+    font-weight:800 !important;
+    text-align:center !important;
+    border-right:1px solid rgba(255,255,255,.055);
+  }
+
+  #generalTable .table-head span:nth-child(2){
+    justify-content:flex-start;
+    text-align:left !important;
+  }
+
+  #generalRows{
+    display:block !important;
+  }
+
+  #generalRows .general-row{
+    min-height:66px !important;
+    margin:0 !important;
+    padding:0 !important;
+    border-radius:0 !important;
+    border-left:1px solid var(--line) !important;
+    border-right:1px solid var(--line) !important;
+    border-bottom:1px solid var(--line) !important;
+    background:rgba(10,30,47,.72) !important;
+    overflow:hidden !important;
+  }
+
+  #generalRows .general-row:nth-child(even){
+    background:rgba(15,39,58,.82) !important;
+  }
+
+  #generalRows .general-row > *{
+    box-sizing:border-box !important;
+    height:100%;
+    min-height:65px;
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    padding:0 7px !important;
+    margin:0 !important;
+    border-right:1px solid rgba(255,255,255,.045);
+    background:transparent !important;
+    border-radius:0 !important;
+    white-space:nowrap;
+    font-size:13px !important;
+    line-height:1.15;
+  }
+
+  #generalRows .team{
+    justify-content:flex-start !important;
+    gap:10px !important;
+  }
+
+  #generalRows .team img{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    flex:0 0 40px !important;
+    border-radius:10px !important;
+    object-fit:cover !important;
+  }
+
+  #generalRows .team .name{
+    display:block !important;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap !important;
+    font-size:13px !important;
+    font-weight:800 !important;
+  }
+
+  #generalRows .pos{
+    font-size:15px !important;
+    font-weight:900 !important;
+  }
+
+  #generalRows .num,
+  #generalRows .center{
+    font-size:13px !important;
+    font-weight:700 !important;
+  }
+
+  /* pista visual de que la tabla continúa hacia la derecha */
+  #generalTable::after{
+    content:"← Desliza lateralmente para ver todas las columnas →";
+    position:sticky;
+    left:0;
+    display:block;
+    width:calc(100vw - 48px);
+    padding:9px 6px 2px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-align:center;
+    opacity:.68;
+    pointer-events:none;
+  }
+}
