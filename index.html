@@ -4,7 +4,7 @@
 <title>Cuban League</title><link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=12-20260723"></head><body>
+<link rel="stylesheet" href="styles.css?v=13-20260723"></head><body>
 <header class="topbar"><div class="brand"><div class="logo">CL</div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><button id="share">Compartir</button></header>
 
 <section class="hero-photo">
@@ -39,7 +39,7 @@
 <div class="history-banner"><div><span class="eyebrow">MUSEO HISTÓRICO</span><h2>Todos los números de la liga</h2><p>Ranking premium, puntos acumulados, palmarés y estadísticas generales.</p></div></div>
 <div class="subtabs"><button class="subtab active" data-hist="premium">Ranking premium</button><button class="subtab" data-hist="points">Puntos acumulados</button><button class="subtab" data-hist="palmares">Palmarés puro</button><button class="subtab" data-hist="championsHistory">Campeones</button></div>
 <div id="premiumTable" class="history-panel active"><div class="section-head"><div><h2>Ranking histórico completo</h2></div><select id="sortGeneral"><option value="ranking">Score histórico</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></div>
-<div class="card scroll"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div></div>
+<div class="card scroll" id="generalTable"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div></div>
 <div id="pointsTable" class="history-panel"><div class="section-head"><h2>Ranking por puntos acumulados</h2></div><div class="card"><div class="thead points-grid"><span>#</span><span>Jugador</span><span>Temporadas</span><span>Puntos</span><span>Promedio</span></div><div id="pointsRows"></div></div></div>
 <div id="palmaresTable" class="history-panel"><div class="section-head"><h2>Palmarés puro</h2></div><div class="card"><div class="thead palmares-grid"><span>#</span><span>Jugador</span><span>Títulos</span><span>2º</span><span>3º</span><span>Podios</span></div><div id="palmaresRows"></div></div></div><div id="championsHistoryTable" class="history-panel"><div class="section-head"><div><span class="eyebrow">CAMPEONES DE LIGA</span><h2>Campeón de cada temporada</h2></div></div><div id="seasonChampions" class="champion-history-grid"></div></div>
 </section>
@@ -54,4 +54,4 @@
 <nav class="bottom-nav"><button data-go="home">Inicio</button><button data-go="current">Tabla</button><button data-go="history">Histórico</button><button data-go="champions">Champions</button></nav>
 <div id="playerModal" class="modal" hidden><div class="modal-card"><button id="closeModal">✕</button><div id="modalContent"></div></div></div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="app.js?v=12-20260723"></script></body></html>
+<script src="app.js?v=13-20260723"></script></body></html>
