@@ -878,3 +878,275 @@ img{
     min-width: 0;
   }
 }
+
+
+/* =========================================================
+   V14 — PUNTOS ACUMULADOS + PALMARÉS PURO EN TABLA REAL
+   Igual que Ranking Premium: scroll horizontal en móvil.
+   ========================================================= */
+@media screen and (max-width: 700px) {
+
+  /* ---------- PUNTOS ACUMULADOS ---------- */
+  #pointsTable .card {
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:auto !important;
+    overscroll-behavior-x:contain !important;
+    position:relative !important;
+    border-radius:18px !important;
+    background:#091a2b !important;
+    padding-bottom:10px !important;
+  }
+
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows,
+  #pointsTable #pointsRows .points-row {
+    min-width:700px !important;
+    width:700px !important;
+    max-width:none !important;
+    box-sizing:border-box !important;
+  }
+
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows .points-row {
+    display:grid !important;
+    grid-template-columns:50px 260px 110px 140px 140px !important;
+    gap:0 !important;
+    align-items:stretch !important;
+  }
+
+  #pointsTable .thead.points-grid {
+    padding:0 !important;
+    margin:0 !important;
+    min-height:56px !important;
+    background:#10283e !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+
+  #pointsTable .thead.points-grid > span {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:56px !important;
+    padding:7px 6px !important;
+    border-right:1px solid rgba(255,255,255,.08) !important;
+    background:transparent !important;
+    font-size:11px !important;
+    font-weight:900 !important;
+    text-align:center !important;
+    white-space:normal !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2){
+    justify-content:flex-start !important;
+    padding-left:12px !important;
+  }
+
+  #pointsTable #pointsRows{
+    display:block !important;
+  }
+
+  #pointsTable #pointsRows .points-row {
+    min-height:68px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    border-top:1px solid #24445f !important;
+    border-radius:0 !important;
+    background:#0b2033 !important;
+  }
+
+  #pointsTable #pointsRows .points-row:nth-child(even){
+    background:#0d263b !important;
+  }
+
+  #pointsTable #pointsRows .points-row > *{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-width:0 !important;
+    min-height:67px !important;
+    padding:6px !important;
+    margin:0 !important;
+    border:0 !important;
+    border-right:1px solid rgba(255,255,255,.06) !important;
+    border-radius:0 !important;
+    background:transparent !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team {
+    justify-content:flex-start !important;
+    gap:9px !important;
+    padding-left:10px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team img {
+    width:42px !important;
+    height:42px !important;
+    min-width:42px !important;
+    flex:0 0 42px !important;
+    border-radius:11px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team .name {
+    display:block !important;
+    width:170px !important;
+    max-width:170px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+    font-weight:850 !important;
+  }
+
+  #pointsTable .card::-webkit-scrollbar {
+    height:8px !important;
+  }
+  #pointsTable .card::-webkit-scrollbar-track {
+    background:#071522 !important;
+  }
+  #pointsTable .card::-webkit-scrollbar-thumb {
+    background:#315774 !important;
+    border-radius:999px !important;
+  }
+
+  /* ---------- PALMARÉS PURO ---------- */
+  #palmaresTable .card {
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:auto !important;
+    overscroll-behavior-x:contain !important;
+    position:relative !important;
+    border-radius:18px !important;
+    background:#091a2b !important;
+    padding-bottom:10px !important;
+  }
+
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows,
+  #palmaresTable #palmaresRows .palmares-row {
+    min-width:760px !important;
+    width:760px !important;
+    max-width:none !important;
+    box-sizing:border-box !important;
+  }
+
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows .palmares-row {
+    display:grid !important;
+    grid-template-columns:50px 260px 90px 90px 90px 90px !important;
+    gap:0 !important;
+    align-items:stretch !important;
+  }
+
+  #palmaresTable .thead.palmares-grid {
+    padding:0 !important;
+    margin:0 !important;
+    min-height:56px !important;
+    background:#10283e !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:56px !important;
+    padding:7px 6px !important;
+    border-right:1px solid rgba(255,255,255,.08) !important;
+    background:transparent !important;
+    font-size:11px !important;
+    font-weight:900 !important;
+    text-align:center !important;
+    white-space:normal !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2){
+    justify-content:flex-start !important;
+    padding-left:12px !important;
+  }
+
+  #palmaresTable #palmaresRows{
+    display:block !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row {
+    min-height:68px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    border-top:1px solid #24445f !important;
+    border-radius:0 !important;
+    background:#0b2033 !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even){
+    background:#0d263b !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row > *{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-width:0 !important;
+    min-height:67px !important;
+    padding:6px !important;
+    margin:0 !important;
+    border:0 !important;
+    border-right:1px solid rgba(255,255,255,.06) !important;
+    border-radius:0 !important;
+    background:transparent !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row .team {
+    justify-content:flex-start !important;
+    gap:9px !important;
+    padding-left:10px !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row .team img {
+    width:42px !important;
+    height:42px !important;
+    min-width:42px !important;
+    flex:0 0 42px !important;
+    border-radius:11px !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row .team .name {
+    display:block !important;
+    width:170px !important;
+    max-width:170px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+    font-weight:850 !important;
+  }
+
+  #palmaresTable .card::-webkit-scrollbar {
+    height:8px !important;
+  }
+  #palmaresTable .card::-webkit-scrollbar-track {
+    background:#071522 !important;
+  }
+  #palmaresTable .card::-webkit-scrollbar-thumb {
+    background:#315774 !important;
+    border-radius:999px !important;
+  }
+}
