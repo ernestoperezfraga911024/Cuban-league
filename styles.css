@@ -445,3 +445,85 @@ img{
 .second-division{margin-top:28px;padding:20px;border:1px solid var(--line);border-radius:20px;background:rgba(10,25,41,.55)}.second-division h3{margin:0 0 4px}.second-division p{margin-top:4px}.second-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px}.second-team{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.second-team .team img{width:36px;height:36px}.second-team>span{white-space:nowrap;color:var(--muted);font-size:.78rem;font-weight:800}
 .champion-history-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.champion-history-card{display:flex;align-items:center;gap:16px;padding:18px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(11,25,41,.96),rgba(8,19,32,.96))}.champion-history-card img,.champion-placeholder{width:70px;height:70px;border-radius:18px;object-fit:cover;flex:0 0 auto}.champion-placeholder{display:grid;place-items:center;background:rgba(244,198,81,.1);font-size:1.8rem}.champion-history-card span{color:var(--gold);font-size:.78rem;font-weight:900}.champion-history-card h3{margin:5px 0 2px}.champion-history-card p{margin:0;font-size:.88rem}
 @media(max-width:620px){.season-result-row{grid-template-columns:48px minmax(0,1fr) 86px;padding:11px}.season-result-row .team{gap:8px}.season-result-row .team img{width:38px;height:38px}.season-points{font-size:.86rem}.second-grid,.champion-history-grid{grid-template-columns:1fr}.second-team .name{font-size:.9rem}.season-title-line{align-items:center}.champion-history-card{padding:14px}.champion-history-card img,.champion-placeholder{width:58px;height:58px;border-radius:15px}}
+
+
+/* V11 — Ranking Premium: tabla real y legible también en móvil vertical */
+@media (max-width: 700px){
+  #generalTable{
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:8px;
+  }
+
+  #generalTable .table-head,
+  #generalRows .general-row{
+    display:grid !important;
+    grid-template-columns:44px 210px 64px 64px 64px 68px 64px 72px 105px 90px 82px !important;
+    min-width:995px !important;
+    width:995px !important;
+    align-items:center;
+    gap:0 !important;
+  }
+
+  #generalTable .table-head{
+    border-radius:18px 18px 0 0;
+  }
+
+  #generalRows{
+    min-width:995px !important;
+  }
+
+  #generalRows .general-row{
+    margin:0 !important;
+    border-radius:0 !important;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:12px 0 !important;
+  }
+
+  #generalRows .general-row:first-child{
+    border-top:1px solid var(--line);
+  }
+
+  #generalRows .team{
+    min-width:0;
+    display:flex !important;
+    align-items:center;
+    gap:10px;
+    padding:0 8px;
+  }
+
+  #generalRows .team img{
+    width:42px !important;
+    height:42px !important;
+    min-width:42px !important;
+    border-radius:11px;
+    object-fit:cover;
+  }
+
+  #generalRows .team .name{
+    white-space:nowrap !important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:14px !important;
+  }
+
+  #generalRows .pos,
+  #generalRows .center,
+  #generalRows .num{
+    background:transparent !important;
+    border-radius:0 !important;
+    padding:0 6px !important;
+    min-width:0 !important;
+    text-align:center;
+    font-size:14px !important;
+  }
+
+  #generalTable .table-head span{
+    white-space:nowrap;
+    font-size:12px !important;
+    padding:0 5px;
+    text-align:center;
+  }
+}
