@@ -681,3 +681,1778 @@ img{
     pointer-events:none;
   }
 }
+
+
+/* =========================================================
+   V13 FINAL MOBILE FIX — RANKING PREMIUM
+   The previous versions styled #generalTable, but the HTML
+   did not actually have that id. V13 adds it to the real
+   scroll container and overrides the older mobile card rules.
+   ========================================================= */
+@media screen and (max-width: 700px) {
+  body {
+    overflow-x: hidden !important;
+  }
+
+  #generalTable.card.scroll {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: auto !important;
+    overscroll-behavior-x: contain !important;
+    position: relative !important;
+    border-radius: 18px !important;
+    background: #091a2b !important;
+  }
+
+  #generalTable > .thead.general-grid,
+  #generalTable > #generalRows,
+  #generalTable > #generalRows > .general-row {
+    min-width: 1040px !important;
+    width: 1040px !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  #generalTable > .thead.general-grid,
+  #generalTable > #generalRows > .general-row {
+    display: grid !important;
+    grid-template-columns:
+      48px
+      220px
+      64px
+      64px
+      64px
+      68px
+      68px
+      68px
+      116px
+      92px
+      92px !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+  }
+
+  #generalTable > .thead.general-grid {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 58px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #10283e !important;
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 3 !important;
+  }
+
+  #generalTable > .thead.general-grid > span {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    min-height: 58px !important;
+    padding: 7px 5px !important;
+    margin: 0 !important;
+    border-right: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #a8bbcd !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+    white-space: normal !important;
+  }
+
+  #generalTable > .thead.general-grid > span:nth-child(2) {
+    justify-content: flex-start !important;
+    padding-left: 12px !important;
+  }
+
+  #generalTable > #generalRows {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #generalTable > #generalRows > .general-row {
+    min-height: 70px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-top: 1px solid #24445f !important;
+    border-radius: 0 !important;
+    background: #0b2033 !important;
+    overflow: visible !important;
+  }
+
+  #generalTable > #generalRows > .general-row:nth-child(even) {
+    background: #0d263b !important;
+  }
+
+  #generalTable > #generalRows > .general-row > * {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    min-height: 69px !important;
+    height: auto !important;
+    padding: 6px 5px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-right: 1px solid rgba(255,255,255,.06) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  #generalTable > #generalRows > .general-row > .team {
+    justify-content: flex-start !important;
+    gap: 9px !important;
+    padding-left: 10px !important;
+  }
+
+  #generalTable > #generalRows > .general-row > .team img {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    flex: 0 0 42px !important;
+    border-radius: 11px !important;
+    object-fit: cover !important;
+  }
+
+  #generalTable > #generalRows > .general-row > .team .name {
+    display: block !important;
+    width: 150px !important;
+    max-width: 150px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+  }
+
+  #generalTable > #generalRows > .general-row > .pos {
+    font-size: 15px !important;
+    font-weight: 900 !important;
+  }
+
+  #generalTable > #generalRows > .general-row > .center,
+  #generalTable > #generalRows > .general-row > .num {
+    text-align: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+  }
+
+  /* Visible horizontal scrollbar area on iPhone/other mobile browsers */
+  #generalTable {
+    padding-bottom: 10px !important;
+  }
+
+  #generalTable::-webkit-scrollbar {
+    height: 8px !important;
+  }
+  #generalTable::-webkit-scrollbar-track {
+    background: #071522 !important;
+  }
+  #generalTable::-webkit-scrollbar-thumb {
+    background: #315774 !important;
+    border-radius: 999px !important;
+  }
+
+  /* Keep surrounding section from stealing/expanding the table width */
+  #historico .container,
+  #history .container,
+  .history-panel,
+  .section {
+    min-width: 0;
+  }
+}
+
+
+/* =========================================================
+   V14 — PUNTOS ACUMULADOS + PALMARÉS PURO EN TABLA REAL
+   Igual que Ranking Premium: scroll horizontal en móvil.
+   ========================================================= */
+@media screen and (max-width: 700px) {
+
+  /* ---------- PUNTOS ACUMULADOS ---------- */
+  #pointsTable .card {
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:auto !important;
+    overscroll-behavior-x:contain !important;
+    position:relative !important;
+    border-radius:18px !important;
+    background:#091a2b !important;
+    padding-bottom:10px !important;
+  }
+
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows,
+  #pointsTable #pointsRows .points-row {
+    min-width:700px !important;
+    width:700px !important;
+    max-width:none !important;
+    box-sizing:border-box !important;
+  }
+
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows .points-row {
+    display:grid !important;
+    grid-template-columns:50px 260px 110px 140px 140px !important;
+    gap:0 !important;
+    align-items:stretch !important;
+  }
+
+  #pointsTable .thead.points-grid {
+    padding:0 !important;
+    margin:0 !important;
+    min-height:56px !important;
+    background:#10283e !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+
+  #pointsTable .thead.points-grid > span {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:56px !important;
+    padding:7px 6px !important;
+    border-right:1px solid rgba(255,255,255,.08) !important;
+    background:transparent !important;
+    font-size:11px !important;
+    font-weight:900 !important;
+    text-align:center !important;
+    white-space:normal !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2){
+    justify-content:flex-start !important;
+    padding-left:12px !important;
+  }
+
+  #pointsTable #pointsRows{
+    display:block !important;
+  }
+
+  #pointsTable #pointsRows .points-row {
+    min-height:68px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    border-top:1px solid #24445f !important;
+    border-radius:0 !important;
+    background:#0b2033 !important;
+  }
+
+  #pointsTable #pointsRows .points-row:nth-child(even){
+    background:#0d263b !important;
+  }
+
+  #pointsTable #pointsRows .points-row > *{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-width:0 !important;
+    min-height:67px !important;
+    padding:6px !important;
+    margin:0 !important;
+    border:0 !important;
+    border-right:1px solid rgba(255,255,255,.06) !important;
+    border-radius:0 !important;
+    background:transparent !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team {
+    justify-content:flex-start !important;
+    gap:9px !important;
+    padding-left:10px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team img {
+    width:42px !important;
+    height:42px !important;
+    min-width:42px !important;
+    flex:0 0 42px !important;
+    border-radius:11px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team .name {
+    display:block !important;
+    width:170px !important;
+    max-width:170px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+    font-weight:850 !important;
+  }
+
+  #pointsTable .card::-webkit-scrollbar {
+    height:8px !important;
+  }
+  #pointsTable .card::-webkit-scrollbar-track {
+    background:#071522 !important;
+  }
+  #pointsTable .card::-webkit-scrollbar-thumb {
+    background:#315774 !important;
+    border-radius:999px !important;
+  }
+
+  /* ---------- PALMARÉS PURO ---------- */
+  #palmaresTable .card {
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:auto !important;
+    overscroll-behavior-x:contain !important;
+    position:relative !important;
+    border-radius:18px !important;
+    background:#091a2b !important;
+    padding-bottom:10px !important;
+  }
+
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows,
+  #palmaresTable #palmaresRows .palmares-row {
+    min-width:760px !important;
+    width:760px !important;
+    max-width:none !important;
+    box-sizing:border-box !important;
+  }
+
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows .palmares-row {
+    display:grid !important;
+    grid-template-columns:50px 260px 90px 90px 90px 90px !important;
+    gap:0 !important;
+    align-items:stretch !important;
+  }
+
+  #palmaresTable .thead.palmares-grid {
+    padding:0 !important;
+    margin:0 !important;
+    min-height:56px !important;
+    background:#10283e !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:56px !important;
+    padding:7px 6px !important;
+    border-right:1px solid rgba(255,255,255,.08) !important;
+    background:transparent !important;
+    font-size:11px !important;
+    font-weight:900 !important;
+    text-align:center !important;
+    white-space:normal !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2){
+    justify-content:flex-start !important;
+    padding-left:12px !important;
+  }
+
+  #palmaresTable #palmaresRows{
+    display:block !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row {
+    min-height:68px !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    border-top:1px solid #24445f !important;
+    border-radius:0 !important;
+    background:#0b2033 !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even){
+    background:#0d263b !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row > *{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-width:0 !important;
+    min-height:67px !important;
+    padding:6px !important;
+    margin:0 !important;
+    border:0 !important;
+    border-right:1px solid rgba(255,255,255,.06) !important;
+    border-radius:0 !important;
+    background:transparent !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row .team {
+    justify-content:flex-start !important;
+    gap:9px !important;
+    padding-left:10px !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row .team img {
+    width:42px !important;
+    height:42px !important;
+    min-width:42px !important;
+    flex:0 0 42px !important;
+    border-radius:11px !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row .team .name {
+    display:block !important;
+    width:170px !important;
+    max-width:170px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+    font-weight:850 !important;
+  }
+
+  #palmaresTable .card::-webkit-scrollbar {
+    height:8px !important;
+  }
+  #palmaresTable .card::-webkit-scrollbar-track {
+    background:#071522 !important;
+  }
+  #palmaresTable .card::-webkit-scrollbar-thumb {
+    background:#315774 !important;
+    border-radius:999px !important;
+  }
+}
+
+
+/* =========================================================
+   V15 — COLUMNA JUGADORES FIJA AL DESLIZAR HORIZONTALMENTE
+   Histórico: Ranking Premium, Puntos acumulados y Palmarés puro
+   ========================================================= */
+@media screen and (max-width: 700px) {
+
+  /* PUNTOS ACUMULADOS: 2da columna = Jugador */
+  #pointsTable .thead.points-grid > span:nth-child(2),
+  #pointsTable #pointsRows .points-row > *:nth-child(2) {
+    position: sticky !important;
+    left: 50px !important;
+    z-index: 8 !important;
+    background: #0b2033 !important;
+    box-shadow: 5px 0 8px rgba(0,0,0,.24) !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2) {
+    z-index: 12 !important;
+    background: #10283e !important;
+  }
+
+  #pointsTable #pointsRows .points-row:nth-child(even) > *:nth-child(2) {
+    background: #0d263b !important;
+  }
+
+  /* PALMARÉS PURO: 2da columna = Jugador */
+  #palmaresTable .thead.palmares-grid > span:nth-child(2),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(2) {
+    position: sticky !important;
+    left: 50px !important;
+    z-index: 8 !important;
+    background: #0b2033 !important;
+    box-shadow: 5px 0 8px rgba(0,0,0,.24) !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2) {
+    z-index: 12 !important;
+    background: #10283e !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even) > *:nth-child(2) {
+    background: #0d263b !important;
+  }
+
+  /* RANKING PREMIUM: mantener fija también la columna de jugador.
+     Se cubren las clases usadas por las distintas versiones del ranking. */
+  #generalTable .thead > *:nth-child(2),
+  #generalTable .premium-row > *:nth-child(2),
+  #generalTable .ranking-row > *:nth-child(2),
+  #generalTable tbody tr > *:nth-child(2),
+  #premiumTable .thead > *:nth-child(2),
+  #premiumTable .premium-row > *:nth-child(2),
+  #premiumTable .ranking-row > *:nth-child(2),
+  #premiumTable tbody tr > *:nth-child(2) {
+    position: sticky !important;
+    left: 50px !important;
+    z-index: 8 !important;
+    background: #0b2033 !important;
+    box-shadow: 5px 0 8px rgba(0,0,0,.24) !important;
+  }
+
+  #generalTable .thead > *:nth-child(2),
+  #premiumTable .thead > *:nth-child(2),
+  #generalTable thead tr > *:nth-child(2),
+  #premiumTable thead tr > *:nth-child(2) {
+    z-index: 12 !important;
+    background: #10283e !important;
+  }
+}
+
+
+/* =========================================================
+   V16 — FIJAR # + JUGADOR COMPLETOS DURANTE SCROLL HORIZONTAL
+   ========================================================= */
+@media screen and (max-width:700px){
+
+  /* ---------- RANKING PREMIUM ---------- */
+  #generalTable .thead.general-grid > span:nth-child(1),
+  #generalTable #generalRows .general-row > *:nth-child(1){
+    position:sticky !important;
+    left:0 !important;
+    z-index:20 !important;
+    background:#0b2033 !important;
+  }
+
+  #generalTable .thead.general-grid > span:nth-child(2),
+  #generalTable #generalRows .general-row > *:nth-child(2){
+    position:sticky !important;
+    left:50px !important;
+    z-index:19 !important;
+    background:#0b2033 !important;
+    box-shadow:6px 0 8px rgba(0,0,0,.30) !important;
+  }
+
+  #generalTable .thead.general-grid > span:nth-child(1),
+  #generalTable .thead.general-grid > span:nth-child(2){
+    z-index:30 !important;
+    background:#10283e !important;
+  }
+
+  /* ---------- PUNTOS ACUMULADOS ---------- */
+  #pointsTable .thead.points-grid > span:nth-child(1),
+  #pointsTable #pointsRows .points-row > *:nth-child(1){
+    position:sticky !important;
+    left:0 !important;
+    z-index:20 !important;
+    background:#0b2033 !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2),
+  #pointsTable #pointsRows .points-row > *:nth-child(2){
+    position:sticky !important;
+    left:50px !important;
+    z-index:19 !important;
+    background:#0b2033 !important;
+    box-shadow:6px 0 8px rgba(0,0,0,.30) !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(1),
+  #pointsTable .thead.points-grid > span:nth-child(2){
+    z-index:30 !important;
+    background:#10283e !important;
+  }
+
+  #pointsTable #pointsRows .points-row:nth-child(even) > *:nth-child(1),
+  #pointsTable #pointsRows .points-row:nth-child(even) > *:nth-child(2){
+    background:#0d263b !important;
+  }
+
+  /* ---------- PALMARÉS PURO ---------- */
+  #palmaresTable .thead.palmares-grid > span:nth-child(1),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(1){
+    position:sticky !important;
+    left:0 !important;
+    z-index:20 !important;
+    background:#0b2033 !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(2){
+    position:sticky !important;
+    left:50px !important;
+    z-index:19 !important;
+    background:#0b2033 !important;
+    box-shadow:6px 0 8px rgba(0,0,0,.30) !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(1),
+  #palmaresTable .thead.palmares-grid > span:nth-child(2){
+    z-index:30 !important;
+    background:#10283e !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even) > *:nth-child(1),
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even) > *:nth-child(2){
+    background:#0d263b !important;
+  }
+
+  /* Evita que el contenido móvil se pinte por encima de las columnas fijas */
+  #generalTable .general-row > *:nth-child(n+3),
+  #pointsTable .points-row > *:nth-child(n+3),
+  #palmaresTable .palmares-row > *:nth-child(n+3){
+    position:relative !important;
+    z-index:1 !important;
+  }
+}
+
+
+/* =========================================================
+   V17 — COLUMNAS FIJAS MÁS COMPACTAS EN TELÉFONO VERTICAL
+   # = 38px / Jugador = 190px
+   Deja visibles más estadísticas sin perder foto + nombre.
+   ========================================================= */
+@media screen and (max-width:700px) and (orientation:portrait){
+
+  /* PUNTOS ACUMULADOS */
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows,
+  #pointsTable #pointsRows .points-row{
+    min-width:618px !important;
+    width:618px !important;
+  }
+
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows .points-row{
+    grid-template-columns:38px 190px 110px 140px 140px !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2),
+  #pointsTable #pointsRows .points-row > *:nth-child(2){
+    left:38px !important;
+  }
+
+  /* PALMARÉS PURO */
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows,
+  #palmaresTable #palmaresRows .palmares-row{
+    min-width:678px !important;
+    width:678px !important;
+  }
+
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows .palmares-row{
+    grid-template-columns:38px 190px 90px 90px 90px 90px !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(2){
+    left:38px !important;
+  }
+
+  /* Ranking Premium: compactar las dos columnas congeladas
+     respetando el ancho del resto de estadísticas. */
+  #generalTable .thead.general-grid,
+  #generalTable #generalRows .general-row{
+    grid-template-columns:38px 190px repeat(9, minmax(78px, auto)) !important;
+  }
+
+  #generalTable .thead.general-grid > span:nth-child(2),
+  #generalTable #generalRows .general-row > *:nth-child(2){
+    left:38px !important;
+  }
+
+  /* Compactar contenido visual del jugador */
+  #pointsTable #pointsRows .points-row .team,
+  #palmaresTable #palmaresRows .palmares-row .team,
+  #generalTable #generalRows .general-row .team{
+    gap:7px !important;
+    padding-left:7px !important;
+    padding-right:6px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team img,
+  #palmaresTable #palmaresRows .palmares-row .team img,
+  #generalTable #generalRows .general-row .team img{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    flex:0 0 36px !important;
+    border-radius:9px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team .name,
+  #palmaresTable #palmaresRows .palmares-row .team .name,
+  #generalTable #generalRows .general-row .team .name{
+    width:132px !important;
+    max-width:132px !important;
+    font-size:12px !important;
+  }
+
+  /* # más compacto */
+  #pointsTable .thead.points-grid > span:nth-child(1),
+  #pointsTable #pointsRows .points-row > *:nth-child(1),
+  #palmaresTable .thead.palmares-grid > span:nth-child(1),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(1),
+  #generalTable .thead.general-grid > span:nth-child(1),
+  #generalTable #generalRows .general-row > *:nth-child(1){
+    padding-left:3px !important;
+    padding-right:3px !important;
+  }
+}
+
+
+/* =========================================================
+   V18 — PERFILES COMPLETOS DE PARTICIPANTE
+   ========================================================= */
+.team-profile-link{cursor:pointer}
+.team-profile-link:hover .name{text-decoration:underline}
+.player-profile-modal{max-width:860px!important}
+.profile-close{position:sticky!important;float:right;top:0;z-index:10}
+.profile-hero{display:flex;align-items:center;gap:20px;padding:6px 46px 18px 0;border-bottom:1px solid var(--line)}
+.profile-avatar{width:108px;height:108px;border-radius:24px;object-fit:cover;flex:0 0 auto}
+.profile-identity h2{font-size:2.25rem;margin:7px 0}.profile-identity p{margin:0;max-width:620px}
+.profile-major-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.profile-major-stats article,.profile-detail-grid article{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+.profile-major-stats b{display:block;font-size:1.7rem}.profile-major-stats span,.profile-detail-grid span,.profile-detail-grid small{display:block;color:var(--muted);font-size:.76rem;margin-top:4px}
+.profile-section{margin-top:24px}.profile-section-head h3{margin:5px 0 12px;font-size:1.35rem}
+.progression-strip{overflow-x:auto;white-space:nowrap;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#071725;font-weight:900;letter-spacing:.03em;color:#dfeaf3}
+.evolution-chart-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:#071522;margin-top:10px}
+.evolution-chart{display:block;width:100%;min-width:640px;height:auto}
+.evo-grid{stroke:#27435b;stroke-width:1}.evo-axis,.evo-label{fill:#8198aa;font-size:11px;font-weight:700}.evo-line{fill:none;stroke:#42d8d1;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.evo-dot{fill:#f4c651;stroke:#071522;stroke-width:3}.evo-value{fill:#f7f9fc;font-size:12px;font-weight:900}
+.profile-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.profile-detail-grid b{display:block;font-size:1.05rem;margin-top:6px}.profile-detail-grid small{min-height:1em}
+.profile-season-table{border:1px solid var(--line);border-radius:16px;overflow:hidden}.profile-season-head,.profile-season-row{display:grid;grid-template-columns:1fr 1.25fr 1fr;align-items:center;padding:12px 14px}.profile-season-head{background:#10283e;color:var(--muted);font-size:.7rem;font-weight:900;text-transform:uppercase}.profile-season-row{border-top:1px solid var(--line)}.profile-season-row>span:last-child{text-align:right}.profile-season-champion{background:linear-gradient(90deg,rgba(244,198,81,.12),transparent)}.profile-season-champion b{color:var(--gold)}
+.profile-no-data{padding:18px;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+
+@media(max-width:700px){
+  .player-profile-modal{width:100%!important;max-width:100%!important;padding:15px 12px!important}
+  .profile-hero{gap:13px;padding-right:36px}.profile-avatar{width:78px;height:78px;border-radius:18px}.profile-identity h2{font-size:1.65rem}.profile-identity p{font-size:.86rem}
+  .profile-major-stats{grid-template-columns:1fr 1fr}.profile-major-stats article{padding:13px}.profile-major-stats b{font-size:1.45rem}
+  .profile-detail-grid{grid-template-columns:1fr 1fr}.profile-detail-grid article{padding:13px}
+  .progression-strip{font-size:.82rem}
+  .evolution-chart{min-width:600px}
+  .profile-season-head,.profile-season-row{grid-template-columns:84px minmax(0,1fr) 88px;padding:10px 9px;font-size:.82rem}
+  .profile-season-head{font-size:.62rem}
+}
+
+
+/* =========================================================
+   V19 — GRÁFICO HISTÓRICO MULTIJUGADOR
+   ========================================================= */
+.evolution-historical-card{border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,rgba(11,25,41,.98),rgba(7,18,30,.98));padding:20px}
+.evolution-historical-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.evolution-historical-head h3{font-size:1.7rem;margin:5px 0}.evolution-historical-head p{margin:0}
+.evolution-player-picker{display:flex;gap:8px;overflow-x:auto;padding:16px 0 12px}
+.evolution-player-chip{display:flex;align-items:center;gap:7px;white-space:nowrap;padding:7px 10px;background:#0b1d30;border:1px solid var(--line);opacity:.72}
+.evolution-player-chip img{width:30px;height:30px;border-radius:8px;object-fit:cover}.evolution-player-chip.selected{opacity:1;border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan);background:rgba(66,216,209,.08)}
+.evolution-legend-note{font-size:.75rem;color:var(--muted);padding:0 0 12px}
+.historical-evolution-chart{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#061421}
+.hist-legend{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border-bottom:1px solid var(--line)}
+.hist-legend-item{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#0d2134;font-size:.75rem}.hist-legend-item img{width:24px;height:24px;border-radius:7px}.hist-color{width:9px;height:9px;border-radius:50%}
+.hist-svg-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.historical-svg{display:block;width:100%;height:auto;min-height:390px}
+.hist-grid{stroke:#203b52;stroke-width:1}.hist-axis,.hist-season{fill:#8da2b4;font-size:11px;font-weight:700}.hist-line{stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;opacity:.9}.hist-dot{stroke:#061421;stroke-width:3}.hist-value{font-size:11px;font-weight:900}.hist-second{font-size:10px;font-weight:900}.evolution-empty{padding:45px 20px;text-align:center;color:var(--muted)}
+@media(max-width:700px){
+ .evolution-historical-card{padding:13px}.evolution-historical-head{align-items:center}.evolution-historical-head h3{font-size:1.35rem}.evolution-historical-head p{font-size:.82rem}
+ .evolution-player-picker{margin-right:-13px;padding-right:13px}.evolution-player-chip{font-size:.72rem}
+ .hist-legend{flex-wrap:nowrap;overflow-x:auto}.hist-legend-item{flex:0 0 auto}
+ .historical-svg{width:auto;min-height:360px}
+}
+
+
+/* =========================================================
+   V20 — ESCUDO/FOTO JUNTO AL NOMBRE DEL PARTICIPANTE
+   ========================================================= */
+.player-inline{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  max-width:100%;
+  vertical-align:middle;
+  cursor:pointer;
+}
+.player-inline img{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  border-radius:9px;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,.10);
+}
+.player-inline>span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.player-inline.compact{gap:6px}
+.player-inline.compact img{width:26px;height:26px;min-width:26px;border-radius:7px}
+.player-inline-name{display:inline-block}
+.record .player-inline{margin-top:7px}
+.record h3 .player-inline,.champion-history-card h3 .player-inline{font-size:inherit}
+@media(max-width:700px){
+  .player-inline{gap:6px}
+  .player-inline img{width:30px;height:30px;min-width:30px;border-radius:8px}
+}
+
+
+/* =========================================================
+   V21 — FOTOS EN EMPATES + HOME + JERARQUÍA MÁS COMPACTA
+   ========================================================= */
+.player-inline{
+  gap:10px;
+  font-size:1.06em;
+  font-weight:800;
+  color:var(--text);
+}
+.player-inline-photos{
+  display:inline-flex;
+  align-items:center;
+  flex:0 0 auto;
+}
+.player-inline-photos img{
+  width:40px;
+  height:40px;
+  min-width:40px;
+  border-radius:10px;
+  object-fit:cover;
+  border:2px solid #10263a;
+  background:#081522;
+}
+.player-inline-photos.multiple img+img{margin-left:-10px}
+.player-inline-photos.multiple img{box-shadow:0 0 0 2px #071522}
+.player-inline.compact .player-inline-photos img{width:31px;height:31px;min-width:31px}
+.player-inline.compact .player-inline-photos.multiple img+img{margin-left:-8px}
+
+/* Records: labels and giant values slightly smaller; holder more prominent */
+.record-card .label,.record .label,.record-card small,.record small{font-size:.82rem}
+.record-card .value,.record .value,.record-card h3,.record h3{font-size:clamp(1.8rem,5vw,2.55rem)}
+.record-card .player-inline,.record .player-inline{font-size:1rem}
+
+/* Home summary cards */
+.home-stat-card .player-inline,.hero-stat .player-inline,.home-highlight .player-inline{
+  font-size:1.05rem;
+}
+.home-stat-card .player-inline-photos img,.hero-stat .player-inline-photos img,.home-highlight .player-inline-photos img{
+  width:38px;height:38px;min-width:38px;
+}
+
+@media(max-width:700px){
+  .player-inline{font-size:1rem;gap:8px}
+  .player-inline-photos img{width:36px;height:36px;min-width:36px;border-radius:9px}
+  .record-card .value,.record .value,.record-card h3,.record h3{font-size:1.85rem}
+  .record-card .label,.record .label,.record-card small,.record small{font-size:.76rem}
+}
+
+
+/* =========================================================
+   V22 — RECORDS: JUGADOR MÁS PROTAGONISTA
+   Fotos y nombres mayores; cifras con una jerarquía más sutil.
+   ========================================================= */
+#recordGrid .record h3{
+  font-size:clamp(1.5rem,3vw,2rem);
+  line-height:1;
+  margin:8px 0 14px;
+}
+#recordGrid .record p{margin:0}
+#recordGrid .record .player-inline{
+  gap:12px;
+  margin-top:0;
+  font-size:1.14rem;
+  font-weight:900;
+}
+#recordGrid .record .player-inline-photos img{
+  width:50px;
+  height:50px;
+  min-width:50px;
+  border-radius:13px;
+}
+#recordGrid .record .player-inline-photos.multiple img+img{margin-left:-12px}
+
+@media(max-width:700px){
+  #recordGrid .record h3{
+    font-size:1.55rem;
+    margin-bottom:13px;
+  }
+  #recordGrid .record .player-inline{
+    gap:10px;
+    font-size:1.1rem;
+  }
+  #recordGrid .record .player-inline-photos img{
+    width:46px;
+    height:46px;
+    min-width:46px;
+    border-radius:12px;
+  }
+  #recordGrid .record .player-inline-photos.multiple img+img{margin-left:-11px}
+}
+
+
+/* =========================================================
+   V23 — MODERN COMPETITION UI
+   Renovación visual completa sin alterar datos ni estructura.
+   ========================================================= */
+:root{
+  --bg:#030914;
+  --panel:#0a1929;
+  --panel2:#10263b;
+  --line:rgba(145,181,213,.17);
+  --text:#f8fbff;
+  --muted:#94aabd;
+  --cyan:#50eadc;
+  --gold:#f5c95c;
+  --blue:#4d78ff;
+  --violet:#8a68ff;
+  --surface:rgba(10,25,41,.82);
+  --surface-strong:rgba(13,34,53,.94);
+  --shadow:0 24px 70px rgba(0,0,0,.28);
+  --shadow-soft:0 12px 38px rgba(0,0,0,.18);
+  --ring:0 0 0 1px rgba(255,255,255,.035) inset;
+  color-scheme:dark;
+}
+
+html{
+  scroll-behavior:smooth;
+  background:#030914;
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 8% 1%,rgba(77,120,255,.18),transparent 31rem),
+    radial-gradient(circle at 92% 28%,rgba(80,234,220,.10),transparent 28rem),
+    radial-gradient(circle at 52% 82%,rgba(138,104,255,.08),transparent 34rem),
+    linear-gradient(180deg,#020711 0%,#071321 52%,#030914 100%);
+  background-attachment:fixed;
+  font-weight:500;
+  letter-spacing:-.008em;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.22;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,black,transparent 75%);
+  -webkit-mask-image:linear-gradient(to bottom,black,transparent 75%);
+}
+
+h1,h2,h3,.brand b,.hero-kpis b{
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  letter-spacing:-.04em;
+}
+
+button,select,input{
+  transition:border-color .2s ease,background .2s ease,color .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+
+button:hover{
+  transform:translateY(-1px);
+  border-color:rgba(80,234,220,.38);
+}
+
+button:focus-visible,input:focus-visible,select:focus-visible{
+  outline:3px solid rgba(80,234,220,.22);
+  outline-offset:2px;
+}
+
+/* Header */
+.topbar{
+  min-height:74px;
+  padding:11px max(20px,calc((100vw - 1240px)/2));
+  background:rgba(3,9,20,.72);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  backdrop-filter:blur(24px) saturate(155%);
+}
+
+.brand{gap:12px}
+.brand b{
+  font-size:.94rem;
+  letter-spacing:.055em;
+}
+.brand small{
+  margin-top:2px;
+  color:#8ea8bd;
+  font-weight:600;
+  letter-spacing:.02em;
+}
+
+.logo{
+  position:relative;
+  width:48px;
+  height:48px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:15px;
+  background:linear-gradient(145deg,#6af5e6 0%,#4a91ff 58%,#7558ff 100%);
+  box-shadow:0 12px 28px rgba(68,139,255,.26),inset 0 1px 0 rgba(255,255,255,.45);
+  font-family:Manrope,Inter,sans-serif;
+  font-size:.88rem;
+  letter-spacing:-.04em;
+}
+
+.logo::after{
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:13px;
+  background:linear-gradient(145deg,rgba(255,255,255,.20),transparent 44%);
+  pointer-events:none;
+}
+
+.topbar>button{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 15px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.055);
+  box-shadow:var(--ring);
+}
+
+.topbar>button:hover{
+  background:rgba(80,234,220,.10);
+  box-shadow:0 10px 24px rgba(0,0,0,.18),var(--ring);
+}
+
+.topbar>button span{
+  color:var(--cyan);
+  font-size:1.05rem;
+}
+
+/* Hero */
+.hero-photo{
+  min-height:710px;
+  padding:92px max(22px,calc((100vw - 1240px)/2)) 64px;
+  background-position:center 34%;
+  isolation:isolate;
+  border-bottom:1px solid rgba(255,255,255,.075);
+  box-shadow:0 30px 90px rgba(0,0,0,.24);
+}
+
+.hero-photo::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 78% 28%,rgba(80,234,220,.16),transparent 25rem),
+    linear-gradient(110deg,rgba(4,10,20,.25),transparent 52%);
+  mix-blend-mode:screen;
+}
+
+.shade{
+  background:
+    linear-gradient(90deg,rgba(2,7,15,.97) 0%,rgba(3,9,19,.78) 39%,rgba(3,9,19,.25) 72%,rgba(3,9,19,.58) 100%),
+    linear-gradient(0deg,#030914 0%,rgba(3,9,20,.22) 58%,rgba(3,9,20,.4) 100%);
+}
+
+.hero-copy{max-width:850px}
+
+.hero-copy .eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 11px;
+  border:1px solid rgba(80,234,220,.28);
+  border-radius:999px;
+  background:rgba(8,29,42,.56);
+  box-shadow:var(--ring);
+  backdrop-filter:blur(12px);
+}
+
+.hero-copy .eyebrow::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 0 5px rgba(80,234,220,.10),0 0 16px rgba(80,234,220,.72);
+}
+
+.hero-copy h1{
+  max-width:820px;
+  margin:20px 0 18px;
+  font-size:clamp(4rem,8.6vw,7.6rem);
+  line-height:.86;
+  letter-spacing:-.075em;
+  text-wrap:balance;
+  text-shadow:0 18px 45px rgba(0,0,0,.38);
+}
+
+.hero-copy p{
+  max-width:650px;
+  margin:0;
+  color:#b6c7d6;
+  font-size:1.08rem;
+}
+
+.actions{gap:11px;margin-top:28px}
+.actions button{
+  min-height:48px;
+  padding:12px 17px;
+  border-color:rgba(255,255,255,.13);
+  box-shadow:var(--ring);
+}
+
+.actions button:first-child{
+  border:0;
+  background:linear-gradient(135deg,#68f1e4,#51b7f3);
+  color:#031018;
+  box-shadow:0 14px 34px rgba(62,210,211,.20);
+}
+
+.actions button:first-child:hover{
+  box-shadow:0 17px 42px rgba(62,210,211,.28);
+}
+
+.actions .secondary{
+  background:rgba(4,13,25,.62);
+  backdrop-filter:blur(14px);
+}
+
+.hero-kpis{
+  max-width:1040px;
+  gap:14px;
+  margin-top:58px;
+}
+
+.hero-kpis article{
+  position:relative;
+  overflow:hidden;
+  padding:20px;
+  border-color:rgba(255,255,255,.13);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(14,34,52,.70),rgba(4,14,27,.58));
+  box-shadow:0 18px 45px rgba(0,0,0,.18),var(--ring);
+  backdrop-filter:blur(18px) saturate(130%);
+  transition:transform .25s ease,border-color .25s ease,background .25s ease;
+}
+
+.hero-kpis article::before{
+  content:"";
+  position:absolute;
+  inset:0 auto auto 0;
+  width:70%;
+  height:1px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+  opacity:.55;
+}
+
+.hero-kpis article:hover{
+  transform:translateY(-4px);
+  border-color:rgba(80,234,220,.25);
+  background:linear-gradient(145deg,rgba(17,43,63,.82),rgba(5,16,30,.68));
+}
+
+.hero-kpis span,.hero-kpis small{
+  color:#93aabd;
+  font-weight:600;
+}
+
+.hero-kpis b{
+  font-size:1.03rem;
+  letter-spacing:-.025em;
+}
+
+/* Navigation */
+.main-nav{
+  top:74px;
+  gap:6px;
+  padding:11px max(20px,calc((100vw - 1240px)/2));
+  border-bottom-color:rgba(255,255,255,.075);
+  background:rgba(3,9,20,.82);
+  box-shadow:0 15px 35px rgba(0,0,0,.12);
+  backdrop-filter:blur(24px) saturate(145%);
+}
+
+.navtab{
+  padding:10px 14px;
+  border-color:transparent;
+  background:transparent;
+  color:#8fa5b8;
+  font-size:.84rem;
+}
+
+.navtab:hover{
+  border-color:rgba(255,255,255,.08);
+  background:rgba(255,255,255,.045);
+  color:#edf6ff;
+}
+
+.navtab.active{
+  border-color:transparent;
+  background:linear-gradient(135deg,#65eadf,#62bff0);
+  color:#031018;
+  box-shadow:0 10px 28px rgba(73,204,211,.20);
+}
+
+/* Content hierarchy */
+main{
+  max-width:1240px;
+  padding:48px 22px 125px;
+}
+
+.page.active{
+  animation:pageReveal .42s cubic-bezier(.2,.75,.3,1) both;
+}
+
+@keyframes pageReveal{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.section-head{
+  margin:34px 0 19px;
+}
+
+.section-head h2{
+  font-size:clamp(1.65rem,3vw,2.2rem);
+  line-height:1.06;
+}
+
+.section-head small{font-weight:600}
+
+.eyebrow{
+  color:#59e8da;
+  font-weight:900;
+}
+
+.panel,.record,.news-card,.card,.player-card,.group{
+  border-color:var(--line);
+  background:
+    linear-gradient(145deg,rgba(15,37,57,.88),rgba(6,18,31,.90));
+  box-shadow:var(--shadow-soft),var(--ring);
+}
+
+.panel,.record,.news-card,.player-card,.group{
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background .25s ease;
+}
+
+.panel:hover,.record:hover,.news-card:hover,.player-card:hover,.group:hover{
+  transform:translateY(-5px);
+  border-color:rgba(80,234,220,.25);
+  background:linear-gradient(145deg,rgba(18,44,65,.94),rgba(7,20,34,.96));
+  box-shadow:0 24px 58px rgba(0,0,0,.25),var(--ring);
+}
+
+.dashboard-grid,.record-grid,.news-grid{
+  gap:16px;
+}
+
+.panel,.record,.news-card{
+  position:relative;
+  overflow:hidden;
+  padding:23px;
+}
+
+.panel::before,.record::before,.news-card::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:1px;
+  background:linear-gradient(90deg,var(--cyan),rgba(77,120,255,.55),transparent 82%);
+  opacity:.52;
+}
+
+.panel span,.record span,.news-card span{
+  font-weight:700;
+  letter-spacing:.015em;
+}
+
+.panel h3{
+  margin:9px 0 5px;
+  font-size:2rem;
+}
+
+/* Editorial photo cards */
+.football-split{gap:18px}
+.photo-card{
+  min-height:500px;
+  border-color:rgba(255,255,255,.12);
+  border-radius:28px;
+  box-shadow:var(--shadow),var(--ring);
+  transition:transform .35s ease,border-color .3s ease,box-shadow .3s ease;
+}
+
+.photo-card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(80,234,220,.26);
+  box-shadow:0 32px 80px rgba(0,0,0,.34),var(--ring);
+}
+
+.photo-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,.10),transparent 28%);
+}
+
+.photo-card:after{
+  background:linear-gradient(0deg,rgba(2,8,16,.98),rgba(3,10,20,.07) 74%);
+}
+
+.photo-card>div{
+  left:28px;
+  right:28px;
+  bottom:27px;
+}
+
+.photo-card h2{
+  font-size:2.2rem;
+  line-height:1.02;
+}
+
+/* Tables */
+.card{
+  border-radius:22px;
+  box-shadow:0 20px 55px rgba(0,0,0,.19),var(--ring);
+}
+
+.thead{
+  min-height:48px;
+  background:linear-gradient(180deg,rgba(19,48,72,.96),rgba(13,36,56,.96));
+  color:#94acc0;
+  letter-spacing:.055em;
+}
+
+.row,.general-row,.points-row,.palmares-row{
+  transition:background .2s ease,color .2s ease;
+}
+
+.row:hover,.general-row:hover,.points-row:hover,.palmares-row:hover{
+  background:rgba(80,234,220,.045);
+}
+
+.team img{
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 8px 20px rgba(0,0,0,.24);
+}
+
+.name{
+  color:#f6faff;
+  font-weight:850;
+}
+
+.num,.pos{
+  font-variant-numeric:tabular-nums;
+}
+
+.pos{color:#94aabd}
+
+/* Participant cards */
+.player-grid{gap:16px}
+.player-card{
+  position:relative;
+  overflow:hidden;
+  min-height:205px;
+  padding:19px;
+  border-radius:22px;
+}
+
+.player-card::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:3px;
+  background:linear-gradient(90deg,var(--cyan),var(--blue),transparent 78%);
+  opacity:.62;
+}
+
+.player-card img{
+  width:78px;
+  height:78px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:20px;
+  box-shadow:0 14px 28px rgba(0,0,0,.28);
+  transition:transform .3s ease,box-shadow .3s ease;
+}
+
+.player-card:hover img{
+  transform:scale(1.05) rotate(-1deg);
+  box-shadow:0 18px 38px rgba(0,0,0,.34);
+}
+
+.player-card h3{
+  font-size:1.08rem;
+  line-height:1.15;
+}
+
+.player-card p{
+  margin-bottom:0;
+  font-size:.88rem;
+}
+
+/* Banners */
+.season-banner,.history-banner,.records-banner,.champions-banner{
+  min-height:315px;
+  padding:34px;
+  margin-bottom:30px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:28px;
+  box-shadow:var(--shadow),var(--ring);
+}
+
+.season-banner::before,.history-banner::before,.records-banner::before,.champions-banner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.09),transparent 24%),
+    radial-gradient(circle at 86% 18%,rgba(80,234,220,.16),transparent 17rem);
+}
+
+.season-banner h2,.history-banner h2,.records-banner h2,.champions-banner h2{
+  font-size:clamp(2.3rem,5vw,3.4rem);
+  line-height:.96;
+}
+
+.season-banner p,.history-banner p,.records-banner p,.champions-banner p{
+  max-width:620px;
+  color:#adbfce;
+}
+
+.subtabs{
+  gap:9px;
+  margin:22px 0;
+  padding:6px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:17px;
+  background:rgba(5,16,28,.62);
+  box-shadow:var(--ring);
+}
+
+.subtab{
+  border-color:transparent;
+  background:transparent;
+  color:#8fa6b9;
+}
+
+.subtab:hover{
+  color:#eef8ff;
+  background:rgba(255,255,255,.04);
+}
+
+.subtab.active{
+  border-color:rgba(245,201,92,.22);
+  background:linear-gradient(135deg,#f5c95c,#eead4f);
+  color:#181105;
+  box-shadow:0 10px 26px rgba(238,173,79,.18);
+}
+
+/* Records and awards */
+#recordGrid{margin-top:18px}
+#recordGrid .record{
+  min-height:175px;
+  background:
+    radial-gradient(circle at 92% 6%,rgba(80,234,220,.12),transparent 9rem),
+    linear-gradient(145deg,rgba(15,39,59,.94),rgba(6,19,32,.96));
+}
+
+#recordGrid .record::after{
+  content:"";
+  position:absolute;
+  right:-28px;
+  bottom:-42px;
+  width:120px;
+  height:120px;
+  border:1px solid rgba(80,234,220,.08);
+  border-radius:50%;
+}
+
+#recordGrid .record h3{
+  position:relative;
+  z-index:1;
+  color:#f6ce6b;
+  text-shadow:0 8px 24px rgba(245,201,92,.15);
+}
+
+#recordGrid .record .player-inline{
+  position:relative;
+  z-index:1;
+}
+
+#awardGrid .record{
+  min-height:195px;
+  background:
+    radial-gradient(circle at 96% 0%,rgba(138,104,255,.12),transparent 9rem),
+    linear-gradient(145deg,rgba(19,36,61,.94),rgba(8,18,34,.96));
+}
+
+#awardGrid .record h3{
+  color:#f5f8ff;
+  font-size:1.38rem;
+  line-height:1.08;
+}
+
+/* Champions */
+.group-grid{gap:17px}
+.group{
+  position:relative;
+  overflow:hidden;
+  padding:21px;
+  border-radius:22px;
+}
+
+.group::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--cyan),transparent);
+  opacity:.7;
+}
+
+.group h3{font-size:1.28rem}
+.group-team{
+  min-height:58px;
+  border-top-color:rgba(255,255,255,.075);
+}
+
+.group-team img{
+  width:40px;
+  height:40px;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 7px 16px rgba(0,0,0,.22);
+}
+
+.status{
+  border:1px solid rgba(80,234,220,.16);
+  background:rgba(80,234,220,.08);
+  box-shadow:var(--ring);
+}
+
+.round{
+  border-color:var(--line);
+  border-radius:20px;
+  background:linear-gradient(145deg,rgba(14,35,54,.91),rgba(6,18,31,.94));
+  box-shadow:var(--shadow-soft),var(--ring);
+}
+
+.empty-match{
+  border-color:rgba(145,181,213,.22);
+  background:rgba(255,255,255,.018);
+}
+
+/* Modal */
+.modal{
+  background:rgba(0,4,10,.78);
+  backdrop-filter:blur(12px);
+}
+
+.modal-card{
+  border-color:rgba(255,255,255,.13);
+  background:
+    radial-gradient(circle at 90% 2%,rgba(77,120,255,.13),transparent 20rem),
+    #081725;
+  box-shadow:0 35px 110px rgba(0,0,0,.58),var(--ring);
+}
+
+.profile-major-stats article,.profile-detail-grid article{
+  background:rgba(255,255,255,.028);
+  box-shadow:var(--ring);
+}
+
+/* Footer */
+footer{
+  border-top-color:rgba(255,255,255,.075);
+  background:rgba(2,7,15,.58);
+}
+
+/* Responsive refinement */
+@media(max-width:850px){
+  .hero-photo{min-height:650px}
+  .photo-card{min-height:440px}
+  .player-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:700px){
+  body{
+    background:
+      radial-gradient(circle at 20% 0%,rgba(77,120,255,.17),transparent 23rem),
+      linear-gradient(180deg,#020711,#06111e 55%,#030914);
+  }
+
+  body::before{background-size:30px 30px}
+
+  .topbar{
+    min-height:59px;
+    padding:9px 12px;
+  }
+
+  .logo{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+  }
+
+  .main-nav{
+    top:59px !important;
+    padding:9px 10px !important;
+    background:rgba(3,9,20,.90) !important;
+  }
+
+  .main-nav .navtab{
+    padding:9px 12px !important;
+    font-size:.78rem !important;
+  }
+
+  .hero-photo{
+    min-height:590px;
+    padding:64px 15px 34px;
+    background-position:58% top;
+  }
+
+  .hero-copy h1{
+    margin:16px 0;
+    font-size:clamp(3rem,15vw,4.5rem);
+    line-height:.88;
+  }
+
+  .hero-copy p{font-size:.94rem}
+
+  .actions{
+    grid-template-columns:1fr 1fr;
+    margin-top:22px;
+  }
+
+  .actions button{
+    min-height:45px;
+    padding:10px 8px;
+    font-size:.82rem;
+  }
+
+  .hero-kpis{
+    gap:9px;
+    margin-top:28px;
+  }
+
+  .hero-kpis article{
+    padding:14px 15px;
+    border-radius:17px;
+  }
+
+  main{
+    padding:25px 11px 105px !important;
+  }
+
+  .page.active{animation-duration:.28s}
+
+  .section-head{
+    margin:25px 0 15px;
+  }
+
+  .section-head h2{
+    font-size:1.65rem;
+  }
+
+  .panel,.record,.news-card{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .football-split{gap:12px}
+  .photo-card{
+    min-height:350px;
+    border-radius:20px;
+  }
+
+  .photo-card>div{
+    left:18px;
+    right:18px;
+    bottom:18px;
+  }
+
+  .photo-card h2{font-size:1.7rem}
+
+  .player-grid{grid-template-columns:1fr !important}
+  .player-card{
+    min-height:auto;
+    padding:15px;
+    border-radius:18px;
+    grid-template-columns:66px minmax(0,1fr) !important;
+    gap:4px 13px;
+  }
+
+  .player-card img{
+    width:66px;
+    height:66px;
+    border-radius:16px;
+  }
+
+  .season-banner,.history-banner,.records-banner,.champions-banner{
+    min-height:225px;
+    padding:20px;
+    margin-bottom:22px;
+    border-radius:20px;
+  }
+
+  .season-banner h2,.history-banner h2,.records-banner h2,.champions-banner h2{
+    font-size:2.15rem;
+  }
+
+  .subtabs{
+    width:100%;
+    margin:16px 0;
+    padding:5px;
+    border-radius:15px;
+  }
+
+  .subtab{
+    padding:9px 11px;
+    font-size:.75rem;
+  }
+
+  #recordGrid .record{min-height:155px}
+  #awardGrid .record{min-height:auto}
+
+  .group{padding:17px;border-radius:18px}
+  .group-team{min-height:54px}
+
+  .bottom-nav{
+    border-top-color:rgba(255,255,255,.09);
+    background:rgba(3,9,20,.92) !important;
+    box-shadow:0 -14px 40px rgba(0,0,0,.28);
+    backdrop-filter:blur(22px) saturate(150%);
+  }
+
+  .bottom-nav button{
+    color:#92a9bc;
+    border-radius:11px;
+  }
+
+  .bottom-nav button:active{
+    background:rgba(80,234,220,.09);
+    color:#eafcff;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
