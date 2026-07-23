@@ -384,3 +384,56 @@ img{
   .record h3,.panel h3{font-size:1.55rem}
   .known-row{font-size:.88rem}
 }
+
+
+/* ===== CUBAN LEAGUE V8 — MOBILE NAVIGATION FIX ===== */
+@media(max-width:620px){
+  /* Keep the complete official navigation visible on portrait phones */
+  .main-nav{
+    display:flex !important;
+    position:sticky !important;
+    top:73px !important;
+    z-index:45 !important;
+    width:100% !important;
+    max-width:100vw !important;
+    gap:8px !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x !important;
+    padding:10px 12px !important;
+    background:rgba(5,12,22,.98) !important;
+    scrollbar-width:none;
+  }
+  .main-nav::-webkit-scrollbar{display:none}
+  .main-nav .navtab{
+    display:block !important;
+    flex:0 0 auto !important;
+    white-space:nowrap !important;
+    min-width:max-content !important;
+    padding:10px 14px !important;
+    font-size:.82rem !important;
+    border-radius:12px !important;
+  }
+
+  /* Header remains compact, but do not hide navigation itself */
+  .topbar>button{display:none !important}
+
+  /* Leave enough room below the sticky nav */
+  main{padding-top:24px !important}
+
+  /* Bottom bar remains quick access; top bar contains ALL sections */
+  .bottom-nav{
+    overflow-x:auto !important;
+    justify-content:flex-start !important;
+    gap:4px !important;
+    scrollbar-width:none;
+  }
+  .bottom-nav::-webkit-scrollbar{display:none}
+  .bottom-nav button{
+    flex:1 0 24% !important;
+    min-width:82px !important;
+    white-space:nowrap !important;
+  }
+}
