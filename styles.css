@@ -1150,3 +1150,74 @@ img{
     border-radius:999px !important;
   }
 }
+
+
+/* =========================================================
+   V15 — COLUMNA JUGADORES FIJA AL DESLIZAR HORIZONTALMENTE
+   Histórico: Ranking Premium, Puntos acumulados y Palmarés puro
+   ========================================================= */
+@media screen and (max-width: 700px) {
+
+  /* PUNTOS ACUMULADOS: 2da columna = Jugador */
+  #pointsTable .thead.points-grid > span:nth-child(2),
+  #pointsTable #pointsRows .points-row > *:nth-child(2) {
+    position: sticky !important;
+    left: 50px !important;
+    z-index: 8 !important;
+    background: #0b2033 !important;
+    box-shadow: 5px 0 8px rgba(0,0,0,.24) !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2) {
+    z-index: 12 !important;
+    background: #10283e !important;
+  }
+
+  #pointsTable #pointsRows .points-row:nth-child(even) > *:nth-child(2) {
+    background: #0d263b !important;
+  }
+
+  /* PALMARÉS PURO: 2da columna = Jugador */
+  #palmaresTable .thead.palmares-grid > span:nth-child(2),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(2) {
+    position: sticky !important;
+    left: 50px !important;
+    z-index: 8 !important;
+    background: #0b2033 !important;
+    box-shadow: 5px 0 8px rgba(0,0,0,.24) !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2) {
+    z-index: 12 !important;
+    background: #10283e !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even) > *:nth-child(2) {
+    background: #0d263b !important;
+  }
+
+  /* RANKING PREMIUM: mantener fija también la columna de jugador.
+     Se cubren las clases usadas por las distintas versiones del ranking. */
+  #generalTable .thead > *:nth-child(2),
+  #generalTable .premium-row > *:nth-child(2),
+  #generalTable .ranking-row > *:nth-child(2),
+  #generalTable tbody tr > *:nth-child(2),
+  #premiumTable .thead > *:nth-child(2),
+  #premiumTable .premium-row > *:nth-child(2),
+  #premiumTable .ranking-row > *:nth-child(2),
+  #premiumTable tbody tr > *:nth-child(2) {
+    position: sticky !important;
+    left: 50px !important;
+    z-index: 8 !important;
+    background: #0b2033 !important;
+    box-shadow: 5px 0 8px rgba(0,0,0,.24) !important;
+  }
+
+  #generalTable .thead > *:nth-child(2),
+  #premiumTable .thead > *:nth-child(2),
+  #generalTable thead tr > *:nth-child(2),
+  #premiumTable thead tr > *:nth-child(2) {
+    z-index: 12 !important;
+    background: #10283e !important;
+  }
+}
