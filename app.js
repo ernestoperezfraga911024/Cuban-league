@@ -139,11 +139,15 @@ function buildEvolutionSVG(history){
   return `<div class="evolution-chart-scroll"><svg class="evolution-chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px" role="img" aria-label="Gráfica de evolución histórica de posiciones. Primera posición arriba y Segunda División indicada debajo.">${grid}${lines}${marks}${labels}</svg></div>`;
 }
 let profileReturnFocus=null;
+function syncModalLock(){
+  const anyOpen=['playerModal','installModal'].some(id=>$(id)&&!$(id).hidden);
+  document.body.classList.toggle('modal-open',anyOpen);
+}
 function closePlayer(){
   const modal=$('playerModal');
   if(modal.hidden)return;
   modal.hidden=true;
-  document.body.classList.remove('modal-open');
+  syncModalLock();
   profileReturnFocus?.focus?.();
 }
 function openPlayer(name){
@@ -212,7 +216,7 @@ function openPlayer(name){
       </div>
     </section>`;
   $('playerModal').hidden=false;
-  document.body.classList.add('modal-open');
+  syncModalLock();
   requestAnimationFrame(()=>$('closeModal').focus());
 }
 
@@ -302,7 +306,81 @@ function renderHistoricalEvolutionChart(){
 function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record"><span>${r.title}</span><h3>${r.value}</h3><p>${playerInline(r.player)}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record"><span>${a.title}</span><h3>${playerInline(a.player)}</h3><p>${a.text}</p></article>`).join('')}
 function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3>${g.name}</h3>${g.teams.map((t,i)=>`<div class="group-team team-profile-link" ${profileTriggerAttrs(t)}><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}" alt="Foto de ${t}"><b>${t}</b><small>Ver ficha</small></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3>${r.round}</h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card"><span>${n.date}</span><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
-async function init(){DATA=await(await fetch('data.json?v=24-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+
+let deferredInstallPrompt=null;
+let installReturnFocus=null;
+const isStandalone=()=>window.matchMedia?.('(display-mode: standalone)')?.matches||window.navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(window.navigator.userAgent)||(window.navigator.platform==='MacIntel'&&window.navigator.maxTouchPoints>1);
+
+function closeInstallGuide(){
+  const modal=$('installModal');
+  if(!modal||modal.hidden)return;
+  modal.hidden=true;
+  syncModalLock();
+  installReturnFocus?.focus?.();
+}
+
+function openInstallGuide(){
+  installReturnFocus=document.activeElement;
+  if(!isIOS()){
+    $('installIntro').textContent='Puedes instalar Cuban League desde el navegador y abrirla como una aplicación independiente.';
+    $('installSteps').innerHTML=`
+      <li><b>Abre el menú del navegador.</b><span>Normalmente son tres puntos en la parte superior.</span></li>
+      <li><b>Elige “Instalar aplicación”.</b><span>También puede aparecer como “Añadir a pantalla de inicio”.</span></li>
+      <li><b>Confirma la instalación.</b><span>Cuban League aparecerá junto a tus otras aplicaciones.</span></li>`;
+  }
+  $('nativeInstall').hidden=!deferredInstallPrompt;
+  $('installModal').hidden=false;
+  syncModalLock();
+  requestAnimationFrame(()=>$('closeInstall').focus());
+}
+
+async function requestInstall(){
+  if(!deferredInstallPrompt){openInstallGuide();return}
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt=null;
+  closeInstallGuide();
+  $('nativeInstall').hidden=true;
+  if(isStandalone())$('installApp').hidden=true;
+}
+
+function updateInstallUI(){
+  if(!$('installApp'))return;
+  $('installApp').hidden=isStandalone();
+  if($('nativeInstall'))$('nativeInstall').hidden=!deferredInstallPrompt;
+}
+
+function setupPWA(){
+  updateInstallUI();
+  $('installApp').onclick=requestInstall;
+  $('nativeInstall').onclick=requestInstall;
+  $('closeInstall').onclick=closeInstallGuide;
+  $('installModal').onclick=e=>{if(e.target.id==='installModal')closeInstallGuide()};
+
+  const syncConnection=()=>document.body.classList.toggle('is-offline',!navigator.onLine);
+  window.addEventListener('online',syncConnection);
+  window.addEventListener('offline',syncConnection);
+  syncConnection();
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js?v=25-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
+  }
+}
+
+window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  updateInstallUI();
+});
+
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  closeInstallGuide();
+  updateInstallUI();
+});
+
+async function init(){DATA=await(await fetch('data.json?v=25-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}
@@ -311,5 +389,6 @@ document.addEventListener('keydown',e=>{
   const team=e.target.closest?.('[data-profile-player]');
   if(team&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openPlayer(team.dataset.profilePlayer)}
   if(e.key==='Escape'&&!$('playerModal').hidden)closePlayer();
+  else if(e.key==='Escape'&&!$('installModal').hidden)closeInstallGuide();
 });
-document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(`${b.dataset.hist}Table`).classList.add('active')});$('sortGeneral').onchange=e=>renderGeneral(e.target.value);$('playerSearch').oninput=e=>renderPlayers(e.target.value);$('closeModal').onclick=closePlayer;$('playerModal').onclick=e=>{if(e.target.id==='playerModal')closePlayer()};$('share').onclick=()=>navigator.share?navigator.share({title:'Cuban League',url:location.href}):navigator.clipboard.writeText(location.href)}init();
+document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(`${b.dataset.hist}Table`).classList.add('active')});$('sortGeneral').onchange=e=>renderGeneral(e.target.value);$('playerSearch').oninput=e=>renderPlayers(e.target.value);$('closeModal').onclick=closePlayer;$('playerModal').onclick=e=>{if(e.target.id==='playerModal')closePlayer()};$('share').onclick=()=>navigator.share?navigator.share({title:'Cuban League',url:location.href}):navigator.clipboard.writeText(location.href);setupPWA();const launchSection=new URLSearchParams(location.search).get('section');if(['home','current','seasons','players','history','records','champions','news'].includes(launchSection))requestAnimationFrame(()=>go(launchSection))}init();

@@ -3009,3 +3009,259 @@ body.modal-open{overflow:hidden}
 
   .group-team small{display:none}
 }
+
+
+/* =========================================================
+   V25 — PWA INSTALABLE EN IPHONE Y ANDROID
+   ========================================================= */
+[hidden]{display:none!important}
+
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.topbar-actions button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:40px;
+  padding:10px 15px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  background:rgba(255,255,255,.055);
+  color:#eff8ff;
+  box-shadow:var(--ring);
+}
+
+.topbar-actions button:hover{
+  background:rgba(80,234,220,.10);
+  box-shadow:0 10px 24px rgba(0,0,0,.18),var(--ring);
+}
+
+.topbar-actions button>span:first-child{
+  color:var(--cyan);
+  font-size:1.05rem;
+}
+
+#installApp{
+  border-color:rgba(80,234,220,.17);
+  background:rgba(80,234,220,.075);
+}
+
+.install-modal{
+  z-index:95;
+}
+
+.install-card{
+  position:relative;
+  width:min(540px,100%);
+  max-height:92dvh;
+  overflow:auto;
+  padding:30px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 90% 2%,rgba(80,234,220,.15),transparent 18rem),
+    linear-gradient(145deg,rgba(13,34,52,.98),rgba(5,16,28,.99));
+  box-shadow:0 35px 110px rgba(0,0,0,.58),var(--ring);
+}
+
+.install-close{
+  position:absolute;
+  top:16px;
+  right:16px;
+  display:grid;
+  width:42px;
+  height:42px;
+  padding:0;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:rgba(4,14,25,.76);
+}
+
+.install-icon{
+  display:block;
+  width:92px;
+  height:92px;
+  margin:0 0 22px;
+  border-radius:25px;
+  box-shadow:0 18px 42px rgba(0,0,0,.34);
+}
+
+.install-card h2{
+  margin:7px 0 10px;
+  font-size:2rem;
+}
+
+.install-card>p{
+  margin:0;
+  color:#a9bdcc;
+}
+
+.install-steps{
+  display:grid;
+  gap:10px;
+  margin:24px 0 0;
+  padding:0;
+  list-style:none;
+  counter-reset:install-step;
+}
+
+.install-steps li{
+  position:relative;
+  min-height:70px;
+  padding:14px 14px 14px 57px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  counter-increment:install-step;
+}
+
+.install-steps li::before{
+  content:counter(install-step);
+  position:absolute;
+  top:14px;
+  left:14px;
+  display:grid;
+  width:30px;
+  height:30px;
+  place-items:center;
+  border-radius:10px;
+  background:linear-gradient(135deg,#68f1e4,#51b7f3);
+  color:#031018;
+  font-size:.82rem;
+  font-weight:900;
+}
+
+.install-steps b,
+.install-steps span{
+  display:block;
+}
+
+.install-steps b{
+  color:#f4f9fd;
+  font-size:.92rem;
+}
+
+.install-steps span{
+  margin-top:4px;
+  color:#8fa7ba;
+  font-size:.78rem;
+  line-height:1.4;
+}
+
+.install-primary{
+  width:100%;
+  min-height:48px;
+  margin-top:17px;
+  border:0;
+  background:linear-gradient(135deg,#68f1e4,#51b7f3);
+  color:#031018;
+  box-shadow:0 14px 34px rgba(62,210,211,.20);
+}
+
+body.is-offline::after{
+  content:"Sin conexión · mostrando datos guardados";
+  position:fixed;
+  top:calc(10px + env(safe-area-inset-top));
+  left:50%;
+  z-index:110;
+  padding:8px 12px;
+  border:1px solid rgba(245,201,92,.25);
+  border-radius:999px;
+  background:rgba(26,21,10,.94);
+  color:#f6ce6b;
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
+  font-size:.72rem;
+  font-weight:800;
+  transform:translateX(-50%);
+  white-space:nowrap;
+}
+
+@media(display-mode:standalone){
+  .topbar{
+    min-height:calc(74px + env(safe-area-inset-top));
+    padding-top:calc(11px + env(safe-area-inset-top));
+  }
+
+  .main-nav{
+    top:calc(74px + env(safe-area-inset-top));
+  }
+}
+
+@media(max-width:700px){
+  .topbar-actions{
+    gap:6px;
+  }
+
+  .topbar-actions button{
+    width:39px;
+    min-width:39px;
+    height:39px;
+    min-height:39px;
+    padding:0;
+    border-radius:12px;
+  }
+
+  .topbar-actions .button-label{
+    display:none;
+  }
+
+  .install-card{
+    width:100%;
+    max-height:94dvh;
+    padding:24px 17px calc(24px + env(safe-area-inset-bottom));
+    border-width:1px 0 0;
+    border-radius:26px 26px 0 0;
+  }
+
+  .install-close{
+    top:14px;
+    right:14px;
+    width:40px;
+    height:40px;
+  }
+
+  .install-icon{
+    width:78px;
+    height:78px;
+    margin-bottom:18px;
+    border-radius:22px;
+  }
+
+  .install-card h2{
+    padding-right:38px;
+    font-size:1.65rem;
+  }
+
+  .install-steps{
+    gap:8px;
+    margin-top:19px;
+  }
+
+  .install-steps li{
+    min-height:64px;
+    padding:12px 11px 12px 52px;
+    border-radius:15px;
+  }
+
+  .install-steps li::before{
+    top:12px;
+    left:11px;
+  }
+
+  @media(display-mode:standalone){
+    .topbar{
+      min-height:calc(59px + env(safe-area-inset-top));
+      padding-top:calc(9px + env(safe-area-inset-top));
+    }
+
+    .main-nav{
+      top:calc(59px + env(safe-area-inset-top))!important;
+    }
+  }
+}
