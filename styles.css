@@ -1221,3 +1221,100 @@ img{
     background: #10283e !important;
   }
 }
+
+
+/* =========================================================
+   V16 — FIJAR # + JUGADOR COMPLETOS DURANTE SCROLL HORIZONTAL
+   ========================================================= */
+@media screen and (max-width:700px){
+
+  /* ---------- RANKING PREMIUM ---------- */
+  #generalTable .thead.general-grid > span:nth-child(1),
+  #generalTable #generalRows .general-row > *:nth-child(1){
+    position:sticky !important;
+    left:0 !important;
+    z-index:20 !important;
+    background:#0b2033 !important;
+  }
+
+  #generalTable .thead.general-grid > span:nth-child(2),
+  #generalTable #generalRows .general-row > *:nth-child(2){
+    position:sticky !important;
+    left:50px !important;
+    z-index:19 !important;
+    background:#0b2033 !important;
+    box-shadow:6px 0 8px rgba(0,0,0,.30) !important;
+  }
+
+  #generalTable .thead.general-grid > span:nth-child(1),
+  #generalTable .thead.general-grid > span:nth-child(2){
+    z-index:30 !important;
+    background:#10283e !important;
+  }
+
+  /* ---------- PUNTOS ACUMULADOS ---------- */
+  #pointsTable .thead.points-grid > span:nth-child(1),
+  #pointsTable #pointsRows .points-row > *:nth-child(1){
+    position:sticky !important;
+    left:0 !important;
+    z-index:20 !important;
+    background:#0b2033 !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2),
+  #pointsTable #pointsRows .points-row > *:nth-child(2){
+    position:sticky !important;
+    left:50px !important;
+    z-index:19 !important;
+    background:#0b2033 !important;
+    box-shadow:6px 0 8px rgba(0,0,0,.30) !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(1),
+  #pointsTable .thead.points-grid > span:nth-child(2){
+    z-index:30 !important;
+    background:#10283e !important;
+  }
+
+  #pointsTable #pointsRows .points-row:nth-child(even) > *:nth-child(1),
+  #pointsTable #pointsRows .points-row:nth-child(even) > *:nth-child(2){
+    background:#0d263b !important;
+  }
+
+  /* ---------- PALMARÉS PURO ---------- */
+  #palmaresTable .thead.palmares-grid > span:nth-child(1),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(1){
+    position:sticky !important;
+    left:0 !important;
+    z-index:20 !important;
+    background:#0b2033 !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(2){
+    position:sticky !important;
+    left:50px !important;
+    z-index:19 !important;
+    background:#0b2033 !important;
+    box-shadow:6px 0 8px rgba(0,0,0,.30) !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(1),
+  #palmaresTable .thead.palmares-grid > span:nth-child(2){
+    z-index:30 !important;
+    background:#10283e !important;
+  }
+
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even) > *:nth-child(1),
+  #palmaresTable #palmaresRows .palmares-row:nth-child(even) > *:nth-child(2){
+    background:#0d263b !important;
+  }
+
+  /* Evita que el contenido móvil se pinte por encima de las columnas fijas */
+  #generalTable .general-row > *:nth-child(n+3),
+  #pointsTable .points-row > *:nth-child(n+3),
+  #palmaresTable .palmares-row > *:nth-child(n+3){
+    position:relative !important;
+    z-index:1 !important;
+  }
+}
