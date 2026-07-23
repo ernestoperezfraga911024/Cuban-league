@@ -1,4 +1,5 @@
 let DATA;const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
+const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function profileTriggerAttrs(name){const safe=profileAttr(name);return `data-profile-player="${safe}" role="button" tabindex="0" aria-label="Ver perfil completo de ${safe}"`}
 function teamCell(name){return `<div class="team team-profile-link" ${profileTriggerAttrs(name)}><img src="${imageMap()[name]||''}" alt="Foto de ${name}"><span class="name">${name}</span></div>`}
@@ -50,7 +51,7 @@ return;
 }
 const first=s.results.filter(r=>r.division===1);
 const second=s.results.filter(r=>r.division===2);
-const rows=first.map(r=>`<div class="season-result-row ${r.position===1?'season-winner':''}"><span class="season-pos">${r.position===1?'🏆':r.position+'º'}</span>${teamCell(r.name)}<span class="season-points">${r.points.toLocaleString()} pts</span></div>`).join('');
+const rows=first.map(r=>`<div class="season-result-row ${r.position===1?'season-winner':''}"><span class="season-pos">${r.position===1?uiIcon('trophy','season-winner-icon'):r.position+'º'}</span>${teamCell(r.name)}<span class="season-points">${r.points.toLocaleString()} pts</span></div>`).join('');
 const secondRows=second.map(r=>`<div class="second-team">${teamCell(r.name)}<span>2ª División</span></div>`).join('');
 $('seasonContent').innerHTML=`<div class="season-table-wrap"><div class="season-title-line"><div><span class="eyebrow">${s.season}</span><h3>Clasificación final</h3></div><span class="status">${first.length} en 1ª División</span></div><div class="card season-results">${rows}</div>${second.length?`<div class="second-division"><h3>2ª División</h3><p>Estos participantes no aparecen en la clasificación de Primera de esta temporada.</p><div class="second-grid">${secondRows}</div></div>`:''}</div>`;
 };
@@ -61,7 +62,7 @@ function renderSeasonChampions(){
 const list=DATA.historicalTables.seasonChampions||[];
 $('seasonChampions').innerHTML=list.map(c=>{
 const img=imageMap()[c.name];
-return `<article class="champion-history-card">${img?`<img src="${img}" alt="">`:`<div class="champion-placeholder">🏆</div>`}<div><span>${c.season}</span><h3>${playerInline(c.name)}</h3><p>${c.points?c.points.toLocaleString()+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div></article>`
+return `<article class="champion-history-card">${img?`<img src="${img}" alt="">`:`<div class="champion-placeholder">${uiIcon('trophy','champion-placeholder-icon')}</div>`}<div><span>${c.season}</span><h3>${playerInline(c.name)}</h3><p>${c.points?c.points.toLocaleString()+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div></article>`
 }).join('')
 }
 function renderPlayers(filter=''){const stats=statMap();$('playerGrid').innerHTML=DATA.participants.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())).map(p=>{const s=stats[p.name]||{};return `<article class="player-card team-profile-link" ${profileTriggerAttrs(p.name)}><img src="${p.shield}" alt="Foto de ${p.name}"><h3>${p.name}</h3><small>${s.label||'Participante'}</small><p>${s.points?.toLocaleString()||0} puntos · ${s.podiums||0} podios</p><span class="profile-card-cta">Ver ficha completa →</span></article>`}).join('')}
@@ -303,9 +304,9 @@ function renderHistoricalEvolutionChart(){
       </svg>
     </div>`;
 }
-function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record"><span>${r.title}</span><h3>${r.value}</h3><p>${playerInline(r.player)}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record"><span>${a.title}</span><h3>${playerInline(a.player)}</h3><p>${a.text}</p></article>`).join('')}
-function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3>${g.name}</h3>${g.teams.map((t,i)=>`<div class="group-team team-profile-link" ${profileTriggerAttrs(t)}><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}" alt="Foto de ${t}"><b>${t}</b><small>Ver ficha</small></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3>${r.round}</h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
-function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card"><span>${n.date}</span><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
+function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record icon-card"><div class="card-label-row"><span>${r.title}</span><span class="record-icon">${uiIcon('trophy')}</span></div><h3>${r.value}</h3><p>${playerInline(r.player)}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record icon-card"><div class="card-label-row"><span>${a.title}</span><span class="record-icon award">${uiIcon('star')}</span></div><h3>${playerInline(a.player)}</h3><p>${a.text}</p></article>`).join('')}
+function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3 class="group-title">${uiIcon('shield')}<span>${g.name}</span></h3>${g.teams.map((t,i)=>`<div class="group-team team-profile-link" ${profileTriggerAttrs(t)}><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}" alt="Foto de ${t}"><b>${t}</b><small>Ver ficha</small></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
+function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card icon-card"><div class="card-label-row"><span>${n.date}</span><span class="record-icon news">${uiIcon('news')}</span></div><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
 
 let deferredInstallPrompt=null;
 let installReturnFocus=null;
@@ -385,7 +386,7 @@ function setupPWA(){
   syncConnection();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js?v=28-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=29-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
   }
 }
 
@@ -401,7 +402,7 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch('data.json?v=28-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch('data.json?v=29-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}

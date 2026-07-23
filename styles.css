@@ -3465,3 +3465,271 @@ body.is-offline::after{
     }
   }
 }
+
+
+/* =========================================================
+   V29 — ICONOGRAFÍA DEPORTIVA
+   ========================================================= */
+.icon-sprite{
+  position:absolute;
+  width:0;
+  height:0;
+  overflow:hidden;
+  visibility:hidden;
+}
+
+.ui-icon{
+  display:block;
+  width:1.1em;
+  height:1.1em;
+  flex:0 0 auto;
+}
+
+.actions button,
+.navtab{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.actions button .ui-icon{
+  width:18px;
+  height:18px;
+}
+
+.navtab{
+  transition:background-color .2s ease,color .2s ease,transform .2s ease;
+}
+
+.navtab .ui-icon{
+  width:17px;
+  height:17px;
+  color:#7f9bae;
+  transition:color .2s ease,transform .2s ease;
+}
+
+.navtab:hover .ui-icon{
+  color:#8ff77a;
+  transform:translateY(-1px);
+}
+
+.navtab.active .ui-icon{
+  color:#052015;
+}
+
+.hero-kpis article{
+  position:relative;
+  overflow:hidden;
+}
+
+.hero-kpis article::after{
+  content:"";
+  position:absolute;
+  right:-34px;
+  bottom:-44px;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:rgba(98,244,111,.07);
+  filter:blur(2px);
+  pointer-events:none;
+}
+
+.kpi-label{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+}
+
+.hero-kpis .kpi-label>span:last-child{
+  color:#a9bbc9;
+  font-size:.74rem;
+  font-weight:750;
+}
+
+.hero-kpis .kpi-icon{
+  display:grid;
+  width:30px;
+  height:30px;
+  place-items:center;
+  border:1px solid rgba(126,248,112,.22);
+  border-radius:10px;
+  background:rgba(64,223,102,.10);
+  color:#8df67b;
+}
+
+.hero-kpis .kpi-icon .ui-icon{
+  width:16px;
+  height:16px;
+}
+
+.metric-panel{
+  position:relative;
+  min-height:154px;
+  overflow:hidden;
+  padding-right:78px;
+}
+
+.metric-panel::after{
+  content:"";
+  position:absolute;
+  right:-46px;
+  bottom:-56px;
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  background:currentColor;
+  opacity:.055;
+  pointer-events:none;
+}
+
+.panel-icon{
+  position:absolute;
+  top:18px;
+  right:18px;
+  display:grid !important;
+  width:48px;
+  height:48px;
+  place-items:center;
+  border:1px solid currentColor;
+  border-radius:15px;
+  background:rgba(255,255,255,.045);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.panel-icon .ui-icon{
+  width:24px;
+  height:24px;
+}
+
+.metric-gold{color:#f4c651}
+.metric-cyan{color:#59e5dc}
+.metric-green{color:#82f477}
+.metric-panel>span:not(.panel-icon),
+.metric-panel h3,
+.metric-panel p{color:initial}
+.metric-panel>span:not(.panel-icon){color:var(--muted)}
+.metric-panel h3{color:var(--text)}
+.metric-panel p{color:var(--muted)}
+
+.title-with-icon{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.section-icon{
+  display:grid;
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  place-items:center;
+  border:1px solid rgba(112,242,106,.22);
+  border-radius:12px;
+  background:linear-gradient(145deg,rgba(91,239,104,.13),rgba(16,185,90,.055));
+  color:#8bf679;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.section-icon .ui-icon{
+  width:19px;
+  height:19px;
+}
+
+.icon-card{
+  position:relative;
+  overflow:hidden;
+}
+
+.card-label-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.record-icon{
+  display:grid !important;
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  place-items:center;
+  border:1px solid rgba(244,198,81,.24);
+  border-radius:12px;
+  background:rgba(244,198,81,.09);
+  color:#f4c651 !important;
+}
+
+.record-icon.award{
+  border-color:rgba(132,244,116,.22);
+  background:rgba(92,229,106,.08);
+  color:#8bf679 !important;
+}
+
+.record-icon.news{
+  border-color:rgba(89,229,220,.22);
+  background:rgba(89,229,220,.08);
+  color:#59e5dc !important;
+}
+
+.record-icon .ui-icon{
+  width:19px;
+  height:19px;
+}
+
+.group-title{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.group-title .ui-icon{
+  width:20px;
+  height:20px;
+  color:#88f478;
+}
+
+.season-winner-icon{
+  width:22px;
+  height:22px;
+  color:#f4c651;
+}
+
+.champion-placeholder-icon{
+  width:32px;
+  height:32px;
+  color:#f4c651;
+}
+
+@media(max-width:700px){
+  .navtab{
+    gap:6px !important;
+  }
+
+  .navtab .ui-icon{
+    width:16px;
+    height:16px;
+  }
+
+  .section-icon{
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+    border-radius:11px;
+  }
+
+  .section-icon .ui-icon{
+    width:17px;
+    height:17px;
+  }
+
+  .title-with-icon{
+    gap:9px;
+  }
+
+  .metric-panel{
+    min-height:142px;
+  }
+}
