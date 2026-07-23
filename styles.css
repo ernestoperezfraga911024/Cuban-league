@@ -1553,3 +1553,46 @@ img{
   .record-card .value,.record .value,.record-card h3,.record h3{font-size:1.85rem}
   .record-card .label,.record .label,.record-card small,.record small{font-size:.76rem}
 }
+
+
+/* =========================================================
+   V22 — RECORDS: JUGADOR MÁS PROTAGONISTA
+   Fotos y nombres mayores; cifras con una jerarquía más sutil.
+   ========================================================= */
+#recordGrid .record h3{
+  font-size:clamp(1.5rem,3vw,2rem);
+  line-height:1;
+  margin:8px 0 14px;
+}
+#recordGrid .record p{margin:0}
+#recordGrid .record .player-inline{
+  gap:12px;
+  margin-top:0;
+  font-size:1.14rem;
+  font-weight:900;
+}
+#recordGrid .record .player-inline-photos img{
+  width:50px;
+  height:50px;
+  min-width:50px;
+  border-radius:13px;
+}
+#recordGrid .record .player-inline-photos.multiple img+img{margin-left:-12px}
+
+@media(max-width:700px){
+  #recordGrid .record h3{
+    font-size:1.55rem;
+    margin-bottom:13px;
+  }
+  #recordGrid .record .player-inline{
+    gap:10px;
+    font-size:1.1rem;
+  }
+  #recordGrid .record .player-inline-photos img{
+    width:46px;
+    height:46px;
+    min-width:46px;
+    border-radius:12px;
+  }
+  #recordGrid .record .player-inline-photos.multiple img+img{margin-left:-11px}
+}
