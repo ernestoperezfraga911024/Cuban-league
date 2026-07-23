@@ -16,3 +16,305 @@ main{max-width:1180px;margin:auto;padding:35px 20px 110px}.page{display:none}.pa
 footer{text-align:center;padding:28px 20px;color:var(--muted);border-top:1px solid var(--line)}footer small{display:block;max-width:900px;margin:auto;line-height:1.5}.bottom-nav{display:none}
 @media(max-width:850px){.football-split{grid-template-columns:1fr}.photo-card{min-height:440px}.dashboard-grid,.record-grid,.news-grid{grid-template-columns:1fr 1fr}.player-grid{grid-template-columns:repeat(2,1fr)}.hero-kpis{grid-template-columns:1fr 1fr}.hero-kpis article:last-child{grid-column:1/-1}.group-grid{grid-template-columns:1fr}.bracket{grid-template-columns:1fr}}
 @media(max-width:620px){.topbar>button,.main-nav{display:none}.hero-photo{min-height:680px;padding-bottom:100px}.hero-copy h1{font-size:3.8rem}.hero-kpis{grid-template-columns:1fr}.hero-kpis article:last-child{grid-column:auto}.dashboard-grid,.record-grid,.news-grid{grid-template-columns:1fr}.player-grid{grid-template-columns:1fr 1fr}.bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:50;justify-content:space-around;padding:10px 8px calc(10px + env(safe-area-inset-bottom));background:rgba(5,12,22,.95);backdrop-filter:blur(16px);border-top:1px solid var(--line)}.bottom-nav button{background:transparent;border:0;font-size:.73rem}.section-head{align-items:center}.current-grid,.row{grid-template-columns:38px minmax(0,1fr) 32px 58px;padding-left:11px;padding-right:11px}.team img{width:43px;height:43px}.points-grid,.points-row{grid-template-columns:40px minmax(150px,1fr) 90px 90px 90px;min-width:650px}.palmares-grid,.palmares-row{grid-template-columns:40px minmax(150px,1fr) 75px 70px 70px 75px;min-width:600px}.profile-stats{grid-template-columns:1fr 1fr}}
+
+html{
+  -webkit-text-size-adjust:100%;
+}
+
+body{
+  overflow-x:hidden;
+  padding-bottom:0;
+}
+
+img{
+  max-width:100%;
+}
+
+.brand,
+.page,
+.player-card,
+.group,
+.group-team{
+  min-width:0;
+}
+
+.main-nav,
+.subtabs,
+.scroll{
+  -webkit-overflow-scrolling:touch;
+}
+
+.main-nav{
+  scrollbar-width:none;
+}
+
+.main-nav::-webkit-scrollbar{
+  display:none;
+}
+
+@media(max-width:620px){
+
+  body{
+    padding-bottom:72px;
+  }
+
+  /* CABECERA */
+  .topbar{
+    padding:10px 12px;
+  }
+
+  .topbar>button{
+    display:none;
+  }
+
+  .brand small{
+    display:none;
+  }
+
+  .brand b{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .logo{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    flex:0 0 auto;
+  }
+
+  /* PORTADA */
+  .hero-photo{
+    min-height:560px;
+    padding:42px 16px 105px;
+    background-position:center top;
+  }
+
+  .hero-copy h1{
+    font-size:clamp(2.65rem,13vw,4rem);
+    line-height:.93;
+  }
+
+  .hero-copy p{
+    font-size:.95rem;
+  }
+
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .actions button{
+    flex:1 1 140px;
+  }
+
+  .hero-kpis{
+    grid-template-columns:1fr;
+    margin-top:30px;
+  }
+
+  .hero-kpis article{
+    padding:14px;
+  }
+
+  /* CONTENIDO */
+  main{
+    padding:24px 12px 95px;
+  }
+
+  .football-split{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .photo-card{
+    min-height:360px;
+    border-radius:18px;
+  }
+
+  .photo-card>div{
+    left:18px;
+    right:18px;
+    bottom:18px;
+  }
+
+  .photo-card h2{
+    font-size:1.65rem;
+  }
+
+  .dashboard-grid,
+  .record-grid,
+  .news-grid,
+  .group-grid,
+  .bracket{
+    grid-template-columns:1fr;
+  }
+
+  /* CLASIFICACION */
+  .current-grid,
+  .row{
+    grid-template-columns:34px minmax(0,1fr) 30px 54px;
+    padding-left:10px;
+    padding-right:10px;
+  }
+
+  .row{
+    padding-top:10px;
+    padding-bottom:10px;
+  }
+
+  .team{
+    gap:9px;
+  }
+
+  .team img{
+    width:40px;
+    height:40px;
+    border-radius:11px;
+    flex:0 0 auto;
+  }
+
+  .name{
+    font-size:.88rem;
+  }
+
+  .thead{
+    font-size:.62rem;
+  }
+
+  /* PARTICIPANTES */
+  .player-grid{
+    grid-template-columns:1fr;
+  }
+
+  .player-card{
+    display:grid;
+    grid-template-columns:64px minmax(0,1fr);
+    column-gap:12px;
+    align-items:center;
+  }
+
+  .player-card img{
+    width:64px;
+    height:64px;
+    grid-row:1/4;
+  }
+
+  .player-card h3,
+  .player-card small,
+  .player-card p{
+    grid-column:2;
+    margin:0;
+  }
+
+  .player-card p{
+    margin-top:6px;
+  }
+
+  /* TITULOS Y SELECTORES */
+  .section-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .section-head select,
+  .section-head input{
+    width:100%;
+  }
+
+  /* BANNERS */
+  .season-banner,
+  .history-banner,
+  .records-banner,
+  .champions-banner{
+    min-height:220px;
+    padding:20px;
+    border-radius:18px;
+  }
+
+  .season-banner h2,
+  .history-banner h2,
+  .records-banner h2,
+  .champions-banner h2{
+    font-size:2rem;
+  }
+
+  /* TABLAS HISTORICAS */
+  .scroll{
+    overflow-x:auto;
+  }
+
+  .general-grid,
+  .general-row{
+    min-width:850px;
+  }
+
+  .points-grid,
+  .points-row{
+    grid-template-columns:
+      36px minmax(140px,1fr) 80px 90px 88px;
+    min-width:540px;
+  }
+
+  .palmares-grid,
+  .palmares-row{
+    grid-template-columns:
+      36px minmax(140px,1fr) 70px 64px 64px 70px;
+    min-width:510px;
+  }
+
+  /* PERFIL DE JUGADOR */
+  .profile-head{
+    align-items:flex-start;
+  }
+
+  .profile-head img{
+    width:78px;
+    height:78px;
+    border-radius:18px;
+    flex:0 0 auto;
+  }
+
+  .profile-stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .modal{
+    padding:8px;
+  }
+
+  .modal-card{
+    padding:18px 14px;
+    border-radius:18px;
+    max-height:94vh;
+  }
+
+  /* MENU INFERIOR TIPO APP */
+  .bottom-nav{
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:50;
+    justify-content:space-around;
+    gap:2px;
+    padding:
+      8px 6px
+      calc(8px + env(safe-area-inset-bottom));
+    background:rgba(5,12,22,.97);
+    backdrop-filter:blur(16px);
+    border-top:1px solid var(--line);
+  }
+
+  .bottom-nav button{
+    flex:1;
+    background:transparent;
+    border:0;
+    font-size:.71rem;
+    padding:8px 4px;
+  }
+}
