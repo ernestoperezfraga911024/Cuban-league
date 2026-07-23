@@ -1,5 +1,5 @@
 let DATA;const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
-function teamCell(name){return `<div class="team"><img src="${imageMap()[name]||''}" alt=""><span class="name">${name}</span></div>`}
+function teamCell(name){return `<div class="team team-profile-link" data-profile-player="${name.replace(/"/g,'&quot;')}"><img src="${imageMap()[name]||''}" alt=""><span class="name">${name}</span></div>`}
 function go(id){document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.navtab[data-section="${id}"]`)?.classList.add('active');scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'})}
 function renderCurrent(){const rows=[...DATA.participants].sort((a,b)=>b.points-a.points||a.id-b.id);$('updated').textContent=DATA.lastUpdated;$('currentRows').innerHTML=rows.map((p,i)=>`<div class="row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.played}</span><span class="num">${p.points}</span></div>`).join('')}
 function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles);return x.sort((a,b)=>b.score-a.score)}
@@ -32,8 +32,100 @@ return `<article class="champion-history-card">${img?`<img src="${img}" alt="">`
 }).join('')
 }
 function renderPlayers(filter=''){const stats=statMap();$('playerGrid').innerHTML=DATA.participants.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())).map(p=>{const s=stats[p.name]||{};return `<article class="player-card" data-player="${p.name}"><img src="${p.shield}"><h3>${p.name}</h3><small>${s.label||'Participante'}</small><p>${s.points?.toLocaleString()||0} puntos · ${s.podiums||0} podios</p></article>`}).join('');document.querySelectorAll('.player-card').forEach(c=>c.onclick=()=>openPlayer(c.dataset.player))}
-function openPlayer(name){const p=DATA.participants.find(x=>x.name===name),s=statMap()[name]||{};$('modalContent').innerHTML=`<div class="profile-head"><img src="${p.shield}"><div><span class="eyebrow">${s.label||'PARTICIPANTE'}</span><h2>${name}</h2><p>${s.description||'Sin historial acumulado todavía.'}</p></div></div><div class="profile-stats"><article><b>${s.titles||0}</b><small>Títulos</small></article><article><b>${s.seconds||0}</b><small>Subcampeonatos</small></article><article><b>${s.thirds||0}</b><small>Terceros</small></article><article><b>${s.podiums||0}</b><small>Podios</small></article><article><b>${s.top5||0}</b><small>Top 5</small></article><article><b>${s.seasons||0}</b><small>Temporadas</small></article><article><b>${s.points?.toLocaleString()||0}</b><small>Puntos</small></article><article><b>${s.average?s.average.toFixed(1):'—'}</b><small>Promedio</small></article><article><b>${s.score?.toFixed(1)||'0.0'}</b><small>Score</small></article></div>`;$('playerModal').hidden=false}
+function getPlayerHistory(name){
+  const archive=DATA.historicalTables?.seasonArchive||[];
+  return archive.map(s=>{
+    const row=(s.results||[]).find(r=>r.name===name);
+    if(!row)return {season:s.season,division:null,position:null,points:null};
+    return {season:s.season,division:row.division,position:row.position,points:row.points};
+  }).filter(x=>x.season!=='2026/27');
+}
+function ordinal(n){return n?`${n}º`:'—'}
+function profileMetrics(name){
+  const h=getPlayerHistory(name);
+  const first=h.filter(x=>x.division===1&&x.position!=null);
+  const positions=first.map(x=>x.position);
+  const points=first.map(x=>x.points).filter(x=>x!=null);
+  const best=first.length?[...first].sort((a,b)=>a.position-b.position||b.points-a.points)[0]:null;
+  const worst=first.length?[...first].sort((a,b)=>b.position-a.position||a.points-b.points)[0]:null;
+  const avgPos=positions.length?positions.reduce((a,b)=>a+b,0)/positions.length:null;
+  const bestPoints=points.length?Math.max(...points):null;
+  return {history:h,first,best,worst,avgPos,bestPoints};
+}
+function buildEvolutionSVG(first){
+  if(!first.length)return `<div class="profile-no-data">Sin temporadas en Primera División para graficar.</div>`;
+  const W=720,H=250,padL=42,padR=18,padT=22,padB=46;
+  const maxPos=Math.max(20,...first.map(x=>x.position));
+  const x=(i)=>first.length===1?(W/2):padL+i*((W-padL-padR)/(first.length-1));
+  const y=(p)=>padT+((p-1)/(maxPos-1))*(H-padT-padB);
+  const pts=first.map((d,i)=>`${x(i)},${y(d.position)}`).join(' ');
+  const grid=[1,5,10,15,20].filter(v=>v<=maxPos).map(v=>{
+    const yy=y(v);return `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" class="evo-grid"/><text x="8" y="${yy+4}" class="evo-axis">${v}º</text>`
+  }).join('');
+  const labels=first.map((d,i)=>`<text x="${x(i)}" y="${H-18}" text-anchor="middle" class="evo-label">${d.season.slice(2)}</text>`).join('');
+  const dots=first.map((d,i)=>`<circle cx="${x(i)}" cy="${y(d.position)}" r="6" class="evo-dot"/><text x="${x(i)}" y="${y(d.position)-11}" text-anchor="middle" class="evo-value">${d.position}º</text>`).join('');
+  return `<div class="evolution-chart-scroll"><svg class="evolution-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolución histórica de posiciones">${grid}<polyline points="${pts}" class="evo-line"/>${dots}${labels}</svg></div>`;
+}
+function openPlayer(name){
+  const p=DATA.participants.find(x=>x.name===name);
+  if(!p)return;
+  const s=statMap()[name]||{};
+  const m=profileMetrics(name);
+  const progression=m.history.map(x=>x.division===1?ordinal(x.position):'2ª').join(' → ');
+  const seasonRows=m.history.map(x=>{
+    const isWinner=x.division===1&&x.position===1;
+    return `<div class="profile-season-row ${isWinner?'profile-season-champion':''}">
+      <span>${x.season}</span>
+      <b>${x.division===1?(isWinner?'🏆 Campeón':ordinal(x.position)):'2ª División'}</b>
+      <span>${x.points!=null?x.points.toLocaleString()+' pts':'—'}</span>
+    </div>`
+  }).join('');
+  $('modalContent').innerHTML=`
+    <section class="profile-hero">
+      <img src="${p.shield}" class="profile-avatar" alt="">
+      <div class="profile-identity">
+        <span class="eyebrow">${s.label||'PARTICIPANTE'}</span>
+        <h2>${name}</h2>
+        <p>${s.description||'Historial de la Cuban League.'}</p>
+      </div>
+    </section>
+
+    <section class="profile-major-stats">
+      <article><b>${s.titles||0}</b><span>Títulos</span></article>
+      <article><b>${s.seconds||0}</b><span>Subcampeonatos</span></article>
+      <article><b>${s.podiums||0}</b><span>Podios</span></article>
+      <article><b>${s.points?.toLocaleString()||0}</b><span>Puntos históricos</span></article>
+    </section>
+
+    <section class="profile-section">
+      <div class="profile-section-head"><div><span class="eyebrow">TRAYECTORIA</span><h3>Evolución por temporada</h3></div></div>
+      <div class="progression-strip">${progression||'Sin historial'}</div>
+      ${buildEvolutionSVG(m.first)}
+    </section>
+
+    <section class="profile-detail-grid">
+      <article><span>Mejor temporada</span><b>${m.best?`${m.best.season} · ${ordinal(m.best.position)}`:'—'}</b><small>${m.best?.points!=null?m.best.points.toLocaleString()+' pts':''}</small></article>
+      <article><span>Peor temporada en 1ª</span><b>${m.worst?`${m.worst.season} · ${ordinal(m.worst.position)}`:'—'}</b><small>${m.worst?.points!=null?m.worst.points.toLocaleString()+' pts':''}</small></article>
+      <article><span>Promedio de posición</span><b>${m.avgPos?m.avgPos.toFixed(1)+'º':'—'}</b><small>Solo temporadas en 1ª</small></article>
+      <article><span>Mayor puntuación</span><b>${m.bestPoints!=null?m.bestPoints.toLocaleString():'—'}</b><small>Puntos en una temporada</small></article>
+      <article><span>Temporadas en 1ª</span><b>${m.first.length}</b><small>De ${m.history.length} temporadas históricas</small></article>
+      <article><span>Top 5</span><b>${s.top5||0}</b><small>Acumulado histórico</small></article>
+    </section>
+
+    <section class="profile-section">
+      <div class="profile-section-head"><div><span class="eyebrow">ARCHIVO</span><h3>Temporada por temporada</h3></div></div>
+      <div class="profile-season-table">
+        <div class="profile-season-head"><span>Temporada</span><span>Resultado</span><span>Puntos</span></div>
+        ${seasonRows}
+      </div>
+    </section>`;
+  $('playerModal').hidden=false;
+}
 function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record"><span>${r.title}</span><h3>${r.value}</h3><p>${r.player}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record"><span>${a.title}</span><h3>${a.player}</h3><p>${a.text}</p></article>`).join('')}
 function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3>${g.name}</h3>${g.teams.map((t,i)=>`<div class="group-team"><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}"><b>${t}</b></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3>${r.round}</h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card"><span>${n.date}</span><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
-async function init(){DATA=await(await fetch('data.json?v=17-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(`${b.dataset.hist}Table`).classList.add('active')});$('sortGeneral').onchange=e=>renderGeneral(e.target.value);$('playerSearch').oninput=e=>renderPlayers(e.target.value);$('closeModal').onclick=()=>$('playerModal').hidden=true;$('playerModal').onclick=e=>{if(e.target.id==='playerModal')$('playerModal').hidden=true};$('share').onclick=()=>navigator.share?navigator.share({title:'Cuban League',url:location.href}):navigator.clipboard.writeText(location.href)}init();
+async function init(){DATA=await(await fetch('data.json?v=18-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+document.addEventListener('click',e=>{
+  const team=e.target.closest('[data-profile-player]');
+  if(team){openPlayer(team.dataset.profilePlayer)}
+});document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(`${b.dataset.hist}Table`).classList.add('active')});$('sortGeneral').onchange=e=>renderGeneral(e.target.value);$('playerSearch').oninput=e=>renderPlayers(e.target.value);$('closeModal').onclick=()=>$('playerModal').hidden=true;$('playerModal').onclick=e=>{if(e.target.id==='playerModal')$('playerModal').hidden=true};$('share').onclick=()=>navigator.share?navigator.share({title:'Cuban League',url:location.href}):navigator.clipboard.writeText(location.href)}init();
