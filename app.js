@@ -121,10 +121,94 @@ function openPlayer(name){
     </section>`;
   $('playerModal').hidden=false;
 }
+
+let evolutionSelected=[];
+const EVOLUTION_COLORS=['#42d8d1','#f4c651','#7f8cff','#ff7c91','#9be36d','#df8cff','#ff9f43','#4dabf7'];
+
+function initHistoricalEvolution(){
+  const picker=$('evolutionPlayerPicker');
+  if(!picker)return;
+  if(!evolutionSelected.length){
+    evolutionSelected=(DATA.historicalStats||[]).slice(0,4).map(x=>x.name);
+  }
+  picker.innerHTML=DATA.participants.map(p=>`
+    <button class="evolution-player-chip ${evolutionSelected.includes(p.name)?'selected':''}" data-evo-player="${p.name}">
+      <img src="${p.shield}" alt=""><span>${p.name}</span>
+    </button>`).join('');
+  picker.querySelectorAll('[data-evo-player]').forEach(btn=>btn.onclick=()=>{
+    const name=btn.dataset.evoPlayer;
+    if(evolutionSelected.includes(name)){
+      evolutionSelected=evolutionSelected.filter(x=>x!==name);
+    }else{
+      if(evolutionSelected.length>=6){alert('Puedes comparar hasta 6 competidores a la vez.');return;}
+      evolutionSelected.push(name);
+    }
+    initHistoricalEvolution();
+  });
+  const clear=$('clearEvolutionPlayers');
+  if(clear)clear.onclick=()=>{evolutionSelected=[];initHistoricalEvolution()};
+  renderHistoricalEvolutionChart();
+}
+
+function renderHistoricalEvolutionChart(){
+  const host=$('historicalEvolutionChart');
+  if(!host)return;
+  const archive=(DATA.historicalTables?.seasonArchive||[]).filter(s=>s.season!=='2026/27');
+  if(!evolutionSelected.length){
+    host.innerHTML='<div class="evolution-empty">Selecciona al menos un competidor para crear la gráfica.</div>';
+    return;
+  }
+
+  const W=Math.max(760,archive.length*120), H=430, L=58, R=28, T=35, B=78;
+  const maxPos=20;
+  const x=i=>archive.length===1?W/2:L+i*((W-L-R)/(archive.length-1));
+  const y=p=>T+((p-1)/(maxPos-1))*(H-T-B);
+
+  const grid=[1,5,10,15,20].map(v=>{
+    const yy=y(v);
+    return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" class="hist-grid"/>
+      <text x="${L-12}" y="${yy+4}" text-anchor="end" class="hist-axis">${v}º</text>`;
+  }).join('');
+
+  const seasons=archive.map((s,i)=>`<text x="${x(i)}" y="${H-42}" text-anchor="middle" class="hist-season">${s.season}</text>`).join('');
+
+  let series='';
+  evolutionSelected.forEach((name,idx)=>{
+    const color=EVOLUTION_COLORS[idx%EVOLUTION_COLORS.length];
+    const points=[];
+    const marks=[];
+    archive.forEach((s,i)=>{
+      const row=(s.results||[]).find(r=>r.name===name);
+      if(row&&row.division===1&&row.position!=null){
+        points.push(`${x(i)},${y(row.position)}`);
+        marks.push(`<circle cx="${x(i)}" cy="${y(row.position)}" r="6" fill="${color}" class="hist-dot">
+          <title>${name} · ${s.season}: ${row.position}º</title></circle>
+          <text x="${x(i)}" y="${y(row.position)-10}" text-anchor="middle" fill="${color}" class="hist-value">${row.position}º</text>`);
+      }else if(row&&row.division===2){
+        marks.push(`<text x="${x(i)}" y="${H-18}" text-anchor="middle" fill="${color}" class="hist-second">2ª</text>`);
+      }
+    });
+    if(points.length>1)series+=`<polyline points="${points.join(' ')}" fill="none" stroke="${color}" class="hist-line"/>`;
+    series+=marks.join('');
+  });
+
+  const legend=evolutionSelected.map((name,idx)=>{
+    const p=DATA.participants.find(x=>x.name===name);
+    const color=EVOLUTION_COLORS[idx%EVOLUTION_COLORS.length];
+    return `<div class="hist-legend-item"><span class="hist-color" style="background:${color}"></span><img src="${p?.shield||''}" alt=""><b>${name}</b></div>`;
+  }).join('');
+
+  host.innerHTML=`<div class="hist-legend">${legend}</div>
+    <div class="hist-svg-scroll">
+      <svg viewBox="0 0 ${W} ${H}" style="min-width:${W}px" class="historical-svg" role="img" aria-label="Comparación histórica de posiciones">
+        ${grid}${series}${seasons}
+      </svg>
+    </div>`;
+}
 function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record"><span>${r.title}</span><h3>${r.value}</h3><p>${r.player}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record"><span>${a.title}</span><h3>${a.player}</h3><p>${a.text}</p></article>`).join('')}
 function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3>${g.name}</h3>${g.teams.map((t,i)=>`<div class="group-team"><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}"><b>${t}</b></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3>${r.round}</h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card"><span>${n.date}</span><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
-async function init(){DATA=await(await fetch('data.json?v=18-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch('data.json?v=19-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}
