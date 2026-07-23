@@ -1318,3 +1318,98 @@ img{
     z-index:1 !important;
   }
 }
+
+
+/* =========================================================
+   V17 — COLUMNAS FIJAS MÁS COMPACTAS EN TELÉFONO VERTICAL
+   # = 38px / Jugador = 190px
+   Deja visibles más estadísticas sin perder foto + nombre.
+   ========================================================= */
+@media screen and (max-width:700px) and (orientation:portrait){
+
+  /* PUNTOS ACUMULADOS */
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows,
+  #pointsTable #pointsRows .points-row{
+    min-width:618px !important;
+    width:618px !important;
+  }
+
+  #pointsTable .thead.points-grid,
+  #pointsTable #pointsRows .points-row{
+    grid-template-columns:38px 190px 110px 140px 140px !important;
+  }
+
+  #pointsTable .thead.points-grid > span:nth-child(2),
+  #pointsTable #pointsRows .points-row > *:nth-child(2){
+    left:38px !important;
+  }
+
+  /* PALMARÉS PURO */
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows,
+  #palmaresTable #palmaresRows .palmares-row{
+    min-width:678px !important;
+    width:678px !important;
+  }
+
+  #palmaresTable .thead.palmares-grid,
+  #palmaresTable #palmaresRows .palmares-row{
+    grid-template-columns:38px 190px 90px 90px 90px 90px !important;
+  }
+
+  #palmaresTable .thead.palmares-grid > span:nth-child(2),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(2){
+    left:38px !important;
+  }
+
+  /* Ranking Premium: compactar las dos columnas congeladas
+     respetando el ancho del resto de estadísticas. */
+  #generalTable .thead.general-grid,
+  #generalTable #generalRows .general-row{
+    grid-template-columns:38px 190px repeat(9, minmax(78px, auto)) !important;
+  }
+
+  #generalTable .thead.general-grid > span:nth-child(2),
+  #generalTable #generalRows .general-row > *:nth-child(2){
+    left:38px !important;
+  }
+
+  /* Compactar contenido visual del jugador */
+  #pointsTable #pointsRows .points-row .team,
+  #palmaresTable #palmaresRows .palmares-row .team,
+  #generalTable #generalRows .general-row .team{
+    gap:7px !important;
+    padding-left:7px !important;
+    padding-right:6px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team img,
+  #palmaresTable #palmaresRows .palmares-row .team img,
+  #generalTable #generalRows .general-row .team img{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    flex:0 0 36px !important;
+    border-radius:9px !important;
+  }
+
+  #pointsTable #pointsRows .points-row .team .name,
+  #palmaresTable #palmaresRows .palmares-row .team .name,
+  #generalTable #generalRows .general-row .team .name{
+    width:132px !important;
+    max-width:132px !important;
+    font-size:12px !important;
+  }
+
+  /* # más compacto */
+  #pointsTable .thead.points-grid > span:nth-child(1),
+  #pointsTable #pointsRows .points-row > *:nth-child(1),
+  #palmaresTable .thead.palmares-grid > span:nth-child(1),
+  #palmaresTable #palmaresRows .palmares-row > *:nth-child(1),
+  #generalTable .thead.general-grid > span:nth-child(1),
+  #generalTable #generalRows .general-row > *:nth-child(1){
+    padding-left:3px !important;
+    padding-right:3px !important;
+  }
+}
