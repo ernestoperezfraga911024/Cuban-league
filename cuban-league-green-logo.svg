@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Escudo verde moderno de Cuban League con balón de fútbol">
+  <defs>
+    <linearGradient id="background" x1="46" y1="20" x2="470" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0a301c"/>
+      <stop offset=".48" stop-color="#041b10"/>
+      <stop offset="1" stop-color="#020d08"/>
+    </linearGradient>
+    <linearGradient id="green" x1="128" y1="72" x2="398" y2="452" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b4ff73"/>
+      <stop offset=".48" stop-color="#48ed70"/>
+      <stop offset="1" stop-color="#10b95a"/>
+    </linearGradient>
+    <linearGradient id="shieldFill" x1="256" y1="78" x2="256" y2="452" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#103a22"/>
+      <stop offset=".48" stop-color="#082818"/>
+      <stop offset="1" stop-color="#03140c"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(256 186) rotate(90) scale(226)">
+      <stop stop-color="#70ff7d" stop-opacity=".23"/>
+      <stop offset="1" stop-color="#70ff7d" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="92" fill="url(#background)"/>
+  <circle cx="256" cy="186" r="226" fill="url(#halo)"/>
+
+  <g fill="none" stroke="#9cff72" stroke-opacity=".10" stroke-width="4">
+    <rect x="55" y="55" width="402" height="402" rx="64"/>
+    <path d="M55 256H457"/>
+    <circle cx="256" cy="256" r="71"/>
+    <path d="M55 166H117V346H55M457 166H395V346H457"/>
+    <circle cx="256" cy="256" r="5" fill="#9cff72" stroke="none"/>
+  </g>
+
+  <path d="M256 66C319 66 377 81 420 105V244C420 345 360 420 256 461C152 420 92 345 92 244V105C135 81 193 66 256 66Z"
+        fill="#0b2a19" stroke="#55ef70" stroke-opacity=".18" stroke-width="22" filter="url(#glow)"/>
+  <path d="M256 66C319 66 377 81 420 105V244C420 345 360 420 256 461C152 420 92 345 92 244V105C135 81 193 66 256 66Z"
+        fill="url(#shieldFill)" stroke="url(#green)" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M120 120C158 94 209 82 256 82C303 82 354 94 392 120" fill="none" stroke="#d6ffc1" stroke-opacity=".42" stroke-width="7" stroke-linecap="round"/>
+
+  <circle cx="256" cy="207" r="84" fill="#03150c" stroke="#74f77e" stroke-opacity=".24" stroke-width="14"/>
+  <circle cx="256" cy="201" r="75" fill="#f5fff0" stroke="url(#green)" stroke-width="7"/>
+
+  <g fill="#128a45" stroke="#128a45" stroke-linejoin="round">
+    <path d="M256 164L286 186L274 221H238L226 186Z"/>
+    <path d="M226 132L256 119L286 132L278 155H234Z"/>
+    <path d="M307 153L328 174L326 203L298 201L291 174Z"/>
+    <path d="M306 231L327 247L309 271L280 276L273 249Z"/>
+    <path d="M206 231L185 247L203 271L232 276L239 249Z"/>
+    <path d="M205 153L184 174L186 203L214 201L221 174Z"/>
+    <g fill="none" stroke="#128a45" stroke-width="6">
+      <path d="M256 164V155M286 186L298 201M274 221L280 249M238 221L232 249M226 186L214 201"/>
+      <path d="M234 155L221 174M278 155L291 174M298 201L274 221M238 221L214 201"/>
+    </g>
+  </g>
+  <path d="M215 145C234 129 260 123 284 132" fill="none" stroke="#fff" stroke-opacity=".72" stroke-width="7" stroke-linecap="round"/>
+
+  <text x="256" y="363" text-anchor="middle" fill="#f6fff2" font-family="Inter, DejaVu Sans, Arial, sans-serif" font-size="86" font-weight="900" letter-spacing="-6">CL</text>
+  <rect x="175" y="383" width="162" height="5" rx="2.5" fill="url(#green)"/>
+  <text x="256" y="420" text-anchor="middle" fill="#83fa78" font-family="Inter, DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="900" letter-spacing="5">LEAGUE</text>
+</svg>

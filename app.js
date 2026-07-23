@@ -324,6 +324,8 @@ function openInstallGuide(){
   installReturnFocus=document.activeElement;
   if(!isIOS()){
     $('installIntro').textContent='Puedes instalar Cuban League desde el navegador y abrirla como una aplicación independiente.';
+    document.querySelector('.install-warning').hidden=true;
+    $('copySafariLink').hidden=true;
     $('installSteps').innerHTML=`
       <li><b>Abre el menú del navegador.</b><span>Normalmente son tres puntos en la parte superior.</span></li>
       <li><b>Elige “Instalar aplicación”.</b><span>También puede aparecer como “Añadir a pantalla de inicio”.</span></li>
@@ -333,6 +335,24 @@ function openInstallGuide(){
   $('installModal').hidden=false;
   syncModalLock();
   requestAnimationFrame(()=>$('closeInstall').focus());
+}
+
+async function copySafariUrl(){
+  const url=`${location.origin}${location.pathname}`;
+  try{
+    await navigator.clipboard.writeText(url);
+  }catch{
+    const field=document.createElement('textarea');
+    field.value=url;
+    field.setAttribute('readonly','');
+    field.style.position='fixed';
+    field.style.opacity='0';
+    document.body.appendChild(field);
+    field.select();
+    document.execCommand('copy');
+    field.remove();
+  }
+  $('copySafariStatus').textContent='Enlace copiado. Ahora abre Safari, pégalo en la barra de dirección y continúa con el paso 2.';
 }
 
 async function requestInstall(){
@@ -355,6 +375,7 @@ function setupPWA(){
   updateInstallUI();
   $('installApp').onclick=requestInstall;
   $('nativeInstall').onclick=requestInstall;
+  $('copySafariLink').onclick=copySafariUrl;
   $('closeInstall').onclick=closeInstallGuide;
   $('installModal').onclick=e=>{if(e.target.id==='installModal')closeInstallGuide()};
 
@@ -364,7 +385,7 @@ function setupPWA(){
   syncConnection();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js?v=25-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=27-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
   }
 }
 
@@ -380,7 +401,7 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch('data.json?v=25-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch('data.json?v=27-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}

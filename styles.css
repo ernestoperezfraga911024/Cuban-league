@@ -2448,6 +2448,154 @@ footer{
   }
 }
 
+
+/* =========================================================
+   V26 — ESCUDO DE FÚTBOL + INSTALACIÓN SIN CONFUSIONES
+   ========================================================= */
+.logo{
+  padding:0;
+  background:#061525;
+  box-shadow:0 12px 28px rgba(68,139,255,.23),inset 0 1px 0 rgba(255,255,255,.24);
+}
+
+.logo::after{display:none}
+
+.logo img{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+  object-fit:cover;
+}
+
+#installApp{
+  background:linear-gradient(135deg,rgba(80,234,220,.17),rgba(77,120,255,.14));
+  color:#f4fffd;
+}
+
+#installApp .button-label{
+  font-weight:900;
+}
+
+.install-card{
+  width:min(580px,100%);
+}
+
+.install-warning{
+  display:grid;
+  gap:5px;
+  margin:18px 0 12px;
+  padding:14px 15px;
+  border:1px solid rgba(245,201,92,.28);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(245,201,92,.13),rgba(245,201,92,.04));
+}
+
+.install-warning b{
+  color:#f6ce6b;
+  font-size:.78rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.install-warning span{
+  color:#e2e8ed;
+  font-size:.84rem;
+  font-weight:700;
+  line-height:1.45;
+}
+
+.copy-safari-link{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  min-height:46px;
+  margin-top:10px;
+  border-color:rgba(80,234,220,.24);
+  background:rgba(80,234,220,.08);
+  color:#dffffb;
+}
+
+.copy-safari-link span{
+  color:var(--cyan);
+  font-size:1.05rem;
+}
+
+.copy-safari-status{
+  min-height:1.2em;
+  margin:8px 2px 0!important;
+  color:#6ce8dc!important;
+  font-size:.75rem;
+  font-weight:750;
+  line-height:1.4;
+}
+
+.install-steps li:nth-child(2){
+  border-color:rgba(80,234,220,.22);
+  background:rgba(80,234,220,.045);
+}
+
+.install-steps li:nth-child(2) b{
+  color:#73efe4;
+}
+
+@media(max-width:700px){
+  #share{
+    display:none!important;
+  }
+
+  #installApp{
+    width:auto;
+    min-width:92px;
+    padding:0 12px;
+    gap:6px;
+  }
+
+  #installApp .button-label{
+    display:inline;
+    font-size:.76rem;
+  }
+
+  .brand{
+    min-width:0;
+  }
+
+  .brand>div:last-child{
+    min-width:0;
+  }
+
+  .brand b{
+    display:block;
+    overflow:hidden;
+    max-width:168px;
+    font-size:.82rem;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .install-warning{
+    margin-top:15px;
+    padding:12px;
+  }
+
+  .install-warning span{
+    font-size:.78rem;
+  }
+
+  .copy-safari-link{
+    padding:10px;
+    font-size:.78rem;
+  }
+}
+
+@media(max-width:380px){
+  .brand b{max-width:145px}
+  .brand small{display:none}
+  #installApp{min-width:86px;padding:0 10px}
+}
+
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{
@@ -3191,6 +3339,40 @@ body.is-offline::after{
   .main-nav{
     top:calc(74px + env(safe-area-inset-top));
   }
+}
+
+
+/* =========================================================
+   V27 — IDENTIDAD VERDE DE FÚTBOL
+   ========================================================= */
+.logo{
+  background:#03170e;
+  border-color:rgba(128,255,111,.28);
+  box-shadow:
+    0 12px 30px rgba(32,220,96,.22),
+    0 0 0 1px rgba(132,255,113,.08),
+    inset 0 1px 0 rgba(255,255,255,.20);
+}
+
+.logo img{
+  filter:saturate(1.08) contrast(1.03);
+}
+
+#installApp{
+  border-color:rgba(114,246,103,.25);
+  background:linear-gradient(135deg,rgba(87,239,103,.17),rgba(16,185,90,.12));
+}
+
+#installApp:hover{
+  background:linear-gradient(135deg,rgba(87,239,103,.24),rgba(16,185,90,.17));
+}
+
+#installApp>span:first-child{
+  color:#9cff72;
+}
+
+.install-icon{
+  box-shadow:0 16px 38px rgba(31,214,98,.24);
 }
 
 @media(max-width:700px){

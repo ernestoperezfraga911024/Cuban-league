@@ -1,16 +1,16 @@
-const CACHE_NAME = 'cuban-league-v25-pwa';
+const CACHE_NAME = 'cuban-league-v27-green-football-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=25-20260723',
-  './app.js?v=25-20260723',
-  './data.json?v=25-20260723',
+  './styles.css?v=27-20260723',
+  './app.js?v=27-20260723',
+  './data.json?v=27-20260723',
   './manifest.json',
-  './app-icon.svg',
-  './icon-192.png',
-  './icon-512.png',
-  './apple-touch-icon.png',
-  './favicon-32.png',
+  './cuban-league-green-logo.svg',
+  './icon-green-192.png',
+  './icon-green-512.png',
+  './apple-touch-icon-green.png',
+  './favicon-green-32.png',
   './bernabeu-bg.jpg',
   './stadium-bg.jpg',
   './mbappe-card.jpg',
@@ -93,7 +93,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=25-20260723'));
+    event.respondWith(networkFirst(request, './data.json?v=27-20260723'));
     return;
   }
 
