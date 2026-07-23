@@ -1,8 +1,1 @@
-const CACHE='cuban-league-v8-mobile-nav-fix';
-self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
-});
-self.addEventListener('fetch',event=>{
-  event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>caches.match(event.request)));
-});
+const C='cuban-league-v9';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./','index.html','styles.css','app.js','data.json','bernabeu-bg.jpg','mbappe-card.jpg','yamal-card.jpg']))));self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));

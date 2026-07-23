@@ -975,49 +975,927 @@
     "seasonArchive": [
       {
         "season": "2019/20",
-        "status": "Pendiente de tabla completa",
-        "known": [
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "Ernesto",
+            "division": 1,
+            "position": 3,
+            "points": 1836
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 4,
+            "points": 1778
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 1,
+            "position": 9,
+            "points": 1608
+          },
           {
             "name": "ANDOBA THE BEST",
+            "division": 1,
             "position": 13,
             "points": 1527
+          },
+          {
+            "name": "Brian",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "GNT D ZONA",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Julio",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Yovany R9",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Rivaldo",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Patria FC",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Viva Libre",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "@elministro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Juventus",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Andy",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
           }
         ]
       },
       {
         "season": "2020/21",
-        "status": "Pendiente de tabla completa",
-        "known": []
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "ANDOBA THE BEST",
+            "division": 1,
+            "position": 1,
+            "points": 1998
+          },
+          {
+            "name": "Julio",
+            "division": 1,
+            "position": 3,
+            "points": 1801
+          },
+          {
+            "name": "GNT D ZONA",
+            "division": 1,
+            "position": 4,
+            "points": 1774
+          },
+          {
+            "name": "Ernesto",
+            "division": 1,
+            "position": 6,
+            "points": 1701
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 7,
+            "points": 1665
+          },
+          {
+            "name": "Yovany R9",
+            "division": 1,
+            "position": 9,
+            "points": 1660
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 1,
+            "position": 15,
+            "points": 1592
+          },
+          {
+            "name": "Brian",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Rivaldo",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Patria FC",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Viva Libre",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "@elministro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Juventus",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Andy",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
+          }
+        ]
       },
       {
         "season": "2021/22",
-        "status": "Pendiente de tabla completa",
-        "known": []
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "GNT D ZONA",
+            "division": 1,
+            "position": 1,
+            "points": 1952
+          },
+          {
+            "name": "Yovany R9",
+            "division": 1,
+            "position": 2,
+            "points": 1789
+          },
+          {
+            "name": "Patria FC",
+            "division": 1,
+            "position": 3,
+            "points": 1786
+          },
+          {
+            "name": "Rivaldo",
+            "division": 1,
+            "position": 4,
+            "points": 1754
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 5,
+            "points": 1726
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 1,
+            "position": 6,
+            "points": 1695
+          },
+          {
+            "name": "Ernesto",
+            "division": 1,
+            "position": 7,
+            "points": 1673
+          },
+          {
+            "name": "Julio",
+            "division": 1,
+            "position": 8,
+            "points": 1634
+          },
+          {
+            "name": "ANDOBA THE BEST",
+            "division": 1,
+            "position": 9,
+            "points": 1587
+          },
+          {
+            "name": "Brian",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Viva Libre",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "@elministro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Juventus",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Andy",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
+          }
+        ]
       },
       {
         "season": "2022/23",
-        "status": "Pendiente de tabla completa",
-        "known": []
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "Rivaldo",
+            "division": 1,
+            "position": 1,
+            "points": 1840
+          },
+          {
+            "name": "GNT D ZONA",
+            "division": 1,
+            "position": 2,
+            "points": 1816
+          },
+          {
+            "name": "Julio",
+            "division": 1,
+            "position": 3,
+            "points": 1792
+          },
+          {
+            "name": "Patria FC",
+            "division": 1,
+            "position": 6,
+            "points": 1716
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 7,
+            "points": 1704
+          },
+          {
+            "name": "Viva Libre",
+            "division": 1,
+            "position": 11,
+            "points": 1669
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 1,
+            "position": 12,
+            "points": 1638
+          },
+          {
+            "name": "Ernesto",
+            "division": 1,
+            "position": 13,
+            "points": 1613
+          },
+          {
+            "name": "ANDOBA THE BEST",
+            "division": 1,
+            "position": 14,
+            "points": 1612
+          },
+          {
+            "name": "Yovany R9",
+            "division": 1,
+            "position": 15,
+            "points": 1574
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 1,
+            "position": 17,
+            "points": 1540
+          },
+          {
+            "name": "Brian",
+            "division": 1,
+            "position": 18,
+            "points": 1396
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "@elministro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Juventus",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Andy",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
+          }
+        ]
       },
       {
         "season": "2023/24",
-        "status": "Pendiente de tabla completa",
-        "known": []
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "ANDOBA THE BEST",
+            "division": 1,
+            "position": 1,
+            "points": 2105
+          },
+          {
+            "name": "Yovany R9",
+            "division": 1,
+            "position": 2,
+            "points": 2044
+          },
+          {
+            "name": "Ernesto",
+            "division": 1,
+            "position": 3,
+            "points": 2032
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 4,
+            "points": 1992
+          },
+          {
+            "name": "GNT D ZONA",
+            "division": 1,
+            "position": 5,
+            "points": 1960
+          },
+          {
+            "name": "Rivaldo",
+            "division": 1,
+            "position": 6,
+            "points": 1938
+          },
+          {
+            "name": "Julio",
+            "division": 1,
+            "position": 8,
+            "points": 1913
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 1,
+            "position": 9,
+            "points": 1872
+          },
+          {
+            "name": "Viva Libre",
+            "division": 1,
+            "position": 10,
+            "points": 1859
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 1,
+            "position": 11,
+            "points": 1792
+          },
+          {
+            "name": "Patria FC",
+            "division": 1,
+            "position": 13,
+            "points": 1785
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 1,
+            "position": 14,
+            "points": 1773
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Brian",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "@elministro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Juventus",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Andy",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
+          }
+        ]
       },
       {
         "season": "2024/25",
-        "status": "Pendiente de tabla completa",
-        "known": []
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "GNT D ZONA",
+            "division": 1,
+            "position": 1,
+            "points": 2094
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 2,
+            "points": 2047
+          },
+          {
+            "name": "Yovany R9",
+            "division": 1,
+            "position": 3,
+            "points": 2031
+          },
+          {
+            "name": "Julio",
+            "division": 1,
+            "position": 4,
+            "points": 1972
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 1,
+            "position": 6,
+            "points": 1905
+          },
+          {
+            "name": "Rivaldo",
+            "division": 1,
+            "position": 7,
+            "points": 1875
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 1,
+            "position": 8,
+            "points": 1874
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 1,
+            "position": 9,
+            "points": 1855
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 1,
+            "position": 10,
+            "points": 1796
+          },
+          {
+            "name": "ANDOBA THE BEST",
+            "division": 1,
+            "position": 11,
+            "points": 1786
+          },
+          {
+            "name": "Viva Libre",
+            "division": 1,
+            "position": 13,
+            "points": 1745
+          },
+          {
+            "name": "Patria FC",
+            "division": 1,
+            "position": 15,
+            "points": 1662
+          },
+          {
+            "name": "Ernesto",
+            "division": 1,
+            "position": 16,
+            "points": 1645
+          },
+          {
+            "name": "@elministro",
+            "division": 1,
+            "position": 17,
+            "points": 1616
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 1,
+            "position": 19,
+            "points": 1557
+          },
+          {
+            "name": "Brian",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Juventus",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Andy",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
+          }
+        ]
       },
       {
         "season": "2025/26",
-        "status": "Pendiente de tabla completa",
-        "known": []
+        "status": "Clasificación final",
+        "results": [
+          {
+            "name": "Juventus",
+            "division": 1,
+            "position": 1,
+            "points": 1938
+          },
+          {
+            "name": "ANDOBA THE BEST",
+            "division": 1,
+            "position": 2,
+            "points": 1920
+          },
+          {
+            "name": "GNT D ZONA",
+            "division": 1,
+            "position": 3,
+            "points": 1870
+          },
+          {
+            "name": "Victor Manuel",
+            "division": 1,
+            "position": 4,
+            "points": 1804
+          },
+          {
+            "name": "MONEY MON$TER",
+            "division": 1,
+            "position": 5,
+            "points": 1791
+          },
+          {
+            "name": "Julio",
+            "division": 1,
+            "position": 6,
+            "points": 1690
+          },
+          {
+            "name": "Yovany R9",
+            "division": 1,
+            "position": 7,
+            "points": 1653
+          },
+          {
+            "name": "Patria FC",
+            "division": 1,
+            "position": 8,
+            "points": 1625
+          },
+          {
+            "name": "Brian",
+            "division": 1,
+            "position": 9,
+            "points": 1605
+          },
+          {
+            "name": "Rivaldo",
+            "division": 1,
+            "position": 10,
+            "points": 1588
+          },
+          {
+            "name": "Viva Libre",
+            "division": 1,
+            "position": 11,
+            "points": 1578
+          },
+          {
+            "name": "Roberto Piñeiro",
+            "division": 1,
+            "position": 12,
+            "points": 1568
+          },
+          {
+            "name": "Bayer Munich",
+            "division": 1,
+            "position": 13,
+            "points": 1564
+          },
+          {
+            "name": "Arian Mirandez Li",
+            "division": 1,
+            "position": 14,
+            "points": 1544
+          },
+          {
+            "name": "Andy",
+            "division": 1,
+            "position": 15,
+            "points": 1527
+          },
+          {
+            "name": "Ernesto",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "@elministro",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Maykel Zuaznabar",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Mario Fernandez",
+            "division": 2,
+            "position": null,
+            "points": null
+          },
+          {
+            "name": "Esteban Dominguez",
+            "division": 2,
+            "position": null,
+            "points": null
+          }
+        ]
       },
       {
         "season": "2026/27",
         "status": "Temporada actual",
-        "known": []
+        "results": []
+      }
+    ],
+    "seasonChampions": [
+      {
+        "season": "2019/20",
+        "name": "Sin dato confirmado",
+        "points": null
+      },
+      {
+        "season": "2020/21",
+        "name": "ANDOBA THE BEST",
+        "points": 1998
+      },
+      {
+        "season": "2021/22",
+        "name": "GNT D ZONA",
+        "points": 1952
+      },
+      {
+        "season": "2022/23",
+        "name": "Rivaldo",
+        "points": 1840
+      },
+      {
+        "season": "2023/24",
+        "name": "ANDOBA THE BEST",
+        "points": 2105
+      },
+      {
+        "season": "2024/25",
+        "name": "GNT D ZONA",
+        "points": 2094
+      },
+      {
+        "season": "2025/26",
+        "name": "Juventus",
+        "points": 1938
       }
     ]
   }
