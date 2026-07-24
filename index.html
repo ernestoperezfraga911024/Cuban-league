@@ -8,8 +8,8 @@
 <title>Cuban League</title><link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=35-20260724"></head><body>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=36-20260724"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -24,7 +24,7 @@
   <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="icon-ball" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9.2 8.4 2.8-2 2.8 2-1.1 3.3h-3.4Z"/><path d="m10.3 11.7-3.5 2.5.9 3.4M13.7 11.7l3.5 2.5-.9 3.4M9.2 8.4 6.1 7.2M14.8 8.4l3.1-1.2M7.7 17.6l4.3 2.1 4.3-2.1"/></symbol>
 </svg>
-<header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-green-logo.svg" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
+<header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-green-logo.svg" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><span class="header-season-badge"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Temporada 2026/27</span></span><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
 
 <nav class="main-nav" aria-label="Navegación principal">
 <button type="button" class="navtab active" data-section="home"><svg class="ui-icon" aria-hidden="true"><use href="#icon-home"></use></svg><span>Inicio</span></button><button type="button" class="navtab" data-section="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Clasificación</span></button>
@@ -35,18 +35,52 @@
 </nav>
 
 <section class="hero-photo">
-<div class="shade"></div><div class="hero-copy"><span class="eyebrow">TEMPORADA 2026/27</span><h1>Una liga.<br>Toda una historia.</h1><p>Clasificación, temporadas, perfiles, récords y Champions en una sola web.</p><div class="actions"><button type="button" data-go="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>Ver clasificación</button><button type="button" class="secondary" data-go="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg>Museo histórico</button></div></div>
-<div class="hero-kpis">
-  <article><div class="kpi-label"><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-crown"></use></svg></span><span>Mejor histórico</span></div><b>GNT D ZONA</b><small>2 títulos · 4 podios</small></article>
-  <article><div class="kpi-label"><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Líder de puntos</span></div><b>ANDOBA THE BEST</b><small>12,535 puntos</small></article>
-  <article><div class="kpi-label"><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span>Participantes</span></div><b>20</b><small>Temporada 2026/27</small></article>
+<div class="shade"></div>
+<div class="hero-shell">
+  <div class="hero-copy">
+    <span class="hero-season-line">TEMPORADA 2026/27</span>
+    <h1>Una liga.<br>Toda una historia.</h1>
+    <span class="hero-accent-line" aria-hidden="true"></span>
+    <p>Clasificación, jornadas y récords de una competición que se escribe cada temporada.</p>
+    <div class="actions">
+      <button type="button" data-go="current"><span>Ver clasificación</span><span class="action-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="secondary" data-go="matchdays"><span>Centro de jornada</span><span class="action-arrow" aria-hidden="true">→</span></button>
+    </div>
+  </div>
+  <div class="hero-kpis">
+    <article><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><div><span>Mejor histórico</span><b>GNT D ZONA</b><small>2 títulos · 4 podios</small></div></article>
+    <article><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-star"></use></svg></span><div><span>Líder de puntos</span><b>ANDOBA THE BEST</b><small>12,535 puntos</small></div></article>
+    <article><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><div><span>Temporada actual</span><b>20</b><small>Participantes</small></div></article>
+  </div>
 </div>
 </section>
 
 <main>
 <section id="home" class="page active">
-<div class="football-split"><article class="photo-card mbappe"><div><span class="eyebrow">POTENCIA</span><h2>Competir hasta el final.</h2><p>La clasificación semanal, las rachas y los cambios de posición serán parte del seguimiento oficial.</p></div></article>
-<article class="photo-card yamal"><div><span class="eyebrow">FUTURO</span><h2>La nueva generación.</h2><p>Perfiles completos, evolución por jornada y estadísticas acumuladas.</p></div></article></div>
+<div class="home-season-layout">
+  <article class="home-live-card">
+    <div class="home-live-top"><span class="home-live-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><span id="homeLiveBadge" class="home-live-badge">PRETEMPORADA</span></div>
+    <span class="eyebrow">ESTADO DE LA TEMPORADA</span>
+    <h2 id="homeLiveTitle">Todo preparado para el comienzo.</h2>
+    <p id="homeLiveCopy">La clasificación está lista. Cuando se publique la primera jornada, este resumen cobrará vida automáticamente.</p>
+    <div class="home-live-summary">
+      <div><span>Última jornada</span><b id="homeLatestRound">—</b><small id="homeLatestWinner">Esperando la primera publicación</small></div>
+      <div><span>Líder actual</span><b id="homeCurrentLeader">Sin comenzar</b><small id="homeLeaderPoints">0 puntos</small></div>
+    </div>
+    <button type="button" class="home-live-cta" data-go="matchdays"><span>Abrir Centro de Jornada</span><span aria-hidden="true">→</span></button>
+  </article>
+
+  <nav class="home-shortcuts" aria-label="Accesos rápidos">
+    <button type="button" data-go="current"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span><b>Clasificación</b><small>Posiciones y estadísticas</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" data-go="matchdays"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><span><b>Jornadas</b><small>Podios, líderes y movimientos</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" data-go="players"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span><b>Participantes</b><small>Todos los perfiles</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" data-go="history"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span><b>Museo histórico</b><small>Temporadas y palmarés</small></span><span aria-hidden="true">→</span></button>
+  </nav>
+</div>
+
+<div class="section-head home-story-heading"><div><span class="eyebrow">FÚTBOL Y DATOS</span><h2>La competición, desde todos los ángulos</h2></div></div>
+<div class="football-split home-stories"><article class="photo-card mbappe"><div><span class="eyebrow">COMPETICIÓN</span><h2>Competir hasta el final.</h2><p>Clasificación semanal, rachas y movimientos oficiales de cada participante.</p><button type="button" data-go="current">Ver clasificación <span aria-hidden="true">→</span></button></div></article>
+<article class="photo-card yamal"><div><span class="eyebrow">EVOLUCIÓN</span><h2>Cada jornada cuenta.</h2><p>Perfiles completos, evolución de posiciones y estadísticas acumuladas.</p><button type="button" data-go="players">Ver participantes <span aria-hidden="true">→</span></button></div></article></div>
 <div class="section-head"><div><span class="eyebrow">RESUMEN</span><h2>Lo mejor de la Cuban League</h2></div></div>
 <div class="dashboard-grid">
   <article class="panel metric-panel metric-gold"><span class="panel-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Más títulos</span><h3>2</h3><p>GNT D ZONA y ANDOBA THE BEST</p></article>
@@ -176,4 +210,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=35-20260724"></script><script src="app.js?v=35-20260724"></script></body></html>
+<script src="supabase-config.js?v=36-20260724"></script><script src="app.js?v=36-20260724"></script></body></html>

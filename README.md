@@ -1,4 +1,4 @@
-# Cuban League V35
+# Cuban League V36
 
 Sitio oficial de la Cuban League con:
 
@@ -11,6 +11,8 @@ Sitio oficial de la Cuban League con:
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.
 - Aplicación web instalable en la pantalla de inicio.
+- Portada minimalista premium con estadio nocturno, accesos rápidos y resumen
+  automático de la temporada.
 
 ## Panel privado
 

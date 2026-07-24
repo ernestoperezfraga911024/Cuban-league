@@ -1,4 +1,4 @@
-const APP_VERSION='35-20260724';
+const APP_VERSION='36-20260724';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -164,6 +164,7 @@ async function syncLiveCurrentStats({render=true}={}){
     if(render){
       renderCurrent();
       renderMatchdayCenter();
+      renderHomeLive();
     }
     return true;
   }catch{
@@ -219,6 +220,32 @@ function renderCurrent(){
     <span class="current-movement">${movementBadge(latest==null?null:movements.get(p.name))}</span>
     <span class="current-form" aria-label="Forma de las últimas jornadas">${recentForm(p.name,latest)}</span>
   </div>`).join('');
+}
+
+function renderHomeLive(){
+  if(!$('homeLiveTitle'))return;
+  const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
+  if(latest==null){
+    $('homeLiveBadge').textContent='PRETEMPORADA';
+    $('homeLiveTitle').textContent='Todo preparado para el comienzo.';
+    $('homeLiveCopy').textContent='La clasificación está lista. Cuando se publique la primera jornada, este resumen cobrará vida automáticamente.';
+    $('homeLatestRound').textContent='—';
+    $('homeLatestWinner').textContent='Esperando la primera publicación';
+    $('homeCurrentLeader').textContent='Sin comenzar';
+    $('homeLeaderPoints').textContent='0 puntos';
+    return;
+  }
+  const weekly=weeklyStandings(latest);
+  const cumulative=cumulativeStandings(latest);
+  const weeklyLeader=weekly[0];
+  const currentLeader=cumulative[0];
+  $('homeLiveBadge').textContent=`JORNADA ${latest}`;
+  $('homeLiveTitle').textContent=`La jornada ${latest} ya forma parte de la historia.`;
+  $('homeLiveCopy').textContent=`${weeklyLeader.name} lideró la fecha con ${weeklyLeader.points.toLocaleString('es')} puntos. Consulta el resumen completo, los goles, clean sheets y movimientos.`;
+  $('homeLatestRound').textContent=`J${latest}`;
+  $('homeLatestWinner').textContent=`${weeklyLeader.name} · ${weeklyLeader.points.toLocaleString('es')} pts`;
+  $('homeCurrentLeader').textContent=currentLeader.name;
+  $('homeLeaderPoints').textContent=`${currentLeader.points.toLocaleString('es')} puntos acumulados`;
 }
 
 function matchdayPlayerLinks(names,limit=3){
@@ -759,7 +786,7 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();renderCurrent();renderMatchdayCenter();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();syncLiveCurrentStats();window.setInterval(()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()},60000);window.addEventListener('online',()=>syncLiveCurrentStats());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()});document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();renderCurrent();renderMatchdayCenter();renderHomeLive();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();syncLiveCurrentStats();window.setInterval(()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()},60000);window.addEventListener('online',()=>syncLiveCurrentStats());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()});document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}
