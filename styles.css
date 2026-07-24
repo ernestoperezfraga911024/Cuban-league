@@ -5635,3 +5635,1125 @@ body.is-offline::after{
     transition:none;
   }
 }
+
+/* =========================================================
+   V37 — SISTEMA VISUAL MINIMALISTA EN TODA LA WEB
+   ========================================================= */
+:root{
+  --bg:#020912;
+  --panel:#06151b;
+  --panel2:#0a2028;
+  --line:rgba(80,230,208,.17);
+  --text:#f5f8f6;
+  --muted:#91a4b5;
+  --cyan:#50e6d0;
+  --gold:#e7ca69;
+  --surface:#06151b;
+  --surface-raised:#092029;
+  --surface-soft:rgba(9,32,41,.78);
+  --green:#6cff73;
+  --emerald:#18d66b;
+  --turquoise:#50e6d0;
+}
+
+html{
+  background:#020912;
+}
+
+body{
+  background:
+    radial-gradient(circle at 10% 12%,rgba(24,214,107,.055),transparent 26rem),
+    radial-gradient(circle at 90% 42%,rgba(80,230,208,.045),transparent 31rem),
+    linear-gradient(180deg,#020912 0%,#031018 48%,#020912 100%);
+  color:var(--text);
+}
+
+body::before{
+  opacity:.12;
+  background-image:
+    linear-gradient(rgba(80,230,208,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(80,230,208,.06) 1px,transparent 1px);
+  background-size:46px 46px;
+  mask-image:linear-gradient(180deg,black,transparent 48%);
+}
+
+button,
+select,
+input{
+  border-color:rgba(80,230,208,.18);
+  border-radius:10px;
+  background:#071820;
+  color:var(--text);
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  box-shadow:none;
+}
+
+button:hover,
+select:hover,
+input:hover{
+  border-color:rgba(108,255,115,.42);
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+.team-profile-link:focus-visible{
+  outline:2px solid var(--green);
+  outline-offset:2px;
+  box-shadow:none;
+}
+
+input::placeholder{
+  color:#687e8e;
+}
+
+main{
+  width:100%;
+  max-width:1240px;
+  padding-top:42px;
+}
+
+.page.active{
+  animation:pageReveal .32s ease both;
+}
+
+h1,
+h2,
+h3,
+h4{
+  font-family:Sora,Manrope,Inter,system-ui,sans-serif;
+}
+
+.eyebrow{
+  color:var(--turquoise);
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.69rem;
+  letter-spacing:.17em;
+}
+
+.section-head{
+  margin:38px 0 18px;
+}
+
+.section-head h2{
+  color:var(--text);
+  font-family:Sora,Manrope,Inter,system-ui,sans-serif;
+  font-size:clamp(1.65rem,3vw,2.15rem);
+  font-weight:700;
+  letter-spacing:-.045em;
+}
+
+.section-head small{
+  color:var(--muted);
+}
+
+.section-icon,
+.panel-icon,
+.record-icon,
+.matchday-empty-icon,
+.matchday-feature-icon,
+.matchday-metric-icon{
+  border-color:rgba(108,255,115,.28);
+  background:rgba(108,255,115,.055);
+  color:var(--green);
+  box-shadow:none;
+}
+
+.section-icon{
+  border-radius:11px;
+}
+
+.status,
+.matchday-status{
+  border-color:rgba(80,230,208,.22);
+  background:rgba(80,230,208,.065);
+  color:#76eadc;
+  box-shadow:none;
+}
+
+/* Shared editorial banner */
+.minimal-page-banner,
+.matchday-banner,
+.season-banner,
+.history-banner,
+.records-banner,
+.champions-banner{
+  position:relative;
+  display:flex;
+  min-height:280px;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:28px;
+  overflow:hidden;
+  margin-bottom:34px;
+  padding:32px 34px;
+  border:1px solid rgba(80,230,208,.43);
+  border-radius:21px;
+  background-image:
+    linear-gradient(90deg,rgba(2,9,18,.98) 0%,rgba(2,9,18,.88) 45%,rgba(2,9,18,.38) 100%),
+    linear-gradient(0deg,rgba(2,9,18,.84),transparent 68%),
+    url('home-stadium-night.jpg') !important;
+  background-position:center 52% !important;
+  background-size:cover !important;
+  box-shadow:0 24px 60px rgba(0,0,0,.25);
+}
+
+.minimal-page-banner::before,
+.matchday-banner::before,
+.season-banner::before,
+.history-banner::before,
+.records-banner::before,
+.champions-banner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 82% 26%,rgba(108,255,115,.09),transparent 15rem),
+    linear-gradient(120deg,rgba(80,230,208,.055),transparent 28%);
+}
+
+.matchday-banner::after{
+  content:none;
+}
+
+.minimal-page-banner>div,
+.matchday-banner>div,
+.season-banner>div,
+.history-banner>div,
+.records-banner>div,
+.champions-banner>div{
+  position:relative;
+  z-index:1;
+  max-width:720px;
+}
+
+.minimal-page-banner h2,
+.matchday-banner h2,
+.season-banner h2,
+.history-banner h2,
+.records-banner h2,
+.champions-banner h2{
+  max-width:760px;
+  margin:8px 0 10px;
+  color:#f5f8f6;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:clamp(2.35rem,5vw,4.4rem);
+  font-weight:700;
+  line-height:.99;
+  letter-spacing:-.06em;
+}
+
+.minimal-page-banner p,
+.matchday-banner p,
+.season-banner p,
+.history-banner p,
+.records-banner p,
+.champions-banner p{
+  max-width:610px;
+  margin:0;
+  color:#9eafbc;
+  font-size:.92rem;
+}
+
+.page-banner-mark{
+  position:relative;
+  z-index:1;
+  display:grid;
+  width:92px;
+  height:92px;
+  flex:0 0 92px;
+  place-items:center;
+  border:1px solid rgba(108,255,115,.52);
+  border-radius:50%;
+  background:rgba(2,15,22,.52);
+  color:var(--green);
+  backdrop-filter:blur(12px);
+}
+
+.page-banner-mark .ui-icon{
+  width:40px;
+  height:40px;
+}
+
+.players-page-banner,
+.news-page-banner{
+  background-position:center 61% !important;
+}
+
+/* Shared surfaces */
+.panel,
+.record,
+.news-card,
+.card,
+.player-card,
+.group,
+.round,
+.second-division,
+.evolution-historical-card,
+.champion-history-card{
+  border-color:rgba(80,230,208,.16);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.035),transparent 11rem),
+    linear-gradient(145deg,rgba(8,27,35,.98),rgba(4,17,25,.99));
+  box-shadow:0 18px 45px rgba(0,0,0,.16);
+}
+
+.panel,
+.record,
+.news-card,
+.player-card,
+.group{
+  transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+
+.panel:hover,
+.record:hover,
+.news-card:hover,
+.player-card:hover,
+.group:hover{
+  border-color:rgba(108,255,115,.33);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.065),transparent 12rem),
+    linear-gradient(145deg,rgba(9,32,39,.99),rgba(5,20,27,.99));
+  box-shadow:0 20px 48px rgba(0,0,0,.2);
+  transform:translateY(-3px);
+}
+
+.panel::before,
+.record::before,
+.news-card::before,
+.player-card::before,
+.group::before{
+  height:2px;
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent 80%);
+  opacity:.72;
+}
+
+.panel,
+.record,
+.news-card{
+  padding:22px;
+}
+
+.panel h3,
+.record h3{
+  color:var(--text);
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.045em;
+}
+
+.panel p,
+.record p,
+.news-card p{
+  color:var(--muted);
+}
+
+.metric-panel{
+  min-height:162px;
+}
+
+.metric-panel h3{
+  color:var(--text);
+}
+
+.metric-gold .panel-icon{
+  border-color:rgba(231,202,105,.3);
+  background:rgba(231,202,105,.07);
+  color:var(--gold);
+}
+
+.photo-card{
+  border-color:rgba(80,230,208,.26);
+  border-radius:20px;
+  box-shadow:0 24px 58px rgba(0,0,0,.2);
+}
+
+.photo-card::before{
+  background:linear-gradient(120deg,rgba(80,230,208,.055),transparent 30%);
+}
+
+.photo-card:hover{
+  border-color:rgba(108,255,115,.42);
+  box-shadow:0 26px 64px rgba(0,0,0,.25);
+  transform:translateY(-3px);
+}
+
+.photo-card h2{
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.045em;
+}
+
+/* Tables */
+.card{
+  box-shadow:0 18px 45px rgba(0,0,0,.16);
+}
+
+.thead,
+.profile-season-head{
+  min-height:48px;
+  border-bottom:1px solid rgba(80,230,208,.15);
+  background:#09232c;
+  color:#91a9b8;
+  letter-spacing:.075em;
+}
+
+.row,
+.general-row,
+.points-row,
+.palmares-row,
+.season-result-row,
+.matchday-table-row,
+.profile-season-row{
+  border-top-color:rgba(80,230,208,.11);
+}
+
+.row:hover,
+.general-row:hover,
+.points-row:hover,
+.palmares-row:hover,
+.season-result-row:hover,
+.matchday-table-row:hover,
+.profile-season-row:hover{
+  background:rgba(108,255,115,.035);
+}
+
+.team img,
+.player-inline img{
+  border-color:rgba(80,230,208,.19);
+  border-radius:13px;
+  box-shadow:0 8px 18px rgba(0,0,0,.22);
+}
+
+.name{
+  color:#f4f8f6;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-weight:850;
+}
+
+.current-table-card{
+  border-color:rgba(80,230,208,.22);
+}
+
+#currentRows .current-row:nth-child(1){
+  background:linear-gradient(90deg,rgba(231,202,105,.075),transparent 72%);
+}
+
+#currentRows .current-row:nth-child(2),
+#currentRows .current-row:nth-child(3){
+  background:linear-gradient(90deg,rgba(80,230,208,.035),transparent 72%);
+}
+
+#currentRows .current-row:nth-child(-n+3) .pos{
+  color:#dfe8e7;
+}
+
+.current-stat{
+  border-color:rgba(80,230,208,.16);
+  border-radius:9px;
+  background:rgba(80,230,208,.045);
+}
+
+.current-goals{
+  color:#68eadc;
+}
+
+.current-clean-sheets{
+  border-color:rgba(108,255,115,.18);
+  background:rgba(108,255,115,.045);
+  color:#88f47f;
+}
+
+.movement{
+  border-color:rgba(80,230,208,.13);
+  background:rgba(255,255,255,.025);
+}
+
+.movement-up{
+  border-color:rgba(108,255,115,.22);
+  background:rgba(108,255,115,.07);
+  color:#8df784;
+}
+
+.movement-down{
+  border-color:rgba(255,104,127,.2);
+  background:rgba(255,92,118,.065);
+}
+
+.form-chip{
+  border-radius:8px;
+}
+
+.form-strong,
+.form-mid{
+  border-color:rgba(108,255,115,.2);
+  background:rgba(108,255,115,.055);
+  color:#8df784;
+}
+
+.current-table-note{
+  color:#8195a4;
+}
+
+/* Matchday Center */
+.matchday-selector select{
+  border-color:rgba(80,230,208,.22);
+  background:#071b23;
+}
+
+.matchday-empty-state{
+  border-color:rgba(80,230,208,.25);
+  border-radius:19px;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(108,255,115,.065),transparent 24rem),
+    linear-gradient(145deg,rgba(7,25,32,.98),rgba(4,16,24,.99));
+}
+
+.matchday-empty-icon{
+  border-radius:50%;
+  box-shadow:none;
+}
+
+.matchday-live-head,
+.matchday-block,
+.matchday-feature-card,
+.matchday-metrics>article,
+.matchday-archive-card{
+  border-color:rgba(80,230,208,.16);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.035),transparent 10rem),
+    linear-gradient(145deg,rgba(8,27,35,.98),rgba(4,17,25,.99));
+  box-shadow:0 16px 40px rgba(0,0,0,.14);
+}
+
+.matchday-live-head h3,
+.matchday-block-title h3,
+.matchday-feature-copy>strong,
+.matchday-metrics article b{
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.04em;
+}
+
+.matchday-block-title>.ui-icon{
+  color:var(--gold);
+}
+
+.podium-player{
+  border-color:rgba(80,230,208,.14);
+  border-radius:16px;
+  background:rgba(255,255,255,.023);
+}
+
+.podium-first{
+  border-color:rgba(231,202,105,.32);
+  background:linear-gradient(180deg,rgba(231,202,105,.12),rgba(231,202,105,.025));
+  color:var(--gold);
+}
+
+.podium-second{
+  border-color:rgba(190,208,218,.2);
+  color:#c6d3da;
+}
+
+.podium-third{
+  border-color:rgba(207,145,100,.21);
+  color:#dba174;
+}
+
+.podium-medal{
+  border-radius:50%;
+  background:#071820;
+}
+
+.podium-avatar img{
+  border-radius:50%;
+}
+
+.matchday-feature-card::after{
+  opacity:.035;
+}
+
+.matchday-feature-icon,
+.matchday-metric-icon{
+  border-radius:50%;
+}
+
+.matchday-player-links .player-inline{
+  border-color:rgba(80,230,208,.14);
+  background:rgba(80,230,208,.035);
+}
+
+.weekly-table-block{
+  overflow:hidden;
+  padding:0;
+}
+
+.matchday-table{
+  border-radius:0;
+  box-shadow:none;
+}
+
+.matchday-table-row:first-child{
+  background:linear-gradient(90deg,rgba(231,202,105,.065),transparent);
+}
+
+.matchday-archive-card:hover,
+.matchday-archive-card.active{
+  border-color:rgba(108,255,115,.34);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.07),transparent 10rem),
+    linear-gradient(145deg,rgba(9,34,39,.99),rgba(5,20,27,.99));
+  transform:translateY(-2px);
+}
+
+.matchday-archive-number{
+  border-color:rgba(108,255,115,.23);
+  border-radius:50%;
+  background:rgba(108,255,115,.06);
+  color:#91f686;
+}
+
+.matchday-archive-empty{
+  border-color:rgba(80,230,208,.2);
+  border-radius:15px;
+  background:rgba(80,230,208,.025);
+}
+
+/* Seasons */
+.season-empty,
+.known-row{
+  border-color:rgba(80,230,208,.2);
+  border-radius:16px;
+  background:rgba(80,230,208,.025);
+}
+
+.season-title-line h3,
+.second-division h3,
+.champion-history-card h3{
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.035em;
+}
+
+.season-results{
+  border:1px solid rgba(80,230,208,.16);
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(8,27,35,.98),rgba(4,17,25,.99));
+  box-shadow:0 18px 45px rgba(0,0,0,.15);
+}
+
+.season-winner,
+.profile-season-champion{
+  background:linear-gradient(90deg,rgba(231,202,105,.1),transparent 76%);
+}
+
+.season-winner .season-pos,
+.season-winner-icon,
+.champion-history-card>span,
+.champion-history-card>div>span{
+  color:var(--gold);
+}
+
+.second-division{
+  padding:21px;
+}
+
+.second-team{
+  border-color:rgba(80,230,208,.13);
+  border-radius:12px;
+  background:rgba(80,230,208,.025);
+}
+
+.champion-history-card{
+  padding:18px;
+}
+
+.champion-history-card img,
+.champion-placeholder{
+  border:1px solid rgba(231,202,105,.22);
+  border-radius:16px;
+}
+
+.champion-placeholder{
+  background:rgba(231,202,105,.065);
+}
+
+/* Participants */
+#playerSearch{
+  min-width:260px;
+  background:#071b23;
+}
+
+.player-grid{
+  gap:14px;
+}
+
+.player-card{
+  min-height:205px;
+  padding:18px;
+  border-radius:17px;
+}
+
+.player-card img{
+  width:82px;
+  height:82px;
+  border-color:rgba(80,230,208,.22);
+  border-radius:18px;
+  box-shadow:0 12px 26px rgba(0,0,0,.25);
+}
+
+.player-card h3{
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.035em;
+}
+
+.player-card:hover img{
+  box-shadow:0 15px 31px rgba(0,0,0,.28);
+  transform:scale(1.025);
+}
+
+.profile-card-cta{
+  color:#82f67c;
+}
+
+/* Historical museum */
+.subtabs{
+  gap:5px;
+  margin:22px 0;
+  padding:5px;
+  border-color:rgba(80,230,208,.14);
+  border-radius:13px;
+  background:rgba(6,21,27,.84);
+  box-shadow:none;
+}
+
+.subtab{
+  border-radius:9px;
+  color:#91a4b5;
+}
+
+.subtab:hover{
+  color:#dff8ee;
+  background:rgba(108,255,115,.045);
+}
+
+.subtab.active{
+  border-color:rgba(108,255,115,.23);
+  background:rgba(108,255,115,.1);
+  color:#8ef784;
+  box-shadow:none;
+}
+
+.evolution-historical-card{
+  padding:22px;
+}
+
+.evolution-historical-head h3{
+  color:var(--text);
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.045em;
+}
+
+.evolution-player-chip{
+  border-color:rgba(80,230,208,.12);
+  border-radius:999px;
+  background:#071820;
+}
+
+.evolution-player-chip.selected{
+  border-color:rgba(108,255,115,.52);
+  background:rgba(108,255,115,.08);
+  color:#a2fa98;
+  box-shadow:none;
+}
+
+.historical-evolution-chart,
+.evolution-chart-scroll{
+  border-color:rgba(80,230,208,.14);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 75% 0%,rgba(108,255,115,.045),transparent 18rem),
+    #04141c;
+}
+
+.evo-grid{
+  stroke:#1d3b41;
+}
+
+.evo-line{
+  stroke:var(--turquoise);
+  filter:drop-shadow(0 4px 7px rgba(80,230,208,.16));
+}
+
+/* Records, awards and news */
+#recordGrid .record,
+#awardGrid .record{
+  min-height:180px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.04),transparent 10rem),
+    linear-gradient(145deg,rgba(8,27,35,.98),rgba(4,17,25,.99));
+}
+
+#recordGrid .record::after{
+  border-color:rgba(108,255,115,.06);
+}
+
+#recordGrid .record h3{
+  color:var(--gold);
+  text-shadow:none;
+}
+
+#awardGrid .record h3{
+  color:var(--text);
+}
+
+.record-icon{
+  border-color:rgba(231,202,105,.25);
+  background:rgba(231,202,105,.065);
+  color:var(--gold) !important;
+}
+
+.record-icon.award,
+.record-icon.news{
+  border-color:rgba(108,255,115,.22);
+  background:rgba(108,255,115,.055);
+  color:var(--green) !important;
+}
+
+.news-card{
+  min-height:190px;
+}
+
+.news-card time,
+.news-card small{
+  color:#76e5d8;
+}
+
+/* Champions */
+.group{
+  padding:20px;
+  border-radius:17px;
+}
+
+.group::before{
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent);
+}
+
+.group-title .ui-icon{
+  color:var(--green);
+}
+
+.group-team{
+  border-top-color:rgba(80,230,208,.1);
+}
+
+.group-team.team-profile-link:hover{
+  background:rgba(108,255,115,.04);
+}
+
+.round{
+  padding:19px;
+  border-radius:17px;
+}
+
+.empty-match{
+  border-color:rgba(80,230,208,.17);
+  border-radius:12px;
+  background:rgba(80,230,208,.02);
+}
+
+/* Profiles and install dialog */
+.modal{
+  background:rgba(0,5,9,.84);
+  backdrop-filter:blur(14px);
+}
+
+.modal-card,
+.install-card{
+  border-color:rgba(80,230,208,.24);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 92% 3%,rgba(108,255,115,.065),transparent 20rem),
+    #04141c;
+  box-shadow:0 34px 100px rgba(0,0,0,.62);
+}
+
+.profile-close,
+.install-close{
+  border-color:rgba(80,230,208,.18);
+  border-radius:50%;
+  background:rgba(3,16,23,.9);
+}
+
+.profile-hero::after{
+  background:linear-gradient(90deg,transparent,var(--turquoise));
+}
+
+.profile-avatar{
+  border-color:rgba(80,230,208,.3);
+  border-radius:22px;
+  box-shadow:0 18px 40px rgba(0,0,0,.3),0 0 0 4px rgba(108,255,115,.035);
+}
+
+.profile-identity h2{
+  color:var(--text);
+  font-family:Sora,Manrope,Inter,sans-serif;
+  letter-spacing:-.055em;
+}
+
+.profile-current-card{
+  border-color:rgba(80,230,208,.17);
+  border-radius:14px;
+  background:rgba(80,230,208,.035);
+  box-shadow:none;
+}
+
+.profile-current-card>div{
+  border-left-color:rgba(80,230,208,.1);
+}
+
+.profile-current-card>div:first-child{
+  background:linear-gradient(135deg,rgba(108,255,115,.065),transparent);
+}
+
+.profile-major-stats article,
+.profile-detail-grid article,
+.profile-journey-step{
+  border-color:rgba(80,230,208,.13);
+  border-radius:14px;
+  background:rgba(80,230,208,.025);
+  box-shadow:none;
+}
+
+.profile-major-stats article::before{
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent);
+}
+
+.profile-major-stats b{
+  color:var(--gold);
+}
+
+.profile-journey-step.champion{
+  border-color:rgba(231,202,105,.3);
+  background:
+    radial-gradient(circle at 92% 5%,rgba(231,202,105,.12),transparent 5rem),
+    rgba(27,27,19,.78);
+}
+
+.profile-journey-arrow{
+  color:var(--turquoise);
+}
+
+.profile-season-table{
+  border-color:rgba(80,230,208,.15);
+  border-radius:14px;
+  background:rgba(4,16,24,.55);
+}
+
+.install-warning{
+  border-color:rgba(231,202,105,.25);
+  border-radius:13px;
+  background:rgba(231,202,105,.065);
+}
+
+.copy-safari-link{
+  border-color:rgba(80,230,208,.2);
+  background:rgba(80,230,208,.05);
+}
+
+.install-steps li,
+.install-steps li:nth-child(2){
+  border-color:rgba(80,230,208,.12);
+  border-radius:13px;
+  background:rgba(80,230,208,.025);
+}
+
+.install-steps li::before{
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--emerald));
+  color:#031108;
+}
+
+.install-primary{
+  border:1px solid rgba(108,255,115,.42);
+  background:linear-gradient(135deg,var(--green),#42dd63);
+  color:#031108;
+  box-shadow:0 12px 30px rgba(63,224,96,.15);
+}
+
+footer{
+  border-top-color:rgba(80,230,208,.12);
+  background:#020a11;
+}
+
+@media(max-width:850px){
+  .minimal-page-banner,
+  .matchday-banner,
+  .season-banner,
+  .history-banner,
+  .records-banner,
+  .champions-banner{
+    min-height:255px;
+  }
+
+  .page-banner-mark{
+    width:76px;
+    height:76px;
+    flex-basis:76px;
+  }
+
+  .page-banner-mark .ui-icon{
+    width:33px;
+    height:33px;
+  }
+}
+
+@media(max-width:700px){
+  body{
+    background:
+      radial-gradient(circle at 20% 0%,rgba(24,214,107,.065),transparent 22rem),
+      linear-gradient(180deg,#020912,#031018 58%,#020912);
+  }
+
+  main{
+    padding:24px 12px 96px;
+  }
+
+  .section-head{
+    margin:30px 0 15px;
+  }
+
+  .section-head h2{
+    font-size:1.7rem;
+  }
+
+  .minimal-page-banner,
+  .matchday-banner,
+  .season-banner,
+  .history-banner,
+  .records-banner,
+  .champions-banner{
+    min-height:225px;
+    align-items:flex-end;
+    gap:14px;
+    margin-bottom:25px;
+    padding:21px 19px;
+    border-radius:17px;
+    background-position:62% center !important;
+  }
+
+  .minimal-page-banner h2,
+  .matchday-banner h2,
+  .season-banner h2,
+  .history-banner h2,
+  .records-banner h2,
+  .champions-banner h2{
+    font-size:clamp(2.05rem,10vw,2.8rem);
+    line-height:1;
+  }
+
+  .minimal-page-banner p,
+  .matchday-banner p,
+  .season-banner p,
+  .history-banner p,
+  .records-banner p,
+  .champions-banner p{
+    display:-webkit-box;
+    overflow:hidden;
+    font-size:.78rem;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+  }
+
+  .page-banner-mark{
+    width:58px;
+    height:58px;
+    flex-basis:58px;
+  }
+
+  .page-banner-mark .ui-icon{
+    width:26px;
+    height:26px;
+  }
+
+  .panel,
+  .record,
+  .news-card{
+    padding:18px;
+    border-radius:15px;
+  }
+
+  .card,
+  .player-card,
+  .group,
+  .round,
+  .second-division,
+  .evolution-historical-card{
+    border-radius:15px;
+  }
+
+  .player-grid{
+    gap:9px;
+  }
+
+  .player-card{
+    min-height:0;
+    grid-template-columns:68px minmax(0,1fr);
+    padding:13px;
+  }
+
+  .player-card img{
+    width:68px;
+    height:68px;
+    border-radius:15px;
+  }
+
+  #playerSearch{
+    width:100%;
+    min-width:0;
+  }
+
+  .matchday-empty-state{
+    min-height:330px;
+    padding:34px 18px;
+  }
+
+  .matchday-live-head,
+  .matchday-block,
+  .matchday-feature-card,
+  .matchday-metrics>article{
+    border-radius:15px;
+  }
+
+  .podium-player{
+    border-radius:14px;
+  }
+
+  .matchday-archive-card{
+    border-radius:14px;
+  }
+
+  .subtabs{
+    margin:17px 0;
+    border-radius:12px;
+  }
+
+  .subtab{
+    padding:9px 11px;
+  }
+
+  .evolution-historical-card{
+    padding:15px;
+  }
+
+  .modal-card,
+  .install-card{
+    border-radius:23px 23px 0 0;
+  }
+
+  .profile-current-card,
+  .profile-season-table{
+    border-radius:13px;
+  }
+}
