@@ -35,7 +35,7 @@ function playerInline(name,opts={}){
     </span>`).join('')}</span>`;
 }
 function go(id){document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.navtab[data-section="${id}"]`)?.classList.add('active');scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'})}
-function renderCurrent(){const rows=[...DATA.participants].sort((a,b)=>b.points-a.points||a.id-b.id);$('updated').textContent=DATA.lastUpdated;$('currentRows').innerHTML=rows.map((p,i)=>`<div class="row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.played}</span><span class="num">${p.points}</span></div>`).join('')}
+function renderCurrent(){const rows=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||a.id-b.id);$('updated').textContent=DATA.lastUpdated;$('currentRows').innerHTML=rows.map((p,i)=>`<div class="row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.played}</span><span class="num">${p.points}</span></div>`).join('')}
 function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles);return x.sort((a,b)=>b.score-a.score)}
 function renderGeneral(mode='ranking'){$('generalRows').innerHTML=sortedGeneral(mode).map((p,i)=>`<div class="general-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.titles}</span><span class="center">${p.seconds}</span><span class="center">${p.thirds}</span><span class="center">${p.podiums}</span><span class="center">${p.top5}</span><span class="center">${p.seasons}</span><span class="num">${p.points.toLocaleString()}</span><span class="num">${p.average?p.average.toFixed(1):'—'}</span><span class="num">${p.score.toFixed(1)}</span></div>`).join('')}
 function renderPoints(){$('pointsRows').innerHTML=DATA.historicalTables.pointsRanking.map((p,i)=>`<div class="points-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.seasons}</span><span class="num">${p.points.toLocaleString()}</span><span class="num">${p.average.toFixed(1)}</span></div>`).join('')}
@@ -76,10 +76,15 @@ function getPlayerHistory(name){
 }
 function ordinal(n){return n?`${n}º`:'—'}
 function currentStanding(name){
-  const sorted=[...DATA.participants].sort((a,b)=>b.points-a.points||a.id-b.id);
+  const participant=DATA.participants.find(p=>p.name===name);
+  if(participant?.active===false){
+    return {active:false,started:false,position:null,points:0,played:0};
+  }
+  const sorted=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||a.id-b.id);
   const player=sorted.find(p=>p.name===name);
   const started=sorted.some(p=>(p.played||0)>0||(p.points||0)>0);
   return {
+    active:true,
     started,
     position:started?sorted.findIndex(p=>p.name===name)+1:null,
     points:player?.points||0,
@@ -166,7 +171,7 @@ function openPlayer(name){
       <span>${x.points!=null?x.points.toLocaleString()+' pts':'—'}</span>
     </div>`
   }).join('');
-  const currentLabel=m.current.started?`${ordinal(m.current.position)} puesto`:'Sin comenzar';
+  const currentLabel=!m.current.active?'No participa':m.current.started?`${ordinal(m.current.position)} puesto`:'Sin comenzar';
   $('modalContent').innerHTML=`
     <section class="profile-hero">
       <img src="${p.shield}" class="profile-avatar" alt="Foto de ${name}">
@@ -386,7 +391,7 @@ function setupPWA(){
   syncConnection();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js?v=30-20260723',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
+    navigator.serviceWorker.register('./sw.js?v=31-20260724',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
   }
 }
 
@@ -402,7 +407,7 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch('data.json?v=30-20260723',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch('data.json?v=31-20260724',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}

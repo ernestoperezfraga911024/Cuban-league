@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Yadiel Lopez</title>
+  <desc id="desc">Avatar azul con las iniciales YL</desc>
+  <defs>
+    <linearGradient id="bg" x1="78" y1="45" x2="438" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#63C9ED"/>
+      <stop offset="1" stop-color="#277CAB"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="256" y1="30" x2="256" y2="260" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#031D2D" flood-opacity=".36"/>
+    </filter>
+  </defs>
+  <rect x="28" y="28" width="456" height="456" rx="112" fill="url(#bg)" filter="url(#shadow)"/>
+  <path d="M140 54h232c58 0 86 29 98 69-63 41-139 63-226 63-74 0-139-16-194-48 6-51 34-84 90-84Z" fill="url(#shine)"/>
+  <rect x="40" y="40" width="432" height="432" rx="100" fill="none" stroke="#B8EEFF" stroke-opacity=".4" stroke-width="4"/>
+  <text x="256" y="318" fill="#06151F" font-family="Inter, Arial, sans-serif" font-size="190" font-weight="650" text-anchor="middle" letter-spacing="-10">YL</text>
+</svg>

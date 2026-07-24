@@ -322,6 +322,57 @@
       ],
       "wins": 0,
       "bestFinish": null
+    },
+    {
+      "id": 21,
+      "name": "Nelson",
+      "shield": "team-nelson.png",
+      "points": 0,
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": 7,
+      "active": false
+    },
+    {
+      "id": 22,
+      "name": "Alejandro Cid Lorences",
+      "shield": "team-alejandro-cid.svg",
+      "points": 0,
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": 5,
+      "active": false
+    },
+    {
+      "id": 23,
+      "name": "Yadiel Lopez",
+      "shield": "team-yadiel-lopez.svg",
+      "points": 0,
+      "played": 0,
+      "evolution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "wins": 0,
+      "bestFinish": 14,
+      "active": false
     }
   ],
   "general": [
@@ -438,6 +489,20 @@
       "description": "Podio, experiencia y capacidad para arruinar quinielas."
     },
     {
+      "name": "Alejandro Cid Lorences",
+      "label": "El Escalador",
+      "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "podiums": 0,
+      "top5": 1,
+      "seasons": 6,
+      "points": 10189,
+      "average": 1698.2,
+      "score": 22.3,
+      "description": "Creció temporada a temporada hasta alcanzar el top 5 en 2024/25."
+    },
+    {
       "name": "Juventus",
       "label": "Campeón Express",
       "titles": 1,
@@ -480,6 +545,20 @@
       "description": "Pocas temporadas, buen promedio y pinta de peligro."
     },
     {
+      "name": "Nelson",
+      "label": "El Veterano Constante",
+      "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "podiums": 0,
+      "top5": 0,
+      "seasons": 7,
+      "points": 11696,
+      "average": 1670.9,
+      "score": 18.3,
+      "description": "Siete temporadas de constancia y más de 11,000 puntos acumulados."
+    },
+    {
       "name": "Bayer Munich",
       "label": "Nombre Grande, Presupuesto Corto",
       "titles": 0,
@@ -520,6 +599,20 @@
       "average": 1712.3,
       "score": 8.3,
       "description": "Correcto y estable, pero aún sin golpes de autoridad."
+    },
+    {
+      "name": "Yadiel Lopez",
+      "label": "Tres Campañas",
+      "titles": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "podiums": 0,
+      "top5": 0,
+      "seasons": 3,
+      "points": 4833,
+      "average": 1611.0,
+      "score": 4.4,
+      "description": "Tres temporadas registradas para seguir construyendo su historia en la liga."
     },
     {
       "name": "Brian",
@@ -711,7 +804,7 @@
     },
     {
       "title": "Más temporadas",
-      "player": "ANDOBA / Arian",
+      "player": "ANDOBA / Arian / Nelson",
       "value": "7"
     },
     {
@@ -811,6 +904,12 @@
         "average": 1779.4
       },
       {
+        "name": "Nelson",
+        "points": 11696,
+        "seasons": 7,
+        "average": 1670.9
+      },
+      {
         "name": "GNT D ZONA",
         "points": 11466,
         "seasons": 6,
@@ -833,6 +932,12 @@
         "points": 10500,
         "seasons": 6,
         "average": 1750.0
+      },
+      {
+        "name": "Alejandro Cid Lorences",
+        "points": 10189,
+        "seasons": 6,
+        "average": 1698.2
       },
       {
         "name": "Victor Manuel",
@@ -875,6 +980,12 @@
         "points": 5137,
         "seasons": 3,
         "average": 1712.3
+      },
+      {
+        "name": "Yadiel Lopez",
+        "points": 4833,
+        "seasons": 3,
+        "average": 1611.0
       },
       {
         "name": "Brian",
@@ -988,6 +1099,12 @@
             "division": 1,
             "position": 4,
             "points": 1778
+          },
+          {
+            "name": "Nelson",
+            "division": 1,
+            "position": 7,
+            "points": 1692
           },
           {
             "name": "Victor Manuel",
@@ -1140,6 +1257,18 @@
             "points": 1660
           },
           {
+            "name": "Nelson",
+            "division": 1,
+            "position": 11,
+            "points": 1646
+          },
+          {
+            "name": "Alejandro Cid Lorences",
+            "division": 1,
+            "position": 12,
+            "points": 1634
+          },
+          {
             "name": "Victor Manuel",
             "division": 1,
             "position": 15,
@@ -1284,6 +1413,18 @@
             "points": 1587
           },
           {
+            "name": "Nelson",
+            "division": 1,
+            "position": 10,
+            "points": 1580
+          },
+          {
+            "name": "Alejandro Cid Lorences",
+            "division": 1,
+            "position": 14,
+            "points": 1458
+          },
+          {
             "name": "Brian",
             "division": 2,
             "position": null,
@@ -1384,6 +1525,18 @@
             "division": 1,
             "position": 7,
             "points": 1704
+          },
+          {
+            "name": "Alejandro Cid Lorences",
+            "division": 1,
+            "position": 8,
+            "points": 1702
+          },
+          {
+            "name": "Nelson",
+            "division": 1,
+            "position": 9,
+            "points": 1697
           },
           {
             "name": "Viva Libre",
@@ -1518,6 +1671,12 @@
             "points": 1938
           },
           {
+            "name": "Alejandro Cid Lorences",
+            "division": 1,
+            "position": 7,
+            "points": 1915
+          },
+          {
             "name": "Julio",
             "division": 1,
             "position": 8,
@@ -1542,6 +1701,12 @@
             "points": 1792
           },
           {
+            "name": "Nelson",
+            "division": 1,
+            "position": 12,
+            "points": 1788
+          },
+          {
             "name": "Patria FC",
             "division": 1,
             "position": 13,
@@ -1552,6 +1717,12 @@
             "division": 1,
             "position": 14,
             "points": 1773
+          },
+          {
+            "name": "Yadiel Lopez",
+            "division": 1,
+            "position": 15,
+            "points": 1740
           },
           {
             "name": "Victor Manuel",
@@ -1632,6 +1803,12 @@
             "points": 1972
           },
           {
+            "name": "Alejandro Cid Lorences",
+            "division": 1,
+            "position": 5,
+            "points": 1945
+          },
+          {
             "name": "MONEY MON$TER",
             "division": 1,
             "position": 6,
@@ -1668,10 +1845,22 @@
             "points": 1786
           },
           {
+            "name": "Nelson",
+            "division": 1,
+            "position": 12,
+            "points": 1773
+          },
+          {
             "name": "Viva Libre",
             "division": 1,
             "position": 13,
             "points": 1745
+          },
+          {
+            "name": "Yadiel Lopez",
+            "division": 1,
+            "position": 14,
+            "points": 1672
           },
           {
             "name": "Patria FC",
@@ -1822,6 +2011,24 @@
             "division": 1,
             "position": 15,
             "points": 1527
+          },
+          {
+            "name": "Alejandro Cid Lorences",
+            "division": 1,
+            "position": 16,
+            "points": 1535
+          },
+          {
+            "name": "Nelson",
+            "division": 1,
+            "position": 17,
+            "points": 1520
+          },
+          {
+            "name": "Yadiel Lopez",
+            "division": 1,
+            "position": 19,
+            "points": 1421
           },
           {
             "name": "Ernesto",
