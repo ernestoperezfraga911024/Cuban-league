@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v33-private-admin-pwa';
+const CACHE_NAME = 'cuban-league-v34-installable-admin-pwa';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,9 +6,11 @@ const APP_SHELL = [
   './app.js?v=33-20260724',
   './data.json?v=33-20260724',
   './supabase-config.js?v=33-20260724',
+  './supabase-config.js?v=34-20260724',
   './admin.html',
-  './admin.css?v=33-20260724',
-  './admin.js?v=33-20260724',
+  './admin.css?v=34-20260724',
+  './admin.js?v=34-20260724',
+  './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
   './manifest.json',

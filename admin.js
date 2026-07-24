@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '33-20260724';
+  const VERSION = '34-20260724';
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
   const state = {
@@ -11,8 +11,86 @@
     published: false,
     dirty: false,
     saving: false,
-    messageTimer: null
+    messageTimer: null,
+    deferredInstallPrompt: null
   };
+
+  function isStandalone() {
+    return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  function openInstallGuide() {
+    $('adminInstallModal').hidden = false;
+    document.body.classList.add('install-open');
+    requestAnimationFrame(() => $('closeAdminInstall').focus());
+  }
+
+  function closeInstallGuide() {
+    $('adminInstallModal').hidden = true;
+    document.body.classList.remove('install-open');
+    $('copyAdminStatus').textContent = '';
+    $('installAdmin').focus();
+  }
+
+  async function copyAdminUrl() {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    try {
+      await navigator.clipboard.writeText(url.toString());
+    } catch {
+      const input = document.createElement('textarea');
+      input.value = url.toString();
+      input.setAttribute('readonly', '');
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      input.remove();
+    }
+    $('copyAdminStatus').textContent = 'Enlace copiado. Ahora abre Safari y pégalo en la barra de dirección.';
+  }
+
+  async function requestAdminInstall() {
+    if (state.deferredInstallPrompt) {
+      state.deferredInstallPrompt.prompt();
+      await state.deferredInstallPrompt.userChoice;
+      state.deferredInstallPrompt = null;
+      $('installAdmin').hidden = isStandalone();
+      return;
+    }
+    openInstallGuide();
+  }
+
+  function setupInstallableAdmin() {
+    $('installAdmin').hidden = isStandalone();
+    $('installAdmin').addEventListener('click', requestAdminInstall);
+    $('closeAdminInstall').addEventListener('click', closeInstallGuide);
+    $('copyAdminLink').addEventListener('click', copyAdminUrl);
+    $('adminInstallModal').addEventListener('click', event => {
+      if (event.target.id === 'adminInstallModal') closeInstallGuide();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !$('adminInstallModal').hidden) closeInstallGuide();
+    });
+
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      state.deferredInstallPrompt = event;
+    });
+    window.addEventListener('appinstalled', () => {
+      state.deferredInstallPrompt = null;
+      $('installAdmin').hidden = true;
+      if (!$('adminInstallModal').hidden) closeInstallGuide();
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register(`./sw.js?v=${VERSION}`, { scope: './' })
+        .then(registration => registration.update())
+        .catch(() => {});
+    }
+  }
 
   function showOnly(viewId) {
     ['loadingView', 'loginView', 'panelView'].forEach(id => {
@@ -347,6 +425,7 @@
         }
       });
       bindEvents();
+      setupInstallableAdmin();
 
       const { data, error } = await state.client.auth.getSession();
       if (error) throw error;

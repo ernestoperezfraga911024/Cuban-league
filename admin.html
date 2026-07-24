@@ -4,12 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#06130f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cuban Admin">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Cuban Admin">
   <meta name="robots" content="noindex,nofollow">
   <meta name="format-detection" content="telephone=no">
   <title>Administración · Cuban League</title>
+  <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=33-20260724">
+  <link rel="stylesheet" href="admin.css?v=34-20260724">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -19,10 +25,16 @@
       <img src="cuban-league-green-logo.svg" alt="">
       <span><b>CUBAN LEAGUE</b><small>Centro de control</small></span>
     </a>
-    <a class="public-link" href="index.html?section=current">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.1 12s3.6-6 9.9-6 9.9 6 9.9 6-3.6 6-9.9 6-9.9-6-9.9-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
-      <span>Ver web</span>
-    </a>
+    <div class="admin-topbar-actions">
+      <button id="installAdmin" class="install-admin-button" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></svg>
+        <span>Instalar</span>
+      </button>
+      <a class="public-link" href="index.html?section=current">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.1 12s3.6-6 9.9-6 9.9 6 9.9 6-3.6 6-9.9 6-9.9-6-9.9-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span>Ver web</span>
+      </a>
+    </div>
   </header>
 
   <main class="admin-main">
@@ -160,9 +172,34 @@
     </section>
   </main>
 
+  <div id="adminInstallModal" class="admin-install-modal" role="dialog" aria-modal="true" aria-labelledby="adminInstallTitle" hidden>
+    <section class="admin-install-card">
+      <button id="closeAdminInstall" class="admin-install-close" type="button" aria-label="Cerrar instrucciones">✕</button>
+      <img src="apple-touch-icon-green.png" alt="">
+      <span class="admin-kicker">IPHONE · ABRIR EN SAFARI</span>
+      <h2 id="adminInstallTitle">Instalar Cuban Admin</h2>
+      <p>El acceso directo abrirá este panel privado como una aplicación independiente.</p>
+      <div class="browser-warning">
+        <b>Primero abre el panel en Safari</b>
+        <span>Si estás usando Chrome, ChatGPT o WhatsApp, copia el enlace y pégalo en Safari. En esos navegadores puede no aparecer la opción correcta.</span>
+      </div>
+      <button id="copyAdminLink" class="copy-admin-link" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+        Copiar enlace del panel
+      </button>
+      <p id="copyAdminStatus" class="copy-admin-status" role="status" aria-live="polite"></p>
+      <ol class="admin-install-steps">
+        <li><span>1</span><div><b>Abre Safari</b><small>Pega allí el enlace copiado del panel privado.</small></div></li>
+        <li><span>2</span><div><b>Toca el botón Compartir de Safari</b><small>Es el cuadrado con una flecha hacia arriba situado en la barra de Safari.</small></div></li>
+        <li><span>3</span><div><b>Selecciona “Add to Home Screen”</b><small>También puede aparecer como “Añadir a pantalla de inicio”.</small></div></li>
+        <li><span>4</span><div><b>Confirma con “Add”</b><small>En el iPhone aparecerá una aplicación llamada Cuban Admin.</small></div></li>
+      </ol>
+    </section>
+  </div>
+
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=33-20260724"></script>
-  <script src="admin.js?v=33-20260724"></script>
+  <script src="supabase-config.js?v=34-20260724"></script>
+  <script src="admin.js?v=34-20260724"></script>
 </body>
 </html>
