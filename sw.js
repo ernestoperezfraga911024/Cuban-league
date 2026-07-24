@@ -1,10 +1,16 @@
-const CACHE_NAME = 'cuban-league-v32-goals-clean-sheets-pwa';
+const CACHE_NAME = 'cuban-league-v33-private-admin-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=32-20260724',
-  './app.js?v=32-20260724',
-  './data.json?v=32-20260724',
+  './styles.css?v=33-20260724',
+  './app.js?v=33-20260724',
+  './data.json?v=33-20260724',
+  './supabase-config.js?v=33-20260724',
+  './admin.html',
+  './admin.css?v=33-20260724',
+  './admin.js?v=33-20260724',
+  './supabase.js',
+  './supabase-js-LICENSE.txt',
   './manifest.json',
   './cuban-league-green-logo.svg',
   './icon-green-192.png',
@@ -91,12 +97,13 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request));
+    const fallback = url.pathname.endsWith('/admin.html') ? './admin.html' : './index.html';
+    event.respondWith(networkFirst(request, fallback));
     return;
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=32-20260724'));
+    event.respondWith(networkFirst(request, './data.json?v=33-20260724'));
     return;
   }
 

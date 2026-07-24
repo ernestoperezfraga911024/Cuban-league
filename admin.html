@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06130f">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="format-detection" content="telephone=no">
+  <title>Administración · Cuban League</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
+  <link rel="stylesheet" href="admin.css?v=33-20260724">
+</head>
+<body>
+  <div class="admin-background" aria-hidden="true"></div>
+
+  <header class="admin-topbar">
+    <a class="admin-brand" href="index.html" aria-label="Volver a Cuban League">
+      <img src="cuban-league-green-logo.svg" alt="">
+      <span><b>CUBAN LEAGUE</b><small>Centro de control</small></span>
+    </a>
+    <a class="public-link" href="index.html?section=current">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.1 12s3.6-6 9.9-6 9.9 6 9.9 6-3.6 6-9.9 6-9.9-6-9.9-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+      <span>Ver web</span>
+    </a>
+  </header>
+
+  <main class="admin-main">
+    <section id="loadingView" class="state-card loading-card" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <div><b>Preparando el panel</b><small>Conectando de forma segura…</small></div>
+    </section>
+
+    <section id="loginView" class="login-layout" hidden>
+      <div class="login-copy">
+        <span class="admin-kicker"><i></i> ÁREA PRIVADA</span>
+        <h1>Controla la liga desde tu celular.</h1>
+        <p>Escribe los puntos, goles y clean sheets de cada jornada. Cuando publiques, la clasificación se actualizará automáticamente.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Solo tú puedes editar</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>Clasificación automática</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Datos por jornada</li>
+        </ul>
+      </div>
+
+      <form id="loginForm" class="login-card">
+        <div class="lock-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        </div>
+        <span class="admin-kicker">INICIAR SESIÓN</span>
+        <h2>Panel de administración</h2>
+        <p>Entra con la cuenta autorizada en Supabase.</p>
+
+        <label for="adminEmail">Correo electrónico</label>
+        <div class="input-shell">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <input id="adminEmail" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </div>
+
+        <label for="adminPassword">Contraseña</label>
+        <div class="input-shell">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input id="adminPassword" name="password" type="password" autocomplete="current-password" required>
+          <button id="togglePassword" class="password-toggle" type="button" aria-label="Mostrar contraseña">Ver</button>
+        </div>
+
+        <p id="loginMessage" class="form-message" role="alert" hidden></p>
+        <button id="loginButton" class="primary-button login-button" type="submit">
+          <span>Entrar al panel</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+        <small class="secure-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></svg>
+          Sesión protegida por Supabase
+        </small>
+      </form>
+    </section>
+
+    <section id="panelView" class="panel-view" hidden>
+      <div class="panel-heading">
+        <div>
+          <span class="admin-kicker"><i></i> TEMPORADA <span id="seasonLabel">2026/27</span></span>
+          <h1>Registrar jornada</h1>
+          <p>Los cambios se ven en la clasificación pública únicamente después de publicarlos.</p>
+        </div>
+        <div class="account-box">
+          <span class="account-avatar" aria-hidden="true">EP</span>
+          <span><small>Administrador</small><b id="sessionEmail"></b></span>
+          <button id="logoutButton" type="button">Salir</button>
+        </div>
+      </div>
+
+      <section class="matchday-toolbar" aria-label="Jornada seleccionada">
+        <div class="matchday-select-group">
+          <label for="matchdaySelect">Jornada</label>
+          <div class="select-shell">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+            <select id="matchdaySelect"></select>
+          </div>
+        </div>
+        <div class="matchday-meta">
+          <span id="publicationBadge" class="publication-badge draft"><i></i><b>Borrador</b></span>
+          <span id="savedAt" class="saved-at">Todavía no guardada</span>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="Resumen de la jornada">
+        <article>
+          <span class="summary-icon points">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>
+          </span>
+          <span><small>Puntos</small><b id="pointsTotal">0</b></span>
+        </article>
+        <article>
+          <span class="summary-icon goals">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m12 7 3 2.2-1.1 3.6h-3.8L9 9.2 12 7Zm-8 5 4-1m8 0 4 1M8.5 19l1.6-3.6m5.4 3.6-1.6-3.6"/></svg>
+          </span>
+          <span><small>Goles</small><b id="goalsTotal">0</b></span>
+        </article>
+        <article>
+          <span class="summary-icon sheets">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </span>
+          <span><small>Clean sheets</small><b id="cleanSheetsTotal">0</b></span>
+        </article>
+      </section>
+
+      <section class="entry-card">
+        <div class="entry-card-head">
+          <div>
+            <span class="admin-kicker">DATOS DE LA JORNADA</span>
+            <h2 id="entryTitle">20 participantes</h2>
+          </div>
+          <div class="stat-key">
+            <span>PTS <small>Puntos</small></span>
+            <span>GOL <small>Goles</small></span>
+            <span>CS <small>Portería a cero</small></span>
+          </div>
+        </div>
+        <div id="playerRows" class="player-entry-list"></div>
+      </section>
+
+      <p id="panelMessage" class="panel-message" role="status" aria-live="polite" hidden></p>
+
+      <div class="action-spacer" aria-hidden="true"></div>
+      <div class="action-dock">
+        <div>
+          <span id="changeState"><i></i> Todos los cambios guardados</span>
+          <small>Jornada <b id="dockMatchday">1</b> · <span id="dockSeason">2026/27</span></small>
+        </div>
+        <button id="saveDraftButton" class="secondary-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5Z"/><path d="M8 4v6h8V4M8 16h8"/></svg>
+          <span>Guardar borrador</span>
+        </button>
+        <button id="publishButton" class="primary-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/><path d="M5 19h14"/></svg>
+          <span>Publicar jornada</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
+  <script src="supabase.js"></script>
+  <script src="supabase-config.js?v=33-20260724"></script>
+  <script src="admin.js?v=33-20260724"></script>
+</body>
+</html>

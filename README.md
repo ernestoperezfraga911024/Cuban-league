@@ -1,12 +1,18 @@
-Cuban League V5
-Incluye:
-- Diseño profesional con fotografías licenciadas de estadio, Mbappé y Lamine Yamal.
-- Clasificación actual.
-- Archivo por temporadas.
-- Perfiles individuales.
-- Ranking premium completo.
-- Ranking por puntos acumulados.
-- Palmarés puro.
-- Récords, premios, Champions y noticias.
+# Cuban League V33
 
-Las tablas completas por temporada no se inventaron: se cargarán cuando estén disponibles los puntos y posiciones finales de cada año.
+Sitio oficial de la Cuban League con:
+
+- Clasificación 2026/27 con jornadas, puntos, goles y clean sheets.
+- Panel privado para registrar y publicar cada jornada desde el celular.
+- Actualización automática de la clasificación mediante Supabase.
+- Archivo histórico por temporadas y perfiles completos.
+- Rankings, palmarés, récords, Champions y noticias.
+- Aplicación web instalable en la pantalla de inicio.
+
+## Panel privado
+
+Después de configurar Supabase, el administrador entra mediante `admin.html`.
+Los borradores permanecen privados; la web pública solamente consulta jornadas
+marcadas como publicadas.
+
+La contraseña y las reglas de acceso se administran exclusivamente en Supabase.

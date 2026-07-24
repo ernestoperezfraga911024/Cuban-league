@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Escudo de Cuban League con balón de fútbol">
+  <defs>
+    <linearGradient id="bg" x1="22" y1="15" x2="492" y2="505" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102d46"/>
+      <stop offset=".5" stop-color="#061525"/>
+      <stop offset="1" stop-color="#020711"/>
+    </linearGradient>
+    <linearGradient id="crest" x1="112" y1="80" x2="404" y2="436" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#72f8e9"/>
+      <stop offset=".52" stop-color="#52b4f4"/>
+      <stop offset="1" stop-color="#8265ff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(402 99) rotate(132) scale(275)">
+      <stop stop-color="#50eadc" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#50eadc" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="ballClip">
+      <circle cx="256" cy="218" r="94"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="402" cy="99" r="275" fill="url(#glow)"/>
+  <g opacity=".10" stroke="#ffffff">
+    <path d="M0 96H512M0 176H512M0 256H512M0 336H512M0 416H512"/>
+    <path d="M96 0V512M176 0V512M256 0V512M336 0V512M416 0V512"/>
+  </g>
+
+  <path d="M256 56C344 56 412 84 426 91V241C426 345 360 418 256 461C152 418 86 345 86 241V91C100 84 168 56 256 56Z" fill="url(#crest)" stroke="#d9fffb" stroke-opacity=".72" stroke-width="7"/>
+  <path d="M118 111C165 81 246 70 327 83" fill="none" stroke="#ffffff" stroke-opacity=".25" stroke-width="17" stroke-linecap="round"/>
+
+  <circle cx="256" cy="218" r="99" fill="#061525" opacity=".30"/>
+  <circle cx="256" cy="211" r="94" fill="#f7fbff" stroke="#031523" stroke-width="8"/>
+
+  <g clip-path="url(#ballClip)" fill="#072034" stroke="#072034" stroke-linejoin="round">
+    <path d="M256 169L291 194L278 235H234L221 194Z"/>
+    <path d="M227 122L256 105L286 122L276 151H237Z"/>
+    <path d="M327 151L350 178L344 211L311 207L300 177Z"/>
+    <path d="M326 249L349 270L325 302L289 307L278 273Z"/>
+    <path d="M186 249L163 270L187 302L223 307L234 273Z"/>
+    <path d="M185 151L162 178L168 211L201 207L212 177Z"/>
+    <g fill="none" stroke-width="7">
+      <path d="M256 169V151M291 194L311 207M278 235L289 273M234 235L223 273M221 194L201 207"/>
+      <path d="M237 151L212 177M276 151L300 177M311 207L278 235M234 235L201 207"/>
+    </g>
+  </g>
+  <circle cx="256" cy="211" r="94" fill="none" stroke="#ffffff" stroke-opacity=".56" stroke-width="3"/>
+
+  <text x="256" y="382" text-anchor="middle" fill="#031018" font-family="DejaVu Sans, Arial, sans-serif" font-size="75" font-weight="900" letter-spacing="-5">CL</text>
+  <rect x="175" y="398" width="162" height="4" rx="2" fill="#031018" fill-opacity=".58"/>
+  <text x="256" y="425" text-anchor="middle" fill="#031018" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" font-weight="900" letter-spacing="4">LEAGUE</text>
+</svg>

@@ -1,8 +1,69 @@
+const APP_VERSION='33-20260724';
 let DATA;const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function profileTriggerAttrs(name){const safe=profileAttr(name);return `data-profile-player="${safe}" role="button" tabindex="0" aria-label="Ver perfil completo de ${safe}"`}
 function teamCell(name){return `<div class="team team-profile-link" ${profileTriggerAttrs(name)}><img src="${imageMap()[name]||''}" alt="Foto de ${name}"><span class="name">${name}</span></div>`}
+
+async function syncLiveCurrentStats({render=true}={}){
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!DATA||!config?.url||!config?.publishableKey)return false;
+  try{
+    const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
+    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,updated_at');
+    endpoint.searchParams.set('season',`eq.${config.season||DATA.currentSeason}`);
+    endpoint.searchParams.set('published','eq.true');
+    endpoint.searchParams.set('order','matchday.asc');
+    const response=await fetch(endpoint,{
+      cache:'no-store',
+      headers:{
+        apikey:config.publishableKey,
+        Authorization:`Bearer ${config.publishableKey}`,
+        Accept:'application/json'
+      }
+    });
+    if(!response.ok)throw new Error('No se pudo actualizar la clasificación');
+    const rows=await response.json();
+    if(!Array.isArray(rows))throw new Error('Respuesta de clasificación no válida');
+
+    const active=DATA.participants.filter(participant=>participant.active!==false);
+    const participantMap=new Map(active.map(participant=>[participant.name,participant]));
+    const totals=new Map();
+    rows.forEach(row=>{
+      if(!participantMap.has(row.participant_name))return;
+      if(!totals.has(row.participant_name)){
+        totals.set(row.participant_name,{points:0,goals:0,cleanSheets:0,matchdays:new Set()});
+      }
+      const total=totals.get(row.participant_name);
+      total.points+=Number(row.points)||0;
+      total.goals+=Number(row.goals)||0;
+      total.cleanSheets+=Number(row.clean_sheets)||0;
+      total.matchdays.add(Number(row.matchday));
+    });
+
+    active.forEach(participant=>{
+      const total=totals.get(participant.name);
+      participant.points=total?.points||0;
+      participant.goals=total?.goals||0;
+      participant.cleanSheets=total?.cleanSheets||0;
+      participant.played=total?.matchdays.size||0;
+    });
+
+    if(rows.length){
+      const dates=rows.map(row=>new Date(row.updated_at)).filter(date=>!Number.isNaN(date.getTime()));
+      const latest=dates.length?new Date(Math.max(...dates.map(date=>date.getTime()))):null;
+      DATA.lastUpdated=latest
+        ?new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(latest)
+        :'Datos publicados';
+    }else{
+      DATA.lastUpdated='Sin jornadas publicadas';
+    }
+    if(render)renderCurrent();
+    return true;
+  }catch{
+    return false;
+  }
+}
 
 function resolveParticipantNames(label){
   if(!label)return [];
@@ -35,7 +96,7 @@ function playerInline(name,opts={}){
     </span>`).join('')}</span>`;
 }
 function go(id){document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.navtab[data-section="${id}"]`)?.classList.add('active');scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'})}
-function renderCurrent(){const rows=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||a.id-b.id);$('updated').textContent=DATA.lastUpdated;$('currentRows').innerHTML=rows.map((p,i)=>`<div class="row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.played}</span><span class="num">${p.points}</span><span class="current-stat current-goals" aria-label="${p.goals??0} goles">${p.goals??0}</span><span class="current-stat current-clean-sheets" aria-label="${p.cleanSheets??0} clean sheets">${p.cleanSheets??0}</span></div>`).join('')}
+function renderCurrent(){const rows=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||(b.goals||0)-(a.goals||0)||(b.cleanSheets||0)-(a.cleanSheets||0)||a.id-b.id);$('updated').textContent=DATA.lastUpdated;$('currentRows').innerHTML=rows.map((p,i)=>`<div class="row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.played}</span><span class="num">${p.points}</span><span class="current-stat current-goals" aria-label="${p.goals??0} goles">${p.goals??0}</span><span class="current-stat current-clean-sheets" aria-label="${p.cleanSheets??0} clean sheets">${p.cleanSheets??0}</span></div>`).join('')}
 function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles);return x.sort((a,b)=>b.score-a.score)}
 function renderGeneral(mode='ranking'){$('generalRows').innerHTML=sortedGeneral(mode).map((p,i)=>`<div class="general-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.titles}</span><span class="center">${p.seconds}</span><span class="center">${p.thirds}</span><span class="center">${p.podiums}</span><span class="center">${p.top5}</span><span class="center">${p.seasons}</span><span class="num">${p.points.toLocaleString()}</span><span class="num">${p.average?p.average.toFixed(1):'—'}</span><span class="num">${p.score.toFixed(1)}</span></div>`).join('')}
 function renderPoints(){$('pointsRows').innerHTML=DATA.historicalTables.pointsRanking.map((p,i)=>`<div class="points-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.seasons}</span><span class="num">${p.points.toLocaleString()}</span><span class="num">${p.average.toFixed(1)}</span></div>`).join('')}
@@ -80,7 +141,7 @@ function currentStanding(name){
   if(participant?.active===false){
     return {active:false,started:false,position:null,points:0,played:0};
   }
-  const sorted=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||a.id-b.id);
+  const sorted=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||(b.goals||0)-(a.goals||0)||(b.cleanSheets||0)-(a.cleanSheets||0)||a.id-b.id);
   const player=sorted.find(p=>p.name===name);
   const started=sorted.some(p=>(p.played||0)>0||(p.points||0)>0);
   return {
@@ -391,7 +452,7 @@ function setupPWA(){
   syncConnection();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js?v=32-20260724',{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
+    navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`,{scope:'./'}).then(registration=>registration.update()).catch(()=>{});
   }
 }
 
@@ -407,7 +468,7 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch('data.json?v=32-20260724',{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+async function init(){DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();renderCurrent();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();syncLiveCurrentStats();window.setInterval(()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()},60000);window.addEventListener('online',()=>syncLiveCurrentStats());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()});document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 document.addEventListener('click',e=>{
   const team=e.target.closest('[data-profile-player]');
   if(team){openPlayer(team.dataset.profilePlayer)}
