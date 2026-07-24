@@ -4,12 +4,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cuban League"><meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Cuban League"><meta name="format-detection" content="telephone=no">
-<meta name="description" content="Archivo oficial de la Cuban League: clasificación, historia, récords, perfiles y Champions.">
+<meta name="description" content="Archivo oficial de la Cuban League: clasificación, jornadas, historia, récords, perfiles y Champions.">
 <title>Cuban League</title><link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=33-20260724"></head><body>
+<link rel="stylesheet" href="styles.css?v=35-20260724"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -22,11 +22,13 @@
   <symbol id="icon-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 4 5 5-8 5 8 4-5-2 12H5Z"/><path d="M5 19h14"/></symbol>
   <symbol id="icon-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z"/></symbol>
   <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="icon-ball" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9.2 8.4 2.8-2 2.8 2-1.1 3.3h-3.4Z"/><path d="m10.3 11.7-3.5 2.5.9 3.4M13.7 11.7l3.5 2.5-.9 3.4M9.2 8.4 6.1 7.2M14.8 8.4l3.1-1.2M7.7 17.6l4.3 2.1 4.3-2.1"/></symbol>
 </svg>
 <header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-green-logo.svg" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
 
 <nav class="main-nav" aria-label="Navegación principal">
 <button type="button" class="navtab active" data-section="home"><svg class="ui-icon" aria-hidden="true"><use href="#icon-home"></use></svg><span>Inicio</span></button><button type="button" class="navtab" data-section="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Clasificación</span></button>
+<button type="button" class="navtab" data-section="matchdays"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Jornadas</span></button>
 <button type="button" class="navtab" data-section="seasons"><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Temporadas</span></button><button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
 <button type="button" class="navtab" data-section="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Histórico</span></button><button type="button" class="navtab" data-section="records"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Récords</span></button>
 <button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
@@ -54,8 +56,62 @@
 </section>
 
 <section id="current" class="page"><div class="section-head"><div><span class="eyebrow">2026/27</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Clasificación actual</span></h2></div><small>Actualizado: <b id="updated"></b></small></div>
-<div class="card current-table-card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span><span title="Goles"><span class="current-label-full">Goles</span><span class="current-label-short">GOL</span></span><span title="Clean sheets"><span class="current-label-full">Clean sheets</span><span class="current-label-short">CS</span></span></div><div id="currentRows"></div></div>
-<p class="current-table-note"><b>GOL</b> = goles · <b>CS</b> = partidos con la portería a cero</p></section>
+<div class="card current-table-card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span><span title="Goles"><span class="current-label-full">Goles</span><span class="current-label-short">GOL</span></span><span title="Clean sheets"><span class="current-label-full">Clean sheets</span><span class="current-label-short">CS</span></span><span title="Movimiento respecto a la jornada anterior">MOV</span><span>Últimas 5</span></div><div id="currentRows"></div></div>
+<p class="current-table-note"><b>GOL</b> = goles · <b>CS</b> = porterías a cero · <b>MOV</b> = posiciones ganadas o perdidas · <b>Últimas 5</b> = puesto conseguido en cada jornada reciente</p></section>
+
+<section id="matchdays" class="page">
+  <div class="matchday-banner">
+    <div>
+      <span class="eyebrow">CENTRO DE JORNADA</span>
+      <h2>Cada fecha,<br>toda la historia.</h2>
+      <p>Podio semanal, líderes, movimientos, récords y archivo oficial.</p>
+    </div>
+  </div>
+
+  <div class="section-head matchday-section-head">
+    <div>
+      <span class="eyebrow">TEMPORADA 2026/27</span>
+      <h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><span>Resumen semanal</span></h2>
+    </div>
+    <label class="matchday-selector"><span>Seleccionar jornada</span><select id="publicMatchdaySelect" disabled><option>Sin jornadas</option></select></label>
+  </div>
+
+  <div id="matchdayEmpty" class="matchday-empty-state" role="status">
+    <span class="matchday-empty-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
+    <span class="eyebrow">PRÓXIMAMENTE</span>
+    <h3>La temporada todavía no ha comenzado</h3>
+    <p>Cuando publiques la primera jornada desde el panel privado, aquí aparecerán automáticamente el podio, los líderes y todos los movimientos.</p>
+  </div>
+
+  <div id="matchdayContent" hidden>
+    <div class="matchday-live-head">
+      <div><span class="eyebrow">JORNADA PUBLICADA</span><h3 id="matchdayTitle">Jornada 1</h3></div>
+      <span id="matchdayStatus" class="matchday-status">Resumen oficial</span>
+    </div>
+
+    <section class="matchday-block">
+      <div class="matchday-block-title"><div><span class="eyebrow">TOP DE LA SEMANA</span><h3>Podio por puntos</h3></div><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></div>
+      <div id="matchdayPodium" class="matchday-podium"></div>
+    </section>
+
+    <div id="matchdayLeaders" class="matchday-feature-grid"></div>
+    <div id="matchdayMovers" class="matchday-feature-grid"></div>
+    <div id="matchdayMetrics" class="matchday-metrics"></div>
+
+    <section class="matchday-block weekly-table-block">
+      <div class="matchday-block-title"><div><span class="eyebrow">CLASIFICACIÓN SEMANAL</span><h3>Resultados de la jornada</h3></div><span id="matchdayPlayerCount" class="status"></span></div>
+      <div class="card matchday-table">
+        <div class="thead matchday-table-grid"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span></div>
+        <div id="matchdayTableRows"></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="matchday-archive-section">
+    <div class="section-head"><div><span class="eyebrow">ARCHIVO OFICIAL</span><h2>Jornadas publicadas</h2></div></div>
+    <div id="matchdayArchive" class="matchday-archive"></div>
+  </section>
+</section>
 
 <section id="seasons" class="page"><div class="season-banner"><div><span class="eyebrow">ARCHIVO DE TEMPORADAS</span><h2>Consulta cada edición</h2><p>Selecciona una temporada para consultar su clasificación final.</p></div></div>
 <div class="section-head"><div><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span><span>Resultados por temporada</span></h2></div><select id="seasonSelect"></select></div><div id="seasonContent"></div></section>
@@ -120,4 +176,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=33-20260724"></script><script src="app.js?v=33-20260724"></script></body></html>
+<script src="supabase-config.js?v=35-20260724"></script><script src="app.js?v=35-20260724"></script></body></html>

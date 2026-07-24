@@ -1,8 +1,11 @@
-# Cuban League V33
+# Cuban League V35
 
 Sitio oficial de la Cuban League con:
 
 - Clasificación 2026/27 con jornadas, puntos, goles y clean sheets.
+- Centro de Jornada con selector, podio semanal, líderes, movimientos,
+  promedio, récord y archivo de todas las jornadas publicadas.
+- Movimiento en la clasificación y forma de las últimas cinco jornadas.
 - Panel privado para registrar y publicar cada jornada desde el celular.
 - Actualización automática de la clasificación mediante Supabase.
 - Archivo histórico por temporadas y perfiles completos.
