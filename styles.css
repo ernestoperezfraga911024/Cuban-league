@@ -3756,3 +3756,106 @@ body.is-offline::after{
     min-height:142px;
   }
 }
+
+/* =========================================================
+   V32 — GOLES Y CLEAN SHEETS EN LA CLASIFICACIÓN
+   ========================================================= */
+.current-table-card .current-grid,
+.current-table-card #currentRows .row{
+  grid-template-columns:50px minmax(180px,1fr) 50px 80px 76px 92px;
+}
+
+.current-table-card .current-grid>span:nth-child(n+3){
+  text-align:center;
+}
+
+.current-table-card #currentRows .row>.num{
+  text-align:center;
+}
+
+.current-stat{
+  justify-self:center;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:38px;
+  min-height:32px;
+  padding:5px 9px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:11px;
+  background:rgba(255,255,255,.035);
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+
+.current-goals{
+  color:#61e9df;
+  border-color:rgba(80,234,220,.2);
+  background:rgba(80,234,220,.065);
+}
+
+.current-clean-sheets{
+  color:#8af27c;
+  border-color:rgba(132,244,116,.2);
+  background:rgba(132,244,116,.06);
+}
+
+.current-label-short{
+  display:none;
+}
+
+.current-table-note{
+  margin:10px 4px 0;
+  color:#849bb0;
+  font-size:.78rem;
+}
+
+.current-table-note b:first-child{
+  color:#61e9df;
+}
+
+.current-table-note b:last-child{
+  color:#8af27c;
+}
+
+@media(max-width:620px){
+  .current-table-card .current-grid,
+  .current-table-card #currentRows .row{
+    grid-template-columns:28px minmax(0,1fr) 28px 46px 38px 38px;
+    padding-left:8px;
+    padding-right:8px;
+  }
+
+  .current-table-card .team{
+    gap:7px;
+  }
+
+  .current-table-card .team img{
+    width:36px;
+    height:36px;
+  }
+
+  .current-table-card .name{
+    font-size:.8rem;
+  }
+
+  .current-label-full{
+    display:none;
+  }
+
+  .current-label-short{
+    display:inline;
+  }
+
+  .current-stat{
+    min-width:30px;
+    min-height:29px;
+    padding:4px 6px;
+    border-radius:9px;
+    font-size:.8rem;
+  }
+
+  .current-table-note{
+    font-size:.7rem;
+  }
+}

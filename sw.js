@@ -1,10 +1,10 @@
-const CACHE_NAME = 'cuban-league-v31-historical-players-pwa';
+const CACHE_NAME = 'cuban-league-v32-goals-clean-sheets-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=31-20260724',
-  './app.js?v=31-20260724',
-  './data.json?v=31-20260724',
+  './styles.css?v=32-20260724',
+  './app.js?v=32-20260724',
+  './data.json?v=32-20260724',
   './manifest.json',
   './cuban-league-green-logo.svg',
   './icon-green-192.png',
@@ -96,7 +96,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=31-20260724'));
+    event.respondWith(networkFirst(request, './data.json?v=32-20260724'));
     return;
   }
 
