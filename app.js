@@ -1,4 +1,4 @@
-const APP_VERSION='38-20260724';
+const APP_VERSION='39-20260724';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -831,7 +831,58 @@ function renderHistoricalEvolutionChart(){
       </svg>
     </div>`;
 }
-function renderRecords(){$('recordGrid').innerHTML=DATA.records.map(r=>`<article class="record icon-card"><div class="card-label-row"><span>${r.title}</span><span class="record-icon">${uiIcon('trophy')}</span></div><h3>${r.value}</h3><p>${playerInline(r.player)}</p></article>`).join('');$('awardGrid').innerHTML=DATA.awards.map(a=>`<article class="record icon-card"><div class="card-label-row"><span>${a.title}</span><span class="record-icon award">${uiIcon('star')}</span></div><h3>${playerInline(a.player)}</h3><p>${a.text}</p></article>`).join('')}
+function recordPresentation(title){
+  if(/títulos|podios|top 5/i.test(title))return {label:'Palmarés',icon:'trophy',tone:'honours'};
+  if(/puntos|promedio/i.test(title))return {label:'Rendimiento',icon:'chart',tone:'performance'};
+  return {label:'Trayectoria',icon:'calendar',tone:'career'};
+}
+
+function recordUnit(title){
+  const units={
+    'Más títulos':'títulos',
+    'Más podios':'podios',
+    'Más puntos acumulados':'puntos',
+    'Mejor promedio':'pts / temporada',
+    'Más temporadas':'temporadas',
+    'Más Top 5':'veces'
+  };
+  return units[title]||'marca';
+}
+
+function renderRecords(){
+  const completedSeasons=(DATA.historicalTables?.seasonArchive||[]).filter(season=>season.results?.length).length;
+  $('recordsMeta').innerHTML=`
+    <article><span class="records-meta-icon">${uiIcon('trophy')}</span><div><b>${DATA.records.length}</b><small>Marcas oficiales</small></div></article>
+    <article><span class="records-meta-icon">${uiIcon('calendar')}</span><div><b>${completedSeasons}</b><small>Temporadas analizadas</small></div></article>
+    <article><span class="records-meta-icon">${uiIcon('users')}</span><div><b>${DATA.participants.length}</b><small>Perfiles históricos</small></div></article>`;
+
+  $('recordGrid').innerHTML=DATA.records.map((record,index)=>{
+    const category=recordPresentation(record.title);
+    return `<article class="record-entry record-${category.tone}">
+      <div class="record-entry-head">
+        <span class="record-order">${String(index+1).padStart(2,'0')}</span>
+        <span class="record-category">${uiIcon(category.icon)}${category.label}</span>
+      </div>
+      <div class="record-entry-body">
+        <div class="record-entry-copy">
+          <span class="record-entry-label">${record.title}</span>
+          <div class="record-holder">${playerInline(record.player)}</div>
+        </div>
+        <div class="record-value"><b>${record.value}</b><small>${recordUnit(record.title)}</small></div>
+      </div>
+    </article>`;
+  }).join('');
+
+  $('awardGrid').innerHTML=DATA.awards.map((award,index)=>`<article class="hall-entry">
+    <div class="hall-entry-side"><span class="hall-order">${String(index+1).padStart(2,'0')}</span><span class="hall-icon">${uiIcon('star')}</span></div>
+    <div class="hall-entry-copy">
+      <span class="hall-kicker">RECONOCIMIENTO HISTÓRICO</span>
+      <h3>${award.title}</h3>
+      <div class="hall-holder">${playerInline(award.player)}</div>
+      <p>${award.text}</p>
+    </div>
+  </article>`).join('');
+}
 function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3 class="group-title">${uiIcon('shield')}<span>${g.name}</span></h3>${g.teams.map((t,i)=>`<div class="group-team team-profile-link" ${profileTriggerAttrs(t)}><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}" alt="Foto de ${t}"><b>${t}</b><small>Ver ficha</small></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card icon-card"><div class="card-label-row"><span>${n.date}</span><span class="record-icon news">${uiIcon('news')}</span></div><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
 

@@ -1,4 +1,4 @@
-# Cuban League V38
+# Cuban League V39
 
 Sitio oficial de la Cuban League con:
 
@@ -17,6 +17,8 @@ Sitio oficial de la Cuban League con:
   participantes, museo histórico, récords, Champions, noticias y perfiles.
 - Pulso dinámico en la portada con pretemporada, Top 5, MVP de jornada, líderes
   de goles y clean sheets y mayor subida en la clasificación.
+- Libro de Récords reorganizado con resumen del archivo, categorías, tarjetas
+  compactas y un Salón de la Fama editorial optimizado para móvil.
 
 ## Panel privado
 

@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v38-season-pulse-pwa';
+const CACHE_NAME = 'cuban-league-v39-records-book-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=38-20260724',
-  './app.js?v=38-20260724',
-  './data.json?v=38-20260724',
-  './supabase-config.js?v=38-20260724',
+  './styles.css?v=39-20260724',
+  './app.js?v=39-20260724',
+  './data.json?v=39-20260724',
+  './supabase-config.js?v=39-20260724',
   './supabase-config.js?v=34-20260724',
   './admin.html',
   './admin.css?v=34-20260724',
@@ -106,7 +106,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=38-20260724'));
+    event.respondWith(networkFirst(request, './data.json?v=39-20260724'));
     return;
   }
 
