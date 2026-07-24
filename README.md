@@ -1,4 +1,4 @@
-# Cuban League V37
+# Cuban League V38
 
 Sitio oficial de la Cuban League con:
 
@@ -15,6 +15,8 @@ Sitio oficial de la Cuban League con:
   automático de la temporada.
 - Sistema visual minimalista unificado en clasificación, jornadas, temporadas,
   participantes, museo histórico, récords, Champions, noticias y perfiles.
+- Pulso dinámico en la portada con pretemporada, Top 5, MVP de jornada, líderes
+  de goles y clean sheets y mayor subida en la clasificación.
 
 ## Panel privado
 

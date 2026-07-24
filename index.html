@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=37-20260724"></head><body>
+<link rel="stylesheet" href="styles.css?v=38-20260724"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -81,12 +81,13 @@
 <div class="section-head home-story-heading"><div><span class="eyebrow">FÚTBOL Y DATOS</span><h2>La competición, desde todos los ángulos</h2></div></div>
 <div class="football-split home-stories"><article class="photo-card mbappe"><div><span class="eyebrow">COMPETICIÓN</span><h2>Competir hasta el final.</h2><p>Clasificación semanal, rachas y movimientos oficiales de cada participante.</p><button type="button" data-go="current">Ver clasificación <span aria-hidden="true">→</span></button></div></article>
 <article class="photo-card yamal"><div><span class="eyebrow">EVOLUCIÓN</span><h2>Cada jornada cuenta.</h2><p>Perfiles completos, evolución de posiciones y estadísticas acumuladas.</p><button type="button" data-go="players">Ver participantes <span aria-hidden="true">→</span></button></div></article></div>
-<div class="section-head"><div><span class="eyebrow">RESUMEN</span><h2>Lo mejor de la Cuban League</h2></div></div>
-<div class="dashboard-grid">
-  <article class="panel metric-panel metric-gold"><span class="panel-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Más títulos</span><h3>2</h3><p>GNT D ZONA y ANDOBA THE BEST</p></article>
-  <article class="panel metric-panel metric-cyan"><span class="panel-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg></span><span>Más podios</span><h3>4</h3><p>GNT D ZONA</p></article>
-  <article class="panel metric-panel metric-green"><span class="panel-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Mayor promedio</span><h3>1,938.0</h3><p>Juventus</p></article>
-</div>
+<section class="season-pulse-section" aria-labelledby="seasonPulseTitle">
+  <div class="section-head season-pulse-heading">
+    <div><span class="eyebrow">EN DIRECTO</span><h2 id="seasonPulseTitle">Pulso de la temporada</h2></div>
+    <span id="seasonPulseBadge" class="season-pulse-badge">PRETEMPORADA</span>
+  </div>
+  <div id="seasonPulse" class="season-pulse" aria-live="polite"></div>
+</section>
 </section>
 
 <section id="current" class="page">
@@ -216,4 +217,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=37-20260724"></script><script src="app.js?v=37-20260724"></script></body></html>
+<script src="supabase-config.js?v=38-20260724"></script><script src="app.js?v=38-20260724"></script></body></html>

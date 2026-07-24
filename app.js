@@ -1,4 +1,4 @@
-const APP_VERSION='37-20260724';
+const APP_VERSION='38-20260724';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -233,6 +233,7 @@ function renderHomeLive(){
     $('homeLatestWinner').textContent='Esperando la primera publicación';
     $('homeCurrentLeader').textContent='Sin comenzar';
     $('homeLeaderPoints').textContent='0 puntos';
+    renderSeasonPulse();
     return;
   }
   const weekly=weeklyStandings(latest);
@@ -246,6 +247,148 @@ function renderHomeLive(){
   $('homeLatestWinner').textContent=`${weeklyLeader.name} · ${weeklyLeader.points.toLocaleString('es')} pts`;
   $('homeCurrentLeader').textContent=currentLeader.name;
   $('homeLeaderPoints').textContent=`${currentLeader.points.toLocaleString('es')} puntos acumulados`;
+  renderSeasonPulse();
+}
+
+function defendingChampion(){
+  const archive=DATA.historicalTables?.seasonArchive||[];
+  const completed=archive.filter(entry=>
+    entry.season!==DATA.currentSeason
+    &&entry.results?.some(result=>result.division===1&&result.position===1)
+  );
+  const latest=completed[completed.length-1];
+  if(!latest)return null;
+  const champion=latest.results.find(result=>result.division===1&&result.position===1);
+  return champion?{...champion,season:latest.season}:null;
+}
+
+function pulsePerson(names){
+  if(!names.length)return '';
+  const participant=DATA.participants.find(player=>player.name===names[0]);
+  if(!participant)return '';
+  const extra=names.length-1;
+  return `<span class="pulse-person team-profile-link" ${profileTriggerAttrs(participant.name)}>
+    <img src="${participant.shield}" alt="Foto de ${participant.name}">
+    <span><b>${participant.name}</b>${extra?`<small>y ${extra} ${extra===1?'más':'más'}</small>`:''}</span>
+  </span>`;
+}
+
+function pulseHighlightCard({tone,icon,label,names=[],value,emptyCopy}){
+  return `<article class="pulse-highlight-card ${tone}">
+    <span class="pulse-highlight-icon">${uiIcon(icon)}</span>
+    <span class="pulse-highlight-label">${label}</span>
+    ${names.length?pulsePerson(names):`<strong class="pulse-highlight-empty">${emptyCopy}</strong>`}
+    <strong class="pulse-highlight-value">${value}</strong>
+  </article>`;
+}
+
+function pulseLeaders(standings,key){
+  const best=Math.max(0,...standings.map(player=>player[key]||0));
+  return {
+    value:best,
+    names:best?standings.filter(player=>(player[key]||0)===best).map(player=>player.name):[]
+  };
+}
+
+function renderSeasonPulse(){
+  const host=$('seasonPulse');
+  const badge=$('seasonPulseBadge');
+  if(!host||!badge)return;
+  const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
+
+  if(latest==null){
+    const champion=defendingChampion();
+    const participantCount=activeParticipants().length;
+    badge.textContent='PRETEMPORADA';
+    host.className='season-pulse is-preseason';
+    host.innerHTML=`
+      <article class="pulse-preseason-main">
+        <span class="pulse-main-icon">${uiIcon('ball')}</span>
+        <span class="eyebrow">TEMPORADA ${DATA.currentSeason}</span>
+        <h3>Esperando la Jornada 1.</h3>
+        <p>En cuanto publiques la primera jornada desde el panel privado, este espacio mostrará automáticamente el Top 5, el MVP y todos los líderes.</p>
+        <span class="pulse-ready-status"><i aria-hidden="true"></i>Clasificación preparada</span>
+        <button type="button" class="pulse-primary-action" data-go="matchdays"><span>Abrir Centro de Jornada</span><span aria-hidden="true">→</span></button>
+      </article>
+      <div class="pulse-preseason-facts">
+        <article class="pulse-fact-card">
+          <span class="pulse-fact-icon">${uiIcon('users')}</span>
+          <span>Participantes confirmados</span>
+          <b>${participantCount}</b>
+          <small>Listos para competir en ${DATA.currentSeason}</small>
+        </article>
+        <article class="pulse-fact-card pulse-defender-card">
+          <span class="pulse-fact-icon trophy">${uiIcon('trophy')}</span>
+          <span>Campeón defensor</span>
+          ${champion?pulsePerson([champion.name]):'<b>—</b>'}
+          <small>${champion?`${champion.season} · ${champion.points.toLocaleString('es')} puntos`:'Pendiente de confirmar'}</small>
+        </article>
+      </div>`;
+  }else{
+    const standings=cumulativeStandings(latest);
+    const weekly=weeklyStandings(latest);
+    const movements=movementForMatchday(latest);
+    const goals=pulseLeaders(standings,'goals');
+    const cleanSheets=pulseLeaders(standings,'cleanSheets');
+    const movementEntries=[...movements.entries()].filter(([,delta])=>Number.isFinite(delta)&&delta>0);
+    const biggestRise=movementEntries.length?Math.max(...movementEntries.map(([,delta])=>delta)):0;
+    const risers=biggestRise?movementEntries.filter(([,delta])=>delta===biggestRise).map(([name])=>name):[];
+    const weeklyMvp=weekly[0];
+    badge.textContent=`JORNADA ${latest}`;
+    host.className='season-pulse is-live';
+    host.innerHTML=`
+      <article class="pulse-standings-card">
+        <div class="pulse-card-head">
+          <div><span class="eyebrow">CLASIFICACIÓN RÁPIDA</span><h3>Top 5 actual</h3></div>
+          <small>Actualizado: ${DATA.lastUpdated}</small>
+        </div>
+        <div class="pulse-standings-list">
+          ${standings.slice(0,5).map(player=>`<div class="pulse-standing-row">
+            <span class="pulse-rank">${player.position}</span>
+            ${teamCell(player.name)}
+            <span class="pulse-row-points"><b>${player.points.toLocaleString('es')}</b><small>PTS</small></span>
+            <span class="pulse-row-movement">${movementBadge(movements.get(player.name))}</span>
+          </div>`).join('')}
+        </div>
+        <button type="button" class="pulse-primary-action" data-go="current"><span>Ver clasificación completa</span><span aria-hidden="true">→</span></button>
+      </article>
+      <div class="pulse-highlight-grid">
+        ${pulseHighlightCard({
+          tone:'pulse-mvp',
+          icon:'star',
+          label:`MVP · Jornada ${latest}`,
+          names:weeklyMvp?[weeklyMvp.name]:[],
+          value:weeklyMvp?`${weeklyMvp.points.toLocaleString('es')} pts`:'—',
+          emptyCopy:'Sin resultados'
+        })}
+        ${pulseHighlightCard({
+          tone:'pulse-goals',
+          icon:'ball',
+          label:'Líder de goles',
+          names:goals.names,
+          value:`${goals.value} ${goals.value===1?'gol':'goles'}`,
+          emptyCopy:'Sin goles registrados'
+        })}
+        ${pulseHighlightCard({
+          tone:'pulse-clean-sheets',
+          icon:'shield',
+          label:'Líder de clean sheets',
+          names:cleanSheets.names,
+          value:`${cleanSheets.value} CS`,
+          emptyCopy:'Sin clean sheets'
+        })}
+        ${pulseHighlightCard({
+          tone:'pulse-rise',
+          icon:'chart',
+          label:'Mayor subida',
+          names:risers,
+          value:biggestRise?`+${biggestRise} ${biggestRise===1?'posición':'posiciones'}`:'Sin cambios',
+          emptyCopy:previousPublishedMatchday(latest)==null?'Primera jornada':'Nadie subió'
+        })}
+      </div>`;
+  }
+
+  host.querySelectorAll('[data-go]').forEach(button=>button.onclick=()=>go(button.dataset.go));
 }
 
 function matchdayPlayerLinks(names,limit=3){

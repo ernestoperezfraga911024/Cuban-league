@@ -6757,3 +6757,725 @@ footer{
     border-radius:13px;
   }
 }
+
+/* =========================================================
+   V38 — PULSO DINÁMICO DE LA TEMPORADA
+   ========================================================= */
+.season-pulse-section{
+  margin-top:6px;
+}
+
+.season-pulse-heading{
+  align-items:center;
+}
+
+.season-pulse-badge{
+  display:inline-flex;
+  min-height:34px;
+  align-items:center;
+  padding:7px 11px;
+  border:1px solid rgba(108,255,115,.24);
+  border-radius:999px;
+  background:rgba(108,255,115,.065);
+  color:#8ff686;
+  font-size:.67rem;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.season-pulse{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);
+  gap:14px;
+}
+
+.pulse-preseason-main,
+.pulse-fact-card,
+.pulse-standings-card,
+.pulse-highlight-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(80,230,208,.17);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.045),transparent 12rem),
+    linear-gradient(145deg,rgba(8,27,35,.99),rgba(4,17,25,.99));
+  box-shadow:0 18px 45px rgba(0,0,0,.16);
+}
+
+.pulse-preseason-main::before,
+.pulse-standings-card::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:2px;
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent 80%);
+}
+
+.pulse-preseason-main{
+  display:flex;
+  min-height:352px;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  padding:32px;
+}
+
+.pulse-preseason-main::after{
+  content:"";
+  position:absolute;
+  right:-92px;
+  bottom:-112px;
+  width:300px;
+  height:300px;
+  border:1px solid rgba(108,255,115,.1);
+  border-radius:50%;
+  box-shadow:
+    0 0 0 38px rgba(108,255,115,.018),
+    0 0 0 76px rgba(80,230,208,.012);
+}
+
+.pulse-main-icon,
+.pulse-fact-icon,
+.pulse-highlight-icon{
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(108,255,115,.28);
+  background:rgba(108,255,115,.055);
+  color:var(--green);
+}
+
+.pulse-main-icon{
+  position:relative;
+  z-index:1;
+  width:54px;
+  height:54px;
+  margin-bottom:22px;
+  border-radius:50%;
+}
+
+.pulse-main-icon .ui-icon{
+  width:25px;
+  height:25px;
+}
+
+.pulse-preseason-main>.eyebrow,
+.pulse-preseason-main h3,
+.pulse-preseason-main p,
+.pulse-ready-status,
+.pulse-primary-action{
+  position:relative;
+  z-index:1;
+}
+
+.pulse-preseason-main h3{
+  max-width:580px;
+  margin:8px 0 10px;
+  color:var(--text);
+  font-size:clamp(2rem,4vw,3.2rem);
+  line-height:1;
+  letter-spacing:-.055em;
+}
+
+.pulse-preseason-main p{
+  max-width:650px;
+  margin:0;
+  color:var(--muted);
+  font-size:.88rem;
+}
+
+.pulse-ready-status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:21px;
+  color:#a8b7c1;
+  font-size:.72rem;
+  font-weight:800;
+}
+
+.pulse-ready-status i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 5px rgba(108,255,115,.08),0 0 14px rgba(108,255,115,.4);
+}
+
+.pulse-primary-action{
+  display:flex;
+  width:100%;
+  min-height:47px;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:20px;
+  padding:11px 14px;
+  border-color:rgba(108,255,115,.28);
+  background:rgba(108,255,115,.07);
+  color:#9af891;
+  font-size:.77rem;
+}
+
+.pulse-primary-action:hover{
+  border-color:rgba(108,255,115,.5);
+  background:rgba(108,255,115,.11);
+}
+
+.pulse-preseason-facts{
+  display:grid;
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.pulse-fact-card{
+  display:flex;
+  min-height:169px;
+  flex-direction:column;
+  justify-content:center;
+  padding:22px 22px 22px 86px;
+}
+
+.pulse-fact-icon{
+  position:absolute;
+  top:22px;
+  left:21px;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+}
+
+.pulse-fact-icon .ui-icon{
+  width:21px;
+  height:21px;
+}
+
+.pulse-fact-icon.trophy{
+  border-color:rgba(231,202,105,.28);
+  background:rgba(231,202,105,.065);
+  color:var(--gold);
+}
+
+.pulse-fact-card>span:not(.pulse-fact-icon){
+  color:#8fa5b3;
+  font-size:.7rem;
+  font-weight:800;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+}
+
+.pulse-fact-card>b{
+  display:block;
+  margin:8px 0 5px;
+  color:var(--text);
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:2.2rem;
+  line-height:1;
+  letter-spacing:-.05em;
+}
+
+.pulse-fact-card>small{
+  color:#7f96a4;
+  font-size:.7rem;
+  line-height:1.4;
+}
+
+.pulse-person{
+  display:flex;
+  min-width:0;
+  align-items:center;
+  gap:10px;
+  margin:9px 0 6px;
+  cursor:pointer;
+}
+
+.pulse-person img{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border:1px solid rgba(80,230,208,.2);
+  border-radius:50%;
+  object-fit:cover;
+  box-shadow:0 8px 18px rgba(0,0,0,.24);
+}
+
+.pulse-person>span{
+  min-width:0;
+}
+
+.pulse-person b,
+.pulse-person small{
+  display:block;
+}
+
+.pulse-person b{
+  overflow:hidden;
+  color:#f3f7f5;
+  font-size:.83rem;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.pulse-person small{
+  margin-top:2px;
+  color:#75e6d8;
+  font-size:.62rem;
+  font-weight:750;
+}
+
+.pulse-person:hover b{
+  color:var(--green);
+}
+
+/* Live pulse */
+.pulse-standings-card{
+  padding:23px;
+}
+
+.pulse-card-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  padding-bottom:16px;
+}
+
+.pulse-card-head h3{
+  margin:5px 0 0;
+  color:var(--text);
+  font-size:1.45rem;
+  letter-spacing:-.045em;
+}
+
+.pulse-card-head>small{
+  max-width:190px;
+  color:#7f95a3;
+  font-size:.64rem;
+  line-height:1.35;
+  text-align:right;
+}
+
+.pulse-standings-list{
+  overflow:hidden;
+  border:1px solid rgba(80,230,208,.12);
+  border-radius:13px;
+  background:rgba(2,13,20,.3);
+}
+
+.pulse-standing-row{
+  display:grid;
+  min-height:62px;
+  grid-template-columns:32px minmax(0,1fr) 82px 58px;
+  align-items:center;
+  gap:10px;
+  padding:9px 11px;
+  border-top:1px solid rgba(80,230,208,.09);
+}
+
+.pulse-standing-row:first-child{
+  border-top:0;
+  background:linear-gradient(90deg,rgba(231,202,105,.075),transparent 80%);
+}
+
+.pulse-standing-row:hover{
+  background-color:rgba(108,255,115,.032);
+}
+
+.pulse-rank{
+  color:#91a6b4;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:.88rem;
+  font-weight:800;
+  text-align:center;
+}
+
+.pulse-standing-row:first-child .pulse-rank{
+  color:var(--gold);
+}
+
+.pulse-standing-row .team{
+  gap:9px;
+}
+
+.pulse-standing-row .team img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+}
+
+.pulse-standing-row .name{
+  font-size:.8rem;
+}
+
+.pulse-row-points{
+  text-align:right;
+}
+
+.pulse-row-points b,
+.pulse-row-points small{
+  display:block;
+}
+
+.pulse-row-points b{
+  color:#f5f8f6;
+  font-size:.86rem;
+  font-variant-numeric:tabular-nums;
+}
+
+.pulse-row-points small{
+  margin-top:2px;
+  color:#6f8795;
+  font-size:.55rem;
+  font-weight:850;
+  letter-spacing:.08em;
+}
+
+.pulse-row-movement{
+  display:flex;
+  justify-content:flex-end;
+}
+
+.pulse-row-movement .movement{
+  min-width:48px;
+  min-height:27px;
+  padding:3px 7px;
+  font-size:.68rem;
+}
+
+.pulse-highlight-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.pulse-highlight-card{
+  display:flex;
+  min-width:0;
+  min-height:188px;
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:18px;
+}
+
+.pulse-highlight-card::after{
+  content:"";
+  position:absolute;
+  right:-48px;
+  bottom:-58px;
+  width:145px;
+  height:145px;
+  border-radius:50%;
+  background:currentColor;
+  opacity:.035;
+}
+
+.pulse-highlight-icon{
+  position:relative;
+  z-index:1;
+  width:39px;
+  height:39px;
+  margin-bottom:13px;
+  border-radius:50%;
+}
+
+.pulse-highlight-icon .ui-icon{
+  width:18px;
+  height:18px;
+}
+
+.pulse-highlight-label,
+.pulse-highlight-value,
+.pulse-highlight-empty,
+.pulse-highlight-card .pulse-person{
+  position:relative;
+  z-index:1;
+}
+
+.pulse-highlight-label{
+  color:#8fa4b2;
+  font-size:.66rem;
+  font-weight:850;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+
+.pulse-highlight-card .pulse-person{
+  margin:10px 0 7px;
+}
+
+.pulse-highlight-value{
+  display:block;
+  margin-top:auto;
+  color:currentColor;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:.92rem;
+  letter-spacing:-.025em;
+}
+
+.pulse-highlight-empty{
+  display:block;
+  margin:12px 0 8px;
+  color:#d8e1e2;
+  font-size:.8rem;
+  line-height:1.25;
+}
+
+.pulse-mvp{
+  color:var(--gold);
+}
+
+.pulse-mvp .pulse-highlight-icon{
+  border-color:rgba(231,202,105,.3);
+  background:rgba(231,202,105,.065);
+  color:var(--gold);
+}
+
+.pulse-goals,
+.pulse-rise{
+  color:#83f47d;
+}
+
+.pulse-clean-sheets{
+  color:#63e5d7;
+}
+
+@media(max-width:900px){
+  .season-pulse{
+    grid-template-columns:1fr;
+  }
+
+  .pulse-preseason-facts{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:auto;
+  }
+
+  .pulse-fact-card{
+    min-height:172px;
+  }
+}
+
+@media(max-width:700px){
+  .season-pulse-section{
+    margin-top:2px;
+  }
+
+  .season-pulse-heading{
+    flex-direction:row;
+    align-items:center;
+    gap:12px;
+  }
+
+  .season-pulse-heading>div{
+    min-width:0;
+  }
+
+  .season-pulse-heading h2{
+    font-size:1.62rem;
+  }
+
+  .season-pulse-badge{
+    flex:0 0 auto;
+    min-height:30px;
+    padding:6px 8px;
+    font-size:.58rem;
+  }
+
+  .season-pulse{
+    gap:9px;
+  }
+
+  .pulse-preseason-main{
+    min-height:326px;
+    padding:22px 19px;
+    border-radius:15px;
+  }
+
+  .pulse-main-icon{
+    width:48px;
+    height:48px;
+    margin-bottom:18px;
+  }
+
+  .pulse-preseason-main h3{
+    font-size:2rem;
+  }
+
+  .pulse-preseason-main p{
+    font-size:.79rem;
+  }
+
+  .pulse-ready-status{
+    margin-top:17px;
+  }
+
+  .pulse-preseason-facts{
+    gap:9px;
+  }
+
+  .pulse-fact-card{
+    min-height:166px;
+    justify-content:flex-start;
+    padding:16px 12px;
+    border-radius:15px;
+  }
+
+  .pulse-fact-icon{
+    position:static;
+    width:38px;
+    height:38px;
+    margin-bottom:13px;
+  }
+
+  .pulse-fact-icon .ui-icon{
+    width:18px;
+    height:18px;
+  }
+
+  .pulse-fact-card>span:not(.pulse-fact-icon){
+    font-size:.58rem;
+    line-height:1.25;
+  }
+
+  .pulse-fact-card>b{
+    margin:7px 0 4px;
+    font-size:1.8rem;
+  }
+
+  .pulse-fact-card>small{
+    margin-top:auto;
+    font-size:.59rem;
+  }
+
+  .pulse-defender-card .pulse-person{
+    gap:7px;
+    margin:7px 0 4px;
+  }
+
+  .pulse-defender-card .pulse-person img{
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+  }
+
+  .pulse-defender-card .pulse-person b{
+    font-size:.69rem;
+  }
+
+  .pulse-standings-card{
+    padding:16px 12px 12px;
+    border-radius:15px;
+  }
+
+  .pulse-card-head{
+    align-items:flex-start;
+    padding:0 3px 13px;
+  }
+
+  .pulse-card-head h3{
+    font-size:1.25rem;
+  }
+
+  .pulse-card-head>small{
+    max-width:120px;
+    font-size:.56rem;
+  }
+
+  .pulse-standing-row{
+    min-height:57px;
+    grid-template-columns:24px minmax(0,1fr) 56px 47px;
+    gap:6px;
+    padding:8px 7px;
+  }
+
+  .pulse-standing-row .team{
+    gap:7px;
+  }
+
+  .pulse-standing-row .team img{
+    width:36px;
+    height:36px;
+  }
+
+  .pulse-standing-row .name{
+    font-size:.7rem;
+  }
+
+  .pulse-row-points b{
+    font-size:.72rem;
+  }
+
+  .pulse-row-movement .movement{
+    min-width:42px;
+    min-height:25px;
+    padding:3px 5px;
+    font-size:.61rem;
+  }
+
+  .pulse-highlight-grid{
+    gap:9px;
+  }
+
+  .pulse-highlight-card{
+    min-height:173px;
+    padding:14px 12px;
+    border-radius:15px;
+  }
+
+  .pulse-highlight-icon{
+    width:35px;
+    height:35px;
+    margin-bottom:11px;
+  }
+
+  .pulse-highlight-label{
+    min-height:2.5em;
+    font-size:.57rem;
+    line-height:1.25;
+  }
+
+  .pulse-highlight-card .pulse-person{
+    gap:7px;
+    margin:8px 0 6px;
+  }
+
+  .pulse-highlight-card .pulse-person img{
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+  }
+
+  .pulse-highlight-card .pulse-person b{
+    font-size:.67rem;
+  }
+
+  .pulse-highlight-card .pulse-person small{
+    font-size:.55rem;
+  }
+
+  .pulse-highlight-value{
+    font-size:.75rem;
+  }
+
+  .pulse-highlight-empty{
+    font-size:.67rem;
+  }
+}
+
+@media(max-width:370px){
+  .season-pulse-heading h2{
+    font-size:1.48rem;
+  }
+
+  .season-pulse-badge{
+    font-size:.53rem;
+  }
+
+  .pulse-standing-row{
+    grid-template-columns:22px minmax(0,1fr) 52px 43px;
+  }
+
+  .pulse-standing-row .team img{
+    width:33px;
+    height:33px;
+  }
+}
