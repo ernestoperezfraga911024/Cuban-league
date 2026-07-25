@@ -1,4 +1,4 @@
-const APP_VERSION='43-20260725';
+const APP_VERSION='44-20260725';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -323,28 +323,62 @@ function heroKpiPreseasonCards(){
       <div><span>${['Primer','Segundo','Tercer'][index]} lugar</span><b>Por definir</b><small>Temporada anterior</small></div>
     </article>`);
   }
-  return [
-    ...podiumCards,
-    `<article class="hero-kpi-placeholder">
-      <span class="kpi-icon">${uiIcon('ball')}</span>
-      <div><span>Líder goleador · ${DATA.currentSeason}</span><b>Por definir</b><small>Comienza en la Jornada 1</small></div>
-    </article>`,
-    `<article class="hero-kpi-placeholder">
-      <span class="kpi-icon">${uiIcon('shield')}</span>
-      <div><span>Líder clean sheets · ${DATA.currentSeason}</span><b>Por definir</b><small>Comienza en la Jornada 1</small></div>
-    </article>`
-  ].join('');
+  return heroKpiLayout({
+    eyebrow:'CLASIFICACIÓN FINAL',
+    title:`Podio ${podium.season}`,
+    subtitle:'Los tres mejores de la última temporada.',
+    badge:'PRETEMPORADA',
+    podiumCards,
+    leaderCards:[
+      heroLeaderMetricCard({
+        label:'Líder goleador',
+        icon:'ball',
+        tone:'goals',
+        value:'—',
+        detail:'Comienza en la Jornada 1'
+      }),
+      heroLeaderMetricCard({
+        label:'Líder clean sheets',
+        icon:'shield',
+        tone:'clean-sheets',
+        value:'—',
+        detail:'Comienza en la Jornada 1'
+      })
+    ]
+  });
 }
 
 function heroKpiPlayerCard({label,player,name=player.name,detail,marker,tone}){
   const markerContent=marker.icon?uiIcon(marker.icon):marker.text;
   return `<article class="hero-kpi-live hero-kpi-${tone} team-profile-link" ${profileTriggerAttrs(player.name)}>
-    <span class="kpi-icon kpi-player-photo">
-      <img src="${player.shield}" alt="Foto de ${profileAttr(player.name)}">
-      <span class="kpi-marker" aria-hidden="true">${markerContent}</span>
-    </span>
+    <span class="kpi-marker" aria-hidden="true">${markerContent}</span>
+    <span class="kpi-icon kpi-player-photo"><img src="${player.shield}" alt="Foto de ${profileAttr(player.name)}"></span>
     <div><span>${label}</span><b>${name}</b><small>${detail}</small></div>
   </article>`;
+}
+
+function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){
+  const player=names.length?DATA.participants.find(entry=>entry.name===names[0]):null;
+  const extra=Math.max(0,names.length-1);
+  const displayName=player?(extra?`${player.name} +${extra}`:player.name):'Por definir';
+  const attrs=player?profileTriggerAttrs(player.name):'';
+  return `<article class="hero-leader-metric hero-leader-${tone}${player?' team-profile-link':' hero-kpi-placeholder'}" ${attrs}>
+    <span class="hero-leader-icon">${uiIcon(icon)}</span>
+    <span class="hero-leader-label">${label}</span>
+    <b>${displayName}</b>
+    <strong>${value}</strong>
+    <small>${detail}</small>
+  </article>`;
+}
+
+function heroKpiLayout({eyebrow,title,subtitle,badge,podiumCards,leaderCards}){
+  const visualPodium=[podiumCards[1],podiumCards[0],podiumCards[2]].filter(Boolean);
+  return `<div class="hero-kpis-heading">
+    <div><span>${eyebrow}</span><strong>${title}</strong><small>${subtitle}</small></div>
+    <span class="hero-kpis-badge">${badge}</span>
+  </div>
+  <div class="hero-podium-grid">${visualPodium.join('')}</div>
+  <div class="hero-leaders-row">${leaderCards.join('')}</div>`;
 }
 
 function renderHeroKpis(latest){
@@ -358,34 +392,38 @@ function renderHeroKpis(latest){
   const standings=cumulativeStandings(latest);
   const goals=pulseLeaders(standings,'goals');
   const cleanSheets=pulseLeaders(standings,'cleanSheets');
-  const leaderCard=(leader,label,icon,tone,singular,plural)=>{
-    const player=standings.find(entry=>entry.name===leader.names[0]);
-    if(!player)return `<article class="hero-kpi-placeholder">
-      <span class="kpi-icon">${uiIcon(icon)}</span>
-      <div><span>${label}</span><b>Por definir</b><small>Sin registros</small></div>
-    </article>`;
-    const extra=Math.max(0,leader.names.length-1);
-    return heroKpiPlayerCard({
-      label,
-      player,
-      name:extra?`${player.name} +${extra}`:player.name,
-      detail:`${leader.value.toLocaleString('es')} ${leader.value===1?singular:plural} acumulados`,
-      marker:{icon},
-      tone
-    });
-  };
-
-  host.innerHTML=[
-    ...standings.slice(0,3).map((player,index)=>heroKpiPlayerCard({
+  const podiumCards=standings.slice(0,3).map((player,index)=>heroKpiPlayerCard({
       label:['Primer lugar','Segundo lugar','Tercer lugar'][index],
       player,
       detail:`${player.points.toLocaleString('es')} puntos acumulados`,
       marker:{text:String(index+1)},
       tone:['first','second','third'][index]
-    })),
-    leaderCard(goals,'Líder goleador','ball','goals','gol','goles'),
-    leaderCard(cleanSheets,'Líder clean sheets','shield','clean-sheets','clean sheet','clean sheets')
-  ].join('');
+    }));
+  host.innerHTML=heroKpiLayout({
+    eyebrow:`TEMPORADA ${DATA.currentSeason}`,
+    title:'Podio actual',
+    subtitle:'Los tres primeros de la clasificación acumulada.',
+    badge:`JORNADA ${latest}`,
+    podiumCards,
+    leaderCards:[
+      heroLeaderMetricCard({
+        label:'Líder goleador',
+        icon:'ball',
+        tone:'goals',
+        names:goals.names,
+        value:goals.value?`${goals.value} ${goals.value===1?'GOL':'GOLES'}`:'SIN GOLES',
+        detail:`Acumulado hasta la Jornada ${latest}`
+      }),
+      heroLeaderMetricCard({
+        label:'Líder clean sheets',
+        icon:'shield',
+        tone:'clean-sheets',
+        names:cleanSheets.names,
+        value:cleanSheets.value?`${cleanSheets.value} ${cleanSheets.value===1?'CLEAN SHEET':'CLEAN SHEETS'}`:'SIN CLEAN SHEETS',
+        detail:`Acumulado hasta la Jornada ${latest}`
+      })
+    ]
+  });
 }
 
 function renderHomeLive(){

@@ -1,4 +1,4 @@
-# Cuban League V43
+# Cuban League V44
 
 Sitio oficial de la Cuban League con:
 
@@ -32,6 +32,8 @@ Sitio oficial de la Cuban League con:
 - La portada muestra cinco tarjetas dinámicas: primero, segundo, tercero, líder
   goleador y líder de clean sheets. Durante la pretemporada conserva el podio
   final de 2025/26 y cambia automáticamente a 2026/27 tras la Jornada 1.
+- El bloque de líderes adopta un podio vertical premium: campeón elevado en el
+  centro, segundo y tercero a los lados, con goleador y clean sheets debajo.
 
 ## Panel privado
 
