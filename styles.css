@@ -8516,3 +8516,532 @@ footer{
   height:2px;
   background:linear-gradient(90deg,var(--green),var(--turquoise),transparent 75%);
 }
+
+/* =========================================================
+   V41 — CENTRO DE TARJETAS PARA WHATSAPP
+   ========================================================= */
+.home-shortcuts>.home-shortcut-share{
+  min-height:112px;
+  grid-column:1/-1;
+  background:
+    radial-gradient(circle at 88% 20%,rgba(108,255,115,.11),transparent 12rem),
+    linear-gradient(145deg,rgba(9,32,36,.98),rgba(4,18,27,.99));
+}
+
+.home-shortcut-share .home-shortcut-icon{
+  border-color:rgba(80,230,208,.35);
+  color:var(--turquoise);
+}
+
+.share-card-banner{
+  position:relative;
+  display:flex;
+  min-height:330px;
+  align-items:flex-end;
+  justify-content:space-between;
+  overflow:hidden;
+  padding:35px;
+  border:1px solid rgba(80,230,208,.2);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 86% 20%,rgba(108,255,115,.13),transparent 17rem),
+    linear-gradient(135deg,rgba(5,29,30,.99),rgba(2,10,18,.99));
+  box-shadow:0 24px 65px rgba(0,0,0,.2);
+}
+
+.share-card-banner::before{
+  content:"";
+  position:absolute;
+  top:-42%;
+  right:8%;
+  width:330px;
+  height:420px;
+  border:1px solid rgba(80,230,208,.12);
+  border-radius:52px;
+  box-shadow:
+    42px 42px 0 rgba(80,230,208,.025),
+    84px 84px 0 rgba(108,255,115,.018);
+  transform:rotate(15deg);
+}
+
+.share-card-banner::after{
+  content:"";
+  position:absolute;
+  right:25%;
+  bottom:0;
+  width:140px;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),var(--turquoise));
+  box-shadow:0 0 25px rgba(80,230,208,.5);
+}
+
+.share-card-banner>div{
+  position:relative;
+  z-index:2;
+  max-width:760px;
+}
+
+.share-card-banner h2{
+  max-width:760px;
+  margin:10px 0 12px;
+  color:#f5faf7;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:clamp(2.5rem,6.2vw,4.8rem);
+  line-height:.95;
+  letter-spacing:-.065em;
+}
+
+.share-card-banner p{
+  max-width:610px;
+  margin:0;
+  color:#8da6a5;
+  font-size:.88rem;
+  line-height:1.6;
+}
+
+.share-card-banner-mark{
+  position:relative;
+  z-index:2;
+  display:grid;
+  width:86px;
+  height:86px;
+  flex:0 0 auto;
+  place-items:center;
+  border:1px solid rgba(108,255,115,.3);
+  border-radius:25px;
+  color:var(--green);
+  background:rgba(108,255,115,.06);
+  box-shadow:0 18px 45px rgba(0,0,0,.25);
+}
+
+.share-card-banner-mark .ui-icon{
+  width:38px;
+  height:38px;
+}
+
+.share-card-section-head{
+  align-items:flex-end;
+  margin-top:38px;
+}
+
+.share-card-format{
+  padding:8px 11px;
+  border:1px solid rgba(80,230,208,.17);
+  border-radius:999px;
+  color:#75e5d7;
+  background:rgba(80,230,208,.05);
+  font-size:.6rem;
+  font-weight:850;
+  letter-spacing:.055em;
+}
+
+.share-card-studio{
+  display:grid;
+  grid-template-columns:minmax(310px,360px) minmax(0,1fr);
+  align-items:start;
+  gap:16px;
+}
+
+.share-card-controls,
+.share-card-preview-panel{
+  border:1px solid rgba(80,230,208,.14);
+  border-radius:19px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.035),transparent 12rem),
+    linear-gradient(145deg,rgba(8,27,35,.98),rgba(4,17,25,.99));
+  box-shadow:0 18px 50px rgba(0,0,0,.17);
+}
+
+.share-card-controls{
+  position:sticky;
+  top:132px;
+  padding:18px;
+}
+
+.share-card-control-head{
+  display:grid;
+  grid-template-columns:35px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  margin-bottom:13px;
+}
+
+.share-card-control-head.compact{
+  margin-top:22px;
+}
+
+.share-card-control-head>div,
+.share-card-control-head b,
+.share-card-control-head small{
+  display:block;
+  min-width:0;
+}
+
+.share-card-control-head b{
+  color:#eef7f3;
+  font-size:.76rem;
+}
+
+.share-card-control-head small{
+  margin-top:3px;
+  color:#738b8d;
+  font-size:.59rem;
+  line-height:1.35;
+}
+
+.share-card-step{
+  display:grid;
+  width:35px;
+  height:35px;
+  place-items:center;
+  border:1px solid rgba(108,255,115,.22);
+  border-radius:11px;
+  color:var(--green);
+  background:rgba(108,255,115,.055);
+  font-size:.59rem;
+  font-weight:900;
+}
+
+.share-card-types{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.share-card-types button{
+  display:grid;
+  min-width:0;
+  min-height:98px;
+  grid-template-columns:30px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  align-items:center;
+  gap:2px 8px;
+  padding:11px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:14px;
+  color:#7c929a;
+  background:rgba(255,255,255,.022);
+  text-align:left;
+}
+
+.share-card-types button:hover,
+.share-card-types button.active{
+  border-color:rgba(108,255,115,.25);
+  color:var(--green);
+  background:rgba(108,255,115,.055);
+}
+
+.share-card-types .ui-icon{
+  width:20px;
+  height:20px;
+  grid-row:1/3;
+}
+
+.share-card-types b,
+.share-card-types small{
+  display:block;
+  min-width:0;
+  grid-column:2;
+}
+
+.share-card-types b{
+  color:#e8f2ef;
+  font-size:.7rem;
+}
+
+.share-card-types small{
+  color:#70858c;
+  font-size:.55rem;
+  line-height:1.25;
+}
+
+.share-card-selectors{
+  display:grid;
+  gap:9px;
+}
+
+.share-card-selectors label,
+.share-card-selectors span{
+  display:block;
+}
+
+.share-card-selectors label>span{
+  margin:0 0 6px 3px;
+  color:#789095;
+  font-size:.58rem;
+  font-weight:850;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+
+.share-card-selectors select{
+  width:100%;
+  min-height:48px;
+  border-color:rgba(80,230,208,.17);
+  border-radius:12px;
+  outline:0;
+  background:#071b23;
+  color:#eff7f3;
+  font-size:.78rem;
+}
+
+.share-card-selectors select:focus{
+  border-color:rgba(108,255,115,.42);
+  box-shadow:0 0 0 3px rgba(108,255,115,.06);
+}
+
+.share-card-generate{
+  display:flex;
+  width:100%;
+  min-height:49px;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+  border-color:rgba(80,230,208,.22);
+  background:rgba(80,230,208,.065);
+  color:#80eadf;
+}
+
+.share-card-generate .ui-icon{
+  width:17px;
+  height:17px;
+}
+
+.share-card-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+
+.share-card-actions button{
+  display:flex;
+  min-height:48px;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:9px;
+  border-color:rgba(255,255,255,.1);
+  background:rgba(255,255,255,.035);
+  color:#d8e5e2;
+  font-size:.68rem;
+}
+
+.share-card-actions button.primary{
+  border-color:rgba(108,255,115,.38);
+  background:linear-gradient(135deg,#9fff7c,#4fe19a);
+  color:#051208;
+}
+
+.share-card-actions button:disabled{
+  cursor:not-allowed;
+  filter:grayscale(.55);
+  opacity:.4;
+}
+
+.share-card-status{
+  min-height:18px;
+  margin:12px 2px 0;
+  color:#75dfd3;
+  font-size:.62rem;
+  line-height:1.4;
+}
+
+.share-card-status.error{
+  color:#ff9ba9;
+}
+
+.share-card-tip{
+  margin:12px 0 0;
+  padding:11px;
+  border:1px solid rgba(231,202,105,.14);
+  border-radius:11px;
+  color:#8d8b7d;
+  background:rgba(231,202,105,.035);
+  font-size:.58rem;
+  line-height:1.45;
+}
+
+.share-card-tip b{
+  color:#dfc66e;
+}
+
+.share-card-preview-panel{
+  overflow:hidden;
+  padding:15px;
+}
+
+.share-card-preview-panel>header,
+.share-card-preview-panel>footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.share-card-preview-panel>header{
+  padding:3px 4px 13px;
+}
+
+.share-card-preview-panel h3{
+  margin:4px 0 0;
+  color:#f1f7f4;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1rem;
+  letter-spacing:-.03em;
+}
+
+.share-card-preview-panel>header>span{
+  padding:6px 8px;
+  border:1px solid rgba(108,255,115,.17);
+  border-radius:8px;
+  color:#82ed7f;
+  background:rgba(108,255,115,.045);
+  font-size:.58rem;
+  font-weight:900;
+}
+
+.share-card-canvas-frame{
+  display:grid;
+  min-height:620px;
+  place-items:center;
+  overflow:hidden;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:15px;
+  background:
+    linear-gradient(45deg,rgba(255,255,255,.022) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.022) 75%),
+    linear-gradient(45deg,rgba(255,255,255,.022) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.022) 75%),
+    #020a0e;
+  background-position:0 0,12px 12px;
+  background-size:24px 24px;
+}
+
+#shareCardCanvas{
+  display:block;
+  width:min(100%,580px);
+  height:auto;
+  border:1px solid rgba(80,230,208,.14);
+  border-radius:12px;
+  background:#020a0e;
+  box-shadow:0 28px 70px rgba(0,0,0,.42);
+}
+
+.share-card-preview-panel>footer{
+  padding:12px 4px 2px;
+  color:#71888d;
+  font-size:.58rem;
+}
+
+.share-card-preview-panel>footer>span{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:#85a19c;
+  font-weight:750;
+}
+
+.share-card-preview-panel>footer i{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 10px rgba(108,255,115,.7);
+}
+
+@media(max-width:900px){
+  .share-card-studio{
+    grid-template-columns:1fr;
+  }
+
+  .share-card-controls{
+    position:static;
+  }
+
+  .share-card-canvas-frame{
+    min-height:0;
+  }
+}
+
+@media(max-width:620px){
+  .home-shortcuts>.home-shortcut-share{
+    min-height:112px;
+  }
+
+  .share-card-banner{
+    min-height:295px;
+    padding:23px 18px;
+    border-radius:18px;
+  }
+
+  .share-card-banner h2{
+    font-size:2.35rem;
+  }
+
+  .share-card-banner p{
+    max-width:86%;
+    font-size:.73rem;
+  }
+
+  .share-card-banner-mark{
+    position:absolute;
+    top:18px;
+    right:18px;
+    width:57px;
+    height:57px;
+    border-radius:17px;
+  }
+
+  .share-card-banner-mark .ui-icon{
+    width:26px;
+    height:26px;
+  }
+
+  .share-card-section-head{
+    flex-direction:row;
+    align-items:flex-end;
+  }
+
+  .share-card-section-head>div{
+    min-width:0;
+  }
+
+  .share-card-section-head h2{
+    font-size:1.45rem;
+  }
+
+  .share-card-format{
+    flex:0 0 auto;
+    font-size:.51rem;
+  }
+
+  .share-card-controls,
+  .share-card-preview-panel{
+    border-radius:16px;
+  }
+
+  .share-card-controls{
+    padding:13px;
+  }
+
+  .share-card-types button{
+    min-height:86px;
+    padding:9px;
+  }
+
+  .share-card-preview-panel{
+    padding:10px;
+  }
+
+  .share-card-canvas-frame{
+    padding:9px;
+    border-radius:12px;
+  }
+
+  .share-card-preview-panel>footer{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:4px;
+  }
+}

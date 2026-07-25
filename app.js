@@ -1,4 +1,4 @@
-const APP_VERSION='40-20260725';
+const APP_VERSION='42-20260725';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -6,6 +6,10 @@ let SELECTED_MATCHDAY=null;
 const CHAMPIONS_MATCHDAY_COUNT=8;
 let CHAMPIONS_MATCHDAY_ROWS=[];
 let CHAMPIONS_PUBLISHED_MATCHDAYS=[];
+let SHARE_CARD_TYPE='podium';
+let SHARE_CARD_GROUP_INDEX=0;
+let SHARE_CARD_RENDER_TOKEN=0;
+let SHARE_CARD_READY=false;
 const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -84,7 +88,10 @@ async function syncChampionsStats({render=true}={}){
 
     CHAMPIONS_MATCHDAY_ROWS=normalizeChampionsMatchdayRows(rows);
     CHAMPIONS_PUBLISHED_MATCHDAYS=[...new Set(CHAMPIONS_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
-    if(render)renderChampions();
+    if(render){
+      renderChampions();
+      if(SHARE_CARD_BOUND)renderShareCardStudio();
+    }
     return true;
   }catch{
     return false;
@@ -224,6 +231,7 @@ async function syncLiveCurrentStats({render=true}={}){
       renderCurrent();
       renderMatchdayCenter();
       renderHomeLive();
+      if(SHARE_CARD_BOUND)renderShareCardStudio();
     }
     return true;
   }catch{
@@ -1015,6 +1023,595 @@ function renderChampions(){
 }
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card icon-card"><div class="card-label-row"><span>${n.date}</span><span class="record-icon news">${uiIcon('news')}</span></div><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
 
+const SHARE_CARD_WIDTH=1080;
+const SHARE_CARD_HEIGHT=1350;
+const SHARE_CARD_IMAGE_CACHE=new Map();
+let SHARE_CARD_BOUND=false;
+
+function cardFont(ctx,size,weight=700){
+  const fontWeight=weight>=700?'bold':'normal';
+  ctx.font=`${fontWeight} ${size}px Arial, sans-serif`;
+}
+
+function roundedPath(ctx,x,y,width,height,radius){
+  const r=Math.min(radius,width/2,height/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+width-r,y);
+  ctx.quadraticCurveTo(x+width,y,x+width,y+r);
+  ctx.lineTo(x+width,y+height-r);
+  ctx.quadraticCurveTo(x+width,y+height,x+width-r,y+height);
+  ctx.lineTo(x+r,y+height);
+  ctx.quadraticCurveTo(x,y+height,x,y+height-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function fillRounded(ctx,x,y,width,height,radius,fill){
+  roundedPath(ctx,x,y,width,height,radius);
+  ctx.fillStyle=fill;
+  ctx.fill();
+}
+
+function strokeRounded(ctx,x,y,width,height,radius,stroke,lineWidth=1){
+  roundedPath(ctx,x,y,width,height,radius);
+  ctx.strokeStyle=stroke;
+  ctx.lineWidth=lineWidth;
+  ctx.stroke();
+}
+
+function fitCardText(ctx,text,maxWidth,startSize,minSize=18,weight=800){
+  let size=startSize;
+  do{
+    cardFont(ctx,size,weight);
+    if(ctx.measureText(String(text)).width<=maxWidth)break;
+    size-=1;
+  }while(size>minSize);
+  return size;
+}
+
+function drawCardText(ctx,text,x,y,maxWidth,startSize,minSize=18,weight=800,align='left',color='#f4faf7'){
+  fitCardText(ctx,text,maxWidth,startSize,minSize,weight);
+  ctx.fillStyle=color;
+  ctx.textAlign=align;
+  ctx.textBaseline='alphabetic';
+  ctx.fillText(String(text),x,y);
+}
+
+function playerInitials(name){
+  return String(name||'?').replace(/^@/,'').split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase()||'?';
+}
+
+function loadShareCardImage(src){
+  if(!src)return Promise.resolve(null);
+  if(SHARE_CARD_IMAGE_CACHE.has(src))return SHARE_CARD_IMAGE_CACHE.get(src);
+  const promise=new Promise(resolve=>{
+    const image=new Image();
+    image.onload=()=>resolve(image);
+    image.onerror=()=>resolve(null);
+    image.src=src;
+  });
+  SHARE_CARD_IMAGE_CACHE.set(src,promise);
+  return promise;
+}
+
+async function preloadShareCardPlayers(names){
+  await Promise.all(names.map(name=>loadShareCardImage(imageMap()[name]||'')));
+}
+
+function drawCoveredImage(ctx,image,x,y,width,height,radius){
+  if(!image)return false;
+  const sourceWidth=image.naturalWidth||image.width||width;
+  const sourceHeight=image.naturalHeight||image.height||height;
+  const scale=Math.max(width/sourceWidth,height/sourceHeight);
+  const drawWidth=sourceWidth*scale;
+  const drawHeight=sourceHeight*scale;
+  ctx.save();
+  roundedPath(ctx,x,y,width,height,radius);
+  ctx.clip();
+  ctx.drawImage(image,x+(width-drawWidth)/2,y+(height-drawHeight)/2,drawWidth,drawHeight);
+  ctx.restore();
+  return true;
+}
+
+async function drawPlayerAvatar(ctx,name,x,y,size,radius=size/2){
+  const image=await loadShareCardImage(imageMap()[name]||'');
+  fillRounded(ctx,x,y,size,size,radius,'#0d2c29');
+  const drawn=drawCoveredImage(ctx,image,x,y,size,size,radius);
+  if(!drawn){
+    drawCardText(ctx,playerInitials(name),x+size/2,y+size*.63,size-16,size*.34,18,850,'center','#72e4d7');
+  }
+  strokeRounded(ctx,x,y,size,size,radius,'rgba(112,238,213,.28)',2);
+}
+
+async function drawShareCardBase(ctx,{eyebrow,title,subtitle,badge}){
+  ctx.clearRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
+  const background=ctx.createLinearGradient(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
+  background.addColorStop(0,'#061b1d');
+  background.addColorStop(.48,'#031117');
+  background.addColorStop(1,'#02090f');
+  ctx.fillStyle=background;
+  ctx.fillRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
+
+  const glow=ctx.createRadialGradient(925,115,10,925,115,470);
+  glow.addColorStop(0,'rgba(108,255,115,.22)');
+  glow.addColorStop(.45,'rgba(80,230,208,.07)');
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow;
+  ctx.fillRect(450,0,630,610);
+
+  ctx.save();
+  ctx.globalAlpha=.08;
+  ctx.strokeStyle='#50e6d0';
+  ctx.lineWidth=2;
+  for(let i=0;i<4;i++){
+    strokeRounded(ctx,735+i*42,-135+i*42,300,420,42,'#50e6d0',2);
+  }
+  ctx.beginPath();
+  ctx.arc(540,710,360,0,Math.PI*2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(80,710);
+  ctx.lineTo(1000,710);
+  ctx.stroke();
+  ctx.restore();
+
+  const logo=await loadShareCardImage('cuban-league-green-logo.svg');
+  fillRounded(ctx,58,52,76,76,21,'rgba(108,255,115,.08)');
+  drawCoveredImage(ctx,logo,58,52,76,76,21);
+  strokeRounded(ctx,58,52,76,76,21,'rgba(108,255,115,.28)',2);
+  drawCardText(ctx,'CUBAN LEAGUE',154,88,460,27,22,850,'left','#f4faf7');
+  drawCardText(ctx,'REGISTRO OFICIAL',154,115,460,14,12,800,'left','#6e9593');
+
+  fillRounded(ctx,810,62,212,51,25,'rgba(108,255,115,.075)');
+  strokeRounded(ctx,810,62,212,51,25,'rgba(108,255,115,.2)',2);
+  drawCardText(ctx,badge,916,95,182,16,12,850,'center','#91f388');
+
+  drawCardText(ctx,eyebrow,60,190,620,19,16,850,'left','#50e6d0');
+  drawCardText(ctx,title,60,259,960,56,34,850,'left','#f7faf8');
+  drawCardText(ctx,subtitle,60,305,930,23,17,600,'left','#849ca5');
+  ctx.fillStyle='#6cff73';
+  ctx.fillRect(60,329,88,4);
+  const line=ctx.createLinearGradient(148,0,1000,0);
+  line.addColorStop(0,'rgba(80,230,208,.55)');
+  line.addColorStop(1,'rgba(80,230,208,0)');
+  ctx.fillStyle=line;
+  ctx.fillRect(148,330,852,2);
+}
+
+function drawShareCardFooter(ctx){
+  ctx.fillStyle='rgba(80,230,208,.12)';
+  ctx.fillRect(60,1273,960,2);
+  drawCardText(ctx,'CUBAN LEAGUE · TEMPORADA 2026/27',60,1314,650,16,13,750,'left','#6f898f');
+  drawCardText(ctx,'DATOS OFICIALES',1020,1314,260,16,13,850,'right','#6fe0d3');
+}
+
+function drawShareCardEmpty(ctx,title,copy){
+  fillRounded(ctx,120,465,840,460,34,'rgba(7,30,34,.88)');
+  strokeRounded(ctx,120,465,840,460,34,'rgba(80,230,208,.16)',2);
+  fillRounded(ctx,452,548,176,176,88,'rgba(108,255,115,.06)');
+  strokeRounded(ctx,452,548,176,176,88,'rgba(108,255,115,.2)',2);
+  ctx.save();
+  ctx.strokeStyle='#6cff73';
+  ctx.lineWidth=11;
+  roundedPath(ctx,497,594,86,78,14);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(520,620,8,0,Math.PI*2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(503,662);
+  ctx.lineTo(538,633);
+  ctx.lineTo(572,662);
+  ctx.stroke();
+  ctx.restore();
+  drawCardText(ctx,title,540,789,680,36,26,850,'center','#f0f7f3');
+  drawCardText(ctx,copy,540,843,700,21,17,600,'center','#80999f');
+}
+
+async function drawPodiumShareCard(ctx,matchday){
+  await drawShareCardBase(ctx,{
+    eyebrow:'RESUMEN SEMANAL',
+    title:'PODIO DE LA JORNADA',
+    subtitle:'Los tres mejores puntajes de la fecha.',
+    badge:matchday?`JORNADA ${matchday}`:'PRETEMPORADA'
+  });
+  if(!matchday){
+    drawShareCardEmpty(ctx,'Esperando la Jornada 1','Publica una jornada para generar el primer podio.');
+    drawShareCardFooter(ctx);
+    return false;
+  }
+
+  const weekly=weeklyStandings(matchday);
+  const top=weekly.slice(0,3);
+  await preloadShareCardPlayers(top.map(player=>player.name));
+  const placements=[
+    {player:top[1],rank:2,x:58,y:470,width:302,height:510,avatar:148,tone:'#b8cad3'},
+    {player:top[0],rank:1,x:389,y:382,width:302,height:598,avatar:178,tone:'#e7ca69'},
+    {player:top[2],rank:3,x:720,y:505,width:302,height:475,avatar:140,tone:'#cc926e'}
+  ];
+
+  for(const placement of placements){
+    if(!placement.player)continue;
+    const {player,rank,x,y,width,height,avatar,tone}=placement;
+    const tileGradient=ctx.createLinearGradient(x,y,x,y+height);
+    tileGradient.addColorStop(0,rank===1?'rgba(231,202,105,.14)':'rgba(80,230,208,.075)');
+    tileGradient.addColorStop(1,'rgba(4,18,24,.94)');
+    fillRounded(ctx,x,y,width,height,30,tileGradient);
+    strokeRounded(ctx,x,y,width,height,30,rank===1?'rgba(231,202,105,.42)':'rgba(80,230,208,.18)',2);
+    fillRounded(ctx,x+20,y+20,58,58,18,tone);
+    drawCardText(ctx,rank,x+49,y+60,40,28,22,900,'center','#061015');
+    await drawPlayerAvatar(ctx,player.name,x+(width-avatar)/2,y+92,avatar,avatar/2);
+    drawCardText(ctx,player.name,x+width/2,y+92+avatar+50,width-34,30,19,850,'center','#f4faf7');
+    drawCardText(ctx,`${player.points.toLocaleString('es')} PTS`,x+width/2,y+height-56,width-30,30,21,900,'center',tone);
+  }
+
+  const average=weekly.reduce((sum,player)=>sum+player.points,0)/weekly.length;
+  const goals=leadersForShareCard(weekly,'goals');
+  const cleanSheets=leadersForShareCard(weekly,'cleanSheets');
+  const leaderName=leader=>leader.names.length>1
+    ?`${leader.names[0]} +${leader.names.length-1}`
+    :leader.names[0]||'Sin registro';
+  const metrics=[
+    {
+      x:60,
+      label:'PROMEDIO',
+      name:'PUNTOS POR JUGADOR',
+      value:`${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})} PTS`,
+      tone:'#79eadd'
+    },
+    {
+      x:387,
+      label:'MÁXIMO GOLEADOR',
+      name:leaderName(goals),
+      value:goals.value?`${goals.value} ${goals.value===1?'GOL':'GOLES'}`:'SIN GOLES',
+      tone:'#91f188'
+    },
+    {
+      x:714,
+      label:'MÁS CLEAN SHEETS',
+      name:leaderName(cleanSheets),
+      value:cleanSheets.value?`${cleanSheets.value} ${cleanSheets.value===1?'CLEAN SHEET':'CLEAN SHEETS'}`:'SIN CLEAN SHEETS',
+      tone:'#e7ca69'
+    }
+  ];
+  metrics.forEach(metric=>{
+    fillRounded(ctx,metric.x,1022,306,164,24,'rgba(7,30,34,.88)');
+    strokeRounded(ctx,metric.x,1022,306,164,24,`${metric.tone}35`,2);
+    drawCardText(ctx,metric.label,metric.x+153,1061,264,15,11,850,'center','#819b9e');
+    drawCardText(ctx,metric.name,metric.x+153,1105,264,20,13,850,'center','#f0f7f3');
+    drawCardText(ctx,metric.value,metric.x+153,1154,264,29,20,900,'center',metric.tone);
+  });
+  drawShareCardFooter(ctx);
+  return true;
+}
+
+async function drawStandingsShareCard(ctx,matchday){
+  await drawShareCardBase(ctx,{
+    eyebrow:'CLASIFICACIÓN GENERAL',
+    title:'TOP 10 DE LA TEMPORADA',
+    subtitle:'Tabla acumulada después de la jornada seleccionada.',
+    badge:matchday?`HASTA J${matchday}`:'PRETEMPORADA'
+  });
+  if(!matchday){
+    drawShareCardEmpty(ctx,'Clasificación sin comenzar','Publica una jornada para crear el Top 10 oficial.');
+    drawShareCardFooter(ctx);
+    return false;
+  }
+
+  const standings=cumulativeStandings(matchday).slice(0,10);
+  const movements=movementForMatchday(matchday);
+  await preloadShareCardPlayers(standings.map(player=>player.name));
+  for(let index=0;index<standings.length;index++){
+    const player=standings[index];
+    const y=355+index*86;
+    fillRounded(ctx,60,y,960,75,19,index===0?'rgba(231,202,105,.105)':'rgba(7,28,34,.88)');
+    strokeRounded(ctx,60,y,960,75,19,index===0?'rgba(231,202,105,.28)':'rgba(80,230,208,.11)',2);
+    fillRounded(ctx,77,y+12,52,52,15,index<3?['#e7ca69','#b9cad2','#c7906c'][index]:'rgba(80,230,208,.08)');
+    drawCardText(ctx,index+1,103,y+47,38,22,18,900,'center',index<3?'#071015':'#6edfd3');
+    await drawPlayerAvatar(ctx,player.name,148,y+9,57,17);
+    drawCardText(ctx,player.name,222,y+47,470,26,17,850,'left','#f0f7f4');
+    const movement=movements.get(player.name);
+    const movementText=movement==null?'—':movement>0?`↑ +${movement}`:movement<0?`↓ ${movement}`:'• 0';
+    const movementColor=movement>0?'#79ef7a':movement<0?'#ff7f91':'#718a91';
+    drawCardText(ctx,movementText,805,y+47,120,19,15,850,'right',movementColor);
+    drawCardText(ctx,player.points.toLocaleString('es'),980,y+44,140,27,20,900,'right',index===0?'#e7ca69':'#82eee1');
+    drawCardText(ctx,'PTS',980,y+61,100,12,10,800,'right','#687f86');
+  }
+  drawShareCardFooter(ctx);
+  return true;
+}
+
+function leadersForShareCard(standings,key){
+  const value=Math.max(0,...standings.map(player=>player[key]||0));
+  const names=value?standings.filter(player=>(player[key]||0)===value).map(player=>player.name):[];
+  return {value,names};
+}
+
+async function drawLeaderShareTile(ctx,{x,y,label,key,name,extra,value,tone}){
+  const gradient=ctx.createLinearGradient(x,y,x+450,y+330);
+  gradient.addColorStop(0,`${tone}1f`);
+  gradient.addColorStop(1,'rgba(4,18,24,.94)');
+  fillRounded(ctx,x,y,460,335,28,gradient);
+  strokeRounded(ctx,x,y,460,335,28,`${tone}55`,2);
+  fillRounded(ctx,x+24,y+24,70,42,18,`${tone}24`);
+  drawCardText(ctx,key,x+59,y+52,54,17,13,900,'center',tone);
+  drawCardText(ctx,label,x+112,y+52,310,17,13,850,'left','#86a0a1');
+  if(name){
+    await drawPlayerAvatar(ctx,name,x+31,y+91,112,32);
+    drawCardText(ctx,name,x+163,y+139,265,27,17,850,'left','#f2f8f5');
+    if(extra)drawCardText(ctx,`y ${extra} más`,x+163,y+171,240,16,13,700,'left','#738d91');
+  }else{
+    fillRounded(ctx,x+31,y+91,112,112,32,'rgba(255,255,255,.03)');
+    drawCardText(ctx,'—',x+87,y+161,80,42,30,850,'center','#617a80');
+    drawCardText(ctx,'Sin registro',x+163,y+148,250,25,18,800,'left','#80969a');
+  }
+  drawCardText(ctx,value,x+31,y+287,398,38,24,900,'left',tone);
+}
+
+async function drawLeadersShareCard(ctx,matchday){
+  await drawShareCardBase(ctx,{
+    eyebrow:'FIGURAS DE LA TEMPORADA',
+    title:'LÍDERES Y DESTACADOS',
+    subtitle:'MVP semanal, goles, clean sheets y mayor subida.',
+    badge:matchday?`JORNADA ${matchday}`:'PRETEMPORADA'
+  });
+  if(!matchday){
+    drawShareCardEmpty(ctx,'Esperando los primeros líderes','Publica una jornada para generar esta tarjeta.');
+    drawShareCardFooter(ctx);
+    return false;
+  }
+
+  const weekly=weeklyStandings(matchday);
+  const standings=cumulativeStandings(matchday);
+  const movements=movementForMatchday(matchday);
+  const goals=leadersForShareCard(standings,'goals');
+  const cleanSheets=leadersForShareCard(standings,'cleanSheets');
+  const rises=[...movements.entries()].filter(([,delta])=>Number.isFinite(delta)&&delta>0);
+  const biggestRise=rises.length?Math.max(...rises.map(([,delta])=>delta)):0;
+  const risers=biggestRise?rises.filter(([,delta])=>delta===biggestRise).map(([name])=>name):[];
+  const tiles=[
+    {x:60,y:385,label:'MVP DE LA JORNADA',key:'MVP',name:weekly[0]?.name,extra:0,value:`${(weekly[0]?.points||0).toLocaleString('es')} PUNTOS`,tone:'#e7ca69'},
+    {x:560,y:385,label:'LÍDER DE GOLES',key:'GOL',name:goals.names[0],extra:Math.max(0,goals.names.length-1),value:`${goals.value} ${goals.value===1?'GOL':'GOLES'}`,tone:'#6cff73'},
+    {x:60,y:760,label:'CLEAN SHEETS',key:'CS',name:cleanSheets.names[0],extra:Math.max(0,cleanSheets.names.length-1),value:`${cleanSheets.value} CLEAN SHEETS`,tone:'#50e6d0'},
+    {x:560,y:760,label:'MAYOR SUBIDA',key:'↑',name:risers[0],extra:Math.max(0,risers.length-1),value:biggestRise?`+${biggestRise} ${biggestRise===1?'POSICIÓN':'POSICIONES'}`:'SIN CAMBIOS',tone:'#8b9cff'}
+  ];
+  await preloadShareCardPlayers(tiles.map(tile=>tile.name).filter(Boolean));
+  for(const tile of tiles)await drawLeaderShareTile(ctx,tile);
+  drawShareCardFooter(ctx);
+  return true;
+}
+
+async function drawChampionsShareCard(ctx,groupIndex){
+  const group=DATA.champions.groups[groupIndex]||DATA.champions.groups[0];
+  const publishedCount=CHAMPIONS_PUBLISHED_MATCHDAYS.length;
+  await drawShareCardBase(ctx,{
+    eyebrow:'CUBAN LEAGUE CHAMPIONS',
+    title:`${group.name.toUpperCase()} · FASE DE GRUPOS`,
+    subtitle:'Ocho partidos por competidor · Ida y vuelta.',
+    badge:`${publishedCount}/8 JORNADAS`
+  });
+  const standings=championsGroupStandings(group);
+  await preloadShareCardPlayers(standings.map(player=>player.name));
+
+  fillRounded(ctx,50,358,980,64,18,'rgba(80,230,208,.075)');
+  drawCardText(ctx,'#',80,399,34,15,12,850,'center','#78aaa7');
+  drawCardText(ctx,'PARTICIPANTE',126,399,260,15,12,850,'left','#78aaa7');
+  for(let day=1;day<=8;day++)drawCardText(ctx,`J${day}`,475+(day-1)*65,399,50,14,11,850,'center','#78aaa7');
+  drawCardText(ctx,'TOTAL',1000,399,80,14,11,850,'center','#91f188');
+
+  for(let index=0;index<standings.length;index++){
+    const player=standings[index];
+    const y=438+index*142;
+    fillRounded(ctx,50,y,980,124,22,index<2?'rgba(108,255,115,.07)':'rgba(6,25,31,.9)');
+    strokeRounded(ctx,50,y,980,124,22,index<2?'rgba(108,255,115,.2)':'rgba(80,230,208,.1)',2);
+    if(index<2){
+      ctx.fillStyle='#6cff73';
+      ctx.fillRect(50,y+25,5,74);
+    }
+    drawCardText(ctx,index+1,80,y+73,34,25,20,900,'center',index<2?'#8df486':'#708b90');
+    await drawPlayerAvatar(ctx,player.name,115,y+25,74,19);
+    drawCardText(ctx,player.name,205,y+71,225,24,15,850,'left','#eff7f4');
+    player.matchdays.forEach((day,dayIndex)=>{
+      const center=475+dayIndex*65;
+      fillRounded(ctx,center-22,y+41,44,44,12,day.played?'rgba(80,230,208,.085)':'rgba(255,255,255,.025)');
+      drawCardText(ctx,day.played?day.points.toLocaleString('es'):'—',center,y+70,38,15,10,850,'center',day.played?'#7feadd':'#50696f');
+    });
+    drawCardText(ctx,player.total.toLocaleString('es'),1000,y+73,74,25,18,900,'center',index<2?'#91f188':'#79e2d7');
+  }
+
+  fillRounded(ctx,160,1177,760,58,22,'rgba(231,202,105,.055)');
+  strokeRounded(ctx,160,1177,760,58,22,'rgba(231,202,105,.15)',2);
+  drawCardText(ctx,'CLASIFICAN LOS 2 PRIMEROS · TOTAL AUTOMÁTICO',540,1214,700,17,13,850,'center','#d8c36f');
+  drawShareCardFooter(ctx);
+  return true;
+}
+
+function selectedShareCardMatchday(){
+  const select=$('cardMatchdaySelect');
+  const value=Number(select?.value);
+  return PUBLISHED_MATCHDAYS.includes(value)?value:null;
+}
+
+function setShareCardStatus(message,error=false){
+  const status=$('shareCardStatus');
+  if(!status)return;
+  status.textContent=message;
+  status.classList.toggle('error',error);
+}
+
+async function renderShareCardPreview(){
+  const canvas=$('shareCardCanvas');
+  if(!canvas)return;
+  let previewCtx=null;
+  try{
+    previewCtx=canvas.getContext('2d');
+  }catch{
+    previewCtx=null;
+  }
+  if(!previewCtx){
+    setShareCardStatus('Este navegador no permite generar la imagen.',true);
+    return;
+  }
+  const workCanvas=document.createElement('canvas');
+  workCanvas.width=SHARE_CARD_WIDTH;
+  workCanvas.height=SHARE_CARD_HEIGHT;
+  const ctx=workCanvas.getContext('2d');
+  if(!ctx){
+    setShareCardStatus('Este navegador no permite generar la imagen.',true);
+    return;
+  }
+  const token=++SHARE_CARD_RENDER_TOKEN;
+  SHARE_CARD_READY=false;
+  $('downloadShareCard').disabled=true;
+  $('shareShareCard').disabled=true;
+  setShareCardStatus('Generando la vista previa…');
+  if(document.fonts?.ready){
+    try{await document.fonts.ready}catch{}
+  }
+
+  try{
+    let ready=false;
+    const matchday=selectedShareCardMatchday();
+    if(SHARE_CARD_TYPE==='podium')ready=await drawPodiumShareCard(ctx,matchday);
+    else if(SHARE_CARD_TYPE==='standings')ready=await drawStandingsShareCard(ctx,matchday);
+    else if(SHARE_CARD_TYPE==='leaders')ready=await drawLeadersShareCard(ctx,matchday);
+    else ready=await drawChampionsShareCard(ctx,SHARE_CARD_GROUP_INDEX);
+    if(token!==SHARE_CARD_RENDER_TOKEN)return;
+    previewCtx.clearRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
+    previewCtx.drawImage(workCanvas.__shareCardSurface||workCanvas,0,0);
+    SHARE_CARD_READY=ready;
+    $('downloadShareCard').disabled=!ready;
+    $('shareShareCard').disabled=!ready;
+    setShareCardStatus(
+      ready
+        ?'Tarjeta lista para descargar o compartir.'
+        :'Publica una jornada desde el panel privado para activar esta tarjeta.'
+    );
+  }catch{
+    if(token!==SHARE_CARD_RENDER_TOKEN)return;
+    SHARE_CARD_READY=false;
+    setShareCardStatus('No se pudo generar la tarjeta. Inténtalo nuevamente.',true);
+  }
+}
+
+function renderShareCardStudio(){
+  if(!$('shareCardCanvas'))return;
+  const matchdaySelect=$('cardMatchdaySelect');
+  const previousSelection=Number(matchdaySelect.value);
+  const selected=PUBLISHED_MATCHDAYS.includes(previousSelection)
+    ?previousSelection
+    :PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1];
+  matchdaySelect.disabled=!PUBLISHED_MATCHDAYS.length;
+  matchdaySelect.innerHTML=PUBLISHED_MATCHDAYS.length
+    ?PUBLISHED_MATCHDAYS.map(day=>`<option value="${day}">Jornada ${day}</option>`).join('')
+    :'<option>Sin jornadas publicadas</option>';
+  if(selected!=null)matchdaySelect.value=String(selected);
+
+  $('cardGroupSelect').innerHTML=DATA.champions.groups.map((group,index)=>`<option value="${index}">${group.name}</option>`).join('');
+  $('cardGroupSelect').value=String(SHARE_CARD_GROUP_INDEX);
+  const champions=SHARE_CARD_TYPE==='champions';
+  $('cardMatchdayField').hidden=champions;
+  $('cardGroupField').hidden=!champions;
+  document.querySelectorAll('[data-card-type]').forEach(button=>{
+    const active=button.dataset.cardType===SHARE_CARD_TYPE;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+  const titles={
+    podium:'Podio de la jornada',
+    standings:'Top 10 de la temporada',
+    leaders:'Líderes y destacados',
+    champions:'Tabla del grupo de Champions'
+  };
+  $('shareCardPreviewTitle').textContent=titles[SHARE_CARD_TYPE];
+  renderShareCardPreview();
+}
+
+function shareCardFilename(){
+  const matchday=selectedShareCardMatchday();
+  const parts={
+    podium:`Podio-Jornada-${matchday||'Sin-Datos'}`,
+    standings:`Top-10-Jornada-${matchday||'Sin-Datos'}`,
+    leaders:`Lideres-Jornada-${matchday||'Sin-Datos'}`,
+    champions:`Champions-${(DATA.champions.groups[SHARE_CARD_GROUP_INDEX]?.name||'Grupo').replace(/\s+/g,'-')}`
+  };
+  return `Cuban-League-${parts[SHARE_CARD_TYPE]}.png`;
+}
+
+function shareCardBlob(){
+  return new Promise((resolve,reject)=>{
+    const canvas=$('shareCardCanvas');
+    if(canvas.toBlob){
+      canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Imagen vacía')),'image/png',1);
+      return;
+    }
+    fetch(canvas.toDataURL('image/png')).then(response=>response.blob()).then(resolve,reject);
+  });
+}
+
+async function downloadShareCard({silent=false}={}){
+  if(!SHARE_CARD_READY)return;
+  try{
+    const blob=await shareCardBlob();
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=shareCardFilename();
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1200);
+    if(!silent)setShareCardStatus('Imagen descargada. Ya puedes enviarla por WhatsApp.');
+  }catch{
+    setShareCardStatus('No se pudo descargar la imagen.',true);
+  }
+}
+
+async function shareGeneratedCard(){
+  if(!SHARE_CARD_READY)return;
+  try{
+    const blob=await shareCardBlob();
+    const file=new File([blob],shareCardFilename(),{type:'image/png'});
+    if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+      await navigator.share({
+        files:[file],
+        title:'Cuban League',
+        text:'Tarjeta oficial de Cuban League'
+      });
+      setShareCardStatus('Tarjeta compartida correctamente.');
+      return;
+    }
+    await downloadShareCard({silent:true});
+    setShareCardStatus('Tu dispositivo descargó la imagen. Adjúntala en WhatsApp.');
+  }catch(error){
+    if(error?.name==='AbortError'){
+      setShareCardStatus('No se compartió la tarjeta.');
+      return;
+    }
+    setShareCardStatus('No se pudo compartir la tarjeta.',true);
+  }
+}
+
+function setupShareCardStudio(){
+  if(SHARE_CARD_BOUND||!$('shareCardCanvas'))return;
+  SHARE_CARD_BOUND=true;
+  document.querySelectorAll('[data-card-type]').forEach(button=>button.onclick=()=>{
+    SHARE_CARD_TYPE=button.dataset.cardType;
+    renderShareCardStudio();
+  });
+  $('cardMatchdaySelect').onchange=renderShareCardPreview;
+  $('cardGroupSelect').onchange=()=>{
+    SHARE_CARD_GROUP_INDEX=Number($('cardGroupSelect').value)||0;
+    renderShareCardPreview();
+  };
+  $('generateShareCard').onclick=renderShareCardPreview;
+  $('downloadShareCard').onclick=()=>downloadShareCard();
+  $('shareShareCard').onclick=shareGeneratedCard;
+  renderShareCardStudio();
+}
+
 let deferredInstallPrompt=null;
 let installReturnFocus=null;
 const isStandalone=()=>window.matchMedia?.('(display-mode: standalone)')?.matches||window.navigator.standalone===true;
@@ -1123,6 +1720,7 @@ async function init(){
   renderRecords();
   renderChampions();
   renderNews();
+  setupShareCardStudio();
 
   const syncPublishedData=()=>{
     syncLiveCurrentStats();
@@ -1166,7 +1764,7 @@ async function init(){
     :navigator.clipboard.writeText(location.href);
   setupPWA();
   const launchSection=new URLSearchParams(location.search).get('section');
-  if(['home','current','matchdays','seasons','players','history','records','champions','news'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','champions','cards','news'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection));
   }
 }

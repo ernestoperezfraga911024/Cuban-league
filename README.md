@@ -1,4 +1,4 @@
-# Cuban League V40
+# Cuban League V42
 
 Sitio oficial de la Cuban League con:
 
@@ -23,6 +23,12 @@ Sitio oficial de la Cuban League con:
   de ida y vuelta, casillas J1–J8 y total automático por participante.
 - Control privado independiente para registrar, guardar y publicar los puntos
   de cada jornada de Champions sin mezclarlos con los datos de la liga.
+- Centro de tarjetas oficiales para WhatsApp con Podio de Jornada, Top 10,
+  líderes de temporada y tabla de cada grupo de Champions.
+- Generación automática en PNG de 1080 × 1350 con fotos, nombres y estadísticas,
+  además de descarga directa y menú nativo para compartir desde el celular.
+- La tarjeta de podio incluye promedio, máximo goleador y líder de clean sheets
+  de la jornada, evitando repetir los puntos del ganador como récord.
 
 ## Panel privado
 

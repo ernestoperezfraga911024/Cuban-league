@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=40-20260725"></head><body>
+<link rel="stylesheet" href="styles.css?v=42-20260725"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -23,6 +23,7 @@
   <symbol id="icon-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z"/></symbol>
   <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="icon-ball" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9.2 8.4 2.8-2 2.8 2-1.1 3.3h-3.4Z"/><path d="m10.3 11.7-3.5 2.5.9 3.4M13.7 11.7l3.5 2.5-.9 3.4M9.2 8.4 6.1 7.2M14.8 8.4l3.1-1.2M7.7 17.6l4.3 2.1 4.3-2.1"/></symbol>
+  <symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></symbol>
 </svg>
 <header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-green-logo.svg" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><span class="header-season-badge"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Temporada 2026/27</span></span><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
 
@@ -31,7 +32,7 @@
 <button type="button" class="navtab" data-section="matchdays"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Jornadas</span></button>
 <button type="button" class="navtab" data-section="seasons"><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Temporadas</span></button><button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
 <button type="button" class="navtab" data-section="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Histórico</span></button><button type="button" class="navtab" data-section="records"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Récords</span></button>
-<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
+<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="cards"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg><span>Tarjetas</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
 </nav>
 
 <section class="hero-photo">
@@ -75,6 +76,7 @@
     <button type="button" data-go="matchdays"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><span><b>Jornadas</b><small>Podios, líderes y movimientos</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="players"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span><b>Participantes</b><small>Todos los perfiles</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="history"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span><b>Museo histórico</b><small>Temporadas y palmarés</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" class="home-shortcut-share" data-go="cards"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg></span><span><b>Tarjetas para WhatsApp</b><small>Podios, clasificación, líderes y Champions listos para compartir</small></span><span aria-hidden="true">→</span></button>
   </nav>
 </div>
 
@@ -223,6 +225,68 @@
   <div id="bracket" class="bracket"></div>
 </section>
 
+<section id="cards" class="page">
+  <div class="share-card-banner">
+    <div>
+      <span class="eyebrow">CONTENIDO OFICIAL</span>
+      <h2>Convierte cada jornada<br>en una imagen.</h2>
+      <p>Genera tarjetas automáticas con los datos publicados y compártelas en WhatsApp sin editar nada manualmente.</p>
+    </div>
+    <span class="share-card-banner-mark"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg></span>
+  </div>
+
+  <div class="section-head share-card-section-head">
+    <div>
+      <span class="eyebrow">CENTRO DE TARJETAS</span>
+      <h2>Elige qué quieres compartir</h2>
+    </div>
+    <span class="share-card-format">PNG · 1080 × 1350</span>
+  </div>
+
+  <div class="share-card-studio">
+    <aside class="share-card-controls" aria-label="Controles para crear la tarjeta">
+      <div class="share-card-control-head">
+        <span class="share-card-step">01</span>
+        <div><b>Selecciona el contenido</b><small>La vista previa se actualiza automáticamente.</small></div>
+      </div>
+
+      <div class="share-card-types" role="group" aria-label="Tipo de tarjeta">
+        <button type="button" class="active" data-card-type="podium" aria-pressed="true"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><b>Podio</b><small>Top 3 semanal</small></button>
+        <button type="button" data-card-type="standings" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><b>Top 10</b><small>Tabla general</small></button>
+        <button type="button" data-card-type="leaders" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#icon-star"></use></svg><b>Líderes</b><small>MVP, goles y CS</small></button>
+        <button type="button" data-card-type="champions" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><b>Champions</b><small>Tabla del grupo</small></button>
+      </div>
+
+      <div class="share-card-control-head compact">
+        <span class="share-card-step">02</span>
+        <div><b>Escoge los datos</b><small>Solo aparecen jornadas publicadas.</small></div>
+      </div>
+
+      <div class="share-card-selectors">
+        <label id="cardMatchdayField"><span>Jornada</span><select id="cardMatchdaySelect" disabled><option>Sin jornadas publicadas</option></select></label>
+        <label id="cardGroupField" hidden><span>Grupo de Champions</span><select id="cardGroupSelect"></select></label>
+      </div>
+
+      <button id="generateShareCard" class="share-card-generate" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg><span>Actualizar tarjeta</span></button>
+
+      <div class="share-card-actions">
+        <button id="downloadShareCard" type="button" disabled><span aria-hidden="true">↓</span><span>Descargar PNG</span></button>
+        <button id="shareShareCard" class="primary" type="button" disabled><span aria-hidden="true">↗</span><span>Compartir</span></button>
+      </div>
+      <p id="shareCardStatus" class="share-card-status" role="status" aria-live="polite">Esperando datos publicados.</p>
+      <p class="share-card-tip"><b>En la PC:</b> descarga la imagen y adjúntala en WhatsApp Web. En el celular, “Compartir” abre el menú donde puedes elegir WhatsApp.</p>
+    </aside>
+
+    <section class="share-card-preview-panel" aria-labelledby="shareCardPreviewTitle">
+      <header><div><span class="eyebrow">VISTA PREVIA</span><h3 id="shareCardPreviewTitle">Tarjeta oficial</h3></div><span>4:5</span></header>
+      <div class="share-card-canvas-frame">
+        <canvas id="shareCardCanvas" width="1080" height="1350" role="img" aria-label="Vista previa de la tarjeta para compartir"></canvas>
+      </div>
+      <footer><span><i></i>Datos oficiales publicados</span><small>Formato optimizado para WhatsApp e Instagram</small></footer>
+    </section>
+  </div>
+</section>
+
 <section id="news" class="page">
 <div class="minimal-page-banner news-page-banner"><div><span class="eyebrow">ACTUALIDAD</span><h2>Todo lo que pasa en la liga.</h2><p>Novedades, jornadas, anuncios y momentos importantes de la Cuban League.</p></div><span class="page-banner-mark"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg></span></div>
 <div class="section-head"><div><span class="eyebrow">ÚLTIMAS PUBLICACIONES</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg></span><span>Noticias y jornadas</span></h2></div></div><div id="newsGrid" class="news-grid"></div></section>
@@ -254,4 +318,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=40-20260725"></script><script src="app.js?v=40-20260725"></script></body></html>
+<script src="supabase-config.js?v=42-20260725"></script><script src="app.js?v=42-20260725"></script></body></html>
