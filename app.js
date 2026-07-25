@@ -1,4 +1,4 @@
-const APP_VERSION='42-20260725';
+const APP_VERSION='43-20260725';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -289,9 +289,109 @@ function renderCurrent(){
   </div>`).join('');
 }
 
+function previousSeasonPodium(){
+  const archive=DATA.historicalTables?.seasonArchive||[];
+  const previous=[...archive].reverse().find(entry=>
+    entry.season!==DATA.currentSeason
+    &&entry.results?.filter(result=>result.division===1&&Number.isInteger(result.position)).length>=3
+  );
+  if(!previous)return {season:'Temporada anterior',players:[]};
+  const players=previous.results
+    .filter(result=>result.division===1&&result.position>=1&&result.position<=3)
+    .sort((a,b)=>a.position-b.position)
+    .map(result=>{
+      const participant=DATA.participants.find(player=>player.name===result.name);
+      return participant?{...participant,finalPoints:result.points}:null;
+    })
+    .filter(Boolean);
+  return {season:previous.season,players};
+}
+
+function heroKpiPreseasonCards(){
+  const podium=previousSeasonPodium();
+  const podiumCards=podium.players.map((player,index)=>heroKpiPlayerCard({
+    label:`${['Primer','Segundo','Tercer'][index]} lugar · ${podium.season}`,
+    player,
+    detail:`${player.finalPoints.toLocaleString('es')} puntos · Clasificación final`,
+    marker:{text:String(index+1)},
+    tone:['first','second','third'][index]
+  }));
+  while(podiumCards.length<3){
+    const index=podiumCards.length;
+    podiumCards.push(`<article class="hero-kpi-placeholder">
+      <span class="kpi-icon">${uiIcon(index===0?'trophy':'medal')}</span>
+      <div><span>${['Primer','Segundo','Tercer'][index]} lugar</span><b>Por definir</b><small>Temporada anterior</small></div>
+    </article>`);
+  }
+  return [
+    ...podiumCards,
+    `<article class="hero-kpi-placeholder">
+      <span class="kpi-icon">${uiIcon('ball')}</span>
+      <div><span>Líder goleador · ${DATA.currentSeason}</span><b>Por definir</b><small>Comienza en la Jornada 1</small></div>
+    </article>`,
+    `<article class="hero-kpi-placeholder">
+      <span class="kpi-icon">${uiIcon('shield')}</span>
+      <div><span>Líder clean sheets · ${DATA.currentSeason}</span><b>Por definir</b><small>Comienza en la Jornada 1</small></div>
+    </article>`
+  ].join('');
+}
+
+function heroKpiPlayerCard({label,player,name=player.name,detail,marker,tone}){
+  const markerContent=marker.icon?uiIcon(marker.icon):marker.text;
+  return `<article class="hero-kpi-live hero-kpi-${tone} team-profile-link" ${profileTriggerAttrs(player.name)}>
+    <span class="kpi-icon kpi-player-photo">
+      <img src="${player.shield}" alt="Foto de ${profileAttr(player.name)}">
+      <span class="kpi-marker" aria-hidden="true">${markerContent}</span>
+    </span>
+    <div><span>${label}</span><b>${name}</b><small>${detail}</small></div>
+  </article>`;
+}
+
+function renderHeroKpis(latest){
+  const host=$('heroKpis');
+  if(!host)return;
+  if(latest==null){
+    host.innerHTML=heroKpiPreseasonCards();
+    return;
+  }
+
+  const standings=cumulativeStandings(latest);
+  const goals=pulseLeaders(standings,'goals');
+  const cleanSheets=pulseLeaders(standings,'cleanSheets');
+  const leaderCard=(leader,label,icon,tone,singular,plural)=>{
+    const player=standings.find(entry=>entry.name===leader.names[0]);
+    if(!player)return `<article class="hero-kpi-placeholder">
+      <span class="kpi-icon">${uiIcon(icon)}</span>
+      <div><span>${label}</span><b>Por definir</b><small>Sin registros</small></div>
+    </article>`;
+    const extra=Math.max(0,leader.names.length-1);
+    return heroKpiPlayerCard({
+      label,
+      player,
+      name:extra?`${player.name} +${extra}`:player.name,
+      detail:`${leader.value.toLocaleString('es')} ${leader.value===1?singular:plural} acumulados`,
+      marker:{icon},
+      tone
+    });
+  };
+
+  host.innerHTML=[
+    ...standings.slice(0,3).map((player,index)=>heroKpiPlayerCard({
+      label:['Primer lugar','Segundo lugar','Tercer lugar'][index],
+      player,
+      detail:`${player.points.toLocaleString('es')} puntos acumulados`,
+      marker:{text:String(index+1)},
+      tone:['first','second','third'][index]
+    })),
+    leaderCard(goals,'Líder goleador','ball','goals','gol','goles'),
+    leaderCard(cleanSheets,'Líder clean sheets','shield','clean-sheets','clean sheet','clean sheets')
+  ].join('');
+}
+
 function renderHomeLive(){
   if(!$('homeLiveTitle'))return;
   const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
+  renderHeroKpis(latest);
   if(latest==null){
     $('homeLiveBadge').textContent='PRETEMPORADA';
     $('homeLiveTitle').textContent='Todo preparado para el comienzo.';

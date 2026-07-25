@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=42-20260725"></head><body>
+<link rel="stylesheet" href="styles.css?v=43-20260725"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -48,10 +48,12 @@
       <button type="button" class="secondary" data-go="matchdays"><span>Centro de jornada</span><span class="action-arrow" aria-hidden="true">→</span></button>
     </div>
   </div>
-  <div class="hero-kpis">
-    <article><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><div><span>Mejor histórico</span><b>GNT D ZONA</b><small>2 títulos · 4 podios</small></div></article>
-    <article><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-star"></use></svg></span><div><span>Líder de puntos</span><b>ANDOBA THE BEST</b><small>12,535 puntos</small></div></article>
-    <article><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><div><span>Temporada actual</span><b>20</b><small>Participantes</small></div></article>
+  <div id="heroKpis" class="hero-kpis" aria-live="polite">
+    <article class="hero-kpi-live hero-kpi-first"><span class="kpi-icon kpi-player-photo"><img src="team-17.png" alt="Foto de Juventus"><span class="kpi-marker" aria-hidden="true">1</span></span><div><span>Primer lugar · 2025/26</span><b>Juventus</b><small>1,938 puntos · Clasificación final</small></div></article>
+    <article class="hero-kpi-live hero-kpi-second"><span class="kpi-icon kpi-player-photo"><img src="team-06.png" alt="Foto de ANDOBA THE BEST"><span class="kpi-marker" aria-hidden="true">2</span></span><div><span>Segundo lugar · 2025/26</span><b>ANDOBA THE BEST</b><small>1,920 puntos · Clasificación final</small></div></article>
+    <article class="hero-kpi-live hero-kpi-third"><span class="kpi-icon kpi-player-photo"><img src="team-05.png" alt="Foto de GNT D ZONA"><span class="kpi-marker" aria-hidden="true">3</span></span><div><span>Tercer lugar · 2025/26</span><b>GNT D ZONA</b><small>1,870 puntos · Clasificación final</small></div></article>
+    <article class="hero-kpi-placeholder"><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><div><span>Líder goleador · 2026/27</span><b>Por definir</b><small>Comienza en la Jornada 1</small></div></article>
+    <article class="hero-kpi-placeholder"><span class="kpi-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span><div><span>Líder clean sheets · 2026/27</span><b>Por definir</b><small>Comienza en la Jornada 1</small></div></article>
   </div>
 </div>
 </section>
@@ -318,4 +320,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=42-20260725"></script><script src="app.js?v=42-20260725"></script></body></html>
+<script src="supabase-config.js?v=43-20260725"></script><script src="app.js?v=43-20260725"></script></body></html>

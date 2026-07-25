@@ -9045,3 +9045,159 @@ footer{
     gap:4px;
   }
 }
+
+/* =========================================================
+   V43 — LÍDERES DE TEMPORADA EN LA PORTADA
+   ========================================================= */
+.hero-kpis{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:14px;
+}
+
+.hero-kpis article,
+.hero-kpis article:last-child{
+  min-height:116px;
+  grid-column:span 2;
+}
+
+.hero-kpis article:nth-child(4),
+.hero-kpis article:nth-child(5){
+  grid-column:span 3;
+}
+
+.hero-kpis article:nth-child(3) b{
+  color:#f5f8f6;
+  font-size:1rem;
+  line-height:normal;
+}
+
+.hero-kpi-live{
+  --kpi-accent:var(--home-green);
+  cursor:pointer;
+}
+
+.hero-kpi-first{--kpi-accent:#e7ca69}
+.hero-kpi-second{--kpi-accent:#b7c8d1}
+.hero-kpi-third{--kpi-accent:#cf916a}
+.hero-kpi-goals{--kpi-accent:#78ee79}
+.hero-kpi-clean-sheets{--kpi-accent:#50e6d0}
+
+.hero-kpis .hero-kpi-live{
+  border-color:color-mix(in srgb,var(--kpi-accent) 42%,transparent);
+}
+
+.hero-kpis .hero-kpi-live:hover{
+  border-color:var(--kpi-accent);
+}
+
+.hero-kpis .hero-kpi-live article>div>span,
+.hero-kpis .hero-kpi-live>div>span{
+  color:var(--kpi-accent);
+}
+
+.hero-kpis .kpi-player-photo{
+  position:relative;
+  overflow:visible;
+  border-color:color-mix(in srgb,var(--kpi-accent) 72%,transparent);
+  background:#07151b;
+}
+
+.hero-kpis .kpi-player-photo>img{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.hero-kpis .kpi-marker{
+  position:absolute;
+  right:-5px;
+  bottom:-5px;
+  display:grid;
+  width:25px;
+  height:25px;
+  place-items:center;
+  border:2px solid #041017;
+  border-radius:50%;
+  background:var(--kpi-accent);
+  color:#041017;
+  font-size:.65rem;
+  font-weight:950;
+  line-height:1;
+  box-shadow:0 5px 14px rgba(0,0,0,.38);
+}
+
+.hero-kpis .kpi-marker .ui-icon{
+  width:13px;
+  height:13px;
+  color:#041017;
+}
+
+.hero-kpis .hero-kpi-placeholder{
+  border-style:dashed;
+  border-color:rgba(80,230,208,.27);
+  background:rgba(2,12,21,.58);
+}
+
+.hero-kpis .hero-kpi-placeholder b{
+  color:#9db0b8;
+}
+
+.hero-kpis article:nth-child(4){animation-delay:.29s}
+.hero-kpis article:nth-child(5){animation-delay:.36s}
+
+@media(max-width:900px){
+  .hero-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .hero-kpis article,
+  .hero-kpis article:nth-child(4),
+  .hero-kpis article:nth-child(5){
+    grid-column:auto;
+  }
+
+  .hero-kpis article:last-child{
+    grid-column:1/-1;
+  }
+}
+
+@media(max-width:700px){
+  .hero-photo{
+    min-height:965px;
+  }
+
+  .hero-kpis{
+    grid-template-columns:1fr;
+  }
+
+  .hero-kpis article,
+  .hero-kpis article:last-child,
+  .hero-kpis article:nth-child(4),
+  .hero-kpis article:nth-child(5){
+    min-height:77px;
+    grid-column:auto;
+  }
+
+  .hero-kpis article:nth-child(3) b{
+    font-size:.83rem;
+  }
+
+  .hero-kpis .kpi-marker{
+    width:21px;
+    height:21px;
+    font-size:.57rem;
+  }
+
+  .hero-kpis .kpi-marker .ui-icon{
+    width:11px;
+    height:11px;
+  }
+}
+
+@media(max-width:370px){
+  .hero-photo{
+    min-height:980px;
+  }
+}

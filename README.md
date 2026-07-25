@@ -1,4 +1,4 @@
-# Cuban League V42
+# Cuban League V43
 
 Sitio oficial de la Cuban League con:
 
@@ -29,6 +29,9 @@ Sitio oficial de la Cuban League con:
   además de descarga directa y menú nativo para compartir desde el celular.
 - La tarjeta de podio incluye promedio, máximo goleador y líder de clean sheets
   de la jornada, evitando repetir los puntos del ganador como récord.
+- La portada muestra cinco tarjetas dinámicas: primero, segundo, tercero, líder
+  goleador y líder de clean sheets. Durante la pretemporada conserva el podio
+  final de 2025/26 y cambia automáticamente a 2026/27 tras la Jornada 1.
 
 ## Panel privado
 
