@@ -1,4 +1,4 @@
-# Cuban League V44
+# Cuban League V45
 
 Sitio oficial de la Cuban League con:
 
@@ -34,6 +34,8 @@ Sitio oficial de la Cuban League con:
   final de 2025/26 y cambia automáticamente a 2026/27 tras la Jornada 1.
 - El bloque de líderes adopta un podio vertical premium: campeón elevado en el
   centro, segundo y tercero a los lados, con goleador y clean sheets debajo.
+- El podio se presenta directamente sobre el fondo, sin un marco exterior,
+  para ganar espacio y conservar solamente las tarjetas individuales.
 
 ## Panel privado
 
