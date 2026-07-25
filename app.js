@@ -1,8 +1,11 @@
-const APP_VERSION='39-20260724';
+const APP_VERSION='40-20260725';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
 let SELECTED_MATCHDAY=null;
+const CHAMPIONS_MATCHDAY_COUNT=8;
+let CHAMPIONS_MATCHDAY_ROWS=[];
+let CHAMPIONS_PUBLISHED_MATCHDAYS=[];
 const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -30,6 +33,62 @@ function normalizeMatchdayRows(rows){
     cleanSheets:Math.max(0,Number(row.clean_sheets)||0),
     updatedAt:row.updated_at||null
   })).filter(row=>validNames.has(row.participantName)&&Number.isInteger(row.matchday)&&row.matchday>0);
+}
+
+function championsSeasonKey(){
+  const season=window.CUBAN_LEAGUE_SUPABASE?.season||DATA?.currentSeason||'2026/27';
+  return `${season}-CHAMPIONS`;
+}
+
+function championsParticipantNames(){
+  return new Set((DATA?.champions?.groups||[]).flatMap(group=>group.teams));
+}
+
+function normalizeChampionsMatchdayRows(rows){
+  const validNames=championsParticipantNames();
+  return rows.map(row=>({
+    participantName:String(row.participant_name||'').trim(),
+    matchday:Number(row.matchday),
+    points:Number(row.points)||0,
+    updatedAt:row.updated_at||null
+  })).filter(row=>
+    validNames.has(row.participantName)
+    &&Number.isInteger(row.matchday)
+    &&row.matchday>=1
+    &&row.matchday<=CHAMPIONS_MATCHDAY_COUNT
+  );
+}
+
+async function syncChampionsStats({render=true}={}){
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!DATA||!config?.url||!config?.publishableKey)return false;
+  try{
+    const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
+    endpoint.searchParams.set('select','participant_name,matchday,points,updated_at');
+    endpoint.searchParams.set('season',`eq.${championsSeasonKey()}`);
+    endpoint.searchParams.set('published','eq.true');
+    endpoint.searchParams.append('matchday','gte.1');
+    endpoint.searchParams.append('matchday',`lte.${CHAMPIONS_MATCHDAY_COUNT}`);
+    endpoint.searchParams.set('order','matchday.asc');
+    const response=await fetch(endpoint,{
+      cache:'no-store',
+      headers:{
+        apikey:config.publishableKey,
+        Authorization:`Bearer ${config.publishableKey}`,
+        Accept:'application/json'
+      }
+    });
+    if(!response.ok)throw new Error('No se pudo actualizar la Champions');
+    const rows=await response.json();
+    if(!Array.isArray(rows))throw new Error('Respuesta de Champions no válida');
+
+    CHAMPIONS_MATCHDAY_ROWS=normalizeChampionsMatchdayRows(rows);
+    CHAMPIONS_PUBLISHED_MATCHDAYS=[...new Set(CHAMPIONS_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
+    if(render)renderChampions();
+    return true;
+  }catch{
+    return false;
+  }
 }
 
 function weeklyStandings(matchday){
@@ -883,7 +942,77 @@ function renderRecords(){
     </div>
   </article>`).join('');
 }
-function renderChampions(){$('groupGrid').innerHTML=DATA.champions.groups.map(g=>`<article class="group"><h3 class="group-title">${uiIcon('shield')}<span>${g.name}</span></h3>${g.teams.map((t,i)=>`<div class="group-team team-profile-link" ${profileTriggerAttrs(t)}><span class="pos">${i+1}</span><img src="${imageMap()[t]||''}" alt="Foto de ${t}"><b>${t}</b><small>Ver ficha</small></div>`).join('')}</article>`).join('');$('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('')}
+function championsGroupStandings(group){
+  const rowMap=new Map(CHAMPIONS_MATCHDAY_ROWS.map(row=>[`${row.participantName}:${row.matchday}`,row]));
+  return group.teams.map((name,sourceIndex)=>{
+    const matchdays=Array.from({length:CHAMPIONS_MATCHDAY_COUNT},(_,index)=>{
+      const matchday=index+1;
+      const row=rowMap.get(`${name}:${matchday}`);
+      return {
+        matchday,
+        played:Boolean(row),
+        points:row?.points||0
+      };
+    });
+    return {
+      name,
+      sourceIndex,
+      matchdays,
+      played:matchdays.filter(day=>day.played).length,
+      total:matchdays.reduce((sum,day)=>sum+day.points,0)
+    };
+  }).sort((a,b)=>b.total-a.total||b.played-a.played||a.sourceIndex-b.sourceIndex);
+}
+
+function renderChampions(){
+  const publishedCount=CHAMPIONS_PUBLISHED_MATCHDAYS.length;
+  const status=$('championsStatus');
+  if(status){
+    status.textContent=publishedCount===0
+      ?DATA.champions.status
+      :publishedCount===CHAMPIONS_MATCHDAY_COUNT
+        ?'Fase completada'
+        :`${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT} jornadas`;
+  }
+
+  $('groupGrid').innerHTML=DATA.champions.groups.map(group=>{
+    const standings=championsGroupStandings(group);
+    const headerDays=Array.from({length:CHAMPIONS_MATCHDAY_COUNT},(_,index)=>`<span class="champions-day-head">J${index+1}</span>`).join('');
+    const rows=standings.map((team,index)=>{
+      const safeName=profileAttr(team.name);
+      const points=team.matchdays.map(day=>`<span class="champions-points-cell${day.played?' is-played':''}" title="${day.played?`Jornada ${day.matchday}: ${day.points.toLocaleString('es')} puntos`:`Jornada ${day.matchday}: pendiente`}">${day.played?day.points.toLocaleString('es'):'—'}</span>`).join('');
+      return `<div class="champions-score-row champions-score-grid">
+        <span class="champions-rank">${index+1}</span>
+        <div class="champions-team-cell team-profile-link" ${profileTriggerAttrs(team.name)}>
+          <img src="${imageMap()[team.name]||''}" alt="Foto de ${safeName}">
+          <b>${safeName}</b>
+        </div>
+        ${points}
+        <strong class="champions-total">${team.total.toLocaleString('es')}</strong>
+      </div>`;
+    }).join('');
+    return `<article class="group champions-group">
+      <header class="champions-group-head">
+        <span class="champions-group-icon">${uiIcon('shield')}</span>
+        <div><h3>${group.name}</h3><small>5 competidores · ida y vuelta</small></div>
+        <span class="champions-round-count">${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT}</span>
+      </header>
+      <div class="champions-score-scroll" tabindex="0" aria-label="Tabla de ${group.name}. Desliza horizontalmente para consultar las ocho jornadas.">
+        <div class="champions-score-table">
+          <div class="champions-score-head champions-score-grid">
+            <span>#</span>
+            <span>Participante</span>
+            ${headerDays}
+            <span>Total</span>
+          </div>
+          ${rows}
+        </div>
+      </div>
+      <footer class="champions-group-footer"><span>Clasifican los 2 primeros</span><span>Total automático</span></footer>
+    </article>`;
+  }).join('');
+  $('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('');
+}
 function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card icon-card"><div class="card-label-row"><span>${n.date}</span><span class="record-icon news">${uiIcon('news')}</span></div><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
 
 let deferredInstallPrompt=null;
@@ -980,15 +1109,65 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
-async function init(){DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();renderCurrent();renderMatchdayCenter();renderHomeLive();renderGeneral();renderPoints();renderPalmares();renderSeasons();renderSeasonChampions();renderPlayers();renderRecords();renderChampions();renderNews();syncLiveCurrentStats();window.setInterval(()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()},60000);window.addEventListener('online',()=>syncLiveCurrentStats());document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncLiveCurrentStats()});document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-document.addEventListener('click',e=>{
-  const team=e.target.closest('[data-profile-player]');
-  if(team){openPlayer(team.dataset.profilePlayer)}
-});
-document.addEventListener('keydown',e=>{
-  const team=e.target.closest?.('[data-profile-player]');
-  if(team&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openPlayer(team.dataset.profilePlayer)}
-  if(e.key==='Escape'&&!$('playerModal').hidden)closePlayer();
-  else if(e.key==='Escape'&&!$('installModal').hidden)closeInstallGuide();
-});
-document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(`${b.dataset.hist}Table`).classList.add('active')});$('sortGeneral').onchange=e=>renderGeneral(e.target.value);$('playerSearch').oninput=e=>renderPlayers(e.target.value);$('closeModal').onclick=closePlayer;$('playerModal').onclick=e=>{if(e.target.id==='playerModal')closePlayer()};$('share').onclick=()=>navigator.share?navigator.share({title:'Cuban League',url:location.href}):navigator.clipboard.writeText(location.href);setupPWA();const launchSection=new URLSearchParams(location.search).get('section');if(['home','current','matchdays','seasons','players','history','records','champions','news'].includes(launchSection))requestAnimationFrame(()=>go(launchSection))}init();
+async function init(){
+  DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();
+  renderCurrent();
+  renderMatchdayCenter();
+  renderHomeLive();
+  renderGeneral();
+  renderPoints();
+  renderPalmares();
+  renderSeasons();
+  renderSeasonChampions();
+  renderPlayers();
+  renderRecords();
+  renderChampions();
+  renderNews();
+
+  const syncPublishedData=()=>{
+    syncLiveCurrentStats();
+    syncChampionsStats();
+  };
+  syncPublishedData();
+  window.setInterval(()=>{
+    if(document.visibilityState==='visible')syncPublishedData();
+  },60000);
+  window.addEventListener('online',syncPublishedData);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')syncPublishedData();
+  });
+
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  document.addEventListener('click',e=>{
+    const team=e.target.closest('[data-profile-player]');
+    if(team)openPlayer(team.dataset.profilePlayer);
+  });
+  document.addEventListener('keydown',e=>{
+    const team=e.target.closest?.('[data-profile-player]');
+    if(team&&(e.key==='Enter'||e.key===' ')){
+      e.preventDefault();
+      openPlayer(team.dataset.profilePlayer);
+    }
+    if(e.key==='Escape'&&!$('playerModal').hidden)closePlayer();
+    else if(e.key==='Escape'&&!$('installModal').hidden)closeInstallGuide();
+  });
+  document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));
+  document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    $(`${b.dataset.hist}Table`).classList.add('active');
+  });
+  $('sortGeneral').onchange=e=>renderGeneral(e.target.value);
+  $('playerSearch').oninput=e=>renderPlayers(e.target.value);
+  $('closeModal').onclick=closePlayer;
+  $('playerModal').onclick=e=>{if(e.target.id==='playerModal')closePlayer()};
+  $('share').onclick=()=>navigator.share
+    ?navigator.share({title:'Cuban League',url:location.href})
+    :navigator.clipboard.writeText(location.href);
+  setupPWA();
+  const launchSection=new URLSearchParams(location.search).get('section');
+  if(['home','current','matchdays','seasons','players','history','records','champions','news'].includes(launchSection)){
+    requestAnimationFrame(()=>go(launchSection));
+  }
+}
+init();

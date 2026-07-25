@@ -1,4 +1,4 @@
-# Cuban League V39
+# Cuban League V40
 
 Sitio oficial de la Cuban League con:
 
@@ -19,6 +19,10 @@ Sitio oficial de la Cuban League con:
   de goles y clean sheets y mayor subida en la clasificación.
 - Libro de Récords reorganizado con resumen del archivo, categorías, tarjetas
   compactas y un Salón de la Fama editorial optimizado para móvil.
+- Grupos oficiales de Champions con cuatro grupos de cinco competidores, fase
+  de ida y vuelta, casillas J1–J8 y total automático por participante.
+- Control privado independiente para registrar, guardar y publicar los puntos
+  de cada jornada de Champions sin mezclarlos con los datos de la liga.
 
 ## Panel privado
 

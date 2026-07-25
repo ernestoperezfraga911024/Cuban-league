@@ -872,45 +872,50 @@
   ],
   "champions": {
     "status": "Preparación",
+    "format": {
+      "legs": 2,
+      "matchesPerParticipant": 8,
+      "qualifiedPerGroup": 2
+    },
     "groups": [
       {
-        "name": "Grupo A",
-        "teams": [
-          "Ernesto",
-          "Victor Manuel",
-          "Brian",
-          "Arian Mirandez Li",
-          "GNT D ZONA"
-        ]
-      },
-      {
-        "name": "Grupo B",
+        "name": "Grupo 1",
         "teams": [
           "ANDOBA THE BEST",
-          "Julio",
           "Yovany R9",
-          "Rivaldo",
-          "Patria FC"
+          "MONEY MON$TER",
+          "Esteban Dominguez",
+          "Victor Manuel"
         ]
       },
       {
-        "name": "Grupo C",
+        "name": "Grupo 2",
         "teams": [
+          "Arian Mirandez Li",
           "Viva Libre",
           "Bayer Munich",
-          "Roberto Piñeiro",
-          "MONEY MON$TER",
-          "@elministro"
+          "Patria FC",
+          "Maykel Zuaznabar"
         ]
       },
       {
-        "name": "Grupo D",
+        "name": "Grupo 3",
         "teams": [
-          "Maykel Zuaznabar",
-          "Juventus",
-          "Andy",
+          "Julio",
           "Mario Fernandez",
-          "Esteban Dominguez"
+          "Andy",
+          "GNT D ZONA",
+          "Brian"
+        ]
+      },
+      {
+        "name": "Grupo 4",
+        "teams": [
+          "Juventus",
+          "Ernesto",
+          "@elministro",
+          "Roberto Piñeiro",
+          "Rivaldo"
         ]
       }
     ],

@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=34-20260724">
+  <link rel="stylesheet" href="admin.css?v=40-20260725">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -92,8 +92,8 @@
       <div class="panel-heading">
         <div>
           <span class="admin-kicker"><i></i> TEMPORADA <span id="seasonLabel">2026/27</span></span>
-          <h1>Registrar jornada</h1>
-          <p>Los cambios se ven en la clasificación pública únicamente después de publicarlos.</p>
+          <h1 id="panelTitle">Registrar jornada</h1>
+          <p id="panelDescription">Los cambios se ven en la clasificación pública únicamente después de publicarlos.</p>
         </div>
         <div class="account-box">
           <span class="account-avatar" aria-hidden="true">EP</span>
@@ -101,6 +101,21 @@
           <button id="logoutButton" type="button">Salir</button>
         </div>
       </div>
+
+      <nav class="competition-switcher" aria-label="Competición que deseas administrar">
+        <button id="leagueModeButton" class="competition-option active" type="button" aria-pressed="true">
+          <span class="competition-option-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>
+          </span>
+          <span><b>Liga</b><small>Clasificación general · 38 jornadas</small></span>
+        </button>
+        <button id="championsModeButton" class="competition-option" type="button" aria-pressed="false">
+          <span class="competition-option-icon trophy">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v3c0 4-1.7 7-4 7s-4-3-4-7V4Z"/><path d="M8 6H4c0 4 1.8 6 5.1 6M16 6h4c0 4-1.8 6-5.1 6M12 14v4m-4 2h8"/></svg>
+          </span>
+          <span><b>Champions</b><small>Fase de grupos · 8 jornadas</small></span>
+        </button>
+      </nav>
 
       <section class="matchday-toolbar" aria-label="Jornada seleccionada">
         <div class="matchday-select-group">
@@ -123,13 +138,13 @@
           </span>
           <span><small>Puntos</small><b id="pointsTotal">0</b></span>
         </article>
-        <article>
+        <article class="league-only-summary">
           <span class="summary-icon goals">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m12 7 3 2.2-1.1 3.6h-3.8L9 9.2 12 7Zm-8 5 4-1m8 0 4 1M8.5 19l1.6-3.6m5.4 3.6-1.6-3.6"/></svg>
           </span>
           <span><small>Goles</small><b id="goalsTotal">0</b></span>
         </article>
-        <article>
+        <article class="league-only-summary">
           <span class="summary-icon sheets">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></svg>
           </span>
@@ -145,8 +160,8 @@
           </div>
           <div class="stat-key">
             <span>PTS <small>Puntos</small></span>
-            <span>GOL <small>Goles</small></span>
-            <span>CS <small>Portería a cero</small></span>
+            <span class="league-only-stat">GOL <small>Goles</small></span>
+            <span class="league-only-stat">CS <small>Portería a cero</small></span>
           </div>
         </div>
         <div id="playerRows" class="player-entry-list"></div>
@@ -199,7 +214,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=34-20260724"></script>
-  <script src="admin.js?v=34-20260724"></script>
+  <script src="supabase-config.js?v=40-20260725"></script>
+  <script src="admin.js?v=40-20260725"></script>
 </body>
 </html>

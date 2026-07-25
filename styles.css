@@ -4814,6 +4814,452 @@ body.is-offline::after{
   }
 }
 
+/* ===== CUBAN LEAGUE V40 · CHAMPIONS GROUP STAGE ===== */
+.champions-format-strip{
+  display:grid;
+  grid-template-columns:.8fr 1.35fr .95fr;
+  gap:10px;
+  margin:14px 0 26px;
+}
+
+.champions-format-strip article{
+  position:relative;
+  min-height:105px;
+  overflow:hidden;
+  padding:17px 18px;
+  border:1px solid rgba(108,255,115,.13);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 100%,rgba(92,229,215,.08),transparent 48%),
+    rgba(5,20,17,.88);
+}
+
+.champions-format-strip article::before{
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  left:0;
+  height:2px;
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent 82%);
+}
+
+.champions-format-strip span,
+.champions-format-strip b,
+.champions-format-strip small{
+  display:block;
+}
+
+.champions-format-strip span{
+  color:#6f8c80;
+  font-size:.62rem;
+  font-weight:900;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+
+.champions-format-strip b{
+  margin-top:8px;
+  color:#f3faf6;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.25rem;
+  letter-spacing:-.035em;
+}
+
+.champions-format-strip small{
+  margin-top:6px;
+  color:#829a90;
+  font-size:.65rem;
+}
+
+.champions-section-head{
+  align-items:flex-end;
+}
+
+.champions-helper{
+  max-width:650px;
+  margin:9px 0 0;
+  color:#82988f;
+  font-size:.77rem;
+}
+
+.champions-group-grid{
+  grid-template-columns:1fr;
+  gap:15px;
+}
+
+.champions-group{
+  padding:0;
+  overflow:hidden;
+  border-color:rgba(92,229,215,.16);
+  background:
+    radial-gradient(circle at 95% 0%,rgba(91,229,216,.065),transparent 30%),
+    linear-gradient(145deg,rgba(7,25,21,.98),rgba(4,16,15,.98));
+}
+
+.champions-group::before{
+  height:2px;
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent 75%);
+}
+
+.champions-group-head{
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:17px 18px 15px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.champions-group-icon{
+  display:grid;
+  width:46px;
+  height:46px;
+  place-items:center;
+  border:1px solid rgba(108,255,115,.22);
+  border-radius:14px;
+  color:var(--green);
+  background:rgba(108,255,115,.055);
+}
+
+.champions-group-icon .ui-icon{
+  width:21px;
+  height:21px;
+}
+
+.champions-group-head h3,
+.champions-group-head small{
+  display:block;
+}
+
+.champions-group-head h3{
+  margin:0;
+  color:#f2f8f5;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.16rem;
+  letter-spacing:-.035em;
+}
+
+.champions-group-head small{
+  margin-top:4px;
+  color:#71887e;
+  font-size:.64rem;
+}
+
+.champions-round-count{
+  min-width:52px;
+  padding:7px 9px;
+  border:1px solid rgba(92,229,215,.17);
+  border-radius:999px;
+  color:#7ce7dd;
+  background:rgba(92,229,215,.055);
+  font-size:.65rem;
+  font-weight:900;
+  text-align:center;
+}
+
+.champions-score-scroll{
+  overflow-x:auto;
+  outline:0;
+  overscroll-behavior-inline:contain;
+  scrollbar-color:rgba(108,255,115,.28) transparent;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+
+.champions-score-scroll:focus-visible{
+  box-shadow:inset 0 0 0 2px rgba(108,255,115,.3);
+}
+
+.champions-score-table{
+  min-width:900px;
+}
+
+.champions-score-grid{
+  display:grid;
+  grid-template-columns:38px minmax(190px,1fr) repeat(8,minmax(48px,.55fr)) 78px;
+  align-items:center;
+}
+
+.champions-score-head{
+  min-height:39px;
+  color:#70897d;
+  background:#0b251e;
+  font-size:.56rem;
+  font-weight:900;
+  letter-spacing:.055em;
+  text-align:center;
+  text-transform:uppercase;
+}
+
+.champions-score-head>span:nth-child(2){
+  padding-left:10px;
+  text-align:left;
+}
+
+.champions-score-row{
+  min-height:66px;
+  border-top:1px solid rgba(255,255,255,.055);
+  background:rgba(4,17,15,.92);
+}
+
+.champions-score-row:hover{
+  background:rgba(108,255,115,.025);
+}
+
+.champions-rank{
+  color:#70877c;
+  font-size:.73rem;
+  font-weight:900;
+  text-align:center;
+}
+
+.champions-team-cell{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  height:100%;
+  padding:8px 10px;
+  cursor:pointer;
+}
+
+.champions-team-cell img{
+  width:39px;
+  height:39px;
+  flex:0 0 auto;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  object-fit:cover;
+  background:#10241c;
+}
+
+.champions-team-cell b{
+  overflow:hidden;
+  color:#eaf4ef;
+  font-size:.72rem;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.champions-team-cell:hover b,
+.champions-team-cell:focus-visible b{
+  color:var(--green);
+}
+
+.champions-points-cell{
+  display:grid;
+  width:36px;
+  height:34px;
+  place-self:center;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:10px;
+  color:#597268;
+  background:rgba(255,255,255,.018);
+  font-size:.66rem;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+
+.champions-points-cell.is-played{
+  border-color:rgba(92,229,215,.2);
+  color:#82eee2;
+  background:rgba(92,229,215,.065);
+}
+
+.champions-total{
+  display:grid;
+  min-height:66px;
+  place-items:center;
+  border-left:1px solid rgba(108,255,115,.1);
+  color:#aaff8c;
+  background:#0a211b;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:.77rem;
+  font-variant-numeric:tabular-nums;
+}
+
+.champions-score-head>span:first-child,
+.champions-rank{
+  position:sticky;
+  left:0;
+  z-index:3;
+  background:#081e19;
+}
+
+.champions-score-head>span:nth-child(2),
+.champions-team-cell{
+  position:sticky;
+  left:38px;
+  z-index:2;
+  background:#071a16;
+}
+
+.champions-score-head>span:first-child,
+.champions-score-head>span:nth-child(2),
+.champions-score-head>span:last-child{
+  z-index:5;
+  align-self:stretch;
+  display:flex;
+  align-items:center;
+}
+
+.champions-score-head>span:first-child{
+  justify-content:center;
+  background:#0b251e;
+}
+
+.champions-score-head>span:nth-child(2){
+  background:#0b251e;
+}
+
+.champions-score-head>span:last-child,
+.champions-total{
+  position:sticky;
+  right:0;
+}
+
+.champions-score-head>span:last-child{
+  justify-content:center;
+  border-left:1px solid rgba(108,255,115,.1);
+  background:#0d2a21;
+}
+
+.champions-group-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:11px 18px;
+  border-top:1px solid rgba(255,255,255,.06);
+  color:#71887e;
+  background:rgba(255,255,255,.015);
+  font-size:.59rem;
+  font-weight:750;
+}
+
+.champions-group-footer span:last-child{
+  color:#78d9d0;
+}
+
+@media(max-width:620px){
+  .champions-format-strip{
+    gap:6px;
+    margin:10px 0 23px;
+  }
+
+  .champions-format-strip article{
+    min-height:94px;
+    padding:13px 9px;
+    border-radius:14px;
+  }
+
+  .champions-format-strip b{
+    margin-top:7px;
+    font-size:.9rem;
+  }
+
+  .champions-format-strip small{
+    font-size:.52rem;
+    line-height:1.25;
+  }
+
+  .champions-format-strip span{
+    font-size:.52rem;
+  }
+
+  .champions-section-head{
+    flex-direction:row;
+    align-items:flex-end;
+  }
+
+  .champions-section-head>div{
+    min-width:0;
+  }
+
+  .champions-section-head h2{
+    font-size:1.45rem;
+  }
+
+  .champions-helper{
+    font-size:.66rem;
+    line-height:1.45;
+  }
+
+  .champions-section-head .status{
+    flex:0 0 auto;
+    padding:7px 9px;
+    font-size:.59rem;
+  }
+
+  .champions-group-grid{
+    gap:10px;
+  }
+
+  .champions-group{
+    border-radius:17px;
+  }
+
+  .champions-group-head{
+    grid-template-columns:40px minmax(0,1fr) auto;
+    gap:10px;
+    padding:13px;
+  }
+
+  .champions-group-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+  }
+
+  .champions-group-head h3{
+    font-size:1rem;
+  }
+
+  .champions-score-table{
+    min-width:790px;
+  }
+
+  .champions-score-grid{
+    grid-template-columns:32px 150px repeat(8,52px) 68px;
+  }
+
+  .champions-score-row{
+    min-height:61px;
+  }
+
+  .champions-score-head>span:nth-child(2),
+  .champions-team-cell{
+    left:32px;
+  }
+
+  .champions-team-cell{
+    gap:7px;
+    padding:7px;
+  }
+
+  .champions-team-cell img{
+    width:35px;
+    height:35px;
+    border-radius:10px;
+  }
+
+  .champions-team-cell b{
+    font-size:.65rem;
+  }
+
+  .champions-total{
+    min-height:61px;
+    font-size:.7rem;
+  }
+
+  .champions-group-footer{
+    padding:10px 13px;
+    font-size:.54rem;
+  }
+}
+
 /* =========================================================
    V36 — PORTADA MINIMALISTA PREMIUM
    ========================================================= */
@@ -8046,4 +8492,27 @@ footer{
   .record-value b{
     font-size:1.55rem;
   }
+}
+
+/* V40 final cascade guard for the table-style Champions cards. */
+#champions .champions-group{
+  padding:0;
+  overflow:hidden;
+  border-color:rgba(92,229,215,.16);
+  background:
+    radial-gradient(circle at 95% 0%,rgba(91,229,216,.065),transparent 30%),
+    linear-gradient(145deg,rgba(7,25,21,.98),rgba(4,16,15,.98));
+}
+
+#champions .champions-group:hover{
+  border-color:rgba(108,255,115,.28);
+  background:
+    radial-gradient(circle at 95% 0%,rgba(91,229,216,.085),transparent 32%),
+    linear-gradient(145deg,rgba(8,28,23,.99),rgba(4,17,15,.99));
+  transform:none;
+}
+
+#champions .champions-group::before{
+  height:2px;
+  background:linear-gradient(90deg,var(--green),var(--turquoise),transparent 75%);
 }

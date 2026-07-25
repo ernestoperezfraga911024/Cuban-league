@@ -1,12 +1,16 @@
 (() => {
   'use strict';
 
-  const VERSION = '34-20260724';
+  const VERSION = '40-20260725';
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
   const state = {
     client: null,
     participants: [],
+    leagueParticipants: [],
+    championsGroups: [],
+    participantIndex: new Map(),
+    competition: 'league',
     matchday: 1,
     published: false,
     dirty: false,
@@ -107,6 +111,22 @@
       .replace(/'/g, '&#039;');
   }
 
+  function isChampionsMode() {
+    return state.competition === 'champions';
+  }
+
+  function currentSeasonKey() {
+    return isChampionsMode() ? `${config.season}-CHAMPIONS` : config.season;
+  }
+
+  function currentCompetitionLabel() {
+    return isChampionsMode() ? 'Champions' : 'Liga';
+  }
+
+  function currentMatchdayCount() {
+    return isChampionsMode() ? 8 : 38;
+  }
+
   function friendlyError(error) {
     const message = String(error?.message || error || '');
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
@@ -136,7 +156,7 @@
 
   function setButtonsBusy(busy) {
     state.saving = busy;
-    [$('saveDraftButton'), $('publishButton')].forEach(button => {
+    [$('saveDraftButton'), $('publishButton'), $('leagueModeButton'), $('championsModeButton')].forEach(button => {
       button.disabled = busy;
     });
     $('matchdaySelect').disabled = busy;
@@ -161,13 +181,19 @@
   }
 
   function syncPublicationUI() {
+    const champions = isChampionsMode();
     const badge = $('publicationBadge');
     badge.classList.toggle('published', state.published);
     badge.classList.toggle('draft', !state.published);
     badge.querySelector('b').textContent = state.published ? 'Publicada' : 'Borrador';
     $('saveDraftButton').querySelector('span').textContent = state.published ? 'Guardar cambios' : 'Guardar borrador';
-    $('publishButton').querySelector('span').textContent = state.published ? 'Actualizar publicación' : 'Publicar jornada';
+    $('publishButton').querySelector('span').textContent = state.published
+      ? 'Actualizar publicación'
+      : champions
+        ? 'Publicar en Champions'
+        : 'Publicar jornada';
     $('dockMatchday').textContent = state.matchday;
+    $('dockSeason').textContent = champions ? 'Champions · fase de grupos' : config.season;
   }
 
   function formatSavedAt(rows) {
@@ -192,30 +218,30 @@
     const rows = [...document.querySelectorAll('.admin-player')];
     const total = stat => rows.reduce((sum, row) => {
       const input = row.querySelector(`[data-stat="${stat}"]`);
-      return sum + valueFor(input);
+      return sum + (input ? valueFor(input) : 0);
     }, 0);
     $('pointsTotal').textContent = total('points').toLocaleString();
     $('goalsTotal').textContent = total('goals').toLocaleString();
     $('cleanSheetsTotal').textContent = total('clean_sheets').toLocaleString();
   }
 
-  function renderPlayerRows(records = []) {
-    const recordMap = new Map(records.map(row => [row.participant_name, row]));
-    $('playerRows').innerHTML = state.participants.map((participant, index) => {
-      const row = recordMap.get(participant.name) || {};
-      const name = escapeHtml(participant.name);
-      const shield = escapeHtml(participant.shield);
-      const playerId = Number(participant.id);
-      return `
-        <article class="admin-player" data-player-id="${playerId}">
-          <div class="admin-player-info">
-            <img src="${shield}" alt="">
-            <span><b>${name}</b><small>Participante ${String(index + 1).padStart(2, '0')}</small></span>
-          </div>
-          <div class="stat-input-wrap">
-            <label for="points-${playerId}">PTS</label>
-            <input class="stat-input" id="points-${playerId}" data-stat="points" type="number" inputmode="numeric" step="1" value="${Number(row.points) || 0}" aria-label="Puntos de ${name}">
-          </div>
+  function renderAdminPlayer(participant, row, subtitle) {
+    const champions = isChampionsMode();
+    const name = escapeHtml(participant.name);
+    const shield = escapeHtml(participant.shield);
+    const playerId = Number(participant.id);
+    const inputPrefix = champions ? 'champions' : 'league';
+    return `
+      <article class="admin-player${champions ? ' champions-admin-player' : ''}" data-player-id="${playerId}">
+        <div class="admin-player-info">
+          <img src="${shield}" alt="">
+          <span><b>${name}</b><small>${escapeHtml(subtitle)}</small></span>
+        </div>
+        <div class="stat-input-wrap">
+          <label for="${inputPrefix}-points-${playerId}">PTS</label>
+          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="number" inputmode="numeric" step="1" value="${Number(row.points) || 0}" aria-label="Puntos de ${name}">
+        </div>
+        ${champions ? '' : `
           <div class="stat-input-wrap">
             <label for="goals-${playerId}">GOL</label>
             <input class="stat-input" id="goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.goals) || 0}" aria-label="Goles de ${name}">
@@ -223,9 +249,38 @@
           <div class="stat-input-wrap">
             <label for="clean-sheets-${playerId}">CS</label>
             <input class="stat-input" id="clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.clean_sheets) || 0}" aria-label="Clean sheets de ${name}">
-          </div>
-        </article>`;
-    }).join('');
+          </div>`}
+      </article>`;
+  }
+
+  function renderPlayerRows(records = []) {
+    const recordMap = new Map(records.map(row => [row.participant_name, row]));
+    if (isChampionsMode()) {
+      $('playerRows').innerHTML = state.championsGroups.map(group => {
+        const groupPlayers = group.teams
+          .map(name => state.participantIndex.get(name))
+          .filter(Boolean);
+        return `<section class="champions-admin-group">
+          <header>
+            <span class="champions-admin-shield">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.8 3 7.9 7.5 9.5 4.5-1.6 7.5-4.7 7.5-9.5V6L12 3Z"/></svg>
+            </span>
+            <span><b>${escapeHtml(group.name)}</b><small>5 competidores · jornada ${state.matchday} de 8</small></span>
+          </header>
+          <div>${groupPlayers.map(participant =>
+            renderAdminPlayer(participant, recordMap.get(participant.name) || {}, group.name)
+          ).join('')}</div>
+        </section>`;
+      }).join('');
+    } else {
+      $('playerRows').innerHTML = state.participants.map((participant, index) =>
+        renderAdminPlayer(
+          participant,
+          recordMap.get(participant.name) || {},
+          `Participante ${String(index + 1).padStart(2, '0')}`
+        )
+      ).join('');
+    }
     updateTotals();
   }
 
@@ -233,13 +288,15 @@
     return [...document.querySelectorAll('.admin-player')].map(node => {
       const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
       const points = valueFor(node.querySelector('[data-stat="points"]'));
-      const goals = valueFor(node.querySelector('[data-stat="goals"]'));
-      const cleanSheets = valueFor(node.querySelector('[data-stat="clean_sheets"]'));
+      const goalsInput = node.querySelector('[data-stat="goals"]');
+      const cleanSheetsInput = node.querySelector('[data-stat="clean_sheets"]');
+      const goals = goalsInput ? valueFor(goalsInput) : 0;
+      const cleanSheets = cleanSheetsInput ? valueFor(cleanSheetsInput) : 0;
       if (goals < 0 || cleanSheets < 0) {
         throw new Error(`Los goles y clean sheets de ${participant.name} no pueden ser negativos.`);
       }
       return {
-        season: config.season,
+        season: currentSeasonKey(),
         matchday: state.matchday,
         participant_name: participant.name,
         points,
@@ -256,7 +313,7 @@
     const { data, error } = await state.client
       .from('matchday_stats')
       .select('participant_name,points,goals,clean_sheets,published,updated_at')
-      .eq('season', config.season)
+      .eq('season', currentSeasonKey())
       .eq('matchday', state.matchday);
 
     if (error) {
@@ -273,11 +330,53 @@
     markDirty(false);
   }
 
+  function updateCompetitionUI() {
+    const champions = isChampionsMode();
+    const matchdayCount = currentMatchdayCount();
+    const championNames = state.championsGroups.flatMap(group => group.teams);
+    state.participants = champions
+      ? championNames.map(name => state.participantIndex.get(name)).filter(Boolean)
+      : [...state.leagueParticipants];
+
+    if (state.matchday > matchdayCount) state.matchday = 1;
+    $('panelView').classList.toggle('competition-champions', champions);
+    $('leagueModeButton').classList.toggle('active', !champions);
+    $('championsModeButton').classList.toggle('active', champions);
+    $('leagueModeButton').setAttribute('aria-pressed', String(!champions));
+    $('championsModeButton').setAttribute('aria-pressed', String(champions));
+    $('panelTitle').textContent = champions ? 'Registrar Champions' : 'Registrar jornada';
+    $('panelDescription').textContent = champions
+      ? 'Escribe los puntos de cada competidor en J1–J8. El total de cada grupo se calcula automáticamente en la web pública.'
+      : 'Los cambios se ven en la clasificación pública únicamente después de publicarlos.';
+    $('entryTitle').textContent = champions
+      ? `${state.participants.length} competidores · 4 grupos`
+      : `${state.participants.length} participantes`;
+    $('matchdaySelect').innerHTML = Array.from({ length: matchdayCount }, (_, index) => {
+      const matchday = index + 1;
+      return `<option value="${matchday}">Jornada ${matchday}</option>`;
+    }).join('');
+    $('matchdaySelect').value = String(state.matchday);
+    $('savedAt').textContent = 'Todavía no guardada';
+    syncPublicationUI();
+  }
+
+  async function switchCompetition(competition) {
+    if (competition === state.competition || state.saving) return;
+    if (state.dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres cambiar de competición y descartarlos?')) return;
+    state.competition = competition;
+    state.matchday = 1;
+    state.published = false;
+    markDirty(false);
+    updateCompetitionUI();
+    await loadMatchday();
+  }
+
   async function saveMatchday(publishRequested) {
     if (state.saving) return;
     const willPublish = state.published || publishRequested;
     if (publishRequested && !state.published) {
-      const accepted = window.confirm(`¿Publicar la jornada ${state.matchday}? La clasificación pública se actualizará inmediatamente.`);
+      const competition = currentCompetitionLabel();
+      const accepted = window.confirm(`¿Publicar la jornada ${state.matchday} de ${competition}? La tabla pública se actualizará inmediatamente.`);
       if (!accepted) return;
     }
 
@@ -295,8 +394,8 @@
       $('savedAt').textContent = formatSavedAt(data || []);
       flashMessage(
         willPublish
-          ? `Jornada ${state.matchday} publicada. La clasificación ya puede actualizarse.`
-          : `Borrador de la jornada ${state.matchday} guardado correctamente.`
+          ? `Jornada ${state.matchday} de ${currentCompetitionLabel()} publicada. La tabla ya puede actualizarse.`
+          : `Borrador de la jornada ${state.matchday} de ${currentCompetitionLabel()} guardado correctamente.`
       );
     } catch (error) {
       flashMessage(friendlyError(error), 'error');
@@ -323,8 +422,8 @@
 
       $('sessionEmail').textContent = session.user.email || '';
       $('seasonLabel').textContent = config.season;
-      $('dockSeason').textContent = config.season;
       showOnly('panelView');
+      updateCompetitionUI();
       await loadMatchday();
     } catch (error) {
       setLoginMessage(friendlyError(error));
@@ -374,6 +473,8 @@
     });
 
     $('logoutButton').addEventListener('click', logout);
+    $('leagueModeButton').addEventListener('click', () => switchCompetition('league'));
+    $('championsModeButton').addEventListener('click', () => switchCompetition('champions'));
     $('saveDraftButton').addEventListener('click', () => saveMatchday(false));
     $('publishButton').addEventListener('click', () => saveMatchday(true));
 
@@ -410,12 +511,17 @@
       const response = await fetch(`data.json?v=${VERSION}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('No se pudo cargar la lista de participantes.');
       const league = await response.json();
-      state.participants = league.participants.filter(participant => participant.active !== false);
-      $('entryTitle').textContent = `${state.participants.length} participantes`;
-      $('matchdaySelect').innerHTML = Array.from({ length: 38 }, (_, index) => {
-        const matchday = index + 1;
-        return `<option value="${matchday}">Jornada ${matchday}</option>`;
-      }).join('');
+      state.leagueParticipants = league.participants.filter(participant => participant.active !== false);
+      state.participantIndex = new Map(league.participants.map(participant => [participant.name, participant]));
+      state.championsGroups = Array.isArray(league.champions?.groups) ? league.champions.groups : [];
+      const missingChampionsPlayers = state.championsGroups
+        .flatMap(group => group.teams)
+        .filter(name => !state.participantIndex.has(name));
+      if (missingChampionsPlayers.length) {
+        throw new Error(`Faltan participantes de Champions: ${missingChampionsPlayers.join(', ')}.`);
+      }
+      state.participants = [...state.leagueParticipants];
+      updateCompetitionUI();
 
       state.client = window.supabase.createClient(config.url, config.publishableKey, {
         auth: {

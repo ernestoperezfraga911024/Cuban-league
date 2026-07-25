@@ -935,3 +935,258 @@ noscript{
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* ===== CUBAN ADMIN V40 · COMPETITION SWITCHER + CHAMPIONS ===== */
+.competition-switcher{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:0 0 14px;
+}
+
+.competition-option{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  align-items:center;
+  gap:13px;
+  min-height:78px;
+  padding:13px 15px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:19px;
+  color:#9aafa3;
+  background:rgba(255,255,255,.022);
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .18s,background .18s,transform .18s;
+}
+
+.competition-option:hover{
+  border-color:rgba(159,255,124,.18);
+  transform:translateY(-1px);
+}
+
+.competition-option.active{
+  border-color:rgba(159,255,124,.27);
+  color:#efffeb;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(92,229,215,.08),transparent 45%),
+    rgba(159,255,124,.055);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.competition-option:disabled{
+  cursor:wait;
+  opacity:.55;
+}
+
+.competition-option-icon{
+  display:grid;
+  width:48px;
+  height:48px;
+  place-items:center;
+  border:1px solid rgba(159,255,124,.16);
+  border-radius:14px;
+  color:#7aa18d;
+  background:rgba(159,255,124,.035);
+}
+
+.competition-option.active .competition-option-icon{
+  border-color:rgba(159,255,124,.28);
+  color:var(--green);
+  background:rgba(159,255,124,.075);
+}
+
+.competition-option-icon.trophy{
+  color:#bca766;
+}
+
+.competition-option-icon svg{
+  width:22px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.competition-option>span:last-child,
+.competition-option b,
+.competition-option small{
+  display:block;
+  min-width:0;
+}
+
+.competition-option b{
+  font-size:.9rem;
+}
+
+.competition-option small{
+  margin-top:4px;
+  color:#71877b;
+  font-size:.64rem;
+  line-height:1.35;
+}
+
+.competition-champions .summary-grid{
+  grid-template-columns:1fr;
+}
+
+.competition-champions .league-only-summary,
+.competition-champions .league-only-stat{
+  display:none;
+}
+
+.competition-champions .summary-grid article{
+  border-color:rgba(92,229,215,.13);
+  background:
+    radial-gradient(circle at 100% 50%,rgba(92,229,215,.07),transparent 35%),
+    rgba(255,255,255,.025);
+}
+
+.competition-champions .stat-key{
+  grid-template-columns:92px;
+}
+
+.competition-champions .player-entry-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:14px;
+}
+
+.competition-champions .player-entry-list>.state-card{
+  grid-column:1/-1;
+  margin:25px auto;
+}
+
+.champions-admin-group{
+  overflow:hidden;
+  border:1px solid rgba(92,229,215,.115);
+  border-radius:18px;
+  background:rgba(3,15,12,.42);
+}
+
+.champions-admin-group>header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:61px;
+  padding:11px 13px;
+  border-bottom:1px solid rgba(255,255,255,.065);
+  background:
+    linear-gradient(90deg,rgba(159,255,124,.055),transparent),
+    rgba(255,255,255,.018);
+}
+
+.champions-admin-shield{
+  display:grid;
+  width:37px;
+  height:37px;
+  flex:0 0 auto;
+  place-items:center;
+  border:1px solid rgba(159,255,124,.2);
+  border-radius:11px;
+  color:var(--green);
+  background:rgba(159,255,124,.05);
+}
+
+.champions-admin-shield svg{
+  width:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+}
+
+.champions-admin-group>header>span:last-child,
+.champions-admin-group>header b,
+.champions-admin-group>header small{
+  display:block;
+  min-width:0;
+}
+
+.champions-admin-group>header b{
+  color:#eff9f3;
+  font-size:.82rem;
+}
+
+.champions-admin-group>header small{
+  margin-top:3px;
+  color:#698176;
+  font-size:.58rem;
+}
+
+.champions-admin-group>div{
+  padding:2px 10px 6px;
+}
+
+.competition-champions .champions-admin-player{
+  grid-template-columns:minmax(0,1fr) 92px;
+  min-height:70px;
+  padding:8px 2px;
+}
+
+.competition-champions .champions-admin-player .stat-input{
+  border-color:rgba(92,229,215,.13);
+}
+
+.competition-champions .champions-admin-player .stat-input:focus{
+  border-color:rgba(92,229,215,.48);
+  background:rgba(92,229,215,.05);
+  box-shadow:0 0 0 3px rgba(92,229,215,.06);
+}
+
+@media(max-width:700px){
+  .competition-switcher{
+    gap:7px;
+  }
+
+  .competition-option{
+    grid-template-columns:40px minmax(0,1fr);
+    gap:9px;
+    min-height:70px;
+    padding:10px;
+    border-radius:16px;
+  }
+
+  .competition-option-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+  }
+
+  .competition-option b{
+    font-size:.77rem;
+  }
+
+  .competition-option small{
+    font-size:.54rem;
+  }
+
+  .competition-champions .player-entry-list{
+    grid-template-columns:1fr;
+    gap:9px;
+    padding:9px;
+  }
+
+  .competition-champions .stat-key{
+    grid-template-columns:64px;
+  }
+
+  .competition-champions .champions-admin-player{
+    grid-template-columns:minmax(0,1fr) 64px;
+  }
+}
+
+@media(max-width:390px){
+  .competition-switcher{
+    grid-template-columns:1fr;
+  }
+
+  .competition-option{
+    min-height:62px;
+  }
+
+  .competition-champions .champions-admin-player{
+    grid-template-columns:minmax(0,1fr) 58px;
+  }
+}

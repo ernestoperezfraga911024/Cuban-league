@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=39-20260724"></head><body>
+<link rel="stylesheet" href="styles.css?v=40-20260725"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -197,7 +197,31 @@
   <div id="awardGrid" class="hall-of-fame-grid"></div>
 </section>
 
-<section id="champions" class="page"><div class="champions-banner"><div><span class="eyebrow">CUBAN LEAGUE CHAMPIONS</span><h2>El camino hacia la gloria</h2></div></div><div class="section-head"><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span><span>Fase de grupos</span></h2><span class="status">Preparación</span></div><div id="groupGrid" class="group-grid"></div><div class="section-head lower"><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Eliminatorias</span></h2></div><div id="bracket" class="bracket"></div></section>
+<section id="champions" class="page">
+  <div class="champions-banner">
+    <div>
+      <span class="eyebrow">CUBAN LEAGUE CHAMPIONS</span>
+      <h2>El camino hacia la gloria</h2>
+      <p>Cuatro grupos, partidos de ida y vuelta y ocho jornadas para decidir los clasificados.</p>
+    </div>
+  </div>
+  <div class="champions-format-strip" role="group" aria-label="Formato de la fase de grupos">
+    <article><span>Grupos</span><b>4</b><small>Cinco competidores</small></article>
+    <article><span>Formato</span><b>Ida y vuelta</b><small>Contra cuatro rivales</small></article>
+    <article><span>Partidos</span><b>8</b><small>Por participante</small></article>
+  </div>
+  <div class="section-head champions-section-head">
+    <div>
+      <span class="eyebrow">TABLAS OFICIALES</span>
+      <h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span><span>Fase de grupos</span></h2>
+      <p class="champions-helper">Cada casilla muestra los puntos de esa jornada. El total se calcula automáticamente.</p>
+    </div>
+    <span id="championsStatus" class="status">Preparación</span>
+  </div>
+  <div id="groupGrid" class="group-grid champions-group-grid"></div>
+  <div class="section-head lower"><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Eliminatorias</span></h2></div>
+  <div id="bracket" class="bracket"></div>
+</section>
 
 <section id="news" class="page">
 <div class="minimal-page-banner news-page-banner"><div><span class="eyebrow">ACTUALIDAD</span><h2>Todo lo que pasa en la liga.</h2><p>Novedades, jornadas, anuncios y momentos importantes de la Cuban League.</p></div><span class="page-banner-mark"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg></span></div>
@@ -230,4 +254,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=39-20260724"></script><script src="app.js?v=39-20260724"></script></body></html>
+<script src="supabase-config.js?v=40-20260725"></script><script src="app.js?v=40-20260725"></script></body></html>
