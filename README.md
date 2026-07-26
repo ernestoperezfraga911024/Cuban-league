@@ -1,4 +1,4 @@
-# Cuban League V45
+# Cuban League V46
 
 Sitio oficial de la Cuban League con:
 
@@ -36,6 +36,8 @@ Sitio oficial de la Cuban League con:
   centro, segundo y tercero a los lados, con goleador y clean sheets debajo.
 - El podio se presenta directamente sobre el fondo, sin un marco exterior,
   para ganar espacio y conservar solamente las tarjetas individuales.
+- Récord dinámico de mayor puntuación en una sola temporada, calculado desde el
+  archivo histórico y acompañado por el jugador, la cifra y la temporada.
 
 ## Panel privado
 

@@ -8185,6 +8185,28 @@ footer{
   text-transform:uppercase;
 }
 
+.record-season{
+  display:inline-flex;
+  width:max-content;
+  align-items:center;
+  gap:4px;
+  margin-top:9px;
+  margin-left:auto;
+  padding:4px 7px;
+  border:1px solid currentColor;
+  border-radius:999px;
+  background:rgba(80,230,208,.035);
+  color:currentColor;
+  font-size:.48rem;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.record-season .ui-icon{
+  width:10px;
+  height:10px;
+}
+
 /* Hall of Fame */
 .hall-section-head{
   align-items:center;
@@ -9747,5 +9769,16 @@ footer{
 @media(max-width:370px){
   .hero-kpis{
     padding:0;
+  }
+}
+
+/* =========================================================
+   V46 — RÉCORD DE PUNTOS EN UNA TEMPORADA
+   ========================================================= */
+@media(max-width:700px){
+  .record-season{
+    margin-top:7px;
+    padding:3px 6px;
+    font-size:.43rem;
   }
 }
