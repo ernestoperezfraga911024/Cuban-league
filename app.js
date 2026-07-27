@@ -1,4 +1,4 @@
-const APP_VERSION='59-20260727';
+const APP_VERSION='60-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -402,12 +402,13 @@ function renderCurrent(){
     ?activeParticipants().sort(sortStandings).map((participant,index)=>({...participant,position:index+1}))
     :cumulativeStandings(latest);
   const movements=latest==null?new Map():movementForMatchday(latest);
+  const achievementSnapshot=buildAchievementSnapshot();
   $('updated').textContent=DATA.lastUpdated;
   $('currentRows').innerHTML=rows.map(p=>{
     const isRelegation=p.position>=16&&p.position<=20;
     return `<div class="row current-row${isRelegation?' is-relegation':''}">
     <span class="pos"${isRelegation?` aria-label="Puesto ${p.position}, zona de descenso"`:''}>${p.position}</span>
-    ${teamCell(p.name)}
+    ${standingsTeamCell(p.name,achievementSnapshot)}
     <span class="center">${p.played}</span>
     <span class="num">${p.points.toLocaleString('es')}</span>
     <span class="current-stat current-goals" aria-label="${p.goals??0} goles">${p.goals??0}</span>
@@ -1442,6 +1443,25 @@ function sortFeaturedAchievements(items){
     ||(ACHIEVEMENT_RARITY_WEIGHT[b.rarity]||0)-(ACHIEVEMENT_RARITY_WEIGHT[a.rarity]||0)
     ||a.name.localeCompare(b.name,'es')
   );
+}
+
+function standingsTeamCell(name,snapshot){
+  const badges=sortFeaturedAchievements(
+    playerAchievementState(name,snapshot).filter(item=>item.earned)
+  );
+  const visible=badges.slice(0,3);
+  const remaining=badges.length-visible.length;
+  const badgeLabel=badges.length===1?'1 insignia conseguida':`${badges.length} insignias conseguidas`;
+  return `<div class="team standings-team team-profile-link" ${profileTriggerAttrs(name)}>
+    <img src="${imageMap()[name]||''}" alt="Foto de ${profileAttr(name)}">
+    <div class="standings-team-copy">
+      <span class="name">${name}</span>
+      ${visible.length?`<span class="standings-mini-badges" aria-label="${badgeLabel}">
+        ${visible.map(item=>`<span class="standings-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
+        ${remaining?`<b class="standings-mini-more" aria-label="${remaining} insignias más">+${remaining}</b>`:''}
+      </span>`:''}
+    </div>
+  </div>`;
 }
 
 function renderAchievementHub(snapshot=buildAchievementSnapshot()){

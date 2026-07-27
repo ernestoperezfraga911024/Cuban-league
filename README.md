@@ -1,4 +1,4 @@
-# Cuban League V59
+# Cuban League V60
 
 Sitio oficial de la Cuban League con:
 
@@ -30,6 +30,8 @@ Sitio oficial de la Cuban League con:
   visitas totales, actividad de hoy, últimos siete días y gráfica diaria.
 - Sistema V59 de 15 insignias por logros, con vitrina completa en cada perfil,
   colección general, requisitos visibles y estado conseguido o bloqueado.
+- La tabla general muestra debajo del nombre hasta tres insignias pequeñas de
+  cada jugador y resume las restantes con “+N”, sin añadir otra columna.
 - Insignias históricas, dinámicas y de jornada: Campeón, Dinastía, Habitual del
   podio, Temporada legendaria, Rey de la jornada, En llamas, La Manita de cinco
   goles, El Muro por la mayor racha de clean sheets, líderes actuales y

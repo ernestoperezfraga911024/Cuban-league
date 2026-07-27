@@ -2161,6 +2161,86 @@ img{
   }
 }
 
+/* =========================================================
+   V60 — INSIGNIAS COMPACTAS EN LA TABLA GENERAL
+   ========================================================= */
+.standings-team{
+  align-self:stretch;
+}
+
+.standings-team-copy{
+  display:grid;
+  min-width:0;
+  align-content:center;
+  gap:5px;
+}
+
+.standings-mini-badges{
+  display:flex;
+  min-height:20px;
+  align-items:center;
+  gap:4px;
+}
+
+.standings-mini-badge{
+  display:grid;
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(83,230,202,.25);
+  border-radius:7px;
+  background:#071e1b;
+  box-shadow:0 4px 10px rgba(0,0,0,.2);
+  font-size:.66rem;
+  line-height:1;
+}
+
+.standings-mini-more{
+  display:grid;
+  height:19px;
+  min-width:23px;
+  place-items:center;
+  padding:0 5px;
+  border:1px solid rgba(113,231,144,.2);
+  border-radius:999px;
+  color:#83ed93;
+  background:rgba(44,157,76,.08);
+  font-size:.56rem;
+  line-height:1;
+}
+
+@media(max-width:620px){
+  .current-table-card .standings-team{
+    gap:6px;
+  }
+
+  .current-table-card .standings-team-copy{
+    gap:3px;
+  }
+
+  .standings-mini-badges{
+    min-height:18px;
+    gap:3px;
+  }
+
+  .standings-mini-badge{
+    width:18px;
+    height:18px;
+    flex-basis:18px;
+    border-radius:6px;
+    font-size:.59rem;
+  }
+
+  .standings-mini-more{
+    height:17px;
+    min-width:21px;
+    padding:0 4px;
+    font-size:.52rem;
+  }
+}
+
 
 /* =========================================================
    V17 — COLUMNAS FIJAS MÁS COMPACTAS EN TELÉFONO VERTICAL
