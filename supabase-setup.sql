@@ -1,5 +1,7 @@
 -- CUBAN LEAGUE · PANEL DE ADMINISTRACIÓN
 -- Ejecutar una sola vez en Supabase > SQL Editor.
+-- Después ejecuta también supabase-admin-upgrade-v57.sql para activar
+-- borradores automáticos, historial, correcciones y deshacer.
 -- El único administrador autorizado será:
 -- ernestoperezfraga911024@gmail.com
 

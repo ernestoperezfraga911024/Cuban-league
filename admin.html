@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=56-20260727">
+  <link rel="stylesheet" href="admin.css?v=57-20260727">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -117,6 +117,20 @@
         </button>
       </nav>
 
+      <section class="admin-workflow" aria-label="Proceso de publicación">
+        <article class="active" data-workflow-step="draft">
+          <span>1</span><div><b>Borrador</b><small>Se guarda automáticamente</small></div>
+        </article>
+        <i aria-hidden="true"></i>
+        <article data-workflow-step="review">
+          <span>2</span><div><b>Revisión</b><small>Comprueba todo antes</small></div>
+        </article>
+        <i aria-hidden="true"></i>
+        <article data-workflow-step="published">
+          <span>3</span><div><b>Publicado</b><small>Visible en la web</small></div>
+        </article>
+      </section>
+
       <section class="matchday-toolbar" aria-label="Jornada seleccionada">
         <div class="matchday-select-group">
           <label for="matchdaySelect">Jornada</label>
@@ -152,6 +166,23 @@
         </article>
       </section>
 
+      <section id="completionCard" class="completion-card warning" aria-live="polite">
+        <span id="completionIcon" class="completion-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01"/><path d="M10.3 4.5 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.5a2 2 0 0 0-3.4 0Z"/></svg>
+        </span>
+        <div>
+          <span class="admin-kicker">CONTROL DE DATOS</span>
+          <b id="completionTitle">Faltan participantes por completar</b>
+          <small id="completionMessage">Escribe puntos, goles y clean sheets de todos los participantes, incluso cuando el valor sea 0.</small>
+          <div class="completion-progress"><i id="completionProgress"></i></div>
+          <span id="missingParticipants" class="missing-participants"></span>
+        </div>
+        <button id="editPublishedButton" class="edit-published-button" type="button" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.5-1 10-10-3.5-3.5-10 10L4 20Z"/><path d="m13.5 6.5 3.5 3.5"/></svg>
+          <span>Corregir jornada</span>
+        </button>
+      </section>
+
       <section class="entry-card">
         <div class="entry-card-head">
           <div>
@@ -167,6 +198,23 @@
         <div id="playerRows" class="player-entry-list"></div>
       </section>
 
+      <section class="revision-card">
+        <header>
+          <div>
+            <span class="admin-kicker">HISTORIAL DE MODIFICACIONES</span>
+            <h2>Versiones de esta jornada</h2>
+            <p>Cada publicación y corrección queda registrada para que puedas consultar qué ocurrió.</p>
+          </div>
+          <button id="undoPublicationButton" class="undo-button" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 8 4 13l5 5"/><path d="M5 13h8a6 6 0 0 1 6 6"/></svg>
+            <span>Deshacer última publicación</span>
+          </button>
+        </header>
+        <div id="revisionList" class="revision-list">
+          <div class="revision-empty"><b>Sin modificaciones publicadas</b><small>La primera publicación aparecerá aquí.</small></div>
+        </div>
+      </section>
+
       <p id="panelMessage" class="panel-message" role="status" aria-live="polite" hidden></p>
 
       <div class="action-spacer" aria-hidden="true"></div>
@@ -177,15 +225,36 @@
         </div>
         <button id="saveDraftButton" class="secondary-button" type="button">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5Z"/><path d="M8 4v6h8V4M8 16h8"/></svg>
-          <span>Guardar borrador</span>
+          <span>Guardar ahora</span>
         </button>
         <button id="publishButton" class="primary-button" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/><path d="M5 19h14"/></svg>
-          <span>Publicar jornada</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.1 12s3.6-6 9.9-6 9.9 6 9.9 6-3.6 6-9.9 6-9.9-6-9.9-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+          <span>Vista previa</span>
         </button>
       </div>
     </section>
   </main>
+
+  <div id="previewModal" class="admin-preview-modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle" hidden>
+    <section class="admin-preview-card">
+      <header>
+        <div><span class="admin-kicker">REVISIÓN FINAL</span><h2 id="previewTitle">Vista previa de la jornada</h2><p id="previewSubtitle"></p></div>
+        <button id="closePreview" class="preview-close" type="button" aria-label="Cerrar vista previa">✕</button>
+      </header>
+      <div id="previewSummary" class="preview-summary"></div>
+      <div class="preview-table-shell">
+        <div class="preview-table-head"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span></div>
+        <div id="previewRows" class="preview-rows"></div>
+      </div>
+      <footer>
+        <button id="cancelPreview" class="secondary-button" type="button">Volver a corregir</button>
+        <button id="confirmPublishButton" class="primary-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/><path d="M5 19h14"/></svg>
+          <span>Confirmar publicación</span>
+        </button>
+      </footer>
+    </section>
+  </div>
 
   <div id="adminInstallModal" class="admin-install-modal" role="dialog" aria-modal="true" aria-labelledby="adminInstallTitle" hidden>
     <section class="admin-install-card">
@@ -214,7 +283,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=56-20260727"></script>
-  <script src="admin.js?v=56-20260727"></script>
+  <script src="supabase-config.js?v=57-20260727"></script>
+  <script src="admin.js?v=57-20260727"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-# Cuban League V56
+# Cuban League V57
 
 Sitio oficial de la Cuban League con:
 
@@ -23,6 +23,9 @@ Sitio oficial de la Cuban League con:
   promedio, récord y archivo de todas las jornadas publicadas.
 - Movimiento en la clasificación y forma de las últimas cinco jornadas.
 - Panel privado para registrar y publicar cada jornada desde el celular.
+- Panel privado V57 con guardado automático del borrador, aviso de
+  participantes incompletos, vista previa obligatoria, corrección protegida de
+  jornadas publicadas, historial de versiones y opción de deshacer.
 - Actualización automática de la clasificación mediante Supabase.
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.
@@ -62,5 +65,8 @@ Sitio oficial de la Cuban League con:
 Después de configurar Supabase, el administrador entra mediante `admin.html`.
 Los borradores permanecen privados; la web pública solamente consulta jornadas
 marcadas como publicadas.
+
+Si la base de datos ya estaba configurada antes de V57, ejecuta una sola vez
+`supabase-admin-upgrade-v57.sql` desde Supabase > SQL Editor.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.

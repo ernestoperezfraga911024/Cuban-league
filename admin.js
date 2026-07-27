@@ -1,7 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '40-20260725';
+  const VERSION = '57-20260727';
+  const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
   const state = {
@@ -13,10 +14,23 @@
     competition: 'league',
     matchday: 1,
     published: false,
+    publishedRows: [],
+    editingPublished: false,
+    hasDraft: false,
     dirty: false,
     saving: false,
+    schemaReady: true,
+    history: [],
+    previewRows: [],
+    previewOpen: false,
     messageTimer: null,
-    deferredInstallPrompt: null
+    deferredInstallPrompt: null,
+    autoSaveTimer: null,
+    autoSaveInFlight: false,
+    autoSaveQueued: false,
+    autoSavePromise: null,
+    autoSaveRevision: 0,
+    suspendAutoSave: false
   };
 
   function isStandalone() {
@@ -75,9 +89,6 @@
     $('adminInstallModal').addEventListener('click', event => {
       if (event.target.id === 'adminInstallModal') closeInstallGuide();
     });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !$('adminInstallModal').hidden) closeInstallGuide();
-    });
 
     window.addEventListener('beforeinstallprompt', event => {
       event.preventDefault();
@@ -127,12 +138,22 @@
     return isChampionsMode() ? 8 : 38;
   }
 
+  function localDraftKey() {
+    return `cuban-admin-draft:${currentSeasonKey()}:${state.matchday}`;
+  }
+
+  function isUpgradeError(error) {
+    const message = String(error?.message || error || '');
+    return /matchday_drafts|matchday_change_log|save_matchday_draft|publish_matchday_revision|undo_last_matchday_publication|schema cache|could not find the function|does not exist/i.test(message);
+  }
+
   function friendlyError(error) {
     const message = String(error?.message || error || '');
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
-    if (/is_league_admin|could not find the function|404/i.test(message)) return 'Falta configurar la base de datos. Ejecuta primero el archivo SQL en Supabase.';
+    if (isUpgradeError(error)) return 'Falta activar las nuevas funciones del panel. Ejecuta “supabase-admin-upgrade-v57.sql” una sola vez en Supabase.';
+    if (/is_league_admin|404/i.test(message)) return 'Falta configurar la base de datos. Ejecuta primero el archivo SQL en Supabase.';
     if (/row-level security|permission denied|not authorized|jwt/i.test(message)) return 'Tu sesión no tiene permiso para realizar esta acción.';
     return message || 'Ocurrió un error inesperado. Inténtalo nuevamente.';
   }
@@ -151,67 +172,69 @@
     node.hidden = false;
     state.messageTimer = setTimeout(() => {
       node.hidden = true;
-    }, 5200);
+    }, 6200);
+  }
+
+  function formatDate(value, prefix = '') {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return prefix ? `${prefix} ahora` : 'Ahora';
+    return `${prefix}${new Intl.DateTimeFormat('es', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(date)}`;
   }
 
   function setButtonsBusy(busy) {
     state.saving = busy;
-    [$('saveDraftButton'), $('publishButton'), $('leagueModeButton'), $('championsModeButton')].forEach(button => {
+    [
+      $('saveDraftButton'),
+      $('publishButton'),
+      $('leagueModeButton'),
+      $('championsModeButton'),
+      $('editPublishedButton'),
+      $('undoPublicationButton'),
+      $('confirmPublishButton')
+    ].filter(Boolean).forEach(button => {
       button.disabled = busy;
     });
     $('matchdaySelect').disabled = busy;
-    document.querySelectorAll('.stat-input').forEach(input => {
-      input.disabled = busy;
-    });
     if (busy) {
       $('saveDraftButton').querySelector('span').textContent = 'Guardando…';
-      $('publishButton').querySelector('span').textContent = 'Guardando…';
-    } else {
-      syncPublicationUI();
+      $('publishButton').querySelector('span').textContent = 'Procesando…';
+      $('confirmPublishButton').querySelector('span').textContent = 'Publicando…';
     }
+    syncPublicationUI();
   }
 
-  function markDirty(dirty = true) {
+  function markDirty(dirty = true, label = '') {
     state.dirty = dirty;
     const node = $('changeState');
     node.classList.toggle('dirty', dirty);
     node.innerHTML = dirty
-      ? '<i></i> Hay cambios sin guardar'
-      : '<i></i> Todos los cambios guardados';
+      ? `<i></i> ${label || 'Guardando borrador automáticamente…'}`
+      : `<i></i> ${label || (state.hasDraft ? 'Borrador guardado automáticamente' : 'Todos los cambios guardados')}`;
   }
 
-  function syncPublicationUI() {
-    const champions = isChampionsMode();
-    const badge = $('publicationBadge');
-    badge.classList.toggle('published', state.published);
-    badge.classList.toggle('draft', !state.published);
-    badge.querySelector('b').textContent = state.published ? 'Publicada' : 'Borrador';
-    $('saveDraftButton').querySelector('span').textContent = state.published ? 'Guardar cambios' : 'Guardar borrador';
-    $('publishButton').querySelector('span').textContent = state.published
-      ? 'Actualizar publicación'
-      : champions
-        ? 'Publicar en Champions'
-        : 'Publicar jornada';
-    $('dockMatchday').textContent = state.matchday;
-    $('dockSeason').textContent = champions ? 'Champions · fase de grupos' : config.season;
+  function setWorkflowStep(step) {
+    const order = ['draft', 'review', 'published'];
+    const activeIndex = order.indexOf(step);
+    document.querySelectorAll('[data-workflow-step]').forEach((item, index) => {
+      item.classList.toggle('active', index === activeIndex);
+      item.classList.toggle('complete', index < activeIndex);
+    });
+    document.querySelectorAll('.admin-workflow>i').forEach((line, index) => {
+      line.classList.toggle('complete', index < activeIndex);
+    });
   }
 
-  function formatSavedAt(rows) {
-    if (!rows.length) return 'Todavía no guardada';
-    const latest = rows.reduce((result, row) => {
-      const date = new Date(row.updated_at);
-      return !result || date > result ? date : result;
-    }, null);
-    if (!latest || Number.isNaN(latest.getTime())) return 'Guardada';
-    return `Guardada ${new Intl.DateTimeFormat('es', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    }).format(latest)}`;
+  function inputNumberOrNull(input) {
+    if (!input || input.value.trim() === '') return null;
+    const value = Number.parseInt(input.value, 10);
+    return Number.isFinite(value) ? value : null;
   }
 
   function valueFor(input) {
-    const value = Number.parseInt(input.value, 10);
-    return Number.isFinite(value) ? value : 0;
+    return inputNumberOrNull(input) ?? 0;
   }
 
   function updateTotals() {
@@ -223,6 +246,119 @@
     $('pointsTotal').textContent = total('points').toLocaleString();
     $('goalsTotal').textContent = total('goals').toLocaleString();
     $('cleanSheetsTotal').textContent = total('clean_sheets').toLocaleString();
+  }
+
+  function validationState() {
+    const missing = [];
+    const complete = [];
+    document.querySelectorAll('.admin-player').forEach(node => {
+      const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
+      const inputs = [...node.querySelectorAll('.stat-input')];
+      const rowComplete = inputs.length === 3 && inputs.every(input => inputNumberOrNull(input) !== null);
+      node.classList.toggle('is-incomplete', !rowComplete);
+      inputs.forEach(input => input.classList.toggle('is-missing', inputNumberOrNull(input) === null));
+      if (rowComplete) complete.push(participant?.name);
+      else if (participant) missing.push(participant.name);
+    });
+    return { missing, complete, total: state.participants.length };
+  }
+
+  function updateCompletionState() {
+    const result = validationState();
+    const locked = state.published && !state.editingPublished;
+    const card = $('completionCard');
+    const percent = result.total ? Math.round((result.complete.length / result.total) * 100) : 0;
+    card.classList.toggle('warning', result.missing.length > 0 && !locked);
+    card.classList.toggle('complete', result.missing.length === 0 && !locked);
+    card.classList.toggle('published-locked', locked);
+    $('completionProgress').style.width = `${locked ? 100 : percent}%`;
+    $('editPublishedButton').hidden = !locked;
+
+    if (locked) {
+      $('completionTitle').textContent = 'Jornada publicada y protegida';
+      $('completionMessage').textContent = 'La web pública no cambiará por accidente. Pulsa “Corregir jornada” para preparar una nueva versión.';
+      $('missingParticipants').textContent = 'Publicación activa · edición bloqueada';
+    } else if (result.missing.length) {
+      $('completionTitle').textContent = `Faltan ${result.missing.length} de ${result.total} participantes`;
+      $('completionMessage').textContent = 'Completa PTS, GOL y CS de todos. Cuando no haya datos, escribe 0.';
+      const visible = result.missing.slice(0, 6);
+      $('missingParticipants').textContent = `Pendientes: ${visible.join(', ')}${result.missing.length > visible.length ? ` y ${result.missing.length - visible.length} más` : ''}`;
+    } else {
+      $('completionTitle').textContent = `Los ${result.total} participantes están completos`;
+      $('completionMessage').textContent = 'Todo está listo. Abre la vista previa y revisa los datos antes de publicarlos.';
+      $('missingParticipants').textContent = 'Validación completa · sin participantes pendientes';
+    }
+
+    const canPreview = !locked && result.missing.length === 0 && state.schemaReady && !state.saving;
+    $('publishButton').disabled = !canPreview;
+    return result;
+  }
+
+  function syncInputLock() {
+    const locked = state.saving || (state.published && !state.editingPublished);
+    document.querySelectorAll('.stat-input').forEach(input => {
+      input.disabled = locked;
+    });
+    $('entryTitle').closest('.entry-card').classList.toggle('is-locked', locked && state.published);
+  }
+
+  function syncPublicationUI() {
+    const locked = state.published && !state.editingPublished;
+    const badge = $('publicationBadge');
+    badge.classList.toggle('published', state.published);
+    badge.classList.toggle('draft', !state.published || state.editingPublished);
+    badge.classList.toggle('editing', state.editingPublished);
+    badge.querySelector('b').textContent = state.editingPublished
+      ? 'Corrección en borrador'
+      : state.published
+        ? 'Publicada'
+        : 'Borrador';
+
+    $('saveDraftButton').querySelector('span').textContent = state.saving
+      ? 'Guardando…'
+      : 'Guardar ahora';
+    $('publishButton').querySelector('span').textContent = state.saving
+      ? 'Procesando…'
+      : state.editingPublished
+        ? 'Revisar corrección'
+        : state.published
+          ? 'Publicada'
+          : 'Vista previa';
+    $('confirmPublishButton').querySelector('span').textContent = state.saving
+      ? 'Publicando…'
+      : state.published
+        ? 'Confirmar corrección'
+        : 'Confirmar publicación';
+
+    $('dockMatchday').textContent = state.matchday;
+    $('dockSeason').textContent = isChampionsMode() ? 'Champions · fase de grupos' : config.season;
+    $('saveDraftButton').disabled = state.saving || locked;
+    syncInputLock();
+    updateCompletionState();
+
+    const activeRevision = state.history.find(item => !item.undone);
+    $('undoPublicationButton').disabled = state.saving || !activeRevision || state.editingPublished || !state.schemaReady;
+    setWorkflowStep(state.previewOpen ? 'review' : locked ? 'published' : 'draft');
+
+    if (locked && !state.saving) {
+      markDirty(false, 'Publicación protegida');
+    }
+  }
+
+  function formatSavedAt(rows) {
+    if (!rows.length) return 'Todavía no guardada';
+    const latest = rows.reduce((result, row) => {
+      const date = new Date(row.updated_at || row.saved_at || row.created_at);
+      return !result || date > result ? date : result;
+    }, null);
+    if (!latest || Number.isNaN(latest.getTime())) return 'Guardada';
+    return formatDate(latest, 'Guardada ');
+  }
+
+  function fieldValue(row, field) {
+    if (!row || !Object.prototype.hasOwnProperty.call(row, field) || row[field] === null || row[field] === undefined) return '';
+    const value = Number(row[field]);
+    return Number.isFinite(value) ? value : '';
   }
 
   function renderAdminPlayer(participant, row, subtitle) {
@@ -239,15 +375,15 @@
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-points-${playerId}">PTS</label>
-          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="number" inputmode="numeric" step="1" value="${Number(row.points) || 0}" aria-label="Puntos de ${name}">
+          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="number" inputmode="numeric" step="1" value="${fieldValue(row, 'points')}" placeholder="—" aria-label="Puntos de ${name}">
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-goals-${playerId}">GOL</label>
-          <input class="stat-input" id="${inputPrefix}-goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.goals) || 0}" aria-label="Goles de ${name}">
+          <input class="stat-input" id="${inputPrefix}-goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'goals')}" placeholder="—" aria-label="Goles de ${name}">
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-clean-sheets-${playerId}">CS</label>
-          <input class="stat-input" id="${inputPrefix}-clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.clean_sheets) || 0}" aria-label="Clean sheets de ${name}">
+          <input class="stat-input" id="${inputPrefix}-clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'clean_sheets')}" placeholder="—" aria-label="Clean sheets de ${name}">
         </div>
       </article>`;
   }
@@ -281,17 +417,20 @@
       ).join('');
     }
     updateTotals();
+    syncPublicationUI();
   }
 
-  function gatherRows(published) {
+  function gatherRows(published, allowIncomplete = false) {
     return [...document.querySelectorAll('.admin-player')].map(node => {
       const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
-      const points = valueFor(node.querySelector('[data-stat="points"]'));
-      const goalsInput = node.querySelector('[data-stat="goals"]');
-      const cleanSheetsInput = node.querySelector('[data-stat="clean_sheets"]');
-      const goals = goalsInput ? valueFor(goalsInput) : 0;
-      const cleanSheets = cleanSheetsInput ? valueFor(cleanSheetsInput) : 0;
-      if (goals < 0 || cleanSheets < 0) {
+      const points = inputNumberOrNull(node.querySelector('[data-stat="points"]'));
+      const goals = inputNumberOrNull(node.querySelector('[data-stat="goals"]'));
+      const cleanSheets = inputNumberOrNull(node.querySelector('[data-stat="clean_sheets"]'));
+      if (!participant) throw new Error('No se pudo identificar uno de los participantes.');
+      if (!allowIncomplete && (points === null || goals === null || cleanSheets === null)) {
+        throw new Error(`Faltan datos de ${participant.name}.`);
+      }
+      if ((goals !== null && goals < 0) || (cleanSheets !== null && cleanSheets < 0)) {
         throw new Error(`Los goles y clean sheets de ${participant.name} no pueden ser negativos.`);
       }
       return {
@@ -306,27 +445,228 @@
     });
   }
 
-  async function loadMatchday() {
-    if (!state.client) return;
-    $('playerRows').innerHTML = '<div class="state-card"><span class="loader" aria-hidden="true"></span><div><b>Cargando jornada</b><small>Un momento…</small></div></div>';
-    const { data, error } = await state.client
-      .from('matchday_stats')
-      .select('participant_name,points,goals,clean_sheets,published,updated_at')
-      .eq('season', currentSeasonKey())
-      .eq('matchday', state.matchday);
+  function saveLocalDraft(rows) {
+    try {
+      localStorage.setItem(localDraftKey(), JSON.stringify({
+        savedAt: new Date().toISOString(),
+        rows
+      }));
+    } catch {
+      // El guardado en Supabase sigue funcionando aunque el navegador bloquee localStorage.
+    }
+  }
 
-    if (error) {
-      renderPlayerRows();
-      flashMessage(friendlyError(error), 'error');
+  function readLocalDraft() {
+    try {
+      const raw = localStorage.getItem(localDraftKey());
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed?.rows)) return null;
+      const expected = new Set(state.participants.map(participant => participant.name));
+      const rows = parsed.rows.filter(row => expected.has(row.participant_name));
+      return rows.length ? { rows, savedAt: parsed.savedAt } : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function clearLocalDraft() {
+    try {
+      localStorage.removeItem(localDraftKey());
+    } catch {
+      // Sin acción adicional.
+    }
+  }
+
+  function scheduleAutoSave() {
+    if (state.suspendAutoSave || (state.published && !state.editingPublished)) return;
+    const rows = gatherRows(false, true);
+    saveLocalDraft(rows);
+    state.hasDraft = true;
+    state.autoSaveRevision += 1;
+    markDirty(true);
+    clearTimeout(state.autoSaveTimer);
+    state.autoSaveTimer = setTimeout(() => persistDraft({ manual: false }), AUTO_SAVE_DELAY);
+    syncPublicationUI();
+  }
+
+  async function persistDraft({ manual = false } = {}) {
+    if (state.published && !state.editingPublished) return false;
+    if (state.autoSaveInFlight) {
+      state.autoSaveQueued = true;
+      return state.autoSavePromise || false;
+    }
+
+    clearTimeout(state.autoSaveTimer);
+    const revision = state.autoSaveRevision;
+    const rows = gatherRows(false, true);
+    saveLocalDraft(rows);
+    state.hasDraft = true;
+
+    if (!state.schemaReady) {
+      markDirty(false, 'Borrador guardado en este dispositivo');
+      $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
+      if (manual) flashMessage('Borrador guardado en este dispositivo. Activa la actualización V57 de Supabase para sincronizarlo.', 'error');
+      return true;
+    }
+
+    state.autoSaveInFlight = true;
+    if (manual) setButtonsBusy(true);
+    const run = async () => {
+      try {
+        const { error } = await state.client.rpc('save_matchday_draft', {
+          p_season: currentSeasonKey(),
+          p_matchday: state.matchday,
+          p_rows: rows
+        });
+        if (error) throw error;
+        $('savedAt').textContent = formatDate(new Date(), 'Guardada ');
+        if (revision === state.autoSaveRevision) {
+          markDirty(false, 'Borrador guardado automáticamente');
+        } else {
+          state.autoSaveQueued = true;
+        }
+        if (manual) flashMessage(`Borrador de la jornada ${state.matchday} guardado correctamente.`);
+        return true;
+      } catch (error) {
+        if (isUpgradeError(error)) state.schemaReady = false;
+        markDirty(false, 'Borrador guardado en este dispositivo');
+        $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
+        if (manual || isUpgradeError(error)) flashMessage(friendlyError(error), 'error');
+        return false;
+      } finally {
+        state.autoSaveInFlight = false;
+        state.autoSavePromise = null;
+        if (manual) setButtonsBusy(false);
+        const shouldRepeat = state.autoSaveQueued && !state.suspendAutoSave;
+        state.autoSaveQueued = false;
+        if (shouldRepeat) {
+          state.autoSaveTimer = setTimeout(() => persistDraft({ manual: false }), 0);
+        }
+        syncPublicationUI();
+      }
+    };
+    state.autoSavePromise = run();
+    return state.autoSavePromise;
+  }
+
+  async function flushAutoSave() {
+    clearTimeout(state.autoSaveTimer);
+    if (state.autoSavePromise) await state.autoSavePromise;
+    if (state.dirty && !state.suspendAutoSave) await persistDraft({ manual: false });
+    if (state.autoSavePromise) await state.autoSavePromise;
+  }
+
+  function snapshotMap(snapshot) {
+    const rows = Array.isArray(snapshot) ? snapshot : [];
+    return new Map(rows.map(row => [row.participant_name, row]));
+  }
+
+  function countSnapshotChanges(beforeSnapshot, afterSnapshot) {
+    const before = snapshotMap(beforeSnapshot);
+    const after = snapshotMap(afterSnapshot);
+    const names = new Set([...before.keys(), ...after.keys()]);
+    let count = 0;
+    names.forEach(name => {
+      const a = before.get(name);
+      const b = after.get(name);
+      if (!a || !b || ['points', 'goals', 'clean_sheets', 'published'].some(key => a[key] !== b[key])) count += 1;
+    });
+    return count;
+  }
+
+  function renderHistory(records = []) {
+    state.history = Array.isArray(records) ? records : [];
+    const list = $('revisionList');
+    if (!state.history.length) {
+      list.innerHTML = '<div class="revision-empty"><b>Sin modificaciones publicadas</b><small>La primera publicación aparecerá aquí.</small></div>';
+      syncPublicationUI();
       return;
     }
 
-    const rows = Array.isArray(data) ? data : [];
-    state.published = rows.some(row => row.published === true);
-    $('savedAt').textContent = formatSavedAt(rows);
-    renderPlayerRows(rows);
+    list.innerHTML = state.history.map((record, index) => {
+      const correction = record.action === 'correction';
+      const undone = record.undone === true;
+      const changes = countSnapshotChanges(record.before_snapshot, record.after_snapshot);
+      const title = correction ? 'Corrección publicada' : 'Publicación inicial';
+      const badge = undone ? 'Deshecha' : correction ? 'Corrección' : 'Publicada';
+      const detail = correction
+        ? `${changes} participante${changes === 1 ? '' : 's'} modificado${changes === 1 ? '' : 's'}`
+        : `${Array.isArray(record.after_snapshot) ? record.after_snapshot.length : changes} participantes publicados`;
+      return `<article class="revision-item${correction ? ' correction' : ''}${undone ? ' undone' : ''}">
+        <span class="revision-number">V${state.history.length - index}</span>
+        <span class="revision-copy"><b>${title}</b><small>${detail} · ${formatDate(record.created_at)}${record.changed_by_email ? ` · ${escapeHtml(record.changed_by_email)}` : ''}</small></span>
+        <span class="revision-badge">${badge}</span>
+      </article>`;
+    }).join('');
     syncPublicationUI();
-    markDirty(false);
+  }
+
+  async function loadMatchday() {
+    if (!state.client) return;
+    clearTimeout(state.autoSaveTimer);
+    state.autoSaveQueued = false;
+    state.previewOpen = false;
+    closePreview(false);
+    $('playerRows').innerHTML = '<div class="state-card"><span class="loader" aria-hidden="true"></span><div><b>Cargando jornada</b><small>Un momento…</small></div></div>';
+
+    const season = currentSeasonKey();
+    const statsResult = await state.client
+      .from('matchday_stats')
+      .select('participant_name,points,goals,clean_sheets,published,updated_at')
+      .eq('season', season)
+      .eq('matchday', state.matchday);
+
+    if (statsResult.error) {
+      renderPlayerRows();
+      flashMessage(friendlyError(statsResult.error), 'error');
+      return;
+    }
+
+    const [draftResult, historyResult] = await Promise.all([
+      state.client
+        .from('matchday_drafts')
+        .select('participant_name,points,goals,clean_sheets,updated_at')
+        .eq('season', season)
+        .eq('matchday', state.matchday),
+      state.client
+        .from('matchday_change_log')
+        .select('id,action,before_snapshot,after_snapshot,changed_by_email,created_at,undone,undone_at')
+        .eq('season', season)
+        .eq('matchday', state.matchday)
+        .order('created_at', { ascending: false })
+        .limit(20)
+    ]);
+
+    state.schemaReady = !draftResult.error && !historyResult.error;
+    if (!state.schemaReady && (isUpgradeError(draftResult.error) || isUpgradeError(historyResult.error))) {
+      flashMessage(friendlyError(draftResult.error || historyResult.error), 'error');
+    }
+
+    const allStats = Array.isArray(statsResult.data) ? statsResult.data : [];
+    const publishedRows = allStats.filter(row => row.published === true);
+    const legacyDraftRows = allStats.filter(row => row.published !== true);
+    const cloudDraftRows = !draftResult.error && Array.isArray(draftResult.data) ? draftResult.data : [];
+    const localDraft = readLocalDraft();
+    const draftRows = localDraft?.rows?.length
+      ? localDraft.rows
+      : cloudDraftRows.length
+        ? cloudDraftRows
+        : legacyDraftRows;
+
+    state.publishedRows = publishedRows;
+    state.published = publishedRows.length > 0;
+    state.hasDraft = draftRows.length > 0;
+    state.editingPublished = state.published && state.hasDraft;
+    const rowsToRender = draftRows.length ? draftRows : publishedRows;
+
+    $('savedAt').textContent = localDraft?.savedAt
+      ? formatDate(localDraft.savedAt, 'Guardada ')
+      : formatSavedAt(draftRows.length ? draftRows : publishedRows);
+    renderPlayerRows(rowsToRender);
+    renderHistory(!historyResult.error && Array.isArray(historyResult.data) ? historyResult.data : []);
+    markDirty(false, state.hasDraft ? 'Borrador recuperado y protegido' : state.published ? 'Publicación protegida' : 'Lista para comenzar');
+    syncPublicationUI();
   }
 
   function updateCompetitionUI() {
@@ -343,10 +683,10 @@
     $('championsModeButton').classList.toggle('active', champions);
     $('leagueModeButton').setAttribute('aria-pressed', String(!champions));
     $('championsModeButton').setAttribute('aria-pressed', String(champions));
-    $('panelTitle').textContent = champions ? 'Registrar Champions' : 'Registrar jornada';
+    $('panelTitle').textContent = champions ? 'Administrar Champions' : 'Administrar jornadas';
     $('panelDescription').textContent = champions
-      ? 'Escribe los puntos, goles y clean sheets de cada competidor en J1–J8. Los totales del grupo se calculan automáticamente.'
-      : 'Los cambios se ven en la clasificación pública únicamente después de publicarlos.';
+      ? 'Registra cada fecha con guardado automático, revisión previa y un historial seguro de correcciones.'
+      : 'Prepara, revisa y publica cada jornada sin riesgo de perder datos ni modificar la web por accidente.';
     $('entryTitle').textContent = champions
       ? `${state.participants.length} competidores · 4 grupos`
       : `${state.participants.length} participantes`;
@@ -359,46 +699,158 @@
     syncPublicationUI();
   }
 
+  async function prepareNavigation() {
+    if (!state.dirty) return;
+    await flushAutoSave();
+  }
+
   async function switchCompetition(competition) {
     if (competition === state.competition || state.saving) return;
-    if (state.dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres cambiar de competición y descartarlos?')) return;
+    await prepareNavigation();
     state.competition = competition;
     state.matchday = 1;
     state.published = false;
+    state.publishedRows = [];
+    state.editingPublished = false;
+    state.hasDraft = false;
     markDirty(false);
     updateCompetitionUI();
     await loadMatchday();
   }
 
-  async function saveMatchday(publishRequested) {
-    if (state.saving) return;
-    const willPublish = state.published || publishRequested;
-    if (publishRequested && !state.published) {
-      const competition = currentCompetitionLabel();
-      const accepted = window.confirm(`¿Publicar la jornada ${state.matchday} de ${competition}? La tabla pública se actualizará inmediatamente.`);
-      if (!accepted) return;
+  function startCorrection() {
+    if (!state.published || state.saving) return;
+    state.editingPublished = true;
+    state.hasDraft = true;
+    state.autoSaveRevision += 1;
+    saveLocalDraft(gatherRows(false, true));
+    syncPublicationUI();
+    scheduleAutoSave();
+    flashMessage('Modo corrección activado. La web pública seguirá mostrando la versión anterior hasta que confirmes la nueva.');
+    requestAnimationFrame(() => document.querySelector('.stat-input')?.focus());
+  }
+
+  function openPreview() {
+    const validation = updateCompletionState();
+    if (validation.missing.length) {
+      flashMessage(`Faltan ${validation.missing.length} participantes. Completa todos los campos antes de revisar.`, 'error');
+      $('completionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!state.schemaReady) {
+      flashMessage('Primero activa la actualización V57 de Supabase para publicar con historial y deshacer.', 'error');
+      return;
     }
 
-    try {
-      const rows = gatherRows(willPublish);
-      setButtonsBusy(true);
-      const { data, error } = await state.client
-        .from('matchday_stats')
-        .upsert(rows, { onConflict: 'season,matchday,participant_name' })
-        .select('participant_name,points,goals,clean_sheets,published,updated_at');
-      if (error) throw error;
+    const rows = gatherRows(true, false);
+    state.previewRows = [...rows].sort((a, b) =>
+      b.points - a.points ||
+      b.goals - a.goals ||
+      b.clean_sheets - a.clean_sheets ||
+      a.participant_name.localeCompare(b.participant_name, 'es')
+    );
+    const total = key => rows.reduce((sum, row) => sum + row[key], 0);
+    $('previewTitle').textContent = state.published ? 'Revisar corrección' : 'Vista previa de la jornada';
+    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes`;
+    $('previewSummary').innerHTML = `
+      <article><small>Participantes</small><b>${rows.length}</b></article>
+      <article><small>Puntos</small><b>${total('points').toLocaleString()}</b></article>
+      <article><small>Goles</small><b>${total('goals').toLocaleString()}</b></article>
+      <article><small>Clean sheets</small><b>${total('clean_sheets').toLocaleString()}</b></article>`;
+    $('previewRows').innerHTML = state.previewRows.map((row, index) => {
+      const participant = state.participantIndex.get(row.participant_name);
+      return `<div class="preview-row">
+        <span>${index + 1}</span>
+        <span class="preview-player"><img src="${escapeHtml(participant?.shield || '')}" alt=""><b>${escapeHtml(row.participant_name)}</b></span>
+        <span>${row.points}</span><span>${row.goals}</span><span>${row.clean_sheets}</span>
+      </div>`;
+    }).join('');
+    $('confirmPublishButton').querySelector('span').textContent = state.published ? 'Confirmar corrección' : 'Confirmar publicación';
+    $('previewModal').hidden = false;
+    document.body.classList.add('preview-open');
+    state.previewOpen = true;
+    syncPublicationUI();
+    requestAnimationFrame(() => $('closePreview').focus());
+  }
 
-      state.published = willPublish;
-      markDirty(false);
-      $('savedAt').textContent = formatSavedAt(data || []);
+  function closePreview(returnFocus = true) {
+    if (!$('previewModal')) return;
+    $('previewModal').hidden = true;
+    document.body.classList.remove('preview-open');
+    state.previewOpen = false;
+    syncPublicationUI();
+    if (returnFocus) $('publishButton').focus();
+  }
+
+  async function publishPreview() {
+    if (state.saving || !state.previewRows.length) return;
+    state.suspendAutoSave = true;
+    state.autoSaveQueued = false;
+    clearTimeout(state.autoSaveTimer);
+    if (state.autoSavePromise) await state.autoSavePromise;
+
+    try {
+      setButtonsBusy(true);
+      const wasCorrection = state.published;
+      const { data, error } = await state.client.rpc('publish_matchday_revision', {
+        p_season: currentSeasonKey(),
+        p_matchday: state.matchday,
+        p_rows: state.previewRows
+      });
+      if (error) throw error;
+      clearLocalDraft();
+      state.hasDraft = false;
+      state.dirty = false;
+      state.editingPublished = false;
+      state.published = Array.isArray(data) ? data.length > 0 : true;
+      closePreview(false);
+      await loadMatchday();
       flashMessage(
-        willPublish
-          ? `Jornada ${state.matchday} de ${currentCompetitionLabel()} publicada. La tabla ya puede actualizarse.`
-          : `Borrador de la jornada ${state.matchday} de ${currentCompetitionLabel()} guardado correctamente.`
+        wasCorrection
+          ? `Corrección de la jornada ${state.matchday} publicada. La versión anterior quedó guardada en el historial.`
+          : `Jornada ${state.matchday} publicada correctamente. Ya está visible en la web.`
       );
     } catch (error) {
+      if (isUpgradeError(error)) state.schemaReady = false;
       flashMessage(friendlyError(error), 'error');
     } finally {
+      state.suspendAutoSave = false;
+      setButtonsBusy(false);
+    }
+  }
+
+  async function undoLastPublication() {
+    const latest = state.history.find(item => !item.undone);
+    if (!latest || state.saving) return;
+    const accepted = window.confirm(
+      `¿Deshacer la última publicación de la jornada ${state.matchday}? ` +
+      'La tabla pública volverá inmediatamente a la versión anterior.'
+    );
+    if (!accepted) return;
+
+    try {
+      state.suspendAutoSave = true;
+      setButtonsBusy(true);
+      const { data, error } = await state.client.rpc('undo_last_matchday_publication', {
+        p_season: currentSeasonKey(),
+        p_matchday: state.matchday
+      });
+      if (error) throw error;
+      clearLocalDraft();
+      state.hasDraft = false;
+      state.dirty = false;
+      state.editingPublished = false;
+      await loadMatchday();
+      flashMessage(
+        Array.isArray(data) && data.length
+          ? `Última modificación deshecha. La jornada ${state.matchday} volvió a su versión anterior.`
+          : `Publicación deshecha. La jornada ${state.matchday} dejó de estar visible en la web.`
+      );
+    } catch (error) {
+      if (isUpgradeError(error)) state.schemaReady = false;
+      flashMessage(friendlyError(error), 'error');
+    } finally {
+      state.suspendAutoSave = false;
       setButtonsBusy(false);
     }
   }
@@ -454,7 +906,7 @@
   }
 
   async function logout() {
-    if (state.dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres cerrar la sesión de todos modos?')) return;
+    await prepareNavigation();
     await state.client.auth.signOut();
     state.dirty = false;
     $('adminPassword').value = '';
@@ -474,16 +926,25 @@
     $('logoutButton').addEventListener('click', logout);
     $('leagueModeButton').addEventListener('click', () => switchCompetition('league'));
     $('championsModeButton').addEventListener('click', () => switchCompetition('champions'));
-    $('saveDraftButton').addEventListener('click', () => saveMatchday(false));
-    $('publishButton').addEventListener('click', () => saveMatchday(true));
+    $('saveDraftButton').addEventListener('click', () => persistDraft({ manual: true }));
+    $('publishButton').addEventListener('click', openPreview);
+    $('editPublishedButton').addEventListener('click', startCorrection);
+    $('undoPublicationButton').addEventListener('click', undoLastPublication);
+    $('closePreview').addEventListener('click', () => closePreview());
+    $('cancelPreview').addEventListener('click', () => closePreview());
+    $('confirmPublishButton').addEventListener('click', publishPreview);
+    $('previewModal').addEventListener('click', event => {
+      if (event.target.id === 'previewModal') closePreview();
+    });
 
     $('matchdaySelect').addEventListener('change', async event => {
       const nextMatchday = Number(event.target.value);
-      if (state.dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres cambiar de jornada y descartarlos?')) {
-        event.target.value = String(state.matchday);
-        return;
-      }
+      await prepareNavigation();
       state.matchday = nextMatchday;
+      state.published = false;
+      state.publishedRows = [];
+      state.editingPublished = false;
+      state.hasDraft = false;
       syncPublicationUI();
       await loadMatchday();
     });
@@ -491,8 +952,14 @@
     $('playerRows').addEventListener('input', event => {
       if (!event.target.matches('.stat-input')) return;
       if (event.target.dataset.stat !== 'points' && valueFor(event.target) < 0) event.target.value = 0;
-      markDirty(true);
       updateTotals();
+      updateCompletionState();
+      scheduleAutoSave();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !$('previewModal').hidden) closePreview();
+      else if (event.key === 'Escape' && !$('adminInstallModal').hidden) closeInstallGuide();
     });
 
     window.addEventListener('beforeunload', event => {
