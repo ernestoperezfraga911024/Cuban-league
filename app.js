@@ -1,4 +1,4 @@
-const APP_VERSION='46-20260726';
+const APP_VERSION='44-20260725';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -1047,7 +1047,6 @@ function recordUnit(title){
     'Más títulos':'títulos',
     'Más podios':'podios',
     'Más puntos acumulados':'puntos',
-    'Más puntos en una temporada':'puntos',
     'Mejor promedio':'pts / temporada',
     'Más temporadas':'temporadas',
     'Más Top 5':'veces'
@@ -1055,46 +1054,14 @@ function recordUnit(title){
   return units[title]||'marca';
 }
 
-function singleSeasonPointsRecord(){
-  const performances=(DATA.historicalTables?.seasonArchive||[]).flatMap(season=>
-    (season.results||[])
-      .filter(result=>result.division===1&&typeof result.points==='number'&&Number.isFinite(result.points))
-      .map(result=>({
-        name:result.name,
-        points:Number(result.points),
-        season:season.season
-      }))
-  );
-  if(!performances.length)return null;
-
-  const maximum=Math.max(...performances.map(result=>result.points));
-  const leaders=performances.filter(result=>result.points===maximum);
-  return {
-    title:'Más puntos en una temporada',
-    player:[...new Set(leaders.map(result=>result.name))].join(' / '),
-    value:maximum.toLocaleString('en-US'),
-    season:[...new Set(leaders.map(result=>result.season))].join(' / ')
-  };
-}
-
-function officialRecords(){
-  const records=DATA.records.filter(record=>record.title!=='Más puntos en una temporada').map(record=>({...record}));
-  const singleSeason=singleSeasonPointsRecord();
-  if(!singleSeason)return records;
-  const accumulatedIndex=records.findIndex(record=>record.title==='Más puntos acumulados');
-  records.splice(accumulatedIndex>=0?accumulatedIndex+1:records.length,0,singleSeason);
-  return records;
-}
-
 function renderRecords(){
-  const records=officialRecords();
   const completedSeasons=(DATA.historicalTables?.seasonArchive||[]).filter(season=>season.results?.length).length;
   $('recordsMeta').innerHTML=`
-    <article><span class="records-meta-icon">${uiIcon('trophy')}</span><div><b>${records.length}</b><small>Marcas oficiales</small></div></article>
+    <article><span class="records-meta-icon">${uiIcon('trophy')}</span><div><b>${DATA.records.length}</b><small>Marcas oficiales</small></div></article>
     <article><span class="records-meta-icon">${uiIcon('calendar')}</span><div><b>${completedSeasons}</b><small>Temporadas analizadas</small></div></article>
     <article><span class="records-meta-icon">${uiIcon('users')}</span><div><b>${DATA.participants.length}</b><small>Perfiles históricos</small></div></article>`;
 
-  $('recordGrid').innerHTML=records.map((record,index)=>{
+  $('recordGrid').innerHTML=DATA.records.map((record,index)=>{
     const category=recordPresentation(record.title);
     return `<article class="record-entry record-${category.tone}">
       <div class="record-entry-head">
@@ -1106,7 +1073,7 @@ function renderRecords(){
           <span class="record-entry-label">${record.title}</span>
           <div class="record-holder">${playerInline(record.player)}</div>
         </div>
-        <div class="record-value"><b>${record.value}</b><small>${recordUnit(record.title)}</small>${record.season?`<span class="record-season">${uiIcon('calendar')} ${record.season}</span>`:''}</div>
+        <div class="record-value"><b>${record.value}</b><small>${recordUnit(record.title)}</small></div>
       </div>
     </article>`;
   }).join('');

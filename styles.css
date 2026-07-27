@@ -8185,28 +8185,6 @@ footer{
   text-transform:uppercase;
 }
 
-.record-season{
-  display:inline-flex;
-  width:max-content;
-  align-items:center;
-  gap:4px;
-  margin-top:9px;
-  margin-left:auto;
-  padding:4px 7px;
-  border:1px solid currentColor;
-  border-radius:999px;
-  background:rgba(80,230,208,.035);
-  color:currentColor;
-  font-size:.48rem;
-  font-weight:900;
-  letter-spacing:.04em;
-}
-
-.record-season .ui-icon{
-  width:10px;
-  height:10px;
-}
-
 /* Hall of Fame */
 .hall-section-head{
   align-items:center;
@@ -9706,79 +9684,5 @@ footer{
 
   .hero-kpis .hero-podium-grid .hero-kpi-first{
     min-height:260px;
-  }
-}
-
-/* =========================================================
-   V45 — PODIO ABIERTO, SIN MARCO EXTERIOR
-   ========================================================= */
-.hero-kpis{
-  max-width:1100px;
-  overflow:visible;
-  padding:0;
-  border:0;
-  border-radius:0;
-  background:none;
-  box-shadow:none;
-  backdrop-filter:none;
-}
-
-.hero-kpis::before,
-.hero-kpis::after{
-  display:none;
-  content:none;
-}
-
-.hero-kpis-heading{
-  padding:0 6px 5px;
-  border-bottom:0;
-}
-
-.hero-podium-grid{
-  gap:18px;
-  margin-top:28px;
-}
-
-.hero-leaders-row{
-  gap:16px;
-  margin-top:18px;
-}
-
-@media(max-width:700px){
-  .hero-kpis{
-    margin-top:32px;
-    padding:0;
-    border-radius:0;
-  }
-
-  .hero-kpis-heading{
-    padding:0 2px 4px;
-  }
-
-  .hero-podium-grid{
-    gap:10px;
-    margin-top:22px;
-  }
-
-  .hero-leaders-row{
-    gap:10px;
-    margin-top:12px;
-  }
-}
-
-@media(max-width:370px){
-  .hero-kpis{
-    padding:0;
-  }
-}
-
-/* =========================================================
-   V46 — RÉCORD DE PUNTOS EN UNA TEMPORADA
-   ========================================================= */
-@media(max-width:700px){
-  .record-season{
-    margin-top:7px;
-    padding:3px 6px;
-    font-size:.43rem;
   }
 }
