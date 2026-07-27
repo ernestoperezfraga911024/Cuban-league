@@ -1,4 +1,4 @@
-# Cuban League V54
+# Cuban League V55
 
 Sitio oficial de la Cuban League con:
 
@@ -15,6 +15,8 @@ Sitio oficial de la Cuban League con:
   de posición y jugador permanecen visibles mientras se desplazan.
 - El ranking histórico elimina el Score y se ordena de forma transparente por
   títulos, podios, Top 5 y puntos acumulados.
+- La portada elimina el bloque decorativo de “Fútbol y datos” para dar prioridad
+  al estado de la temporada, los accesos rápidos y el contenido dinámico.
 - Centro de Jornada con selector, podio semanal, líderes, movimientos,
   promedio, récord y archivo de todas las jornadas publicadas.
 - Movimiento en la clasificación y forma de las últimas cinco jornadas.

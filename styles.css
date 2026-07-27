@@ -7306,7 +7306,7 @@ footer{
    V38 — PULSO DINÁMICO DE LA TEMPORADA
    ========================================================= */
 .season-pulse-section{
-  margin-top:6px;
+  margin-top:42px;
 }
 
 .season-pulse-heading{
@@ -7800,7 +7800,7 @@ footer{
 
 @media(max-width:700px){
   .season-pulse-section{
-    margin-top:2px;
+    margin-top:28px;
   }
 
   .season-pulse-heading{
