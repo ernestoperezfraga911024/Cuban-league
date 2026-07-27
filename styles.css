@@ -2162,6 +2162,179 @@ img{
 }
 
 /* =========================================================
+   V61 — DIRECTORIO DE PARTICIPANTES COMPACTO
+   Más perfiles visibles sin perder foto, datos ni insignias.
+   ========================================================= */
+#players .player-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+#players .player-card{
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr) 30px;
+  min-height:96px;
+  align-items:center;
+  gap:11px;
+  padding:11px 12px;
+  border-radius:15px;
+}
+
+#players .player-card::before{
+  height:2px;
+}
+
+#players .player-card>img{
+  width:58px;
+  height:58px;
+  grid-column:1;
+  grid-row:1;
+  border-radius:15px;
+}
+
+#players .player-card-copy{
+  display:grid;
+  min-width:0;
+  grid-column:2;
+  grid-row:1;
+  align-content:center;
+}
+
+#players .player-card h3,
+#players .player-card small,
+#players .player-card p{
+  min-width:0;
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#players .player-card h3{
+  font-size:.94rem;
+  line-height:1.15;
+}
+
+#players .player-card small{
+  margin-top:2px;
+  color:#8ea39d;
+  font-size:.66rem;
+}
+
+#players .player-card p{
+  margin-top:4px;
+  color:#a9bbb6;
+  font-size:.68rem;
+  line-height:1.25;
+}
+
+#players .player-card-badges{
+  min-height:0;
+  gap:4px;
+  margin:6px 0 0;
+}
+
+#players .player-mini-badge{
+  width:21px;
+  height:21px;
+  border-radius:7px;
+  box-shadow:0 4px 10px rgba(0,0,0,.17);
+  font-size:.67rem;
+}
+
+#players .player-card-badges>b{
+  height:20px;
+  min-width:23px;
+  padding:0 5px;
+  font-size:.55rem;
+}
+
+#players .player-card .profile-card-cta{
+  display:grid;
+  width:28px;
+  height:28px;
+  grid-column:3;
+  grid-row:1;
+  place-items:center;
+  margin:0;
+  border:1px solid rgba(112,241,119,.24);
+  border-radius:50%;
+  color:#81f27e;
+  background:rgba(69,219,83,.055);
+  font-size:1rem;
+  line-height:1;
+}
+
+#players .player-card:hover .profile-card-cta{
+  border-color:rgba(112,241,119,.46);
+  background:rgba(69,219,83,.1);
+  transform:translateX(2px);
+}
+
+@media(max-width:1020px){
+  #players .player-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:700px){
+  #players .player-grid{
+    grid-template-columns:1fr!important;
+    gap:8px;
+  }
+
+  #players .player-card{
+    grid-template-columns:55px minmax(0,1fr) 28px!important;
+    min-height:90px;
+    gap:9px;
+    padding:9px 10px;
+    border-radius:14px;
+  }
+
+  #players .player-card>img{
+    width:55px;
+    height:55px;
+    grid-row:1!important;
+    border-radius:14px;
+  }
+
+  #players .player-card h3{
+    font-size:.92rem;
+  }
+
+  #players .player-card small{
+    font-size:.63rem;
+  }
+
+  #players .player-card p{
+    font-size:.65rem;
+  }
+
+  #players .player-card-badges,
+  #players .player-card .profile-card-cta{
+    grid-column:auto!important;
+  }
+}
+
+@media(max-width:370px){
+  #players .player-card{
+    grid-template-columns:51px minmax(0,1fr) 26px!important;
+    min-height:86px;
+    gap:8px;
+    padding:8px 9px;
+  }
+
+  #players .player-card>img{
+    width:51px;
+    height:51px;
+  }
+
+  #players .player-card h3{
+    font-size:.86rem;
+  }
+}
+
+/* =========================================================
    V60 — INSIGNIAS COMPACTAS EN LA TABLA GENERAL
    ========================================================= */
 .standings-team{

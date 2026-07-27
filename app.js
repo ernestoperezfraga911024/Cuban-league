@@ -1,4 +1,4 @@
-const APP_VERSION='60-20260727';
+const APP_VERSION='61-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -1506,14 +1506,16 @@ function renderPlayers(filter=''){
     const visible=badges.slice(0,3);
     return `<article class="player-card team-profile-link" ${profileTriggerAttrs(player.name)}>
       <img src="${player.shield}" alt="Foto de ${player.name}">
-      <h3>${player.name}</h3>
-      <small>${statsRow.label||'Participante'}</small>
-      <p>${statsRow.points?.toLocaleString()||0} puntos · ${statsRow.podiums||0} podios</p>
-      <div class="player-card-badges" aria-label="${badges.length} insignias conseguidas">
-        ${visible.length?visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join(''):'<span class="player-badges-empty">Primera insignia pendiente</span>'}
-        ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
+      <div class="player-card-copy">
+        <h3>${player.name}</h3>
+        <small>${statsRow.label||'Participante'}</small>
+        <p>${statsRow.points?.toLocaleString()||0} puntos · ${statsRow.podiums||0} podios</p>
+        ${visible.length?`<div class="player-card-badges" aria-label="${badges.length} insignias conseguidas">
+          ${visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
+          ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
+        </div>`:''}
       </div>
-      <span class="profile-card-cta">Ver ficha e insignias →</span>
+      <span class="profile-card-cta" aria-hidden="true">→</span>
     </article>`;
   }).join('');
 }
