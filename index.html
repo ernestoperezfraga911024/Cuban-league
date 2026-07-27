@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=51-20260727"></head><body>
+<link rel="stylesheet" href="styles.css?v=52-20260727"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -228,11 +228,29 @@
 
 <section id="history" class="page">
 <div class="history-banner"><div><span class="eyebrow">MUSEO HISTÓRICO</span><h2>Todos los números de la liga</h2><p>Ranking premium, puntos acumulados, palmarés y estadísticas generales.</p></div></div>
-<div class="subtabs"><button type="button" class="subtab active" data-hist="premium">Ranking premium</button><button type="button" class="subtab" data-hist="points">Puntos acumulados</button><button type="button" class="subtab" data-hist="palmares">Palmarés puro</button><button type="button" class="subtab" data-hist="championsHistory">Campeones</button></div>
-<div id="premiumTable" class="history-panel active"><div class="section-head"><div><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span>Ranking histórico completo</span></h2></div><select id="sortGeneral"><option value="ranking">Score histórico</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></div>
-<div class="card scroll" id="generalTable"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div></div>
-<div id="pointsTable" class="history-panel"><div class="section-head"><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Ranking por puntos acumulados</span></h2></div><div class="card"><div class="thead points-grid"><span>#</span><span>Jugador</span><span>Temporadas</span><span>Puntos</span><span>Promedio</span></div><div id="pointsRows"></div></div></div>
-<div id="palmaresTable" class="history-panel"><div class="section-head"><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg></span><span>Palmarés puro</span></h2></div><div class="card"><div class="thead palmares-grid"><span>#</span><span>Jugador</span><span>Títulos</span><span>2º</span><span>3º</span><span>Podios</span></div><div id="palmaresRows"></div></div></div><div id="championsHistoryTable" class="history-panel"><div class="section-head"><div><span class="eyebrow">CAMPEONES DE LIGA</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Campeón de cada temporada</span></h2></div></div><div id="seasonChampions" class="champion-history-grid"></div></div>
+<div class="subtabs history-subtabs">
+  <button type="button" class="subtab active" data-hist="premium"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Ranking premium</span></button>
+  <button type="button" class="subtab" data-hist="points"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Puntos acumulados</span></button>
+  <button type="button" class="subtab" data-hist="palmares"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Palmarés puro</span></button>
+  <button type="button" class="subtab" data-hist="championsHistory"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Campeones</span></button>
+</div>
+<div id="premiumTable" class="history-panel active">
+  <div class="section-head history-table-heading"><div><span class="eyebrow">ÍNDICE HISTÓRICO</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span>Ranking histórico completo</span></h2><p>Compara dominio, regularidad, puntos y palmarés de cada competidor.</p></div><label class="history-sort-control"><span>Ordenar por</span><select id="sortGeneral"><option value="ranking">Score histórico</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></label></div>
+  <div id="historicalPodium" class="historical-podium"></div>
+  <div class="card scroll history-table-card" id="generalTable"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span><span>Score</span></div><div id="generalRows"></div></div>
+</div>
+<div id="pointsTable" class="history-panel">
+  <div class="section-head history-table-heading"><div><span class="eyebrow">RENDIMIENTO ACUMULADO</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Ranking por puntos</span></h2><p>Todos los puntos oficiales sumados a través de las temporadas.</p></div></div>
+  <div class="card history-table-card"><div class="thead points-grid"><span>#</span><span>Jugador</span><span>Temporadas</span><span>Puntos</span><span>Promedio</span></div><div id="pointsRows"></div></div>
+</div>
+<div id="palmaresTable" class="history-panel">
+  <div class="section-head history-table-heading"><div><span class="eyebrow">HONORES DE LA LIGA</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg></span><span>Palmarés puro</span></h2><p>Títulos, subcampeonatos, terceros lugares y podios oficiales.</p></div></div>
+  <div class="card history-table-card"><div class="thead palmares-grid"><span>#</span><span>Jugador</span><span>Títulos</span><span>2º</span><span>3º</span><span>Podios</span></div><div id="palmaresRows"></div></div>
+</div>
+<div id="championsHistoryTable" class="history-panel">
+  <div class="section-head history-table-heading"><div><span class="eyebrow">CAMPEONES DE LIGA</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Campeón de cada temporada</span></h2><p>El archivo cronológico de quienes levantaron la Cuban League.</p></div></div>
+  <div id="seasonChampions" class="champion-history-grid"></div>
+</div>
 
 <div id="evolutionTable" class="history-panel">
   <div class="evolution-historical-card">
@@ -385,4 +403,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=51-20260727"></script><script src="app.js?v=51-20260727"></script></body></html>
+<script src="supabase-config.js?v=52-20260727"></script><script src="app.js?v=52-20260727"></script></body></html>

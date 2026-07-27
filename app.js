@@ -1,4 +1,4 @@
-const APP_VERSION='51-20260727';
+const APP_VERSION='52-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -952,9 +952,74 @@ function renderMatchdayCenter(){
 }
 
 function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles);return x.sort((a,b)=>b.score-a.score)}
-function renderGeneral(mode='ranking'){$('generalRows').innerHTML=sortedGeneral(mode).map((p,i)=>`<div class="general-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.titles}</span><span class="center">${p.seconds}</span><span class="center">${p.thirds}</span><span class="center">${p.podiums}</span><span class="center">${p.top5}</span><span class="center">${p.seasons}</span><span class="num">${p.points.toLocaleString()}</span><span class="num">${p.average?p.average.toFixed(1):'—'}</span><span class="num">${p.score.toFixed(1)}</span></div>`).join('')}
-function renderPoints(){$('pointsRows').innerHTML=DATA.historicalTables.pointsRanking.map((p,i)=>`<div class="points-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.seasons}</span><span class="num">${p.points.toLocaleString()}</span><span class="num">${p.average.toFixed(1)}</span></div>`).join('')}
-function renderPalmares(){$('palmaresRows').innerHTML=DATA.historicalTables.palmaresRanking.map((p,i)=>`<div class="palmares-row"><span class="pos">${i+1}</span>${teamCell(p.name)}<span class="center">${p.titles}</span><span class="center">${p.seconds}</span><span class="center">${p.thirds}</span><span class="center">${p.podiums}</span></div>`).join('')}
+
+function historicalPodiumMetric(player,mode){
+  if(mode==='points')return {label:'Puntos históricos',value:player.points,unit:'PTS',decimals:0};
+  if(mode==='titles')return {label:'Palmarés',value:player.titles,unit:player.titles===1?'TÍTULO':'TÍTULOS',decimals:0};
+  if(mode==='average')return {label:'Promedio',value:player.average||0,unit:'PTS / TEMP.',decimals:1};
+  if(mode==='podiums')return {label:'Regularidad',value:player.podiums,unit:player.podiums===1?'PODIO':'PODIOS',decimals:0};
+  return {label:'Índice histórico',value:player.score,unit:'SCORE',decimals:1};
+}
+
+function renderHistoricalPodium(list,mode){
+  const host=$('historicalPodium');
+  if(!host)return;
+  const order=[1,0,2];
+  host.innerHTML=order.map(index=>{
+    const player=list[index];
+    if(!player)return '';
+    const rank=index+1;
+    const metric=historicalPodiumMetric(player,mode);
+    const value=Number(metric.value||0).toLocaleString('es',{
+      minimumFractionDigits:metric.decimals,
+      maximumFractionDigits:metric.decimals
+    });
+    return `<article class="historical-podium-card historical-podium-${rank} team-profile-link" ${profileTriggerAttrs(player.name)}>
+      <span class="historical-podium-place">${rank}</span>
+      <img src="${imageMap()[player.name]||''}" alt="Foto de ${player.name}">
+      <div><small>${metric.label}</small><strong>${player.name}</strong><b>${value}<span>${metric.unit}</span></b></div>
+    </article>`;
+  }).join('');
+}
+
+function renderGeneral(mode='ranking'){
+  const list=sortedGeneral(mode);
+  renderHistoricalPodium(list,mode);
+  $('generalRows').innerHTML=list.map((p,i)=>`<div class="general-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
+    <span class="pos">${i+1}</span>
+    ${teamCell(p.name)}
+    <span class="center history-metric" data-label="Títulos">${p.titles}</span>
+    <span class="center history-metric" data-label="2º lugar">${p.seconds}</span>
+    <span class="center history-metric" data-label="3º lugar">${p.thirds}</span>
+    <span class="center history-metric" data-label="Podios">${p.podiums}</span>
+    <span class="center history-metric" data-label="Top 5">${p.top5}</span>
+    <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
+    <span class="num history-metric history-metric-wide" data-label="Puntos">${p.points.toLocaleString('es')}</span>
+    <span class="num history-metric history-metric-wide" data-label="Promedio">${p.average?p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1}):'—'}</span>
+    <span class="num history-metric history-metric-featured" data-label="Score">${p.score.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</span>
+  </div>`).join('');
+}
+
+function renderPoints(){
+  $('pointsRows').innerHTML=DATA.historicalTables.pointsRanking.map((p,i)=>`<div class="points-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
+    <span class="pos">${i+1}</span>
+    ${teamCell(p.name)}
+    <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
+    <span class="num history-metric history-metric-featured" data-label="Puntos">${p.points.toLocaleString('es')}</span>
+    <span class="num history-metric" data-label="Promedio">${p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</span>
+  </div>`).join('');
+}
+
+function renderPalmares(){
+  $('palmaresRows').innerHTML=DATA.historicalTables.palmaresRanking.map((p,i)=>`<div class="palmares-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
+    <span class="pos">${i+1}</span>
+    ${teamCell(p.name)}
+    <span class="center history-metric history-metric-featured" data-label="Títulos">${p.titles}</span>
+    <span class="center history-metric" data-label="2º lugar">${p.seconds}</span>
+    <span class="center history-metric" data-label="3º lugar">${p.thirds}</span>
+    <span class="center history-metric" data-label="Podios">${p.podiums}</span>
+  </div>`).join('');
+}
 function renderSeasons(){
 const list=DATA.historicalTables.seasonArchive;
 $('seasonSelect').innerHTML=list.map(s=>`<option>${s.season}</option>`).join('');
@@ -975,9 +1040,14 @@ $('seasonSelect').onchange=e=>show(e.target.value)
 }
 function renderSeasonChampions(){
 const list=DATA.historicalTables.seasonChampions||[];
-$('seasonChampions').innerHTML=list.map(c=>{
+$('seasonChampions').innerHTML=list.map((c,index)=>{
 const img=imageMap()[c.name];
-return `<article class="champion-history-card">${img?`<img src="${img}" alt="">`:`<div class="champion-placeholder">${uiIcon('trophy','champion-placeholder-icon')}</div>`}<div><span>${c.season}</span><h3>${playerInline(c.name)}</h3><p>${c.points?c.points.toLocaleString()+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div></article>`
+return `<article class="champion-history-card">
+  <span class="champion-history-number">${String(index+1).padStart(2,'0')}</span>
+  ${img?`<img src="${img}" alt="Foto de ${c.name}">`:`<div class="champion-placeholder">${uiIcon('trophy','champion-placeholder-icon')}</div>`}
+  <div><span class="champion-season">${c.season}</span><h3>${playerInline(c.name)}</h3><p>${c.points?c.points.toLocaleString('es')+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div>
+  <span class="champion-history-mark">${uiIcon('trophy')}</span>
+</article>`
 }).join('')
 }
 function renderPlayers(filter=''){const stats=statMap();$('playerGrid').innerHTML=DATA.participants.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())).map(p=>{const s=stats[p.name]||{};return `<article class="player-card team-profile-link" ${profileTriggerAttrs(p.name)}><img src="${p.shield}" alt="Foto de ${p.name}"><h3>${p.name}</h3><small>${s.label||'Participante'}</small><p>${s.points?.toLocaleString()||0} puntos · ${s.podiums||0} podios</p><span class="profile-card-cta">Ver ficha completa →</span></article>`}).join('')}
