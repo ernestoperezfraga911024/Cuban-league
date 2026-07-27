@@ -1028,12 +1028,12 @@ noscript{
 }
 
 .competition-champions .summary-grid{
-  grid-template-columns:1fr;
+  grid-template-columns:repeat(3,1fr);
 }
 
 .competition-champions .league-only-summary,
 .competition-champions .league-only-stat{
-  display:none;
+  display:flex;
 }
 
 .competition-champions .summary-grid article{
@@ -1044,7 +1044,11 @@ noscript{
 }
 
 .competition-champions .stat-key{
-  grid-template-columns:92px;
+  grid-template-columns:repeat(3,72px);
+}
+
+.competition-champions .stat-key .league-only-stat{
+  display:block;
 }
 
 .competition-champions .player-entry-list{
@@ -1120,7 +1124,7 @@ noscript{
 }
 
 .competition-champions .champions-admin-player{
-  grid-template-columns:minmax(0,1fr) 92px;
+  grid-template-columns:minmax(0,1fr) repeat(3,72px);
   min-height:70px;
   padding:8px 2px;
 }
@@ -1168,12 +1172,16 @@ noscript{
     padding:9px;
   }
 
+  .competition-champions .summary-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+
   .competition-champions .stat-key{
-    grid-template-columns:64px;
+    grid-template-columns:repeat(3,56px);
   }
 
   .competition-champions .champions-admin-player{
-    grid-template-columns:minmax(0,1fr) 64px;
+    grid-template-columns:minmax(0,1fr) repeat(3,56px);
   }
 }
 
@@ -1187,6 +1195,10 @@ noscript{
   }
 
   .competition-champions .champions-admin-player{
-    grid-template-columns:minmax(0,1fr) 58px;
+    grid-template-columns:minmax(0,1fr) repeat(3,48px);
+  }
+
+  .competition-champions .stat-key{
+    grid-template-columns:repeat(3,48px);
   }
 }

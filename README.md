@@ -1,4 +1,4 @@
-# Cuban League V44
+# Cuban League V47
 
 Sitio oficial de la Cuban League con:
 
@@ -10,6 +10,7 @@ Sitio oficial de la Cuban League con:
 - Actualización automática de la clasificación mediante Supabase.
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.
+- Tablas de Champions adaptadas al celular con J1–J8, puntos, goles y clean sheets.
 - Aplicación web instalable en la pantalla de inicio.
 - Portada minimalista premium con estadio nocturno, accesos rápidos y resumen
   automático de la temporada.
@@ -34,6 +35,10 @@ Sitio oficial de la Cuban League con:
   final de 2025/26 y cambia automáticamente a 2026/27 tras la Jornada 1.
 - El bloque de líderes adopta un podio vertical premium: campeón elevado en el
   centro, segundo y tercero a los lados, con goleador y clean sheets debajo.
+- El podio se presenta directamente sobre el fondo, sin un marco exterior,
+  para ganar espacio y conservar solamente las tarjetas individuales.
+- Récord dinámico de mayor puntuación en una sola temporada, calculado desde el
+  archivo histórico y acompañado por el jugador, la cifra y la temporada.
 
 ## Panel privado
 

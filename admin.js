@@ -241,15 +241,14 @@
           <label for="${inputPrefix}-points-${playerId}">PTS</label>
           <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="number" inputmode="numeric" step="1" value="${Number(row.points) || 0}" aria-label="Puntos de ${name}">
         </div>
-        ${champions ? '' : `
-          <div class="stat-input-wrap">
-            <label for="goals-${playerId}">GOL</label>
-            <input class="stat-input" id="goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.goals) || 0}" aria-label="Goles de ${name}">
-          </div>
-          <div class="stat-input-wrap">
-            <label for="clean-sheets-${playerId}">CS</label>
-            <input class="stat-input" id="clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.clean_sheets) || 0}" aria-label="Clean sheets de ${name}">
-          </div>`}
+        <div class="stat-input-wrap">
+          <label for="${inputPrefix}-goals-${playerId}">GOL</label>
+          <input class="stat-input" id="${inputPrefix}-goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.goals) || 0}" aria-label="Goles de ${name}">
+        </div>
+        <div class="stat-input-wrap">
+          <label for="${inputPrefix}-clean-sheets-${playerId}">CS</label>
+          <input class="stat-input" id="${inputPrefix}-clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${Number(row.clean_sheets) || 0}" aria-label="Clean sheets de ${name}">
+        </div>
       </article>`;
   }
 
@@ -346,7 +345,7 @@
     $('championsModeButton').setAttribute('aria-pressed', String(champions));
     $('panelTitle').textContent = champions ? 'Registrar Champions' : 'Registrar jornada';
     $('panelDescription').textContent = champions
-      ? 'Escribe los puntos de cada competidor en J1–J8. El total de cada grupo se calcula automáticamente en la web pública.'
+      ? 'Escribe los puntos, goles y clean sheets de cada competidor en J1–J8. Los totales del grupo se calculan automáticamente.'
       : 'Los cambios se ven en la clasificación pública únicamente después de publicarlos.';
     $('entryTitle').textContent = champions
       ? `${state.participants.length} competidores · 4 grupos`
