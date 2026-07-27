@@ -1,14 +1,19 @@
-# Cuban League V64
+# Cuban League V65
 
 Sitio oficial de la Cuban League con:
 
-- Clasificación 2026/27 con jornadas, puntos, goles y clean sheets.
+- Clasificación 2026/27 con jornadas, puntos, goles, clean sheets y tarjetas
+  rojas.
 - Zona de descenso dinámica: los puestos 16 al 20 quedan resaltados en rojo y
   se actualizan automáticamente después de cada jornada.
 - Centro de clasificación con selector entre tabla general, ranking de
-  goleadores y ranking de clean sheets, todos actualizados automáticamente.
+  goleadores, ranking de clean sheets y registro de tarjetas rojas, todos
+  actualizados automáticamente.
 - Vista Jornada dentro de Clasificación, con selector de todas las fechas
-  publicadas y tabla independiente de puntos, goles y clean sheets por jornada.
+  publicadas y tabla independiente de puntos, goles, clean sheets y tarjetas
+  rojas por jornada.
+- Las tarjetas rojas son una estadística disciplinaria: se acumulan por equipo
+  y por jornada, pero no modifican los puntos ni el orden de desempate.
 - Museo Histórico rediseñado con podio dinámico, tablas reales de filas y
   columnas, posiciones destacadas y archivo de campeones.
 - En el celular las tablas históricas conservan sus encabezados y las columnas
@@ -67,7 +72,8 @@ Sitio oficial de la Cuban League con:
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.
 - Tablas horizontales de Champions adaptadas al celular con J1–J8, puntos,
-  goles y clean sheets, sin espacio sobrante al terminar el desplazamiento.
+  goles, clean sheets y tarjetas rojas, sin espacio sobrante al terminar el
+  desplazamiento.
 - Aplicación web instalable en la pantalla de inicio.
 - Portada minimalista premium con estadio nocturno, accesos rápidos y resumen
   automático de la temporada.
@@ -80,7 +86,8 @@ Sitio oficial de la Cuban League con:
 - Grupos oficiales de Champions con cuatro grupos de cinco competidores, fase
   de ida y vuelta, casillas J1–J8 y total automático por participante.
 - Control privado independiente para registrar, guardar y publicar los puntos
-  goles y clean sheets de cada jornada de Champions sin mezclarlos con la liga.
+  goles, clean sheets y tarjetas rojas de cada jornada de Champions sin
+  mezclarlos con la liga.
 - Centro de tarjetas oficiales para WhatsApp con Podio de Jornada, Top 10,
   líderes de temporada y tabla de cada grupo de Champions.
 - Generación automática en PNG de 1080 × 1350 con fotos, nombres y estadísticas,
@@ -111,5 +118,9 @@ Para activar las estadísticas privadas de visitas de V58, ejecuta después
 
 Para activar las fechas y premios automáticos de V59, ejecuta finalmente
 `SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
+
+Para activar la estadística de tarjetas rojas de V65, ejecuta después
+`SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
+Las jornadas antiguas se conservan y reciben automáticamente el valor 0.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.

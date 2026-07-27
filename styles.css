@@ -14423,3 +14423,192 @@ footer{
     font-size:.43rem;
   }
 }
+
+/* =========================================================
+   V65 — TARJETAS ROJAS
+   ========================================================= */
+.current-red-cards{
+  color:#ff7a84;
+  border-color:rgba(255,91,105,.25);
+  background:rgba(255,91,105,.075);
+}
+
+.current-table-card .current-grid,
+.current-table-card #currentRows .current-row{
+  grid-template-columns:50px minmax(180px,1fr) 50px 80px 76px 92px 82px 84px 188px;
+}
+
+.current-table-note b:nth-child(3){
+  color:#ff7a84;
+}
+
+.standings-switcher{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+.season-leader-hero.red-cards .season-leader-card{
+  border-color:rgba(255,91,105,.27);
+  background:
+    radial-gradient(circle at 100% 30%,rgba(255,91,105,.13),transparent 15rem),
+    linear-gradient(135deg,rgba(35,17,27,.99),rgba(4,17,25,.99));
+}
+
+.season-leader-hero.red-cards .season-leader-icon{
+  border-color:rgba(255,91,105,.34);
+  color:#ff7a84;
+  background:rgba(255,91,105,.075);
+}
+
+.season-leader-hero.red-cards .season-leader-copy>small,
+.season-leader-hero.red-cards .season-leader-number{
+  color:#ff7a84;
+}
+
+.season-stat-value.red-cards{
+  border-color:rgba(255,91,105,.25);
+  color:#ff7a84;
+  background:rgba(255,91,105,.075);
+}
+
+.classification-matchday-grid{
+  grid-template-columns:55px minmax(210px,1fr) 100px 74px 74px 74px;
+}
+
+#matchdayLeaders.matchday-feature-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.feature-red{
+  color:#ff7a84;
+}
+
+.matchday-table-grid{
+  grid-template-columns:50px minmax(180px,1fr) 90px 70px 70px 70px;
+}
+
+.pulse-red-cards{
+  color:#ff7a84;
+}
+
+.pulse-red-cards .pulse-highlight-icon{
+  border-color:rgba(255,91,105,.3);
+  background:rgba(255,91,105,.075);
+  color:#ff7a84;
+}
+
+.pulse-highlight-grid>.pulse-highlight-card:last-child:nth-child(odd){
+  grid-column:1/-1;
+}
+
+.profile-current-card{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+.profile-current-card>div:first-child{
+  grid-column:span 2;
+}
+
+.profile-current-red b{
+  color:#ff7a84;
+}
+
+.champions-score-table{
+  min-width:948px;
+}
+
+.champions-score-grid{
+  grid-template-columns:38px minmax(190px,1fr) repeat(8,minmax(48px,.55fr)) 76px 58px 58px 58px;
+}
+
+.champions-red-cards-total{
+  color:#ff7a84;
+  background:rgba(255,91,105,.035);
+}
+
+.champions-red-cards-head{
+  color:#ff7a84;
+  background:rgba(255,91,105,.055);
+}
+
+@media(max-width:850px){
+  .current-table-card .current-grid,
+  .current-table-card #currentRows .current-row{
+    grid-template-columns:34px minmax(0,1fr) 34px 56px 45px 45px 45px;
+    grid-template-rows:auto auto;
+  }
+
+  .current-table-card .current-grid>span:nth-child(7){
+    display:inline-flex;
+  }
+
+  .current-table-card .current-grid>span:nth-child(8),
+  .current-table-card .current-grid>span:nth-child(9){
+    display:none;
+  }
+}
+
+@media(max-width:700px){
+  #matchdayLeaders.matchday-feature-grid{
+    grid-template-columns:1fr;
+  }
+
+  .profile-current-card{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .profile-current-card>div:first-child{
+    grid-column:1/-1;
+  }
+}
+
+@media(max-width:620px){
+  .standings-switcher{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .standings-switcher button:last-child{
+    grid-column:1/-1;
+  }
+
+  .current-table-card .current-grid,
+  .current-table-card #currentRows .current-row{
+    grid-template-columns:28px minmax(0,1fr) 27px 43px 35px 35px 35px;
+    grid-template-rows:auto auto;
+  }
+
+  .current-table-card .current-grid>span:nth-child(7){
+    display:inline-flex;
+  }
+
+  .current-table-card .current-grid>span:nth-child(8),
+  .current-table-card .current-grid>span:nth-child(9){
+    display:none;
+  }
+
+  .classification-matchday-grid{
+    grid-template-columns:29px minmax(0,1fr) 49px 37px 37px 37px;
+  }
+
+  .matchday-table-grid{
+    grid-template-columns:27px minmax(0,1fr) 49px 36px 36px 36px;
+  }
+
+  .champions-score-table{
+    width:818px;
+    min-width:818px;
+  }
+
+  .champions-score-grid{
+    grid-template-columns:32px 160px repeat(8,50px) 70px 52px 52px 52px;
+  }
+}
+
+@media(max-width:360px){
+  .classification-matchday-grid{
+    grid-template-columns:26px minmax(0,1fr) 45px 34px 34px 34px;
+  }
+
+  .matchday-table-grid{
+    grid-template-columns:25px minmax(0,1fr) 45px 33px 33px 33px;
+  }
+}

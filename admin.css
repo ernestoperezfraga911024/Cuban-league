@@ -1592,6 +1592,119 @@ body.preview-open{overflow:hidden}
   box-shadow:0 20px 58px rgba(0,0,0,.2);
 }
 
+/* =========================================================
+   V65 — TARJETAS ROJAS
+   ========================================================= */
+.summary-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+.summary-icon.red-cards{
+  color:#ff6f79;
+  background:rgba(255,91,105,.065);
+}
+
+.summary-icon.red-cards svg{
+  fill:currentColor;
+  stroke:none;
+}
+
+.stat-key{
+  grid-template-columns:repeat(4,76px);
+}
+
+.admin-player{
+  grid-template-columns:minmax(0,1fr) repeat(4,76px);
+}
+
+.stat-input[data-stat="red_cards"]:focus{
+  border-color:rgba(255,111,121,.6);
+  background:rgba(255,91,105,.055);
+  box-shadow:0 0 0 3px rgba(255,91,105,.065);
+}
+
+.competition-champions .summary-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+.competition-champions .stat-key{
+  grid-template-columns:repeat(4,72px);
+}
+
+.competition-champions .champions-admin-player{
+  grid-template-columns:minmax(0,1fr) repeat(4,72px);
+}
+
+.preview-summary{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+.preview-table-head,
+.preview-row{
+  grid-template-columns:36px minmax(0,1fr) 60px 54px 54px 54px;
+}
+
+@media(max-width:700px){
+  .summary-grid,
+  .competition-champions .summary-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  .admin-player{
+    grid-template-columns:minmax(0,1fr) repeat(4,minmax(46px,57px));
+  }
+
+  .competition-champions .stat-key{
+    grid-template-columns:repeat(4,52px);
+  }
+
+  .competition-champions .champions-admin-player{
+    grid-template-columns:minmax(0,1fr) repeat(4,52px);
+  }
+
+  .preview-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .preview-summary article:last-child{
+    grid-column:1/-1;
+  }
+
+  .preview-table-head,
+  .preview-row{
+    grid-template-columns:26px minmax(0,1fr) 43px 37px 37px 37px;
+    gap:4px;
+    padding-right:8px;
+    padding-left:8px;
+  }
+}
+
+@media(max-width:390px){
+  .summary-grid,
+  .competition-champions .summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .admin-player,
+  .competition-champions .champions-admin-player{
+    grid-template-columns:minmax(0,1fr) repeat(4,44px);
+  }
+
+  .competition-champions .stat-key{
+    grid-template-columns:repeat(4,44px);
+  }
+
+  .admin-player-info img{
+    width:35px;
+    height:35px;
+  }
+
+  .stat-input{
+    height:48px;
+    font-size:15px;
+  }
+}
+
 .visitor-analytics::after{
   content:"";
   position:absolute;

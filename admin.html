@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=64-20260727">
+  <link rel="stylesheet" href="admin.css?v=65-20260727">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -47,7 +47,7 @@
       <div class="login-copy">
         <span class="admin-kicker"><i></i> ÁREA PRIVADA</span>
         <h1>Controla la liga desde tu celular.</h1>
-        <p>Escribe los puntos, goles y clean sheets de cada jornada. Cuando publiques, la clasificación se actualizará automáticamente.</p>
+        <p>Escribe los puntos, goles, clean sheets y tarjetas rojas de cada jornada. Cuando publiques, la clasificación se actualizará automáticamente.</p>
         <ul class="feature-list">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Solo tú puedes editar</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>Clasificación automática</li>
@@ -263,6 +263,12 @@
           </span>
           <span><small>Clean sheets</small><b id="cleanSheetsTotal">0</b></span>
         </article>
+        <article class="league-only-summary">
+          <span class="summary-icon red-cards">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="1.5" transform="rotate(-6 12 12)"/></svg>
+          </span>
+          <span><small>Tarjetas rojas</small><b id="redCardsTotal">0</b></span>
+        </article>
       </section>
 
       <section id="completionCard" class="completion-card warning" aria-live="polite">
@@ -272,7 +278,7 @@
         <div>
           <span class="admin-kicker">CONTROL DE DATOS</span>
           <b id="completionTitle">Faltan participantes por completar</b>
-          <small id="completionMessage">Escribe puntos, goles y clean sheets de todos los participantes, incluso cuando el valor sea 0.</small>
+          <small id="completionMessage">Escribe puntos, goles, clean sheets y tarjetas rojas de todos los participantes, incluso cuando el valor sea 0.</small>
           <div class="completion-progress"><i id="completionProgress"></i></div>
           <span id="missingParticipants" class="missing-participants"></span>
         </div>
@@ -292,6 +298,7 @@
             <span>PTS <small>Puntos</small></span>
             <span class="league-only-stat">GOL <small>Goles</small></span>
             <span class="league-only-stat">CS <small>Portería a cero</small></span>
+            <span class="league-only-stat">TR <small>Tarjetas rojas</small></span>
           </div>
         </div>
         <div id="playerRows" class="player-entry-list"></div>
@@ -342,7 +349,7 @@
       </header>
       <div id="previewSummary" class="preview-summary"></div>
       <div class="preview-table-shell">
-        <div class="preview-table-head"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span></div>
+        <div class="preview-table-head"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span><span>TR</span></div>
         <div id="previewRows" class="preview-rows"></div>
       </div>
       <footer>
@@ -382,7 +389,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=64-20260727"></script>
-  <script src="admin.js?v=64-20260727"></script>
+  <script src="supabase-config.js?v=65-20260727"></script>
+  <script src="admin.js?v=65-20260727"></script>
 </body>
 </html>

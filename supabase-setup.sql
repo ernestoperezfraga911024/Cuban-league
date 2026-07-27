@@ -6,6 +6,8 @@
 -- el contador privado de visitas y la gráfica de audiencia.
 -- Después ejecuta SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt para activar
 -- las fechas oficiales, Jugador del Mes y Campeón de Invierno.
+-- Por último ejecuta SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt para
+-- activar el registro disciplinario sin perder las jornadas anteriores.
 -- El único administrador autorizado será:
 -- ernestoperezfraga911024@gmail.com
 

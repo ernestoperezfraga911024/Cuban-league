@@ -1,0 +1,414 @@
+-- CUBAN LEAGUE · ACTUALIZACIÓN V65 · TARJETAS ROJAS
+-- Abre este archivo, selecciona todo, copia y pega en Supabase > SQL Editor.
+-- Pulsa Run una sola vez.
+-- Conserva todas las jornadas anteriores y les asigna 0 tarjetas rojas.
+
+begin;
+
+alter table public.matchday_stats
+  add column if not exists red_cards integer;
+
+update public.matchday_stats
+set red_cards = 0
+where red_cards is null;
+
+alter table public.matchday_stats
+  alter column red_cards set default 0,
+  alter column red_cards set not null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'matchday_stats_red_cards_nonnegative'
+      and conrelid = 'public.matchday_stats'::regclass
+  ) then
+    alter table public.matchday_stats
+      add constraint matchday_stats_red_cards_nonnegative
+      check (red_cards >= 0);
+  end if;
+end
+$$;
+
+alter table public.matchday_drafts
+  add column if not exists red_cards integer;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'matchday_drafts_red_cards_nonnegative'
+      and conrelid = 'public.matchday_drafts'::regclass
+  ) then
+    alter table public.matchday_drafts
+      add constraint matchday_drafts_red_cards_nonnegative
+      check (red_cards is null or red_cards >= 0);
+  end if;
+end
+$$;
+
+create or replace function public.save_matchday_draft(
+  p_season text,
+  p_matchday integer,
+  p_rows jsonb
+)
+returns setof public.matchday_drafts
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  if p_season is null or btrim(p_season) = '' then
+    raise exception 'Season is required';
+  end if;
+
+  if p_matchday is null or p_matchday not between 1 and 60 then
+    raise exception 'Invalid matchday';
+  end if;
+
+  if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) = 0 then
+    raise exception 'Draft rows are required';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_to_recordset(p_rows) as row_data(
+      participant_name text,
+      points integer,
+      goals integer,
+      clean_sheets integer,
+      red_cards integer
+    )
+    where participant_name is null
+       or btrim(participant_name) = ''
+       or (goals is not null and goals < 0)
+       or (clean_sheets is not null and clean_sheets < 0)
+       or (red_cards is not null and red_cards < 0)
+  ) then
+    raise exception 'Invalid draft row';
+  end if;
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  insert into public.matchday_drafts (
+    season,
+    matchday,
+    participant_name,
+    points,
+    goals,
+    clean_sheets,
+    red_cards,
+    saved_by
+  )
+  select
+    p_season,
+    p_matchday,
+    row_data.participant_name,
+    row_data.points,
+    row_data.goals,
+    row_data.clean_sheets,
+    row_data.red_cards,
+    (select auth.uid())
+  from jsonb_to_recordset(p_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer
+  );
+
+  return query
+  select drafts.*
+  from public.matchday_drafts as drafts
+  where drafts.season = p_season
+    and drafts.matchday = p_matchday
+  order by drafts.participant_name;
+end;
+$$;
+
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from public;
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from anon;
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from authenticated;
+grant execute on function public.save_matchday_draft(text, integer, jsonb) to authenticated;
+
+create or replace function public.publish_matchday_revision(
+  p_season text,
+  p_matchday integer,
+  p_rows jsonb
+)
+returns setof public.matchday_stats
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  before_rows jsonb;
+  after_rows jsonb;
+  history_action text;
+  total_rows integer;
+  distinct_rows integer;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  if p_season is null or btrim(p_season) = '' then
+    raise exception 'Season is required';
+  end if;
+
+  if p_matchday is null or p_matchday not between 1 and 60 then
+    raise exception 'Invalid matchday';
+  end if;
+
+  if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) = 0 then
+    raise exception 'Published rows are required';
+  end if;
+
+  select count(*), count(distinct participant_name)
+    into total_rows, distinct_rows
+  from jsonb_to_recordset(p_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer
+  );
+
+  if total_rows <> distinct_rows then
+    raise exception 'Participants cannot be repeated';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_to_recordset(p_rows) as row_data(
+      participant_name text,
+      points integer,
+      goals integer,
+      clean_sheets integer,
+      red_cards integer
+    )
+    where participant_name is null
+       or btrim(participant_name) = ''
+       or points is null
+       or goals is null
+       or clean_sheets is null
+       or red_cards is null
+       or goals < 0
+       or clean_sheets < 0
+       or red_cards < 0
+  ) then
+    raise exception 'Every participant needs points, goals, clean sheets and red cards';
+  end if;
+
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'participant_name', stats.participant_name,
+        'points', stats.points,
+        'goals', stats.goals,
+        'clean_sheets', stats.clean_sheets,
+        'red_cards', stats.red_cards,
+        'published', stats.published
+      )
+      order by stats.participant_name
+    ),
+    '[]'::jsonb
+  )
+  into before_rows
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday
+    and stats.published = true;
+
+  history_action := case
+    when jsonb_array_length(before_rows) = 0 then 'publish'
+    else 'correction'
+  end;
+
+  delete from public.matchday_stats
+  where season = p_season
+    and matchday = p_matchday;
+
+  insert into public.matchday_stats (
+    season,
+    matchday,
+    participant_name,
+    points,
+    goals,
+    clean_sheets,
+    red_cards,
+    published
+  )
+  select
+    p_season,
+    p_matchday,
+    row_data.participant_name,
+    row_data.points,
+    row_data.goals,
+    row_data.clean_sheets,
+    row_data.red_cards,
+    true
+  from jsonb_to_recordset(p_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer
+  );
+
+  select jsonb_agg(
+    jsonb_build_object(
+      'participant_name', stats.participant_name,
+      'points', stats.points,
+      'goals', stats.goals,
+      'clean_sheets', stats.clean_sheets,
+      'red_cards', stats.red_cards,
+      'published', stats.published
+    )
+    order by stats.participant_name
+  )
+  into after_rows
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday;
+
+  insert into public.matchday_change_log (
+    season,
+    matchday,
+    action,
+    before_snapshot,
+    after_snapshot,
+    changed_by,
+    changed_by_email
+  )
+  values (
+    p_season,
+    p_matchday,
+    history_action,
+    before_rows,
+    after_rows,
+    (select auth.uid()),
+    coalesce((select auth.jwt() ->> 'email'), 'Administrador')
+  );
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  return query
+  select stats.*
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday
+  order by stats.participant_name;
+end;
+$$;
+
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from public;
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from anon;
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from authenticated;
+grant execute on function public.publish_matchday_revision(text, integer, jsonb) to authenticated;
+
+create or replace function public.undo_last_matchday_publication(
+  p_season text,
+  p_matchday integer
+)
+returns setof public.matchday_stats
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  last_change public.matchday_change_log%rowtype;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select *
+    into last_change
+  from public.matchday_change_log
+  where season = p_season
+    and matchday = p_matchday
+    and undone = false
+  order by created_at desc
+  limit 1
+  for update;
+
+  if not found then
+    raise exception 'There is no publication to undo';
+  end if;
+
+  delete from public.matchday_stats
+  where season = p_season
+    and matchday = p_matchday;
+
+  if jsonb_array_length(last_change.before_snapshot) > 0 then
+    insert into public.matchday_stats (
+      season,
+      matchday,
+      participant_name,
+      points,
+      goals,
+      clean_sheets,
+      red_cards,
+      published
+    )
+    select
+      p_season,
+      p_matchday,
+      row_data.participant_name,
+      row_data.points,
+      row_data.goals,
+      row_data.clean_sheets,
+      coalesce(row_data.red_cards, 0),
+      coalesce(row_data.published, true)
+    from jsonb_to_recordset(last_change.before_snapshot) as row_data(
+      participant_name text,
+      points integer,
+      goals integer,
+      clean_sheets integer,
+      red_cards integer,
+      published boolean
+    );
+  end if;
+
+  update public.matchday_change_log
+  set
+    undone = true,
+    undone_at = now(),
+    undone_by = (select auth.uid())
+  where id = last_change.id;
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  return query
+  select stats.*
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday
+  order by stats.participant_name;
+end;
+$$;
+
+revoke all on function public.undo_last_matchday_publication(text, integer) from public;
+revoke all on function public.undo_last_matchday_publication(text, integer) from anon;
+revoke all on function public.undo_last_matchday_publication(text, integer) from authenticated;
+grant execute on function public.undo_last_matchday_publication(text, integer) to authenticated;
+
+commit;
+
+select
+  'Tarjetas rojas activadas correctamente' as resultado,
+  count(*) as jornadas_con_valor_inicial
+from public.matchday_stats;

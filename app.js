@@ -1,4 +1,4 @@
-const APP_VERSION='64-20260727';
+const APP_VERSION='65-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -86,6 +86,7 @@ function normalizeMatchdayRows(rows){
     points:Math.max(0,Number(row.points)||0),
     goals:Math.max(0,Number(row.goals)||0),
     cleanSheets:Math.max(0,Number(row.clean_sheets)||0),
+    redCards:Math.max(0,Number(row.red_cards)||0),
     updatedAt:row.updated_at||null
   })).filter(row=>validNames.has(row.participantName)&&Number.isInteger(row.matchday)&&row.matchday>0);
 }
@@ -107,6 +108,7 @@ function normalizeChampionsMatchdayRows(rows){
     points:Number(row.points)||0,
     goals:Math.max(0,Number(row.goals)||0),
     cleanSheets:Math.max(0,Number(row.clean_sheets)||0),
+    redCards:Math.max(0,Number(row.red_cards)||0),
     updatedAt:row.updated_at||null
   })).filter(row=>
     validNames.has(row.participantName)
@@ -116,18 +118,20 @@ function normalizeChampionsMatchdayRows(rows){
   );
 }
 
-async function syncChampionsStats({render=true}={}){
+async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatchday=null}={}){
   const config=window.CUBAN_LEAGUE_SUPABASE;
-  if(!DATA||!config?.url||!config?.publishableKey)return false;
-  try{
+  const request=async includeRedCards=>{
     const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
-    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,updated_at');
-    endpoint.searchParams.set('season',`eq.${championsSeasonKey()}`);
+    endpoint.searchParams.set(
+      'select',
+      `participant_name,matchday,points,goals,clean_sheets,${includeRedCards?'red_cards,':''}updated_at`
+    );
+    endpoint.searchParams.set('season',`eq.${season}`);
     endpoint.searchParams.set('published','eq.true');
-    endpoint.searchParams.append('matchday','gte.1');
-    endpoint.searchParams.append('matchday',`lte.${CHAMPIONS_MATCHDAY_COUNT}`);
+    if(minimumMatchday!=null)endpoint.searchParams.append('matchday',`gte.${minimumMatchday}`);
+    if(maximumMatchday!=null)endpoint.searchParams.append('matchday',`lte.${maximumMatchday}`);
     endpoint.searchParams.set('order','matchday.asc');
-    const response=await fetch(endpoint,{
+    return fetch(endpoint,{
       cache:'no-store',
       headers:{
         apikey:config.publishableKey,
@@ -135,10 +139,24 @@ async function syncChampionsStats({render=true}={}){
         Accept:'application/json'
       }
     });
-    if(!response.ok)throw new Error('No se pudo actualizar la Champions');
-    const rows=await response.json();
-    if(!Array.isArray(rows))throw new Error('Respuesta de Champions no válida');
+  };
 
+  let response=await request(true);
+  if(!response.ok)response=await request(false);
+  if(!response.ok)throw new Error('No se pudieron actualizar las estadísticas');
+  const rows=await response.json();
+  if(!Array.isArray(rows))throw new Error('Respuesta de estadísticas no válida');
+  return rows;
+}
+
+async function syncChampionsStats({render=true}={}){
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!DATA||!config?.url||!config?.publishableKey)return false;
+  try{
+    const rows=await fetchPublishedStatsRows(championsSeasonKey(),{
+      minimumMatchday:1,
+      maximumMatchday:CHAMPIONS_MATCHDAY_COUNT
+    });
     CHAMPIONS_MATCHDAY_ROWS=normalizeChampionsMatchdayRows(rows);
     CHAMPIONS_PUBLISHED_MATCHDAYS=[...new Set(CHAMPIONS_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
     if(render){
@@ -164,6 +182,7 @@ function weeklyStandings(matchday){
       points:row?.points||0,
       goals:row?.goals||0,
       cleanSheets:row?.cleanSheets||0,
+      redCards:row?.redCards||0,
       played:row?1:0
     };
   }).sort(sortStandings).map((participant,index)=>({...participant,position:index+1}));
@@ -172,7 +191,7 @@ function weeklyStandings(matchday){
 function cumulativeStandings(matchday){
   const totals=new Map(activeParticipants().map(participant=>[
     participant.name,
-    {points:0,goals:0,cleanSheets:0,matchdays:new Set()}
+    {points:0,goals:0,cleanSheets:0,redCards:0,matchdays:new Set()}
   ]));
   LIVE_MATCHDAY_ROWS.forEach(row=>{
     if(row.matchday>matchday||!totals.has(row.participantName))return;
@@ -180,6 +199,7 @@ function cumulativeStandings(matchday){
     total.points+=row.points;
     total.goals+=row.goals;
     total.cleanSheets+=row.cleanSheets;
+    total.redCards+=row.redCards;
     total.matchdays.add(row.matchday);
   });
   return activeParticipants().map(participant=>{
@@ -189,6 +209,7 @@ function cumulativeStandings(matchday){
       points:total.points,
       goals:total.goals,
       cleanSheets:total.cleanSheets,
+      redCards:total.redCards,
       played:total.matchdays.size
     };
   }).sort(sortStandings).map((participant,index)=>({...participant,position:index+1}));
@@ -238,23 +259,7 @@ async function syncLiveCurrentStats({render=true}={}){
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!DATA||!config?.url||!config?.publishableKey)return false;
   try{
-    const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
-    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,updated_at');
-    endpoint.searchParams.set('season',`eq.${config.season||DATA.currentSeason}`);
-    endpoint.searchParams.set('published','eq.true');
-    endpoint.searchParams.set('order','matchday.asc');
-    const response=await fetch(endpoint,{
-      cache:'no-store',
-      headers:{
-        apikey:config.publishableKey,
-        Authorization:`Bearer ${config.publishableKey}`,
-        Accept:'application/json'
-      }
-    });
-    if(!response.ok)throw new Error('No se pudo actualizar la clasificación');
-    const rows=await response.json();
-    if(!Array.isArray(rows))throw new Error('Respuesta de clasificación no válida');
-
+    const rows=await fetchPublishedStatsRows(config.season||DATA.currentSeason);
     LIVE_MATCHDAY_ROWS=normalizeMatchdayRows(rows);
     PUBLISHED_MATCHDAYS=[...new Set(LIVE_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
     if(!PUBLISHED_MATCHDAYS.includes(SELECTED_MATCHDAY)){
@@ -268,6 +273,7 @@ async function syncLiveCurrentStats({render=true}={}){
       participant.points=total?.points||0;
       participant.goals=total?.goals||0;
       participant.cleanSheets=total?.cleanSheets||0;
+      participant.redCards=total?.redCards||0;
       participant.played=total?.played||0;
     });
 
@@ -425,6 +431,7 @@ function renderCurrent(){
     <span class="num">${p.points.toLocaleString('es')}</span>
     <span class="current-stat current-goals" aria-label="${p.goals??0} goles">${p.goals??0}</span>
     <span class="current-stat current-clean-sheets" aria-label="${p.cleanSheets??0} clean sheets">${p.cleanSheets??0}</span>
+    <span class="current-stat current-red-cards" aria-label="${p.redCards??0} tarjetas rojas">${p.redCards??0}</span>
     <span class="current-movement">${movementBadge(latest==null?null:movements.get(p.name))}</span>
     <span class="current-form" aria-label="Forma de las últimas jornadas">${recentForm(p.name,latest)}</span>
   </div>`;
@@ -446,6 +453,15 @@ function renderCurrent(){
     tone:'clean-sheets',
     heroId:'currentCleanSheetsHero',
     rowsId:'currentCleanSheetsRows'
+  });
+  renderSeasonStatRanking(rows,latest,{
+    metric:'redCards',
+    label:'Más tarjetas rojas',
+    unit:'tarjetas rojas',
+    icon:'red-card',
+    tone:'red-cards',
+    heroId:'currentRedCardsHero',
+    rowsId:'currentRedCardsRows'
   });
   renderClassificationMatchday();
 }
@@ -491,6 +507,7 @@ function renderClassificationMatchday(){
     :0;
   const totalGoals=standings.reduce((total,player)=>total+player.goals,0);
   const totalCleanSheets=standings.reduce((total,player)=>total+player.cleanSheets,0);
+  const totalRedCards=standings.reduce((total,player)=>total+player.redCards,0);
 
   summary.innerHTML=`<article class="classification-matchday-winner">
       <span class="classification-matchday-summary-icon">${uiIcon('trophy')}</span>
@@ -499,7 +516,7 @@ function renderClassificationMatchday(){
       <b>${bestPoints.toLocaleString('es')}<span>PTS</span></b>
     </article>
     <article><small>Promedio</small><strong>${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</strong><span>PTS / jugador</span></article>
-    <article><small>Estadísticas</small><strong>${totalGoals.toLocaleString('es')} GOL</strong><span>${totalCleanSheets.toLocaleString('es')} clean sheets</span></article>`;
+    <article><small>Estadísticas</small><strong>${totalGoals.toLocaleString('es')} GOL · ${totalRedCards.toLocaleString('es')} TR</strong><span>${totalCleanSheets.toLocaleString('es')} clean sheets</span></article>`;
 
   rowsHost.innerHTML=standings.map((player,index)=>`<div class="classification-matchday-row classification-matchday-grid${index<3?' is-weekly-podium':''}">
     <span class="classification-matchday-rank">${player.position}</span>
@@ -507,11 +524,12 @@ function renderClassificationMatchday(){
     <strong class="classification-matchday-points">${player.points.toLocaleString('es')}</strong>
     <span class="current-stat current-goals" aria-label="${player.goals} goles">${player.goals}</span>
     <span class="current-stat current-clean-sheets" aria-label="${player.cleanSheets} clean sheets">${player.cleanSheets}</span>
+    <span class="current-stat current-red-cards" aria-label="${player.redCards} tarjetas rojas">${player.redCards}</span>
   </div>`).join('');
 }
 
 function renderSeasonStatRanking(rows,latest,{metric,label,unit,icon,tone,heroId,rowsId}){
-  const secondaryMetric=metric==='goals'?'cleanSheets':'goals';
+  const secondaryMetric=metric==='goals'?'cleanSheets':metric==='cleanSheets'?'goals':'points';
   const ranked=[...rows].sort((a,b)=>
     (b[metric]||0)-(a[metric]||0)
     ||(b[secondaryMetric]||0)-(a[secondaryMetric]||0)
@@ -771,7 +789,7 @@ function renderHomeLive(){
   const currentLeader=cumulative[0];
   $('homeLiveBadge').textContent=`JORNADA ${latest}`;
   $('homeLiveTitle').textContent=`La jornada ${latest} ya forma parte de la historia.`;
-  $('homeLiveCopy').textContent=`${weeklyLeader.name} lideró la fecha con ${weeklyLeader.points.toLocaleString('es')} puntos. Consulta el resumen completo, los goles, clean sheets y movimientos.`;
+  $('homeLiveCopy').textContent=`${weeklyLeader.name} lideró la fecha con ${weeklyLeader.points.toLocaleString('es')} puntos. Consulta el resumen completo, los goles, clean sheets, tarjetas rojas y movimientos.`;
   $('homeLatestRound').textContent=`J${latest}`;
   $('homeLatestWinner').textContent=`${weeklyLeader.name} · ${weeklyLeader.points.toLocaleString('es')} pts`;
   $('homeCurrentLeader').textContent=currentLeader.name;
@@ -859,6 +877,7 @@ function renderSeasonPulse(){
     const movements=movementForMatchday(latest);
     const goals=pulseLeaders(standings,'goals');
     const cleanSheets=pulseLeaders(standings,'cleanSheets');
+    const redCards=pulseLeaders(standings,'redCards');
     const movementEntries=[...movements.entries()].filter(([,delta])=>Number.isFinite(delta)&&delta>0);
     const biggestRise=movementEntries.length?Math.max(...movementEntries.map(([,delta])=>delta)):0;
     const risers=biggestRise?movementEntries.filter(([,delta])=>delta===biggestRise).map(([name])=>name):[];
@@ -907,6 +926,14 @@ function renderSeasonPulse(){
           emptyCopy:'Sin clean sheets'
         })}
         ${pulseHighlightCard({
+          tone:'pulse-red-cards',
+          icon:'red-card',
+          label:'Más tarjetas rojas',
+          names:redCards.names,
+          value:`${redCards.value} ${redCards.value===1?'roja':'rojas'}`,
+          emptyCopy:'Sin tarjetas rojas'
+        })}
+        ${pulseHighlightCard({
           tone:'pulse-rise',
           icon:'chart',
           label:'Mayor subida',
@@ -950,9 +977,10 @@ function renderMatchdayArchive(){
     const weekly=weeklyStandings(day);
     const winner=weekly[0];
     const totalGoals=weekly.reduce((sum,player)=>sum+player.goals,0);
+    const totalRedCards=weekly.reduce((sum,player)=>sum+player.redCards,0);
     return `<button type="button" class="matchday-archive-card ${day===SELECTED_MATCHDAY?'active':''}" data-matchday-open="${day}" aria-label="Ver resumen de la jornada ${day}">
       <span class="matchday-archive-number">J${day}</span>
-      <span class="matchday-archive-copy"><small>Jornada ${day}</small><b>${winner.name}</b><span>${winner.points.toLocaleString('es')} pts · ${totalGoals} ${totalGoals===1?'gol':'goles'}</span></span>
+      <span class="matchday-archive-copy"><small>Jornada ${day}</small><b>${winner.name}</b><span>${winner.points.toLocaleString('es')} pts · ${totalGoals} ${totalGoals===1?'gol':'goles'} · ${totalRedCards} TR</span></span>
       <span class="matchday-archive-arrow" aria-hidden="true">→</span>
     </button>`;
   }).join('');
@@ -979,6 +1007,8 @@ function renderMatchdayDetails(){
   const goalLeaders=maxGoals?weekly.filter(player=>player.goals===maxGoals).map(player=>player.name):[];
   const maxCleanSheets=Math.max(0,...weekly.map(player=>player.cleanSheets));
   const cleanSheetLeaders=maxCleanSheets?weekly.filter(player=>player.cleanSheets===maxCleanSheets).map(player=>player.name):[];
+  const maxRedCards=Math.max(0,...weekly.map(player=>player.redCards));
+  const redCardLeaders=maxRedCards?weekly.filter(player=>player.redCards===maxRedCards).map(player=>player.name):[];
 
   $('matchdayTitle').textContent=`Jornada ${matchday}`;
   $('matchdayStatus').textContent=`${weekly.filter(player=>player.played).length} resultados · publicada`;
@@ -994,7 +1024,7 @@ function renderMatchdayDetails(){
     <div class="podium-avatar team-profile-link" ${profileTriggerAttrs(player.name)}><img src="${player.shield}" alt="Foto de ${player.name}"></div>
     <h4 class="team-profile-link" ${profileTriggerAttrs(player.name)}>${player.name}</h4>
     <strong>${player.points.toLocaleString('es')} pts</strong>
-    <small>${player.goals} GOL · ${player.cleanSheets} CS</small>
+    <small>${player.goals} GOL · ${player.cleanSheets} CS · ${player.redCards} TR</small>
   </article>`).join('');
 
   $('matchdayLeaders').innerHTML=[
@@ -1015,6 +1045,15 @@ function renderMatchdayDetails(){
       value:maxCleanSheets?`${maxCleanSheets} ${maxCleanSheets===1?'clean sheet':'clean sheets'}`:'Sin clean sheets',
       names:cleanSheetLeaders,
       description:'Todavía no hay porterías a cero registradas.'
+    }),
+    featureCard({
+      tone:'feature-red',
+      icon:'red-card',
+      eyebrow:'DISCIPLINA',
+      title:'Más tarjetas rojas',
+      value:maxRedCards?`${maxRedCards} ${maxRedCards===1?'tarjeta roja':'tarjetas rojas'}`:'Sin tarjetas rojas',
+      names:redCardLeaders,
+      description:'Todavía no hay expulsiones registradas en esta jornada.'
     })
   ].join('');
 
@@ -1061,6 +1100,7 @@ function renderMatchdayDetails(){
     <span class="num">${player.points.toLocaleString('es')}</span>
     <span class="current-stat current-goals">${player.goals}</span>
     <span class="current-stat current-clean-sheets">${player.cleanSheets}</span>
+    <span class="current-stat current-red-cards">${player.redCards}</span>
   </div>`).join('');
 }
 
@@ -1263,7 +1303,7 @@ function monthlyAchievementAwards(){
       .map(item=>item.matchday));
     const totals=new Map(activeParticipants().map(player=>[
       player.name,
-      {...player,points:0,goals:0,cleanSheets:0,played:0}
+      {...player,points:0,goals:0,cleanSheets:0,redCards:0,played:0}
     ]));
     LIVE_MATCHDAY_ROWS.forEach(row=>{
       if(!monthDays.has(row.matchday)||!milestonesByDay.has(row.matchday)||!totals.has(row.participantName))return;
@@ -1271,6 +1311,7 @@ function monthlyAchievementAwards(){
       total.points+=row.points;
       total.goals+=row.goals;
       total.cleanSheets+=row.cleanSheets;
+      total.redCards+=row.redCards;
       total.played+=1;
     });
     const ranking=[...totals.values()].filter(player=>player.played>0).sort(sortStandings);
@@ -1562,7 +1603,7 @@ function ordinal(n){return n?`${n}º`:'—'}
 function currentStanding(name){
   const participant=DATA.participants.find(p=>p.name===name);
   if(participant?.active===false){
-    return {active:false,started:false,position:null,points:0,played:0};
+    return {active:false,started:false,position:null,points:0,goals:0,cleanSheets:0,redCards:0,played:0};
   }
   const sorted=DATA.participants.filter(p=>p.active!==false).sort((a,b)=>b.points-a.points||(b.goals||0)-(a.goals||0)||(b.cleanSheets||0)-(a.cleanSheets||0)||a.id-b.id);
   const player=sorted.find(p=>p.name===name);
@@ -1572,6 +1613,9 @@ function currentStanding(name){
     started,
     position:started?sorted.findIndex(p=>p.name===name)+1:null,
     points:player?.points||0,
+    goals:player?.goals||0,
+    cleanSheets:player?.cleanSheets||0,
+    redCards:player?.redCards||0,
     played:player?.played||0
   };
 }
@@ -1673,6 +1717,9 @@ function openPlayer(name){
       <div><span>Temporada ${DATA.currentSeason}</span><b>${currentLabel}</b></div>
       <div><span>Jornadas</span><b>${m.current.played}</b></div>
       <div><span>Puntos</span><b>${m.current.points.toLocaleString()}</b></div>
+      <div><span>Goles</span><b>${m.current.goals}</b></div>
+      <div><span>Clean sheets</span><b>${m.current.cleanSheets}</b></div>
+      <div class="profile-current-red"><span>Tarjetas rojas</span><b>${m.current.redCards}</b></div>
       <div><span>Ranking histórico</span><b>${m.historicalRank?`#${m.historicalRank}`:'—'}</b></div>
     </section>
 
@@ -1914,7 +1961,8 @@ function championsGroupStandings(group){
         played:Boolean(row),
         points:row?.points||0,
         goals:row?.goals||0,
-        cleanSheets:row?.cleanSheets||0
+        cleanSheets:row?.cleanSheets||0,
+        redCards:row?.redCards||0
       };
     });
     return {
@@ -1924,7 +1972,8 @@ function championsGroupStandings(group){
       played:matchdays.filter(day=>day.played).length,
       total:matchdays.reduce((sum,day)=>sum+day.points,0),
       goals:matchdays.reduce((sum,day)=>sum+day.goals,0),
-      cleanSheets:matchdays.reduce((sum,day)=>sum+day.cleanSheets,0)
+      cleanSheets:matchdays.reduce((sum,day)=>sum+day.cleanSheets,0),
+      redCards:matchdays.reduce((sum,day)=>sum+day.redCards,0)
     };
   }).sort((a,b)=>
     b.total-a.total
@@ -1973,6 +2022,7 @@ function renderChampions(){
         <strong class="champions-total champions-points-total">${team.total.toLocaleString('es')}</strong>
         <strong class="champions-stat-total champions-goals-total">${team.goals.toLocaleString('es')}</strong>
         <strong class="champions-stat-total champions-cs-total">${team.cleanSheets.toLocaleString('es')}</strong>
+        <strong class="champions-stat-total champions-red-cards-total">${team.redCards.toLocaleString('es')}</strong>
       </div>`;
     }).join('');
     return `<article class="group champions-group">
@@ -1981,7 +2031,7 @@ function renderChampions(){
         <div><h3>${group.name}</h3><small>5 competidores · ida y vuelta</small></div>
         <span class="champions-round-count">${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT}</span>
       </header>
-      <div class="champions-scroll-cue"><span>J1–J8 · PTS · GOL · CS</span><b>Desliza para ver todo →</b></div>
+      <div class="champions-scroll-cue"><span>J1–J8 · PTS · GOL · CS · TR</span><b>Desliza para ver todo →</b></div>
       <div class="champions-score-scroll" tabindex="0" aria-label="Tabla de ${group.name}. Desliza horizontalmente para consultar las ocho jornadas.">
         <div class="champions-score-table">
           <div class="champions-score-head champions-score-grid">
@@ -1991,11 +2041,12 @@ function renderChampions(){
             <span class="champions-summary-head champions-points-head">PTS</span>
             <span class="champions-summary-head champions-goals-head">GOL</span>
             <span class="champions-summary-head champions-cs-head">CS</span>
+            <span class="champions-summary-head champions-red-cards-head">TR</span>
           </div>
           ${rows}
         </div>
       </div>
-      <footer class="champions-group-footer"><span>Clasifican los 2 primeros</span><span>Orden: PTS · GOL · CS</span></footer>
+      <footer class="champions-group-footer"><span>Clasifican los 2 primeros</span><span>TR = tarjetas rojas · desempate: PTS · GOL · CS</span></footer>
     </article>`;
   }).join('');
   $('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('');
@@ -2229,6 +2280,7 @@ async function drawPodiumShareCard(ctx,matchday){
   const average=weekly.reduce((sum,player)=>sum+player.points,0)/weekly.length;
   const goals=leadersForShareCard(weekly,'goals');
   const cleanSheets=leadersForShareCard(weekly,'cleanSheets');
+  const redCards=leadersForShareCard(weekly,'redCards');
   const leaderName=leader=>leader.names.length>1
     ?`${leader.names[0]} +${leader.names.length-1}`
     :leader.names[0]||'Sin registro';
@@ -2241,26 +2293,33 @@ async function drawPodiumShareCard(ctx,matchday){
       tone:'#79eadd'
     },
     {
-      x:387,
+      x:303,
       label:'MÁXIMO GOLEADOR',
       name:leaderName(goals),
       value:goals.value?`${goals.value} ${goals.value===1?'GOL':'GOLES'}`:'SIN GOLES',
       tone:'#91f188'
     },
     {
-      x:714,
+      x:546,
       label:'MÁS CLEAN SHEETS',
       name:leaderName(cleanSheets),
       value:cleanSheets.value?`${cleanSheets.value} ${cleanSheets.value===1?'CLEAN SHEET':'CLEAN SHEETS'}`:'SIN CLEAN SHEETS',
       tone:'#e7ca69'
+    },
+    {
+      x:789,
+      label:'TARJETAS ROJAS',
+      name:leaderName(redCards),
+      value:redCards.value?`${redCards.value} ${redCards.value===1?'ROJA':'ROJAS'}`:'SIN ROJAS',
+      tone:'#ff6f79'
     }
   ];
   metrics.forEach(metric=>{
-    fillRounded(ctx,metric.x,1022,306,164,24,'rgba(7,30,34,.88)');
-    strokeRounded(ctx,metric.x,1022,306,164,24,`${metric.tone}35`,2);
-    drawCardText(ctx,metric.label,metric.x+153,1061,264,15,11,850,'center','#819b9e');
-    drawCardText(ctx,metric.name,metric.x+153,1105,264,20,13,850,'center','#f0f7f3');
-    drawCardText(ctx,metric.value,metric.x+153,1154,264,29,20,900,'center',metric.tone);
+    fillRounded(ctx,metric.x,1022,231,164,24,'rgba(7,30,34,.88)');
+    strokeRounded(ctx,metric.x,1022,231,164,24,`${metric.tone}35`,2);
+    drawCardText(ctx,metric.label,metric.x+115.5,1061,205,15,10,850,'center','#819b9e');
+    drawCardText(ctx,metric.name,metric.x+115.5,1105,205,20,12,850,'center','#f0f7f3');
+    drawCardText(ctx,metric.value,metric.x+115.5,1154,205,29,18,900,'center',metric.tone);
   });
   drawShareCardFooter(ctx);
   return true;
@@ -2376,11 +2435,12 @@ async function drawChampionsShareCard(ctx,groupIndex){
 
   fillRounded(ctx,50,358,980,64,18,'rgba(80,230,208,.075)');
   drawCardText(ctx,'#',80,399,34,15,12,850,'center','#78aaa7');
-  drawCardText(ctx,'PARTICIPANTE',126,399,245,15,12,850,'left','#78aaa7');
-  for(let day=1;day<=8;day++)drawCardText(ctx,`J${day}`,442+(day-1)*54,399,38,13,10,850,'center','#78aaa7');
-  drawCardText(ctx,'PTS',880,399,54,13,10,850,'center','#91f188');
-  drawCardText(ctx,'GOL',940,399,50,13,10,850,'center','#6cff73');
-  drawCardText(ctx,'CS',1000,399,50,13,10,850,'center','#50e6d0');
+  drawCardText(ctx,'PARTICIPANTE',126,399,220,15,12,850,'left','#78aaa7');
+  for(let day=1;day<=8;day++)drawCardText(ctx,`J${day}`,405+(day-1)*50,399,34,13,10,850,'center','#78aaa7');
+  drawCardText(ctx,'PTS',820,399,48,13,10,850,'center','#91f188');
+  drawCardText(ctx,'GOL',880,399,48,13,10,850,'center','#6cff73');
+  drawCardText(ctx,'CS',940,399,48,13,10,850,'center','#50e6d0');
+  drawCardText(ctx,'TR',1000,399,48,13,10,850,'center','#ff6f79');
 
   for(let index=0;index<standings.length;index++){
     const player=standings[index];
@@ -2393,20 +2453,21 @@ async function drawChampionsShareCard(ctx,groupIndex){
     }
     drawCardText(ctx,index+1,80,y+73,34,25,20,900,'center',index<2?'#8df486':'#708b90');
     await drawPlayerAvatar(ctx,player.name,115,y+25,74,19);
-    drawCardText(ctx,player.name,205,y+71,190,22,14,850,'left','#eff7f4');
+    drawCardText(ctx,player.name,205,y+71,165,22,13,850,'left','#eff7f4');
     player.matchdays.forEach((day,dayIndex)=>{
-      const center=442+dayIndex*54;
-      fillRounded(ctx,center-18,y+42,36,42,10,day.played?'rgba(80,230,208,.085)':'rgba(255,255,255,.025)');
-      drawCardText(ctx,day.played?day.points.toLocaleString('es'):'—',center,y+69,31,13,9,850,'center',day.played?'#7feadd':'#50696f');
+      const center=405+dayIndex*50;
+      fillRounded(ctx,center-17,y+42,34,42,10,day.played?'rgba(80,230,208,.085)':'rgba(255,255,255,.025)');
+      drawCardText(ctx,day.played?day.points.toLocaleString('es'):'—',center,y+69,29,13,9,850,'center',day.played?'#7feadd':'#50696f');
     });
-    drawCardText(ctx,player.total.toLocaleString('es'),880,y+73,54,21,15,900,'center',index<2?'#91f188':'#79e2d7');
-    drawCardText(ctx,player.goals.toLocaleString('es'),940,y+73,48,19,13,900,'center','#6cff73');
-    drawCardText(ctx,player.cleanSheets.toLocaleString('es'),1000,y+73,48,19,13,900,'center','#50e6d0');
+    drawCardText(ctx,player.total.toLocaleString('es'),820,y+73,48,21,15,900,'center',index<2?'#91f188':'#79e2d7');
+    drawCardText(ctx,player.goals.toLocaleString('es'),880,y+73,48,19,13,900,'center','#6cff73');
+    drawCardText(ctx,player.cleanSheets.toLocaleString('es'),940,y+73,48,19,13,900,'center','#50e6d0');
+    drawCardText(ctx,player.redCards.toLocaleString('es'),1000,y+73,48,19,13,900,'center','#ff6f79');
   }
 
   fillRounded(ctx,160,1177,760,58,22,'rgba(231,202,105,.055)');
   strokeRounded(ctx,160,1177,760,58,22,'rgba(231,202,105,.15)',2);
-  drawCardText(ctx,'CLASIFICAN LOS 2 PRIMEROS · PTS · GOL · CS',540,1214,700,17,13,850,'center','#d8c36f');
+  drawCardText(ctx,'CLASIFICAN LOS 2 PRIMEROS · PTS · GOL · CS · TR',540,1214,760,17,13,850,'center','#d8c36f');
   drawShareCardFooter(ctx);
   return true;
 }

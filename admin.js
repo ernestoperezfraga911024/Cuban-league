@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '64-20260727';
+  const VERSION = '65-20260727';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
@@ -20,6 +20,7 @@
     dirty: false,
     saving: false,
     schemaReady: true,
+    redCardsSchemaReady: true,
     achievementSchemaReady: true,
     history: [],
     previewRows: [],
@@ -164,11 +165,17 @@
     return /matchday_milestones|save_matchday_milestone|achievement milestone/i.test(message);
   }
 
+  function isRedCardsUpgradeError(error) {
+    const message = String(error?.message || error || '');
+    return /red_cards|tarjetas rojas|tarjeta roja/i.test(message);
+  }
+
   function friendlyError(error) {
     const message = String(error?.message || error || '');
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
+    if (isRedCardsUpgradeError(error)) return 'Falta activar las tarjetas rojas. Ejecuta “SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAchievementUpgradeError(error)) return 'Falta activar las insignias. Ejecuta “SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAnalyticsUpgradeError(error)) return 'Falta activar el contador de visitas. Ejecuta “SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isUpgradeError(error)) return 'Falta activar las nuevas funciones del panel. Ejecuta “SUPABASE-V57-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
@@ -324,6 +331,7 @@
     $('pointsTotal').textContent = total('points').toLocaleString();
     $('goalsTotal').textContent = total('goals').toLocaleString();
     $('cleanSheetsTotal').textContent = total('clean_sheets').toLocaleString();
+    $('redCardsTotal').textContent = total('red_cards').toLocaleString();
   }
 
   function validationState() {
@@ -332,7 +340,7 @@
     document.querySelectorAll('.admin-player').forEach(node => {
       const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
       const inputs = [...node.querySelectorAll('.stat-input')];
-      const rowComplete = inputs.length === 3 && inputs.every(input => inputNumberOrNull(input) !== null);
+      const rowComplete = inputs.length === 4 && inputs.every(input => inputNumberOrNull(input) !== null);
       node.classList.toggle('is-incomplete', !rowComplete);
       inputs.forEach(input => input.classList.toggle('is-missing', inputNumberOrNull(input) === null));
       if (rowComplete) complete.push(participant?.name);
@@ -358,7 +366,7 @@
       $('missingParticipants').textContent = 'Publicación activa · edición bloqueada';
     } else if (result.missing.length) {
       $('completionTitle').textContent = `Faltan ${result.missing.length} de ${result.total} participantes`;
-      $('completionMessage').textContent = 'Completa PTS, GOL y CS de todos. Cuando no haya datos, escribe 0.';
+      $('completionMessage').textContent = 'Completa PTS, GOL, CS y TR de todos. Cuando no haya datos, escribe 0.';
       const visible = result.missing.slice(0, 6);
       $('missingParticipants').textContent = `Pendientes: ${visible.join(', ')}${result.missing.length > visible.length ? ` y ${result.missing.length - visible.length} más` : ''}`;
     } else {
@@ -367,7 +375,13 @@
       $('missingParticipants').textContent = 'Validación completa · sin participantes pendientes';
     }
 
-    const canPreview = !locked && result.missing.length === 0 && state.schemaReady && !state.saving;
+    if (!state.redCardsSchemaReady && !locked) {
+      $('completionTitle').textContent = 'Falta activar tarjetas rojas en Supabase';
+      $('completionMessage').textContent = 'Ejecuta el archivo V65 una sola vez. El borrador permanecerá guardado en este dispositivo.';
+      $('missingParticipants').textContent = 'Actualización V65 pendiente';
+    }
+
+    const canPreview = !locked && result.missing.length === 0 && state.schemaReady && state.redCardsSchemaReady && !state.saving;
     $('publishButton').disabled = !canPreview;
     return result;
   }
@@ -467,6 +481,10 @@
           <label for="${inputPrefix}-clean-sheets-${playerId}">CS</label>
           <input class="stat-input" id="${inputPrefix}-clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'clean_sheets')}" placeholder="—" aria-label="Clean sheets de ${name}">
         </div>
+        <div class="stat-input-wrap">
+          <label for="${inputPrefix}-red-cards-${playerId}">TR</label>
+          <input class="stat-input" id="${inputPrefix}-red-cards-${playerId}" data-stat="red_cards" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'red_cards')}" placeholder="—" aria-label="Tarjetas rojas de ${name}">
+        </div>
       </article>`;
   }
 
@@ -508,12 +526,13 @@
       const points = inputNumberOrNull(node.querySelector('[data-stat="points"]'));
       const goals = inputNumberOrNull(node.querySelector('[data-stat="goals"]'));
       const cleanSheets = inputNumberOrNull(node.querySelector('[data-stat="clean_sheets"]'));
+      const redCards = inputNumberOrNull(node.querySelector('[data-stat="red_cards"]'));
       if (!participant) throw new Error('No se pudo identificar uno de los participantes.');
-      if (!allowIncomplete && (points === null || goals === null || cleanSheets === null)) {
+      if (!allowIncomplete && (points === null || goals === null || cleanSheets === null || redCards === null)) {
         throw new Error(`Faltan datos de ${participant.name}.`);
       }
-      if ((goals !== null && goals < 0) || (cleanSheets !== null && cleanSheets < 0)) {
-        throw new Error(`Los goles y clean sheets de ${participant.name} no pueden ser negativos.`);
+      if ((goals !== null && goals < 0) || (cleanSheets !== null && cleanSheets < 0) || (redCards !== null && redCards < 0)) {
+        throw new Error(`Los goles, clean sheets y tarjetas rojas de ${participant.name} no pueden ser negativos.`);
       }
       return {
         season: currentSeasonKey(),
@@ -522,6 +541,7 @@
         points,
         goals,
         clean_sheets: cleanSheets,
+        red_cards: redCards,
         published
       };
     });
@@ -619,10 +639,17 @@
     saveLocalDraft(rows);
     state.hasDraft = true;
 
-    if (!state.schemaReady) {
+    if (!state.schemaReady || !state.redCardsSchemaReady) {
       markDirty(false, 'Borrador guardado en este dispositivo');
       $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
-      if (manual) flashMessage('Borrador guardado en este dispositivo. Activa la actualización V57 de Supabase para sincronizarlo.', 'error');
+      if (manual) {
+        flashMessage(
+          state.redCardsSchemaReady
+            ? 'Borrador guardado en este dispositivo. Activa la actualización V57 de Supabase para sincronizarlo.'
+            : 'Borrador guardado en este dispositivo. Activa la actualización V65 de Supabase para guardar tarjetas rojas.',
+          'error'
+        );
+      }
       return true;
     }
 
@@ -689,7 +716,7 @@
     names.forEach(name => {
       const a = before.get(name);
       const b = after.get(name);
-      if (!a || !b || ['points', 'goals', 'clean_sheets', 'published'].some(key => a[key] !== b[key])) count += 1;
+      if (!a || !b || ['points', 'goals', 'clean_sheets', 'red_cards', 'published'].some(key => a[key] !== b[key])) count += 1;
     });
     return count;
   }
@@ -730,11 +757,20 @@
     $('playerRows').innerHTML = '<div class="state-card"><span class="loader" aria-hidden="true"></span><div><b>Cargando jornada</b><small>Un momento…</small></div></div>';
 
     const season = currentSeasonKey();
-    const statsResult = await state.client
+    let statsResult = await state.client
       .from('matchday_stats')
-      .select('participant_name,points,goals,clean_sheets,published,updated_at')
+      .select('participant_name,points,goals,clean_sheets,red_cards,published,updated_at')
       .eq('season', season)
       .eq('matchday', state.matchday);
+
+    state.redCardsSchemaReady = !statsResult.error;
+    if (statsResult.error && isRedCardsUpgradeError(statsResult.error)) {
+      statsResult = await state.client
+        .from('matchday_stats')
+        .select('participant_name,points,goals,clean_sheets,published,updated_at')
+        .eq('season', season)
+        .eq('matchday', state.matchday);
+    }
 
     if (statsResult.error) {
       renderPlayerRows();
@@ -742,10 +778,10 @@
       return;
     }
 
-    const [draftResult, historyResult, milestoneResult] = await Promise.all([
+    let [draftResult, historyResult, milestoneResult] = await Promise.all([
       state.client
         .from('matchday_drafts')
-        .select('participant_name,points,goals,clean_sheets,updated_at')
+        .select('participant_name,points,goals,clean_sheets,red_cards,updated_at')
         .eq('season', season)
         .eq('matchday', state.matchday),
       state.client
@@ -765,10 +801,22 @@
           .limit(1)
     ]);
 
+    if (draftResult.error && isRedCardsUpgradeError(draftResult.error)) {
+      state.redCardsSchemaReady = false;
+      draftResult = await state.client
+        .from('matchday_drafts')
+        .select('participant_name,points,goals,clean_sheets,updated_at')
+        .eq('season', season)
+        .eq('matchday', state.matchday);
+    }
+
     state.schemaReady = !draftResult.error && !historyResult.error;
     state.achievementSchemaReady = isChampionsMode() || !milestoneResult.error;
     if (!state.schemaReady && (isUpgradeError(draftResult.error) || isUpgradeError(historyResult.error))) {
       flashMessage(friendlyError(draftResult.error || historyResult.error), 'error');
+    }
+    if (!state.redCardsSchemaReady) {
+      flashMessage('Activa la actualización V65 de Supabase para guardar y publicar tarjetas rojas.', 'error');
     }
 
     const allStats = Array.isArray(statsResult.data) ? statsResult.data : [];
@@ -875,6 +923,11 @@
       flashMessage('Primero activa la actualización V57 de Supabase para publicar con historial y deshacer.', 'error');
       return;
     }
+    if (!state.redCardsSchemaReady) {
+      flashMessage('Primero activa la actualización V65 de Supabase para publicar tarjetas rojas.', 'error');
+      $('completionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     const milestoneCheck = milestoneValidation({ required: !isChampionsMode() });
     if (!milestoneCheck.valid) {
       flashMessage(milestoneCheck.message, 'error');
@@ -910,13 +963,14 @@
       <article><small>Participantes</small><b>${rows.length}</b></article>
       <article><small>Puntos</small><b>${total('points').toLocaleString()}</b></article>
       <article><small>Goles</small><b>${total('goals').toLocaleString()}</b></article>
-      <article><small>Clean sheets</small><b>${total('clean_sheets').toLocaleString()}</b></article>`;
+      <article><small>Clean sheets</small><b>${total('clean_sheets').toLocaleString()}</b></article>
+      <article><small>Tarjetas rojas</small><b>${total('red_cards').toLocaleString()}</b></article>`;
     $('previewRows').innerHTML = state.previewRows.map((row, index) => {
       const participant = state.participantIndex.get(row.participant_name);
       return `<div class="preview-row">
         <span>${index + 1}</span>
         <span class="preview-player"><img src="${escapeHtml(participant?.shield || '')}" alt=""><b>${escapeHtml(row.participant_name)}</b></span>
-        <span>${row.points}</span><span>${row.goals}</span><span>${row.clean_sheets}</span>
+        <span>${row.points}</span><span>${row.goals}</span><span>${row.clean_sheets}</span><span>${row.red_cards}</span>
       </div>`;
     }).join('');
     $('confirmPublishButton').querySelector('span').textContent = state.published ? 'Confirmar corrección' : 'Confirmar publicación';
