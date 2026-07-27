@@ -1869,3 +1869,171 @@ body.preview-open{overflow:hidden}
   .visitor-analytics-foot{align-items:flex-start;flex-direction:column;padding:11px 13px}
   .analytics-unavailable{margin:0 12px 14px;padding:14px}
 }
+
+/* ===== CUBAN ADMIN V59 · ACHIEVEMENT MILESTONES ===== */
+
+.achievement-settings{
+  margin:14px 0;
+  overflow:hidden;
+  border:1px solid rgba(255,211,106,.16);
+  border-radius:21px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(255,211,106,.07),transparent 38%),
+    rgba(7,21,16,.78);
+}
+
+.achievement-settings>header{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  align-items:center;
+  gap:13px;
+  padding:17px 20px 14px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.achievement-settings-icon{
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  border:1px solid rgba(255,211,106,.22);
+  border-radius:15px;
+  color:var(--yellow);
+  background:rgba(255,211,106,.055);
+}
+
+.achievement-settings-icon svg{
+  width:24px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.achievement-settings h2{margin:6px 0 4px;font-size:1.08rem}
+.achievement-settings header p{margin:0;color:#71877b;font-size:.64rem;line-height:1.45}
+
+.achievement-settings-fields{
+  display:grid;
+  grid-template-columns:minmax(190px,.8fr) 1fr 1fr;
+  align-items:stretch;
+  gap:9px;
+  padding:13px 16px;
+}
+
+.matchday-date-field,
+.achievement-switch{
+  min-height:70px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:15px;
+  background:rgba(255,255,255,.025);
+}
+
+.matchday-date-field{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:11px 12px;
+}
+
+.matchday-date-field>span{
+  color:#8fa99c;
+  font-size:.61rem;
+  font-weight:850;
+}
+
+.matchday-date-field input{
+  min-width:132px;
+  min-height:43px;
+  padding:8px 9px;
+  border:1px solid rgba(159,255,124,.16);
+  border-radius:11px;
+  color:#eaffdf;
+  background:#081913;
+  font-size:.68rem;
+  font-weight:800;
+}
+
+.matchday-date-field input::-webkit-calendar-picker-indicator{filter:invert(1) sepia(.3) saturate(2);opacity:.72}
+
+.achievement-switch{
+  position:relative;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  cursor:pointer;
+}
+
+.achievement-switch input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+}
+
+.achievement-switch-control{
+  position:relative;
+  display:block;
+  width:42px;
+  height:24px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:999px;
+  background:rgba(255,255,255,.055);
+  transition:.2s ease;
+}
+
+.achievement-switch-control i{
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#70867b;
+  transition:.2s ease;
+}
+
+.achievement-switch input:checked+.achievement-switch-control{
+  border-color:rgba(255,211,106,.32);
+  background:rgba(255,211,106,.14);
+}
+
+.achievement-switch input:checked+.achievement-switch-control i{
+  left:21px;
+  background:var(--yellow);
+  box-shadow:0 0 16px rgba(255,211,106,.25);
+}
+
+.achievement-switch input:focus-visible+.achievement-switch-control{outline:2px solid var(--cyan);outline-offset:3px}
+.achievement-switch b,.achievement-switch small{display:block}
+.achievement-switch b{font-size:.67rem}
+.achievement-switch small{margin-top:4px;color:#6d8478;font-size:.55rem}
+
+.achievement-settings-message{
+  margin:0;
+  padding:0 17px 13px;
+  color:#72897d;
+  font-size:.57rem;
+  line-height:1.45;
+}
+
+.achievement-settings-message.warning{color:#e3bd67}
+.achievement-settings-message.success{color:#8ae9a2}
+.competition-champions .achievement-settings{display:none}
+
+@media(max-width:850px){
+  .achievement-settings-fields{grid-template-columns:1fr 1fr}
+  .matchday-date-field{grid-column:1/-1}
+}
+
+@media(max-width:560px){
+  .achievement-settings>header{grid-template-columns:42px minmax(0,1fr);padding:14px}
+  .achievement-settings-icon{width:42px;height:42px;border-radius:13px}
+  .achievement-settings-fields{grid-template-columns:1fr;padding:11px}
+  .matchday-date-field{grid-column:auto}
+  .achievement-switch{min-height:64px}
+}

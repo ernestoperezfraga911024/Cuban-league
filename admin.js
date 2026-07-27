@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '58-20260727';
+  const VERSION = '59-20260727';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
@@ -20,6 +20,7 @@
     dirty: false,
     saving: false,
     schemaReady: true,
+    achievementSchemaReady: true,
     history: [],
     previewRows: [],
     previewOpen: false,
@@ -31,7 +32,12 @@
     autoSavePromise: null,
     autoSaveRevision: 0,
     suspendAutoSave: false,
-    analyticsLoading: false
+    analyticsLoading: false,
+    milestone: {
+      matchdayDate: '',
+      isMonthEnd: false,
+      isYearEnd: false
+    }
   };
 
   function isStandalone() {
@@ -153,11 +159,17 @@
     return /site_visits|get_site_analytics|track_site_visit|visitor analytics/i.test(message);
   }
 
+  function isAchievementUpgradeError(error) {
+    const message = String(error?.message || error || '');
+    return /matchday_milestones|save_matchday_milestone|achievement milestone/i.test(message);
+  }
+
   function friendlyError(error) {
     const message = String(error?.message || error || '');
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
+    if (isAchievementUpgradeError(error)) return 'Falta activar las insignias. Ejecuta “SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAnalyticsUpgradeError(error)) return 'Falta activar el contador de visitas. Ejecuta “SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isUpgradeError(error)) return 'Falta activar las nuevas funciones del panel. Ejecuta “SUPABASE-V57-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (/is_league_admin|404/i.test(message)) return 'Falta configurar la base de datos. Ejecuta primero el archivo SQL en Supabase.';
@@ -191,6 +203,62 @@
     }).format(date)}`;
   }
 
+  function localDateInputValue() {
+    const now = new Date();
+    const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+    return local.toISOString().slice(0, 10);
+  }
+
+  function gatherMilestone() {
+    return {
+      matchdayDate: $('matchdayDate').value || '',
+      isMonthEnd: $('monthEndToggle').checked,
+      isYearEnd: $('yearEndToggle').checked
+    };
+  }
+
+  function milestoneValidation({ required = true } = {}) {
+    if (isChampionsMode()) return { valid: true, milestone: null, message: '' };
+    const milestone = gatherMilestone();
+    if (required && !milestone.matchdayDate) {
+      return { valid: false, milestone, message: 'Selecciona la fecha de esta jornada antes de continuar.' };
+    }
+    if (milestone.isYearEnd && milestone.matchdayDate && !/-12-\d{2}$/.test(milestone.matchdayDate)) {
+      return { valid: false, milestone, message: 'El Campeón de Invierno solo puede entregarse en la última jornada de diciembre.' };
+    }
+    return { valid: true, milestone, message: '' };
+  }
+
+  function updateAchievementSettingsMessage() {
+    if (isChampionsMode()) return;
+    const node = $('achievementSettingsMessage');
+    const result = milestoneValidation({ required: false });
+    node.classList.toggle('warning', !result.valid || !state.achievementSchemaReady);
+    node.classList.toggle('success', result.valid && state.achievementSchemaReady && (result.milestone?.isMonthEnd || result.milestone?.isYearEnd));
+
+    if (!state.achievementSchemaReady) {
+      node.textContent = 'Activa V59 en Supabase para guardar fechas y entregar las nuevas insignias.';
+    } else if (!result.valid) {
+      node.textContent = result.message;
+    } else if (result.milestone?.isYearEnd) {
+      node.textContent = 'Al publicar la última jornada de diciembre se entregarán Jugador del Mes y Campeón de Invierno.';
+    } else if (result.milestone?.isMonthEnd) {
+      node.textContent = 'Al publicar se calculará y entregará el Jugador del Mes.';
+    } else {
+      node.textContent = 'La fecha se guarda con el borrador de esta jornada.';
+    }
+  }
+
+  function setMilestoneForm(milestone = {}) {
+    const matchdayDate = milestone.matchday_date || milestone.matchdayDate || localDateInputValue();
+    $('matchdayDate').value = matchdayDate;
+    $('monthEndToggle').checked = milestone.is_month_end === true || milestone.isMonthEnd === true;
+    $('yearEndToggle').checked = milestone.is_year_end === true || milestone.isYearEnd === true;
+    if ($('yearEndToggle').checked) $('monthEndToggle').checked = true;
+    state.milestone = gatherMilestone();
+    updateAchievementSettingsMessage();
+  }
+
   function setButtonsBusy(busy) {
     state.saving = busy;
     [
@@ -205,6 +273,9 @@
       button.disabled = busy;
     });
     $('matchdaySelect').disabled = busy;
+    ['matchdayDate', 'monthEndToggle', 'yearEndToggle'].forEach(id => {
+      $(id).disabled = busy;
+    });
     if (busy) {
       $('saveDraftButton').querySelector('span').textContent = 'Guardando…';
       $('publishButton').querySelector('span').textContent = 'Procesando…';
@@ -306,7 +377,11 @@
     document.querySelectorAll('.stat-input').forEach(input => {
       input.disabled = locked;
     });
+    ['matchdayDate', 'monthEndToggle', 'yearEndToggle'].forEach(id => {
+      $(id).disabled = locked || isChampionsMode();
+    });
     $('entryTitle').closest('.entry-card').classList.toggle('is-locked', locked && state.published);
+    $('achievementSettings').classList.toggle('is-locked', locked && state.published);
   }
 
   function syncPublicationUI() {
@@ -456,7 +531,8 @@
     try {
       localStorage.setItem(localDraftKey(), JSON.stringify({
         savedAt: new Date().toISOString(),
-        rows
+        rows,
+        milestone: isChampionsMode() ? null : gatherMilestone()
       }));
     } catch {
       // El guardado en Supabase sigue funcionando aunque el navegador bloquee localStorage.
@@ -471,7 +547,7 @@
       if (!Array.isArray(parsed?.rows)) return null;
       const expected = new Set(state.participants.map(participant => participant.name));
       const rows = parsed.rows.filter(row => expected.has(row.participant_name));
-      return rows.length ? { rows, savedAt: parsed.savedAt } : null;
+      return rows.length ? { rows, savedAt: parsed.savedAt, milestone: parsed.milestone || null } : null;
     } catch {
       return null;
     }
@@ -495,6 +571,39 @@
     clearTimeout(state.autoSaveTimer);
     state.autoSaveTimer = setTimeout(() => persistDraft({ manual: false }), AUTO_SAVE_DELAY);
     syncPublicationUI();
+  }
+
+  async function persistMatchdayMilestone({ required = false } = {}) {
+    if (isChampionsMode()) return true;
+    const validation = milestoneValidation({ required });
+    if (!validation.valid) {
+      updateAchievementSettingsMessage();
+      if (required) throw new Error(validation.message);
+      return false;
+    }
+    if (!validation.milestone?.matchdayDate) return false;
+    if (!state.achievementSchemaReady) {
+      if (required) throw new Error('matchday_milestones is not configured');
+      return false;
+    }
+
+    const { error } = await state.client.rpc('save_matchday_milestone', {
+      p_season: currentSeasonKey(),
+      p_matchday: state.matchday,
+      p_matchday_date: validation.milestone.matchdayDate,
+      p_is_month_end: validation.milestone.isMonthEnd,
+      p_is_year_end: validation.milestone.isYearEnd
+    });
+    if (error) {
+      if (isAchievementUpgradeError(error)) state.achievementSchemaReady = false;
+      updateAchievementSettingsMessage();
+      if (required) throw error;
+      return false;
+    }
+
+    state.milestone = validation.milestone;
+    updateAchievementSettingsMessage();
+    return true;
   }
 
   async function persistDraft({ manual = false } = {}) {
@@ -527,6 +636,9 @@
           p_rows: rows
         });
         if (error) throw error;
+        // En una corrección, la fecha nueva permanece en el borrador local
+        // hasta confirmar la publicación para no alterar premios públicos antes de tiempo.
+        if (!state.published) await persistMatchdayMilestone({ required: false });
         $('savedAt').textContent = formatDate(new Date(), 'Guardada ');
         if (revision === state.autoSaveRevision) {
           markDirty(false, 'Borrador guardado automáticamente');
@@ -630,7 +742,7 @@
       return;
     }
 
-    const [draftResult, historyResult] = await Promise.all([
+    const [draftResult, historyResult, milestoneResult] = await Promise.all([
       state.client
         .from('matchday_drafts')
         .select('participant_name,points,goals,clean_sheets,updated_at')
@@ -642,10 +754,19 @@
         .eq('season', season)
         .eq('matchday', state.matchday)
         .order('created_at', { ascending: false })
-        .limit(20)
+        .limit(20),
+      isChampionsMode()
+        ? Promise.resolve({ data: [], error: null })
+        : state.client
+          .from('matchday_milestones')
+          .select('matchday_date,is_month_end,is_year_end,updated_at')
+          .eq('season', season)
+          .eq('matchday', state.matchday)
+          .limit(1)
     ]);
 
     state.schemaReady = !draftResult.error && !historyResult.error;
+    state.achievementSchemaReady = isChampionsMode() || !milestoneResult.error;
     if (!state.schemaReady && (isUpgradeError(draftResult.error) || isUpgradeError(historyResult.error))) {
       flashMessage(friendlyError(draftResult.error || historyResult.error), 'error');
     }
@@ -655,6 +776,9 @@
     const legacyDraftRows = allStats.filter(row => row.published !== true);
     const cloudDraftRows = !draftResult.error && Array.isArray(draftResult.data) ? draftResult.data : [];
     const localDraft = readLocalDraft();
+    const cloudMilestone = !milestoneResult.error && Array.isArray(milestoneResult.data)
+      ? milestoneResult.data[0] || null
+      : null;
     const draftRows = localDraft?.rows?.length
       ? localDraft.rows
       : cloudDraftRows.length
@@ -666,6 +790,7 @@
     state.hasDraft = draftRows.length > 0;
     state.editingPublished = state.published && state.hasDraft;
     const rowsToRender = draftRows.length ? draftRows : publishedRows;
+    setMilestoneForm(localDraft?.milestone || cloudMilestone || {});
 
     $('savedAt').textContent = localDraft?.savedAt
       ? formatDate(localDraft.savedAt, 'Guardada ')
@@ -703,6 +828,8 @@
     }).join('');
     $('matchdaySelect').value = String(state.matchday);
     $('savedAt').textContent = 'Todavía no guardada';
+    if (!champions && !$('matchdayDate').value) setMilestoneForm({});
+    else updateAchievementSettingsMessage();
     syncPublicationUI();
   }
 
@@ -748,6 +875,17 @@
       flashMessage('Primero activa la actualización V57 de Supabase para publicar con historial y deshacer.', 'error');
       return;
     }
+    const milestoneCheck = milestoneValidation({ required: !isChampionsMode() });
+    if (!milestoneCheck.valid) {
+      flashMessage(milestoneCheck.message, 'error');
+      $('achievementSettings').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!isChampionsMode() && !state.achievementSchemaReady) {
+      flashMessage('Primero activa la actualización V59 de Supabase para publicar fechas e insignias.', 'error');
+      $('achievementSettings').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     const rows = gatherRows(true, false);
     state.previewRows = [...rows].sort((a, b) =>
@@ -758,7 +896,16 @@
     );
     const total = key => rows.reduce((sum, row) => sum + row[key], 0);
     $('previewTitle').textContent = state.published ? 'Revisar corrección' : 'Vista previa de la jornada';
-    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes`;
+    const milestone = milestoneCheck.milestone;
+    const matchdayDateLabel = milestone?.matchdayDate
+      ? new Intl.DateTimeFormat('es', { dateStyle: 'medium' }).format(new Date(`${milestone.matchdayDate}T12:00:00`))
+      : '';
+    const prizeLabel = milestone?.isYearEnd
+      ? ' · cierre mensual e invernal'
+      : milestone?.isMonthEnd
+        ? ' · cierre mensual'
+        : '';
+    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}`;
     $('previewSummary').innerHTML = `
       <article><small>Participantes</small><b>${rows.length}</b></article>
       <article><small>Puntos</small><b>${total('points').toLocaleString()}</b></article>
@@ -799,6 +946,7 @@
     try {
       setButtonsBusy(true);
       const wasCorrection = state.published;
+      await persistMatchdayMilestone({ required: !isChampionsMode() });
       const { data, error } = await state.client.rpc('publish_matchday_revision', {
         p_season: currentSeasonKey(),
         p_matchday: state.matchday,
@@ -1051,6 +1199,25 @@
       state.hasDraft = false;
       syncPublicationUI();
       await loadMatchday();
+    });
+
+    $('matchdayDate').addEventListener('change', () => {
+      state.milestone = gatherMilestone();
+      updateAchievementSettingsMessage();
+      scheduleAutoSave();
+    });
+
+    $('monthEndToggle').addEventListener('change', () => {
+      state.milestone = gatherMilestone();
+      updateAchievementSettingsMessage();
+      scheduleAutoSave();
+    });
+
+    $('yearEndToggle').addEventListener('change', event => {
+      if (event.target.checked) $('monthEndToggle').checked = true;
+      state.milestone = gatherMilestone();
+      updateAchievementSettingsMessage();
+      scheduleAutoSave();
     });
 
     $('playerRows').addEventListener('input', event => {

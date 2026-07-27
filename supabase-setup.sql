@@ -4,6 +4,8 @@
 -- borradores automáticos, historial, correcciones y deshacer.
 -- Finalmente ejecuta SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt para activar
 -- el contador privado de visitas y la gráfica de audiencia.
+-- Después ejecuta SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt para activar
+-- las fechas oficiales, Jugador del Mes y Campeón de Invierno.
 -- El único administrador autorizado será:
 -- ernestoperezfraga911024@gmail.com
 

@@ -1,4 +1,4 @@
-# Cuban League V58
+# Cuban League V59
 
 Sitio oficial de la Cuban League con:
 
@@ -28,6 +28,18 @@ Sitio oficial de la Cuban League con:
   jornadas publicadas, historial de versiones y opción de deshacer.
 - Panel privado V58 con contador de audiencia: personas únicas aproximadas,
   visitas totales, actividad de hoy, últimos siete días y gráfica diaria.
+- Sistema V59 de 15 insignias por logros, con vitrina completa en cada perfil,
+  colección general, requisitos visibles y estado conseguido o bloqueado.
+- Insignias históricas, dinámicas y de jornada: Campeón, Dinastía, Habitual del
+  podio, Temporada legendaria, Rey de la jornada, En llamas, La Manita de cinco
+  goles, El Muro por la mayor racha de clean sheets, líderes actuales y
+  campeón de Champions.
+- Insignia Club 2.000 para cada participante que supere los 2.000 puntos en una
+  misma temporada.
+- Jugador del Mes calculado al publicar la última jornada de cada mes y Campeón
+  de Invierno calculado al publicar la última jornada de diciembre.
+- El panel privado permite asignar fecha a cada jornada y marcar de forma
+  explícita los cierres mensual y anual para que los premios sean exactos.
 - El contador utiliza identificadores anónimos por navegador y dispositivo; no
   guarda nombres, correos ni direcciones IP de los visitantes.
 - Actualización automática de la clasificación mediante Supabase.
@@ -75,5 +87,8 @@ Si la base de datos ya estaba configurada antes de V57, ejecuta una sola vez
 
 Para activar las estadísticas privadas de visitas de V58, ejecuta después
 `SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
+
+Para activar las fechas y premios automáticos de V59, ejecuta finalmente
+`SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.

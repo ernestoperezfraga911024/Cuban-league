@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=58-20260727">
+  <link rel="stylesheet" href="admin.css?v=59-20260727">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -214,6 +214,36 @@
         </div>
       </section>
 
+      <section id="achievementSettings" class="achievement-settings" aria-labelledby="achievementSettingsTitle">
+        <header>
+          <span class="achievement-settings-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 4h8v3c0 4-1.7 7-4 7s-4-3-4-7V4Z"/><path d="M8 6H4c0 4 1.8 6 5.1 6M16 6h4c0 4-1.8 6-5.1 6M12 14v4m-4 2h8"/></svg>
+          </span>
+          <div>
+            <span class="admin-kicker">INSIGNIAS AUTOMÁTICAS</span>
+            <h2 id="achievementSettingsTitle">Fecha y cierre de premios</h2>
+            <p>Estos datos permiten entregar Jugador del Mes y Campeón de Invierno exactamente en la jornada correcta.</p>
+          </div>
+        </header>
+        <div class="achievement-settings-fields">
+          <label class="matchday-date-field">
+            <span>Fecha de la jornada</span>
+            <input id="matchdayDate" type="date" required>
+          </label>
+          <label class="achievement-switch">
+            <input id="monthEndToggle" type="checkbox">
+            <span class="achievement-switch-control" aria-hidden="true"><i></i></span>
+            <span><b>Última jornada del mes</b><small>Entrega Jugador del Mes</small></span>
+          </label>
+          <label class="achievement-switch">
+            <input id="yearEndToggle" type="checkbox">
+            <span class="achievement-switch-control" aria-hidden="true"><i></i></span>
+            <span><b>Última jornada de diciembre</b><small>Entrega Campeón de Invierno</small></span>
+          </label>
+        </div>
+        <p id="achievementSettingsMessage" class="achievement-settings-message">La fecha se guarda con el borrador de esta jornada.</p>
+      </section>
+
       <section class="summary-grid" aria-label="Resumen de la jornada">
         <article>
           <span class="summary-icon points">
@@ -352,7 +382,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=58-20260727"></script>
-  <script src="admin.js?v=58-20260727"></script>
+  <script src="supabase-config.js?v=59-20260727"></script>
+  <script src="admin.js?v=59-20260727"></script>
 </body>
 </html>

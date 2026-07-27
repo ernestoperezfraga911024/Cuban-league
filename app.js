@@ -1,7 +1,8 @@
-const APP_VERSION='58-20260727';
+const APP_VERSION='59-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
+let MATCHDAY_MILESTONES=[];
 let SELECTED_MATCHDAY=null;
 let SELECTED_CLASSIFICATION_MATCHDAY=null;
 const CHAMPIONS_MATCHDAY_COUNT=8;
@@ -283,10 +284,54 @@ async function syncLiveCurrentStats({render=true}={}){
       renderCurrent();
       renderMatchdayCenter();
       renderHomeLive();
+      renderPlayers($('playerSearch')?.value||'');
       if(SHARE_CARD_BOUND)renderShareCardStudio();
     }
     return true;
   }catch{
+    return false;
+  }
+}
+
+function normalizeMatchdayMilestones(rows){
+  const published=new Set(PUBLISHED_MATCHDAYS);
+  return rows.map(row=>({
+    matchday:Number(row.matchday),
+    matchdayDate:String(row.matchday_date||''),
+    isMonthEnd:row.is_month_end===true,
+    isYearEnd:row.is_year_end===true
+  })).filter(row=>
+    Number.isInteger(row.matchday)
+    &&published.has(row.matchday)
+    &&/^\d{4}-\d{2}-\d{2}$/.test(row.matchdayDate)
+  ).sort((a,b)=>a.matchday-b.matchday);
+}
+
+async function syncAchievementMilestones({render=true}={}){
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!DATA||!config?.url||!config?.publishableKey)return false;
+  try{
+    const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_milestones`);
+    endpoint.searchParams.set('select','matchday,matchday_date,is_month_end,is_year_end');
+    endpoint.searchParams.set('season',`eq.${config.season||DATA.currentSeason}`);
+    endpoint.searchParams.set('order','matchday.asc');
+    const response=await fetch(endpoint,{
+      cache:'no-store',
+      headers:{
+        apikey:config.publishableKey,
+        Authorization:`Bearer ${config.publishableKey}`,
+        Accept:'application/json'
+      }
+    });
+    if(!response.ok)throw new Error('No se pudieron actualizar las insignias');
+    const rows=await response.json();
+    if(!Array.isArray(rows))throw new Error('Respuesta de insignias no válida');
+    MATCHDAY_MILESTONES=normalizeMatchdayMilestones(rows);
+    if(render)renderPlayers($('playerSearch')?.value||'');
+    return true;
+  }catch{
+    MATCHDAY_MILESTONES=[];
+    if(render)renderPlayers($('playerSearch')?.value||'');
     return false;
   }
 }
@@ -1127,7 +1172,331 @@ return `<article class="champion-history-card">
 </article>`
 }).join('')
 }
-function renderPlayers(filter=''){const stats=statMap();$('playerGrid').innerHTML=DATA.participants.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())).map(p=>{const s=stats[p.name]||{};return `<article class="player-card team-profile-link" ${profileTriggerAttrs(p.name)}><img src="${p.shield}" alt="Foto de ${p.name}"><h3>${p.name}</h3><small>${s.label||'Participante'}</small><p>${s.points?.toLocaleString()||0} puntos · ${s.podiums||0} podios</p><span class="profile-card-cta">Ver ficha completa →</span></article>`}).join('')}
+const ACHIEVEMENT_CATALOG=[
+  {id:'champion',icon:'🏆',name:'Campeón',rarity:'legendary',type:'Histórica',requirement:'Ganar una temporada de la Cuban League.'},
+  {id:'dynasty',icon:'👑',name:'Dinastía',rarity:'legendary',type:'Histórica',requirement:'Conquistar al menos 2 títulos de Liga.'},
+  {id:'podium_regular',icon:'🥉',name:'Habitual del podio',rarity:'epic',type:'Histórica',requirement:'Terminar entre los tres primeros en 3 temporadas.'},
+  {id:'season_record',icon:'⚡',name:'Temporada legendaria',rarity:'legendary',type:'Récord',requirement:'Poseer el récord de puntos en una misma temporada.'},
+  {id:'two_thousand',icon:'💎',name:'Club 2.000',rarity:'epic',type:'Histórica',requirement:'Superar los 2.000 puntos en una misma temporada.'},
+  {id:'matchday_king',icon:'🗓️',name:'Rey de la jornada',rarity:'epic',type:'Temporada',requirement:'Ganar 3 jornadas durante la temporada actual.'},
+  {id:'on_fire',icon:'🔥',name:'En llamas',rarity:'epic',type:'Racha',requirement:'Mantenerse en el Top 3 durante 3 jornadas consecutivas.'},
+  {id:'manita',icon:'⚽',name:'La Manita',rarity:'rare',type:'Jornada',requirement:'Marcar 5 goles o más en una misma jornada.'},
+  {id:'wall',icon:'🧤',name:'El Muro',rarity:'legendary',type:'Récord',requirement:'Poseer la mayor racha de jornadas consecutivas con clean sheet (mínimo 2).'},
+  {id:'leader',icon:'⭐',name:'Líder actual',rarity:'rare',type:'Dinámica',requirement:'Ocupar el primer puesto de la clasificación actual.'},
+  {id:'pichichi',icon:'🥇',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar la tabla de goles de la temporada.'},
+  {id:'golden_glove',icon:'🛡️',name:'Guante de Oro',rarity:'rare',type:'Dinámica',requirement:'Liderar la tabla de clean sheets de la temporada.'},
+  {id:'king_europe',icon:'🌟',name:'Rey de Europa',rarity:'legendary',type:'Champions',requirement:'Ganar la Cuban League Champions.'},
+  {id:'player_month',icon:'📅',name:'Jugador del Mes',rarity:'epic',type:'Mensual',requirement:'Sumar más puntos en las jornadas oficiales de un mes.'},
+  {id:'winter_champion',icon:'❄️',name:'Campeón de Invierno',rarity:'epic',type:'Temporada',requirement:'Liderar la clasificación al finalizar la última jornada de diciembre.'}
+];
+
+const ACHIEVEMENT_RARITY_WEIGHT={legendary:4,epic:3,rare:2,common:1};
+
+function achievementMonthLabel(dateValue){
+  const date=new Date(`${dateValue}T12:00:00`);
+  if(Number.isNaN(date.getTime()))return '';
+  const label=new Intl.DateTimeFormat('es',{month:'long',year:'numeric'}).format(date);
+  return label.charAt(0).toUpperCase()+label.slice(1);
+}
+
+function achievementSeasonRecord(){
+  const results=(DATA.historicalTables?.seasonArchive||[]).flatMap(season=>
+    (season.results||[])
+      .filter(result=>result.division===1&&Number.isFinite(result.points))
+      .map(result=>({name:result.name,points:Number(result.points),season:season.season}))
+  );
+  if(!results.length)return {points:0,holders:[]};
+  const points=Math.max(...results.map(result=>result.points));
+  return {points,holders:results.filter(result=>result.points===points)};
+}
+
+function championsWinner(){
+  const direct=DATA.champions?.champion;
+  if(typeof direct==='string'&&DATA.participants.some(player=>player.name===direct))return direct;
+  const final=(DATA.champions?.knockout||[]).find(round=>/final/i.test(round.round||''));
+  const winner=final?.winner||final?.champion;
+  return typeof winner==='string'&&DATA.participants.some(player=>player.name===winner)?winner:null;
+}
+
+function monthlyAchievementAwards(){
+  const milestonesByDay=new Map(MATCHDAY_MILESTONES.map(item=>[item.matchday,item]));
+  const closingByMonth=new Map();
+  MATCHDAY_MILESTONES.filter(item=>item.isMonthEnd).forEach(item=>{
+    closingByMonth.set(item.matchdayDate.slice(0,7),item);
+  });
+
+  return [...closingByMonth.entries()].map(([monthKey,closing])=>{
+    const monthDays=new Set(MATCHDAY_MILESTONES
+      .filter(item=>item.matchdayDate.startsWith(monthKey)&&item.matchday<=closing.matchday)
+      .map(item=>item.matchday));
+    const totals=new Map(activeParticipants().map(player=>[
+      player.name,
+      {...player,points:0,goals:0,cleanSheets:0,played:0}
+    ]));
+    LIVE_MATCHDAY_ROWS.forEach(row=>{
+      if(!monthDays.has(row.matchday)||!milestonesByDay.has(row.matchday)||!totals.has(row.participantName))return;
+      const total=totals.get(row.participantName);
+      total.points+=row.points;
+      total.goals+=row.goals;
+      total.cleanSheets+=row.cleanSheets;
+      total.played+=1;
+    });
+    const ranking=[...totals.values()].filter(player=>player.played>0).sort(sortStandings);
+    return ranking.length?{
+      name:ranking[0].name,
+      month:monthKey,
+      label:achievementMonthLabel(closing.matchdayDate),
+      matchday:closing.matchday,
+      points:ranking[0].points
+    }:null;
+  }).filter(Boolean).sort((a,b)=>a.month.localeCompare(b.month));
+}
+
+function winterAchievementAwards(){
+  return MATCHDAY_MILESTONES.filter(item=>item.isYearEnd).map(item=>{
+    const winner=cumulativeStandings(item.matchday)[0];
+    return winner?{
+      name:winner.name,
+      year:item.matchdayDate.slice(0,4),
+      matchday:item.matchday,
+      points:winner.points
+    }:null;
+  }).filter(Boolean);
+}
+
+function buildAchievementSnapshot(){
+  const players=new Map(DATA.participants.map(player=>[player.name,new Map()]));
+  const metrics=new Map(DATA.participants.map(player=>[player.name,{
+    matchdayWins:0,
+    topThreeStreak:0,
+    maxGoals:0,
+    maxGoalsMatchday:null,
+    cleanSheetStreak:0
+  }]));
+  const historical=statMap();
+  const seasonRecord=achievementSeasonRecord();
+  const twoThousandSeasons=new Map(DATA.participants.map(player=>[
+    player.name,
+    (DATA.historicalTables?.seasonArchive||[]).flatMap(season=>
+      (season.results||[])
+        .filter(result=>result.name===player.name&&result.division===1&&Number(result.points)>2000)
+        .map(result=>({season:season.season,points:Number(result.points)}))
+    ).sort((a,b)=>b.points-a.points)
+  ]));
+  const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
+  const current=latest==null?[]:cumulativeStandings(latest);
+  const pichichiTotal=current.length?Math.max(...current.map(player=>player.goals||0)):0;
+  const gloveTotal=current.length?Math.max(...current.map(player=>player.cleanSheets||0)):0;
+
+  PUBLISHED_MATCHDAYS.forEach(matchday=>{
+    const rows=LIVE_MATCHDAY_ROWS.filter(row=>row.matchday===matchday);
+    if(!rows.length)return;
+    const winningPoints=Math.max(...rows.map(row=>row.points));
+    rows.filter(row=>row.points===winningPoints).forEach(row=>{
+      if(metrics.has(row.participantName))metrics.get(row.participantName).matchdayWins+=1;
+    });
+    rows.forEach(row=>{
+      const playerMetrics=metrics.get(row.participantName);
+      if(!playerMetrics)return;
+      if(row.goals>playerMetrics.maxGoals){
+        playerMetrics.maxGoals=row.goals;
+        playerMetrics.maxGoalsMatchday=matchday;
+      }
+    });
+  });
+
+  DATA.participants.forEach(player=>{
+    let topRun=0;
+    let cleanRun=0;
+    PUBLISHED_MATCHDAYS.forEach(matchday=>{
+      const row=LIVE_MATCHDAY_ROWS.find(item=>item.matchday===matchday&&item.participantName===player.name);
+      const weekly=row?weeklyStandings(matchday).find(item=>item.name===player.name):null;
+      if(weekly&&weekly.position<=3){
+        topRun+=1;
+        metrics.get(player.name).topThreeStreak=Math.max(metrics.get(player.name).topThreeStreak,topRun);
+      }else{
+        topRun=0;
+      }
+      if(row&&(row.cleanSheets||0)>0){
+        cleanRun+=1;
+        metrics.get(player.name).cleanSheetStreak=Math.max(metrics.get(player.name).cleanSheetStreak,cleanRun);
+      }else{
+        cleanRun=0;
+      }
+    });
+  });
+
+  const cleanSheetRecord=Math.max(0,...[...metrics.values()].map(item=>item.cleanSheetStreak));
+  const monthAwards=monthlyAchievementAwards();
+  const winterAwards=winterAchievementAwards();
+  const europeChampion=championsWinner();
+
+  const resolve=(player,catalog)=>{
+    const stats=historical[player.name]||{};
+    const playerMetrics=metrics.get(player.name);
+    const currentRow=current.find(item=>item.name===player.name);
+    const monthly=monthAwards.filter(award=>award.name===player.name);
+    const winter=winterAwards.filter(award=>award.name===player.name);
+    const record=seasonRecord.holders.find(holder=>holder.name===player.name);
+    let earned=false;
+    let meta='';
+    let progress='';
+
+    if(catalog.id==='champion'){
+      earned=(stats.titles||0)>=1;
+      meta=earned?`${stats.titles} ${stats.titles===1?'título':'títulos'}`:'';
+    }else if(catalog.id==='dynasty'){
+      earned=(stats.titles||0)>=2;
+      meta=earned?`${stats.titles} títulos`:'';
+      progress=`${Math.min(stats.titles||0,2)}/2 títulos`;
+    }else if(catalog.id==='podium_regular'){
+      earned=(stats.podiums||0)>=3;
+      meta=earned?`${stats.podiums} podios`:'';
+      progress=`${Math.min(stats.podiums||0,3)}/3 podios`;
+    }else if(catalog.id==='season_record'){
+      earned=Boolean(record);
+      meta=earned?`${record.points.toLocaleString('es')} pts · ${record.season}`:'';
+    }else if(catalog.id==='two_thousand'){
+      const seasons=twoThousandSeasons.get(player.name)||[];
+      earned=seasons.length>0;
+      meta=earned
+        ?seasons.length===1
+          ?`${seasons[0].points.toLocaleString('es')} pts · ${seasons[0].season}`
+          :`${seasons.length} temporadas · máximo ${seasons[0].points.toLocaleString('es')} pts`
+        :'';
+    }else if(catalog.id==='matchday_king'){
+      earned=playerMetrics.matchdayWins>=3;
+      meta=earned?`${playerMetrics.matchdayWins} jornadas ganadas`:'';
+      progress=`${Math.min(playerMetrics.matchdayWins,3)}/3 victorias`;
+    }else if(catalog.id==='on_fire'){
+      earned=playerMetrics.topThreeStreak>=3;
+      meta=earned?`Racha de ${playerMetrics.topThreeStreak} jornadas`:'';
+      progress=`${Math.min(playerMetrics.topThreeStreak,3)}/3 en el Top 3`;
+    }else if(catalog.id==='manita'){
+      earned=playerMetrics.maxGoals>=5;
+      meta=earned?`${playerMetrics.maxGoals} goles · J${playerMetrics.maxGoalsMatchday}`:'';
+      progress=`Récord personal: ${playerMetrics.maxGoals}/5 goles`;
+    }else if(catalog.id==='wall'){
+      earned=cleanSheetRecord>=2&&playerMetrics.cleanSheetStreak===cleanSheetRecord;
+      meta=earned?`Récord: ${cleanSheetRecord} jornadas seguidas`:'';
+      progress=cleanSheetRecord<2
+        ?`${playerMetrics.cleanSheetStreak}/2 jornadas`
+        :`Récord actual: ${cleanSheetRecord}`;
+    }else if(catalog.id==='leader'){
+      earned=Boolean(currentRow&&currentRow.position===1&&latest!=null);
+      meta=earned?`${currentRow.points.toLocaleString('es')} pts · J${latest}`:'';
+    }else if(catalog.id==='pichichi'){
+      earned=Boolean(currentRow&&pichichiTotal>0&&currentRow.goals===pichichiTotal);
+      meta=earned?`${currentRow.goals} ${currentRow.goals===1?'gol':'goles'}`:'';
+    }else if(catalog.id==='golden_glove'){
+      earned=Boolean(currentRow&&gloveTotal>0&&currentRow.cleanSheets===gloveTotal);
+      meta=earned?`${currentRow.cleanSheets} clean ${currentRow.cleanSheets===1?'sheet':'sheets'}`:'';
+    }else if(catalog.id==='king_europe'){
+      earned=europeChampion===player.name;
+      meta=earned?'Campeón de Champions':'';
+    }else if(catalog.id==='player_month'){
+      earned=monthly.length>0;
+      meta=earned
+        ?monthly.length===1?monthly[0].label:`${monthly.length} premios · ${monthly.map(award=>award.label.split(' ')[0]).join(', ')}`
+        :'';
+      progress=MATCHDAY_MILESTONES.some(item=>item.isMonthEnd)?'Premio mensual publicado':'Se entrega al cerrar cada mes';
+    }else if(catalog.id==='winter_champion'){
+      earned=winter.length>0;
+      meta=earned
+        ?winter.length===1?`${winter[0].year} · ${winter[0].points.toLocaleString('es')} pts`:`${winter.length} veces`
+        :'';
+      progress=MATCHDAY_MILESTONES.some(item=>item.isYearEnd)?'Cierre de diciembre publicado':'Se entrega al cerrar diciembre';
+    }
+
+    return {
+      ...catalog,
+      earned,
+      meta,
+      progress,
+      detail:earned?(meta||catalog.requirement):(progress||catalog.requirement)
+    };
+  };
+
+  DATA.participants.forEach(player=>{
+    ACHIEVEMENT_CATALOG.forEach(catalog=>{
+      players.get(player.name).set(catalog.id,resolve(player,catalog));
+    });
+  });
+
+  return {
+    players,
+    catalog:ACHIEVEMENT_CATALOG.map(catalog=>{
+      const achievers=DATA.participants.filter(player=>players.get(player.name).get(catalog.id).earned);
+      return {...catalog,achievers};
+    })
+  };
+}
+
+function playerAchievementState(name,snapshot=buildAchievementSnapshot()){
+  return [...(snapshot.players.get(name)?.values()||[])];
+}
+
+function sortFeaturedAchievements(items){
+  return [...items].sort((a,b)=>
+    Number(b.earned)-Number(a.earned)
+    ||(ACHIEVEMENT_RARITY_WEIGHT[b.rarity]||0)-(ACHIEVEMENT_RARITY_WEIGHT[a.rarity]||0)
+    ||a.name.localeCompare(b.name,'es')
+  );
+}
+
+function renderAchievementHub(snapshot=buildAchievementSnapshot()){
+  const host=$('achievementHub');
+  if(!host)return;
+  const unlocked=snapshot.catalog.filter(item=>item.achievers.length);
+  const totalAwards=snapshot.catalog.reduce((sum,item)=>sum+item.achievers.length,0);
+  const rarest=[...unlocked].sort((a,b)=>
+    a.achievers.length-b.achievers.length
+    ||(ACHIEVEMENT_RARITY_WEIGHT[b.rarity]||0)-(ACHIEVEMENT_RARITY_WEIGHT[a.rarity]||0)
+  )[0];
+
+  host.innerHTML=`<section class="achievement-hub-shell">
+    <div class="achievement-hub-head">
+      <div><span class="eyebrow">SALA DE TROFEOS</span><h2>Insignias por logros</h2><p>Cada insignia nace de datos oficiales. Las bloqueadas muestran exactamente lo que falta.</p></div>
+      <div class="achievement-hub-score"><b>${unlocked.length}<span>/${ACHIEVEMENT_CATALOG.length}</span></b><small>tipos estrenados</small></div>
+    </div>
+    <div class="achievement-hub-summary">
+      <article><span>🏅</span><div><b>${totalAwards}</b><small>insignias entregadas</small></div></article>
+      <article><span>💎</span><div><b>${rarest?rarest.name:'Por estrenar'}</b><small>${rarest?`${rarest.achievers.length} ${rarest.achievers.length===1?'poseedor':'poseedores'}`:'La primera puede ser tuya'}</small></div></article>
+      <article><span>🔒</span><div><b>${ACHIEVEMENT_CATALOG.length-unlocked.length}</b><small>retos sin estrenar</small></div></article>
+    </div>
+    <div class="achievement-catalog-scroll" role="list" aria-label="Colección de insignias">
+      ${snapshot.catalog.map(item=>`<article class="achievement-catalog-card achievement-${item.rarity}${item.achievers.length?' is-unlocked':' is-locked'}" role="listitem">
+        <span class="achievement-catalog-icon" aria-hidden="true">${item.icon}</span>
+        <div><small>${item.type}</small><b>${item.name}</b><p>${item.requirement}</p></div>
+        <span class="achievement-owner-count">${item.achievers.length?`${item.achievers.length} ${item.achievers.length===1?'jugador':'jugadores'}`:'Sin estrenar'}</span>
+      </article>`).join('')}
+    </div>
+    <p class="achievement-hub-hint">Toca cualquier participante para abrir su vitrina completa.</p>
+  </section>`;
+}
+
+function renderPlayers(filter=''){
+  const stats=statMap();
+  const snapshot=buildAchievementSnapshot();
+  renderAchievementHub(snapshot);
+  const query=String(filter||'').trim().toLowerCase();
+  $('playerGrid').innerHTML=DATA.participants.filter(player=>player.name.toLowerCase().includes(query)).map(player=>{
+    const statsRow=stats[player.name]||{};
+    const badges=sortFeaturedAchievements(playerAchievementState(player.name,snapshot).filter(item=>item.earned));
+    const visible=badges.slice(0,3);
+    return `<article class="player-card team-profile-link" ${profileTriggerAttrs(player.name)}>
+      <img src="${player.shield}" alt="Foto de ${player.name}">
+      <h3>${player.name}</h3>
+      <small>${statsRow.label||'Participante'}</small>
+      <p>${statsRow.points?.toLocaleString()||0} puntos · ${statsRow.podiums||0} podios</p>
+      <div class="player-card-badges" aria-label="${badges.length} insignias conseguidas">
+        ${visible.length?visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join(''):'<span class="player-badges-empty">Primera insignia pendiente</span>'}
+        ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
+      </div>
+      <span class="profile-card-cta">Ver ficha e insignias →</span>
+    </article>`;
+  }).join('');
+}
 function getPlayerHistory(name){
   const archive=DATA.historicalTables?.seasonArchive||[];
   return archive.map(s=>{
@@ -1234,6 +1603,9 @@ function openPlayer(name){
     </div>`
   }).join('');
   const currentLabel=!m.current.active?'No participa':m.current.started?`${ordinal(m.current.position)} puesto`:'Sin comenzar';
+  const achievements=playerAchievementState(name);
+  const earnedAchievements=achievements.filter(item=>item.earned);
+  const achievementPercent=Math.round((earnedAchievements.length/ACHIEVEMENT_CATALOG.length)*100);
   $('modalContent').innerHTML=`
     <section class="profile-hero">
       <img src="${p.shield}" class="profile-avatar" alt="Foto de ${name}">
@@ -1256,6 +1628,28 @@ function openPlayer(name){
       <article><b>${s.seconds||0}</b><span>Subcampeonatos</span></article>
       <article><b>${s.podiums||0}</b><span>Podios</span></article>
       <article><b>${s.points?.toLocaleString()||0}</b><span>Puntos históricos</span></article>
+    </section>
+
+    <section class="profile-section profile-achievements-section">
+      <div class="profile-section-head achievement-profile-head">
+        <div><span class="eyebrow">VITRINA PERSONAL</span><h3>Insignias por logros</h3><p>Los premios se actualizan automáticamente con cada jornada publicada.</p></div>
+        <div class="profile-achievement-count"><b>${earnedAchievements.length}<span>/${ACHIEVEMENT_CATALOG.length}</span></b><small>conseguidas</small></div>
+      </div>
+      <div class="profile-achievement-progress" role="progressbar" aria-label="Progreso de insignias" aria-valuemin="0" aria-valuemax="${ACHIEVEMENT_CATALOG.length}" aria-valuenow="${earnedAchievements.length}">
+        <span style="width:${achievementPercent}%"></span>
+      </div>
+      <div class="profile-achievement-grid">
+        ${achievements.map(item=>`<article class="profile-achievement-card achievement-${item.rarity}${item.earned?' is-earned':' is-locked'}">
+          <div class="profile-achievement-card-top">
+            <span class="profile-achievement-icon" aria-hidden="true">${item.icon}</span>
+            <span class="profile-achievement-status">${item.earned?'CONSEGUIDA':'BLOQUEADA'}</span>
+          </div>
+          <small>${item.type}</small>
+          <h4>${item.name}</h4>
+          <p>${item.requirement}</p>
+          ${item.earned||item.progress?`<span class="profile-achievement-detail">${profileAttr(item.detail)}</span>`:''}
+        </article>`).join('')}
+      </div>
     </section>
 
     <section class="profile-section">
@@ -2248,9 +2642,18 @@ async function init(){
   renderNews();
   setupShareCardStudio();
 
-  const syncPublishedData=()=>{
-    syncLiveCurrentStats();
-    syncChampionsStats();
+  const syncPublishedData=async()=>{
+    await syncLiveCurrentStats({render:false});
+    await Promise.all([
+      syncAchievementMilestones({render:false}),
+      syncChampionsStats({render:false})
+    ]);
+    renderCurrent();
+    renderMatchdayCenter();
+    renderHomeLive();
+    renderPlayers($('playerSearch')?.value||'');
+    renderChampions();
+    if(SHARE_CARD_BOUND)renderShareCardStudio();
   };
   syncPublishedData();
   window.setInterval(()=>{
