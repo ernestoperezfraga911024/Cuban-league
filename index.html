@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=62-20260727"></head><body>
+<link rel="stylesheet" href="styles.css?v=63-20260727"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -32,7 +32,7 @@
 <button type="button" class="navtab" data-section="matchdays"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Jornadas</span></button>
 <button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
 <button type="button" class="navtab" data-section="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Historia</span></button>
-<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="cards"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg><span>Tarjetas</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
+<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="rules"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span>Reglamento</span></button><button type="button" class="navtab" data-section="cards"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg><span>Tarjetas</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
 </nav>
 
 <section class="hero-photo">
@@ -86,6 +86,7 @@
     <button type="button" data-go="matchdays"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><span><b>Jornadas</b><small>Podios, líderes y movimientos</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="players"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span><b>Participantes</b><small>Todos los perfiles</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="history" data-history-view="historical"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span><b>Historia</b><small>Temporadas, rankings y récords</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" data-go="rules"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span><span><b>Reglamento oficial</b><small>Normas de Liga y Champions</small></span><span aria-hidden="true">→</span></button>
     <button type="button" class="home-shortcut-share" data-go="cards"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg></span><span><b>Tarjetas para WhatsApp</b><small>Podios, clasificación, líderes y Champions listos para compartir</small></span><span aria-hidden="true">→</span></button>
   </nav>
 </div>
@@ -332,6 +333,110 @@
   <div id="bracket" class="bracket"></div>
 </section>
 
+<section id="rules" class="page regulation-page">
+  <div class="regulation-banner">
+    <div class="regulation-banner-copy">
+      <span class="eyebrow">REGLAMENTO OFICIAL · 2026/27</span>
+      <h2>Reglas claras.<br>Competencia justa.</h2>
+      <p>Consulta en un solo lugar las normas de la Liga, el formato de Champions y todos sus premios.</p>
+    </div>
+    <span class="regulation-banner-mark" aria-hidden="true"><svg class="ui-icon"><use href="#icon-shield"></use></svg></span>
+  </div>
+
+  <div class="regulation-switcher" role="tablist" aria-label="Seleccionar reglamento">
+    <button type="button" id="regulationTabLeague" class="active" role="tab" aria-selected="true" aria-controls="regulationLeaguePanel" data-regulation-view="league">
+      <span class="regulation-tab-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span>
+      <span><b>Liga</b><small>Mercado e inactividad</small></span>
+    </button>
+    <button type="button" id="regulationTabChampions" role="tab" aria-selected="false" aria-controls="regulationChampionsPanel" data-regulation-view="champions">
+      <span class="regulation-tab-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span>
+      <span><b>Champions</b><small>Formato y premios</small></span>
+    </button>
+  </div>
+
+  <div id="regulationLeaguePanel" class="regulation-panel" role="tabpanel" aria-labelledby="regulationTabLeague" data-regulation-panel="league">
+    <div class="regulation-panel-head">
+      <span class="regulation-panel-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span>
+      <div><span class="eyebrow">CUBAN LEAGUE</span><h3>Reglamento de Liga</h3><p>Normas generales para proteger la igualdad y la actividad de la competición.</p></div>
+      <span class="regulation-status">VIGENTE</span>
+    </div>
+
+    <section class="regulation-rule-block" aria-labelledby="marketRulesTitle">
+      <div class="regulation-block-heading">
+        <div><span class="regulation-block-number">01</span><span><small>NORMAS GENERALES</small><h4 id="marketRulesTitle">Mercado y cláusulas</h4></span></div>
+        <span class="regulation-block-label">3 reglas</span>
+      </div>
+      <div class="regulation-rule-list">
+        <article><span>1</span><div><b>Sin compraventa entre místers</b><p>Quedan prohibidas las compras y ventas directas de jugadores entre participantes.</p></div></article>
+        <article><span>2</span><div><b>Cláusulazos ilimitados</b><p>Cada míster podrá ejecutar una cantidad ilimitada de cláusulazos durante la temporada.</p></div></article>
+        <article><span>3</span><div><b>Protección antes de la jornada</b><p>No se permitirán cláusulazos durante las 24 horas anteriores al comienzo de una jornada.</p></div></article>
+      </div>
+    </section>
+
+    <section class="regulation-inactivity" aria-labelledby="inactivityRulesTitle">
+      <div class="regulation-inactivity-head">
+        <span class="regulation-alert-icon" aria-hidden="true">!</span>
+        <div><span class="eyebrow">CONTROL DE ACTIVIDAD</span><h4 id="inactivityRulesTitle">Declaración de inactividad</h4></div>
+      </div>
+      <p class="regulation-inactivity-intro">Un míster será declarado inactivo y <b>no podrá realizar movimientos</b> cuando incurra en cualquiera de estas condiciones:</p>
+      <div class="regulation-condition-grid">
+        <article><span>01</span><div><b>Tres semanas sin conexión</b><p>Permanecer tres semanas consecutivas sin conectarse, salvo causa de fuerza mayor.</p></div></article>
+        <article><span>02</span><div><b>Saldo negativo reiterado</b><p>Presentar saldo negativo en dos de las últimas cinco jornadas o en tres jornadas durante toda la temporada.</p></div></article>
+        <article><span>03</span><div><b>Posiciones vacías</b><p>Dejar posiciones vacías en dos de las últimas tres jornadas o en tres jornadas durante toda la temporada.</p></div></article>
+      </div>
+      <div class="regulation-note"><b>Importante</b><span>Una causa de fuerza mayor deberá comunicarse para que la ausencia no sea considerada inactividad.</span></div>
+    </section>
+  </div>
+
+  <div id="regulationChampionsPanel" class="regulation-panel" role="tabpanel" aria-labelledby="regulationTabChampions" data-regulation-panel="champions" hidden>
+    <div class="regulation-panel-head champions-regulation-head">
+      <span class="regulation-panel-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span>
+      <div><span class="eyebrow">CUBAN LEAGUE CHAMPIONS</span><h3>Reglamento de Champions</h3><p>Formato oficial, permanencia y premios de cada fase.</p></div>
+      <span class="regulation-status">VIGENTE</span>
+    </div>
+
+    <section class="regulation-rule-block" aria-labelledby="championsFormatTitle">
+      <div class="regulation-block-heading">
+        <div><span class="regulation-block-number">01</span><span><small>FORMATO OFICIAL</small><h4 id="championsFormatTitle">Camino hacia la final</h4></span></div>
+        <span class="regulation-block-label">8 jornadas</span>
+      </div>
+      <div class="champions-route">
+        <article><span class="champions-route-step">01</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><b>Fase de grupos</b><p>Ocho jornadas clasificatorias. Avanzan los dos primeros de cada grupo.</p></article>
+        <article><span class="champions-route-step">02</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><b>Cuartos</b><p>Eliminatoria a doble jornada.</p></article>
+        <article><span class="champions-route-step">03</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><b>Semifinales</b><p>Eliminatoria a doble jornada.</p></article>
+        <article><span class="champions-route-step">04</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><b>Final</b><p>La copa se decide en una sola jornada.</p></article>
+      </div>
+    </section>
+
+    <section class="champions-protection" aria-labelledby="championsProtectionTitle">
+      <span class="champions-protection-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span>
+      <div><span class="eyebrow">PRIVILEGIO DEL CAMPEÓN</span><h4 id="championsProtectionTitle">El campeón no desciende</h4><p>Si termina entre los puestos 16.º y 20.º, conservará la categoría. En ese caso descenderá el participante situado en el <b>puesto 15.º</b>, manteniéndose un total de cinco descensos.</p></div>
+    </section>
+
+    <section class="champions-prizes" aria-labelledby="championsPrizesTitle">
+      <div class="regulation-block-heading">
+        <div><span class="regulation-block-number">02</span><span><small>BONIFICACIONES</small><h4 id="championsPrizesTitle">Premios de la fase de grupos</h4></span></div>
+        <span class="regulation-block-label">Por jornada</span>
+      </div>
+      <div class="champions-prize-table" role="table" aria-label="Premios por cada jornada de la fase de grupos">
+        <div class="champions-prize-row champions-prize-head" role="row"><span role="columnheader">Jornadas</span><span role="columnheader">Posición en el grupo</span><span role="columnheader">Premio</span></div>
+        <div class="champions-prize-row" role="row"><span role="cell"><b>J1–J4</b></span><span role="cell">1.er lugar</span><span role="cell"><strong>$400 mil</strong></span></div>
+        <div class="champions-prize-row" role="row"><span role="cell"><b>J1–J4</b></span><span role="cell">2.º lugar</span><span role="cell"><strong>$300 mil</strong></span></div>
+        <div class="champions-prize-row prize-row-late" role="row"><span role="cell"><b>J5–J8</b></span><span role="cell">1.er lugar</span><span role="cell"><strong>$800 mil</strong></span></div>
+        <div class="champions-prize-row prize-row-late" role="row"><span role="cell"><b>J5–J8</b></span><span role="cell">2.º lugar</span><span role="cell"><strong>$600 mil</strong></span></div>
+      </div>
+      <div class="prize-payment-note"><span aria-hidden="true">✓</span><p><b>Pago después de cada jornada.</b> La bonificación corresponde al primero y al segundo de cada grupo en esa fecha.</p></div>
+
+      <div class="knockout-prize-heading"><span class="eyebrow">PREMIOS POR CLASIFICAR</span><h4>Recompensas de eliminatorias</h4></div>
+      <div class="knockout-prize-grid">
+        <article><span class="knockout-prize-step">CUARTOS</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><p>Avanzar a semifinales</p><b>$2 millones</b></article>
+        <article><span class="knockout-prize-step">SEMIFINALES</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-star"></use></svg><p>Avanzar a la final</p><b>$3 millones</b></article>
+        <article class="champion-prize"><span class="knockout-prize-step">CAMPEÓN</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><p>Capital inicial de la próxima temporada</p><b>$5 millones</b></article>
+      </div>
+    </section>
+  </div>
+</section>
+
 <section id="cards" class="page">
   <div class="share-card-banner">
     <div>
@@ -425,4 +530,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=62-20260727"></script><script src="app.js?v=62-20260727"></script></body></html>
+<script src="supabase-config.js?v=63-20260727"></script><script src="app.js?v=63-20260727"></script></body></html>

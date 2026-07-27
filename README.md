@@ -1,4 +1,4 @@
-# Cuban League V62
+# Cuban League V63
 
 Sitio oficial de la Cuban League con:
 
@@ -38,6 +38,13 @@ Sitio oficial de la Cuban League con:
 - La Sala de Trofeos presenta el resumen en una sola fila y las 15 insignias
   en una cuadrícula compacta de dos columnas en móvil, mostrando icono, nombre,
   requisito y poseedores sin desplazamiento horizontal.
+- Nueva sección de Reglamento Oficial con acceso desde la navegación y la
+  portada, y pestañas independientes para Liga y Champions.
+- El reglamento de Liga organiza las reglas de mercado, cláusulazos y los tres
+  supuestos de declaración de inactividad.
+- El reglamento de Champions explica las ocho jornadas de grupos, las
+  eliminatorias, la protección del campeón frente al descenso y todos los
+  premios por jornada y por clasificación.
 - Insignias históricas, dinámicas y de jornada: Campeón, Dinastía, Habitual del
   podio, Temporada legendaria, Rey de la jornada, En llamas, La Manita de cinco
   goles, El Muro por la mayor racha de clean sheets, líderes actuales y

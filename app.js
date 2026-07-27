@@ -1,4 +1,4 @@
-const APP_VERSION='62-20260727';
+const APP_VERSION='63-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -395,6 +395,18 @@ function go(id,historyView){
   document.querySelector(`.navtab[data-section="${target}"]`)?.classList.add('active');
   if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
   scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'});
+}
+function setRegulationView(view='league'){
+  const selected=view==='champions'?'champions':'league';
+  document.querySelectorAll('[data-regulation-view]').forEach(button=>{
+    const active=button.dataset.regulationView===selected;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-selected',String(active));
+    button.tabIndex=active?0:-1;
+  });
+  document.querySelectorAll('[data-regulation-panel]').forEach(panel=>{
+    panel.hidden=panel.dataset.regulationPanel!==selected;
+  });
 }
 function renderCurrent(){
   const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
@@ -2701,6 +2713,9 @@ async function init(){
     else if(e.key==='Escape'&&!$('installModal').hidden)closeInstallGuide();
   });
   document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));
+  document.querySelectorAll('[data-regulation-view]').forEach(button=>{
+    button.onclick=()=>setRegulationView(button.dataset.regulationView);
+  });
   document.querySelectorAll('.history-hub-tab[data-history-view]').forEach(button=>{
     button.onclick=()=>setHistoryHubView(button.dataset.historyView);
   });
@@ -2721,7 +2736,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','champions','cards','news'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','champions','rules','cards','news'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }
