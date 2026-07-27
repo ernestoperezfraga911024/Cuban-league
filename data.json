@@ -849,6 +849,17 @@
   ],
   "champions": {
     "status": "Preparación",
+    "champion": "ANDOBA THE BEST",
+    "defendingChampion": "ANDOBA THE BEST",
+    "championSeason": "2020/21",
+    "history": [
+      {
+        "season": "2020/21",
+        "champion": "ANDOBA THE BEST",
+        "edition": 1,
+        "note": "Campeón de la única edición disputada"
+      }
+    ],
     "format": {
       "legs": 2,
       "matchesPerParticipant": 8,

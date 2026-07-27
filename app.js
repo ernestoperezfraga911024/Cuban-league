@@ -1,4 +1,4 @@
-const APP_VERSION='63-20260727';
+const APP_VERSION='64-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -1175,6 +1175,25 @@ $('seasonSelect').onchange=e=>show(e.target.value)
 }
 function renderSeasonChampions(){
 const list=DATA.historicalTables.seasonChampions||[];
+$('championsLegacy').innerHTML=(DATA.champions?.history||[]).length
+  ?`<section class="champions-legacy-section">
+    <div class="champions-legacy-heading">
+      <div><span class="eyebrow">HISTORIAL DE CHAMPIONS</span><h2>Campeones de Europa</h2><p>El registro oficial de todas las ediciones disputadas.</p></div>
+      <span class="champions-legacy-count">${DATA.champions.history.length} ${DATA.champions.history.length===1?'edición':'ediciones'}</span>
+    </div>
+    <div class="champions-legacy-grid">
+      ${DATA.champions.history.map(item=>{
+        const img=imageMap()[item.champion];
+        return `<article class="champions-legacy-card team-profile-link" ${profileTriggerAttrs(item.champion)}>
+          <span class="champions-legacy-trophy">${uiIcon('trophy')}</span>
+          ${img?`<img src="${img}" alt="Foto de ${profileAttr(item.champion)}">`:''}
+          <div><small>CAMPEÓN · ${item.season}</small><h3>${item.champion}</h3><p>${item.note||'Campeón de la Cuban League Champions'}</p></div>
+          <span class="champions-legacy-edition">EDICIÓN ${String(item.edition||1).padStart(2,'0')}</span>
+        </article>`;
+      }).join('')}
+    </div>
+  </section>`
+  :'';
 $('seasonChampions').innerHTML=list.map((c,index)=>{
 const img=imageMap()[c.name];
 return `<article class="champion-history-card">
@@ -1406,7 +1425,7 @@ function buildAchievementSnapshot(){
       meta=earned?`${currentRow.cleanSheets} clean ${currentRow.cleanSheets===1?'sheet':'sheets'}`:'';
     }else if(catalog.id==='king_europe'){
       earned=europeChampion===player.name;
-      meta=earned?'Campeón de Champions':'';
+      meta=earned?`Campeón de Champions · ${DATA.champions?.championSeason||'edición histórica'}`:'';
     }else if(catalog.id==='player_month'){
       earned=monthly.length>0;
       meta=earned
@@ -1673,7 +1692,7 @@ function openPlayer(name){
         <span style="width:${achievementPercent}%"></span>
       </div>
       <div class="profile-achievement-grid">
-        ${achievements.map(item=>`<article class="profile-achievement-card achievement-${item.rarity}${item.earned?' is-earned':' is-locked'}">
+        ${achievements.map(item=>`<article class="profile-achievement-card achievement-${item.rarity} achievement-${item.id}${item.earned?' is-earned':' is-locked'}">
           <div class="profile-achievement-card-top">
             <span class="profile-achievement-icon" aria-hidden="true">${item.icon}</span>
             <span class="profile-achievement-status">${item.earned?'CONSEGUIDA':'BLOQUEADA'}</span>
@@ -1918,6 +1937,17 @@ function championsGroupStandings(group){
 
 function renderChampions(){
   const publishedCount=CHAMPIONS_PUBLISHED_MATCHDAYS.length;
+  const championsHolder=DATA.champions?.defendingChampion||DATA.champions?.champion;
+  const defendingHost=$('championsDefendingChampion');
+  if(defendingHost){
+    const championImage=imageMap()[championsHolder];
+    defendingHost.innerHTML=championsHolder?`<article class="champions-defending-card team-profile-link" ${profileTriggerAttrs(championsHolder)}>
+      <span class="champions-defending-crown">${uiIcon('trophy')}</span>
+      ${championImage?`<img src="${championImage}" alt="Foto de ${profileAttr(championsHolder)}">`:''}
+      <div><span>CAMPEÓN DEFENSOR</span><h3>${championsHolder}</h3><p>Campeón de Champions ${DATA.champions?.championSeason||''} · única edición disputada</p></div>
+      <span class="champions-defending-badge">REY DE EUROPA</span>
+    </article>`:'';
+  }
   const status=$('championsStatus');
   if(status){
     status.textContent=publishedCount===0

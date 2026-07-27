@@ -1,4 +1,4 @@
-# Cuban League V63
+# Cuban League V64
 
 Sitio oficial de la Cuban League con:
 
@@ -45,6 +45,12 @@ Sitio oficial de la Cuban League con:
 - El reglamento de Champions explica las ocho jornadas de grupos, las
   eliminatorias, la protección del campeón frente al descenso y todos los
   premios por jornada y por clasificación.
+- ANDOBA THE BEST queda registrado como campeón de la única edición histórica
+  de Champions, disputada en 2020/21, y recibe la insignia Rey de Europa.
+- Champions presenta a ANDOBA THE BEST como campeón defensor y el apartado
+  Histórico incorpora un archivo propio de campeones de Champions.
+- La portada incluye “Ver reglamento” junto a los accesos principales de
+  Clasificación y Centro de Jornada.
 - Insignias históricas, dinámicas y de jornada: Campeón, Dinastía, Habitual del
   podio, Temporada legendaria, Rey de la jornada, En llamas, La Manita de cinco
   goles, El Muro por la mayor racha de clean sheets, líderes actuales y
