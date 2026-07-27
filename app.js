@@ -1,4 +1,4 @@
-const APP_VERSION='48-20260727';
+const APP_VERSION='49-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -279,8 +279,10 @@ function renderCurrent(){
     :cumulativeStandings(latest);
   const movements=latest==null?new Map():movementForMatchday(latest);
   $('updated').textContent=DATA.lastUpdated;
-  $('currentRows').innerHTML=rows.map(p=>`<div class="row current-row">
-    <span class="pos">${p.position}</span>
+  $('currentRows').innerHTML=rows.map(p=>{
+    const isRelegation=p.position>=16&&p.position<=20;
+    return `<div class="row current-row${isRelegation?' is-relegation':''}">
+    <span class="pos"${isRelegation?` aria-label="Puesto ${p.position}, zona de descenso"`:''}>${p.position}</span>
     ${teamCell(p.name)}
     <span class="center">${p.played}</span>
     <span class="num">${p.points.toLocaleString('es')}</span>
@@ -288,7 +290,8 @@ function renderCurrent(){
     <span class="current-stat current-clean-sheets" aria-label="${p.cleanSheets??0} clean sheets">${p.cleanSheets??0}</span>
     <span class="current-movement">${movementBadge(latest==null?null:movements.get(p.name))}</span>
     <span class="current-form" aria-label="Forma de las últimas jornadas">${recentForm(p.name,latest)}</span>
-  </div>`).join('');
+  </div>`;
+  }).join('');
 }
 
 function previousSeasonPodium(){

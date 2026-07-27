@@ -9874,3 +9874,120 @@ footer{
     font-size:.43rem;
   }
 }
+
+/* =========================================================
+   V49 — ZONA DE DESCENSO EN LA CLASIFICACIÓN GENERAL
+   ========================================================= */
+.current-standings-meta{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:7px;
+}
+
+.current-standings-meta small{
+  color:#8399a8;
+}
+
+.relegation-legend{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border:1px solid rgba(255,87,108,.28);
+  border-radius:999px;
+  color:#ff9caa;
+  background:rgba(255,64,88,.07);
+  font-size:.62rem;
+  font-weight:850;
+  letter-spacing:.045em;
+  line-height:1;
+  text-transform:uppercase;
+}
+
+.relegation-legend b{
+  color:#ffd5da;
+}
+
+.relegation-dot{
+  width:7px;
+  height:7px;
+  flex:0 0 7px;
+  border-radius:50%;
+  background:#ff526b;
+  box-shadow:0 0 0 4px rgba(255,82,107,.1),0 0 12px rgba(255,82,107,.45);
+}
+
+#currentRows .current-row.is-relegation{
+  position:relative;
+  border-top-color:rgba(255,82,107,.2);
+  background:
+    linear-gradient(90deg,rgba(255,64,88,.14),rgba(255,64,88,.045) 58%,transparent 100%),
+    rgba(9,20,28,.72);
+  box-shadow:inset 3px 0 0 rgba(255,82,107,.78);
+}
+
+#currentRows .current-row.is-relegation:hover{
+  background:
+    linear-gradient(90deg,rgba(255,64,88,.19),rgba(255,64,88,.065) 62%,transparent 100%),
+    rgba(10,22,30,.82);
+}
+
+#currentRows .current-row.is-relegation .pos{
+  display:grid;
+  width:30px;
+  height:30px;
+  place-self:center;
+  place-items:center;
+  border:1px solid rgba(255,91,112,.38);
+  border-radius:10px;
+  color:#ff93a2;
+  background:rgba(255,66,91,.12);
+  box-shadow:0 7px 18px rgba(93,7,23,.18);
+}
+
+#currentRows .current-row.is-relegation .name{
+  color:#ffe1e5;
+}
+
+#currentRows .current-row.is-relegation .team img{
+  border-color:rgba(255,91,112,.34);
+  box-shadow:0 8px 20px rgba(82,8,20,.28);
+}
+
+@media(max-width:620px){
+  .current-standings-meta{
+    gap:6px;
+  }
+
+  .relegation-legend{
+    padding:5px 8px;
+    font-size:.54rem;
+  }
+
+  #currentRows .current-row.is-relegation{
+    box-shadow:inset 2px 0 0 rgba(255,82,107,.82);
+  }
+
+  #currentRows .current-row.is-relegation .pos{
+    width:24px;
+    height:24px;
+    border-radius:8px;
+    font-size:.71rem;
+  }
+}
+
+@media(max-width:430px){
+  #current .section-head{
+    align-items:flex-end;
+  }
+
+  .current-standings-meta small{
+    font-size:.61rem;
+  }
+
+  .relegation-legend{
+    max-width:128px;
+    white-space:nowrap;
+  }
+}

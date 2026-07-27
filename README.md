@@ -1,8 +1,10 @@
-# Cuban League V48
+# Cuban League V49
 
 Sitio oficial de la Cuban League con:
 
 - Clasificación 2026/27 con jornadas, puntos, goles y clean sheets.
+- Zona de descenso dinámica: los puestos 16 al 20 quedan resaltados en rojo y
+  se actualizan automáticamente después de cada jornada.
 - Centro de Jornada con selector, podio semanal, líderes, movimientos,
   promedio, récord y archivo de todas las jornadas publicadas.
 - Movimiento en la clasificación y forma de las últimas cinco jornadas.
