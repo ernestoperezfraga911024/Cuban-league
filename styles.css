@@ -10402,3 +10402,345 @@ footer{
     grid-template-columns:28px minmax(0,1fr) 46px 28px 52px;
   }
 }
+
+/* =========================================================
+   V51 — CLASIFICACIÓN POR JORNADA
+   ========================================================= */
+.standings-switcher{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+.classification-matchday-toolbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:13px;
+  padding:18px 19px;
+  border:1px solid rgba(80,230,208,.18);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(108,255,115,.07),transparent 10rem),
+    rgba(5,21,28,.9);
+}
+
+.classification-matchday-toolbar h3{
+  margin:5px 0 0;
+  color:#f2f8f5;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.25rem;
+  letter-spacing:-.04em;
+}
+
+.classification-matchday-toolbar label{
+  display:flex;
+  min-width:185px;
+  flex-direction:column;
+  gap:5px;
+}
+
+.classification-matchday-toolbar label>span{
+  color:#789087;
+  font-size:.58rem;
+  font-weight:850;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.classification-matchday-toolbar select{
+  width:100%;
+  border-color:rgba(108,255,115,.24);
+  color:#dff8df;
+  background:#09251e;
+}
+
+.classification-matchday-empty{
+  display:grid;
+  min-height:230px;
+  place-items:center;
+  align-content:center;
+  gap:10px;
+  padding:28px;
+  border:1px dashed rgba(80,230,208,.23);
+  border-radius:18px;
+  color:#81978e;
+  background:rgba(80,230,208,.025);
+  text-align:center;
+}
+
+.classification-matchday-empty .ui-icon{
+  width:36px;
+  height:36px;
+  color:#61e6da;
+}
+
+.classification-matchday-empty strong{
+  color:#e6f0eb;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1rem;
+}
+
+.classification-matchday-empty p{
+  max-width:430px;
+  margin:0;
+  font-size:.76rem;
+}
+
+.classification-matchday-summary{
+  display:grid;
+  grid-template-columns:1.7fr repeat(2,minmax(150px,.65fr));
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.classification-matchday-summary article{
+  display:flex;
+  min-width:0;
+  min-height:105px;
+  flex-direction:column;
+  justify-content:center;
+  padding:16px;
+  border:1px solid rgba(80,230,208,.17);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(80,230,208,.055),transparent 8rem),
+    rgba(5,21,27,.9);
+}
+
+.classification-matchday-summary article>small,
+.classification-matchday-winner>div>small{
+  display:block;
+  margin-bottom:6px;
+  color:#778e85;
+  font-size:.57rem;
+  font-weight:850;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.classification-matchday-summary article>strong{
+  color:#e9f4ef;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.22rem;
+  letter-spacing:-.04em;
+}
+
+.classification-matchday-summary article>span{
+  margin-top:4px;
+  color:#6f867e;
+  font-size:.59rem;
+  font-weight:750;
+  text-transform:uppercase;
+}
+
+.classification-matchday-winner{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  border-color:rgba(231,202,105,.24)!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(231,202,105,.09),transparent 10rem),
+    rgba(7,24,28,.94)!important;
+}
+
+.classification-matchday-summary-icon{
+  display:grid;
+  width:41px;
+  height:41px;
+  place-items:center;
+  border:1px solid rgba(231,202,105,.27);
+  border-radius:13px;
+  color:#e7ca69;
+  background:rgba(231,202,105,.06);
+}
+
+.classification-matchday-summary-icon .ui-icon{
+  width:20px;
+  height:20px;
+}
+
+.classification-matchday-winner>div{
+  min-width:0;
+}
+
+.classification-matchday-winner>div>strong{
+  color:#ecf4f0;
+  font-size:.83rem;
+}
+
+.classification-matchday-winner>b{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  color:#e7ca69;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.42rem;
+  font-variant-numeric:tabular-nums;
+}
+
+.classification-matchday-winner>b>span{
+  color:#8d8462;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.48rem;
+  letter-spacing:.06em;
+}
+
+.classification-matchday-grid{
+  display:grid;
+  grid-template-columns:55px minmax(210px,1fr) 100px 74px 74px;
+  align-items:center;
+}
+
+.classification-matchday-table .thead>span:nth-child(n+3){
+  text-align:center;
+}
+
+.classification-matchday-row{
+  min-height:68px;
+  padding:9px 16px;
+  border-top:1px solid rgba(80,230,208,.1);
+  background:rgba(4,17,23,.76);
+}
+
+.classification-matchday-row:hover{
+  background:rgba(80,230,208,.035);
+}
+
+.classification-matchday-row.is-weekly-podium{
+  background:
+    linear-gradient(90deg,rgba(231,202,105,.055),transparent 64%),
+    rgba(4,17,23,.8);
+}
+
+.classification-matchday-row:first-child{
+  box-shadow:inset 3px 0 0 rgba(231,202,105,.68);
+}
+
+.classification-matchday-rank{
+  color:#71877e;
+  font-size:.78rem;
+  font-weight:900;
+  text-align:center;
+}
+
+.classification-matchday-row:first-child .classification-matchday-rank{
+  color:#e7ca69;
+}
+
+.classification-matchday-points{
+  color:#f0f6f2;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:.9rem;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+
+@media(max-width:620px){
+  .standings-switcher{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .standings-switcher button{
+    min-height:49px;
+    flex-direction:row;
+    gap:7px;
+    font-size:.65rem;
+  }
+
+  .classification-matchday-toolbar{
+    align-items:center;
+    gap:10px;
+    padding:13px;
+    border-radius:15px;
+  }
+
+  .classification-matchday-toolbar h3{
+    font-size:1rem;
+  }
+
+  .classification-matchday-toolbar label{
+    min-width:145px;
+  }
+
+  .classification-matchday-toolbar label>span{
+    font-size:.49rem;
+  }
+
+  .classification-matchday-toolbar select{
+    padding:8px 10px;
+    font-size:.72rem;
+  }
+
+  .classification-matchday-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .classification-matchday-winner{
+    grid-column:1/-1;
+  }
+
+  .classification-matchday-summary article{
+    min-height:87px;
+    padding:12px;
+    border-radius:14px;
+  }
+
+  .classification-matchday-summary article>strong{
+    font-size:1rem;
+  }
+
+  .classification-matchday-grid{
+    grid-template-columns:30px minmax(0,1fr) 53px 40px 40px;
+  }
+
+  .classification-matchday-table .thead{
+    padding:11px 8px;
+    font-size:.56rem;
+  }
+
+  .classification-matchday-row{
+    min-height:61px;
+    padding:8px;
+  }
+
+  .classification-matchday-row .team{
+    gap:7px;
+  }
+
+  .classification-matchday-row .team img{
+    width:37px;
+    height:37px;
+    border-radius:11px;
+  }
+
+  .classification-matchday-row .name{
+    font-size:.71rem;
+  }
+
+  .classification-matchday-points{
+    font-size:.78rem;
+  }
+
+  .classification-matchday-row .current-stat{
+    min-width:30px;
+    min-height:29px;
+    padding:4px 6px;
+    font-size:.72rem;
+  }
+}
+
+@media(max-width:360px){
+  .classification-matchday-toolbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .classification-matchday-toolbar label{
+    width:100%;
+  }
+
+  .classification-matchday-grid{
+    grid-template-columns:28px minmax(0,1fr) 48px 37px 37px;
+  }
+}

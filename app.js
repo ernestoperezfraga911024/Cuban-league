@@ -1,8 +1,9 @@
-const APP_VERSION='50-20260727';
+const APP_VERSION='51-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
 let SELECTED_MATCHDAY=null;
+let SELECTED_CLASSIFICATION_MATCHDAY=null;
 const CHAMPIONS_MATCHDAY_COUNT=8;
 let CHAMPIONS_MATCHDAY_ROWS=[];
 let CHAMPIONS_PUBLISHED_MATCHDAYS=[];
@@ -310,6 +311,67 @@ function renderCurrent(){
     heroId:'currentCleanSheetsHero',
     rowsId:'currentCleanSheetsRows'
   });
+  renderClassificationMatchday();
+}
+
+function renderClassificationMatchday(){
+  const select=$('classificationMatchdaySelect');
+  const title=$('classificationMatchdayTitle');
+  const empty=$('classificationMatchdayEmpty');
+  const content=$('classificationMatchdayContent');
+  const summary=$('classificationMatchdaySummary');
+  const rowsHost=$('classificationMatchdayRows');
+  if(!select||!title||!empty||!content||!summary||!rowsHost)return;
+
+  if(!PUBLISHED_MATCHDAYS.length){
+    SELECTED_CLASSIFICATION_MATCHDAY=null;
+    select.innerHTML='<option value="">Sin jornadas publicadas</option>';
+    select.disabled=true;
+    title.textContent='Jornada';
+    empty.hidden=false;
+    content.hidden=true;
+    return;
+  }
+
+  if(!PUBLISHED_MATCHDAYS.includes(SELECTED_CLASSIFICATION_MATCHDAY)){
+    SELECTED_CLASSIFICATION_MATCHDAY=PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1];
+  }
+  select.disabled=false;
+  select.innerHTML=PUBLISHED_MATCHDAYS.map(matchday=>
+    `<option value="${matchday}"${matchday===SELECTED_CLASSIFICATION_MATCHDAY?' selected':''}>Jornada ${matchday}</option>`
+  ).join('');
+  select.value=String(SELECTED_CLASSIFICATION_MATCHDAY);
+  title.textContent=`Jornada ${SELECTED_CLASSIFICATION_MATCHDAY}`;
+  empty.hidden=true;
+  content.hidden=false;
+
+  const standings=weeklyStandings(SELECTED_CLASSIFICATION_MATCHDAY);
+  const bestPoints=standings[0]?.points||0;
+  const winners=bestPoints
+    ?standings.filter(player=>player.points===bestPoints).map(player=>player.name)
+    :[];
+  const average=standings.length
+    ?standings.reduce((total,player)=>total+player.points,0)/standings.length
+    :0;
+  const totalGoals=standings.reduce((total,player)=>total+player.goals,0);
+  const totalCleanSheets=standings.reduce((total,player)=>total+player.cleanSheets,0);
+
+  summary.innerHTML=`<article class="classification-matchday-winner">
+      <span class="classification-matchday-summary-icon">${uiIcon('trophy')}</span>
+      <div><small>${winners.length>1?'Ganadores empatados':'Ganador de la jornada'}</small>
+      ${winners.length?playerInline(winners.join(' / '),{compact:true}):'<strong>Sin puntos registrados</strong>'}</div>
+      <b>${bestPoints.toLocaleString('es')}<span>PTS</span></b>
+    </article>
+    <article><small>Promedio</small><strong>${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</strong><span>PTS / jugador</span></article>
+    <article><small>Estadísticas</small><strong>${totalGoals.toLocaleString('es')} GOL</strong><span>${totalCleanSheets.toLocaleString('es')} clean sheets</span></article>`;
+
+  rowsHost.innerHTML=standings.map((player,index)=>`<div class="classification-matchday-row classification-matchday-grid${index<3?' is-weekly-podium':''}">
+    <span class="classification-matchday-rank">${player.position}</span>
+    ${teamCell(player.name)}
+    <strong class="classification-matchday-points">${player.points.toLocaleString('es')}</strong>
+    <span class="current-stat current-goals" aria-label="${player.goals} goles">${player.goals}</span>
+    <span class="current-stat current-clean-sheets" aria-label="${player.cleanSheets} clean sheets">${player.cleanSheets}</span>
+  </div>`).join('');
 }
 
 function renderSeasonStatRanking(rows,latest,{metric,label,unit,icon,tone,heroId,rowsId}){
@@ -405,6 +467,13 @@ function setupStandingsSwitcher(){
       setStandingsView(tabs[nextIndex].dataset.standingsView,{focus:true});
     };
   });
+  const matchdaySelect=$('classificationMatchdaySelect');
+  if(matchdaySelect){
+    matchdaySelect.onchange=()=>{
+      SELECTED_CLASSIFICATION_MATCHDAY=Number(matchdaySelect.value)||null;
+      renderClassificationMatchday();
+    };
+  }
   setStandingsView('general');
 }
 

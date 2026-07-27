@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=50-20260727"></head><body>
+<link rel="stylesheet" href="styles.css?v=51-20260727"></head><body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
   <symbol id="icon-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></symbol>
@@ -110,6 +110,9 @@
   <button type="button" id="standingsTabGeneral" class="active" role="tab" aria-selected="true" aria-controls="currentGeneralPanel" data-standings-view="general">
     <svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Tabla general</span>
   </button>
+  <button type="button" id="standingsTabMatchday" role="tab" aria-selected="false" aria-controls="currentMatchdayPanel" data-standings-view="matchday">
+    <svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Jornada</span>
+  </button>
   <button type="button" id="standingsTabGoals" role="tab" aria-selected="false" aria-controls="currentGoalsPanel" data-standings-view="goals">
     <svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Goleadores</span>
   </button>
@@ -121,6 +124,26 @@
 <div id="currentGeneralPanel" class="standings-panel" role="tabpanel" aria-labelledby="standingsTabGeneral" data-standings-panel="general">
 <div class="card current-table-card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span><span title="Goles"><span class="current-label-full">Goles</span><span class="current-label-short">GOL</span></span><span title="Clean sheets"><span class="current-label-full">Clean sheets</span><span class="current-label-short">CS</span></span><span title="Movimiento respecto a la jornada anterior">MOV</span><span>Últimas 5</span></div><div id="currentRows"></div></div>
 <p class="current-table-note"><b>GOL</b> = goles · <b>CS</b> = porterías a cero · <b>MOV</b> = posiciones ganadas o perdidas · <b>Últimas 5</b> = puesto conseguido en cada jornada reciente</p>
+</div>
+
+<div id="currentMatchdayPanel" class="standings-panel" role="tabpanel" aria-labelledby="standingsTabMatchday" data-standings-panel="matchday" hidden>
+  <div class="classification-matchday-toolbar">
+    <div><span class="eyebrow">RESULTADOS POR FECHA</span><h3 id="classificationMatchdayTitle">Jornada</h3></div>
+    <label><span>Seleccionar jornada</span><select id="classificationMatchdaySelect" aria-label="Seleccionar jornada de la clasificación"></select></label>
+  </div>
+  <div id="classificationMatchdayEmpty" class="classification-matchday-empty">
+    <svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+    <strong>Todavía no hay jornadas publicadas</strong>
+    <p>Al publicar la Jornada 1 aparecerá aquí su clasificación completa.</p>
+  </div>
+  <div id="classificationMatchdayContent" hidden>
+    <div id="classificationMatchdaySummary" class="classification-matchday-summary"></div>
+    <div class="card classification-matchday-table">
+      <div class="thead classification-matchday-grid"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span></div>
+      <div id="classificationMatchdayRows"></div>
+    </div>
+    <p class="season-stat-note">Resultados exclusivos de la jornada seleccionada, sin acumular fechas anteriores.</p>
+  </div>
 </div>
 
 <div id="currentGoalsPanel" class="standings-panel" role="tabpanel" aria-labelledby="standingsTabGoals" data-standings-panel="goals" hidden>
@@ -362,4 +385,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=50-20260727"></script><script src="app.js?v=50-20260727"></script></body></html>
+<script src="supabase-config.js?v=51-20260727"></script><script src="app.js?v=51-20260727"></script></body></html>
