@@ -1,4 +1,4 @@
-# Cuban League V52
+# Cuban League V53
 
 Sitio oficial de la Cuban League con:
 
@@ -9,8 +9,10 @@ Sitio oficial de la Cuban League con:
   goleadores y ranking de clean sheets, todos actualizados automáticamente.
 - Vista Jornada dentro de Clasificación, con selector de todas las fechas
   publicadas y tabla independiente de puntos, goles y clean sheets por jornada.
-- Museo Histórico rediseñado con podio dinámico, tablas premium, filas de
-  oro/plata/bronce, métricas identificadas en móvil y archivo de campeones.
+- Museo Histórico rediseñado con podio dinámico, tablas reales de filas y
+  columnas, posiciones destacadas y archivo de campeones.
+- En el celular las tablas históricas conservan sus encabezados y las columnas
+  de posición y jugador permanecen visibles mientras se desplazan.
 - Centro de Jornada con selector, podio semanal, líderes, movimientos,
   promedio, récord y archivo de todas las jornadas publicadas.
 - Movimiento en la clasificación y forma de las últimas cinco jornadas.
