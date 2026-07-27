@@ -1,4 +1,4 @@
-const APP_VERSION='57-20260727';
+const APP_VERSION='58-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -16,6 +16,55 @@ const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden=
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function profileTriggerAttrs(name){const safe=profileAttr(name);return `data-profile-player="${safe}" role="button" tabindex="0" aria-label="Ver perfil completo de ${safe}"`}
 function teamCell(name){return `<div class="team team-profile-link" ${profileTriggerAttrs(name)}><img src="${imageMap()[name]||''}" alt="Foto de ${name}"><span class="name">${name}</span></div>`}
+
+function randomAnonymousId(){
+  if(window.crypto?.randomUUID)return window.crypto.randomUUID();
+  const bytes=new Uint8Array(16);
+  window.crypto?.getRandomValues?.(bytes);
+  bytes[6]=(bytes[6]&15)|64;
+  bytes[8]=(bytes[8]&63)|128;
+  const hex=[...bytes].map(value=>value.toString(16).padStart(2,'0')).join('');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
+
+function anonymousId(storageName,key){
+  try{
+    const storage=window[storageName];
+    const existing=storage.getItem(key);
+    if(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existing||''))return existing;
+    const created=randomAnonymousId();
+    storage.setItem(key,created);
+    return created;
+  }catch{
+    return randomAnonymousId();
+  }
+}
+
+async function trackSiteVisit(){
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!config?.url||!config?.publishableKey)return false;
+  try{
+    const endpoint=`${config.url.replace(/\/$/,'')}/rest/v1/rpc/track_site_visit`;
+    const response=await fetch(endpoint,{
+      method:'POST',
+      cache:'no-store',
+      keepalive:true,
+      headers:{
+        apikey:config.publishableKey,
+        Authorization:`Bearer ${config.publishableKey}`,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        p_visitor_id:anonymousId('localStorage','cuban-league-visitor-id'),
+        p_session_id:anonymousId('sessionStorage','cuban-league-session-id'),
+        p_path:location.pathname||'/'
+      })
+    });
+    return response.ok;
+  }catch{
+    return false;
+  }
+}
 
 function activeParticipants(){
   return DATA.participants.filter(participant=>participant.active!==false);
@@ -2183,6 +2232,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 async function init(){
+  trackSiteVisit();
   DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();
   renderCurrent();
   renderMatchdayCenter();

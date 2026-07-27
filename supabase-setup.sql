@@ -1,7 +1,9 @@
 -- CUBAN LEAGUE · PANEL DE ADMINISTRACIÓN
 -- Ejecutar una sola vez en Supabase > SQL Editor.
--- Después ejecuta también supabase-admin-upgrade-v57.sql para activar
+-- Después ejecuta también SUPABASE-V57-COPIAR-Y-PEGAR.txt para activar
 -- borradores automáticos, historial, correcciones y deshacer.
+-- Finalmente ejecuta SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt para activar
+-- el contador privado de visitas y la gráfica de audiencia.
 -- El único administrador autorizado será:
 -- ernestoperezfraga911024@gmail.com
 

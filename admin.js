@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '57-20260727';
+  const VERSION = '58-20260727';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
@@ -30,7 +30,8 @@
     autoSaveQueued: false,
     autoSavePromise: null,
     autoSaveRevision: 0,
-    suspendAutoSave: false
+    suspendAutoSave: false,
+    analyticsLoading: false
   };
 
   function isStandalone() {
@@ -147,12 +148,18 @@
     return /matchday_drafts|matchday_change_log|save_matchday_draft|publish_matchday_revision|undo_last_matchday_publication|schema cache|could not find the function|does not exist/i.test(message);
   }
 
+  function isAnalyticsUpgradeError(error) {
+    const message = String(error?.message || error || '');
+    return /site_visits|get_site_analytics|track_site_visit|visitor analytics/i.test(message);
+  }
+
   function friendlyError(error) {
     const message = String(error?.message || error || '');
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
-    if (isUpgradeError(error)) return 'Falta activar las nuevas funciones del panel. Ejecuta “supabase-admin-upgrade-v57.sql” una sola vez en Supabase.';
+    if (isAnalyticsUpgradeError(error)) return 'Falta activar el contador de visitas. Ejecuta “SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
+    if (isUpgradeError(error)) return 'Falta activar las nuevas funciones del panel. Ejecuta “SUPABASE-V57-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (/is_league_admin|404/i.test(message)) return 'Falta configurar la base de datos. Ejecuta primero el archivo SQL en Supabase.';
     if (/row-level security|permission denied|not authorized|jwt/i.test(message)) return 'Tu sesión no tiene permiso para realizar esta acción.';
     return message || 'Ocurrió un error inesperado. Inténtalo nuevamente.';
@@ -855,6 +862,101 @@
     }
   }
 
+  function analyticsNumber(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.max(0, number) : 0;
+  }
+
+  function analyticsDayLabel(dateValue) {
+    const date = new Date(`${dateValue}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return '—';
+    return new Intl.DateTimeFormat('es', { weekday: 'short' })
+      .format(date)
+      .replace('.', '')
+      .slice(0, 3);
+  }
+
+  function analyticsLongDayLabel(dateValue) {
+    const date = new Date(`${dateValue}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return '—';
+    return new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' })
+      .format(date)
+      .replace('.', '');
+  }
+
+  function renderVisitorAnalytics(payload) {
+    const daily = Array.isArray(payload?.daily) ? payload.daily.map(day => ({
+      date: String(day.date || ''),
+      visits: analyticsNumber(day.visits),
+      visitors: analyticsNumber(day.visitors)
+    })) : [];
+    const maxVisits = Math.max(1, ...daily.map(day => day.visits));
+    const peak = daily.reduce((best, day) => day.visits > (best?.visits ?? -1) ? day : best, null);
+
+    $('analyticsUniqueVisitors').textContent = analyticsNumber(payload?.uniqueVisitors).toLocaleString('es');
+    $('analyticsTotalVisits').textContent = analyticsNumber(payload?.totalVisits).toLocaleString('es');
+    $('analyticsTodayVisits').textContent = analyticsNumber(payload?.todayVisits).toLocaleString('es');
+    $('analyticsTodayVisitors').textContent = `${analyticsNumber(payload?.todayVisitors).toLocaleString('es')} ${analyticsNumber(payload?.todayVisitors) === 1 ? 'persona' : 'personas'}`;
+    $('analyticsWeekVisits').textContent = analyticsNumber(payload?.last7Visits).toLocaleString('es');
+    $('analyticsWeekVisitors').textContent = `${analyticsNumber(payload?.last7Visitors).toLocaleString('es')} ${analyticsNumber(payload?.last7Visitors) === 1 ? 'persona' : 'personas'}`;
+    $('analyticsPeakDay').textContent = peak && peak.visits
+      ? `${analyticsLongDayLabel(peak.date)} · ${peak.visits.toLocaleString('es')}`
+      : 'Sin visitas';
+
+    $('analyticsDailyChart').innerHTML = daily.map((day, index) => {
+      const height = day.visits ? Math.max(8, Math.round((day.visits / maxVisits) * 100)) : 5;
+      const isToday = index === daily.length - 1;
+      const label = `${analyticsLongDayLabel(day.date)}: ${day.visits} ${day.visits === 1 ? 'visita' : 'visitas'} de ${day.visitors} ${day.visitors === 1 ? 'persona' : 'personas'}`;
+      return `<div class="analytics-day${isToday ? ' is-today' : ''}" title="${escapeHtml(label)}">
+        <strong>${day.visits.toLocaleString('es')}</strong>
+        <span style="--bar-height:${height}%"></span>
+        <small>${analyticsDayLabel(day.date)}</small>
+      </div>`;
+    }).join('');
+    $('analyticsDailyChart').setAttribute(
+      'aria-label',
+      daily.length
+        ? `Visitas de los últimos siete días. ${daily.map(day => `${analyticsLongDayLabel(day.date)}: ${day.visits}`).join(', ')}.`
+        : 'Todavía no hay visitas registradas.'
+    );
+    $('analyticsUpdatedAt').textContent = formatDate(new Date(), 'Actualizado ');
+    $('analyticsUnavailable').hidden = true;
+    $('analyticsContent').hidden = false;
+  }
+
+  async function loadVisitorAnalytics({ manual = false } = {}) {
+    if (!state.client || state.analyticsLoading) return false;
+    const button = $('refreshAnalyticsButton');
+    state.analyticsLoading = true;
+    button.disabled = true;
+    button.classList.add('loading');
+    button.querySelector('span').textContent = 'Actualizando…';
+    $('analyticsUpdatedAt').textContent = 'Actualizando estadísticas…';
+
+    try {
+      const { data, error } = await state.client.rpc('get_site_analytics', { p_days: 7 });
+      if (error) throw error;
+      renderVisitorAnalytics(data || {});
+      if (manual) flashMessage('Estadísticas de visitas actualizadas.');
+      return true;
+    } catch (error) {
+      if (isAnalyticsUpgradeError(error)) {
+        $('analyticsContent').hidden = true;
+        $('analyticsUnavailable').hidden = false;
+        $('analyticsUpdatedAt').textContent = 'Contador pendiente de activar';
+      } else {
+        $('analyticsUpdatedAt').textContent = 'No se pudieron actualizar las visitas';
+        if (manual) flashMessage(friendlyError(error), 'error');
+      }
+      return false;
+    } finally {
+      state.analyticsLoading = false;
+      button.disabled = false;
+      button.classList.remove('loading');
+      button.querySelector('span').textContent = 'Actualizar';
+    }
+  }
+
   async function verifyAdministrator() {
     const { data, error } = await state.client.rpc('is_league_admin');
     if (error) throw error;
@@ -876,6 +978,7 @@
       showOnly('panelView');
       updateCompetitionUI();
       await loadMatchday();
+      loadVisitorAnalytics();
     } catch (error) {
       setLoginMessage(friendlyError(error));
       showOnly('loginView');
@@ -924,6 +1027,7 @@
     });
 
     $('logoutButton').addEventListener('click', logout);
+    $('refreshAnalyticsButton').addEventListener('click', () => loadVisitorAnalytics({ manual: true }));
     $('leagueModeButton').addEventListener('click', () => switchCompetition('league'));
     $('championsModeButton').addEventListener('click', () => switchCompetition('champions'));
     $('saveDraftButton').addEventListener('click', () => persistDraft({ manual: true }));

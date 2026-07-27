@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=57-20260727">
+  <link rel="stylesheet" href="admin.css?v=58-20260727">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -101,6 +101,75 @@
           <button id="logoutButton" type="button">Salir</button>
         </div>
       </div>
+
+      <section class="visitor-analytics" aria-labelledby="visitorAnalyticsTitle">
+        <header class="visitor-analytics-head">
+          <div>
+            <span class="admin-kicker"><i></i> AUDIENCIA</span>
+            <h2 id="visitorAnalyticsTitle">Visitas de la página</h2>
+            <p>Consulta cuántas personas están entrando a Cuban League y cómo se mueve la audiencia cada día.</p>
+          </div>
+          <button id="refreshAnalyticsButton" class="refresh-analytics-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M6.1 9A7 7 0 0 1 18.5 6.5L20 8M4 16l1.5 1.5A7 7 0 0 0 17.9 15"/></svg>
+            <span>Actualizar</span>
+          </button>
+        </header>
+
+        <div id="analyticsUnavailable" class="analytics-unavailable" hidden>
+          <span class="analytics-unavailable-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>
+          </span>
+          <div>
+            <b>Falta activar el contador de visitas</b>
+            <small>Ejecuta “SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.</small>
+          </div>
+        </div>
+
+        <div id="analyticsContent">
+          <div class="analytics-metric-grid">
+            <article class="analytics-metric unique">
+              <span class="analytics-metric-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
+              </span>
+              <span><small>Personas únicas</small><b id="analyticsUniqueVisitors">—</b><em>Desde que se activó</em></span>
+            </article>
+            <article class="analytics-metric total">
+              <span class="analytics-metric-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.1 12s3.6-6 9.9-6 9.9 6 9.9 6-3.6 6-9.9 6-9.9-6-9.9-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+              </span>
+              <span><small>Visitas totales</small><b id="analyticsTotalVisits">—</b><em>Entradas a la web</em></span>
+            </article>
+            <article class="analytics-metric today">
+              <span class="analytics-metric-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+              </span>
+              <span><small>Hoy</small><b id="analyticsTodayVisits">—</b><em id="analyticsTodayVisitors">— personas</em></span>
+            </article>
+            <article class="analytics-metric week">
+              <span class="analytics-metric-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>
+              </span>
+              <span><small>Últimos 7 días</small><b id="analyticsWeekVisits">—</b><em id="analyticsWeekVisitors">— personas</em></span>
+            </article>
+          </div>
+
+          <section class="analytics-chart-card" aria-labelledby="analyticsChartTitle">
+            <div class="analytics-chart-copy">
+              <span>
+                <small>ACTIVIDAD RECIENTE</small>
+                <b id="analyticsChartTitle">Visitas por día</b>
+              </span>
+              <span class="analytics-chart-peak"><small>Mejor día</small><b id="analyticsPeakDay">—</b></span>
+            </div>
+            <div id="analyticsDailyChart" class="analytics-daily-chart" role="img" aria-label="Gráfica de visitas de los últimos siete días"></div>
+          </section>
+        </div>
+
+        <footer class="visitor-analytics-foot">
+          <span>Las personas únicas se calculan por navegador y dispositivo, sin guardar nombres ni direcciones IP.</span>
+          <b id="analyticsUpdatedAt">Cargando estadísticas…</b>
+        </footer>
+      </section>
 
       <nav class="competition-switcher" aria-label="Competición que deseas administrar">
         <button id="leagueModeButton" class="competition-option active" type="button" aria-pressed="true">
@@ -283,7 +352,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=57-20260727"></script>
-  <script src="admin.js?v=57-20260727"></script>
+  <script src="supabase-config.js?v=58-20260727"></script>
+  <script src="admin.js?v=58-20260727"></script>
 </body>
 </html>

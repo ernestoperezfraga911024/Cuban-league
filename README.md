@@ -1,4 +1,4 @@
-# Cuban League V57
+# Cuban League V58
 
 Sitio oficial de la Cuban League con:
 
@@ -26,6 +26,10 @@ Sitio oficial de la Cuban League con:
 - Panel privado V57 con guardado automático del borrador, aviso de
   participantes incompletos, vista previa obligatoria, corrección protegida de
   jornadas publicadas, historial de versiones y opción de deshacer.
+- Panel privado V58 con contador de audiencia: personas únicas aproximadas,
+  visitas totales, actividad de hoy, últimos siete días y gráfica diaria.
+- El contador utiliza identificadores anónimos por navegador y dispositivo; no
+  guarda nombres, correos ni direcciones IP de los visitantes.
 - Actualización automática de la clasificación mediante Supabase.
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.
@@ -67,6 +71,9 @@ Los borradores permanecen privados; la web pública solamente consulta jornadas
 marcadas como publicadas.
 
 Si la base de datos ya estaba configurada antes de V57, ejecuta una sola vez
-`supabase-admin-upgrade-v57.sql` desde Supabase > SQL Editor.
+`SUPABASE-V57-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
+
+Para activar las estadísticas privadas de visitas de V58, ejecuta después
+`SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.
