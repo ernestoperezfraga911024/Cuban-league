@@ -1,4 +1,4 @@
-# Cuban League V47
+# Cuban League V48
 
 Sitio oficial de la Cuban League con:
 
@@ -10,7 +10,8 @@ Sitio oficial de la Cuban League con:
 - Actualización automática de la clasificación mediante Supabase.
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.
-- Tablas de Champions adaptadas al celular con J1–J8, puntos, goles y clean sheets.
+- Tablas horizontales de Champions adaptadas al celular con J1–J8, puntos,
+  goles y clean sheets, sin espacio sobrante al terminar el desplazamiento.
 - Aplicación web instalable en la pantalla de inicio.
 - Portada minimalista premium con estadio nocturno, accesos rápidos y resumen
   automático de la temporada.
@@ -23,7 +24,7 @@ Sitio oficial de la Cuban League con:
 - Grupos oficiales de Champions con cuatro grupos de cinco competidores, fase
   de ida y vuelta, casillas J1–J8 y total automático por participante.
 - Control privado independiente para registrar, guardar y publicar los puntos
-  de cada jornada de Champions sin mezclarlos con los datos de la liga.
+  goles y clean sheets de cada jornada de Champions sin mezclarlos con la liga.
 - Centro de tarjetas oficiales para WhatsApp con Podio de Jornada, Top 10,
   líderes de temporada y tabla de cada grupo de Champions.
 - Generación automática en PNG de 1080 × 1350 con fotos, nombres y estadísticas,

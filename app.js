@@ -1,4 +1,4 @@
-const APP_VERSION='47-20260727';
+const APP_VERSION='48-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -1172,7 +1172,7 @@ function renderChampions(){
     const rows=standings.map((team,index)=>{
       const safeName=profileAttr(team.name);
       const points=team.matchdays.map(day=>`<span class="champions-points-cell${day.played?' is-played':''}" title="${day.played?`Jornada ${day.matchday}: ${day.points.toLocaleString('es')} puntos`:`Jornada ${day.matchday}: pendiente`}">${day.played?day.points.toLocaleString('es'):'—'}</span>`).join('');
-      return `<div class="champions-score-row champions-score-grid">
+      return `<div class="champions-score-row champions-score-grid${index<2?' is-qualifying':''}">
         <span class="champions-rank">${index+1}</span>
         <div class="champions-team-cell team-profile-link" ${profileTriggerAttrs(team.name)}>
           <img src="${imageMap()[team.name]||''}" alt="Foto de ${safeName}">
@@ -1184,31 +1184,13 @@ function renderChampions(){
         <strong class="champions-stat-total champions-cs-total">${team.cleanSheets.toLocaleString('es')}</strong>
       </div>`;
     }).join('');
-    const mobileRows=standings.map((team,index)=>{
-      const safeName=profileAttr(team.name);
-      const matchdays=team.matchdays.map(day=>`<span class="champions-mobile-day${day.played?' is-played':''}" title="${day.played?`Jornada ${day.matchday}: ${day.points.toLocaleString('es')} puntos`:`Jornada ${day.matchday}: pendiente`}"><small>J${day.matchday}</small><b>${day.played?day.points.toLocaleString('es'):'—'}</b></span>`).join('');
-      return `<article class="champions-mobile-row${index<2?' is-qualifying':''}">
-        <div class="champions-mobile-player">
-          <span class="champions-mobile-rank">${index+1}</span>
-          <div class="champions-mobile-team team-profile-link" ${profileTriggerAttrs(team.name)}>
-            <img src="${imageMap()[team.name]||''}" alt="Foto de ${safeName}">
-            <span><b>${safeName}</b><small>${index<2?'Zona de clasificación':'Fase de grupos'}</small></span>
-          </div>
-        </div>
-        <div class="champions-mobile-stats" aria-label="Totales de ${safeName}">
-          <span class="points"><small>PTS</small><b>${team.total.toLocaleString('es')}</b></span>
-          <span class="goals"><small>GOL</small><b>${team.goals.toLocaleString('es')}</b></span>
-          <span class="sheets"><small>CS</small><b>${team.cleanSheets.toLocaleString('es')}</b></span>
-        </div>
-        <div class="champions-mobile-days">${matchdays}</div>
-      </article>`;
-    }).join('');
     return `<article class="group champions-group">
       <header class="champions-group-head">
         <span class="champions-group-icon">${uiIcon('shield')}</span>
         <div><h3>${group.name}</h3><small>5 competidores · ida y vuelta</small></div>
         <span class="champions-round-count">${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT}</span>
       </header>
+      <div class="champions-scroll-cue"><span>J1–J8 · PTS · GOL · CS</span><b>Desliza para ver todo →</b></div>
       <div class="champions-score-scroll" tabindex="0" aria-label="Tabla de ${group.name}. Desliza horizontalmente para consultar las ocho jornadas.">
         <div class="champions-score-table">
           <div class="champions-score-head champions-score-grid">
@@ -1222,7 +1204,6 @@ function renderChampions(){
           ${rows}
         </div>
       </div>
-      <div class="champions-mobile-list">${mobileRows}</div>
       <footer class="champions-group-footer"><span>Clasifican los 2 primeros</span><span>Orden: PTS · GOL · CS</span></footer>
     </article>`;
   }).join('');

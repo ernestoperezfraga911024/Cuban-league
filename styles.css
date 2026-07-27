@@ -5007,6 +5007,23 @@ body.is-offline::after{
   background:rgba(108,255,115,.025);
 }
 
+.champions-score-row.is-qualifying{
+  box-shadow:inset 3px 0 0 rgba(108,255,115,.7);
+  background:
+    linear-gradient(90deg,rgba(108,255,115,.055),rgba(108,255,115,.012) 42%,transparent),
+    rgba(4,17,15,.92);
+}
+
+.champions-score-row.is-qualifying:hover{
+  background:
+    linear-gradient(90deg,rgba(108,255,115,.075),rgba(108,255,115,.02) 42%,transparent),
+    rgba(4,17,15,.94);
+}
+
+.champions-score-row.is-qualifying .champions-rank{
+  color:#aaff8c;
+}
+
 .champions-rank{
   color:#70877c;
   font-size:.73rem;
@@ -5155,7 +5172,7 @@ body.is-offline::after{
   background:rgba(80,230,208,.045);
 }
 
-.champions-mobile-list{display:none}
+.champions-scroll-cue{display:none}
 
 .champions-group-footer{
   display:flex;
@@ -5248,227 +5265,48 @@ body.is-offline::after{
     font-size:1rem;
   }
 
-  .champions-score-scroll{
-    display:none;
-  }
-
-  .champions-mobile-list{
-    display:grid;
-    gap:9px;
-    padding:10px;
-    background:
-      radial-gradient(circle at 100% 0%,rgba(80,230,208,.045),transparent 38%),
-      rgba(0,7,7,.3);
-  }
-
-  .champions-mobile-row{
-    position:relative;
-    overflow:hidden;
-    padding:12px;
-    border:1px solid rgba(255,255,255,.075);
-    border-radius:15px;
-    background:
-      linear-gradient(145deg,rgba(8,29,24,.96),rgba(4,18,16,.98));
-    box-shadow:0 8px 24px rgba(0,0,0,.13);
-  }
-
-  .champions-mobile-row::before{
-    content:"";
-    position:absolute;
-    top:10px;
-    bottom:10px;
-    left:0;
-    width:3px;
-    border-radius:0 3px 3px 0;
-    background:rgba(111,143,130,.3);
-  }
-
-  .champions-mobile-row.is-qualifying{
-    border-color:rgba(108,255,115,.17);
-    background:
-      radial-gradient(circle at 100% 0%,rgba(108,255,115,.065),transparent 35%),
-      linear-gradient(145deg,rgba(8,31,24,.98),rgba(4,18,16,.98));
-  }
-
-  .champions-mobile-row.is-qualifying::before{
-    background:linear-gradient(180deg,var(--green),var(--turquoise));
-    box-shadow:0 0 14px rgba(108,255,115,.3);
-  }
-
-  .champions-mobile-player{
-    display:grid;
-    grid-template-columns:28px minmax(0,1fr);
-    align-items:center;
-    gap:8px;
-  }
-
-  .champions-mobile-rank{
-    display:grid;
-    width:27px;
-    height:27px;
-    place-items:center;
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:9px;
-    color:#789085;
-    background:rgba(255,255,255,.035);
-    font-size:.66rem;
-    font-weight:900;
-  }
-
-  .is-qualifying .champions-mobile-rank{
-    border-color:rgba(108,255,115,.24);
-    color:#9bff8d;
-    background:rgba(108,255,115,.08);
-  }
-
-  .champions-mobile-team{
+  .champions-scroll-cue{
     display:flex;
     align-items:center;
+    justify-content:space-between;
     gap:10px;
-    min-width:0;
-    padding:0;
-    cursor:pointer;
-  }
-
-  .champions-mobile-team img{
-    width:44px;
-    height:44px;
-    flex:0 0 auto;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:13px;
-    object-fit:cover;
-    background:#10241c;
-  }
-
-  .champions-mobile-team>span{
-    min-width:0;
-  }
-
-  .champions-mobile-team b,
-  .champions-mobile-team small{
-    display:block;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-
-  .champions-mobile-team b{
-    color:#eff8f3;
-    font-size:.76rem;
-  }
-
-  .champions-mobile-team small{
-    margin-top:3px;
+    padding:8px 12px;
+    border-bottom:1px solid rgba(255,255,255,.055);
     color:#6f887c;
+    background:rgba(80,230,208,.025);
     font-size:.5rem;
-    font-weight:750;
-    letter-spacing:.045em;
+    font-weight:800;
+    letter-spacing:.035em;
     text-transform:uppercase;
   }
 
-  .is-qualifying .champions-mobile-team small{
-    color:#8ee985;
+  .champions-scroll-cue b{
+    color:#79dfd5;
+    font-size:.49rem;
   }
 
-  .champions-mobile-stats{
-    display:grid;
-    grid-template-columns:1.25fr 1fr 1fr;
-    gap:6px;
-    margin-top:11px;
-  }
-
-  .champions-mobile-stats>span{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:6px;
-    min-height:38px;
-    padding:7px 9px;
-    border:1px solid rgba(255,255,255,.07);
-    border-radius:11px;
-    background:rgba(255,255,255,.025);
-  }
-
-  .champions-mobile-stats small{
-    color:#70877c;
-    font-size:.5rem;
-    font-weight:900;
-    letter-spacing:.06em;
-  }
-
-  .champions-mobile-stats b{
-    font-family:Sora,Manrope,Inter,sans-serif;
-    font-size:.78rem;
-    font-variant-numeric:tabular-nums;
-  }
-
-  .champions-mobile-stats .points{
-    border-color:rgba(108,255,115,.13);
-    color:#aaff8c;
-    background:rgba(108,255,115,.045);
-  }
-
-  .champions-mobile-stats .goals{
-    color:#8dff86;
-  }
-
-  .champions-mobile-stats .sheets{
-    border-color:rgba(80,230,208,.12);
-    color:#6feadd;
-    background:rgba(80,230,208,.035);
-  }
-
-  .champions-mobile-days{
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:5px;
-    margin-top:7px;
-  }
-
-  .champions-mobile-day{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:5px;
-    min-height:34px;
-    padding:6px 8px;
-    border:1px solid rgba(255,255,255,.055);
-    border-radius:9px;
-    color:#536d62;
-    background:rgba(0,0,0,.12);
-  }
-
-  .champions-mobile-day small{
-    color:#61786e;
-    font-size:.46rem;
-    font-weight:850;
-  }
-
-  .champions-mobile-day b{
-    font-size:.61rem;
-    font-variant-numeric:tabular-nums;
-  }
-
-  .champions-mobile-day.is-played{
-    border-color:rgba(80,230,208,.16);
-    color:#7feadd;
-    background:rgba(80,230,208,.055);
-  }
-
-  .champions-mobile-day.is-played small{
-    color:#72aaa1;
+  .champions-score-scroll{
+    display:block;
+    overflow-x:auto;
+    scroll-snap-type:x proximity;
+    background:#04110f;
   }
 
   .champions-score-table{
-    min-width:920px;
+    width:766px;
+    min-width:766px;
   }
 
   .champions-score-grid{
-    grid-template-columns:32px 150px repeat(8,50px) 68px 52px 52px;
+    grid-template-columns:32px 160px repeat(8,50px) 70px 52px 52px;
   }
 
   .champions-score-row{
     min-height:61px;
+  }
+
+  .champions-score-row.is-qualifying{
+    box-shadow:inset 2px 0 0 rgba(108,255,115,.75);
   }
 
   .champions-score-head>span:nth-child(2),
@@ -5479,6 +5317,7 @@ body.is-offline::after{
   .champions-team-cell{
     gap:7px;
     padding:7px;
+    box-shadow:8px 0 15px rgba(0,0,0,.16);
   }
 
   .champions-team-cell img{
@@ -5508,10 +5347,9 @@ body.is-offline::after{
 }
 
 @media(max-width:360px){
-  .champions-mobile-row{padding:10px}
-  .champions-mobile-team img{width:40px;height:40px}
-  .champions-mobile-stats>span{padding-inline:7px}
-  .champions-mobile-day{padding-inline:6px}
+  .champions-scroll-cue{
+    padding-inline:10px;
+  }
 }
 
 /* =========================================================

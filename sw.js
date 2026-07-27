@@ -1,14 +1,14 @@
-const CACHE_NAME = 'cuban-league-v47-champions-groups-pwa';
+const CACHE_NAME = 'cuban-league-v48-champions-table-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=47-20260727',
-  './app.js?v=47-20260727',
-  './data.json?v=47-20260727',
-  './supabase-config.js?v=47-20260727',
+  './styles.css?v=48-20260727',
+  './app.js?v=48-20260727',
+  './data.json?v=48-20260727',
+  './supabase-config.js?v=48-20260727',
   './admin.html',
-  './admin.css?v=47-20260727',
-  './admin.js?v=47-20260727',
+  './admin.css?v=48-20260727',
+  './admin.js?v=48-20260727',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
@@ -105,7 +105,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=47-20260727'));
+    event.respondWith(networkFirst(request, './data.json?v=48-20260727'));
     return;
   }
 
