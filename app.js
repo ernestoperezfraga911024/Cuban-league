@@ -1,4 +1,4 @@
-const APP_VERSION='55-20260727';
+const APP_VERSION='56-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -272,7 +272,36 @@ function playerInline(name,opts={}){
       <span>${p.name}</span>
     </span>`).join('')}</span>`;
 }
-function go(id){document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.navtab[data-section="${id}"]`)?.classList.add('active');scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'})}
+function setHistoryHubView(view='historical'){
+  const allowed=['seasons','historical','records'];
+  const selected=allowed.includes(view)?view:'historical';
+  document.querySelectorAll('.history-hub-tab[data-history-view]').forEach(button=>{
+    const active=button.dataset.historyView===selected;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-selected',String(active));
+  });
+  document.querySelectorAll('[data-history-panel]').forEach(panel=>{
+    const active=panel.dataset.historyPanel===selected;
+    panel.classList.toggle('active',active);
+    panel.hidden=!active;
+  });
+}
+function go(id,historyView){
+  let target=id;
+  let selectedHistoryView=historyView;
+  if(id==='seasons'){
+    target='history';
+    selectedHistoryView='seasons';
+  }else if(id==='records'){
+    target='history';
+    selectedHistoryView='records';
+  }
+  document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));
+  $(target)?.classList.add('active');
+  document.querySelector(`.navtab[data-section="${target}"]`)?.classList.add('active');
+  if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
+  scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'});
+}
 function renderCurrent(){
   const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
   const rows=latest==null
@@ -2182,7 +2211,7 @@ async function init(){
     if(document.visibilityState==='visible')syncPublishedData();
   });
 
-  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go,b.dataset.historyView));
   document.addEventListener('click',e=>{
     const team=e.target.closest('[data-profile-player]');
     if(team)openPlayer(team.dataset.profilePlayer);
@@ -2197,6 +2226,9 @@ async function init(){
     else if(e.key==='Escape'&&!$('installModal').hidden)closeInstallGuide();
   });
   document.querySelectorAll('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.section));
+  document.querySelectorAll('.history-hub-tab[data-history-view]').forEach(button=>{
+    button.onclick=()=>setHistoryHubView(button.dataset.historyView);
+  });
   document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
@@ -2211,9 +2243,11 @@ async function init(){
     :navigator.clipboard.writeText(location.href);
   setupStandingsSwitcher();
   setupPWA();
-  const launchSection=new URLSearchParams(location.search).get('section');
+  const launchParams=new URLSearchParams(location.search);
+  const launchSection=launchParams.get('section');
+  const launchHistoryView=launchParams.get('view');
   if(['home','current','matchdays','seasons','players','history','records','champions','cards','news'].includes(launchSection)){
-    requestAnimationFrame(()=>go(launchSection));
+    requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }
 init();

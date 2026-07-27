@@ -55,7 +55,7 @@
       "name": "Récords",
       "short_name": "Récords",
       "description": "Abrir el libro de récords",
-      "url": "./?section=records"
+      "url": "./?section=history&view=records"
     }
   ]
 }
