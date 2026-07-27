@@ -8,7 +8,7 @@ main{max-width:1180px;margin:auto;padding:35px 20px 110px}.page{display:none}.pa
 .football-split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.photo-card{position:relative;min-height:520px;border-radius:24px;overflow:hidden;background-size:cover;background-position:center;border:1px solid var(--line)}.photo-card:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,11,20,.96),rgba(4,11,20,.08) 70%)}.photo-card>div{position:absolute;z-index:2;left:24px;right:24px;bottom:24px}.photo-card h2{font-size:2rem;margin:7px 0}.mbappe{background-image:url('mbappe-card.jpg')}.yamal{background-image:url('yamal-card.jpg')}
 .dashboard-grid,.record-grid,.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.panel,.record,.news-card,.card,.player-card,.group{border:1px solid var(--line);background:linear-gradient(145deg,rgba(11,25,41,.96),rgba(8,19,32,.96));border-radius:20px}.panel,.record,.news-card{padding:21px}.panel span,.record span,.news-card span{color:var(--muted);font-size:.74rem}.panel h3,.record h3{font-size:1.8rem;margin:8px 0}.card{overflow:hidden}.thead,.row,.general-row,.points-row,.palmares-row{display:grid;align-items:center}.thead{background:#0f2237;color:var(--muted);font-size:.7rem;text-transform:uppercase;font-weight:900;padding:14px 16px}.current-grid,.row{grid-template-columns:50px minmax(0,1fr) 45px 80px}.row{padding:13px 16px;border-top:1px solid var(--line)}.team{display:flex;align-items:center;gap:12px;min-width:0}.team img{width:48px;height:48px;object-fit:cover;border-radius:14px}.name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800}.pos{font-weight:900;color:var(--muted)}.center{text-align:center;color:var(--muted)}.num{text-align:right;font-weight:900}
 .player-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.player-card{padding:16px;cursor:pointer;transition:.2s}.player-card:hover{transform:translateY(-4px)}.player-card img{width:72px;height:72px;border-radius:18px;object-fit:cover}.player-card h3{margin:12px 0 4px}.player-card small{color:var(--muted)}
-.general-grid,.general-row{grid-template-columns:44px minmax(180px,1fr) repeat(6,55px) 95px 80px 70px}.general-row{padding:13px 16px;border-top:1px solid var(--line);min-width:850px}.scroll{overflow-x:auto}.scroll>.thead,.scroll>#generalRows{min-width:850px}.points-grid,.points-row{grid-template-columns:50px minmax(0,1fr) 110px 110px 110px}.palmares-grid,.palmares-row{grid-template-columns:50px minmax(0,1fr) 90px 80px 80px 90px}.points-row,.palmares-row{padding:13px 16px;border-top:1px solid var(--line)}.subtabs{display:flex;gap:8px;overflow-x:auto;margin:18px 0}.subtab{white-space:nowrap}.subtab.active{background:var(--gold);color:#151006}.history-panel{display:none}.history-panel.active{display:block}
+.general-grid,.general-row{grid-template-columns:44px minmax(180px,1fr) repeat(6,55px) 95px 80px}.general-row{padding:13px 16px;border-top:1px solid var(--line);min-width:780px}.scroll{overflow-x:auto}.scroll>.thead,.scroll>#generalRows{min-width:780px}.points-grid,.points-row{grid-template-columns:50px minmax(0,1fr) 110px 110px 110px}.palmares-grid,.palmares-row{grid-template-columns:50px minmax(0,1fr) 90px 80px 80px 90px}.points-row,.palmares-row{padding:13px 16px;border-top:1px solid var(--line)}.subtabs{display:flex;gap:8px;overflow-x:auto;margin:18px 0}.subtab{white-space:nowrap}.subtab.active{background:var(--gold);color:#151006}.history-panel{display:none}.history-panel.active{display:block}
 .season-banner,.history-banner,.records-banner,.champions-banner{min-height:280px;border-radius:24px;padding:30px;display:flex;align-items:flex-end;background-position:center;background-size:cover;position:relative;overflow:hidden}.season-banner{background-image:linear-gradient(90deg,rgba(3,9,18,.93),rgba(3,9,18,.28)),url('yamal-card.jpg')}.history-banner{background-image:linear-gradient(90deg,rgba(3,9,18,.94),rgba(3,9,18,.3)),url('bernabeu-bg.jpg')}.records-banner{background-image:linear-gradient(90deg,rgba(3,9,18,.94),rgba(3,9,18,.3)),url('mbappe-card.jpg')}.champions-banner{background-image:linear-gradient(90deg,rgba(3,9,18,.94),rgba(3,9,18,.3)),url('bernabeu-bg.jpg')}.season-banner>div,.history-banner>div,.records-banner>div,.champions-banner>div{position:relative;z-index:2}.season-banner h2,.history-banner h2,.records-banner h2,.champions-banner h2{font-size:2.5rem;margin:7px 0}
 .season-empty{padding:35px;border:1px dashed #335771;border-radius:20px;background:rgba(66,216,209,.04)}.known-row{padding:14px;border:1px solid var(--line);border-radius:14px;margin-top:12px;background:var(--panel)}
 .group-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.group{padding:18px}.group-team{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.group-team img{width:36px;height:36px;border-radius:10px}.status{padding:8px 12px;border-radius:999px;background:rgba(66,216,209,.12);color:var(--cyan);font-weight:800}.bracket{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.round{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.empty-match{padding:18px;border:1px dashed #34556e;border-radius:14px;color:var(--muted);margin-top:10px}.lower{margin-top:35px}
@@ -712,8 +712,8 @@ img{
   #generalTable > .thead.general-grid,
   #generalTable > #generalRows,
   #generalTable > #generalRows > .general-row {
-    min-width: 1040px !important;
-    width: 1040px !important;
+    min-width: 872px !important;
+    width: 872px !important;
     max-width: none !important;
     box-sizing: border-box !important;
   }
@@ -731,7 +731,6 @@ img{
       68px
       68px
       116px
-      92px
       92px !important;
     gap: 0 !important;
     align-items: stretch !important;
@@ -1366,8 +1365,15 @@ img{
   /* Ranking Premium: compactar las dos columnas congeladas
      respetando el ancho del resto de estadísticas. */
   #generalTable .thead.general-grid,
+  #generalTable #generalRows,
   #generalTable #generalRows .general-row{
-    grid-template-columns:38px 190px repeat(9, minmax(78px, auto)) !important;
+    min-width:852px !important;
+    width:852px !important;
+  }
+
+  #generalTable .thead.general-grid,
+  #generalTable #generalRows .general-row{
+    grid-template-columns:38px 190px repeat(8, minmax(78px, auto)) !important;
   }
 
   #generalTable .thead.general-grid > span:nth-child(2),
@@ -4972,7 +4978,7 @@ body.is-offline::after{
 }
 
 .champions-score-table{
-  min-width:980px;
+  min-width:890px;
 }
 
 .champions-score-grid{

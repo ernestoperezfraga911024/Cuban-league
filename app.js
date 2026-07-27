@@ -1,4 +1,4 @@
-const APP_VERSION='53-20260727';
+const APP_VERSION='54-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -951,14 +951,14 @@ function renderMatchdayCenter(){
   renderMatchdayArchive();
 }
 
-function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles);return x.sort((a,b)=>b.score-a.score)}
+function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles||b.points-a.points);return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.top5-a.top5||b.points-a.points||b.average-a.average)}
 
 function historicalPodiumMetric(player,mode){
   if(mode==='points')return {label:'Puntos históricos',value:player.points,unit:'PTS',decimals:0};
   if(mode==='titles')return {label:'Palmarés',value:player.titles,unit:player.titles===1?'TÍTULO':'TÍTULOS',decimals:0};
   if(mode==='average')return {label:'Promedio',value:player.average||0,unit:'PTS / TEMP.',decimals:1};
   if(mode==='podiums')return {label:'Regularidad',value:player.podiums,unit:player.podiums===1?'PODIO':'PODIOS',decimals:0};
-  return {label:'Índice histórico',value:player.score,unit:'SCORE',decimals:1};
+  return {label:'Palmarés histórico',value:player.titles,unit:player.titles===1?'TÍTULO':'TÍTULOS',decimals:0};
 }
 
 function renderHistoricalPodium(list,mode){
@@ -994,9 +994,8 @@ function renderGeneral(mode='ranking'){
     <span class="center history-metric" data-label="Podios">${p.podiums}</span>
     <span class="center history-metric" data-label="Top 5">${p.top5}</span>
     <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
-    <span class="num history-metric history-metric-wide" data-label="Puntos">${p.points.toLocaleString('es')}</span>
+    <span class="num history-metric history-metric-wide history-metric-featured" data-label="Puntos">${p.points.toLocaleString('es')}</span>
     <span class="num history-metric history-metric-wide" data-label="Promedio">${p.average?p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1}):'—'}</span>
-    <span class="num history-metric history-metric-featured" data-label="Score">${p.score.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</span>
   </div>`).join('');
 }
 
@@ -1085,7 +1084,7 @@ function profileMetrics(name){
   const worst=first.length?[...first].sort((a,b)=>b.position-a.position||a.points-b.points)[0]:null;
   const avgPos=positions.length?positions.reduce((a,b)=>a+b,0)/positions.length:null;
   const bestPoints=first.length?[...first].sort((a,b)=>(b.points||0)-(a.points||0))[0]:null;
-  const historicalRank=[...DATA.general].sort((a,b)=>b.score-a.score).findIndex(x=>x.name===name)+1;
+  const historicalRank=sortedGeneral('ranking').findIndex(x=>x.name===name)+1;
   return {history:h,first,second,best,worst,avgPos,bestPoints,historicalRank:historicalRank||null,current:currentStanding(name)};
 }
 function historyResult(entry){
