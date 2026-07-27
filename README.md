@@ -1,4 +1,4 @@
-# Cuban League V66
+# Cuban League V67
 
 Sitio oficial de la Cuban League con:
 
@@ -103,6 +103,8 @@ Sitio oficial de la Cuban League con:
   para ganar espacio y conservar solamente las tarjetas individuales.
 - En pantallas de escritorio, la portada ocupa el alto útil completo y coloca
   el podio a la derecha del titular; en móvil conserva el podio vertical.
+- En monitores grandes, el hero aprovecha prácticamente todo el ancho visible:
+  el título crece, el podio se ensancha y sus tarjetas ganan altura y presencia.
 - La portada elimina la antigua etiqueta de espera y usa estados más directos
   solamente donde aportan información.
 - Récord dinámico de mayor puntuación en una sola temporada, calculado desde el
