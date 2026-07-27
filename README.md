@@ -1,4 +1,4 @@
-# Cuban League V61
+# Cuban League V62
 
 Sitio oficial de la Cuban League con:
 
@@ -35,6 +35,9 @@ Sitio oficial de la Cuban League con:
 - El directorio de participantes usa filas horizontales compactas con foto,
   apodo, estadísticas e insignias; en el celular muestra más jugadores por
   pantalla y abre la ficha mediante una flecha lateral.
+- La Sala de Trofeos presenta el resumen en una sola fila y las 15 insignias
+  en una cuadrícula compacta de dos columnas en móvil, mostrando icono, nombre,
+  requisito y poseedores sin desplazamiento horizontal.
 - Insignias históricas, dinámicas y de jornada: Campeón, Dinastía, Habitual del
   podio, Temporada legendaria, Rey de la jornada, En llamas, La Manita de cinco
   goles, El Muro por la mayor racha de clean sheets, líderes actuales y

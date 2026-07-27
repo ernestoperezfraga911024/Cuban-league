@@ -1,4 +1,4 @@
-const APP_VERSION='61-20260727';
+const APP_VERSION='62-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -1176,19 +1176,19 @@ return `<article class="champion-history-card">
 const ACHIEVEMENT_CATALOG=[
   {id:'champion',icon:'🏆',name:'Campeón',rarity:'legendary',type:'Histórica',requirement:'Ganar una temporada de la Cuban League.'},
   {id:'dynasty',icon:'👑',name:'Dinastía',rarity:'legendary',type:'Histórica',requirement:'Conquistar al menos 2 títulos de Liga.'},
-  {id:'podium_regular',icon:'🥉',name:'Habitual del podio',rarity:'epic',type:'Histórica',requirement:'Terminar entre los tres primeros en 3 temporadas.'},
-  {id:'season_record',icon:'⚡',name:'Temporada legendaria',rarity:'legendary',type:'Récord',requirement:'Poseer el récord de puntos en una misma temporada.'},
-  {id:'two_thousand',icon:'💎',name:'Club 2.000',rarity:'epic',type:'Histórica',requirement:'Superar los 2.000 puntos en una misma temporada.'},
-  {id:'matchday_king',icon:'🗓️',name:'Rey de la jornada',rarity:'epic',type:'Temporada',requirement:'Ganar 3 jornadas durante la temporada actual.'},
-  {id:'on_fire',icon:'🔥',name:'En llamas',rarity:'epic',type:'Racha',requirement:'Mantenerse en el Top 3 durante 3 jornadas consecutivas.'},
-  {id:'manita',icon:'⚽',name:'La Manita',rarity:'rare',type:'Jornada',requirement:'Marcar 5 goles o más en una misma jornada.'},
-  {id:'wall',icon:'🧤',name:'El Muro',rarity:'legendary',type:'Récord',requirement:'Poseer la mayor racha de jornadas consecutivas con clean sheet (mínimo 2).'},
-  {id:'leader',icon:'⭐',name:'Líder actual',rarity:'rare',type:'Dinámica',requirement:'Ocupar el primer puesto de la clasificación actual.'},
-  {id:'pichichi',icon:'🥇',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar la tabla de goles de la temporada.'},
-  {id:'golden_glove',icon:'🛡️',name:'Guante de Oro',rarity:'rare',type:'Dinámica',requirement:'Liderar la tabla de clean sheets de la temporada.'},
+  {id:'podium_regular',icon:'🥉',name:'Habitual del podio',rarity:'epic',type:'Histórica',requirement:'Terminar en el Top 3 durante 3 temporadas.'},
+  {id:'season_record',icon:'⚡',name:'Temporada legendaria',rarity:'legendary',type:'Récord',requirement:'Tener el récord de puntos en una temporada.'},
+  {id:'two_thousand',icon:'💎',name:'Club 2.000',rarity:'epic',type:'Histórica',requirement:'Superar 2.000 puntos en una temporada.'},
+  {id:'matchday_king',icon:'🗓️',name:'Rey de la jornada',rarity:'epic',type:'Temporada',requirement:'Ganar 3 jornadas en la temporada actual.'},
+  {id:'on_fire',icon:'🔥',name:'En llamas',rarity:'epic',type:'Racha',requirement:'Estar en el Top 3 durante 3 jornadas seguidas.'},
+  {id:'manita',icon:'⚽',name:'La Manita',rarity:'rare',type:'Jornada',requirement:'Marcar 5 goles o más en una jornada.'},
+  {id:'wall',icon:'🧤',name:'El Muro',rarity:'legendary',type:'Récord',requirement:'Tener la mayor racha de clean sheets seguidos (mínimo 2).'},
+  {id:'leader',icon:'⭐',name:'Líder actual',rarity:'rare',type:'Dinámica',requirement:'Ocupar el 1.º puesto de la clasificación actual.'},
+  {id:'pichichi',icon:'🥇',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar los goles de la temporada.'},
+  {id:'golden_glove',icon:'🛡️',name:'Guante de Oro',rarity:'rare',type:'Dinámica',requirement:'Liderar los clean sheets de la temporada.'},
   {id:'king_europe',icon:'🌟',name:'Rey de Europa',rarity:'legendary',type:'Champions',requirement:'Ganar la Cuban League Champions.'},
-  {id:'player_month',icon:'📅',name:'Jugador del Mes',rarity:'epic',type:'Mensual',requirement:'Sumar más puntos en las jornadas oficiales de un mes.'},
-  {id:'winter_champion',icon:'❄️',name:'Campeón de Invierno',rarity:'epic',type:'Temporada',requirement:'Liderar la clasificación al finalizar la última jornada de diciembre.'}
+  {id:'player_month',icon:'📅',name:'Jugador del Mes',rarity:'epic',type:'Mensual',requirement:'Sumar más puntos en las jornadas del mes.'},
+  {id:'winter_champion',icon:'❄️',name:'Campeón de Invierno',rarity:'epic',type:'Temporada',requirement:'Liderar la tabla al cerrar diciembre.'}
 ];
 
 const ACHIEVEMENT_RARITY_WEIGHT={legendary:4,epic:3,rare:2,common:1};

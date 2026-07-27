@@ -12541,3 +12541,306 @@ footer{
     background:#2f7567!important;
   }
 }
+
+/* =========================================================
+   V62 — SALA DE TROFEOS COMPACTA
+   Cuadrícula visible, sin carrusel horizontal y con reglas claras.
+   ========================================================= */
+#players .achievement-hub{
+  margin:16px 0 26px;
+}
+
+#players .achievement-hub-shell{
+  padding:20px;
+  border-radius:21px;
+}
+
+#players .achievement-hub-head{
+  gap:14px;
+}
+
+#players .achievement-hub-head h2{
+  margin:4px 0;
+  font-size:clamp(1.5rem,2.6vw,2rem);
+}
+
+#players .achievement-hub-head p{
+  max-width:600px;
+  font-size:.82rem;
+  line-height:1.4;
+}
+
+#players .achievement-hub-score{
+  min-width:108px;
+  padding:11px 13px;
+  border-radius:15px;
+}
+
+#players .achievement-hub-score b{
+  font-size:1.65rem;
+}
+
+#players .achievement-hub-score small{
+  margin-top:4px;
+  font-size:.58rem;
+}
+
+#players .achievement-hub-summary{
+  gap:8px;
+  margin:14px 0;
+}
+
+#players .achievement-hub-summary article{
+  min-height:60px;
+  gap:8px;
+  padding:9px 11px;
+  border-radius:14px;
+}
+
+#players .achievement-hub-summary article>span{
+  width:34px;
+  height:34px;
+  flex-basis:34px;
+  border-radius:11px;
+  font-size:1rem;
+}
+
+#players .achievement-hub-summary b{
+  font-size:.82rem;
+}
+
+#players .achievement-hub-summary small{
+  margin-top:2px;
+  font-size:.62rem;
+}
+
+#players .achievement-catalog-scroll{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-auto-columns:auto;
+  grid-auto-flow:row;
+  gap:9px;
+  overflow:visible;
+  padding:0;
+  scroll-snap-type:none;
+}
+
+#players .achievement-catalog-card{
+  grid-template-columns:39px minmax(0,1fr);
+  grid-template-rows:auto 1fr;
+  min-height:138px;
+  gap:8px;
+  padding:11px;
+  border-radius:16px;
+  scroll-snap-align:none;
+}
+
+#players .achievement-catalog-card::after{
+  right:-47px;
+  bottom:-63px;
+  width:105px;
+  height:105px;
+}
+
+#players .achievement-catalog-icon{
+  width:39px;
+  height:39px;
+  border-radius:12px;
+  font-size:1.15rem;
+}
+
+#players .achievement-catalog-card small{
+  font-size:.53rem;
+  letter-spacing:.075em;
+}
+
+#players .achievement-catalog-card b{
+  margin-top:2px;
+  font-size:.82rem;
+}
+
+#players .achievement-catalog-card p{
+  margin-top:4px;
+  color:#91a9a2;
+  font-size:.66rem;
+  line-height:1.32;
+}
+
+#players .achievement-owner-count{
+  margin-top:6px;
+  font-size:.56rem;
+}
+
+#players .achievement-hub-hint{
+  margin:8px 1px 0;
+  font-size:.65rem;
+}
+
+@media(max-width:1020px){
+  #players .achievement-catalog-scroll{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:700px){
+  #players .achievement-hub{
+    margin:12px 0 22px;
+  }
+
+  #players .achievement-hub-shell{
+    padding:13px 11px;
+    border-radius:18px;
+  }
+
+  #players .achievement-hub-shell::before{
+    left:18px;
+    width:108px;
+  }
+
+  #players .achievement-hub-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 74px;
+    align-items:start;
+    gap:8px;
+  }
+
+  #players .achievement-hub-head h2{
+    margin:3px 0;
+    font-size:1.35rem;
+  }
+
+  #players .achievement-hub-head p{
+    font-size:.68rem;
+    line-height:1.34;
+  }
+
+  #players .achievement-hub-score{
+    display:block;
+    width:auto;
+    min-width:0;
+    padding:9px 5px;
+    border-radius:13px;
+    text-align:center;
+  }
+
+  #players .achievement-hub-score b{
+    font-size:1.32rem;
+  }
+
+  #players .achievement-hub-score b span{
+    font-size:.7rem;
+  }
+
+  #players .achievement-hub-score small{
+    margin-top:4px;
+    font-size:.43rem;
+    line-height:1.2;
+  }
+
+  #players .achievement-hub-summary{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+    margin:10px 0;
+  }
+
+  #players .achievement-hub-summary article{
+    display:grid;
+    min-height:54px;
+    grid-template-columns:25px minmax(0,1fr);
+    gap:5px;
+    padding:6px;
+    border-radius:11px;
+  }
+
+  #players .achievement-hub-summary article>span{
+    width:25px;
+    height:25px;
+    flex-basis:25px;
+    border-radius:8px;
+    font-size:.76rem;
+  }
+
+  #players .achievement-hub-summary b{
+    display:-webkit-box;
+    overflow:hidden;
+    font-size:.61rem;
+    line-height:1.14;
+    white-space:normal;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+  }
+
+  #players .achievement-hub-summary article:not(:nth-child(2)) b{
+    font-size:.86rem;
+  }
+
+  #players .achievement-hub-summary small{
+    display:-webkit-box;
+    overflow:hidden;
+    margin-top:2px;
+    font-size:.47rem;
+    line-height:1.16;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+  }
+
+  #players .achievement-catalog-scroll{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  #players .achievement-catalog-card{
+    grid-template-columns:32px minmax(0,1fr);
+    min-height:120px;
+    gap:6px;
+    padding:8px;
+    border-radius:13px;
+  }
+
+  #players .achievement-catalog-icon{
+    width:32px;
+    height:32px;
+    border-radius:10px;
+    font-size:.93rem;
+  }
+
+  #players .achievement-catalog-card small{
+    font-size:.45rem;
+  }
+
+  #players .achievement-catalog-card b{
+    font-size:.69rem;
+    line-height:1.1;
+  }
+
+  #players .achievement-catalog-card p{
+    margin-top:3px;
+    font-size:.57rem;
+    line-height:1.27;
+  }
+
+  #players .achievement-owner-count{
+    margin-top:4px;
+    font-size:.48rem;
+    letter-spacing:.025em;
+  }
+
+  #players .achievement-hub-hint{
+    font-size:.58rem;
+  }
+}
+
+@media(max-width:370px){
+  #players .achievement-hub-head h2{
+    font-size:1.2rem;
+  }
+
+  #players .achievement-catalog-card{
+    min-height:118px;
+    padding:7px;
+  }
+
+  #players .achievement-catalog-card p{
+    font-size:.54rem;
+  }
+}
