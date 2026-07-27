@@ -1,4 +1,4 @@
-# Cuban League V65
+# Cuban League V66
 
 Sitio oficial de la Cuban League con:
 
@@ -79,7 +79,7 @@ Sitio oficial de la Cuban League con:
   automático de la temporada.
 - Sistema visual minimalista unificado en clasificación, jornadas, temporadas,
   participantes, museo histórico, récords, Champions, noticias y perfiles.
-- Pulso dinámico en la portada con pretemporada, Top 5, MVP de jornada, líderes
+- Pulso dinámico en la portada antes de la Jornada 1, Top 5, MVP de jornada, líderes
   de goles y clean sheets y mayor subida en la clasificación.
 - Libro de Récords reorganizado con resumen del archivo, categorías, tarjetas
   compactas y un Salón de la Fama editorial optimizado para móvil.
@@ -95,12 +95,16 @@ Sitio oficial de la Cuban League con:
 - La tarjeta de podio incluye promedio, máximo goleador y líder de clean sheets
   de la jornada, evitando repetir los puntos del ganador como récord.
 - La portada muestra cinco tarjetas dinámicas: primero, segundo, tercero, líder
-  goleador y líder de clean sheets. Durante la pretemporada conserva el podio
+  goleador y líder de clean sheets. Antes de la Jornada 1 conserva el podio
   final de 2025/26 y cambia automáticamente a 2026/27 tras la Jornada 1.
 - El bloque de líderes adopta un podio vertical premium: campeón elevado en el
   centro, segundo y tercero a los lados, con goleador y clean sheets debajo.
 - El podio se presenta directamente sobre el fondo, sin un marco exterior,
   para ganar espacio y conservar solamente las tarjetas individuales.
+- En pantallas de escritorio, la portada ocupa el alto útil completo y coloca
+  el podio a la derecha del titular; en móvil conserva el podio vertical.
+- La portada elimina la antigua etiqueta de espera y usa estados más directos
+  solamente donde aportan información.
 - Récord dinámico de mayor puntuación en una sola temporada, calculado desde el
   archivo histórico y acompañado por el jugador, la cifra y la temporada.
 

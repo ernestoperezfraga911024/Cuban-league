@@ -1,4 +1,4 @@
-const APP_VERSION='65-20260727';
+const APP_VERSION='66-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -669,7 +669,7 @@ function heroKpiPreseasonCards(){
     eyebrow:'CLASIFICACIÓN FINAL',
     title:`Podio ${podium.season}`,
     subtitle:'Los tres mejores de la última temporada.',
-    badge:'PRETEMPORADA',
+    badge:'',
     podiumCards,
     leaderCards:[
       heroLeaderMetricCard({
@@ -715,9 +715,10 @@ function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){
 
 function heroKpiLayout({eyebrow,title,subtitle,badge,podiumCards,leaderCards}){
   const visualPodium=[podiumCards[1],podiumCards[0],podiumCards[2]].filter(Boolean);
+  const badgeMarkup=badge?`<span class="hero-kpis-badge">${badge}</span>`:'';
   return `<div class="hero-kpis-heading">
     <div><span>${eyebrow}</span><strong>${title}</strong><small>${subtitle}</small></div>
-    <span class="hero-kpis-badge">${badge}</span>
+    ${badgeMarkup}
   </div>
   <div class="hero-podium-grid">${visualPodium.join('')}</div>
   <div class="hero-leaders-row">${leaderCards.join('')}</div>`;
@@ -773,7 +774,7 @@ function renderHomeLive(){
   const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
   renderHeroKpis(latest);
   if(latest==null){
-    $('homeLiveBadge').textContent='PRETEMPORADA';
+    $('homeLiveBadge').textContent='POR COMENZAR';
     $('homeLiveTitle').textContent='Todo preparado para el comienzo.';
     $('homeLiveCopy').textContent='La clasificación está lista. Cuando se publique la primera jornada, este resumen cobrará vida automáticamente.';
     $('homeLatestRound').textContent='—';
@@ -846,7 +847,7 @@ function renderSeasonPulse(){
   if(latest==null){
     const champion=defendingChampion();
     const participantCount=activeParticipants().length;
-    badge.textContent='PRETEMPORADA';
+    badge.textContent='POR COMENZAR';
     host.className='season-pulse is-preseason';
     host.innerHTML=`
       <article class="pulse-preseason-main">
@@ -2245,7 +2246,7 @@ async function drawPodiumShareCard(ctx,matchday){
     eyebrow:'RESUMEN SEMANAL',
     title:'PODIO DE LA JORNADA',
     subtitle:'Los tres mejores puntajes de la fecha.',
-    badge:matchday?`JORNADA ${matchday}`:'PRETEMPORADA'
+    badge:matchday?`JORNADA ${matchday}`:'SIN JORNADAS'
   });
   if(!matchday){
     drawShareCardEmpty(ctx,'Esperando la Jornada 1','Publica una jornada para generar el primer podio.');
@@ -2330,7 +2331,7 @@ async function drawStandingsShareCard(ctx,matchday){
     eyebrow:'CLASIFICACIÓN GENERAL',
     title:'TOP 10 DE LA TEMPORADA',
     subtitle:'Tabla acumulada después de la jornada seleccionada.',
-    badge:matchday?`HASTA J${matchday}`:'PRETEMPORADA'
+    badge:matchday?`HASTA J${matchday}`:'SIN JORNADAS'
   });
   if(!matchday){
     drawShareCardEmpty(ctx,'Clasificación sin comenzar','Publica una jornada para crear el Top 10 oficial.');
@@ -2393,7 +2394,7 @@ async function drawLeadersShareCard(ctx,matchday){
     eyebrow:'FIGURAS DE LA TEMPORADA',
     title:'LÍDERES Y DESTACADOS',
     subtitle:'MVP semanal, goles, clean sheets y mayor subida.',
-    badge:matchday?`JORNADA ${matchday}`:'PRETEMPORADA'
+    badge:matchday?`JORNADA ${matchday}`:'SIN JORNADAS'
   });
   if(!matchday){
     drawShareCardEmpty(ctx,'Esperando los primeros líderes','Publica una jornada para generar esta tarjeta.');
