@@ -1,4 +1,4 @@
-const APP_VERSION='49-20260727';
+const APP_VERSION='50-20260727';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -292,6 +292,120 @@ function renderCurrent(){
     <span class="current-form" aria-label="Forma de las últimas jornadas">${recentForm(p.name,latest)}</span>
   </div>`;
   }).join('');
+  renderSeasonStatRanking(rows,latest,{
+    metric:'goals',
+    label:'Líder goleador',
+    unit:'goles',
+    icon:'ball',
+    tone:'goals',
+    heroId:'currentGoalsHero',
+    rowsId:'currentGoalsRows'
+  });
+  renderSeasonStatRanking(rows,latest,{
+    metric:'cleanSheets',
+    label:'Líder de clean sheets',
+    unit:'clean sheets',
+    icon:'shield',
+    tone:'clean-sheets',
+    heroId:'currentCleanSheetsHero',
+    rowsId:'currentCleanSheetsRows'
+  });
+}
+
+function renderSeasonStatRanking(rows,latest,{metric,label,unit,icon,tone,heroId,rowsId}){
+  const secondaryMetric=metric==='goals'?'cleanSheets':'goals';
+  const ranked=[...rows].sort((a,b)=>
+    (b[metric]||0)-(a[metric]||0)
+    ||(b[secondaryMetric]||0)-(a[secondaryMetric]||0)
+    ||(b.points||0)-(a.points||0)
+    ||a.id-b.id
+  );
+  const leaders=pulseLeaders(ranked,metric);
+  const hasLeader=latest!=null&&leaders.value>0;
+  const hero=$(heroId);
+  const tableRows=$(rowsId);
+  if(!hero||!tableRows)return;
+
+  hero.className=`season-leader-hero ${tone}${hasLeader?' has-leader':' is-empty'}`;
+  if(hasLeader){
+    const tied=leaders.names.length>1;
+    hero.innerHTML=`<article class="season-leader-card">
+      <span class="season-leader-icon">${uiIcon(icon)}</span>
+      <div class="season-leader-copy">
+        <small>${tied?`${leaders.names.length} líderes empatados`:label}</small>
+        ${playerInline(leaders.names.join(' / '),{compact:true})}
+        <p>Datos acumulados hasta la Jornada ${latest}.</p>
+      </div>
+      <strong class="season-leader-number">${leaders.value.toLocaleString('es')}<span>${unit}</span></strong>
+    </article>`;
+  }else{
+    const emptyTitle=latest==null?'Por definir':'Aún sin registros';
+    const emptyCopy=latest==null
+      ?'Este liderato se activará automáticamente después de la Jornada 1.'
+      :`Después de la Jornada ${latest} todavía no se ha registrado esta estadística.`;
+    hero.innerHTML=`<article class="season-leader-card">
+      <span class="season-leader-icon">${uiIcon(icon)}</span>
+      <div class="season-leader-copy">
+        <small>${label}</small>
+        <strong>${emptyTitle}</strong>
+        <p>${emptyCopy}</p>
+      </div>
+      <strong class="season-leader-number">—</strong>
+    </article>`;
+  }
+
+  let previousValue=null;
+  let competitionRank=0;
+  tableRows.innerHTML=ranked.map((player,index)=>{
+    const value=player[metric]||0;
+    if(value!==previousValue){
+      competitionRank=index+1;
+      previousValue=value;
+    }
+    const displayedRank=leaders.value>0?competitionRank:'—';
+    const isLeader=leaders.value>0&&value===leaders.value;
+    return `<div class="season-stat-row season-stat-grid${isLeader?' is-stat-leader':''}">
+      <span class="season-stat-rank">${displayedRank}</span>
+      ${teamCell(player.name)}
+      <strong class="season-stat-value ${tone}" aria-label="${value} ${unit}">${value.toLocaleString('es')}</strong>
+      <span class="center">${player.played||0}</span>
+      <span class="num">${(player.points||0).toLocaleString('es')}</span>
+    </div>`;
+  }).join('');
+}
+
+function setStandingsView(view,{focus=false}={}){
+  const tabs=[...document.querySelectorAll('[data-standings-view]')];
+  const validView=tabs.some(tab=>tab.dataset.standingsView===view)?view:'general';
+  tabs.forEach(tab=>{
+    const selected=tab.dataset.standingsView===validView;
+    tab.classList.toggle('active',selected);
+    tab.setAttribute('aria-selected',String(selected));
+    tab.tabIndex=selected?0:-1;
+    if(selected&&focus)tab.focus();
+  });
+  document.querySelectorAll('[data-standings-panel]').forEach(panel=>{
+    panel.hidden=panel.dataset.standingsPanel!==validView;
+  });
+  document.querySelector('.relegation-legend')?.toggleAttribute('hidden',validView!=='general');
+}
+
+function setupStandingsSwitcher(){
+  const tabs=[...document.querySelectorAll('[data-standings-view]')];
+  tabs.forEach((tab,index)=>{
+    tab.onclick=()=>setStandingsView(tab.dataset.standingsView);
+    tab.onkeydown=event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();
+      let nextIndex=index;
+      if(event.key==='ArrowLeft')nextIndex=(index-1+tabs.length)%tabs.length;
+      if(event.key==='ArrowRight')nextIndex=(index+1)%tabs.length;
+      if(event.key==='Home')nextIndex=0;
+      if(event.key==='End')nextIndex=tabs.length-1;
+      setStandingsView(tabs[nextIndex].dataset.standingsView,{focus:true});
+    };
+  });
+  setStandingsView('general');
 }
 
 function previousSeasonPodium(){
@@ -1957,6 +2071,7 @@ async function init(){
   $('share').onclick=()=>navigator.share
     ?navigator.share({title:'Cuban League',url:location.href})
     :navigator.clipboard.writeText(location.href);
+  setupStandingsSwitcher();
   setupPWA();
   const launchSection=new URLSearchParams(location.search).get('section');
   if(['home','current','matchdays','seasons','players','history','records','champions','cards','news'].includes(launchSection)){
