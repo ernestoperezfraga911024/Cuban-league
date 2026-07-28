@@ -1,31 +1,6 @@
-const APP_VERSION='70-20260728';
+const APP_VERSION='71-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
-const DYNAMIC_COUNTER_SELECTOR=[
-  '.hero-podium-grid article small',
-  '.hero-leader-metric strong',
-  '.home-live-summary>div>b',
-  '.pulse-fact-card>b',
-  '.pulse-highlight-value',
-  '.pulse-row-points>b',
-  '.current-row>.num',
-  '.classification-matchday-points',
-  '.season-leader-number',
-  '.season-stat-value',
-  '.podium-player>strong',
-  '.matchday-feature-copy>strong',
-  '.matchday-metrics article b',
-  '.achievement-hub-score>b',
-  '.achievement-hub-summary article b',
-  '.profile-achievement-count>b',
-  '.records-meta article b',
-  '.record-value>b',
-  '.historical-podium-card b',
-  '.champions-legacy-count',
-  '.profile-current-card>div:not(:first-child)>b',
-  '.profile-major-stats article>b',
-  '.profile-detail-grid article:nth-child(n+3)>b'
-].join(',');
 const MOTION_CARD_SELECTOR=[
   '.hero-podium-grid article',
   '.hero-leaders-row article',
@@ -60,7 +35,6 @@ let SHARE_CARD_GROUP_INDEX=0;
 let SHARE_CARD_RENDER_TOKEN=0;
 let SHARE_CARD_READY=false;
 let SECTION_TRANSITION_TOKEN=0;
-let COUNTER_VISIBILITY_OBSERVER=null;
 let MOTION_MUTATION_OBSERVER=null;
 let MOTION_SYSTEM_READY=false;
 let KNOWN_ACHIEVEMENT_KEYS=null;
@@ -441,111 +415,6 @@ function matchingMotionElements(root,selector){
   return [...new Set(matches)];
 }
 
-function parseCounterValue(element){
-  if(!element)return null;
-  const textNode=[...element.childNodes].find(node=>node.nodeType===3&&/-?\d[\d.,]*/.test(node.nodeValue||''));
-  if(!textNode)return null;
-  const original=textNode.nodeValue.trim();
-  const match=original.match(/-?\d[\d.,]*/);
-  if(!match)return null;
-  const matched=match[0];
-  const raw=matched.replace(/[.,]+$/,'');
-  if(!raw)return null;
-  const unsigned=raw.replace(/^-/, '');
-  const comma=unsigned.lastIndexOf(',');
-  const dot=unsigned.lastIndexOf('.');
-  const lastSeparator=Math.max(comma,dot);
-  const separatorCount=(unsigned.match(/[.,]/g)||[]).length;
-  const digitsAfter=lastSeparator>=0?unsigned.length-lastSeparator-1:0;
-  const hasBoth=comma>=0&&dot>=0;
-  const decimals=lastSeparator>=0
-    &&digitsAfter>0
-    &&digitsAfter<=2
-    &&(hasBoth||separatorCount===1)
-      ?digitsAfter
-      :0;
-  let normalized;
-  if(decimals){
-    normalized=`${unsigned.slice(0,lastSeparator).replace(/[.,]/g,'')}.${unsigned.slice(lastSeparator+1).replace(/[.,]/g,'')}`;
-  }else{
-    normalized=unsigned.replace(/[.,]/g,'');
-  }
-  const target=Number(`${raw.startsWith('-')?'-':''}${normalized}`);
-  if(!Number.isFinite(target))return null;
-  return {
-    original,
-    textNode,
-    target,
-    decimals,
-    prefix:original.slice(0,match.index),
-    suffix:original.slice(match.index+raw.length)
-  };
-}
-
-function formatCounterFrame(value,decimals){
-  return new Intl.NumberFormat('es-ES',{
-    minimumFractionDigits:decimals,
-    maximumFractionDigits:decimals
-  }).format(value);
-}
-
-function animateDynamicCounter(element){
-  if(element.dataset.counterRunning==='1')return;
-  const counter=parseCounterValue(element);
-  if(!counter)return;
-  element.dataset.counterSignature=counter.original;
-  if(prefersReducedMotion()||counter.target===0){
-    counter.textNode.nodeValue=counter.original;
-    return;
-  }
-  element.dataset.counterRunning='1';
-  element.classList.add('is-counting');
-  const duration=760+Math.min(Math.abs(counter.target),2500)/2500*300;
-  const started=performance.now();
-  const write=value=>{counter.textNode.nodeValue=value};
-
-  const frame=now=>{
-    const progress=Math.min(1,(now-started)/duration);
-    const eased=1-Math.pow(1-progress,4);
-    const current=counter.target*eased;
-    write(`${counter.prefix}${formatCounterFrame(current,counter.decimals)}${counter.suffix}`);
-    if(progress<1){
-      requestAnimationFrame(frame);
-      return;
-    }
-    write(counter.original);
-    element.dataset.counterRunning='0';
-    element.classList.remove('is-counting');
-  };
-  requestAnimationFrame(frame);
-}
-
-function registerDynamicCounters(root=document){
-  matchingMotionElements(root,DYNAMIC_COUNTER_SELECTOR).forEach(element=>{
-    if(element.dataset.counterRunning==='1')return;
-    const counter=parseCounterValue(element);
-    if(!counter)return;
-    if(element.dataset.counterRegistered==='1'&&element.dataset.counterSignature===counter.original)return;
-    element.dataset.counterRegistered='1';
-    element.dataset.counterSignature=counter.original;
-    if(COUNTER_VISIBILITY_OBSERVER)COUNTER_VISIBILITY_OBSERVER.observe(element);
-    else animateDynamicCounter(element);
-  });
-}
-
-function replaySectionCounters(section){
-  if(prefersReducedMotion())return;
-  matchingMotionElements(section,DYNAMIC_COUNTER_SELECTOR).forEach(element=>{
-    if(element.dataset.counterRunning==='1')return;
-    if(COUNTER_VISIBILITY_OBSERVER){
-      COUNTER_VISIBILITY_OBSERVER.unobserve(element);
-      COUNTER_VISIBILITY_OBSERVER.observe(element);
-    }else{
-      animateDynamicCounter(element);
-    }
-  });
-}
-
 function enhanceThreeDimensionalCards(root=document){
   const desktopPointer=window.matchMedia?.('(min-width: 960px) and (hover: hover) and (pointer: fine)');
   if(!desktopPointer?.matches||prefersReducedMotion())return;
@@ -590,28 +459,16 @@ function enhanceThreeDimensionalCards(root=document){
 function setupMotionSystem(){
   if(MOTION_SYSTEM_READY)return;
   MOTION_SYSTEM_READY=true;
-  if('IntersectionObserver' in window){
-    COUNTER_VISIBILITY_OBSERVER=new IntersectionObserver(entries=>{
-      entries.forEach(entry=>{
-        if(!entry.isIntersecting)return;
-        COUNTER_VISIBILITY_OBSERVER.unobserve(entry.target);
-        animateDynamicCounter(entry.target);
-      });
-    },{threshold:.45,rootMargin:'0px 0px -7% 0px'});
-  }
   MOTION_MUTATION_OBSERVER=new MutationObserver(mutations=>{
     mutations.forEach(mutation=>{
-      registerDynamicCounters(mutation.target);
       enhanceThreeDimensionalCards(mutation.target);
       mutation.addedNodes.forEach(node=>{
         if(node.nodeType!==1)return;
-        registerDynamicCounters(node);
         enhanceThreeDimensionalCards(node);
       });
     });
   });
   MOTION_MUTATION_OBSERVER.observe(document.body,{childList:true,subtree:true});
-  registerDynamicCounters(document);
   enhanceThreeDimensionalCards(document);
   window.matchMedia?.('(min-width: 960px) and (hover: hover) and (pointer: fine)')
     .addEventListener?.('change',event=>{
@@ -736,7 +593,6 @@ function go(id,historyView){
   if(current===next){
     if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
     scrollToSectionStart();
-    replaySectionCounters(next);
     return;
   }
 
@@ -750,9 +606,7 @@ function go(id,historyView){
     if(token!==SECTION_TRANSITION_TOKEN)return;
     document.documentElement.classList.remove('section-transition-active');
     next.classList.remove('page-entering');
-    registerDynamicCounters(next);
     enhanceThreeDimensionalCards(next);
-    replaySectionCounters(next);
   };
 
   if(document.startViewTransition&&!prefersReducedMotion()){
@@ -2159,11 +2013,9 @@ function openPlayer(name){
     </section>`;
   $('playerModal').hidden=false;
   syncModalLock();
-  registerDynamicCounters($('modalContent'));
   enhanceThreeDimensionalCards($('modalContent'));
   requestAnimationFrame(()=>{
     animateProfileAchievementUnlocks();
-    replaySectionCounters($('modalContent'));
     $('closeModal').focus();
   });
 }

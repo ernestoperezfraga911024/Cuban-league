@@ -15262,7 +15262,7 @@ footer{
 }
 
 /* =========================================================
-   V70 — MOVIMIENTO MODERNO, CONTADORES, 3D E INSIGNIAS
+   V71 — TRANSICIONES, 3D E INSIGNIAS
    ========================================================= */
 @keyframes sectionPageEnter{
   from{
@@ -15335,10 +15335,6 @@ footer{
 
 ::view-transition-new(league-section){
   animation:sectionPageEnter .46s cubic-bezier(.16,.82,.24,1) both;
-}
-
-.is-counting{
-  font-variant-numeric:tabular-nums;
 }
 
 .motion-tilt-glare{

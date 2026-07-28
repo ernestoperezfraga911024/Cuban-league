@@ -1,4 +1,4 @@
-# Cuban League V70
+# Cuban League V71
 
 Sitio oficial de la Cuban League con:
 
@@ -113,8 +113,8 @@ Sitio oficial de la Cuban League con:
 - Las secciones principales y sus pestañas internas cambian con transiciones
   suaves, desenfoque breve y compatibilidad con la preferencia de movimiento
   reducido del dispositivo.
-- Los puntos y las métricas principales se animan con contadores al entrar en
-  pantalla, manteniendo su formato y unidades.
+- Los puntos, récords y estadísticas aparecen directamente con su valor final,
+  sin animaciones de conteo.
 - En PC, las tarjetas destacadas reaccionan al movimiento del puntero con una
   profundidad 3D sutil y un reflejo dinámico.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
