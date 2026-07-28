@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v74-aligned-participant-cards-pwa';
+const CACHE_NAME = 'cuban-league-v75-fixed-participant-grid-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=74-20260728',
-  './app.js?v=74-20260728',
-  './data.json?v=74-20260728',
-  './supabase-config.js?v=74-20260728',
+  './styles.css?v=75-20260728',
+  './app.js?v=75-20260728',
+  './data.json?v=75-20260728',
+  './supabase-config.js?v=75-20260728',
   './admin.html',
   './admin.css?v=71-20260728',
   './admin.js?v=71-20260728',
@@ -105,7 +105,16 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=74-20260728'));
+    event.respondWith(networkFirst(request, './data.json?v=75-20260728'));
+    return;
+  }
+
+  if (
+    url.pathname.endsWith('/styles.css') ||
+    url.pathname.endsWith('/app.js') ||
+    url.pathname.endsWith('/supabase-config.js')
+  ) {
+    event.respondWith(networkFirst(request));
     return;
   }
 

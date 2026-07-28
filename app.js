@@ -1,4 +1,4 @@
-const APP_VERSION='74-20260728';
+const APP_VERSION='75-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -1811,16 +1811,16 @@ function renderPlayers(filter=''){
     const statsRow=stats[player.name]||{};
     const badges=sortFeaturedAchievements(playerAchievementState(player.name,snapshot).filter(item=>item.earned));
     const visible=badges.slice(0,3);
-    return `<article class="player-card team-profile-link" ${profileTriggerAttrs(player.name)}>
+    return `<article class="player-card player-card-v75 team-profile-link" ${profileTriggerAttrs(player.name)}>
       <img src="${player.shield}" alt="Foto de ${player.name}">
-      <div class="player-card-copy">
+      <div class="player-card-main">
         <h3>${player.name}</h3>
         <small>${statsRow.label||'Participante'}</small>
         <p>${statsRow.points?.toLocaleString()||0} puntos · ${statsRow.podiums||0} podios</p>
-        <div class="player-card-badges${visible.length?'':' is-empty'}"${visible.length?` aria-label="${badges.length} insignias conseguidas"`:' aria-hidden="true"'}>
-          ${visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
-          ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
-        </div>
+      </div>
+      <div class="player-card-badges${visible.length?'':' is-empty'}"${visible.length?` aria-label="${badges.length} insignias conseguidas"`:' aria-hidden="true"'}>
+        ${visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
+        ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
       </div>
       <span class="profile-card-cta" aria-hidden="true">→</span>
     </article>`;
