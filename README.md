@@ -1,4 +1,4 @@
-# Cuban League V69
+# Cuban League V70
 
 Sitio oficial de la Cuban League con:
 
@@ -110,6 +110,15 @@ Sitio oficial de la Cuban League con:
 - La portada incorpora una entrada cinematográfica breve: aparece el titular,
   entran segundo y tercero desde los lados, el campeón asciende al centro y
   finalmente aparecen los líderes inferiores.
+- Las secciones principales y sus pestañas internas cambian con transiciones
+  suaves, desenfoque breve y compatibilidad con la preferencia de movimiento
+  reducido del dispositivo.
+- Los puntos y las métricas principales se animan con contadores al entrar en
+  pantalla, manteniendo su formato y unidades.
+- En PC, las tarjetas destacadas reaccionan al movimiento del puntero con una
+  profundidad 3D sutil y un reflejo dinámico.
+- Las insignias conseguidas se presentan con una animación de desbloqueo; las
+  nuevas insignias muestran además un aviso que abre directamente el perfil.
 - La portada elimina la antigua etiqueta de espera y usa estados más directos
   solamente donde aportan información.
 - Récord dinámico de mayor puntuación en una sola temporada, calculado desde el

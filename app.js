@@ -1,5 +1,51 @@
-const APP_VERSION='69-20260728';
+const APP_VERSION='70-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
+const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
+const DYNAMIC_COUNTER_SELECTOR=[
+  '.hero-podium-grid article small',
+  '.hero-leader-metric strong',
+  '.home-live-summary>div>b',
+  '.pulse-fact-card>b',
+  '.pulse-highlight-value',
+  '.pulse-row-points>b',
+  '.current-row>.num',
+  '.classification-matchday-points',
+  '.season-leader-number',
+  '.season-stat-value',
+  '.podium-player>strong',
+  '.matchday-feature-copy>strong',
+  '.matchday-metrics article b',
+  '.achievement-hub-score>b',
+  '.achievement-hub-summary article b',
+  '.profile-achievement-count>b',
+  '.records-meta article b',
+  '.record-value>b',
+  '.historical-podium-card b',
+  '.champions-legacy-count',
+  '.profile-current-card>div:not(:first-child)>b',
+  '.profile-major-stats article>b',
+  '.profile-detail-grid article:nth-child(n+3)>b'
+].join(',');
+const MOTION_CARD_SELECTOR=[
+  '.hero-podium-grid article',
+  '.hero-leaders-row article',
+  '.home-live-card',
+  '.pulse-fact-card',
+  '.pulse-highlight-card',
+  '.player-card',
+  '.podium-player',
+  '.matchday-feature-card',
+  '.matchday-metrics>article',
+  '.historical-podium-card',
+  '.record-entry',
+  '.achievement-catalog-card.is-unlocked',
+  '.profile-achievement-card.is-earned',
+  '.news-card',
+  '.champions-group',
+  '.champions-defending-card',
+  '.champions-legacy-card',
+  '.round'
+].join(',');
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -13,6 +59,13 @@ let SHARE_CARD_TYPE='podium';
 let SHARE_CARD_GROUP_INDEX=0;
 let SHARE_CARD_RENDER_TOKEN=0;
 let SHARE_CARD_READY=false;
+let SECTION_TRANSITION_TOKEN=0;
+let COUNTER_VISIBILITY_OBSERVER=null;
+let MOTION_MUTATION_OBSERVER=null;
+let MOTION_SYSTEM_READY=false;
+let KNOWN_ACHIEVEMENT_KEYS=null;
+let ACHIEVEMENT_UNLOCK_TIMER=null;
+let ACHIEVEMENT_UNLOCK_HIDE_TIMER=null;
 const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -376,6 +429,268 @@ function playerInline(name,opts={}){
       <span>${p.name}</span>
     </span>`).join('')}</span>`;
 }
+
+function prefersReducedMotion(){
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
+}
+
+function matchingMotionElements(root,selector){
+  const matches=[];
+  if(root?.nodeType===1&&root.matches?.(selector))matches.push(root);
+  if(root?.querySelectorAll)matches.push(...root.querySelectorAll(selector));
+  return [...new Set(matches)];
+}
+
+function parseCounterValue(element){
+  if(!element)return null;
+  const textNode=[...element.childNodes].find(node=>node.nodeType===3&&/-?\d[\d.,]*/.test(node.nodeValue||''));
+  if(!textNode)return null;
+  const original=textNode.nodeValue.trim();
+  const match=original.match(/-?\d[\d.,]*/);
+  if(!match)return null;
+  const matched=match[0];
+  const raw=matched.replace(/[.,]+$/,'');
+  if(!raw)return null;
+  const unsigned=raw.replace(/^-/, '');
+  const comma=unsigned.lastIndexOf(',');
+  const dot=unsigned.lastIndexOf('.');
+  const lastSeparator=Math.max(comma,dot);
+  const separatorCount=(unsigned.match(/[.,]/g)||[]).length;
+  const digitsAfter=lastSeparator>=0?unsigned.length-lastSeparator-1:0;
+  const hasBoth=comma>=0&&dot>=0;
+  const decimals=lastSeparator>=0
+    &&digitsAfter>0
+    &&digitsAfter<=2
+    &&(hasBoth||separatorCount===1)
+      ?digitsAfter
+      :0;
+  let normalized;
+  if(decimals){
+    normalized=`${unsigned.slice(0,lastSeparator).replace(/[.,]/g,'')}.${unsigned.slice(lastSeparator+1).replace(/[.,]/g,'')}`;
+  }else{
+    normalized=unsigned.replace(/[.,]/g,'');
+  }
+  const target=Number(`${raw.startsWith('-')?'-':''}${normalized}`);
+  if(!Number.isFinite(target))return null;
+  return {
+    original,
+    textNode,
+    target,
+    decimals,
+    prefix:original.slice(0,match.index),
+    suffix:original.slice(match.index+raw.length)
+  };
+}
+
+function formatCounterFrame(value,decimals){
+  return new Intl.NumberFormat('es-ES',{
+    minimumFractionDigits:decimals,
+    maximumFractionDigits:decimals
+  }).format(value);
+}
+
+function animateDynamicCounter(element){
+  if(element.dataset.counterRunning==='1')return;
+  const counter=parseCounterValue(element);
+  if(!counter)return;
+  element.dataset.counterSignature=counter.original;
+  if(prefersReducedMotion()||counter.target===0){
+    counter.textNode.nodeValue=counter.original;
+    return;
+  }
+  element.dataset.counterRunning='1';
+  element.classList.add('is-counting');
+  const duration=760+Math.min(Math.abs(counter.target),2500)/2500*300;
+  const started=performance.now();
+  const write=value=>{counter.textNode.nodeValue=value};
+
+  const frame=now=>{
+    const progress=Math.min(1,(now-started)/duration);
+    const eased=1-Math.pow(1-progress,4);
+    const current=counter.target*eased;
+    write(`${counter.prefix}${formatCounterFrame(current,counter.decimals)}${counter.suffix}`);
+    if(progress<1){
+      requestAnimationFrame(frame);
+      return;
+    }
+    write(counter.original);
+    element.dataset.counterRunning='0';
+    element.classList.remove('is-counting');
+  };
+  requestAnimationFrame(frame);
+}
+
+function registerDynamicCounters(root=document){
+  matchingMotionElements(root,DYNAMIC_COUNTER_SELECTOR).forEach(element=>{
+    if(element.dataset.counterRunning==='1')return;
+    const counter=parseCounterValue(element);
+    if(!counter)return;
+    if(element.dataset.counterRegistered==='1'&&element.dataset.counterSignature===counter.original)return;
+    element.dataset.counterRegistered='1';
+    element.dataset.counterSignature=counter.original;
+    if(COUNTER_VISIBILITY_OBSERVER)COUNTER_VISIBILITY_OBSERVER.observe(element);
+    else animateDynamicCounter(element);
+  });
+}
+
+function replaySectionCounters(section){
+  if(prefersReducedMotion())return;
+  matchingMotionElements(section,DYNAMIC_COUNTER_SELECTOR).forEach(element=>{
+    if(element.dataset.counterRunning==='1')return;
+    if(COUNTER_VISIBILITY_OBSERVER){
+      COUNTER_VISIBILITY_OBSERVER.unobserve(element);
+      COUNTER_VISIBILITY_OBSERVER.observe(element);
+    }else{
+      animateDynamicCounter(element);
+    }
+  });
+}
+
+function enhanceThreeDimensionalCards(root=document){
+  const desktopPointer=window.matchMedia?.('(min-width: 960px) and (hover: hover) and (pointer: fine)');
+  if(!desktopPointer?.matches||prefersReducedMotion())return;
+  matchingMotionElements(root,MOTION_CARD_SELECTOR).forEach(card=>{
+    if(card.dataset.motionTiltReady==='1')return;
+    card.dataset.motionTiltReady='1';
+    card.classList.add('motion-tilt-card');
+    const glare=document.createElement('span');
+    glare.className='motion-tilt-glare';
+    glare.setAttribute('aria-hidden','true');
+    card.appendChild(glare);
+    let pointerFrame=0;
+
+    const reset=()=>{
+      if(pointerFrame)cancelAnimationFrame(pointerFrame);
+      card.classList.remove('is-tilting');
+      card.style.setProperty('--tilt-rx','0deg');
+      card.style.setProperty('--tilt-ry','0deg');
+      card.style.setProperty('--tilt-glare-x','50%');
+      card.style.setProperty('--tilt-glare-y','50%');
+    };
+
+    card.addEventListener('pointermove',event=>{
+      if(!desktopPointer.matches)return;
+      const bounds=card.getBoundingClientRect();
+      const x=Math.max(0,Math.min(1,(event.clientX-bounds.left)/bounds.width));
+      const y=Math.max(0,Math.min(1,(event.clientY-bounds.top)/bounds.height));
+      if(pointerFrame)cancelAnimationFrame(pointerFrame);
+      pointerFrame=requestAnimationFrame(()=>{
+        card.classList.add('is-tilting');
+        card.style.setProperty('--tilt-rx',`${((.5-y)*7).toFixed(2)}deg`);
+        card.style.setProperty('--tilt-ry',`${((x-.5)*9).toFixed(2)}deg`);
+        card.style.setProperty('--tilt-glare-x',`${(x*100).toFixed(1)}%`);
+        card.style.setProperty('--tilt-glare-y',`${(y*100).toFixed(1)}%`);
+      });
+    });
+    card.addEventListener('pointerleave',reset);
+    card.addEventListener('pointercancel',reset);
+  });
+}
+
+function setupMotionSystem(){
+  if(MOTION_SYSTEM_READY)return;
+  MOTION_SYSTEM_READY=true;
+  if('IntersectionObserver' in window){
+    COUNTER_VISIBILITY_OBSERVER=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(!entry.isIntersecting)return;
+        COUNTER_VISIBILITY_OBSERVER.unobserve(entry.target);
+        animateDynamicCounter(entry.target);
+      });
+    },{threshold:.45,rootMargin:'0px 0px -7% 0px'});
+  }
+  MOTION_MUTATION_OBSERVER=new MutationObserver(mutations=>{
+    mutations.forEach(mutation=>{
+      registerDynamicCounters(mutation.target);
+      enhanceThreeDimensionalCards(mutation.target);
+      mutation.addedNodes.forEach(node=>{
+        if(node.nodeType!==1)return;
+        registerDynamicCounters(node);
+        enhanceThreeDimensionalCards(node);
+      });
+    });
+  });
+  MOTION_MUTATION_OBSERVER.observe(document.body,{childList:true,subtree:true});
+  registerDynamicCounters(document);
+  enhanceThreeDimensionalCards(document);
+  window.matchMedia?.('(min-width: 960px) and (hover: hover) and (pointer: fine)')
+    .addEventListener?.('change',event=>{
+      if(event.matches)enhanceThreeDimensionalCards(document);
+    });
+}
+
+function animateProfileAchievementUnlocks(){
+  if(prefersReducedMotion())return;
+  const section=document.querySelector('.profile-achievements-section');
+  const cards=[...document.querySelectorAll('.profile-achievement-card.is-earned')];
+  section?.classList.add('is-unlock-revealing');
+  cards.forEach((card,index)=>{
+    card.style.setProperty('--unlock-delay',`${Math.min(index,7)*75}ms`);
+    card.classList.remove('is-unlock-reveal');
+  });
+  requestAnimationFrame(()=>cards.forEach(card=>card.classList.add('is-unlock-reveal')));
+}
+
+function currentAchievementKeys(snapshot){
+  const unlocked=[];
+  snapshot.players.forEach((achievements,playerName)=>{
+    achievements.forEach(item=>{
+      if(item.earned)unlocked.push({
+        key:`${encodeURIComponent(playerName)}::${item.id}`,
+        playerName,
+        item
+      });
+    });
+  });
+  return unlocked;
+}
+
+function dismissAchievementToast(){
+  const toast=$('achievementUnlockToast');
+  if(!toast)return;
+  clearTimeout(ACHIEVEMENT_UNLOCK_TIMER);
+  clearTimeout(ACHIEVEMENT_UNLOCK_HIDE_TIMER);
+  toast.classList.remove('is-visible');
+  ACHIEVEMENT_UNLOCK_HIDE_TIMER=setTimeout(()=>{toast.hidden=true},320);
+}
+
+function showAchievementUnlockToast(unlocks){
+  const toast=$('achievementUnlockToast');
+  const first=unlocks[0];
+  if(!toast||!first)return;
+  clearTimeout(ACHIEVEMENT_UNLOCK_TIMER);
+  clearTimeout(ACHIEVEMENT_UNLOCK_HIDE_TIMER);
+  $('achievementUnlockIcon').textContent=first.item.icon;
+  $('achievementUnlockTitle').textContent='Insignia desbloqueada';
+  $('achievementUnlockCopy').textContent=unlocks.length===1
+    ?`${first.playerName} consiguió “${first.item.name}”.`
+    :`${first.playerName} consiguió “${first.item.name}” y hay ${unlocks.length-1} premio${unlocks.length===2?'':'s'} más.`;
+  toast.dataset.profilePlayer=first.playerName;
+  toast.hidden=false;
+  requestAnimationFrame(()=>toast.classList.add('is-visible'));
+  ACHIEVEMENT_UNLOCK_TIMER=setTimeout(dismissAchievementToast,5600);
+}
+
+function checkForNewAchievementUnlocks(snapshot=buildAchievementSnapshot()){
+  const current=currentAchievementKeys(snapshot);
+  const currentKeys=new Set(current.map(entry=>entry.key));
+  if(KNOWN_ACHIEVEMENT_KEYS==null){
+    try{
+      const stored=JSON.parse(localStorage.getItem(ACHIEVEMENT_SEEN_KEY)||'null');
+      if(Array.isArray(stored))KNOWN_ACHIEVEMENT_KEYS=new Set(stored);
+    }catch{}
+  }
+  if(KNOWN_ACHIEVEMENT_KEYS==null){
+    KNOWN_ACHIEVEMENT_KEYS=currentKeys;
+    try{localStorage.setItem(ACHIEVEMENT_SEEN_KEY,JSON.stringify([...KNOWN_ACHIEVEMENT_KEYS]))}catch{}
+    return;
+  }
+  const newUnlocks=current.filter(entry=>!KNOWN_ACHIEVEMENT_KEYS.has(entry.key));
+  currentKeys.forEach(key=>KNOWN_ACHIEVEMENT_KEYS.add(key));
+  try{localStorage.setItem(ACHIEVEMENT_SEEN_KEY,JSON.stringify([...KNOWN_ACHIEVEMENT_KEYS]))}catch{}
+  if(newUnlocks.length)showAchievementUnlockToast(newUnlocks);
+}
+
 function setHistoryHubView(view='historical'){
   const allowed=['seasons','historical','records'];
   const selected=allowed.includes(view)?view:'historical';
@@ -390,6 +705,21 @@ function setHistoryHubView(view='historical'){
     panel.hidden=!active;
   });
 }
+
+function applySectionChange(target,selectedHistoryView){
+  document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
+  document.querySelectorAll('.navtab').forEach(tab=>tab.classList.remove('active'));
+  $(target)?.classList.add('active');
+  document.querySelector(`.navtab[data-section="${target}"]`)?.classList.add('active');
+  if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
+}
+
+function scrollToSectionStart(){
+  const main=document.querySelector('main');
+  if(!main)return;
+  window.scrollTo({top:Math.max(0,main.offsetTop-100),behavior:'auto'});
+}
+
 function go(id,historyView){
   let target=id;
   let selectedHistoryView=historyView;
@@ -400,11 +730,53 @@ function go(id,historyView){
     target='history';
     selectedHistoryView='records';
   }
-  document.querySelectorAll('.page,.navtab').forEach(x=>x.classList.remove('active'));
-  $(target)?.classList.add('active');
-  document.querySelector(`.navtab[data-section="${target}"]`)?.classList.add('active');
-  if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
-  scrollTo({top:document.querySelector('main').offsetTop-100,behavior:'smooth'});
+  const next=$(target);
+  if(!next)return;
+  const current=document.querySelector('.page.active');
+  if(current===next){
+    if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
+    scrollToSectionStart();
+    replaySectionCounters(next);
+    return;
+  }
+
+  const token=++SECTION_TRANSITION_TOKEN;
+  document.querySelectorAll('.page-entering,.page-leaving').forEach(page=>page.classList.remove('page-entering','page-leaving'));
+  const change=()=>{
+    applySectionChange(target,selectedHistoryView);
+    scrollToSectionStart();
+  };
+  const finish=()=>{
+    if(token!==SECTION_TRANSITION_TOKEN)return;
+    document.documentElement.classList.remove('section-transition-active');
+    next.classList.remove('page-entering');
+    registerDynamicCounters(next);
+    enhanceThreeDimensionalCards(next);
+    replaySectionCounters(next);
+  };
+
+  if(document.startViewTransition&&!prefersReducedMotion()){
+    document.documentElement.classList.add('section-transition-active');
+    try{
+      const transition=document.startViewTransition(change);
+      transition.finished.then(finish).catch(finish);
+      return;
+    }catch{}
+  }
+
+  if(prefersReducedMotion()){
+    change();
+    finish();
+    return;
+  }
+  current?.classList.add('page-leaving');
+  setTimeout(()=>{
+    if(token!==SECTION_TRANSITION_TOKEN)return;
+    current?.classList.remove('page-leaving');
+    change();
+    next.classList.add('page-entering');
+    setTimeout(finish,470);
+  },130);
 }
 function setRegulationView(view='league'){
   const selected=view==='champions'?'champions':'league';
@@ -949,7 +1321,6 @@ function renderSeasonPulse(){
       </div>`;
   }
 
-  host.querySelectorAll('[data-go]').forEach(button=>button.onclick=()=>go(button.dataset.go));
 }
 
 function matchdayPlayerLinks(names,limit=3){
@@ -1692,7 +2063,11 @@ function closePlayer(){
 function openPlayer(name){
   const p=DATA.participants.find(x=>x.name===name);
   if(!p)return;
-  profileReturnFocus=document.activeElement;
+  const returnFocus=document.activeElement;
+  profileReturnFocus=returnFocus?.id==='achievementUnlockToast'
+    ?document.querySelector('.navtab.active')
+    :returnFocus;
+  dismissAchievementToast();
   const s=statMap()[name]||{};
   const m=profileMetrics(name);
   const seasonRows=m.history.map(x=>{
@@ -1744,10 +2119,10 @@ function openPlayer(name){
         <span style="width:${achievementPercent}%"></span>
       </div>
       <div class="profile-achievement-grid">
-        ${achievements.map(item=>`<article class="profile-achievement-card achievement-${item.rarity} achievement-${item.id}${item.earned?' is-earned':' is-locked'}">
+        ${achievements.map(item=>`<article class="profile-achievement-card achievement-${item.rarity} achievement-${item.id}${item.earned?' is-earned':' is-locked'}" data-achievement-id="${item.id}">
           <div class="profile-achievement-card-top">
             <span class="profile-achievement-icon" aria-hidden="true">${item.icon}</span>
-            <span class="profile-achievement-status">${item.earned?'CONSEGUIDA':'BLOQUEADA'}</span>
+            <span class="profile-achievement-status">${item.earned?'DESBLOQUEADA':'BLOQUEADA'}</span>
           </div>
           <small>${item.type}</small>
           <h4>${item.name}</h4>
@@ -1784,7 +2159,13 @@ function openPlayer(name){
     </section>`;
   $('playerModal').hidden=false;
   syncModalLock();
-  requestAnimationFrame(()=>$('closeModal').focus());
+  registerDynamicCounters($('modalContent'));
+  enhanceThreeDimensionalCards($('modalContent'));
+  requestAnimationFrame(()=>{
+    animateProfileAchievementUnlocks();
+    replaySectionCounters($('modalContent'));
+    $('closeModal').focus();
+  });
 }
 
 let evolutionSelected=[];
@@ -2758,6 +3139,7 @@ window.addEventListener('appinstalled',()=>{
 async function init(){
   trackSiteVisit();
   DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();
+  setupMotionSystem();
   renderCurrent();
   renderMatchdayCenter();
   renderHomeLive();
@@ -2784,6 +3166,7 @@ async function init(){
     renderPlayers($('playerSearch')?.value||'');
     renderChampions();
     if(SHARE_CARD_BOUND)renderShareCardStudio();
+    checkForNewAchievementUnlocks();
   };
   syncPublishedData();
   window.setInterval(()=>{
@@ -2794,8 +3177,12 @@ async function init(){
     if(document.visibilityState==='visible')syncPublishedData();
   });
 
-  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go,b.dataset.historyView));
   document.addEventListener('click',e=>{
+    const route=e.target.closest('[data-go]');
+    if(route){
+      go(route.dataset.go,route.dataset.historyView);
+      return;
+    }
     const team=e.target.closest('[data-profile-player]');
     if(team)openPlayer(team.dataset.profilePlayer);
   });

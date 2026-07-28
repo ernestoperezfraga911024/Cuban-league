@@ -15260,3 +15260,342 @@ footer{
     filter:none;
   }
 }
+
+/* =========================================================
+   V70 — MOVIMIENTO MODERNO, CONTADORES, 3D E INSIGNIAS
+   ========================================================= */
+@keyframes sectionPageEnter{
+  from{
+    opacity:0;
+    translate:0 24px;
+    scale:.985;
+    filter:blur(5px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:blur(0);
+  }
+}
+
+@keyframes sectionPageLeave{
+  from{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:blur(0);
+  }
+  to{
+    opacity:0;
+    translate:0 -10px;
+    scale:.994;
+    filter:blur(3px);
+  }
+}
+
+@keyframes sectionPanelReveal{
+  from{
+    opacity:0;
+    translate:0 12px;
+    filter:blur(3px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    filter:blur(0);
+  }
+}
+
+.page.active{
+  view-transition-name:league-section;
+}
+
+.page.page-entering{
+  display:block;
+  animation:sectionPageEnter .45s cubic-bezier(.16,.82,.24,1) both;
+}
+
+.page.page-leaving{
+  display:block;
+  pointer-events:none;
+  animation:sectionPageLeave .13s ease both;
+}
+
+.history-hub-panel:not([hidden]),
+.regulation-panel:not([hidden]),
+.standings-panel:not([hidden]),
+.history-panel.active{
+  animation:sectionPanelReveal .4s cubic-bezier(.2,.75,.22,1) both;
+}
+
+::view-transition-old(league-section){
+  animation:sectionPageLeave .18s ease both;
+}
+
+::view-transition-new(league-section){
+  animation:sectionPageEnter .46s cubic-bezier(.16,.82,.24,1) both;
+}
+
+.is-counting{
+  font-variant-numeric:tabular-nums;
+}
+
+.motion-tilt-glare{
+  display:none!important;
+}
+
+@media(min-width:960px) and (hover:hover) and (pointer:fine){
+  body .motion-tilt-card.motion-tilt-card{
+    --tilt-rx:0deg;
+    --tilt-ry:0deg;
+    --tilt-lift:0px;
+    --tilt-glare-x:50%;
+    --tilt-glare-y:50%;
+    position:relative;
+    isolation:isolate;
+    transform:
+      perspective(1100px)
+      translate3d(0,var(--tilt-lift),0)
+      rotateX(var(--tilt-rx))
+      rotateY(var(--tilt-ry));
+    transform-style:preserve-3d;
+    will-change:transform;
+    transition:
+      transform .16s cubic-bezier(.2,.72,.2,1),
+      border-color .24s ease,
+      box-shadow .24s ease;
+  }
+
+  body .motion-tilt-card.motion-tilt-card.is-tilting{
+    --tilt-lift:-6px;
+    border-color:rgba(101,239,214,.38);
+    box-shadow:
+      0 25px 46px rgba(0,0,0,.32),
+      0 8px 22px rgba(35,196,172,.09),
+      inset 0 1px rgba(255,255,255,.07);
+  }
+
+  .motion-tilt-glare{
+    position:absolute!important;
+    z-index:6;
+    inset:0;
+    display:block!important;
+    width:auto!important;
+    height:auto!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:inherit;
+    pointer-events:none;
+    opacity:0;
+    background:
+      radial-gradient(
+        circle at var(--tilt-glare-x) var(--tilt-glare-y),
+        rgba(255,255,255,.2),
+        rgba(84,235,211,.07) 23%,
+        transparent 54%
+      );
+    mix-blend-mode:screen;
+    transition:opacity .2s ease;
+  }
+
+  .motion-tilt-card.is-tilting>.motion-tilt-glare{
+    opacity:.72;
+  }
+}
+
+@keyframes achievementUnlockReveal{
+  0%{
+    opacity:0;
+    translate:0 24px;
+    scale:.84;
+    filter:grayscale(.65) brightness(.65);
+  }
+  62%{
+    opacity:1;
+    translate:0 -3px;
+    scale:1.035;
+    filter:grayscale(0) brightness(1.16);
+  }
+  100%{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:grayscale(0) brightness(1);
+  }
+}
+
+@keyframes achievementIconUnlock{
+  0%{transform:scale(.55) rotate(-18deg)}
+  55%{transform:scale(1.22) rotate(7deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+
+@keyframes achievementUnlockSweep{
+  0%{opacity:0;transform:translateX(-130%) rotate(18deg)}
+  34%{opacity:.7}
+  100%{opacity:0;transform:translateX(145%) rotate(18deg)}
+}
+
+@keyframes achievementProgressReveal{
+  from{scale:0 1}
+  to{scale:1 1}
+}
+
+.profile-achievement-card.is-earned::before{
+  position:absolute;
+  z-index:3;
+  top:-45%;
+  bottom:-45%;
+  left:-38%;
+  width:35%;
+  content:"";
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+  transform:translateX(-130%) rotate(18deg);
+}
+
+.profile-achievement-card.is-earned.is-unlock-reveal{
+  animation:achievementUnlockReveal .72s cubic-bezier(.17,.82,.24,1.15) var(--unlock-delay,0ms) both;
+}
+
+.profile-achievement-card.is-earned.is-unlock-reveal::before{
+  animation:achievementUnlockSweep .8s ease calc(var(--unlock-delay,0ms) + 90ms) both;
+}
+
+.profile-achievement-card.is-earned.is-unlock-reveal .profile-achievement-icon{
+  animation:achievementIconUnlock .62s cubic-bezier(.2,.78,.25,1.25) calc(var(--unlock-delay,0ms) + 70ms) both;
+}
+
+.profile-achievement-card.is-earned.is-unlock-reveal .profile-achievement-status{
+  box-shadow:0 0 18px rgba(98,238,128,.24);
+}
+
+.profile-achievements-section.is-unlock-revealing .profile-achievement-progress span{
+  transform-origin:left center;
+  animation:achievementProgressReveal .82s cubic-bezier(.2,.78,.22,1) both;
+}
+
+.achievement-unlock-toast{
+  position:fixed;
+  z-index:120;
+  top:104px;
+  right:24px;
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) 24px;
+  align-items:center;
+  gap:13px;
+  width:min(390px,calc(100vw - 32px));
+  min-height:82px;
+  padding:13px 15px;
+  border:1px solid rgba(111,243,143,.38);
+  border-radius:21px;
+  color:#f5fff8;
+  background:
+    radial-gradient(circle at 8% 0,rgba(111,243,143,.18),transparent 8rem),
+    linear-gradient(145deg,rgba(8,40,32,.98),rgba(4,22,27,.98));
+  box-shadow:0 24px 65px rgba(0,0,0,.48),0 0 34px rgba(74,223,121,.1);
+  text-align:left;
+  cursor:pointer;
+  opacity:0;
+  translate:22px 0;
+  scale:.96;
+  transition:
+    opacity .28s ease,
+    translate .36s cubic-bezier(.2,.78,.24,1),
+    scale .36s cubic-bezier(.2,.78,.24,1);
+}
+
+.achievement-unlock-toast[hidden]{
+  display:none;
+}
+
+.achievement-unlock-toast.is-visible{
+  opacity:1;
+  translate:0 0;
+  scale:1;
+}
+
+.achievement-unlock-toast-icon{
+  display:grid;
+  width:52px;
+  height:52px;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:17px;
+  background:rgba(255,255,255,.06);
+  box-shadow:inset 0 1px rgba(255,255,255,.08);
+  font-size:1.55rem;
+}
+
+.achievement-unlock-toast.is-visible .achievement-unlock-toast-icon{
+  animation:achievementIconUnlock .68s cubic-bezier(.2,.78,.25,1.25) .08s both;
+}
+
+.achievement-unlock-toast-copy b,
+.achievement-unlock-toast-copy small{
+  display:block;
+}
+
+.achievement-unlock-toast-copy b{
+  margin-bottom:4px;
+  color:#79f18a;
+  font-family:Sora,Inter,sans-serif;
+  font-size:.8rem;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+.achievement-unlock-toast-copy small{
+  color:#d5e9df;
+  font-size:.78rem;
+  font-weight:700;
+  line-height:1.35;
+}
+
+.achievement-unlock-toast-arrow{
+  color:#7bf18a;
+  font-size:1.1rem;
+  font-weight:900;
+  transition:translate .2s ease;
+}
+
+.achievement-unlock-toast:hover .achievement-unlock-toast-arrow{
+  translate:4px 0;
+}
+
+@media(max-width:700px){
+  .achievement-unlock-toast{
+    top:auto;
+    right:14px;
+    bottom:calc(18px + env(safe-area-inset-bottom));
+    left:14px;
+    width:auto;
+    translate:0 24px;
+  }
+
+  .achievement-unlock-toast.is-visible{
+    translate:0 0;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .page.active{
+    view-transition-name:none;
+  }
+
+  .page.page-entering,
+  .page.page-leaving,
+  .history-hub-panel:not([hidden]),
+  .regulation-panel:not([hidden]),
+  .standings-panel:not([hidden]),
+  .history-panel.active,
+  .profile-achievement-card.is-earned.is-unlock-reveal,
+  .profile-achievement-card.is-earned.is-unlock-reveal::before,
+  .profile-achievement-card.is-earned.is-unlock-reveal .profile-achievement-icon,
+  .profile-achievements-section.is-unlock-revealing .profile-achievement-progress span,
+  .achievement-unlock-toast.is-visible .achievement-unlock-toast-icon{
+    animation:none!important;
+  }
+}
