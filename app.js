@@ -1,4 +1,4 @@
-const APP_VERSION='76-20260728';
+const APP_VERSION='77-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -427,10 +427,7 @@ function enhanceThreeDimensionalCards(root=document){
     if(card.dataset.motionTiltReady==='1')return;
     card.dataset.motionTiltReady='1';
     card.classList.add('motion-tilt-card');
-    const glare=document.createElement('span');
-    glare.className='motion-tilt-glare';
-    glare.setAttribute('aria-hidden','true');
-    card.appendChild(glare);
+    card.querySelectorAll(':scope > .motion-tilt-glare').forEach(glare=>glare.remove());
     let pointerFrame=0;
 
     const reset=()=>{
@@ -438,8 +435,6 @@ function enhanceThreeDimensionalCards(root=document){
       card.classList.remove('is-tilting');
       card.style.setProperty('--tilt-rx','0deg');
       card.style.setProperty('--tilt-ry','0deg');
-      card.style.setProperty('--tilt-glare-x','50%');
-      card.style.setProperty('--tilt-glare-y','50%');
     };
 
     card.addEventListener('pointermove',event=>{
@@ -452,8 +447,6 @@ function enhanceThreeDimensionalCards(root=document){
         card.classList.add('is-tilting');
         card.style.setProperty('--tilt-rx',`${((.5-y)*7).toFixed(2)}deg`);
         card.style.setProperty('--tilt-ry',`${((x-.5)*9).toFixed(2)}deg`);
-        card.style.setProperty('--tilt-glare-x',`${(x*100).toFixed(1)}%`);
-        card.style.setProperty('--tilt-glare-y',`${(y*100).toFixed(1)}%`);
       });
     });
     card.addEventListener('pointerleave',reset);

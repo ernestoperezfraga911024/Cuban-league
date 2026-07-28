@@ -1,4 +1,4 @@
-# Cuban League V76
+# Cuban League V77
 
 Sitio oficial de la Cuban League con:
 
@@ -125,8 +125,8 @@ Sitio oficial de la Cuban League con:
 - La Carta ADN de Victor Manuel resume su estilo de gestión y permite consultar
   qué significa cada indicador, cómo se calcula y las temporadas que mejor
   representan su continuidad y su rotación.
-- En PC, las tarjetas destacadas reaccionan al movimiento del puntero con una
-  profundidad 3D sutil y un reflejo dinámico.
+- En PC, las tarjetas destacadas conservan una profundidad 3D sutil, pero sin
+  el reflejo ni el foco de luz que seguía al puntero.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
   nuevas insignias muestran además un aviso que abre directamente el perfil.
 - La portada elimina la antigua etiqueta de espera y usa estados más directos
