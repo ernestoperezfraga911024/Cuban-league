@@ -1,4 +1,4 @@
-const APP_VERSION='73-20260728';
+const APP_VERSION='74-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -1817,10 +1817,10 @@ function renderPlayers(filter=''){
         <h3>${player.name}</h3>
         <small>${statsRow.label||'Participante'}</small>
         <p>${statsRow.points?.toLocaleString()||0} puntos · ${statsRow.podiums||0} podios</p>
-        ${visible.length?`<div class="player-card-badges" aria-label="${badges.length} insignias conseguidas">
+        <div class="player-card-badges${visible.length?'':' is-empty'}"${visible.length?` aria-label="${badges.length} insignias conseguidas"`:' aria-hidden="true"'}>
           ${visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
           ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
-        </div>`:''}
+        </div>
       </div>
       <span class="profile-card-cta" aria-hidden="true">→</span>
     </article>`;
