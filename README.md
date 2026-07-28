@@ -1,4 +1,4 @@
-# Cuban League V68
+# Cuban League V69
 
 Sitio oficial de la Cuban League con:
 
@@ -68,6 +68,8 @@ Sitio oficial de la Cuban League con:
   explícita los cierres mensual y anual para que los premios sean exactos.
 - El contador utiliza identificadores anónimos por navegador y dispositivo; no
   guarda nombres, correos ni direcciones IP de los visitantes.
+- Al verificar la cuenta del administrador, ese navegador queda excluido
+  automáticamente del contador para registrar solamente visitas externas.
 - Actualización automática de la clasificación mediante Supabase.
 - Archivo histórico por temporadas y perfiles completos.
 - Rankings, palmarés, récords, Champions y noticias.

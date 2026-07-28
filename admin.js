@@ -1,7 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '68-20260728';
+  const VERSION = '69-20260728';
+  const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
@@ -1165,6 +1166,12 @@
     return data === true;
   }
 
+  function excludeOwnerVisitsOnThisBrowser() {
+    try {
+      localStorage.setItem(OWNER_VISIT_EXCLUSION_KEY, '1');
+    } catch {}
+  }
+
   async function openPanel(session) {
     try {
       const authorized = await verifyAdministrator();
@@ -1175,6 +1182,7 @@
         return;
       }
 
+      excludeOwnerVisitsOnThisBrowser();
       $('sessionEmail').textContent = session.user.email || '';
       $('seasonLabel').textContent = config.season;
       showOnly('panelView');

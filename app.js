@@ -1,4 +1,5 @@
-const APP_VERSION='68-20260728';
+const APP_VERSION='69-20260728';
+const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -42,6 +43,9 @@ function anonymousId(storageName,key){
 }
 
 async function trackSiteVisit(){
+  try{
+    if(localStorage.getItem(OWNER_VISIT_EXCLUSION_KEY)==='1')return false;
+  }catch{}
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!config?.url||!config?.publishableKey)return false;
   try{
