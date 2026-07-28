@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '67-20260727';
+  const VERSION = '68-20260728';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);

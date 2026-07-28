@@ -15050,3 +15050,213 @@ footer{
     padding-bottom:15px;
   }
 }
+
+/* =========================================================
+   V68 — ENTRADA CINEMATOGRÁFICA DEL HERO
+   ========================================================= */
+@keyframes heroTitleReveal{
+  from{
+    opacity:0;
+    translate:0 26px;
+    filter:blur(7px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    filter:blur(0);
+  }
+}
+
+@keyframes heroDetailReveal{
+  from{
+    opacity:0;
+    translate:0 14px;
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+  }
+}
+
+@keyframes heroHeadingReveal{
+  from{
+    opacity:0;
+    translate:0 -16px;
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+  }
+}
+
+@keyframes podiumEnterLeft{
+  from{
+    opacity:0;
+    translate:-54px 22px;
+    scale:.95;
+    filter:blur(5px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:blur(0);
+  }
+}
+
+@keyframes podiumEnterRight{
+  from{
+    opacity:0;
+    translate:54px 22px;
+    scale:.95;
+    filter:blur(5px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:blur(0);
+  }
+}
+
+@keyframes podiumChampionRise{
+  from{
+    opacity:0;
+    translate:0 78px;
+    scale:.92;
+    filter:blur(6px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:blur(0);
+  }
+}
+
+@keyframes podiumLeaderReveal{
+  from{
+    opacity:0;
+    translate:0 25px;
+    scale:.98;
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+  }
+}
+
+.hero-copy{
+  animation:none;
+}
+
+.hero-copy h1{
+  animation:heroTitleReveal .66s cubic-bezier(.2,.72,.2,1) .02s both;
+}
+
+.hero-accent-line{
+  animation:heroDetailReveal .48s ease .16s both;
+}
+
+.hero-copy p{
+  animation:heroDetailReveal .5s ease .22s both;
+}
+
+.hero-photo .actions{
+  animation:heroDetailReveal .52s ease .3s both;
+}
+
+.hero-kpis-heading{
+  animation:heroHeadingReveal .48s ease .18s both;
+}
+
+.hero-kpis article{
+  animation:none;
+}
+
+.hero-kpis .hero-podium-grid .hero-kpi-second{
+  animation:podiumEnterLeft .64s cubic-bezier(.18,.78,.22,1) .3s both;
+}
+
+.hero-kpis .hero-podium-grid .hero-kpi-third{
+  animation:podiumEnterRight .64s cubic-bezier(.18,.78,.22,1) .34s both;
+}
+
+.hero-kpis .hero-podium-grid .hero-kpi-first{
+  animation:podiumChampionRise .7s cubic-bezier(.16,.84,.24,1) .46s both;
+}
+
+.hero-kpis .hero-leaders-row article:first-child{
+  animation:podiumLeaderReveal .5s ease .72s both;
+}
+
+.hero-kpis .hero-leaders-row article:last-child{
+  animation:podiumLeaderReveal .5s ease .79s both;
+}
+
+@media(min-width:1180px){
+  @keyframes podiumEnterLeft{
+    from{
+      opacity:0;
+      translate:-78px 25px;
+      scale:.94;
+      filter:blur(6px);
+    }
+    to{
+      opacity:1;
+      translate:0 0;
+      scale:1;
+      filter:blur(0);
+    }
+  }
+
+  @keyframes podiumEnterRight{
+    from{
+      opacity:0;
+      translate:78px 25px;
+      scale:.94;
+      filter:blur(6px);
+    }
+    to{
+      opacity:1;
+      translate:0 0;
+      scale:1;
+      filter:blur(0);
+    }
+  }
+
+  @keyframes podiumChampionRise{
+    from{
+      opacity:0;
+      translate:0 96px;
+      scale:.9;
+      filter:blur(7px);
+    }
+    to{
+      opacity:1;
+      translate:0 0;
+      scale:1;
+      filter:blur(0);
+    }
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .hero-copy h1,
+  .hero-accent-line,
+  .hero-copy p,
+  .hero-photo .actions,
+  .hero-kpis-heading,
+  .hero-kpis .hero-podium-grid .hero-kpi-second,
+  .hero-kpis .hero-podium-grid .hero-kpi-third,
+  .hero-kpis .hero-podium-grid .hero-kpi-first,
+  .hero-kpis .hero-leaders-row article:first-child,
+  .hero-kpis .hero-leaders-row article:last-child{
+    animation:none !important;
+    opacity:1;
+    translate:0 0;
+    scale:1;
+    filter:none;
+  }
+}
