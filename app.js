@@ -1,31 +1,6 @@
-const APP_VERSION='80-20260728';
+const APP_VERSION='81-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
-const MOTION_CARD_SELECTOR=[
-  '.hero-podium-grid article',
-  '.hero-leaders-row article',
-  '.home-live-card',
-  '.pulse-fact-card',
-  '.pulse-highlight-card',
-  '.player-card',
-  '.podium-player',
-  '.matchday-feature-card',
-  '.matchday-metrics>article',
-  '.historical-podium-card',
-  '.record-entry',
-  '.achievement-catalog-card.is-unlocked',
-  '.profile-achievement-card.is-earned',
-  '.manager-dna-card-face',
-  '.manager-dna-guide',
-  '.manager-legacy-trust-card',
-  '.manager-legacy-mvp-card',
-  '.manager-legacy-position-card',
-  '.news-card',
-  '.champions-group',
-  '.champions-defending-card',
-  '.champions-legacy-card',
-  '.round'
-].join(',');
 let DATA;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
@@ -40,8 +15,6 @@ let SHARE_CARD_GROUP_INDEX=0;
 let SHARE_CARD_RENDER_TOKEN=0;
 let SHARE_CARD_READY=false;
 let SECTION_TRANSITION_TOKEN=0;
-let MOTION_MUTATION_OBSERVER=null;
-let MOTION_SYSTEM_READY=false;
 let KNOWN_ACHIEVEMENT_KEYS=null;
 let ACHIEVEMENT_UNLOCK_TIMER=null;
 let ACHIEVEMENT_UNLOCK_HIDE_TIMER=null;
@@ -413,67 +386,6 @@ function prefersReducedMotion(){
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
 }
 
-function matchingMotionElements(root,selector){
-  const matches=[];
-  if(root?.nodeType===1&&root.matches?.(selector))matches.push(root);
-  if(root?.querySelectorAll)matches.push(...root.querySelectorAll(selector));
-  return [...new Set(matches)];
-}
-
-function enhanceThreeDimensionalCards(root=document){
-  const desktopPointer=window.matchMedia?.('(min-width: 960px) and (hover: hover) and (pointer: fine)');
-  if(!desktopPointer?.matches||prefersReducedMotion())return;
-  matchingMotionElements(root,MOTION_CARD_SELECTOR).forEach(card=>{
-    if(card.dataset.motionTiltReady==='1')return;
-    card.dataset.motionTiltReady='1';
-    card.classList.add('motion-tilt-card');
-    card.querySelectorAll(':scope > .motion-tilt-glare').forEach(glare=>glare.remove());
-    let pointerFrame=0;
-
-    const reset=()=>{
-      if(pointerFrame)cancelAnimationFrame(pointerFrame);
-      card.classList.remove('is-tilting');
-      card.style.setProperty('--tilt-rx','0deg');
-      card.style.setProperty('--tilt-ry','0deg');
-    };
-
-    card.addEventListener('pointermove',event=>{
-      if(!desktopPointer.matches)return;
-      const bounds=card.getBoundingClientRect();
-      const x=Math.max(0,Math.min(1,(event.clientX-bounds.left)/bounds.width));
-      const y=Math.max(0,Math.min(1,(event.clientY-bounds.top)/bounds.height));
-      if(pointerFrame)cancelAnimationFrame(pointerFrame);
-      pointerFrame=requestAnimationFrame(()=>{
-        card.classList.add('is-tilting');
-        card.style.setProperty('--tilt-rx',`${((.5-y)*7).toFixed(2)}deg`);
-        card.style.setProperty('--tilt-ry',`${((x-.5)*9).toFixed(2)}deg`);
-      });
-    });
-    card.addEventListener('pointerleave',reset);
-    card.addEventListener('pointercancel',reset);
-  });
-}
-
-function setupMotionSystem(){
-  if(MOTION_SYSTEM_READY)return;
-  MOTION_SYSTEM_READY=true;
-  MOTION_MUTATION_OBSERVER=new MutationObserver(mutations=>{
-    mutations.forEach(mutation=>{
-      enhanceThreeDimensionalCards(mutation.target);
-      mutation.addedNodes.forEach(node=>{
-        if(node.nodeType!==1)return;
-        enhanceThreeDimensionalCards(node);
-      });
-    });
-  });
-  MOTION_MUTATION_OBSERVER.observe(document.body,{childList:true,subtree:true});
-  enhanceThreeDimensionalCards(document);
-  window.matchMedia?.('(min-width: 960px) and (hover: hover) and (pointer: fine)')
-    .addEventListener?.('change',event=>{
-      if(event.matches)enhanceThreeDimensionalCards(document);
-    });
-}
-
 function animateProfileAchievementUnlocks(){
   if(prefersReducedMotion())return;
   const section=document.querySelector('.profile-achievements-section');
@@ -609,7 +521,6 @@ function go(id,historyView){
     if(token!==SECTION_TRANSITION_TOKEN)return;
     document.documentElement.classList.remove('section-transition-active');
     next.classList.remove('page-entering');
-    enhanceThreeDimensionalCards(next);
   };
 
   if(document.startViewTransition&&!prefersReducedMotion()){
@@ -2336,7 +2247,6 @@ function selectManagerLegacySeason(name,seasonName){
   void host.offsetWidth;
   host.innerHTML=managerLegacySeasonMarkup(name,record,season);
   host.classList.add('is-changing');
-  enhanceThreeDimensionalCards(host);
 }
 
 function historyResult(entry){
@@ -2493,7 +2403,6 @@ function openPlayer(name){
     </section>`;
   $('playerModal').hidden=false;
   syncModalLock();
-  enhanceThreeDimensionalCards($('modalContent'));
   requestAnimationFrame(()=>{
     animateProfileAchievementUnlocks();
     $('closeModal').focus();
@@ -3471,7 +3380,6 @@ window.addEventListener('appinstalled',()=>{
 async function init(){
   trackSiteVisit();
   DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();
-  setupMotionSystem();
   renderCurrent();
   renderMatchdayCenter();
   renderHomeLive();

@@ -1,4 +1,4 @@
-# Cuban League V80
+# Cuban League V81
 
 Sitio oficial de la Cuban League con:
 
@@ -7,6 +7,8 @@ Sitio oficial de la Cuban League con:
   se oculta y la sección elegida comienza desde arriba en móvil y escritorio.
 - Una sola fotografía de estadio recorre el fondo de toda la web para mantener
   la misma identidad visual en cada apartado, sin cortes ni rayas entre vistas.
+- Las tarjetas permanecen estables en PC: se eliminó la inclinación 3D y el
+  desplazamiento que seguía la posición del cursor.
 - Experiencia panorámica de escritorio a ancho completo, con márgenes fluidos
   en lugar de una columna central estrecha.
 - Fondos fotográficos de estadio extendidos por todas las secciones públicas,
@@ -141,8 +143,8 @@ Sitio oficial de la Cuban League con:
 - La Carta ADN de Victor Manuel resume su estilo de gestión y permite consultar
   qué significa cada indicador, cómo se calcula y las temporadas que mejor
   representan su continuidad y su rotación.
-- En PC, las tarjetas destacadas conservan una profundidad 3D sutil, pero sin
-  el reflejo ni el foco de luz que seguía al puntero.
+- En PC, las tarjetas destacadas mantienen su posición al pasar el mouse, sin
+  inclinación, desplazamiento, reflejo ni foco de luz.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
   nuevas insignias muestran además un aviso que abre directamente el perfil.
 - La portada elimina la antigua etiqueta de espera y usa estados más directos

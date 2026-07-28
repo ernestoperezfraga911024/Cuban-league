@@ -15262,7 +15262,7 @@ footer{
 }
 
 /* =========================================================
-   V71 — TRANSICIONES, 3D E INSIGNIAS
+   V71 — TRANSICIONES E INSIGNIAS
    ========================================================= */
 @keyframes sectionPageEnter{
   from{
@@ -15339,35 +15339,6 @@ footer{
 
 .motion-tilt-glare{
   display:none!important;
-}
-
-@media(min-width:960px) and (hover:hover) and (pointer:fine){
-  body .motion-tilt-card.motion-tilt-card{
-    --tilt-rx:0deg;
-    --tilt-ry:0deg;
-    --tilt-lift:0px;
-    position:relative;
-    isolation:isolate;
-    transform:
-      perspective(1100px)
-      translate3d(0,var(--tilt-lift),0)
-      rotateX(var(--tilt-rx))
-      rotateY(var(--tilt-ry));
-    transform-style:preserve-3d;
-    will-change:transform;
-    transition:
-      transform .16s cubic-bezier(.2,.72,.2,1),
-      border-color .24s ease,
-      box-shadow .24s ease;
-  }
-
-  body .motion-tilt-card.motion-tilt-card.is-tilting{
-    --tilt-lift:-6px;
-    border-color:rgba(255,255,255,.14);
-    box-shadow:
-      0 25px 46px rgba(0,0,0,.32),
-      inset 0 1px rgba(255,255,255,.07);
-  }
 }
 
 @keyframes achievementUnlockReveal{
@@ -18413,5 +18384,43 @@ footer{
   .regulation-banner,
   .share-card-banner{
     padding-top:25px!important;
+  }
+}
+
+/* =========================================================
+   V81 — Tarjetas estables en PC
+   Sin inclinación ni desplazamiento al pasar el cursor
+   ========================================================= */
+@media(min-width:960px) and (hover:hover) and (pointer:fine){
+  body .motion-tilt-card.motion-tilt-card,
+  body .motion-tilt-card.motion-tilt-card.is-tilting{
+    --tilt-rx:0deg!important;
+    --tilt-ry:0deg!important;
+    --tilt-lift:0px!important;
+    transform:none!important;
+    transform-style:flat!important;
+    will-change:auto!important;
+  }
+
+  .hero-kpis article:hover,
+  .panel:hover,
+  .record:hover,
+  .news-card:hover,
+  .player-card:hover,
+  .group:hover,
+  .photo-card:hover,
+  .matchday-archive-card:hover,
+  .record-entry:hover,
+  .historical-podium-card:hover,
+  .home-shortcuts>button:hover{
+    transform:none!important;
+  }
+
+  .historical-podium-1:hover{
+    transform:translateY(-12px)!important;
+  }
+
+  .player-card:hover img{
+    transform:none!important;
   }
 }
