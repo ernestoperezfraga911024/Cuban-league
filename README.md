@@ -1,11 +1,11 @@
-# Cuban League V75
+# Cuban League V76
 
 Sitio oficial de la Cuban League con:
 
-- Directorio de participantes reconstruido con una cuadrícula interna fija:
-  foto a la izquierda, nombre y datos alineados, insignias en una fila inferior
-  y flecha a la derecha. Todas las tarjetas mantienen exactamente la misma
-  altura y los nombres largos no desplazan ningún elemento.
+- Directorio de participantes con cuatro filas independientes para nombre,
+  descripción, puntos e insignias. Las descripciones largas pueden ocupar dos
+  líneas completas sin quedar ocultas, y las insignias permanecen siempre en
+  su propia fila inferior.
 - Clasificación 2026/27 con jornadas, puntos, goles, clean sheets y tarjetas
   rojas.
 - Zona de descenso dinámica: los puestos 16 al 20 quedan resaltados en rojo y

@@ -9,17 +9,17 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=75-20260728">
-<style id="participant-card-layout-v75">
+<link rel="stylesheet" href="styles.css?v=76-20260728">
+<style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
     display:grid!important;
     grid-template-columns:68px minmax(0,1fr) 38px!important;
-    grid-template-rows:auto auto auto 26px!important;
+    grid-template-rows:auto minmax(32px,auto) auto 26px!important;
     align-items:center!important;
     width:100%!important;
-    height:116px!important;
-    min-height:116px!important;
+    height:136px!important;
+    min-height:136px!important;
     padding:12px 13px!important;
     column-gap:13px!important;
     row-gap:0!important;
@@ -35,7 +35,7 @@
     margin:0!important;
   }
   #players .player-card .player-card-copy,
-  #players .player-card.player-card-v75 .player-card-main{
+  #players .player-card.player-card-v76 .player-card-main{
     display:contents!important;
   }
   #players .player-card h3{
@@ -55,10 +55,11 @@
     grid-row:2!important;
     width:100%!important;
     margin:3px 0 0!important;
-    overflow:hidden!important;
+    overflow:visible!important;
     text-align:left!important;
-    text-overflow:ellipsis!important;
-    white-space:nowrap!important;
+    text-overflow:clip!important;
+    white-space:normal!important;
+    line-height:1.25!important;
   }
   #players .player-card p{
     display:block!important;
@@ -94,6 +95,24 @@
     width:38px!important;
     height:38px!important;
     margin:0!important;
+  }
+}
+@media(max-width:370px){
+  #players .player-card{
+    grid-template-columns:60px minmax(0,1fr) 32px!important;
+    grid-template-rows:auto minmax(42px,auto) auto 25px!important;
+    height:144px!important;
+    min-height:144px!important;
+    padding:11px 10px!important;
+    column-gap:10px!important;
+  }
+  #players .player-card>img{
+    width:60px!important;
+    height:60px!important;
+  }
+  #players .player-card .profile-card-cta{
+    width:32px!important;
+    height:32px!important;
   }
 }
 </style></head><body>
@@ -640,4 +659,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=75-20260728"></script><script src="app.js?v=75-20260728"></script></body></html>
+<script src="supabase-config.js?v=76-20260728"></script><script src="app.js?v=76-20260728"></script></body></html>

@@ -17153,24 +17153,24 @@ footer{
   }
 }
 
-/* V75 · Tarjetas de participantes con posiciones físicas fijas */
-#players .player-card.player-card-v75{
+/* V76 · Nombre, descripción, puntos e insignias en filas independientes */
+#players .player-card.player-card-v76{
   display:grid!important;
   grid-template-columns:62px minmax(0,1fr) 32px!important;
-  grid-template-rows:minmax(0,1fr) 25px!important;
+  grid-template-rows:auto minmax(32px,auto) auto 25px!important;
   align-items:center!important;
   width:100%;
-  height:108px!important;
-  min-height:108px!important;
+  height:132px!important;
+  min-height:132px!important;
   padding:11px 12px!important;
   column-gap:11px!important;
   row-gap:0!important;
   text-align:left!important;
 }
 
-#players .player-card.player-card-v75>img{
+#players .player-card.player-card-v76>img{
   grid-column:1!important;
-  grid-row:1 / 3!important;
+  grid-row:1 / 5!important;
   align-self:center!important;
   justify-self:start!important;
   width:62px!important;
@@ -17178,54 +17178,58 @@ footer{
   margin:0!important;
 }
 
-#players .player-card.player-card-v75 .player-card-main{
-  display:block!important;
-  grid-column:2!important;
-  grid-row:1!important;
-  align-self:end!important;
-  justify-self:stretch!important;
-  width:100%;
-  min-width:0;
-  margin:0!important;
-  padding:0!important;
-  text-align:left!important;
+#players .player-card.player-card-v76 .player-card-main{
+  display:contents!important;
 }
 
-#players .player-card.player-card-v75 h3,
-#players .player-card.player-card-v75 small,
-#players .player-card.player-card-v75 p{
+#players .player-card.player-card-v76 h3,
+#players .player-card.player-card-v76 small,
+#players .player-card.player-card-v76 p{
   display:block!important;
+  grid-column:2!important;
   width:100%;
   min-width:0;
   margin-right:0!important;
-  overflow:hidden;
   text-align:left!important;
+}
+
+#players .player-card.player-card-v76 h3{
+  grid-row:1!important;
+  align-self:end!important;
+  margin:0!important;
+  overflow:hidden;
+  font-size:.94rem!important;
+  line-height:1.15!important;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
 
-#players .player-card.player-card-v75 h3{
-  margin:0!important;
-  font-size:.94rem!important;
-  line-height:1.15!important;
-}
-
-#players .player-card.player-card-v75 small{
+#players .player-card.player-card-v76 small{
+  grid-row:2!important;
+  align-self:center!important;
   margin:3px 0 0!important;
+  overflow:visible!important;
   font-size:.66rem!important;
-  line-height:1.2!important;
+  line-height:1.25!important;
+  text-overflow:clip!important;
+  white-space:normal!important;
 }
 
-#players .player-card.player-card-v75 p{
+#players .player-card.player-card-v76 p{
+  grid-row:3!important;
+  align-self:center!important;
   margin:4px 0 0!important;
+  overflow:hidden;
   font-size:.68rem!important;
   line-height:1.2!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
-#players .player-card.player-card-v75>.player-card-badges{
+#players .player-card.player-card-v76>.player-card-badges{
   display:flex!important;
   grid-column:2!important;
-  grid-row:2!important;
+  grid-row:4!important;
   align-self:start!important;
   justify-self:stretch!important;
   align-items:center!important;
@@ -17236,14 +17240,14 @@ footer{
   margin:2px 0 0!important;
 }
 
-#players .player-card.player-card-v75>.player-card-badges.is-empty{
+#players .player-card.player-card-v76>.player-card-badges.is-empty{
   visibility:hidden!important;
 }
 
-#players .player-card.player-card-v75>.profile-card-cta{
+#players .player-card.player-card-v76>.profile-card-cta{
   display:grid!important;
   grid-column:3!important;
-  grid-row:1 / 3!important;
+  grid-row:1 / 5!important;
   align-self:center!important;
   justify-self:end!important;
   width:32px!important;
@@ -17258,59 +17262,60 @@ footer{
     gap:9px!important;
   }
 
-  #players .player-card.player-card-v75{
+  #players .player-card.player-card-v76{
     grid-template-columns:68px minmax(0,1fr) 38px!important;
-    grid-template-rows:minmax(0,1fr) 26px!important;
-    height:116px!important;
-    min-height:116px!important;
+    grid-template-rows:auto minmax(32px,auto) auto 26px!important;
+    height:136px!important;
+    min-height:136px!important;
     padding:12px 13px!important;
     column-gap:13px!important;
     border-radius:16px!important;
   }
 
-  #players .player-card.player-card-v75>img{
-    width:68px!important;
-    height:68px!important;
+  #players .player-card.player-card-v76>img{
+    width:72px!important;
+    height:72px!important;
     border-radius:16px!important;
   }
 
-  #players .player-card.player-card-v75 h3{
+  #players .player-card.player-card-v76 h3{
     font-size:1rem!important;
   }
 
-  #players .player-card.player-card-v75 small{
+  #players .player-card.player-card-v76 small{
     font-size:.68rem!important;
   }
 
-  #players .player-card.player-card-v75 p{
+  #players .player-card.player-card-v76 p{
     font-size:.69rem!important;
   }
 
-  #players .player-card.player-card-v75>.profile-card-cta{
+  #players .player-card.player-card-v76>.profile-card-cta{
     width:38px!important;
     height:38px!important;
   }
 }
 
 @media(max-width:370px){
-  #players .player-card.player-card-v75{
+  #players .player-card.player-card-v76{
     grid-template-columns:60px minmax(0,1fr) 32px!important;
-    height:110px!important;
-    min-height:110px!important;
+    grid-template-rows:auto minmax(42px,auto) auto 25px!important;
+    height:144px!important;
+    min-height:144px!important;
     padding:11px 10px!important;
     column-gap:10px!important;
   }
 
-  #players .player-card.player-card-v75>img{
+  #players .player-card.player-card-v76>img{
     width:60px!important;
     height:60px!important;
   }
 
-  #players .player-card.player-card-v75 h3{
+  #players .player-card.player-card-v76 h3{
     font-size:.91rem!important;
   }
 
-  #players .player-card.player-card-v75>.profile-card-cta{
+  #players .player-card.player-card-v76>.profile-card-cta{
     width:32px!important;
     height:32px!important;
   }
