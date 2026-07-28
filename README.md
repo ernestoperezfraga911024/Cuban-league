@@ -1,4 +1,4 @@
-# Cuban League V81
+# Cuban League V82
 
 Sitio oficial de la Cuban League con:
 
@@ -9,6 +9,8 @@ Sitio oficial de la Cuban League con:
   la misma identidad visual en cada apartado, sin cortes ni rayas entre vistas.
 - Las tarjetas permanecen estables en PC: se eliminó la inclinación 3D y el
   desplazamiento que seguía la posición del cursor.
+- El podio y los rankings de Histórico muestran las insignias reales ganadas
+  por cada equipo, con acceso al perfil para consultar la colección completa.
 - Experiencia panorámica de escritorio a ancho completo, con márgenes fluidos
   en lugar de una columna central estrecha.
 - Fondos fotográficos de estadio extendidos por todas las secciones públicas,

@@ -18424,3 +18424,97 @@ footer{
     transform:none!important;
   }
 }
+
+/* =========================================================
+   V82 — Insignias dentro del archivo Histórico
+   ========================================================= */
+#history .historical-ranking-row .standings-team{
+  gap:10px;
+}
+
+#history .historical-ranking-row .standings-team-copy{
+  gap:4px;
+}
+
+#history .historical-ranking-row .standings-mini-badges{
+  min-height:18px;
+}
+
+#history .historical-ranking-row .standings-mini-badge{
+  width:18px;
+  height:18px;
+  flex-basis:18px;
+  border-radius:6px;
+  font-size:.59rem;
+}
+
+#history .historical-ranking-row .standings-mini-more{
+  height:17px;
+  min-width:21px;
+  padding:0 4px;
+  font-size:.52rem;
+}
+
+#history .historical-podium-badges{
+  min-height:18px;
+  justify-content:flex-start;
+  margin-top:7px;
+}
+
+#history .historical-podium-badges .standings-mini-badge{
+  width:18px;
+  height:18px;
+  flex-basis:18px;
+  border-radius:6px;
+  font-size:.58rem;
+}
+
+#history .historical-podium-badges .standings-mini-more{
+  height:17px;
+  min-width:21px;
+  padding:0 4px;
+  font-size:.51rem;
+}
+
+#history .historical-podium-badges+b{
+  margin-top:8px;
+}
+
+@media(max-width:700px){
+  #history .historical-ranking-row{
+    min-height:76px;
+  }
+
+  #history .historical-ranking-row .standings-team{
+    gap:7px;
+  }
+
+  #history .historical-ranking-row .standings-team-copy{
+    gap:3px;
+  }
+
+  #history .historical-podium-badges{
+    min-height:16px;
+    justify-content:center;
+    gap:2px;
+    margin-top:5px;
+  }
+
+  #history .historical-podium-badges .standings-mini-badge{
+    width:16px;
+    height:16px;
+    flex-basis:16px;
+    border-radius:5px;
+    font-size:.52rem;
+  }
+
+  #history .historical-podium-badges .standings-mini-more{
+    height:16px;
+    min-width:19px;
+    font-size:.47rem;
+  }
+
+  #history .historical-podium-badges+b{
+    margin-top:5px;
+  }
+}

@@ -1,4 +1,4 @@
-const APP_VERSION='81-20260728';
+const APP_VERSION='82-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1290,7 +1290,7 @@ function historicalPodiumMetric(player,mode){
   return {label:'Palmarés histórico',value:player.titles,unit:player.titles===1?'TÍTULO':'TÍTULOS',decimals:0};
 }
 
-function renderHistoricalPodium(list,mode){
+function renderHistoricalPodium(list,mode,snapshot=buildAchievementSnapshot()){
   const host=$('historicalPodium');
   if(!host)return;
   const order=[1,0,2];
@@ -1303,20 +1303,24 @@ function renderHistoricalPodium(list,mode){
       minimumFractionDigits:metric.decimals,
       maximumFractionDigits:metric.decimals
     });
+    const badges=compactAchievementBadges(player.name,snapshot,{
+      className:'historical-podium-badges'
+    });
     return `<article class="historical-podium-card historical-podium-${rank} team-profile-link" ${profileTriggerAttrs(player.name)}>
       <span class="historical-podium-place">${rank}</span>
       <img src="${imageMap()[player.name]||''}" alt="Foto de ${player.name}">
-      <div><small>${metric.label}</small><strong>${player.name}</strong><b>${value}<span>${metric.unit}</span></b></div>
+      <div><small>${metric.label}</small><strong>${player.name}</strong>${badges}<b>${value}<span>${metric.unit}</span></b></div>
     </article>`;
   }).join('');
 }
 
 function renderGeneral(mode='ranking'){
   const list=sortedGeneral(mode);
-  renderHistoricalPodium(list,mode);
+  const snapshot=buildAchievementSnapshot();
+  renderHistoricalPodium(list,mode,snapshot);
   $('generalRows').innerHTML=list.map((p,i)=>`<div class="general-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
     <span class="pos">${i+1}</span>
-    ${teamCell(p.name)}
+    ${standingsTeamCell(p.name,snapshot)}
     <span class="center history-metric" data-label="Títulos">${p.titles}</span>
     <span class="center history-metric" data-label="2º lugar">${p.seconds}</span>
     <span class="center history-metric" data-label="3º lugar">${p.thirds}</span>
@@ -1329,9 +1333,10 @@ function renderGeneral(mode='ranking'){
 }
 
 function renderPoints(){
+  const snapshot=buildAchievementSnapshot();
   $('pointsRows').innerHTML=DATA.historicalTables.pointsRanking.map((p,i)=>`<div class="points-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
     <span class="pos">${i+1}</span>
-    ${teamCell(p.name)}
+    ${standingsTeamCell(p.name,snapshot)}
     <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
     <span class="num history-metric history-metric-featured" data-label="Puntos">${p.points.toLocaleString('es')}</span>
     <span class="num history-metric" data-label="Promedio">${p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</span>
@@ -1339,9 +1344,10 @@ function renderPoints(){
 }
 
 function renderPalmares(){
+  const snapshot=buildAchievementSnapshot();
   $('palmaresRows').innerHTML=DATA.historicalTables.palmaresRanking.map((p,i)=>`<div class="palmares-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
     <span class="pos">${i+1}</span>
-    ${teamCell(p.name)}
+    ${standingsTeamCell(p.name,snapshot)}
     <span class="center history-metric history-metric-featured" data-label="Títulos">${p.titles}</span>
     <span class="center history-metric" data-label="2º lugar">${p.seconds}</span>
     <span class="center history-metric" data-label="3º lugar">${p.thirds}</span>
@@ -1670,21 +1676,27 @@ function sortFeaturedAchievements(items){
   );
 }
 
-function standingsTeamCell(name,snapshot){
+function compactAchievementBadges(name,snapshot,{limit=3,className=''}={}){
   const badges=sortFeaturedAchievements(
     playerAchievementState(name,snapshot).filter(item=>item.earned)
   );
-  const visible=badges.slice(0,3);
+  if(!badges.length)return '';
+  const visible=badges.slice(0,limit);
   const remaining=badges.length-visible.length;
   const badgeLabel=badges.length===1?'1 insignia conseguida':`${badges.length} insignias conseguidas`;
+  const classes=`standings-mini-badges${className?` ${className}`:''}`;
+  return `<span class="${classes}" aria-label="${badgeLabel}">
+    ${visible.map(item=>`<span class="standings-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
+    ${remaining?`<span class="standings-mini-more" aria-label="${remaining} insignias más">+${remaining}</span>`:''}
+  </span>`;
+}
+
+function standingsTeamCell(name,snapshot){
   return `<div class="team standings-team team-profile-link" ${profileTriggerAttrs(name)}>
     <img src="${imageMap()[name]||''}" alt="Foto de ${profileAttr(name)}">
     <div class="standings-team-copy">
       <span class="name">${name}</span>
-      ${visible.length?`<span class="standings-mini-badges" aria-label="${badgeLabel}">
-        ${visible.map(item=>`<span class="standings-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
-        ${remaining?`<b class="standings-mini-more" aria-label="${remaining} insignias más">+${remaining}</b>`:''}
-      </span>`:''}
+      ${compactAchievementBadges(name,snapshot)}
     </div>
   </div>`;
 }
