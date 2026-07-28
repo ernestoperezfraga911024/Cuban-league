@@ -1,4 +1,4 @@
-const APP_VERSION='79-20260728';
+const APP_VERSION='80-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -562,17 +562,22 @@ function setHistoryHubView(view='historical'){
 }
 
 function applySectionChange(target,selectedHistoryView){
+  const isHome=target==='home';
   document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
   document.querySelectorAll('.navtab').forEach(tab=>tab.classList.remove('active'));
   $(target)?.classList.add('active');
   document.querySelector(`.navtab[data-section="${target}"]`)?.classList.add('active');
+  document.body.dataset.section=target;
+  const hero=document.querySelector('.hero-photo');
+  if(hero){
+    hero.setAttribute('aria-hidden',String(!isHome));
+    hero.inert=!isHome;
+  }
   if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
 }
 
 function scrollToSectionStart(){
-  const main=document.querySelector('main');
-  if(!main)return;
-  window.scrollTo({top:Math.max(0,main.offsetTop-100),behavior:'auto'});
+  window.scrollTo({top:0,behavior:'auto'});
 }
 
 function go(id,historyView){

@@ -1,7 +1,12 @@
-# Cuban League V79
+# Cuban League V80
 
 Sitio oficial de la Cuban League con:
 
+- Navegación por vistas completas: Inicio es la portada inicial y al abrir
+  Clasificación, Jornadas, Participantes o cualquier otro apartado, la portada
+  se oculta y la sección elegida comienza desde arriba en móvil y escritorio.
+- Una sola fotografía de estadio recorre el fondo de toda la web para mantener
+  la misma identidad visual en cada apartado, sin cortes ni rayas entre vistas.
 - Experiencia panorámica de escritorio a ancho completo, con márgenes fluidos
   en lugar de una columna central estrecha.
 - Fondos fotográficos de estadio extendidos por todas las secciones públicas,

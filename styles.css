@@ -18206,3 +18206,212 @@ footer{
     padding-top:14px!important;
   }
 }
+
+/* =========================================================
+   V80 — VISTAS COMPLETAS Y UN ÚNICO ESTADIO EN TODA LA WEB
+   ========================================================= */
+html{
+  background:#02080d!important;
+}
+
+body{
+  position:relative;
+  isolation:isolate;
+  min-height:100svh;
+  background-color:transparent!important;
+  background-image:none!important;
+}
+
+body::before{
+  content:""!important;
+  position:fixed!important;
+  z-index:-1!important;
+  inset:0!important;
+  opacity:1!important;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(2,8,13,.58) 0%,rgba(2,9,15,.67) 48%,rgba(2,8,13,.8) 100%),
+    url('bernabeu-bg.jpg') center center/cover no-repeat!important;
+  mask-image:none!important;
+  -webkit-mask-image:none!important;
+}
+
+body[data-section]:not([data-section="home"]) .hero-photo{
+  display:none!important;
+}
+
+.hero-photo{
+  border:0!important;
+  border-bottom:0!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+main{
+  position:relative;
+  z-index:1;
+  border:0!important;
+  background-color:transparent!important;
+  background-image:
+    linear-gradient(180deg,rgba(2,9,15,.16),rgba(2,9,15,.54) 62%,rgba(2,9,15,.72))!important;
+  background-attachment:scroll!important;
+  box-shadow:none!important;
+}
+
+body[data-section="home"] main{
+  background-image:
+    linear-gradient(180deg,rgba(2,9,15,.28),rgba(2,9,15,.62) 70%,rgba(2,9,15,.76))!important;
+}
+
+body[data-section]:not([data-section="home"]) main{
+  min-height:calc(100svh - 144px);
+}
+
+.minimal-page-banner,
+.matchday-banner,
+.season-banner,
+.history-banner,
+.records-banner,
+.champions-banner,
+.regulation-banner,
+.share-card-banner{
+  border:0!important;
+  border-bottom:0!important;
+  border-radius:0!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
+.minimal-page-banner::before,
+.minimal-page-banner::after,
+.matchday-banner::before,
+.matchday-banner::after,
+.season-banner::before,
+.season-banner::after,
+.history-banner::before,
+.history-banner::after,
+.records-banner::before,
+.records-banner::after,
+.champions-banner::before,
+.champions-banner::after,
+.regulation-banner::before,
+.regulation-banner::after,
+.share-card-banner::before,
+.share-card-banner::after{
+  content:none!important;
+}
+
+.page-banner-mark,
+.regulation-banner-mark,
+.share-card-banner-mark{
+  display:none!important;
+}
+
+footer{
+  position:relative;
+  z-index:1;
+  border-top:0!important;
+  background:rgba(2,8,13,.78)!important;
+}
+
+@media(max-width:1023px){
+  body[data-section]:not([data-section="home"]) main{
+    width:100%!important;
+    max-width:none!important;
+    min-height:calc(100svh - 118px);
+    margin:0!important;
+    padding:clamp(26px,6vw,44px) clamp(14px,4vw,26px) 92px!important;
+  }
+
+  body[data-section]:not([data-section="home"]) .page.active{
+    min-height:calc(100svh - 190px);
+  }
+
+  .minimal-page-banner,
+  .matchday-banner,
+  .season-banner,
+  .history-banner,
+  .records-banner,
+  .champions-banner,
+  .regulation-banner,
+  .share-card-banner{
+    min-height:auto!important;
+    align-items:flex-end!important;
+    overflow:visible!important;
+    margin:0 0 30px!important;
+    padding:clamp(30px,7vw,48px) 0 26px!important;
+  }
+
+  .minimal-page-banner>div,
+  .matchday-banner>div,
+  .season-banner>div,
+  .history-banner>div,
+  .records-banner>div,
+  .champions-banner>div,
+  .regulation-banner-copy,
+  .share-card-banner>div{
+    width:100%;
+    max-width:none!important;
+  }
+
+  .minimal-page-banner h2,
+  .matchday-banner h2,
+  .season-banner h2,
+  .history-banner h2,
+  .records-banner h2,
+  .champions-banner h2,
+  .regulation-banner h2,
+  .share-card-banner h2{
+    max-width:780px!important;
+    margin:9px 0 13px!important;
+    font-size:clamp(2.35rem,9.8vw,4.25rem)!important;
+    line-height:.98!important;
+    text-shadow:0 13px 35px rgba(0,0,0,.46);
+  }
+
+  .minimal-page-banner p,
+  .matchday-banner p,
+  .season-banner p,
+  .history-banner p,
+  .records-banner p,
+  .champions-banner p,
+  .regulation-banner p,
+  .share-card-banner p{
+    max-width:660px!important;
+    color:#b1c1c6!important;
+    font-size:.87rem!important;
+    line-height:1.6!important;
+  }
+}
+
+@media(max-width:700px){
+  body::before{
+    background:
+      linear-gradient(180deg,rgba(2,8,13,.6) 0%,rgba(2,9,15,.72) 55%,rgba(2,8,13,.84) 100%),
+      url('bernabeu-bg.jpg') 56% center/cover no-repeat!important;
+  }
+
+  .hero-photo .shade{
+    background:
+      linear-gradient(90deg,rgba(2,9,15,.91),rgba(2,9,15,.63) 72%,rgba(2,9,15,.48)),
+      linear-gradient(0deg,rgba(2,9,15,.84),transparent 48%,rgba(2,9,15,.2))!important;
+  }
+
+  body[data-section]:not([data-section="home"]) main{
+    min-height:calc(100svh - 118px);
+    padding-top:18px!important;
+  }
+
+  .minimal-page-banner,
+  .matchday-banner,
+  .season-banner,
+  .history-banner,
+  .records-banner,
+  .champions-banner,
+  .regulation-banner,
+  .share-card-banner{
+    padding-top:25px!important;
+  }
+}
