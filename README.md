@@ -1,4 +1,4 @@
-# Cuban League V83
+# Cuban League V84
 
 Sitio oficial de la Cuban League con:
 
@@ -142,12 +142,13 @@ Sitio oficial de la Cuban League con:
   reducido del dispositivo.
 - Los puntos, récords y estadísticas aparecen directamente con su valor final,
   sin animaciones de conteo.
-- El perfil de Victor Manuel estrena “Legado del Míster”: estrellas por
-  temporada, Los Intocables y un análisis transparente de continuidad,
-  rotación y renovación de referentes.
-- La Carta ADN de Victor Manuel resume su estilo de gestión y permite consultar
-  qué significa cada indicador, cómo se calcula y las temporadas que mejor
-  representan su continuidad y su rotación.
+- El perfil de Victor Manuel incorpora “La Pizarra del Míster” como un panel
+  plegable, cerrado por defecto para no alargar el perfil. Se abre y se oculta
+  con un solo botón tanto en móvil como en PC.
+- La pizarra usa términos futbolísticos y métricas explicadas: continuidad de
+  la columna vertebral, rotación del núcleo, peso de la figura y equilibrio por
+  líneas. Incluye Los Intocables, claves del ciclo y una pizarra de PT, DF, MC
+  y DL para cada temporada, sin comparar jugadores entre campañas.
 - En PC, las tarjetas destacadas mantienen su posición al pasar el mouse, sin
   inclinación, desplazamiento, reflejo ni foco de luz.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
