@@ -1,4 +1,4 @@
-const APP_VERSION='71-20260728';
+const APP_VERSION='72-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -15,6 +15,10 @@ const MOTION_CARD_SELECTOR=[
   '.record-entry',
   '.achievement-catalog-card.is-unlocked',
   '.profile-achievement-card.is-earned',
+  '.manager-legacy-strategy-card',
+  '.manager-legacy-trust-card',
+  '.manager-legacy-mvp-card',
+  '.manager-legacy-position-card',
   '.news-card',
   '.champions-group',
   '.champions-defending-card',
@@ -1861,6 +1865,268 @@ function profileMetrics(name){
   const historicalRank=sortedGeneral('ranking').findIndex(x=>x.name===name)+1;
   return {history:h,first,second,best,worst,avgPos,bestPoints,historicalRank:historicalRank||null,current:currentStanding(name)};
 }
+
+const MANAGER_LEGACY_POSITIONS={
+  DL:{label:'Delantero',short:'DL'},
+  MC:{label:'Mediocampista',short:'MC'},
+  DF:{label:'Defensa',short:'DF'},
+  PT:{label:'Portero',short:'PT'}
+};
+
+function managerLegacyRecord(name){
+  return DATA.managerLegacies?.[name]||null;
+}
+
+function managerLegacyInitials(name){
+  return String(name||'')
+    .trim()
+    .split(/\s+/)
+    .slice(0,2)
+    .map(part=>part[0]||'')
+    .join('')
+    .toUpperCase();
+}
+
+function managerLegacySeasonMetrics(record,season){
+  const expected=season.expectedMatchdays||record.expectedMatchdays||38;
+  const players=season.standouts||[];
+  const averageLineups=players.length
+    ?players.reduce((sum,player)=>sum+(player.lineups||0),0)/players.length
+    :0;
+  const continuity=Math.max(0,Math.min(100,Math.round((averageLineups/expected)*100)));
+  const rotation=100-continuity;
+  const style=continuity>=72
+    ?'Muy conservador'
+    :continuity>=60
+      ?'Conservador'
+      :continuity>=48
+        ?'Equilibrado'
+        :continuity>=36
+          ?'Rotador'
+          :'Muy rotador';
+  return {expected,averageLineups,continuity,rotation,style};
+}
+
+function managerLegacyMetrics(record){
+  const seasons=(record.seasons||[]).map(season=>({
+    season,
+    metrics:managerLegacySeasonMetrics(record,season)
+  }));
+  const averageLineups=seasons.length
+    ?seasons.reduce((sum,item)=>sum+item.metrics.averageLineups,0)/seasons.length
+    :0;
+  const averageExpected=seasons.length
+    ?seasons.reduce((sum,item)=>sum+item.metrics.expected,0)/seasons.length
+    :0;
+  const continuity=seasons.length
+    ?Math.round((averageLineups/averageExpected)*100)
+    :0;
+  const rotation=100-continuity;
+  const playerTotals=new Map();
+  seasons.forEach(({season})=>{
+    (season.standouts||[]).forEach(player=>{
+      const current=playerTotals.get(player.name)||{
+        name:player.name,
+        lineups:0,
+        points:0,
+        seasons:new Set(),
+        roles:new Set()
+      };
+      current.lineups+=player.lineups||0;
+      current.points+=player.points||0;
+      current.seasons.add(season.season);
+      current.roles.add(player.role);
+      playerTotals.set(player.name,current);
+    });
+  });
+  const trusted=[...playerTotals.values()]
+    .sort((a,b)=>b.lineups-a.lineups||b.points-a.points||a.name.localeCompare(b.name,'es'))
+    .slice(0,3);
+  let retained=0;
+  let comparable=0;
+  for(let index=1;index<seasons.length;index++){
+    const previous=new Set((seasons[index-1].season.standouts||[]).map(player=>player.name));
+    const current=new Set((seasons[index].season.standouts||[]).map(player=>player.name));
+    comparable+=Math.min(previous.size,current.size);
+    current.forEach(name=>{if(previous.has(name))retained++});
+  }
+  const retention=comparable?Math.round((retained/comparable)*100):0;
+  const mostStable=[...seasons].sort((a,b)=>b.metrics.continuity-a.metrics.continuity)[0]||null;
+  const mostRotating=[...seasons].sort((a,b)=>a.metrics.continuity-b.metrics.continuity)[0]||null;
+  const continuityStyle=continuity>=60?'Núcleo estable':continuity>=48?'Equilibrio':'Rotación frecuente';
+  const retentionStyle=retention>=50?'retención alta':retention>=25?'renovación selectiva':'renovación anual';
+  return {
+    averageLineups,
+    continuity,
+    rotation,
+    retention,
+    trusted,
+    mostStable,
+    mostRotating,
+    title:`${continuityStyle} con ${retentionStyle}`
+  };
+}
+
+function managerLegacyResult(name,season){
+  const historical=getPlayerHistory(name).find(entry=>entry.season===season);
+  if(!historical)return {result:'Sin dato',points:null};
+  return {
+    result:historical.division===1?ordinal(historical.position):historyResult(historical),
+    points:historical.points
+  };
+}
+
+function managerLegacySeasonMarkup(name,record,season){
+  const metrics=managerLegacySeasonMetrics(record,season);
+  const result=managerLegacyResult(name,season.season);
+  const mvp=season.mvp||{};
+  const mvpPosition=MANAGER_LEGACY_POSITIONS[mvp.role]?.label||'Jugador';
+  const mvpAverage=mvp.lineups?mvp.points/mvp.lineups:0;
+  return `<div class="manager-legacy-season-head">
+      <div>
+        <span class="eyebrow">TEMPORADA ${season.season}</span>
+        <h4>Los pilares de ${name}</h4>
+      </div>
+      <div class="manager-legacy-season-result">
+        <span>Resultado del equipo</span>
+        <b>${result.result}</b>
+        <small>${result.points!=null?`${result.points.toLocaleString()} puntos`:'Sin puntuación registrada'}</small>
+      </div>
+    </div>
+    <div class="manager-legacy-season-layout">
+      <article class="manager-legacy-mvp-card">
+        <div class="manager-legacy-card-top">
+          <span class="manager-legacy-award">MVP</span>
+          <span class="manager-legacy-role">${mvpPosition}</span>
+        </div>
+        <div class="manager-legacy-player">
+          <span class="manager-legacy-player-token" aria-hidden="true">${managerLegacyInitials(mvp.name)}</span>
+          <div><small>Figura de la temporada</small><h4>${mvp.name}</h4></div>
+        </div>
+        <div class="manager-legacy-player-metrics">
+          <div><b>${mvp.points}</b><span>puntos</span></div>
+          <div><b>${mvp.lineups}</b><span>alineaciones</span></div>
+          <div><b>${mvpAverage.toFixed(1)}</b><span>pts/alineación</span></div>
+        </div>
+      </article>
+      <aside class="manager-legacy-season-strategy">
+        <span class="eyebrow">ESTILO DE ESA TEMPORADA</span>
+        <h4>${metrics.style}</h4>
+        <p>El núcleo destacado promedió <b>${metrics.averageLineups.toFixed(1)}</b> alineaciones sobre ${metrics.expected} jornadas.</p>
+        <div class="manager-legacy-scale" style="--legacy-continuity:${metrics.continuity}%">
+          <span>Más rotación</span><span>Más conservación</span><i aria-hidden="true"></i>
+        </div>
+        <div class="manager-legacy-season-index">
+          <div><b>${metrics.continuity}%</b><span>continuidad</span></div>
+          <div><b>${metrics.rotation}%</b><span>rotación estimada</span></div>
+        </div>
+      </aside>
+    </div>
+    <div class="manager-legacy-position-grid">
+      ${(season.standouts||[]).map(player=>{
+        const position=MANAGER_LEGACY_POSITIONS[player.role]||{label:player.role,short:player.role};
+        const average=player.lineups?player.points/player.lineups:0;
+        const isMvp=player.name===mvp.name;
+        return `<article class="manager-legacy-position-card${isMvp?' is-mvp':''}">
+          <div class="manager-legacy-position-card-top">
+            <span class="manager-legacy-position-badge">${position.short}</span>
+            <span>${isMvp?'TAMBIÉN MVP':`MEJOR ${position.label.toUpperCase()}`}</span>
+          </div>
+          <div class="manager-legacy-position-player">
+            <span aria-hidden="true">${managerLegacyInitials(player.name)}</span>
+            <h5>${player.name}</h5>
+          </div>
+          <div class="manager-legacy-position-stats">
+            <b>${player.points} pts</b>
+            <span>${player.lineups} alineaciones · ${average.toFixed(1)} por aparición</span>
+          </div>
+        </article>`;
+      }).join('')}
+    </div>`;
+}
+
+function managerLegacyMarkup(name){
+  const record=managerLegacyRecord(name);
+  if(!record?.seasons?.length)return '';
+  const metrics=managerLegacyMetrics(record);
+  const selected=record.seasons[record.seasons.length-1];
+  const stable=metrics.mostStable;
+  const rotating=metrics.mostRotating;
+  return `<section class="profile-section manager-legacy-section" data-manager-legacy-name="${profileAttr(name)}">
+    <div class="profile-section-head manager-legacy-heading">
+      <div>
+        <span class="eyebrow">LEGADO DEL MÍSTER</span>
+        <h3>Estrellas e identidad de plantilla</h3>
+        <p>Los futbolistas que sostuvieron cada temporada y lo que sus alineaciones revelan sobre la estrategia de ${name}.</p>
+      </div>
+      <span class="manager-legacy-season-count">${record.seasons.length} temporadas</span>
+    </div>
+
+    <div class="manager-legacy-overview">
+      <article class="manager-legacy-strategy-card">
+        <div>
+          <span class="eyebrow">IDENTIDAD HISTÓRICA</span>
+          <h4>${metrics.title}</h4>
+          <p>Confía en un núcleo durante la temporada, pero sus cuatro referentes por posición cambian entre las temporadas documentadas.</p>
+        </div>
+        <div class="manager-legacy-strategy-score">
+          <div><b>${metrics.continuity}%</b><span>continuidad del núcleo</span></div>
+          <div><b>${metrics.rotation}%</b><span>rotación estimada</span></div>
+          <div><b>${metrics.retention}%</b><span>referentes repetidos</span></div>
+        </div>
+        <div class="manager-legacy-scale manager-legacy-scale-historical" style="--legacy-continuity:${metrics.continuity}%">
+          <span>Equipo rotador</span><span>Equipo conservador</span><i aria-hidden="true"></i>
+        </div>
+        <div class="manager-legacy-extremes">
+          <span><small>Mayor continuidad</small><b>${stable?`${stable.season.season.slice(2)} · ${stable.metrics.continuity}%`:'—'}</b></span>
+          <span><small>Mayor rotación</small><b>${rotating?`${rotating.season.season.slice(2)} · ${rotating.metrics.rotation}%`:'—'}</b></span>
+        </div>
+      </article>
+
+      <article class="manager-legacy-trust-card">
+        <div><span class="eyebrow">LOS INTOCABLES</span><h4>Mayor confianza en una temporada</h4></div>
+        <div class="manager-legacy-trust-list">
+          ${metrics.trusted.map((player,index)=>`<div>
+            <span class="manager-legacy-trust-rank">${index+1}</span>
+            <span class="manager-legacy-trust-token" aria-hidden="true">${managerLegacyInitials(player.name)}</span>
+            <span><b>${player.name}</b><small>${[...player.roles].map(role=>MANAGER_LEGACY_POSITIONS[role]?.short||role).join(' · ')}</small></span>
+            <strong>${player.lineups}<small>alineaciones</small></strong>
+          </div>`).join('')}
+        </div>
+        <p class="manager-legacy-renewal-note"><b>Renovación total de referentes:</b> ninguno de los líderes por posición se repite entre las temporadas documentadas.</p>
+      </article>
+    </div>
+
+    <div class="manager-legacy-season-nav">
+      <div><span class="eyebrow">ARCHIVO DE ESTRELLAS</span><h4>Elige una temporada</h4></div>
+      <div class="manager-legacy-tabs" role="tablist" aria-label="Temporadas destacadas de ${name}">
+        ${record.seasons.map(season=>`<button type="button" class="manager-legacy-season-tab${season.season===selected.season?' is-active':''}" role="tab" aria-selected="${season.season===selected.season?'true':'false'}" data-manager-legacy-season="${season.season}" data-manager-legacy-manager="${profileAttr(name)}">${season.season.slice(2)}</button>`).join('')}
+      </div>
+    </div>
+    <div id="managerLegacyDetail" class="manager-legacy-detail" role="tabpanel" aria-live="polite">
+      ${managerLegacySeasonMarkup(name,record,selected)}
+    </div>
+    <p class="manager-legacy-method"><b>Cómo se calcula:</b> la continuidad estima el promedio de alineaciones de los mejores PT, DF, MC y DL sobre 38 jornadas. La retención compara si esos referentes se mantienen entre temporadas documentadas. Describe el núcleo destacado, no toda la plantilla.</p>
+  </section>`;
+}
+
+function selectManagerLegacySeason(name,seasonName){
+  const record=managerLegacyRecord(name);
+  const season=record?.seasons?.find(item=>item.season===seasonName);
+  const host=$('managerLegacyDetail');
+  if(!record||!season||!host)return;
+  document.querySelectorAll('[data-manager-legacy-season]').forEach(button=>{
+    const active=button.dataset.managerLegacySeason===seasonName;
+    button.classList.toggle('is-active',active);
+    button.setAttribute('aria-selected',active?'true':'false');
+  });
+  host.classList.remove('is-changing');
+  void host.offsetWidth;
+  host.innerHTML=managerLegacySeasonMarkup(name,record,season);
+  host.classList.add('is-changing');
+  enhanceThreeDimensionalCards(host);
+}
+
 function historyResult(entry){
   if(entry.division===1&&entry.position===1)return 'Campeón';
   if(entry.division===1)return ordinal(entry.position);
@@ -1963,6 +2229,8 @@ function openPlayer(name){
       <article><b>${s.podiums||0}</b><span>Podios</span></article>
       <article><b>${s.points?.toLocaleString()||0}</b><span>Puntos históricos</span></article>
     </section>
+
+    ${managerLegacyMarkup(name)}
 
     <section class="profile-section profile-achievements-section">
       <div class="profile-section-head achievement-profile-head">
@@ -3033,6 +3301,11 @@ async function init(){
     const route=e.target.closest('[data-go]');
     if(route){
       go(route.dataset.go,route.dataset.historyView);
+      return;
+    }
+    const legacySeason=e.target.closest('[data-manager-legacy-season]');
+    if(legacySeason){
+      selectManagerLegacySeason(legacySeason.dataset.managerLegacyManager,legacySeason.dataset.managerLegacySeason);
       return;
     }
     const team=e.target.closest('[data-profile-player]');

@@ -15561,7 +15561,897 @@ footer{
   translate:4px 0;
 }
 
+/* =========================================================
+   V72 — LEGADO DEL MÍSTER Y ESTRATEGIA DE PLANTILLA
+   ========================================================= */
+@keyframes managerLegacyReveal{
+  from{
+    opacity:0;
+    translate:0 12px;
+    filter:blur(3px);
+  }
+  to{
+    opacity:1;
+    translate:0 0;
+    filter:blur(0);
+  }
+}
+
+.manager-legacy-section{
+  position:relative;
+  overflow:hidden;
+  padding:22px;
+  border:1px solid rgba(80,234,220,.16);
+  border-radius:25px;
+  background:
+    radial-gradient(circle at 95% 0,rgba(77,120,255,.14),transparent 21rem),
+    radial-gradient(circle at 0 38%,rgba(80,234,220,.08),transparent 20rem),
+    linear-gradient(150deg,rgba(8,25,41,.98),rgba(4,15,27,.98));
+  box-shadow:0 24px 70px rgba(0,0,0,.26),var(--ring);
+}
+
+.manager-legacy-section::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,black,transparent 74%);
+}
+
+.manager-legacy-section>*{
+  position:relative;
+  z-index:1;
+}
+
+.manager-legacy-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:17px;
+}
+
+.manager-legacy-heading h3{
+  margin-bottom:7px;
+}
+
+.manager-legacy-heading p{
+  max-width:650px;
+  margin:0;
+  color:#91aabc;
+  font-size:.82rem;
+  line-height:1.5;
+}
+
+.manager-legacy-season-count{
+  flex:0 0 auto;
+  padding:8px 11px;
+  border:1px solid rgba(80,234,220,.22);
+  border-radius:999px;
+  color:#6ef0e4;
+  background:rgba(80,234,220,.07);
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+
+.manager-legacy-overview{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(290px,.85fr);
+  gap:12px;
+}
+
+.manager-legacy-strategy-card,
+.manager-legacy-trust-card,
+.manager-legacy-mvp-card,
+.manager-legacy-position-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(145deg,rgba(16,38,59,.94),rgba(6,19,32,.96));
+  box-shadow:inset 0 1px rgba(255,255,255,.025);
+}
+
+.manager-legacy-strategy-card{
+  min-height:290px;
+  padding:21px;
+  border-color:rgba(80,234,220,.17);
+  border-radius:21px;
+}
+
+.manager-legacy-strategy-card::after{
+  content:"";
+  position:absolute;
+  top:-70px;
+  right:-55px;
+  width:190px;
+  height:190px;
+  border:1px solid rgba(80,234,220,.10);
+  border-radius:50%;
+  box-shadow:0 0 0 26px rgba(80,234,220,.025),0 0 0 54px rgba(80,234,220,.018);
+}
+
+.manager-legacy-strategy-card h4,
+.manager-legacy-trust-card h4{
+  position:relative;
+  z-index:1;
+  margin:7px 0 8px;
+  color:#f5fbff;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.35rem;
+  letter-spacing:-.035em;
+  line-height:1.08;
+}
+
+.manager-legacy-strategy-card>div>p{
+  position:relative;
+  z-index:1;
+  max-width:530px;
+  margin:0;
+  color:#91aabc;
+  font-size:.78rem;
+  line-height:1.5;
+}
+
+.manager-legacy-strategy-score{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:18px 0 15px;
+}
+
+.manager-legacy-strategy-score>div{
+  min-width:0;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;
+  background:rgba(255,255,255,.025);
+}
+
+.manager-legacy-strategy-score b,
+.manager-legacy-strategy-score span{
+  display:block;
+}
+
+.manager-legacy-strategy-score b{
+  color:#f6ce6b;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.35rem;
+  letter-spacing:-.04em;
+}
+
+.manager-legacy-strategy-score span{
+  margin-top:3px;
+  color:#83a0b4;
+  font-size:.61rem;
+  font-weight:800;
+  line-height:1.25;
+  text-transform:uppercase;
+}
+
+.manager-legacy-scale{
+  --legacy-continuity:50%;
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  min-height:35px;
+  padding-top:17px;
+  color:#7893a8;
+  font-size:.58rem;
+  font-weight:850;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+.manager-legacy-scale::before{
+  content:"";
+  position:absolute;
+  top:5px;
+  right:0;
+  left:0;
+  height:6px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#8171f3 0%,#4f9edc 40%,#50eadc 68%,#f5c95c 100%);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.38);
+}
+
+.manager-legacy-scale i{
+  position:absolute;
+  top:0;
+  left:clamp(7px,var(--legacy-continuity),calc(100% - 7px));
+  width:16px;
+  height:16px;
+  border:3px solid #071522;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 2px rgba(255,255,255,.22),0 4px 12px rgba(0,0,0,.36);
+  translate:-50% 0;
+}
+
+.manager-legacy-extremes{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:8px;
+}
+
+.manager-legacy-extremes span{
+  min-width:0;
+}
+
+.manager-legacy-extremes small,
+.manager-legacy-extremes b{
+  display:block;
+}
+
+.manager-legacy-extremes small{
+  color:#718ca1;
+  font-size:.59rem;
+  font-weight:750;
+  text-transform:uppercase;
+}
+
+.manager-legacy-extremes b{
+  margin-top:3px;
+  color:#dceaf4;
+  font-size:.75rem;
+}
+
+.manager-legacy-trust-card{
+  min-height:290px;
+  padding:19px;
+  border-radius:21px;
+}
+
+.manager-legacy-trust-list{
+  display:grid;
+  gap:7px;
+  margin-top:13px;
+}
+
+.manager-legacy-trust-list>div{
+  display:grid;
+  grid-template-columns:22px 38px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:8px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+}
+
+.manager-legacy-trust-rank{
+  color:#f6ce6b;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.8rem;
+  font-weight:900;
+  text-align:center;
+}
+
+.manager-legacy-trust-token,
+.manager-legacy-player-token,
+.manager-legacy-position-player>span{
+  display:grid;
+  flex:0 0 auto;
+  place-items:center;
+  border:1px solid rgba(80,234,220,.20);
+  color:#8ff8ed;
+  background:
+    radial-gradient(circle at 30% 20%,rgba(255,255,255,.10),transparent 50%),
+    linear-gradient(145deg,rgba(40,94,112,.7),rgba(14,42,61,.92));
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-weight:900;
+  letter-spacing:-.04em;
+}
+
+.manager-legacy-trust-token{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  font-size:.67rem;
+}
+
+.manager-legacy-trust-list b,
+.manager-legacy-trust-list small,
+.manager-legacy-trust-list strong{
+  display:block;
+}
+
+.manager-legacy-trust-list b{
+  overflow:hidden;
+  color:#eef7fd;
+  font-size:.73rem;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.manager-legacy-trust-list small{
+  margin-top:2px;
+  color:#7895aa;
+  font-size:.57rem;
+  font-weight:800;
+}
+
+.manager-legacy-trust-list strong{
+  color:#f6ce6b;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1rem;
+  text-align:right;
+}
+
+.manager-legacy-trust-list strong small{
+  color:#718da2;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:.52rem;
+  font-weight:750;
+  text-transform:uppercase;
+}
+
+.manager-legacy-renewal-note{
+  margin:12px 1px 0;
+  color:#84a0b4;
+  font-size:.65rem;
+  line-height:1.4;
+}
+
+.manager-legacy-renewal-note b{
+  color:#7af1e6;
+}
+
+.manager-legacy-season-nav{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin-top:22px;
+}
+
+.manager-legacy-season-nav h4{
+  margin:4px 0 0;
+  color:#eef7fd;
+  font-size:1rem;
+}
+
+.manager-legacy-tabs{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  max-width:66%;
+  padding:3px 1px 7px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(80,234,220,.26) transparent;
+}
+
+.manager-legacy-season-tab{
+  flex:0 0 auto;
+  min-height:36px;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:11px;
+  color:#8da6b9;
+  background:rgba(255,255,255,.035);
+  font-size:.69rem;
+  font-weight:900;
+}
+
+.manager-legacy-season-tab:hover{
+  color:#dffbf7;
+  border-color:rgba(80,234,220,.24);
+}
+
+.manager-legacy-season-tab.is-active{
+  border-color:rgba(80,234,220,.56);
+  color:#071b24;
+  background:#64eadf;
+  box-shadow:0 8px 24px rgba(80,234,220,.14);
+}
+
+.manager-legacy-detail{
+  margin-top:11px;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:21px;
+  background:rgba(3,14,25,.5);
+}
+
+.manager-legacy-detail.is-changing{
+  animation:managerLegacyReveal .38s cubic-bezier(.2,.78,.24,1) both;
+}
+
+.manager-legacy-season-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:13px;
+}
+
+.manager-legacy-season-head h4{
+  margin:5px 0 0;
+  color:#f2f8fc;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.35rem;
+  letter-spacing:-.035em;
+}
+
+.manager-legacy-season-result{
+  text-align:right;
+}
+
+.manager-legacy-season-result span,
+.manager-legacy-season-result b,
+.manager-legacy-season-result small{
+  display:block;
+}
+
+.manager-legacy-season-result span,
+.manager-legacy-season-result small{
+  color:#7895aa;
+  font-size:.6rem;
+  font-weight:750;
+}
+
+.manager-legacy-season-result b{
+  margin:2px 0;
+  color:#f6ce6b;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.25rem;
+}
+
+.manager-legacy-season-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(245px,.65fr);
+  gap:10px;
+}
+
+.manager-legacy-mvp-card{
+  min-height:210px;
+  padding:18px;
+  border-color:rgba(245,201,92,.25);
+  border-radius:19px;
+  background:
+    radial-gradient(circle at 95% 0,rgba(245,201,92,.17),transparent 13rem),
+    linear-gradient(145deg,rgba(39,38,29,.95),rgba(9,24,36,.96));
+}
+
+.manager-legacy-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.manager-legacy-award{
+  padding:6px 9px;
+  border:1px solid rgba(245,201,92,.36);
+  border-radius:999px;
+  color:#ffe08a;
+  background:rgba(245,201,92,.10);
+  font-size:.62rem;
+  font-weight:950;
+  letter-spacing:.12em;
+}
+
+.manager-legacy-role{
+  color:#9db0bd;
+  font-size:.62rem;
+  font-weight:850;
+  text-transform:uppercase;
+}
+
+.manager-legacy-player{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin:17px 0;
+}
+
+.manager-legacy-player-token{
+  width:58px;
+  height:58px;
+  border-color:rgba(245,201,92,.28);
+  border-radius:18px;
+  color:#ffe394;
+  background:
+    radial-gradient(circle at 30% 20%,rgba(255,255,255,.14),transparent 48%),
+    linear-gradient(145deg,rgba(111,91,39,.82),rgba(28,42,51,.94));
+  font-size:1rem;
+}
+
+.manager-legacy-player small{
+  color:#8fa6b8;
+  font-size:.62rem;
+  font-weight:750;
+  text-transform:uppercase;
+}
+
+.manager-legacy-player h4{
+  margin:4px 0 0;
+  color:#fff7da;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.45rem;
+  letter-spacing:-.04em;
+}
+
+.manager-legacy-player-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.manager-legacy-player-metrics>div{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+
+.manager-legacy-player-metrics b,
+.manager-legacy-player-metrics span{
+  display:block;
+}
+
+.manager-legacy-player-metrics b{
+  color:#f5cf68;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.15rem;
+}
+
+.manager-legacy-player-metrics span{
+  margin-top:2px;
+  color:#7f99ad;
+  font-size:.56rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.manager-legacy-season-strategy{
+  padding:18px;
+  border:1px solid rgba(80,234,220,.13);
+  border-radius:19px;
+  background:
+    radial-gradient(circle at 90% 0,rgba(80,234,220,.11),transparent 10rem),
+    rgba(8,26,41,.88);
+}
+
+.manager-legacy-season-strategy h4{
+  margin:7px 0 8px;
+  color:#7bf2e7;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.25rem;
+}
+
+.manager-legacy-season-strategy p{
+  margin:0 0 13px;
+  color:#8da6b9;
+  font-size:.69rem;
+  line-height:1.45;
+}
+
+.manager-legacy-season-strategy p b{
+  color:#e9f7fb;
+}
+
+.manager-legacy-season-index{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:9px;
+}
+
+.manager-legacy-season-index>div{
+  padding:9px;
+  border-radius:11px;
+  background:rgba(255,255,255,.035);
+}
+
+.manager-legacy-season-index b,
+.manager-legacy-season-index span{
+  display:block;
+}
+
+.manager-legacy-season-index b{
+  color:#f6ce6b;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1rem;
+}
+
+.manager-legacy-season-index span{
+  color:#7590a5;
+  font-size:.53rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.manager-legacy-position-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin-top:9px;
+}
+
+.manager-legacy-position-card{
+  min-width:0;
+  min-height:166px;
+  padding:12px;
+  border-radius:16px;
+}
+
+.manager-legacy-position-card.is-mvp{
+  border-color:rgba(245,201,92,.26);
+  background:
+    radial-gradient(circle at 100% 0,rgba(245,201,92,.10),transparent 8rem),
+    linear-gradient(145deg,rgba(31,37,38,.96),rgba(6,19,32,.96));
+}
+
+.manager-legacy-position-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:5px;
+  color:#7994a8;
+  font-size:.48rem;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.manager-legacy-position-badge{
+  display:grid;
+  width:30px;
+  height:30px;
+  place-items:center;
+  border:1px solid rgba(80,234,220,.24);
+  border-radius:9px;
+  color:#76f0e5;
+  background:rgba(80,234,220,.07);
+  font-size:.59rem;
+}
+
+.manager-legacy-position-card.is-mvp .manager-legacy-position-badge{
+  border-color:rgba(245,201,92,.30);
+  color:#f6ce6b;
+  background:rgba(245,201,92,.08);
+}
+
+.manager-legacy-position-player{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:13px 0 11px;
+}
+
+.manager-legacy-position-player>span{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  font-size:.65rem;
+}
+
+.manager-legacy-position-player h5{
+  min-width:0;
+  margin:0;
+  color:#eef6fb;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.8rem;
+  line-height:1.12;
+}
+
+.manager-legacy-position-stats b,
+.manager-legacy-position-stats span{
+  display:block;
+}
+
+.manager-legacy-position-stats b{
+  color:#f4cd67;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.84rem;
+}
+
+.manager-legacy-position-stats span{
+  margin-top:3px;
+  color:#7590a5;
+  font-size:.56rem;
+  line-height:1.3;
+}
+
+.manager-legacy-method{
+  margin:12px 2px 0;
+  color:#718b9e;
+  font-size:.61rem;
+  line-height:1.5;
+}
+
+.manager-legacy-method b{
+  color:#95afc1;
+}
+
+@media(max-width:850px){
+  .manager-legacy-overview,
+  .manager-legacy-season-layout{
+    grid-template-columns:1fr;
+  }
+
+  .manager-legacy-trust-card,
+  .manager-legacy-strategy-card{
+    min-height:0;
+  }
+
+  .manager-legacy-position-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
 @media(max-width:700px){
+  .manager-legacy-section{
+    margin-right:-2px;
+    margin-left:-2px;
+    padding:15px 11px;
+    border-radius:21px;
+  }
+
+  .manager-legacy-heading{
+    display:block;
+  }
+
+  .manager-legacy-heading p{
+    font-size:.72rem;
+  }
+
+  .manager-legacy-season-count{
+    display:inline-flex;
+    margin-top:10px;
+  }
+
+  .manager-legacy-strategy-card,
+  .manager-legacy-trust-card{
+    padding:15px;
+    border-radius:17px;
+  }
+
+  .manager-legacy-strategy-card h4,
+  .manager-legacy-trust-card h4{
+    font-size:1.12rem;
+  }
+
+  .manager-legacy-strategy-score{
+    gap:5px;
+    margin:14px 0 12px;
+  }
+
+  .manager-legacy-strategy-score>div{
+    padding:9px 7px;
+  }
+
+  .manager-legacy-strategy-score b{
+    font-size:1.12rem;
+  }
+
+  .manager-legacy-strategy-score span{
+    font-size:.51rem;
+  }
+
+  .manager-legacy-extremes{
+    gap:7px;
+  }
+
+  .manager-legacy-trust-list>div{
+    grid-template-columns:20px 34px minmax(0,1fr) auto;
+    gap:6px;
+    padding:7px 6px;
+  }
+
+  .manager-legacy-trust-token{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+  }
+
+  .manager-legacy-season-nav{
+    display:block;
+    margin-top:18px;
+  }
+
+  .manager-legacy-tabs{
+    max-width:none;
+    margin-top:10px;
+    margin-right:-11px;
+    padding-right:11px;
+  }
+
+  .manager-legacy-detail{
+    padding:13px 9px;
+    border-radius:17px;
+  }
+
+  .manager-legacy-season-head{
+    gap:10px;
+  }
+
+  .manager-legacy-season-head h4{
+    font-size:1.08rem;
+  }
+
+  .manager-legacy-season-result b{
+    font-size:1rem;
+  }
+
+  .manager-legacy-mvp-card,
+  .manager-legacy-season-strategy{
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .manager-legacy-player{
+    margin:14px 0;
+  }
+
+  .manager-legacy-player-token{
+    width:50px;
+    height:50px;
+    border-radius:15px;
+  }
+
+  .manager-legacy-player h4{
+    font-size:1.15rem;
+  }
+
+  .manager-legacy-player-metrics{
+    gap:5px;
+  }
+
+  .manager-legacy-player-metrics>div{
+    padding:8px 6px;
+  }
+
+  .manager-legacy-player-metrics b{
+    font-size:1rem;
+  }
+
+  .manager-legacy-player-metrics span{
+    font-size:.49rem;
+  }
+
+  .manager-legacy-position-grid{
+    gap:6px;
+  }
+
+  .manager-legacy-position-card{
+    min-height:154px;
+    padding:10px;
+    border-radius:14px;
+  }
+
+  .manager-legacy-position-card-top{
+    font-size:.43rem;
+  }
+
+  .manager-legacy-position-player{
+    align-items:flex-start;
+    gap:6px;
+    margin:11px 0 9px;
+  }
+
+  .manager-legacy-position-player>span{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+  }
+
+  .manager-legacy-position-player h5{
+    padding-top:3px;
+    font-size:.71rem;
+  }
+
+  .manager-legacy-method{
+    font-size:.56rem;
+  }
+
   .achievement-unlock-toast{
     top:auto;
     right:14px;
@@ -15591,7 +16481,8 @@ footer{
   .profile-achievement-card.is-earned.is-unlock-reveal::before,
   .profile-achievement-card.is-earned.is-unlock-reveal .profile-achievement-icon,
   .profile-achievements-section.is-unlock-revealing .profile-achievement-progress span,
-  .achievement-unlock-toast.is-visible .achievement-unlock-toast-icon{
+  .achievement-unlock-toast.is-visible .achievement-unlock-toast-icon,
+  .manager-legacy-detail.is-changing{
     animation:none!important;
   }
 }

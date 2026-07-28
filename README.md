@@ -1,4 +1,4 @@
-# Cuban League V71
+# Cuban League V72
 
 Sitio oficial de la Cuban League con:
 
@@ -115,6 +115,9 @@ Sitio oficial de la Cuban League con:
   reducido del dispositivo.
 - Los puntos, récords y estadísticas aparecen directamente con su valor final,
   sin animaciones de conteo.
+- El perfil de Victor Manuel estrena “Legado del Míster”: estrellas por
+  temporada, Los Intocables y un análisis transparente de continuidad,
+  rotación y renovación de referentes.
 - En PC, las tarjetas destacadas reaccionan al movimiento del puntero con una
   profundidad 3D sutil y un reflejo dinámico.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
