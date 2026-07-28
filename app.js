@@ -1,4 +1,4 @@
-const APP_VERSION='77-20260728';
+const APP_VERSION='78-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -923,8 +923,17 @@ function heroKpiPlayerCard({label,player,name=player.name,detail,marker,tone}){
   return `<article class="hero-kpi-live hero-kpi-${tone} team-profile-link" ${profileTriggerAttrs(player.name)}>
     <span class="kpi-marker" aria-hidden="true">${markerContent}</span>
     <span class="kpi-icon kpi-player-photo"><img src="${player.shield}" alt="Foto de ${profileAttr(player.name)}"></span>
-    <div><span>${label}</span><b>${name}</b><small>${detail}</small></div>
+    <div><span>${label}</span><b>${name}</b>${heroKpiScoreMarkup(detail)}</div>
   </article>`;
+}
+
+function heroKpiScoreMarkup(detail){
+  const sections=String(detail).split('·').map(section=>section.trim()).filter(Boolean);
+  const score=sections.shift()||'';
+  const match=score.match(/^([\d.,]+)\s+puntos?\s*(.*)$/i);
+  if(!match)return `<small>${detail}</small>`;
+  const caption=[match[2].trim(),...sections].filter(Boolean).join(' · ');
+  return `<small class="hero-kpi-score"><strong><span>${match[1]}</span> puntos</strong>${caption?`<em>${caption}</em>`:''}</small>`;
 }
 
 function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){

@@ -1,7 +1,18 @@
-# Cuban League V77
+# Cuban League V78
 
 Sitio oficial de la Cuban League con:
 
+- Experiencia panorámica de escritorio a ancho completo, con márgenes fluidos
+  en lugar de una columna central estrecha.
+- Fondos fotográficos de estadio extendidos por todas las secciones públicas,
+  con distintas imágenes según el apartado y capas de contraste para conservar
+  la legibilidad.
+- Portada de PC ampliada con encabezado, navegación y botones más cómodos,
+  además de un podio más fino y editorial donde los puntos son el dato
+  protagonista.
+- Clasificación de PC abierta y espaciosa: el encabezado deja de estar
+  encerrado en una tarjeta, desaparece el icono circular decorativo, las
+  pestañas usan una línea inferior y la tabla aprovecha el ancho de la pantalla.
 - Directorio de participantes con cuatro filas independientes para nombre,
   descripción, puntos e insignias. Las descripciones largas pueden ocupar dos
   líneas completas sin quedar ocultas, y las insignias permanecen siempre en
