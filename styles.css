@@ -16466,6 +16466,693 @@ footer{
   }
 }
 
+/* =========================================================
+   V73 — CARTA ADN DEL MÍSTER
+   ========================================================= */
+.manager-dna-module{
+  display:grid;
+  grid-template-columns:minmax(280px,320px) minmax(0,1fr);
+  align-items:stretch;
+  gap:14px;
+}
+
+.manager-dna-card-face,
+.manager-dna-guide{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 24px 55px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.08);
+}
+
+.manager-dna-card-face{
+  min-height:468px;
+  padding:17px;
+  border-color:rgba(245,201,92,.34);
+  border-radius:29px;
+  background:
+    radial-gradient(circle at 50% 33%,rgba(80,234,220,.19),transparent 12rem),
+    radial-gradient(circle at 100% 0,rgba(245,201,92,.22),transparent 14rem),
+    linear-gradient(155deg,#18334a 0%,#0a2235 42%,#071624 100%);
+  isolation:isolate;
+}
+
+.manager-dna-card-face::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  z-index:-1;
+  border:1px solid rgba(245,201,92,.23);
+  border-radius:23px;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.055),transparent 28%),
+    repeating-linear-gradient(135deg,transparent 0 17px,rgba(255,255,255,.018) 18px 19px);
+}
+
+.manager-dna-card-face::after{
+  content:"";
+  position:absolute;
+  right:-90px;
+  bottom:-100px;
+  z-index:-1;
+  width:250px;
+  height:250px;
+  border:1px solid rgba(80,234,220,.13);
+  border-radius:50%;
+  box-shadow:0 0 0 34px rgba(80,234,220,.025),0 0 0 70px rgba(80,234,220,.018);
+}
+
+.manager-dna-card-brand{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.manager-dna-card-brand span{
+  color:#f7d575;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:.78rem;
+  font-weight:950;
+  letter-spacing:.16em;
+}
+
+.manager-dna-card-brand small{
+  color:#85a7b7;
+  font-size:.53rem;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+
+.manager-dna-card-rating{
+  position:absolute;
+  top:49px;
+  left:19px;
+  z-index:2;
+  text-align:center;
+}
+
+.manager-dna-card-rating b,
+.manager-dna-card-rating span{
+  display:block;
+}
+
+.manager-dna-card-rating b{
+  color:#fff1bb;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:2.6rem;
+  line-height:.92;
+  letter-spacing:-.08em;
+  text-shadow:0 7px 24px rgba(0,0,0,.32);
+}
+
+.manager-dna-card-rating span{
+  margin-top:4px;
+  color:#79f0e4;
+  font-size:.58rem;
+  font-weight:950;
+  letter-spacing:.14em;
+}
+
+.manager-dna-card-portrait{
+  position:relative;
+  display:grid;
+  height:205px;
+  margin:13px 0 0;
+  place-items:center;
+}
+
+.manager-dna-card-portrait::before{
+  content:"";
+  position:absolute;
+  width:182px;
+  height:182px;
+  border:1px solid rgba(245,201,92,.20);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(80,234,220,.15),rgba(8,29,45,.08) 60%,transparent 61%);
+  box-shadow:0 0 0 15px rgba(255,255,255,.018),0 25px 55px rgba(0,0,0,.30);
+}
+
+.manager-dna-card-portrait img{
+  position:relative;
+  z-index:1;
+  width:156px;
+  height:156px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:50%;
+  object-fit:cover;
+  box-shadow:0 18px 40px rgba(0,0,0,.38);
+}
+
+.manager-dna-card-portrait>span{
+  position:absolute;
+  right:50%;
+  bottom:4px;
+  z-index:2;
+  padding:6px 10px;
+  border:1px solid rgba(245,201,92,.28);
+  border-radius:999px;
+  color:#ffe8a2;
+  background:rgba(8,24,36,.88);
+  box-shadow:0 8px 22px rgba(0,0,0,.30);
+  font-size:.52rem;
+  font-weight:950;
+  letter-spacing:.10em;
+  white-space:nowrap;
+  translate:50% 0;
+}
+
+.manager-dna-card-identity{
+  text-align:center;
+}
+
+.manager-dna-card-identity small{
+  color:#76eee3;
+  font-size:.56rem;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.manager-dna-card-identity h4{
+  margin:5px 0 3px;
+  color:#fff5cf;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.42rem;
+  letter-spacing:-.055em;
+  line-height:1;
+  text-transform:uppercase;
+}
+
+.manager-dna-card-identity p{
+  margin:0;
+  color:#9eb4c2;
+  font-size:.63rem;
+  font-weight:750;
+  text-transform:capitalize;
+}
+
+.manager-dna-card-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:5px;
+  margin-top:15px;
+  padding:10px 0;
+  border-top:1px solid rgba(245,201,92,.18);
+  border-bottom:1px solid rgba(245,201,92,.18);
+}
+
+.manager-dna-card-stats>div{
+  min-width:0;
+  text-align:center;
+}
+
+.manager-dna-card-stats>div+div{
+  border-left:1px solid rgba(255,255,255,.075);
+}
+
+.manager-dna-card-stats b,
+.manager-dna-card-stats span{
+  display:block;
+}
+
+.manager-dna-card-stats b{
+  color:#f7d574;
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:1.13rem;
+  letter-spacing:-.045em;
+}
+
+.manager-dna-card-stats span{
+  margin-top:2px;
+  color:#78e9df;
+  font-size:.48rem;
+  font-weight:950;
+  letter-spacing:.10em;
+}
+
+.manager-dna-card-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+}
+
+.manager-dna-card-footer span{
+  color:#809cac;
+  font-size:.54rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.manager-dna-card-footer b{
+  display:grid;
+  width:27px;
+  height:27px;
+  place-items:center;
+  border:1px solid rgba(80,234,220,.20);
+  border-radius:9px;
+  color:#7df0e5;
+  background:rgba(80,234,220,.07);
+  font-size:.55rem;
+}
+
+.manager-dna-guide{
+  min-width:0;
+  padding:21px;
+  border-color:rgba(80,234,220,.15);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(77,120,255,.13),transparent 19rem),
+    linear-gradient(150deg,rgba(13,35,54,.96),rgba(5,18,31,.97));
+}
+
+.manager-dna-guide-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.manager-dna-guide-head h4{
+  margin:5px 0 0;
+  color:#f2f8fc;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1.35rem;
+  letter-spacing:-.04em;
+}
+
+.manager-dna-not-grade{
+  max-width:170px;
+  padding:7px 9px;
+  border:1px solid rgba(245,201,92,.18);
+  border-radius:11px;
+  color:#d5c68e;
+  background:rgba(245,201,92,.055);
+  font-size:.55rem;
+  font-weight:800;
+  line-height:1.3;
+  text-align:right;
+}
+
+.manager-dna-metric-tabs{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  margin:16px 0 10px;
+}
+
+.manager-dna-metric-tab{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:0 7px;
+  min-width:0;
+  min-height:61px;
+  padding:9px;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:13px;
+  color:#8fa8b9;
+  background:rgba(255,255,255,.028);
+  text-align:left;
+}
+
+.manager-dna-metric-tab:hover,
+.manager-dna-metric-tab:focus-visible{
+  border-color:rgba(80,234,220,.28);
+  color:#daf7f4;
+}
+
+.manager-dna-metric-tab.is-active{
+  border-color:rgba(80,234,220,.44);
+  color:#f2fffd;
+  background:linear-gradient(145deg,rgba(80,234,220,.14),rgba(77,120,255,.07));
+  box-shadow:inset 0 0 0 1px rgba(80,234,220,.07),0 8px 22px rgba(0,0,0,.16);
+}
+
+.manager-dna-metric-tab>span{
+  grid-row:1 / 3;
+  display:grid;
+  width:27px;
+  height:27px;
+  place-items:center;
+  border-radius:8px;
+  color:#6feee2;
+  background:rgba(80,234,220,.08);
+  font-size:.52rem;
+  font-weight:950;
+}
+
+.manager-dna-metric-tab>b{
+  color:#f5cf68;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.98rem;
+  line-height:1;
+}
+
+.manager-dna-metric-tab>small{
+  overflow:hidden;
+  font-size:.49rem;
+  font-weight:800;
+  line-height:1.1;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.manager-dna-explanation{
+  min-height:145px;
+  padding:15px;
+  border:1px solid rgba(80,234,220,.12);
+  border-radius:16px;
+  background:rgba(3,16,28,.56);
+}
+
+.manager-dna-explanation.is-changing{
+  animation:managerLegacyReveal .32s cubic-bezier(.2,.78,.24,1) both;
+}
+
+.manager-dna-explanation-heading{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.manager-dna-explanation-heading>span{
+  display:grid;
+  width:38px;
+  height:38px;
+  flex:0 0 auto;
+  place-items:center;
+  border:1px solid rgba(80,234,220,.20);
+  border-radius:12px;
+  color:#7af1e6;
+  background:rgba(80,234,220,.07);
+  font-size:.62rem;
+  font-weight:950;
+}
+
+.manager-dna-explanation-heading small{
+  color:#f6ce6b;
+  font-size:.58rem;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+.manager-dna-explanation-heading h5{
+  margin:3px 0 0;
+  color:#edf7fb;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:1rem;
+}
+
+.manager-dna-explanation>p{
+  margin:11px 0 8px;
+  color:#9ab0c0;
+  font-size:.71rem;
+  line-height:1.5;
+}
+
+.manager-dna-formula{
+  display:block;
+  color:#708b9e;
+  font-size:.59rem;
+  line-height:1.4;
+}
+
+.manager-dna-formula b{
+  color:#91aabb;
+}
+
+.manager-dna-takeaway{
+  margin-top:10px;
+  padding:14px;
+  border:1px solid rgba(245,201,92,.13);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(245,201,92,.08),transparent 10rem),
+    rgba(255,255,255,.018);
+}
+
+.manager-dna-takeaway h5{
+  margin:5px 0 5px;
+  color:#f6d478;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.95rem;
+  text-transform:capitalize;
+}
+
+.manager-dna-takeaway>p{
+  margin:0;
+  color:#8ea6b8;
+  font-size:.66rem;
+  line-height:1.45;
+}
+
+.manager-dna-takeaway-stats{
+  display:flex;
+  gap:18px;
+  margin-top:10px;
+}
+
+.manager-dna-takeaway-stats span{
+  display:flex;
+  align-items:baseline;
+  gap:5px;
+}
+
+.manager-dna-takeaway-stats b{
+  color:#f3cc66;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-size:.92rem;
+}
+
+.manager-dna-takeaway-stats small{
+  color:#708da1;
+  font-size:.52rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.manager-dna-result-clue{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:10px;
+  padding:12px 14px;
+  border-left:3px solid #7b8dff;
+  border-radius:0 13px 13px 0;
+  background:rgba(123,141,255,.055);
+}
+
+.manager-dna-result-clue p{
+  margin:4px 0 0;
+  color:#9eb2c1;
+  font-size:.65rem;
+}
+
+.manager-dna-result-clue p b{
+  color:#e8edff;
+}
+
+.manager-dna-result-clue>small{
+  max-width:155px;
+  color:#758fa3;
+  font-size:.52rem;
+  line-height:1.35;
+  text-align:right;
+}
+
+.manager-dna-season-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:10px;
+}
+
+.manager-dna-season-actions button{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+  min-width:0;
+  padding:10px 11px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  color:#90a8b9;
+  background:rgba(255,255,255,.025);
+  text-align:left;
+}
+
+.manager-dna-season-actions button:hover,
+.manager-dna-season-actions button:focus-visible{
+  border-color:rgba(80,234,220,.27);
+  color:#e4faf7;
+  background:rgba(80,234,220,.055);
+}
+
+.manager-dna-season-actions span{
+  overflow:hidden;
+  font-size:.56rem;
+  font-weight:800;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.manager-dna-season-actions b{
+  flex:0 0 auto;
+  color:#f4cd67;
+  font-size:.59rem;
+}
+
+.manager-legacy-trust-card-wide{
+  min-height:0;
+  margin-top:12px;
+}
+
+.manager-legacy-trust-card-wide .manager-legacy-trust-list{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.manager-legacy-trust-card-wide .manager-legacy-renewal-note{
+  padding-top:9px;
+  border-top:1px solid rgba(255,255,255,.055);
+}
+
+@media(max-width:850px){
+  .manager-dna-module{
+    grid-template-columns:1fr;
+  }
+
+  .manager-dna-card-face{
+    width:100%;
+    max-width:350px;
+    margin:0 auto;
+  }
+
+  .manager-legacy-trust-card-wide .manager-legacy-trust-list{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:700px){
+  .manager-dna-module{
+    gap:10px;
+  }
+
+  .manager-dna-card-face{
+    min-height:446px;
+    padding:15px;
+    border-radius:25px;
+  }
+
+  .manager-dna-card-rating{
+    top:46px;
+    left:17px;
+  }
+
+  .manager-dna-card-rating b{
+    font-size:2.3rem;
+  }
+
+  .manager-dna-card-portrait{
+    height:192px;
+  }
+
+  .manager-dna-card-portrait::before{
+    width:168px;
+    height:168px;
+  }
+
+  .manager-dna-card-portrait img{
+    width:145px;
+    height:145px;
+  }
+
+  .manager-dna-guide{
+    padding:15px 11px;
+    border-radius:19px;
+  }
+
+  .manager-dna-guide-head{
+    display:block;
+  }
+
+  .manager-dna-guide-head h4{
+    font-size:1.14rem;
+  }
+
+  .manager-dna-not-grade{
+    display:inline-flex;
+    max-width:none;
+    margin-top:9px;
+    text-align:left;
+  }
+
+  .manager-dna-metric-tabs{
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+    margin-top:12px;
+  }
+
+  .manager-dna-metric-tab{
+    min-height:57px;
+    padding:8px;
+  }
+
+  .manager-dna-metric-tab>small{
+    white-space:normal;
+  }
+
+  .manager-dna-explanation{
+    min-height:158px;
+    padding:13px;
+  }
+
+  .manager-dna-explanation>p{
+    font-size:.67rem;
+  }
+
+  .manager-dna-takeaway{
+    padding:12px;
+  }
+
+  .manager-dna-takeaway-stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+
+  .manager-dna-takeaway-stats span{
+    display:block;
+  }
+
+  .manager-dna-takeaway-stats small{
+    display:block;
+    margin-top:2px;
+  }
+
+  .manager-dna-result-clue{
+    display:block;
+  }
+
+  .manager-dna-result-clue>small{
+    display:block;
+    max-width:none;
+    margin-top:6px;
+    text-align:left;
+  }
+
+  .manager-dna-season-actions{
+    grid-template-columns:1fr;
+  }
+
+  .manager-legacy-trust-card-wide{
+    margin-top:9px;
+  }
+}
+
 @media(prefers-reduced-motion:reduce){
   .page.active{
     view-transition-name:none;
@@ -16482,7 +17169,8 @@ footer{
   .profile-achievement-card.is-earned.is-unlock-reveal .profile-achievement-icon,
   .profile-achievements-section.is-unlock-revealing .profile-achievement-progress span,
   .achievement-unlock-toast.is-visible .achievement-unlock-toast-icon,
-  .manager-legacy-detail.is-changing{
+  .manager-legacy-detail.is-changing,
+  .manager-dna-explanation.is-changing{
     animation:none!important;
   }
 }

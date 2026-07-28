@@ -1,4 +1,4 @@
-# Cuban League V72
+# Cuban League V73
 
 Sitio oficial de la Cuban League con:
 
@@ -118,6 +118,9 @@ Sitio oficial de la Cuban League con:
 - El perfil de Victor Manuel estrena “Legado del Míster”: estrellas por
   temporada, Los Intocables y un análisis transparente de continuidad,
   rotación y renovación de referentes.
+- La Carta ADN de Victor Manuel resume su estilo de gestión y permite consultar
+  qué significa cada indicador, cómo se calcula y las temporadas que mejor
+  representan su continuidad y su rotación.
 - En PC, las tarjetas destacadas reaccionan al movimiento del puntero con una
   profundidad 3D sutil y un reflejo dinámico.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
