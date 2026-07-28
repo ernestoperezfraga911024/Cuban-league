@@ -1,4 +1,4 @@
-const APP_VERSION='82-20260728';
+const APP_VERSION='83-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1334,7 +1334,8 @@ function renderGeneral(mode='ranking'){
 
 function renderPoints(){
   const snapshot=buildAchievementSnapshot();
-  $('pointsRows').innerHTML=DATA.historicalTables.pointsRanking.map((p,i)=>`<div class="points-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
+  const ranking=[...DATA.historicalTables.pointsRanking].sort((a,b)=>b.points-a.points);
+  $('pointsRows').innerHTML=ranking.map((p,i)=>`<div class="points-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
     <span class="pos">${i+1}</span>
     ${standingsTeamCell(p.name,snapshot)}
     <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
@@ -1345,7 +1346,13 @@ function renderPoints(){
 
 function renderPalmares(){
   const snapshot=buildAchievementSnapshot();
-  $('palmaresRows').innerHTML=DATA.historicalTables.palmaresRanking.map((p,i)=>`<div class="palmares-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
+  const stats=statMap();
+  const ranking=[...DATA.historicalTables.palmaresRanking].sort((a,b)=>
+    b.titles-a.titles
+    ||b.podiums-a.podiums
+    ||(stats[b.name]?.points||0)-(stats[a.name]?.points||0)
+  );
+  $('palmaresRows').innerHTML=ranking.map((p,i)=>`<div class="palmares-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
     <span class="pos">${i+1}</span>
     ${standingsTeamCell(p.name,snapshot)}
     <span class="center history-metric history-metric-featured" data-label="Títulos">${p.titles}</span>

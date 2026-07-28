@@ -1,4 +1,4 @@
-# Cuban League V82
+# Cuban League V83
 
 Sitio oficial de la Cuban League con:
 
@@ -11,6 +11,9 @@ Sitio oficial de la Cuban League con:
   desplazamiento que seguía la posición del cursor.
 - El podio y los rankings de Histórico muestran las insignias reales ganadas
   por cada equipo, con acceso al perfil para consultar la colección completa.
+- El archivo oficial comienza en 2020/21: se eliminaron por completo los datos
+  de 2019/20 y GNT D ZONA figura en Segunda, sin estadísticas de Primera, en
+  2020/21. Totales, promedios, rankings, récords e insignias fueron corregidos.
 - Experiencia panorámica de escritorio a ancho completo, con márgenes fluidos
   en lugar de una columna central estrecha.
 - Fondos fotográficos de estadio extendidos por todas las secciones públicas,

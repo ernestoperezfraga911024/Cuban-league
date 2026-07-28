@@ -7,41 +7,6 @@
       "expectedMatchdays": 38,
       "seasons": [
         {
-          "season": "2019/20",
-          "mvp": {
-            "name": "Dani Parejo",
-            "role": "MC",
-            "points": 137,
-            "lineups": 19
-          },
-          "standouts": [
-            {
-              "role": "DL",
-              "name": "Raúl García",
-              "points": 129,
-              "lineups": 23
-            },
-            {
-              "role": "MC",
-              "name": "Dani Parejo",
-              "points": 137,
-              "lineups": 19
-            },
-            {
-              "role": "DF",
-              "name": "Paulo Oliveira",
-              "points": 59,
-              "lineups": 14
-            },
-            {
-              "role": "PT",
-              "name": "Rubén Blanco",
-              "points": 51,
-              "lineups": 11
-            }
-          ]
-        },
-        {
           "season": "2020/21",
           "mvp": {
             "name": "Ivan Rakitić",
@@ -640,11 +605,11 @@
       "seconds": 1,
       "thirds": 1,
       "podiums": 4,
-      "top5": 6,
-      "seasons": 6,
-      "points": 11466,
-      "average": 1911.0,
-      "description": "El terror de la liga: gana, queda en podio y casi nunca da una temporada mala."
+      "top5": 5,
+      "seasons": 5,
+      "points": 9692,
+      "average": 1938.4,
+      "description": "El terror de la liga: dos títulos, cuatro podios y el mejor promedio histórico."
     },
     {
       "name": "ANDOBA THE BEST",
@@ -654,9 +619,9 @@
       "thirds": 0,
       "podiums": 3,
       "top5": 3,
-      "seasons": 7,
-      "points": 12535,
-      "average": 1790.7,
+      "seasons": 6,
+      "points": 11008,
+      "average": 1834.7,
       "description": "Tiene dos títulos, la mejor temporada individual y lidera en puntos acumulados."
     },
     {
@@ -679,11 +644,11 @@
       "seconds": 1,
       "thirds": 0,
       "podiums": 1,
-      "top5": 5,
-      "seasons": 7,
-      "points": 12456,
-      "average": 1779.4,
-      "description": "Siete temporadas, muchísimos puntos y cinco top 5."
+      "top5": 4,
+      "seasons": 6,
+      "points": 10678,
+      "average": 1779.7,
+      "description": "Seis temporadas, muchísimos puntos y cuatro top 5."
     },
     {
       "name": "Julio",
@@ -716,13 +681,13 @@
       "label": "El Podio Sin Copa",
       "titles": 0,
       "seconds": 0,
-      "thirds": 2,
-      "podiums": 2,
-      "top5": 2,
-      "seasons": 6,
-      "points": 10500,
-      "average": 1750.0,
-      "description": "Dos podios y 10,500 puntos: historial real de candidato."
+      "thirds": 1,
+      "podiums": 1,
+      "top5": 1,
+      "seasons": 5,
+      "points": 8664,
+      "average": 1732.8,
+      "description": "Un podio y 8,664 puntos: historial real de candidato."
     },
     {
       "name": "Patria FC",
@@ -771,10 +736,10 @@
       "thirds": 0,
       "podiums": 0,
       "top5": 1,
-      "seasons": 6,
-      "points": 10094,
-      "average": 1682.3,
-      "description": "Mucho acumulado y una presencia reciente en el top 5."
+      "seasons": 5,
+      "points": 8486,
+      "average": 1697.2,
+      "description": "Cinco temporadas y una presencia reciente en el top 5."
     },
     {
       "name": "MONEY MON$TER",
@@ -797,10 +762,10 @@
       "thirds": 0,
       "podiums": 0,
       "top5": 0,
-      "seasons": 7,
-      "points": 11696,
-      "average": 1670.9,
-      "description": "Siete temporadas de constancia y más de 11,000 puntos acumulados."
+      "seasons": 6,
+      "points": 10004,
+      "average": 1667.3,
+      "description": "Seis temporadas de constancia y 10,004 puntos acumulados."
     },
     {
       "name": "Bayer Munich",
@@ -935,12 +900,6 @@
   ],
   "seasons": [
     {
-      "id": "2019/20",
-      "label": "2019/20",
-      "status": "Pendiente de cargar",
-      "results": []
-    },
-    {
       "id": "2020/21",
       "label": "2020/21",
       "status": "Pendiente de cargar",
@@ -1002,7 +961,7 @@
     {
       "title": "Reivindicación Histórica",
       "player": "Ernesto",
-      "text": "Dos podios y 10,500 puntos pesan demasiado."
+      "text": "Un podio y 8,664 puntos sostienen su candidatura."
     },
     {
       "title": "Campeón Relámpago",
@@ -1029,22 +988,22 @@
     {
       "title": "Más puntos acumulados",
       "player": "ANDOBA THE BEST",
-      "value": "12,535"
+      "value": "11,008"
     },
     {
       "title": "Mejor promedio",
-      "player": "Juventus",
-      "value": "1,938.0"
+      "player": "GNT D ZONA",
+      "value": "1,938.4"
     },
     {
       "title": "Más temporadas",
-      "player": "ANDOBA / Arian / Nelson",
-      "value": "7"
+      "player": "ANDOBA / Yovany R9 / Arian / Julio / Alejandro Cid Lorences / Nelson",
+      "value": "6"
     },
     {
       "title": "Más Top 5",
       "player": "GNT D ZONA",
-      "value": "6"
+      "value": "5"
     }
   ],
   "news": [
@@ -1056,11 +1015,11 @@
     {
       "date": "Histórico",
       "title": "GNT D ZONA lidera el ranking premium",
-      "text": "Dos títulos, cuatro podios y seis top 5 lo colocan como el más completo."
+      "text": "Dos títulos, cuatro podios y cinco top 5 lo colocan como el más completo."
     },
     {
       "date": "Récord",
-      "title": "ANDOBA THE BEST alcanza 12,535 puntos",
+      "title": "ANDOBA THE BEST alcanza 11,008 puntos",
       "text": "Se convierte en el líder histórico por puntos acumulados."
     }
   ],
@@ -1143,27 +1102,27 @@
     "pointsRanking": [
       {
         "name": "ANDOBA THE BEST",
-        "points": 12535,
-        "seasons": 7,
-        "average": 1790.7
+        "points": 11008,
+        "seasons": 6,
+        "average": 1834.7
       },
       {
         "name": "Arian Mirandez Li",
-        "points": 12456,
-        "seasons": 7,
-        "average": 1779.4
+        "points": 10678,
+        "seasons": 6,
+        "average": 1779.7
       },
       {
         "name": "Nelson",
-        "points": 11696,
-        "seasons": 7,
-        "average": 1670.9
+        "points": 10004,
+        "seasons": 6,
+        "average": 1667.3
       },
       {
         "name": "GNT D ZONA",
-        "points": 11466,
-        "seasons": 6,
-        "average": 1911.0
+        "points": 9692,
+        "seasons": 5,
+        "average": 1938.4
       },
       {
         "name": "Julio",
@@ -1179,9 +1138,9 @@
       },
       {
         "name": "Ernesto",
-        "points": 10500,
-        "seasons": 6,
-        "average": 1750.0
+        "points": 8664,
+        "seasons": 5,
+        "average": 1732.8
       },
       {
         "name": "Alejandro Cid Lorences",
@@ -1191,9 +1150,9 @@
       },
       {
         "name": "Victor Manuel",
-        "points": 10094,
-        "seasons": 6,
-        "average": 1682.3
+        "points": 8486,
+        "seasons": 5,
+        "average": 1697.2
       },
       {
         "name": "Rivaldo",
@@ -1322,8 +1281,8 @@
         "name": "Ernesto",
         "titles": 0,
         "seconds": 0,
-        "thirds": 2,
-        "podiums": 2
+        "thirds": 1,
+        "podiums": 1
       },
       {
         "name": "Patria FC",
@@ -1334,138 +1293,6 @@
       }
     ],
     "seasonArchive": [
-      {
-        "season": "2019/20",
-        "status": "Clasificación final",
-        "results": [
-          {
-            "name": "Ernesto",
-            "division": 1,
-            "position": 3,
-            "points": 1836
-          },
-          {
-            "name": "Arian Mirandez Li",
-            "division": 1,
-            "position": 4,
-            "points": 1778
-          },
-          {
-            "name": "Nelson",
-            "division": 1,
-            "position": 7,
-            "points": 1692
-          },
-          {
-            "name": "Victor Manuel",
-            "division": 1,
-            "position": 9,
-            "points": 1608
-          },
-          {
-            "name": "ANDOBA THE BEST",
-            "division": 1,
-            "position": 13,
-            "points": 1527
-          },
-          {
-            "name": "Brian",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "GNT D ZONA",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Julio",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Yovany R9",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Rivaldo",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Patria FC",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Viva Libre",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Bayer Munich",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Roberto Piñeiro",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "MONEY MON$TER",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "@elministro",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Maykel Zuaznabar",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Juventus",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Andy",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Mario Fernandez",
-            "division": 2,
-            "position": null,
-            "points": null
-          },
-          {
-            "name": "Esteban Dominguez",
-            "division": 2,
-            "position": null,
-            "points": null
-          }
-        ]
-      },
       {
         "season": "2020/21",
         "status": "Clasificación final",
@@ -1484,9 +1311,9 @@
           },
           {
             "name": "GNT D ZONA",
-            "division": 1,
-            "position": 4,
-            "points": 1774
+            "division": 2,
+            "position": null,
+            "points": null
           },
           {
             "name": "Ernesto",
@@ -2319,11 +2146,6 @@
       }
     ],
     "seasonChampions": [
-      {
-        "season": "2019/20",
-        "name": "Sin dato confirmado",
-        "points": null
-      },
       {
         "season": "2020/21",
         "name": "ANDOBA THE BEST",
