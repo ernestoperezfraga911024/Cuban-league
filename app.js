@@ -1,4 +1,4 @@
-const APP_VERSION='78-20260728';
+const APP_VERSION='79-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 const MOTION_CARD_SELECTOR=[
@@ -933,7 +933,7 @@ function heroKpiScoreMarkup(detail){
   const match=score.match(/^([\d.,]+)\s+puntos?\s*(.*)$/i);
   if(!match)return `<small>${detail}</small>`;
   const caption=[match[2].trim(),...sections].filter(Boolean).join(' · ');
-  return `<small class="hero-kpi-score"><strong><span>${match[1]}</span> puntos</strong>${caption?`<em>${caption}</em>`:''}</small>`;
+  return `<small class="hero-kpi-score"><strong><span class="hero-kpi-score-value">${match[1]}</span><span class="hero-kpi-score-unit">puntos</span></strong>${caption?`<em>${caption}</em>`:''}</small>`;
 }
 
 function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){
