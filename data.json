@@ -182,6 +182,221 @@
           ]
         }
       ]
+    },
+    "Arian Mirandez Li": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2020/21",
+          "mvp": {
+            "name": "Florian Lejeune",
+            "role": "DF",
+            "points": 121,
+            "lineups": 26
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Kike García",
+              "points": 93,
+              "lineups": 16
+            },
+            {
+              "role": "MC",
+              "name": "Álex Fernández",
+              "points": 52,
+              "lineups": 13
+            },
+            {
+              "role": "DF",
+              "name": "Florian Lejeune",
+              "points": 121,
+              "lineups": 26
+            },
+            {
+              "role": "PT",
+              "name": "Yassine Bounou",
+              "points": 59,
+              "lineups": 11
+            }
+          ]
+        },
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Lucas Ocampos",
+            "role": "DL",
+            "points": 124,
+            "lineups": 28
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Lucas Ocampos",
+              "points": 124,
+              "lineups": 28
+            },
+            {
+              "role": "MC",
+              "name": "Papu Gómez",
+              "points": 79,
+              "lineups": 15
+            },
+            {
+              "role": "DF",
+              "name": "Dani Alves",
+              "points": 64,
+              "lineups": 11
+            },
+            {
+              "role": "PT",
+              "name": "Matías Dituro",
+              "points": 62,
+              "lineups": 13
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Karim Benzema",
+            "role": "DL",
+            "points": 127,
+            "lineups": 15
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Karim Benzema",
+              "points": 127,
+              "lineups": 15
+            },
+            {
+              "role": "MC",
+              "name": "Dani Ceballos",
+              "points": 78,
+              "lineups": 16
+            },
+            {
+              "role": "DF",
+              "name": "Alejandro Balde",
+              "points": 106,
+              "lineups": 25
+            },
+            {
+              "role": "PT",
+              "name": "Ter Stegen",
+              "points": 82,
+              "lineups": 16
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Toni Kroos",
+            "role": "MC",
+            "points": 146,
+            "lineups": 18
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Mikel Oyarzabal",
+              "points": 73,
+              "lineups": 14
+            },
+            {
+              "role": "MC",
+              "name": "Toni Kroos",
+              "points": 146,
+              "lineups": 18
+            },
+            {
+              "role": "DF",
+              "name": "Antonio Raíllo",
+              "points": 51,
+              "lineups": 8
+            },
+            {
+              "role": "PT",
+              "name": "Augusto Batalla",
+              "points": 56,
+              "lineups": 9
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Ayoze Pérez",
+            "role": "DL",
+            "points": 125,
+            "lineups": 17
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Ayoze Pérez",
+              "points": 125,
+              "lineups": 17
+            },
+            {
+              "role": "MC",
+              "name": "Dani Olmo",
+              "points": 111,
+              "lineups": 14
+            },
+            {
+              "role": "DF",
+              "name": "Íñigo Martínez",
+              "points": 92,
+              "lineups": 16
+            },
+            {
+              "role": "PT",
+              "name": "Jasper Cillessen",
+              "points": 30,
+              "lineups": 7
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Kylian Mbappé",
+            "role": "DL",
+            "points": 108,
+            "lineups": 12
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Kylian Mbappé",
+              "points": 108,
+              "lineups": 12
+            },
+            {
+              "role": "MC",
+              "name": "Arda Güler",
+              "points": 57,
+              "lineups": 7
+            },
+            {
+              "role": "DF",
+              "name": "Dean Huijsen",
+              "points": 82,
+              "lineups": 13
+            },
+            {
+              "role": "PT",
+              "name": "Jan Oblak",
+              "points": 77,
+              "lineups": 17
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [

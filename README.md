@@ -1,7 +1,11 @@
-# Cuban League V89
+# Cuban League V90
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Arian Mirandez Li incorpora sus referentes de las
+  seis temporadas oficiales, desde 2020/21 hasta 2025/26, con MVP, puntos,
+  alineaciones y rendimiento por línea. Su incorporación activa el primer
+  Duelo de Banquillos real frente a Victor Manuel.
 - “Hombres de hierro” dentro de la Pizarra del Míster: muestra los cinco
   referentes que más jornadas fueron alineados por cada equipo, junto con su
   posición y temporada. El Duelo de Banquillos también compara el máximo de
