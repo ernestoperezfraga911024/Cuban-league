@@ -1,4 +1,4 @@
-# Cuban League V85
+# Cuban League V87
 
 Sitio oficial de la Cuban League con:
 
@@ -149,9 +149,8 @@ Sitio oficial de la Cuban League con:
   la columna vertebral, rotación del núcleo, peso de la figura y equilibrio por
   líneas. Incluye Los Intocables, claves del ciclo y una pizarra de PT, DF, MC
   y DL para cada temporada, sin comparar jugadores entre campañas.
-- La Pizarra del Míster muestra fotografías reales de sus 20 futbolistas
-  destacados en el MVP, Los Intocables y el campo táctico. Conserva las
-  iniciales como respaldo y reúne las fuentes en un desplegable discreto.
+- La Pizarra del Míster presenta a los futbolistas únicamente mediante sus
+  nombres, posiciones y estadísticas, sin fotografías ni iniciales.
 - En PC, las tarjetas destacadas mantienen su posición al pasar el mouse, sin
   inclinación, desplazamiento, reflejo ni foco de luz.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las

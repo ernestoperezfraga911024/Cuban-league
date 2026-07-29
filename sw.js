@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v85-real-player-portraits-pwa';
+const CACHE_NAME = 'cuban-league-v87-manager-names-only-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=85-20260728',
-  './app.js?v=85-20260728',
-  './data.json?v=85-20260728',
-  './supabase-config.js?v=85-20260728',
+  './styles.css?v=87-20260728',
+  './app.js?v=87-20260728',
+  './data.json?v=87-20260728',
+  './supabase-config.js?v=87-20260728',
   './admin.html',
   './admin.css?v=71-20260728',
   './admin.js?v=71-20260728',
@@ -23,26 +23,6 @@ const APP_SHELL = [
   './home-stadium-night.jpg',
   './mbappe-card.jpg',
   './yamal-card.jpg',
-  './player-faces/antonio-sivera.png',
-  './player-faces/borja-iglesias.jpg',
-  './player-faces/david-soria.jpg',
-  './player-faces/florian-lejeune.png',
-  './player-faces/guido-rodriguez.webp',
-  './player-faces/ivan-rakitic.jpg',
-  './player-faces/jeremias-ledesma.jpg',
-  './player-faces/jorge-de-frutos.jpg',
-  './player-faces/juan-cruz.jpg',
-  './player-faces/jules-kounde.jpg',
-  './player-faces/leandro-cabrera.png',
-  './player-faces/lucas-ocampos.jpg',
-  './player-faces/luis-suarez.jpg',
-  './player-faces/marko-dmitrovic.png',
-  './player-faces/pablo-maffeo.jpg',
-  './player-faces/raphinha.jpg',
-  './player-faces/roque-mesa.jpg',
-  './player-faces/sergio-herrera.webp',
-  './player-faces/unai-nunez.png',
-  './player-faces/vedat-muriqi.jpg',
   './team-01.png',
   './team-02.png',
   './team-03.png',
@@ -125,7 +105,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=85-20260728'));
+    event.respondWith(networkFirst(request, './data.json?v=87-20260728'));
     return;
   }
 

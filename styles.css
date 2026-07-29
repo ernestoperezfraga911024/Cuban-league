@@ -15757,7 +15757,7 @@ footer{
 
 .manager-legacy-trust-list>div{
   display:grid;
-  grid-template-columns:22px 38px minmax(0,1fr) auto;
+  grid-template-columns:22px minmax(0,1fr) auto;
   align-items:center;
   gap:8px;
   min-width:0;
@@ -15775,8 +15775,6 @@ footer{
   text-align:center;
 }
 
-.manager-legacy-trust-token,
-.manager-legacy-player-token,
 .manager-legacy-position-player>span{
   display:grid;
   flex:0 0 auto;
@@ -15789,45 +15787,6 @@ footer{
   font-family:Manrope,Inter,system-ui,sans-serif;
   font-weight:900;
   letter-spacing:-.04em;
-}
-
-.manager-player-portrait{
-  position:relative;
-  overflow:hidden;
-  isolation:isolate;
-}
-
-.manager-player-initials{
-  position:relative;
-  z-index:0;
-  display:grid;
-  width:100%;
-  height:100%;
-  place-items:center;
-}
-
-.manager-player-portrait>img{
-  position:absolute;
-  z-index:1;
-  inset:0;
-  width:100%;
-  height:100%;
-  border-radius:inherit;
-  object-fit:cover;
-  object-position:var(--portrait-x,50%) var(--portrait-y,25%);
-  background:
-    radial-gradient(circle at 50% 20%,rgba(81,233,216,.16),transparent 58%),
-    #0b2732;
-  transform:scale(var(--portrait-scale,1));
-  transform-origin:var(--portrait-x,50%) var(--portrait-y,25%);
-  transition:none;
-}
-
-.manager-legacy-trust-token{
-  width:38px;
-  height:38px;
-  border-radius:12px;
-  font-size:.67rem;
 }
 
 .manager-legacy-trust-list b,
@@ -16021,20 +15980,8 @@ footer{
 .manager-legacy-player{
   display:flex;
   align-items:center;
-  gap:13px;
+  gap:0;
   margin:17px 0;
-}
-
-.manager-legacy-player-token{
-  width:58px;
-  height:58px;
-  border-color:rgba(245,201,92,.28);
-  border-radius:18px;
-  color:#ffe394;
-  background:
-    radial-gradient(circle at 30% 20%,rgba(255,255,255,.14),transparent 48%),
-    linear-gradient(145deg,rgba(111,91,39,.82),rgba(28,42,51,.94));
-  font-size:1rem;
 }
 
 .manager-legacy-player small{
@@ -16244,97 +16191,6 @@ footer{
   color:#95afc1;
 }
 
-.manager-photo-credits{
-  margin-top:11px;
-  border:1px solid rgba(255,255,255,.065);
-  border-radius:13px;
-  color:#7f99aa;
-  background:rgba(4,17,29,.42);
-}
-
-.manager-photo-credits summary{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:10px 12px;
-  cursor:pointer;
-  list-style:none;
-  font-size:.61rem;
-  font-weight:850;
-}
-
-.manager-photo-credits summary::-webkit-details-marker{
-  display:none;
-}
-
-.manager-photo-credits summary::after{
-  content:'+';
-  display:grid;
-  width:21px;
-  height:21px;
-  flex:0 0 21px;
-  place-items:center;
-  border:1px solid rgba(80,234,220,.15);
-  border-radius:7px;
-  color:#77e9df;
-  background:rgba(80,234,220,.04);
-}
-
-.manager-photo-credits[open] summary::after{
-  content:'−';
-}
-
-.manager-photo-credits summary span{
-  color:#a9becb;
-}
-
-.manager-photo-credits summary small{
-  margin-left:auto;
-  color:#607d91;
-  font-size:.55rem;
-  text-transform:uppercase;
-}
-
-.manager-photo-credits>div{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:6px;
-  padding:0 10px 10px;
-}
-
-.manager-photo-credits a{
-  display:flex;
-  min-width:0;
-  flex-direction:column;
-  gap:2px;
-  padding:8px 9px;
-  border:1px solid rgba(255,255,255,.05);
-  border-radius:9px;
-  color:#7d98a9;
-  background:rgba(255,255,255,.018);
-  text-decoration:none;
-}
-
-.manager-photo-credits a:focus-visible{
-  outline:2px solid rgba(80,234,220,.65);
-  outline-offset:2px;
-}
-
-.manager-photo-credits a b{
-  overflow:hidden;
-  color:#cbdbe4;
-  font-size:.59rem;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.manager-photo-credits a span{
-  color:#6f899b;
-  font-size:.52rem;
-  line-height:1.3;
-}
-
 @media(max-width:850px){
   .manager-legacy-overview,
   .manager-legacy-season-layout{
@@ -16350,9 +16206,6 @@ footer{
     grid-template-columns:1fr 1fr;
   }
 
-  .manager-photo-credits>div{
-    grid-template-columns:1fr;
-  }
 }
 
 @media(max-width:700px){
@@ -16409,15 +16262,9 @@ footer{
   }
 
   .manager-legacy-trust-list>div{
-    grid-template-columns:20px 34px minmax(0,1fr) auto;
+    grid-template-columns:20px minmax(0,1fr) auto;
     gap:6px;
     padding:7px 6px;
-  }
-
-  .manager-legacy-trust-token{
-    width:34px;
-    height:34px;
-    border-radius:10px;
   }
 
   .manager-legacy-season-nav{
@@ -16457,12 +16304,6 @@ footer{
 
   .manager-legacy-player{
     margin:14px 0;
-  }
-
-  .manager-legacy-player-token{
-    width:50px;
-    height:50px;
-    border-radius:15px;
   }
 
   .manager-legacy-player h4{
@@ -18647,8 +18488,8 @@ footer{
 }
 
 /* =========================================================
-   V85 — LA PIZARRA DEL MÍSTER
-   Panel táctico plegable con retratos reales
+   V87 — LA PIZARRA DEL MÍSTER
+   Panel táctico plegable centrado en nombres y datos
    ========================================================= */
 @keyframes managerBoardReveal{
   from{
@@ -19119,7 +18960,7 @@ footer{
   position:absolute;
   z-index:2;
   display:grid;
-  grid-template-columns:30px 38px minmax(0,1fr);
+  grid-template-columns:30px minmax(0,1fr);
   align-items:center;
   gap:7px;
   width:min(230px,31%);
@@ -19180,19 +19021,6 @@ footer{
   border-color:rgba(231,202,105,.32);
   color:var(--gold);
   background:rgba(231,202,105,.08);
-}
-
-.manager-lineup-token{
-  display:grid;
-  width:38px;
-  height:38px;
-  place-items:center;
-  border:1px solid rgba(80,230,208,.2);
-  border-radius:11px;
-  color:#8df1e6;
-  background:linear-gradient(145deg,rgba(41,92,89,.8),rgba(10,39,43,.94));
-  font-size:.62rem;
-  font-weight:900;
 }
 
 .manager-lineup-player-copy{
@@ -19437,7 +19265,7 @@ footer{
   }
 
   .manager-lineup-player{
-    grid-template-columns:27px 34px minmax(0,1fr);
+    grid-template-columns:27px minmax(0,1fr);
     gap:5px;
     width:190px;
     max-width:calc(100% - 22px);
@@ -19469,12 +19297,6 @@ footer{
   .manager-lineup-position{
     width:27px;
     height:27px;
-  }
-
-  .manager-lineup-token{
-    width:34px;
-    height:34px;
-    border-radius:10px;
   }
 
   .manager-lineup-player-copy h5{
