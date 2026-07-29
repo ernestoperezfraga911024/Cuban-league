@@ -1,4 +1,4 @@
-const APP_VERSION='88-20260728';
+const APP_VERSION='89-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1910,6 +1910,17 @@ function managerLegacySeasonMetrics(name,record,season){
 
 function managerLegacyMetrics(name,record){
   const seasons=(record.seasons||[]).map(season=>managerLegacySeasonMetrics(name,record,season));
+  const durablePlayers=seasons.flatMap(item=>(item.players||[]).map(player=>({
+    name:player.name,
+    role:player.role,
+    points:player.points||0,
+    lineups:player.lineups||0,
+    season:item.season.season
+  }))).sort((a,b)=>
+    b.lineups-a.lineups||
+    b.points-a.points||
+    a.name.localeCompare(b.name,'es')
+  ).slice(0,5);
   const totalReferenceLineups=seasons.reduce((sum,item)=>sum+item.totalReferenceLineups,0);
   const totalReferenceSlots=seasons.reduce((sum,item)=>sum+(item.expected*Math.max(item.players.length,1)),0);
   const continuity=totalReferenceSlots?(totalReferenceLineups/totalReferenceSlots)*100:0;
@@ -1960,6 +1971,8 @@ function managerLegacyMetrics(name,record){
     :'';
   return {
     seasons,
+    durablePlayers,
+    mostDurable:durablePlayers[0]||null,
     continuity,
     rotation,
     style:managerContinuityLabel(continuity),
@@ -2050,6 +2063,27 @@ function managerStyleCardMarkup(name,metrics){
   </div>`;
 }
 
+function managerIronMenMarkup(metrics){
+  if(!metrics.durablePlayers.length)return '';
+  return `<article class="manager-iron-card">
+    <div class="manager-iron-head">
+      <div><span class="eyebrow">HOMBRES DE HIERRO</span><h4>Los más alineados por el míster</h4></div>
+      <span>Máximo en una temporada</span>
+    </div>
+    <div class="manager-iron-list">
+      ${metrics.durablePlayers.map((player,index)=>`<div class="manager-iron-row${index===0?' is-leader':''}">
+        <span class="manager-iron-rank">${index+1}</span>
+        <div class="manager-iron-player">
+          <b>${player.name}</b>
+          <small>${MANAGER_LEGACY_POSITIONS[player.role]?.short||player.role} · ${player.season}</small>
+        </div>
+        <strong>${player.lineups}<small>jornadas</small></strong>
+      </div>`).join('')}
+    </div>
+    <p>Ranking de los referentes registrados. La cifra indica cuántas jornadas fueron alineados en esa campaña; no tiene que ser una racha consecutiva.</p>
+  </article>`;
+}
+
 function managerComparisonResultMarkup(primaryName,secondaryName){
   const primaryRecord=managerLegacyRecord(primaryName);
   const secondaryRecord=managerLegacyRecord(secondaryName);
@@ -2060,6 +2094,17 @@ function managerComparisonResultMarkup(primaryName,secondaryName){
   const lessDependent=a.crackDependence===b.crackDependence?'Empate':a.crackDependence<b.crackDependence?primaryName:secondaryName;
   const moreEfficient=a.crackEfficiency===b.crackEfficiency?'Empate':a.crackEfficiency>b.crackEfficiency?primaryName:secondaryName;
   const moreBalanced=a.balanceSpread===b.balanceSpread?'Empate':a.balanceSpread<b.balanceSpread?primaryName:secondaryName;
+  const aDurable=a.mostDurable;
+  const bDurable=b.mostDurable;
+  const aDurableStat=aDurable?`${aDurable.lineups}<small>${aDurable.name}</small>`:'—';
+  const bDurableStat=bDurable?`${bDurable.lineups}<small>${bDurable.name}</small>`:'—';
+  const durableLeader=(!aDurable&&!bDurable)
+    ?'Sin datos'
+    :(aDurable?.lineups||0)===(bDurable?.lineups||0)
+      ?`Empate: ${aDurable?.name||'—'} y ${bDurable?.name||'—'} (${aDurable?.lineups||0})`
+      :(aDurable?.lineups||0)>(bDurable?.lineups||0)
+        ?`${primaryName}: ${aDurable.name} (${aDurable.lineups})`
+        :`${secondaryName}: ${bDurable.name} (${bDurable.lineups})`;
   return `<div class="manager-duel-scoreboard">
     <div class="manager-duel-names"><b>${primaryName}</b><span>VS</span><b>${secondaryName}</b></div>
     <div class="manager-duel-table">
@@ -2068,12 +2113,14 @@ function managerComparisonResultMarkup(primaryName,secondaryName){
       <div><strong>${a.crackDependence.toFixed(1)}%</strong><span>Dependencia del crack</span><strong>${b.crackDependence.toFixed(1)}%</strong></div>
       <div><strong>${a.crackEfficiency.toFixed(1)}</strong><span>Pts/alineación del crack</span><strong>${b.crackEfficiency.toFixed(1)}</strong></div>
       <div><strong>${a.balanceSpread.toFixed(1)} pp</strong><span>Desnivel entre líneas</span><strong>${b.balanceSpread.toFixed(1)} pp</strong></div>
+      <div><strong>${aDurableStat}</strong><span>Máximo de jornadas</span><strong>${bDurableStat}</strong></div>
     </div>
     <div class="manager-duel-verdicts">
       <span>Más conservador <b>${moreConservative}</b></span>
       <span>Menos crack-dependiente <b>${lessDependent}</b></span>
       <span>Crack más rentable <b>${moreEfficient}</b></span>
       <span>Más equilibrado <b>${moreBalanced}</b></span>
+      <span>Jugador más duradero <b>${durableLeader}</b></span>
     </div>
   </div>`;
 }
@@ -2177,7 +2224,7 @@ function managerLegacyMarkup(name){
       <span class="manager-board-toggle-copy">
         <small>ESTILO DEL EQUIPO</small>
         <strong>La Pizarra del Míster</strong>
-        <span>Conservador o rotador, dependencia del crack y comparación</span>
+        <span>Estilo, dependencia del crack, hombres de hierro y comparación</span>
       </span>
       <span class="manager-board-toggle-summary">
         <b>${metrics.continuity.toFixed(0)}%</b>
@@ -2193,12 +2240,13 @@ function managerLegacyMarkup(name){
           <div>
             <span class="eyebrow">LA PIZARRA DEL MÍSTER</span>
             <h3>El estilo de ${name}, en números</h3>
-            <p>Una lectura sencilla de continuidad, rotación estimada, dependencia del crack y reparto de puntos por líneas.</p>
+            <p>Una lectura sencilla de continuidad, rotación estimada, dependencia del crack, jugadores más alineados y reparto de puntos por líneas.</p>
           </div>
           <span class="manager-legacy-season-count">${record.seasons.length} temporadas</span>
         </div>
 
         ${managerStyleCardMarkup(name,metrics)}
+        ${managerIronMenMarkup(metrics)}
         ${managerDuelMarkup(name)}
 
         <div class="manager-legacy-season-nav">

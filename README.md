@@ -1,7 +1,11 @@
-# Cuban League V88
+# Cuban League V89
 
 Sitio oficial de la Cuban League con:
 
+- “Hombres de hierro” dentro de la Pizarra del Míster: muestra los cinco
+  referentes que más jornadas fueron alineados por cada equipo, junto con su
+  posición y temporada. El Duelo de Banquillos también compara el máximo de
+  jornadas y señala qué míster tuvo al jugador más duradero.
 - Navegación por vistas completas: Inicio es la portada inicial y al abrir
   Clasificación, Jornadas, Participantes o cualquier otro apartado, la portada
   se oculta y la sección elegida comienza desde arriba en móvil y escritorio.
