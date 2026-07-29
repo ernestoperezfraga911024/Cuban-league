@@ -1,4 +1,4 @@
-# Cuban League V87
+# Cuban League V88
 
 Sitio oficial de la Cuban League con:
 
@@ -142,15 +142,19 @@ Sitio oficial de la Cuban League con:
   reducido del dispositivo.
 - Los puntos, récords y estadísticas aparecen directamente con su valor final,
   sin animaciones de conteo.
-- El perfil de Victor Manuel incorpora “La Pizarra del Míster” como un panel
-  plegable, cerrado por defecto para no alargar el perfil. Se abre y se oculta
-  con un solo botón tanto en móvil como en PC.
-- La pizarra usa términos futbolísticos y métricas explicadas: continuidad de
-  la columna vertebral, rotación del núcleo, peso de la figura y equilibrio por
-  líneas. Incluye Los Intocables, claves del ciclo y una pizarra de PT, DF, MC
-  y DL para cada temporada, sin comparar jugadores entre campañas.
-- La Pizarra del Míster presenta a los futbolistas únicamente mediante sus
-  nombres, posiciones y estadísticas, sin fotografías ni iniciales.
+- El perfil de Victor Manuel incorpora “La Pizarra del Míster” como panel
+  plegable, cerrado por defecto para no alargar el perfil. Su nueva Carta de
+  Estilo clasifica al equipo como conservador, equilibrado o rotador a partir
+  de la continuidad de sus referentes.
+- La dependencia del crack compara los puntos del MVP con todos los puntos del
+  equipo en cada temporada. También se muestran su rentabilidad por alineación,
+  la línea dominante y el reparto histórico entre PT, DF, MC y DL.
+- El análisis explica qué modelo ha producido mejores posiciones históricas,
+  permite revisar cada campaña y deja preparado el Duelo de Banquillos para
+  comparar automáticamente dos equipos cuando existan más cartas de estilo.
+- La Pizarra presenta a los futbolistas únicamente mediante nombres, posiciones
+  y estadísticas, sin fotografías, iniciales ni comparaciones entre jugadores
+  de temporadas diferentes.
 - En PC, las tarjetas destacadas mantienen su posición al pasar el mouse, sin
   inclinación, desplazamiento, reflejo ni foco de luz.
 - Las insignias conseguidas se presentan con una animación de desbloqueo; las
