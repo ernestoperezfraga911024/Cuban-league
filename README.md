@@ -1,7 +1,10 @@
-# Cuban League V90
+# Cuban League V91
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de ANDOBA THE BEST incorpora sus seis temporadas
+  oficiales, desde 2020/21 hasta 2025/26. La comparación de estilos ya permite
+  medirlo directamente frente a Victor Manuel y Arian Mirandez Li.
 - La Pizarra del Míster de Arian Mirandez Li incorpora sus referentes de las
   seis temporadas oficiales, desde 2020/21 hasta 2025/26, con MVP, puntos,
   alineaciones y rendimiento por línea. Su incorporación activa el primer

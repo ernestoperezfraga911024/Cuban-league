@@ -397,6 +397,221 @@
           ]
         }
       ]
+    },
+    "ANDOBA THE BEST": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2020/21",
+          "mvp": {
+            "name": "Leo Messi",
+            "role": "DL",
+            "points": 148,
+            "lineups": 11
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Leo Messi",
+              "points": 148,
+              "lineups": 11
+            },
+            {
+              "role": "MC",
+              "name": "Frenkie De Jong",
+              "points": 100,
+              "lineups": 18
+            },
+            {
+              "role": "DF",
+              "name": "Aïssa Mandi",
+              "points": 71,
+              "lineups": 14
+            },
+            {
+              "role": "PT",
+              "name": "Alex Remiro",
+              "points": 71,
+              "lineups": 25
+            }
+          ]
+        },
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Luka Modrić",
+            "role": "MC",
+            "points": 99,
+            "lineups": 17
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Enes Ünal",
+              "points": 63,
+              "lineups": 12
+            },
+            {
+              "role": "MC",
+              "name": "Luka Modrić",
+              "points": 99,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Víctor Ruiz",
+              "points": 36,
+              "lineups": 9
+            },
+            {
+              "role": "PT",
+              "name": "Edgar Badía",
+              "points": 35,
+              "lineups": 8
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Robert Lewandowski",
+            "role": "DL",
+            "points": 130,
+            "lineups": 14
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Robert Lewandowski",
+              "points": 130,
+              "lineups": 14
+            },
+            {
+              "role": "MC",
+              "name": "Sergi Darder",
+              "points": 92,
+              "lineups": 15
+            },
+            {
+              "role": "DF",
+              "name": "Dani Carvajal",
+              "points": 35,
+              "lineups": 8
+            },
+            {
+              "role": "PT",
+              "name": "Fernando Pacheco",
+              "points": 54,
+              "lineups": 16
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Antoine Griezmann",
+            "role": "DL",
+            "points": 140,
+            "lineups": 18
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Antoine Griezmann",
+              "points": 140,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Isco",
+              "points": 102,
+              "lineups": 13
+            },
+            {
+              "role": "DF",
+              "name": "Dani Carvajal",
+              "points": 53,
+              "lineups": 10
+            },
+            {
+              "role": "PT",
+              "name": "Ter Stegen",
+              "points": 85,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Robert Lewandowski",
+            "role": "DL",
+            "points": 184,
+            "lineups": 22
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Robert Lewandowski",
+              "points": 184,
+              "lineups": 22
+            },
+            {
+              "role": "MC",
+              "name": "Rodrigo De Paul",
+              "points": 86,
+              "lineups": 15
+            },
+            {
+              "role": "DF",
+              "name": "Antonio Raíllo",
+              "points": 74,
+              "lineups": 15
+            },
+            {
+              "role": "PT",
+              "name": "Augusto Batalla",
+              "points": 75,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Lamine Yamal",
+            "role": "DL",
+            "points": 196,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Lamine Yamal",
+              "points": 196,
+              "lineups": 19
+            },
+            {
+              "role": "MC",
+              "name": "Aurélien Tchouaméni",
+              "points": 75,
+              "lineups": 12
+            },
+            {
+              "role": "DF",
+              "name": "Daley Blind",
+              "points": 89,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "Ionuț Radu",
+              "points": 66,
+              "lineups": 13
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [
