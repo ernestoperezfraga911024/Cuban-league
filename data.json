@@ -827,6 +827,221 @@
           ]
         }
       ]
+    },
+    "Yovany R9": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2020/21",
+          "mvp": {
+            "name": "Suso",
+            "role": "DL",
+            "points": 111,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Suso",
+              "points": 111,
+              "lineups": 19
+            },
+            {
+              "role": "MC",
+              "name": "Marcos Llorente",
+              "points": 90,
+              "lineups": 13
+            },
+            {
+              "role": "DF",
+              "name": "Raphaël Varane",
+              "points": 89,
+              "lineups": 16
+            },
+            {
+              "role": "PT",
+              "name": "Unai Simón",
+              "points": 60,
+              "lineups": 16
+            }
+          ]
+        },
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Éder Militão",
+            "role": "DF",
+            "points": 152,
+            "lineups": 25
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Karim Benzema",
+              "points": 116,
+              "lineups": 11
+            },
+            {
+              "role": "MC",
+              "name": "Santi Comesaña",
+              "points": 58,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Éder Militão",
+              "points": 152,
+              "lineups": 25
+            },
+            {
+              "role": "PT",
+              "name": "Gero Rulli",
+              "points": 131,
+              "lineups": 28
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Kang-In Lee",
+            "role": "MC",
+            "points": 83,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Nicolas Jackson",
+              "points": 76,
+              "lineups": 7
+            },
+            {
+              "role": "MC",
+              "name": "Kang-In Lee",
+              "points": 83,
+              "lineups": 19
+            },
+            {
+              "role": "DF",
+              "name": "Nahuel Molina",
+              "points": 79,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "Fernando Martínez",
+              "points": 45,
+              "lineups": 10
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "David Soria",
+            "role": "PT",
+            "points": 180,
+            "lineups": 35
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Álvaro Morata",
+              "points": 51,
+              "lineups": 7
+            },
+            {
+              "role": "MC",
+              "name": "Aleix García",
+              "points": 170,
+              "lineups": 27
+            },
+            {
+              "role": "DF",
+              "name": "João Cancelo",
+              "points": 92,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "David Soria",
+              "points": 180,
+              "lineups": 35
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Isco",
+            "role": "MC",
+            "points": 177,
+            "lineups": 20
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Iago Aspas",
+              "points": 93,
+              "lineups": 13
+            },
+            {
+              "role": "MC",
+              "name": "Isco",
+              "points": 177,
+              "lineups": 20
+            },
+            {
+              "role": "DF",
+              "name": "Fran García",
+              "points": 67,
+              "lineups": 11
+            },
+            {
+              "role": "PT",
+              "name": "Dominik Greif",
+              "points": 60,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Odysseas Vlachodimos",
+            "role": "PT",
+            "points": 115,
+            "lineups": 28
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Georges Mikautadze",
+              "points": 109,
+              "lineups": 20
+            },
+            {
+              "role": "MC",
+              "name": "Arda Güler",
+              "points": 109,
+              "lineups": 19
+            },
+            {
+              "role": "DF",
+              "name": "Yuri Berchiche",
+              "points": 61,
+              "lineups": 14
+            },
+            {
+              "role": "PT",
+              "name": "Odysseas Vlachodimos",
+              "points": 115,
+              "lineups": 28
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [

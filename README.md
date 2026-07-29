@@ -1,7 +1,11 @@
-# Cuban League V92
+# Cuban League V93
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Yovany R9 incorpora sus seis temporadas oficiales,
+  desde 2020/21 hasta 2025/26, con referentes por línea, estilo de rotación,
+  dependencia del jugador clave y Hombres de hierro. También queda disponible
+  en el Duelo de Banquillos contra los demás místeres registrados.
 - La Pizarra del Míster de Julio incorpora sus seis temporadas oficiales,
   desde 2020/21 hasta 2025/26, con sus referentes por línea, estilo de rotación,
   dependencia del jugador clave y Hombres de hierro. También queda disponible
