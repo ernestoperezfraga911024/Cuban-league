@@ -1042,6 +1042,186 @@
           ]
         }
       ]
+    },
+    "GNT D ZONA": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Vinícius Júnior",
+            "role": "DL",
+            "points": 175,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Vinícius Júnior",
+              "points": 175,
+              "lineups": 23
+            },
+            {
+              "role": "MC",
+              "name": "Casemiro",
+              "points": 148,
+              "lineups": 21
+            },
+            {
+              "role": "DF",
+              "name": "Pacha Espino",
+              "points": 99,
+              "lineups": 21
+            },
+            {
+              "role": "PT",
+              "name": "Luís Maximiano",
+              "points": 58,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Antoine Griezmann",
+            "role": "DL",
+            "points": 102,
+            "lineups": 12
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Antoine Griezmann",
+              "points": 102,
+              "lineups": 12
+            },
+            {
+              "role": "MC",
+              "name": "Toni Kroos",
+              "points": 94,
+              "lineups": 14
+            },
+            {
+              "role": "DF",
+              "name": "Iván Balliu",
+              "points": 53,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "Thibaut Courtois",
+              "points": 95,
+              "lineups": 16
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Álvaro Valles",
+            "role": "PT",
+            "points": 169,
+            "lineups": 29
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Hugo Duro",
+              "points": 114,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Mikel Merino",
+              "points": 159,
+              "lineups": 24
+            },
+            {
+              "role": "DF",
+              "name": "Axel Witsel",
+              "points": 92,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "Álvaro Valles",
+              "points": 169,
+              "lineups": 29
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Kylian Mbappé",
+            "role": "DL",
+            "points": 220,
+            "lineups": 20
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Kylian Mbappé",
+              "points": 220,
+              "lineups": 20
+            },
+            {
+              "role": "MC",
+              "name": "Fede Valverde",
+              "points": 130,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Marcos Alonso",
+              "points": 68,
+              "lineups": 10
+            },
+            {
+              "role": "PT",
+              "name": "Vicente Guaita",
+              "points": 34,
+              "lineups": 7
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Fede Valverde",
+            "role": "MC",
+            "points": 145,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Ademola Lookman",
+              "points": 45,
+              "lineups": 8
+            },
+            {
+              "role": "MC",
+              "name": "Fede Valverde",
+              "points": 145,
+              "lineups": 19
+            },
+            {
+              "role": "DF",
+              "name": "Álvaro Carreras",
+              "points": 85,
+              "lineups": 19
+            },
+            {
+              "role": "PT",
+              "name": "Alex Remiro",
+              "points": 103,
+              "lineups": 24
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [

@@ -1,7 +1,12 @@
-# Cuban League V93
+# Cuban League V94
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de GNT D ZONA incorpora sus cinco temporadas oficiales
+  de Primera, desde 2021/22 hasta 2025/26. La temporada 2020/21 continúa
+  excluida del análisis porque el equipo militaba en Segunda. Sus referentes,
+  Hombres de hierro, dependencia del crack y estilo de rotación también quedan
+  disponibles en el Duelo de Banquillos.
 - La Pizarra del Míster de Yovany R9 incorpora sus seis temporadas oficiales,
   desde 2020/21 hasta 2025/26, con referentes por línea, estilo de rotación,
   dependencia del jugador clave y Hombres de hierro. También queda disponible
