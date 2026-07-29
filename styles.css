@@ -15791,6 +15791,38 @@ footer{
   letter-spacing:-.04em;
 }
 
+.manager-player-portrait{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.manager-player-initials{
+  position:relative;
+  z-index:0;
+  display:grid;
+  width:100%;
+  height:100%;
+  place-items:center;
+}
+
+.manager-player-portrait>img{
+  position:absolute;
+  z-index:1;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+  object-fit:cover;
+  object-position:var(--portrait-x,50%) var(--portrait-y,25%);
+  background:
+    radial-gradient(circle at 50% 20%,rgba(81,233,216,.16),transparent 58%),
+    #0b2732;
+  transform:scale(var(--portrait-scale,1));
+  transform-origin:var(--portrait-x,50%) var(--portrait-y,25%);
+  transition:none;
+}
+
 .manager-legacy-trust-token{
   width:38px;
   height:38px;
@@ -16212,6 +16244,97 @@ footer{
   color:#95afc1;
 }
 
+.manager-photo-credits{
+  margin-top:11px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:13px;
+  color:#7f99aa;
+  background:rgba(4,17,29,.42);
+}
+
+.manager-photo-credits summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  cursor:pointer;
+  list-style:none;
+  font-size:.61rem;
+  font-weight:850;
+}
+
+.manager-photo-credits summary::-webkit-details-marker{
+  display:none;
+}
+
+.manager-photo-credits summary::after{
+  content:'+';
+  display:grid;
+  width:21px;
+  height:21px;
+  flex:0 0 21px;
+  place-items:center;
+  border:1px solid rgba(80,234,220,.15);
+  border-radius:7px;
+  color:#77e9df;
+  background:rgba(80,234,220,.04);
+}
+
+.manager-photo-credits[open] summary::after{
+  content:'−';
+}
+
+.manager-photo-credits summary span{
+  color:#a9becb;
+}
+
+.manager-photo-credits summary small{
+  margin-left:auto;
+  color:#607d91;
+  font-size:.55rem;
+  text-transform:uppercase;
+}
+
+.manager-photo-credits>div{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+  padding:0 10px 10px;
+}
+
+.manager-photo-credits a{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:2px;
+  padding:8px 9px;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:9px;
+  color:#7d98a9;
+  background:rgba(255,255,255,.018);
+  text-decoration:none;
+}
+
+.manager-photo-credits a:focus-visible{
+  outline:2px solid rgba(80,234,220,.65);
+  outline-offset:2px;
+}
+
+.manager-photo-credits a b{
+  overflow:hidden;
+  color:#cbdbe4;
+  font-size:.59rem;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.manager-photo-credits a span{
+  color:#6f899b;
+  font-size:.52rem;
+  line-height:1.3;
+}
+
 @media(max-width:850px){
   .manager-legacy-overview,
   .manager-legacy-season-layout{
@@ -16225,6 +16348,10 @@ footer{
 
   .manager-legacy-position-grid{
     grid-template-columns:1fr 1fr;
+  }
+
+  .manager-photo-credits>div{
+    grid-template-columns:1fr;
   }
 }
 
@@ -18520,8 +18647,8 @@ footer{
 }
 
 /* =========================================================
-   V84 — LA PIZARRA DEL MÍSTER
-   Panel táctico plegable dentro del perfil
+   V85 — LA PIZARRA DEL MÍSTER
+   Panel táctico plegable con retratos reales
    ========================================================= */
 @keyframes managerBoardReveal{
   from{

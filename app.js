@@ -1,4 +1,4 @@
-const APP_VERSION='84-20260728';
+const APP_VERSION='85-20260728';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1811,6 +1811,140 @@ const MANAGER_LEGACY_POSITIONS={
   PT:{label:'Portero',short:'PT'}
 };
 
+const MANAGER_PLAYER_PHOTOS={
+  'Ivan Rakitić':{
+    src:'./player-faces/ivan-rakitic.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Ivan_Rakiti%C4%87_2020_(cropped).jpg',
+    credit:'Дмитрий Пукалик · CC BY-SA 3.0',
+    y:'24%'
+  },
+  'Lucas Ocampos':{
+    src:'./player-faces/lucas-ocampos.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Lucas_Ocampos_2020.jpg',
+    credit:'Дмитрий Пукалик · CC BY-SA 3.0',
+    y:'24%'
+  },
+  'Jules Koundé':{
+    src:'./player-faces/jules-kounde.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Jules_Kounde_France_v_Senegal_16_June_2026-449_(cropped).jpg',
+    credit:'Bryan Berlin · CC BY-SA 4.0',
+    y:'20%'
+  },
+  'David Soria':{
+    src:'./player-faces/david-soria.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:05-05-2016_-_Sevilla_FC_-_FC_Shakhtar_Donetsk_-_3-1_(26235556264)_(cropped).jpg',
+    credit:'Aleksandr Osipov · CC BY-SA 2.0',
+    y:'18%'
+  },
+  'Luis Suárez':{
+    src:'./player-faces/luis-suarez.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Luis_Su%C3%A1rez_2026_(cropped).jpg',
+    credit:'The White House · dominio público',
+    y:'28%'
+  },
+  'Guido Rodríguez':{
+    src:'./player-faces/guido-rodriguez.webp',
+    source:'https://www.whufc.com/en/teams/mens-team/guido-rodriguez',
+    credit:'West Ham United · fotografía oficial',
+    y:'19%',
+    scale:2.05
+  },
+  'Leandro Cabrera':{
+    src:'./player-faces/leandro-cabrera.png',
+    source:'https://www.laliga.com/en-GB/player/cabrera',
+    credit:'LALIGA · fotografía oficial',
+    y:'20%',
+    scale:1.52
+  },
+  'Sergio Herrera':{
+    src:'./player-faces/sergio-herrera.webp',
+    source:'https://www.osasuna.es/en-sergio-herrera-2025',
+    credit:'CA Osasuna · fotografía oficial',
+    y:'17%',
+    scale:1.3
+  },
+  'Borja Iglesias':{
+    src:'./player-faces/borja-iglesias.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Borja_Iglesias_Argentina_v_Spain_19_July_2026-253_(cropped).jpg',
+    credit:'Bryan Berlin · CC BY-SA 4.0',
+    y:'20%'
+  },
+  'Roque Mesa':{
+    src:'./player-faces/roque-mesa.jpg',
+    source:'https://sevillafc.es/es/actualidad/noticias/roque-mesa-llega-cedido-con-opcion-de-compra',
+    credit:'Sevilla FC · fotografía oficial',
+    x:'26%',
+    y:'24%',
+    scale:1.45
+  },
+  'Unai Núñez':{
+    src:'./player-faces/unai-nunez.png',
+    source:'https://www.athletic-club.eus/jugadores/unai-nunez-gestoso/',
+    credit:'Athletic Club · fotografía oficial',
+    y:'18%',
+    scale:1.08
+  },
+  'Jeremías Ledesma':{
+    src:'./player-faces/jeremias-ledesma.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Universidad_Cat%C3%B3lica_-_Rosario_Central_20190313_24.jpg',
+    credit:'Carlos Figueroa Rojas · CC BY-SA 4.0',
+    y:'18%'
+  },
+  'Raphinha':{
+    src:'./player-faces/raphinha.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Raphinha_Brazil_V_Morocco_13_June_2026-133_(cropped).jpg',
+    credit:'Bryan Berlin · CC BY-SA 4.0',
+    y:'20%'
+  },
+  'Juan Cruz':{
+    src:'./player-faces/juan-cruz.jpg',
+    source:'https://www.cdleganes.com/noticias/el-cd-leganes-incorpora-en-propiedad-a-juan-cruz-para-las-proximas-cuatro-temporadas',
+    credit:'CD Leganés · fotografía oficial',
+    y:'28%',
+    scale:1.42
+  },
+  'Pablo Maffeo':{
+    src:'./player-faces/pablo-maffeo.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Pablo_maffeo.jpg',
+    credit:'Jeollo / VfB-exklusiv.de · CC BY-SA 3.0',
+    y:'19%'
+  },
+  'Marko Dmitrović':{
+    src:'./player-faces/marko-dmitrovic.png',
+    source:'https://www.laliga.com/en-GB/player/dmitrovic',
+    credit:'LALIGA · fotografía oficial',
+    y:'20%',
+    scale:1.55
+  },
+  'Florian Lejeune':{
+    src:'./player-faces/florian-lejeune.png',
+    source:'https://www.laliga.com/en-GB/player/lejeune',
+    credit:'LALIGA · fotografía oficial',
+    y:'20%',
+    scale:1.55
+  },
+  'Vedat Muriqi':{
+    src:'./player-faces/vedat-muriqi.jpg',
+    source:'https://commons.wikimedia.org/wiki/File:Vedat_Muriqi_Fenerbah%C3%A7e_20260717_(6).jpg',
+    credit:'Zafer · CC BY 4.0',
+    y:'23%'
+  },
+  'Jorge de Frutos':{
+    src:'./player-faces/jorge-de-frutos.jpg',
+    source:'https://www.rayovallecano.es/jugadores/de-frutos',
+    credit:'Rayo Vallecano · fotografía oficial',
+    y:'17%',
+    scale:1.16
+  },
+  'Antonio Sivera':{
+    src:'./player-faces/antonio-sivera.png',
+    source:'https://deportivoalaves.com/equipos/equipo-masculino',
+    credit:'Deportivo Alavés · fotografía oficial',
+    y:'17%',
+    scale:2.08
+  }
+};
+
 function managerLegacyRecord(name){
   return DATA.managerLegacies?.[name]||null;
 }
@@ -1823,6 +1957,43 @@ function managerLegacyInitials(name){
     .map(part=>part[0]||'')
     .join('')
     .toUpperCase();
+}
+
+function managerPlayerPortrait(name,className){
+  const photo=MANAGER_PLAYER_PHOTOS[name];
+  const initials=managerLegacyInitials(name);
+  const style=photo
+    ?` style="--portrait-x:${photo.x||'50%'};--portrait-y:${photo.y||'25%'};--portrait-scale:${photo.scale||1}"`
+    :'';
+  return `<span class="${className} manager-player-portrait"${style}>
+    <span class="manager-player-initials" aria-hidden="true">${initials}</span>
+    ${photo?`<img src="${photo.src}" alt="Foto de ${profileAttr(name)}" loading="lazy" decoding="async">`:''}
+  </span>`;
+}
+
+function bindManagerPortraitFallbacks(root=document){
+  root.querySelectorAll('.manager-player-portrait img').forEach(image=>{
+    const removeBrokenImage=()=>image.remove();
+    if(image.complete&&!image.naturalWidth)removeBrokenImage();
+    else image.onerror=removeBrokenImage;
+  });
+}
+
+function managerPlayerPhotoCredits(record){
+  const names=[...new Set((record.seasons||[]).flatMap(season=>
+    [season.mvp?.name,...(season.standouts||[]).map(player=>player.name)]
+  ).filter(Boolean))];
+  const rows=names
+    .map(name=>({name,photo:MANAGER_PLAYER_PHOTOS[name]}))
+    .filter(item=>item.photo)
+    .map(({name,photo})=>`<a href="${photo.source}" target="_blank" rel="noopener noreferrer">
+      <b>${name}</b><span>${photo.credit}</span>
+    </a>`).join('');
+  if(!rows)return '';
+  return `<details class="manager-photo-credits">
+    <summary><span>Fuentes de las fotografías</span><small>${names.length} futbolistas</small></summary>
+    <div>${rows}</div>
+  </details>`;
 }
 
 function managerLegacySeasonMetrics(record,season){
@@ -2163,7 +2334,7 @@ function managerLegacySeasonMarkup(name,record,season){
           <span class="manager-legacy-role">${mvpPosition}</span>
         </div>
         <div class="manager-legacy-player">
-          <span class="manager-legacy-player-token" aria-hidden="true">${managerLegacyInitials(mvp.name)}</span>
+          ${managerPlayerPortrait(mvp.name,'manager-legacy-player-token')}
           <div><small>Figura de la temporada</small><h4>${mvp.name}</h4></div>
         </div>
         <div class="manager-legacy-player-metrics">
@@ -2196,7 +2367,7 @@ function managerLegacySeasonMarkup(name,record,season){
         const isMvp=player.name===mvp.name;
         return `<article class="manager-lineup-player manager-lineup-player--${String(player.role||'').toLowerCase()}${isMvp?' is-mvp':''}">
           <span class="manager-lineup-position">${position.short}</span>
-          <span class="manager-lineup-token" aria-hidden="true">${managerLegacyInitials(player.name)}</span>
+          ${managerPlayerPortrait(player.name,'manager-lineup-token')}
           <div class="manager-lineup-player-copy">
             <small>${isMvp?'MVP Y REFERENTE':position.label.toUpperCase()}</small>
             <h5>${player.name}</h5>
@@ -2246,7 +2417,7 @@ function managerLegacyMarkup(name){
           <div class="manager-legacy-trust-list">
             ${metrics.trusted.map((player,index)=>`<div>
               <span class="manager-legacy-trust-rank">${index+1}</span>
-              <span class="manager-legacy-trust-token" aria-hidden="true">${managerLegacyInitials(player.name)}</span>
+              ${managerPlayerPortrait(player.name,'manager-legacy-trust-token')}
               <span><b>${player.name}</b><small>${[...player.roles].map(role=>MANAGER_LEGACY_POSITIONS[role]?.short||role).join(' · ')}</small></span>
               <strong>${player.lineups}<small>alineaciones</small></strong>
             </div>`).join('')}
@@ -2263,6 +2434,7 @@ function managerLegacyMarkup(name){
           ${managerLegacySeasonMarkup(name,record,selected)}
         </div>
         <p class="manager-legacy-method"><b>Cómo se calcula:</b> la continuidad usa el promedio de alineaciones de los referentes PT, DF, MC y DL sobre 38 jornadas; la rotación es su complemento. El peso de la figura compara al MVP con los cuatro referentes y el equilibrio por líneas mide cuánto cambia el uso entre posiciones. Es una lectura del núcleo destacado, no de toda la plantilla.</p>
+        ${managerPlayerPhotoCredits(record)}
         <button type="button" class="manager-board-close" data-manager-board-close>Ocultar la pizarra</button>
       </section>
     </div>
@@ -2308,6 +2480,7 @@ function selectManagerLegacySeason(name,seasonName){
   host.classList.remove('is-changing');
   void host.offsetWidth;
   host.innerHTML=managerLegacySeasonMarkup(name,record,season);
+  bindManagerPortraitFallbacks(host);
   host.classList.add('is-changing');
 }
 
@@ -2466,6 +2639,7 @@ function openPlayer(name){
   $('playerModal').hidden=false;
   syncModalLock();
   requestAnimationFrame(()=>{
+    bindManagerPortraitFallbacks($('modalContent'));
     animateProfileAchievementUnlocks();
     $('closeModal').focus();
   });
