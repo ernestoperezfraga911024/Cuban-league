@@ -1,7 +1,12 @@
-# Cuban League V91
+# Cuban League V92
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Julio incorpora sus seis temporadas oficiales,
+  desde 2020/21 hasta 2025/26, con sus referentes por línea, estilo de rotación,
+  dependencia del jugador clave y Hombres de hierro. También queda disponible
+  en el Duelo de Banquillos frente a Victor Manuel, Arian Mirandez Li y ANDOBA
+  THE BEST.
 - La Pizarra del Míster de ANDOBA THE BEST incorpora sus seis temporadas
   oficiales, desde 2020/21 hasta 2025/26. La comparación de estilos ya permite
   medirlo directamente frente a Victor Manuel y Arian Mirandez Li.

@@ -612,6 +612,221 @@
           ]
         }
       ]
+    },
+    "Julio": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2020/21",
+          "mvp": {
+            "name": "João Félix",
+            "role": "DL",
+            "points": 121,
+            "lineups": 21
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "João Félix",
+              "points": 121,
+              "lineups": 21
+            },
+            {
+              "role": "MC",
+              "name": "Frenkie De Jong",
+              "points": 84,
+              "lineups": 14
+            },
+            {
+              "role": "DF",
+              "name": "Emerson de Souza",
+              "points": 92,
+              "lineups": 19
+            },
+            {
+              "role": "PT",
+              "name": "Marko Dmitrović",
+              "points": 29,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Brais Méndez",
+            "role": "MC",
+            "points": 113,
+            "lineups": 27
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Antoine Griezmann",
+              "points": 89,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Brais Méndez",
+              "points": 113,
+              "lineups": 27
+            },
+            {
+              "role": "DF",
+              "name": "Martin Valjent",
+              "points": 89,
+              "lineups": 26
+            },
+            {
+              "role": "PT",
+              "name": "Aitor Fernández",
+              "points": 52,
+              "lineups": 10
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Alejandro Catena",
+            "role": "DF",
+            "points": 122,
+            "lineups": 26
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Viktor Tsygankov",
+              "points": 71,
+              "lineups": 14
+            },
+            {
+              "role": "MC",
+              "name": "Samuel Chukwueze",
+              "points": 91,
+              "lineups": 19
+            },
+            {
+              "role": "DF",
+              "name": "Alejandro Catena",
+              "points": 122,
+              "lineups": 26
+            },
+            {
+              "role": "PT",
+              "name": "Gero Rulli",
+              "points": 86,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Ayoze Pérez",
+            "role": "DL",
+            "points": 114,
+            "lineups": 22
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Ayoze Pérez",
+              "points": 114,
+              "lineups": 22
+            },
+            {
+              "role": "MC",
+              "name": "Aurélien Tchouaméni",
+              "points": 88,
+              "lineups": 14
+            },
+            {
+              "role": "DF",
+              "name": "David García",
+              "points": 82,
+              "lineups": 19
+            },
+            {
+              "role": "PT",
+              "name": "Paulo Gazzaniga",
+              "points": 94,
+              "lineups": 17
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Álvaro García",
+            "role": "MC",
+            "points": 113,
+            "lineups": 21
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Cucho Hernández",
+              "points": 89,
+              "lineups": 12
+            },
+            {
+              "role": "MC",
+              "name": "Álvaro García",
+              "points": 113,
+              "lineups": 21
+            },
+            {
+              "role": "DF",
+              "name": "Antonio Raíllo",
+              "points": 100,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "David Soria",
+              "points": 65,
+              "lineups": 13
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Julián Álvarez",
+            "role": "DL",
+            "points": 100,
+            "lineups": 18
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Julián Álvarez",
+              "points": 100,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Pedri",
+              "points": 97,
+              "lineups": 14
+            },
+            {
+              "role": "DF",
+              "name": "Santiago Mouriño",
+              "points": 86,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "Sergio Herrera",
+              "points": 87,
+              "lineups": 14
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [
