@@ -1,7 +1,11 @@
-# Cuban League V94
+# Cuban League V95
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Ernesto incorpora sus cinco temporadas disponibles,
+  desde 2020/21 hasta 2024/25, con referentes por línea, dependencia del crack,
+  estilo de rotación y Hombres de hierro. Giorgi Mamardashvili marca su mayor
+  continuidad con 36 jornadas; la temporada 2025/26 queda pendiente de datos.
 - La Pizarra del Míster de GNT D ZONA incorpora sus cinco temporadas oficiales
   de Primera, desde 2021/22 hasta 2025/26. La temporada 2020/21 continúa
   excluida del análisis porque el equipo militaba en Segunda. Sus referentes,

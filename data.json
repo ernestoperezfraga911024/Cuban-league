@@ -3,6 +3,186 @@
   "currentSeason": "2026/27",
   "lastUpdated": "Sin actualizar",
   "managerLegacies": {
+    "Ernesto": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2020/21",
+          "mvp": {
+            "name": "Leo Messi",
+            "role": "DL",
+            "points": 211,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Leo Messi",
+              "points": 211,
+              "lineups": 19
+            },
+            {
+              "role": "MC",
+              "name": "Denis Suárez",
+              "points": 85,
+              "lineups": 19
+            },
+            {
+              "role": "DF",
+              "name": "Sergio Ramos",
+              "points": 87,
+              "lineups": 13
+            },
+            {
+              "role": "PT",
+              "name": "Jeremías Ledesma",
+              "points": 28,
+              "lineups": 7
+            }
+          ]
+        },
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Nacho Vidal",
+            "role": "DF",
+            "points": 114,
+            "lineups": 31
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Memphis Depay",
+              "points": 94,
+              "lineups": 14
+            },
+            {
+              "role": "MC",
+              "name": "Mauro Arambarri",
+              "points": 80,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Nacho Vidal",
+              "points": 114,
+              "lineups": 31
+            },
+            {
+              "role": "PT",
+              "name": "Reina",
+              "points": 59,
+              "lineups": 16
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Dani Parejo",
+            "role": "MC",
+            "points": 151,
+            "lineups": 24
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Joselu",
+              "points": 80,
+              "lineups": 10
+            },
+            {
+              "role": "MC",
+              "name": "Dani Parejo",
+              "points": 151,
+              "lineups": 24
+            },
+            {
+              "role": "DF",
+              "name": "Antonio Raíllo",
+              "points": 140,
+              "lineups": 28
+            },
+            {
+              "role": "PT",
+              "name": "Giorgi Mamardashvili",
+              "points": 137,
+              "lineups": 36
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Robert Lewandowski",
+            "role": "DL",
+            "points": 165,
+            "lineups": 22
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Robert Lewandowski",
+              "points": 165,
+              "lineups": 22
+            },
+            {
+              "role": "MC",
+              "name": "Fede Valverde",
+              "points": 158,
+              "lineups": 25
+            },
+            {
+              "role": "DF",
+              "name": "Miguel Gutiérrez",
+              "points": 122,
+              "lineups": 24
+            },
+            {
+              "role": "PT",
+              "name": "Unai Simón",
+              "points": 49,
+              "lineups": 7
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Sergio Herrera",
+            "role": "PT",
+            "points": 187,
+            "lineups": 31
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Thierno Barry",
+              "points": 86,
+              "lineups": 17
+            },
+            {
+              "role": "MC",
+              "name": "Pablo Barrios",
+              "points": 76,
+              "lineups": 18
+            },
+            {
+              "role": "DF",
+              "name": "José Ángel Carmona",
+              "points": 87,
+              "lineups": 19
+            },
+            {
+              "role": "PT",
+              "name": "Sergio Herrera",
+              "points": 187,
+              "lineups": 31
+            }
+          ]
+        }
+      ]
+    },
     "Victor Manuel": {
       "expectedMatchdays": 38,
       "seasons": [
