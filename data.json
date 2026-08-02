@@ -183,6 +183,186 @@
         }
       ]
     },
+    "Rivaldo": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Raúl de Tomás",
+            "role": "DL",
+            "points": 159,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Raúl de Tomás",
+              "points": 159,
+              "lineups": 23
+            },
+            {
+              "role": "MC",
+              "name": "Sergio Busquets",
+              "points": 74,
+              "lineups": 10
+            },
+            {
+              "role": "DF",
+              "name": "Ronald Araújo",
+              "points": 99,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "Alex Remiro",
+              "points": 76,
+              "lineups": 14
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Pedri",
+            "role": "MC",
+            "points": 130,
+            "lineups": 20
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Rodrygo",
+              "points": 91,
+              "lineups": 16
+            },
+            {
+              "role": "MC",
+              "name": "Pedri",
+              "points": 130,
+              "lineups": 20
+            },
+            {
+              "role": "DF",
+              "name": "Pablo Maffeo",
+              "points": 81,
+              "lineups": 20
+            },
+            {
+              "role": "PT",
+              "name": "Ter Stegen",
+              "points": 111,
+              "lineups": 20
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Samuel Lino",
+            "role": "MC",
+            "points": 136,
+            "lineups": 24
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Sávio",
+              "points": 68,
+              "lineups": 12
+            },
+            {
+              "role": "MC",
+              "name": "Samuel Lino",
+              "points": 136,
+              "lineups": 24
+            },
+            {
+              "role": "DF",
+              "name": "Jesús Areso",
+              "points": 115,
+              "lineups": 24
+            },
+            {
+              "role": "PT",
+              "name": "Ørjan Nyland",
+              "points": 85,
+              "lineups": 15
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Óscar Mingueza",
+            "role": "DF",
+            "points": 103,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Kylian Mbappé",
+              "points": 82,
+              "lineups": 10
+            },
+            {
+              "role": "MC",
+              "name": "Luka Modrić",
+              "points": 81,
+              "lineups": 13
+            },
+            {
+              "role": "DF",
+              "name": "Óscar Mingueza",
+              "points": 103,
+              "lineups": 19
+            },
+            {
+              "role": "PT",
+              "name": "Giorgi Mamardashvili",
+              "points": 47,
+              "lineups": 9
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Cucho Hernández",
+            "role": "DL",
+            "points": 119,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Cucho Hernández",
+              "points": 119,
+              "lineups": 23
+            },
+            {
+              "role": "MC",
+              "name": "Samuel Costa",
+              "points": 71,
+              "lineups": 11
+            },
+            {
+              "role": "DF",
+              "name": "Natan Souza",
+              "points": 72,
+              "lineups": 22
+            },
+            {
+              "role": "PT",
+              "name": "Julen Agirrezabala",
+              "points": 75,
+              "lineups": 17
+            }
+          ]
+        }
+      ]
+    },
     "Victor Manuel": {
       "expectedMatchdays": 38,
       "seasons": [

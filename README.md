@@ -1,7 +1,12 @@
-# Cuban League V95
+# Cuban League V96
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Rivaldo incorpora sus cinco temporadas oficiales de
+  Primera, desde 2021/22 hasta 2025/26. La temporada 2020/21 queda fuera del
+  análisis porque militaba en Segunda. Sus referentes, Hombres de hierro,
+  dependencia del crack y título de 2022/23 quedan disponibles en el Duelo de
+  Banquillos.
 - La Pizarra del Míster de Ernesto incorpora sus cinco temporadas disponibles,
   desde 2020/21 hasta 2024/25, con referentes por línea, dependencia del crack,
   estilo de rotación y Hombres de hierro. Giorgi Mamardashvili marca su mayor
