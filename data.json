@@ -1582,6 +1582,186 @@
           ]
         }
       ]
+    },
+    "Patria FC": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2021/22",
+          "mvp": {
+            "name": "Alejandro Catena",
+            "role": "DF",
+            "points": 154,
+            "lineups": 31
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Arnaut Danjuma",
+              "points": 107,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Nabil Fekir",
+              "points": 101,
+              "lineups": 15
+            },
+            {
+              "role": "DF",
+              "name": "Alejandro Catena",
+              "points": 154,
+              "lineups": 31
+            },
+            {
+              "role": "PT",
+              "name": "Thibaut Courtois",
+              "points": 151,
+              "lineups": 31
+            }
+          ]
+        },
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Vinícius Júnior",
+            "role": "DL",
+            "points": 126,
+            "lineups": 20
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Vinícius Júnior",
+              "points": 126,
+              "lineups": 20
+            },
+            {
+              "role": "MC",
+              "name": "Álex Berenguer",
+              "points": 84,
+              "lineups": 15
+            },
+            {
+              "role": "DF",
+              "name": "Martin Valjent",
+              "points": 64,
+              "lineups": 15
+            },
+            {
+              "role": "PT",
+              "name": "Alex Remiro",
+              "points": 62,
+              "lineups": 15
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Gorka Guruzeta",
+            "role": "DL",
+            "points": 151,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Gorka Guruzeta",
+              "points": 151,
+              "lineups": 23
+            },
+            {
+              "role": "MC",
+              "name": "Nico Williams",
+              "points": 87,
+              "lineups": 11
+            },
+            {
+              "role": "DF",
+              "name": "Alex Suárez",
+              "points": 45,
+              "lineups": 14
+            },
+            {
+              "role": "PT",
+              "name": "Unai Simón",
+              "points": 104,
+              "lineups": 23
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Lamine Yamal",
+            "role": "DL",
+            "points": 160,
+            "lineups": 18
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Lamine Yamal",
+              "points": 160,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Aimar Oroz",
+              "points": 107,
+              "lineups": 20
+            },
+            {
+              "role": "DF",
+              "name": "Raúl Asencio",
+              "points": 66,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "Antonio Sivera",
+              "points": 91,
+              "lineups": 17
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Kylian Mbappé",
+            "role": "DL",
+            "points": 174,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Kylian Mbappé",
+              "points": 174,
+              "lineups": 19
+            },
+            {
+              "role": "MC",
+              "name": "Mikel Jauregizar",
+              "points": 70,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Leandro Cabrera",
+              "points": 45,
+              "lineups": 13
+            },
+            {
+              "role": "PT",
+              "name": "Aarón Escandell",
+              "points": 108,
+              "lineups": 15
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [

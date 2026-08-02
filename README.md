@@ -1,7 +1,12 @@
-# Cuban League V96
+# Cuban League V97
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Patria FC incorpora sus cinco temporadas oficiales
+  de Primera, desde 2021/22 hasta 2025/26. La temporada 2020/21 queda fuera del
+  análisis porque militaba en Segunda. Alejandro Catena y Thibaut Courtois
+  comparten su récord de continuidad con 31 jornadas, y el equipo ya puede
+  compararse en el Duelo de Banquillos.
 - La Pizarra del Míster de Rivaldo incorpora sus cinco temporadas oficiales de
   Primera, desde 2021/22 hasta 2025/26. La temporada 2020/21 queda fuera del
   análisis porque militaba en Segunda. Sus referentes, Hombres de hierro,
