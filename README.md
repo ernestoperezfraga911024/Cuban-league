@@ -1,7 +1,29 @@
-# Cuban League V100
+# Cuban League V105
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Andy incorpora su temporada de Primera 2025/26.
+  Pablo Fornals es su MVP con 135 puntos, mientras Dakonam Djené lidera sus
+  Hombres de hierro con 30 jornadas. Ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Brian incorpora sus temporadas de Primera 2022/23
+  y 2025/26. Gavi y Antony Santos fueron sus MVP, y Alejandro Catena marca su
+  mayor permanencia con 35 jornadas. Ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Maykel Zuaznabar incorpora su temporada de Primera
+  2024/25. Diego López es su MVP y Hombre de hierro con 114 puntos y 26
+  jornadas; Luis Rioja, Pep Chavarría y Alex Remiro completan sus referentes
+  por línea. El equipo ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de @elministro incorpora su temporada de Primera
+  2024/25. Iñaki Williams es su MVP y Hombre de hierro con 106 puntos y 20
+  jornadas; Brahim Díaz, Miguel Gutiérrez y Rui Silva completan sus referentes
+  por línea. El equipo ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Juventus incorpora su temporada de Primera 2025/26.
+  Mathew Ryan es el MVP y uno de sus Hombres de hierro con 101 puntos y 16
+  jornadas. El campeón ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de MONEY MON$TER incorpora sus tres temporadas
+  oficiales de Primera, desde 2023/24 hasta 2025/26. Las campañas 2020/21,
+  2021/22 y 2022/23 quedan fuera del análisis porque el equipo militaba en
+  Segunda. Mika Mármol lidera sus Hombres de hierro con 33 jornadas y el
+  equipo ya participa en el Duelo de Banquillos.
 - La Pizarra del Míster de Roberto Piñeiro incorpora sus tres temporadas
   oficiales de Primera, desde 2023/24 hasta 2025/26. Las campañas 2020/21,
   2021/22 y 2022/23 quedan fuera del análisis porque el equipo militaba en

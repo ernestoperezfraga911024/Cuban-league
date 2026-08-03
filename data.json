@@ -2162,6 +2162,351 @@
           ]
         }
       ]
+    },
+    "MONEY MON$TER": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Pepelu",
+            "role": "MC",
+            "points": 149,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Lamine Yamal",
+              "points": 117,
+              "lineups": 15
+            },
+            {
+              "role": "MC",
+              "name": "Pepelu",
+              "points": 149,
+              "lineups": 23
+            },
+            {
+              "role": "DF",
+              "name": "Mika Mármol",
+              "points": 130,
+              "lineups": 33
+            },
+            {
+              "role": "PT",
+              "name": "Alex Remiro",
+              "points": 106,
+              "lineups": 24
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Julián Álvarez",
+            "role": "DL",
+            "points": 137,
+            "lineups": 15
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Julián Álvarez",
+              "points": 137,
+              "lineups": 15
+            },
+            {
+              "role": "MC",
+              "name": "Oihan Sancet",
+              "points": 75,
+              "lineups": 8
+            },
+            {
+              "role": "DF",
+              "name": "Nahuel Tenaglia",
+              "points": 111,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "Jan Oblak",
+              "points": 85,
+              "lineups": 17
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Andrei Rațiu",
+            "role": "DF",
+            "points": 115,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Federico Viñas",
+              "points": 83,
+              "lineups": 13
+            },
+            {
+              "role": "MC",
+              "name": "Aimar Oroz",
+              "points": 80,
+              "lineups": 23
+            },
+            {
+              "role": "DF",
+              "name": "Andrei Rațiu",
+              "points": 115,
+              "lineups": 23
+            },
+            {
+              "role": "PT",
+              "name": "Leo Román",
+              "points": 57,
+              "lineups": 12
+            }
+          ]
+        }
+      ]
+    },
+    "@elministro": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Iñaki Williams",
+            "role": "DL",
+            "points": 106,
+            "lineups": 20
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Iñaki Williams",
+              "points": 106,
+              "lineups": 20
+            },
+            {
+              "role": "MC",
+              "name": "Brahim Díaz",
+              "points": 81,
+              "lineups": 19
+            },
+            {
+              "role": "DF",
+              "name": "Miguel Gutiérrez",
+              "points": 80,
+              "lineups": 15
+            },
+            {
+              "role": "PT",
+              "name": "Rui Silva",
+              "points": 54,
+              "lineups": 11
+            }
+          ]
+        }
+      ]
+    },
+    "Maykel Zuaznabar": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Diego López",
+            "role": "DL",
+            "points": 114,
+            "lineups": 26
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Diego López",
+              "points": 114,
+              "lineups": 26
+            },
+            {
+              "role": "MC",
+              "name": "Luis Rioja",
+              "points": 82,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Pep Chavarría",
+              "points": 87,
+              "lineups": 19
+            },
+            {
+              "role": "PT",
+              "name": "Alex Remiro",
+              "points": 56,
+              "lineups": 10
+            }
+          ]
+        }
+      ]
+    },
+    "Andy": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Pablo Fornals",
+            "role": "MC",
+            "points": 135,
+            "lineups": 22
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Raphinha",
+              "points": 93,
+              "lineups": 11
+            },
+            {
+              "role": "MC",
+              "name": "Pablo Fornals",
+              "points": 135,
+              "lineups": 22
+            },
+            {
+              "role": "DF",
+              "name": "Dakonam Djené",
+              "points": 84,
+              "lineups": 30
+            },
+            {
+              "role": "PT",
+              "name": "Paulo Gazzaniga",
+              "points": 88,
+              "lineups": 16
+            }
+          ]
+        }
+      ]
+    },
+    "Brian": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Gavi",
+            "role": "MC",
+            "points": 114,
+            "lineups": 28
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Álvaro Morata",
+              "points": 81,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Gavi",
+              "points": 114,
+              "lineups": 28
+            },
+            {
+              "role": "DF",
+              "name": "Leandro Cabrera",
+              "points": 93,
+              "lineups": 31
+            },
+            {
+              "role": "PT",
+              "name": "Yassine Bounou",
+              "points": 49,
+              "lineups": 13
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Antony Santos",
+            "role": "DL",
+            "points": 174,
+            "lineups": 29
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Antony Santos",
+              "points": 174,
+              "lineups": 29
+            },
+            {
+              "role": "MC",
+              "name": "Alex Baena",
+              "points": 121,
+              "lineups": 25
+            },
+            {
+              "role": "DF",
+              "name": "Alejandro Catena",
+              "points": 159,
+              "lineups": 35
+            },
+            {
+              "role": "PT",
+              "name": "David Soria",
+              "points": 167,
+              "lineups": 32
+            }
+          ]
+        }
+      ]
+    },
+    "Juventus": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Mathew Ryan",
+            "role": "PT",
+            "points": 101,
+            "lineups": 16
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Mikel Oyarzabal",
+              "points": 79,
+              "lineups": 11
+            },
+            {
+              "role": "MC",
+              "name": "Pedri",
+              "points": 83,
+              "lineups": 10
+            },
+            {
+              "role": "DF",
+              "name": "Marcos Llorente",
+              "points": 86,
+              "lineups": 16
+            },
+            {
+              "role": "PT",
+              "name": "Mathew Ryan",
+              "points": 101,
+              "lineups": 16
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [

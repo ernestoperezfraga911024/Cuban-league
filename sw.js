@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v100-roberto-pineiro-manager-pwa';
+const CACHE_NAME = 'cuban-league-v105-andy-brian-manager-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=100-20260802',
-  './app.js?v=100-20260802',
-  './data.json?v=100-20260802',
-  './supabase-config.js?v=100-20260802',
+  './styles.css?v=105-20260803',
+  './app.js?v=105-20260803',
+  './data.json?v=105-20260803',
+  './supabase-config.js?v=105-20260803',
   './admin.html',
   './admin.css?v=71-20260728',
   './admin.js?v=71-20260728',
@@ -105,7 +105,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=100-20260802'));
+    event.respondWith(networkFirst(request, './data.json?v=105-20260803'));
     return;
   }
 
