@@ -1762,6 +1762,406 @@
           ]
         }
       ]
+    },
+    "Viva Libre": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Lucas Boyé",
+            "role": "DL",
+            "points": 137,
+            "lineups": 32
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Lucas Boyé",
+              "points": 137,
+              "lineups": 32
+            },
+            {
+              "role": "MC",
+              "name": "Takefusa Kubo",
+              "points": 132,
+              "lineups": 20
+            },
+            {
+              "role": "DF",
+              "name": "Eric García",
+              "points": 54,
+              "lineups": 12
+            },
+            {
+              "role": "PT",
+              "name": "Pepe Reina",
+              "points": 83,
+              "lineups": 20
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Alexander Sørloth",
+            "role": "DL",
+            "points": 170,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Alexander Sørloth",
+              "points": 170,
+              "lineups": 19
+            },
+            {
+              "role": "MC",
+              "name": "Jon Guridi",
+              "points": 133,
+              "lineups": 31
+            },
+            {
+              "role": "DF",
+              "name": "Andoni Gorosabel",
+              "points": 135,
+              "lineups": 34
+            },
+            {
+              "role": "PT",
+              "name": "Sergio Herrera",
+              "points": 105,
+              "lineups": 20
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Mikel Oyarzabal",
+            "role": "DL",
+            "points": 122,
+            "lineups": 28
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Mikel Oyarzabal",
+              "points": 122,
+              "lineups": 28
+            },
+            {
+              "role": "MC",
+              "name": "Koke",
+              "points": 121,
+              "lineups": 28
+            },
+            {
+              "role": "DF",
+              "name": "Lucas Vázquez",
+              "points": 74,
+              "lineups": 14
+            },
+            {
+              "role": "PT",
+              "name": "Unai Simón",
+              "points": 103,
+              "lineups": 18
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Marko Dmitrović",
+            "role": "PT",
+            "points": 178,
+            "lineups": 35
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Vedat Muriqi",
+              "points": 85,
+              "lineups": 13
+            },
+            {
+              "role": "MC",
+              "name": "Sergi Darder",
+              "points": 136,
+              "lineups": 31
+            },
+            {
+              "role": "DF",
+              "name": "Jules Koundé",
+              "points": 79,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "Marko Dmitrović",
+              "points": 178,
+              "lineups": 35
+            }
+          ]
+        }
+      ]
+    },
+    "Bayer Munich": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2022/23",
+          "mvp": {
+            "name": "Rui Silva",
+            "role": "PT",
+            "points": 98,
+            "lineups": 24
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Sergio Camello",
+              "points": 67,
+              "lineups": 18
+            },
+            {
+              "role": "MC",
+              "name": "Frenkie De Jong",
+              "points": 88,
+              "lineups": 14
+            },
+            {
+              "role": "DF",
+              "name": "Fran García",
+              "points": 91,
+              "lineups": 21
+            },
+            {
+              "role": "PT",
+              "name": "Rui Silva",
+              "points": 98,
+              "lineups": 24
+            }
+          ]
+        },
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Ante Budimir",
+            "role": "DL",
+            "points": 137,
+            "lineups": 19
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Ante Budimir",
+              "points": 137,
+              "lineups": 19
+            },
+            {
+              "role": "MC",
+              "name": "Nemanja Maksimović",
+              "points": 77,
+              "lineups": 15
+            },
+            {
+              "role": "DF",
+              "name": "Carl Starfelt",
+              "points": 70,
+              "lineups": 13
+            },
+            {
+              "role": "PT",
+              "name": "Jeremías Ledesma",
+              "points": 69,
+              "lineups": 13
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Joan Garcia",
+            "role": "PT",
+            "points": 236,
+            "lineups": 37
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Alexander Sørloth",
+              "points": 164,
+              "lineups": 29
+            },
+            {
+              "role": "MC",
+              "name": "Pape Gueye",
+              "points": 91,
+              "lineups": 16
+            },
+            {
+              "role": "DF",
+              "name": "David López",
+              "points": 84,
+              "lineups": 18
+            },
+            {
+              "role": "PT",
+              "name": "Joan Garcia",
+              "points": 236,
+              "lineups": 37
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Jude Bellingham",
+            "role": "MC",
+            "points": 100,
+            "lineups": 17
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Haissem Hassan",
+              "points": 66,
+              "lineups": 16
+            },
+            {
+              "role": "MC",
+              "name": "Jude Bellingham",
+              "points": 100,
+              "lineups": 17
+            },
+            {
+              "role": "DF",
+              "name": "Nahuel Tenaglia",
+              "points": 62,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "Aarón Escandell",
+              "points": 93,
+              "lineups": 21
+            }
+          ]
+        }
+      ]
+    },
+    "Roberto Piñeiro": {
+      "expectedMatchdays": 38,
+      "seasons": [
+        {
+          "season": "2023/24",
+          "mvp": {
+            "name": "Iago Aspas",
+            "role": "DL",
+            "points": 168,
+            "lineups": 23
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Iago Aspas",
+              "points": 168,
+              "lineups": 23
+            },
+            {
+              "role": "MC",
+              "name": "Sergio Arribas",
+              "points": 81,
+              "lineups": 13
+            },
+            {
+              "role": "DF",
+              "name": "Dakonam Djené",
+              "points": 80,
+              "lineups": 24
+            },
+            {
+              "role": "PT",
+              "name": "Predrag Rajković",
+              "points": 134,
+              "lineups": 25
+            }
+          ]
+        },
+        {
+          "season": "2024/25",
+          "mvp": {
+            "name": "Ante Budimir",
+            "role": "DL",
+            "points": 141,
+            "lineups": 21
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Ante Budimir",
+              "points": 141,
+              "lineups": 21
+            },
+            {
+              "role": "MC",
+              "name": "Dani Rodríguez",
+              "points": 119,
+              "lineups": 23
+            },
+            {
+              "role": "DF",
+              "name": "Florian Lejeune",
+              "points": 99,
+              "lineups": 17
+            },
+            {
+              "role": "PT",
+              "name": "Thibaut Courtois",
+              "points": 127,
+              "lineups": 23
+            }
+          ]
+        },
+        {
+          "season": "2025/26",
+          "mvp": {
+            "name": "Augusto Batalla",
+            "role": "PT",
+            "points": 125,
+            "lineups": 27
+          },
+          "standouts": [
+            {
+              "role": "DL",
+              "name": "Gerard Moreno",
+              "points": 101,
+              "lineups": 17
+            },
+            {
+              "role": "MC",
+              "name": "Giuliano Simeone",
+              "points": 122,
+              "lineups": 26
+            },
+            {
+              "role": "DF",
+              "name": "Jonny Otto",
+              "points": 85,
+              "lineups": 28
+            },
+            {
+              "role": "PT",
+              "name": "Augusto Batalla",
+              "points": 125,
+              "lineups": 27
+            }
+          ]
+        }
+      ]
     }
   },
   "participants": [

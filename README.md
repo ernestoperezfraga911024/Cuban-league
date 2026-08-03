@@ -1,7 +1,22 @@
-# Cuban League V97
+# Cuban League V100
 
 Sitio oficial de la Cuban League con:
 
+- La Pizarra del Míster de Roberto Piñeiro incorpora sus tres temporadas
+  oficiales de Primera, desde 2023/24 hasta 2025/26. Las campañas 2020/21,
+  2021/22 y 2022/23 quedan fuera del análisis porque el equipo militaba en
+  Segunda. Jonny Otto lidera sus Hombres de hierro con 28 jornadas y el equipo
+  ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Bayer Munich incorpora sus cuatro temporadas
+  oficiales de Primera, desde 2022/23 hasta 2025/26. Las campañas 2020/21 y
+  2021/22 quedan fuera del análisis porque el equipo militaba en Segunda. Joan
+  Garcia lidera sus Hombres de hierro con 37 jornadas y el equipo ya participa
+  en el Duelo de Banquillos.
+- La Pizarra del Míster de Viva Libre incorpora sus cuatro temporadas oficiales
+  de Primera, desde 2022/23 hasta 2025/26. Las campañas 2020/21 y 2021/22 quedan
+  fuera del análisis porque el equipo militaba en Segunda. Marko Dmitrović
+  encabeza sus Hombres de hierro con 35 jornadas y el equipo ya participa en el
+  Duelo de Banquillos.
 - La Pizarra del Míster de Patria FC incorpora sus cinco temporadas oficiales
   de Primera, desde 2021/22 hasta 2025/26. La temporada 2020/21 queda fuera del
   análisis porque militaba en Segunda. Alejandro Catena y Thibaut Courtois
