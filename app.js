@@ -1,4 +1,4 @@
-const APP_VERSION='107-20260804';
+const APP_VERSION='108-20260804';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -2809,7 +2809,7 @@ function crazyStatsAggregateCareers(records){
   });
   return [...careers.values()].map(item=>({
     ...item,
-    campaigns:item.seasons.size,
+    seasonsCount:item.seasons.size,
     average:item.lineups?item.points/item.lineups:0
   }));
 }
@@ -2834,7 +2834,7 @@ function crazyStatsCrackCareers(manager,legacy){
   });
   return [...cracks.values()].map(item=>({
     ...item,
-    campaigns:item.seasons.size,
+    seasonsCount:item.seasons.size,
     average:item.lineups?item.points/item.lineups:0
   })).sort((a,b)=>b.points-a.points||b.lineups-a.lineups||a.name.localeCompare(b.name,'es'));
 }
@@ -2843,15 +2843,22 @@ function crazyStatsDataset(){
   const records=crazyStatsPlayerRecords();
   const teams=Object.entries(DATA.managerLegacies||{}).map(([name,legacy])=>{
     const metrics=managerLegacyMetrics(name,legacy);
-    const careers=crazyStatsAggregateCareers(records.filter(record=>record.manager===name))
+    const teamRecords=records.filter(record=>record.manager===name);
+    const careers=crazyStatsAggregateCareers(teamRecords)
       .sort((a,b)=>b.lineups-a.lineups||b.points-a.points||a.name.localeCompare(b.name,'es'));
+    const ironMan=[...teamRecords].sort((a,b)=>
+      b.lineups-a.lineups||
+      b.points-a.points||
+      String(b.season||'').localeCompare(String(a.season||''),'es')||
+      a.name.localeCompare(b.name,'es')
+    )[0]||null;
     const cracks=crazyStatsCrackCareers(name,legacy);
     return {
       name,
       legacy,
       metrics,
       careers,
-      ironMan:careers[0]||null,
+      ironMan,
       cracks,
       bestCrack:cracks[0]||null
     };
@@ -2870,13 +2877,13 @@ function crazyStatsDataset(){
   const efficientCracks=cracks.filter(player=>player.lineups>=20).sort((a,b)=>
     b.average-a.average||b.points-a.points||a.name.localeCompare(b.name,'es')
   );
-  const singleCampaign=[...records].sort((a,b)=>
+  const bestSeasonRecord=[...records].sort((a,b)=>
     b.points-a.points||b.lineups-a.lineups||a.name.localeCompare(b.name,'es')
   );
   return {
     records,
     teams,
-    totalCampaigns:teams.reduce((sum,team)=>sum+(team.legacy.seasons||[]).length,0),
+    totalSeasons:teams.reduce((sum,team)=>sum+(team.legacy.seasons||[]).length,0),
     totalCareers:teams.reduce((sum,team)=>sum+team.careers.length,0),
     conservative:byContinuity[0]||null,
     rotator:byContinuity[byContinuity.length-1]||null,
@@ -2887,7 +2894,7 @@ function crazyStatsDataset(){
     cracks,
     bestCrack:cracks[0]||null,
     efficientCrack:efficientCracks[0]||null,
-    singleCampaign:singleCampaign[0]||null
+    bestSeasonRecord:bestSeasonRecord[0]||null
   };
 }
 
@@ -2917,12 +2924,12 @@ function crazyStatsIronCard(team,index){
     <div class="crazy-team-card-copy">
       ${crazyStatsTeamLink(team.name)}
       <h4>${crazyStatsEscape(player.name)}</h4>
-      <p>El futbolista más utilizado por este equipo en el archivo disponible.</p>
+      <p>El futbolista más alineado por este equipo en una sola temporada.</p>
     </div>
     <div class="crazy-team-card-metrics">
       <div class="crazy-metric"><span>alineaciones</span><strong>${crazyStatsNumber(player.lineups)}</strong></div>
       <div class="crazy-metric"><span>puntos</span><strong>${crazyStatsNumber(player.points)}</strong></div>
-      <div class="crazy-metric"><span>${player.campaigns===1?'campaña':'campañas'}</span><strong>${crazyStatsNumber(player.campaigns)}</strong></div>
+      <div class="crazy-metric"><span>temporada</span><strong>${crazyStatsEscape(player.season||'—')}</strong></div>
     </div>
   </article>`;
 }
@@ -2973,7 +2980,7 @@ function renderCrazyStats(){
   const iron=stats.leagueIronMan;
   const bestCrack=stats.bestCrack;
   const efficient=stats.efficientCrack;
-  const campaign=stats.singleCampaign;
+  const bestSeasonRecord=stats.bestSeasonRecord;
   const styleTeams=[...stats.teams].sort((a,b)=>b.metrics.continuity-a.metrics.continuity||a.name.localeCompare(b.name,'es'));
   const crackTeams=stats.teams.filter(team=>team.bestCrack).sort((a,b)=>
     b.bestCrack.points-a.bestCrack.points||b.bestCrack.lineups-a.bestCrack.lineups||a.name.localeCompare(b.name,'es')
@@ -2987,7 +2994,7 @@ function renderCrazyStats(){
       </div>
       <div class="crazy-stats-counts" aria-label="Cobertura de las estadísticas">
         <span class="crazy-stats-count"><strong>${stats.teams.length}</strong><span>equipos</span></span>
-        <span class="crazy-stats-count"><strong>${stats.totalCampaigns}</strong><span>campañas</span></span>
+        <span class="crazy-stats-count"><strong>${stats.totalSeasons}</strong><span>temporadas</span></span>
         <span class="crazy-stats-count"><strong>${stats.totalCareers}</strong><span>jugadores</span></span>
       </div>
     </div>
@@ -3002,19 +3009,19 @@ function renderCrazyStats(){
     <section id="crazyStatsRecords" class="crazy-stats-panel is-active" role="tabpanel" aria-labelledby="crazyStatsTabRecords" data-crazy-stats-panel="records">
       <div class="crazy-panel-head"><div><span class="eyebrow">RÉCORDS GENERALES</span><h3>Los extremos de la liga</h3></div><p>Ocho datos rápidos con su significado visible.</p></div>
       <div class="crazy-record-grid">
-        ${crazyStatsRecordCard({icon:'shield',label:'MAYOR CONTINUIDAD',title:conservative?.name||'Sin dato',value:`${crazyStatsNumber(conservative?.metrics.continuity,1)}%`,detail:`${conservative?.metrics.style||'Sin estilo'} en ${conservative?.legacy.seasons.length||0} campañas.`,tone:'green',manager:conservative?.name})}
+        ${crazyStatsRecordCard({icon:'shield',label:'MAYOR CONTINUIDAD',title:conservative?.name||'Sin dato',value:`${crazyStatsNumber(conservative?.metrics.continuity,1)}%`,detail:`${conservative?.metrics.style||'Sin estilo'} en ${conservative?.legacy.seasons.length||0} temporadas.`,tone:'green',manager:conservative?.name})}
         ${crazyStatsRecordCard({icon:'chart',label:'MAYOR ROTACIÓN',title:rotator?.name||'Sin dato',value:`${crazyStatsNumber(rotator?.metrics.rotation,1)}%`,detail:`Rotación estimada según el uso de sus cuatro referentes.`,tone:'cyan',manager:rotator?.name})}
         ${crazyStatsRecordCard({icon:'star',label:'MEJOR CRACK ACUMULADO',title:bestCrack?.name||'Sin dato',value:`${crazyStatsNumber(bestCrack?.points)} pts`,detail:`Con ${bestCrack?.manager||'sin equipo'}: ${crazyStatsNumber(bestCrack?.lineups)} alineaciones MVP.`,tone:'gold',manager:bestCrack?.manager})}
         ${crazyStatsRecordCard({icon:'ball',label:'MÁS CRACK-DEPENDIENTE',title:dependent?.name||'Sin dato',value:`${crazyStatsNumber(dependent?.metrics.crackDependence,1)}%`,detail:`Porcentaje de los puntos oficiales aportados por sus MVP.`,tone:'orange',manager:dependent?.name})}
         ${crazyStatsRecordCard({icon:'users',label:'JUEGO MÁS CORAL',title:coral?.name||'Sin dato',value:`${crazyStatsNumber(coral?.metrics.crackDependence,1)}%`,detail:`La menor dependencia acumulada de un solo crack.`,tone:'violet',manager:coral?.name})}
-        ${crazyStatsRecordCard({icon:'trophy',label:'JUGADOR DE HIERRO',title:iron?.ironMan?.name||'Sin dato',value:`${crazyStatsNumber(iron?.ironMan?.lineups)} alineaciones`,detail:`Acumuladas con ${iron?.name||'sin equipo'} en ${iron?.ironMan?.campaigns||0} campañas.`,tone:'green',manager:iron?.name})}
-        ${crazyStatsRecordCard({icon:'medal',label:'MEJOR CAMPAÑA INDIVIDUAL',title:campaign?.name||'Sin dato',value:`${crazyStatsNumber(campaign?.points)} pts`,detail:`${campaign?.manager||'Sin equipo'} · temporada ${campaign?.season||'—'} · ${crazyStatsNumber(campaign?.lineups)} alineaciones.`,tone:'gold',manager:campaign?.manager})}
+        ${crazyStatsRecordCard({icon:'trophy',label:'JUGADOR DE HIERRO',title:iron?.ironMan?.name||'Sin dato',value:`${crazyStatsNumber(iron?.ironMan?.lineups)} alineaciones`,detail:`${iron?.name||'Sin equipo'} · temporada ${iron?.ironMan?.season||'—'} · ${crazyStatsNumber(iron?.ironMan?.points)} puntos.`,tone:'green',manager:iron?.name})}
+        ${crazyStatsRecordCard({icon:'medal',label:'MEJOR TEMPORADA INDIVIDUAL',title:bestSeasonRecord?.name||'Sin dato',value:`${crazyStatsNumber(bestSeasonRecord?.points)} pts`,detail:`${bestSeasonRecord?.manager||'Sin equipo'} · temporada ${bestSeasonRecord?.season||'—'} · ${crazyStatsNumber(bestSeasonRecord?.lineups)} alineaciones.`,tone:'gold',manager:bestSeasonRecord?.manager})}
         ${crazyStatsRecordCard({icon:'chart',label:'CRACK MÁS RENTABLE',title:efficient?.name||'Sin dato',value:`${crazyStatsNumber(efficient?.average,1)} pts/al.`,detail:`${efficient?.manager||'Sin equipo'} · mínimo 20 alineaciones MVP acumuladas.`,tone:'cyan',manager:efficient?.manager})}
       </div>
     </section>
 
     <section id="crazyStatsIron" class="crazy-stats-panel" role="tabpanel" aria-labelledby="crazyStatsTabIron" data-crazy-stats-panel="iron" hidden>
-      <div class="crazy-panel-head"><div><span class="eyebrow">UNO POR EQUIPO</span><h3>Los jugadores de hierro</h3></div><p>El jugador que más alineaciones acumuló con cada equipo.</p></div>
+      <div class="crazy-panel-head"><div><span class="eyebrow">UNO POR EQUIPO</span><h3>Los jugadores de hierro</h3></div><p>El jugador con más alineaciones en una sola temporada de cada equipo.</p></div>
       <div class="crazy-team-list">${stats.ironMen.map(crazyStatsIronCard).join('')}</div>
     </section>
 
@@ -3032,8 +3039,8 @@ function renderCrazyStats(){
       <summary><span>${uiIcon('shield')} Cómo se calculan estas estadísticas</span><b>Ver método</b></summary>
       <div>
         <p><b>Continuidad:</b> promedio de alineaciones de los referentes PT, DF, MC y DL frente a las jornadas posibles. <b>Rotación estimada:</b> el porcentaje restante; es una tendencia, no el recuento de todos los fichajes.</p>
-        <p><b>Dependencia del crack:</b> puntos de los MVP divididos entre los puntos oficiales del equipo. <b>Jugador de hierro:</b> alineaciones acumuladas de un mismo futbolista con el mismo equipo.</p>
-        <p>Cuando un MVP también aparece como mejor jugador de su posición en una campaña, se cuenta una sola vez. Los datos históricos originales permanecen intactos.</p>
+        <p><b>Dependencia del crack:</b> puntos de los MVP divididos entre los puntos oficiales del equipo. <b>Jugador de hierro:</b> mejor registro de alineaciones de un futbolista en una sola temporada, comparando todas las temporadas del equipo.</p>
+        <p>Cuando un MVP también aparece como mejor jugador de su posición en una temporada, se cuenta una sola vez. Los datos históricos originales permanecen intactos.</p>
       </div>
     </details>`;
 }
