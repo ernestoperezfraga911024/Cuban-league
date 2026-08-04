@@ -1,4 +1,4 @@
-const APP_VERSION='105-20260803';
+const APP_VERSION='106-20260804';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -2736,7 +2736,319 @@ function renderChampions(){
   }).join('');
   $('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('');
 }
-function renderNews(){$('newsGrid').innerHTML=DATA.news.map(n=>`<article class="news-card icon-card"><div class="card-label-row"><span>${n.date}</span><span class="record-icon news">${uiIcon('news')}</span></div><h3>${n.title}</h3><p>${n.text}</p></article>`).join('')}
+function crazyStatsNormalizeName(value){
+  return String(value||'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .trim()
+    .toLocaleLowerCase('es');
+}
+
+function crazyStatsEscape(value){
+  return String(value??'').replace(/[&<>"']/g,char=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  })[char]);
+}
+
+function crazyStatsNumber(value,digits=0){
+  const number=Number(value)||0;
+  return number.toLocaleString('es-ES',{
+    minimumFractionDigits:digits,
+    maximumFractionDigits:digits
+  });
+}
+
+function crazyStatsPlayerRecords(){
+  const records=[];
+  Object.entries(DATA.managerLegacies||{}).forEach(([manager,legacy])=>{
+    (legacy.seasons||[]).forEach(season=>{
+      const seasonPlayers=new Map();
+      const addPlayer=(player,isMvp=false)=>{
+        if(!player?.name)return;
+        const key=crazyStatsNormalizeName(player.name);
+        const previous=seasonPlayers.get(key);
+        seasonPlayers.set(key,{
+          manager,
+          season:season.season,
+          name:previous?.name||player.name,
+          points:Math.max(previous?.points||0,Number(player.points)||0),
+          lineups:Math.max(previous?.lineups||0,Number(player.lineups)||0),
+          role:previous?.role||player.role||(isMvp?'MVP':'Jugador'),
+          isMvp:Boolean(previous?.isMvp||isMvp)
+        });
+      };
+      (season.standouts||[]).forEach(player=>addPlayer(player,false));
+      addPlayer(season.mvp,true);
+      records.push(...seasonPlayers.values());
+    });
+  });
+  return records;
+}
+
+function crazyStatsAggregateCareers(records){
+  const careers=new Map();
+  records.forEach(record=>{
+    const key=crazyStatsNormalizeName(record.name);
+    const current=careers.get(key)||{
+      name:record.name,
+      manager:record.manager,
+      points:0,
+      lineups:0,
+      seasons:new Set(),
+      mvpSeasons:0
+    };
+    current.points+=record.points||0;
+    current.lineups+=record.lineups||0;
+    current.seasons.add(record.season);
+    if(record.isMvp)current.mvpSeasons+=1;
+    careers.set(key,current);
+  });
+  return [...careers.values()].map(item=>({
+    ...item,
+    campaigns:item.seasons.size,
+    average:item.lineups?item.points/item.lineups:0
+  }));
+}
+
+function crazyStatsCrackCareers(manager,legacy){
+  const cracks=new Map();
+  (legacy.seasons||[]).forEach(season=>{
+    const player=season.mvp;
+    if(!player?.name)return;
+    const key=crazyStatsNormalizeName(player.name);
+    const current=cracks.get(key)||{
+      name:player.name,
+      manager,
+      points:0,
+      lineups:0,
+      seasons:new Set()
+    };
+    current.points+=Number(player.points)||0;
+    current.lineups+=Number(player.lineups)||0;
+    current.seasons.add(season.season);
+    cracks.set(key,current);
+  });
+  return [...cracks.values()].map(item=>({
+    ...item,
+    campaigns:item.seasons.size,
+    average:item.lineups?item.points/item.lineups:0
+  })).sort((a,b)=>b.points-a.points||b.lineups-a.lineups||a.name.localeCompare(b.name,'es'));
+}
+
+function crazyStatsDataset(){
+  const records=crazyStatsPlayerRecords();
+  const teams=Object.entries(DATA.managerLegacies||{}).map(([name,legacy])=>{
+    const metrics=managerLegacyMetrics(name,legacy);
+    const careers=crazyStatsAggregateCareers(records.filter(record=>record.manager===name))
+      .sort((a,b)=>b.lineups-a.lineups||b.points-a.points||a.name.localeCompare(b.name,'es'));
+    const cracks=crazyStatsCrackCareers(name,legacy);
+    return {
+      name,
+      legacy,
+      metrics,
+      careers,
+      ironMan:careers[0]||null,
+      cracks,
+      bestCrack:cracks[0]||null
+    };
+  }).filter(team=>team.legacy?.seasons?.length);
+  const byContinuity=[...teams].sort((a,b)=>b.metrics.continuity-a.metrics.continuity||a.name.localeCompare(b.name,'es'));
+  const withOfficialPoints=teams.filter(team=>team.metrics.totalTeamPoints>0&&team.metrics.crackDependence>0);
+  const byDependence=[...withOfficialPoints].sort((a,b)=>b.metrics.crackDependence-a.metrics.crackDependence||a.name.localeCompare(b.name,'es'));
+  const ironMen=teams.filter(team=>team.ironMan).sort((a,b)=>
+    b.ironMan.lineups-a.ironMan.lineups||
+    b.ironMan.points-a.ironMan.points||
+    a.name.localeCompare(b.name,'es')
+  );
+  const cracks=teams.flatMap(team=>team.cracks).sort((a,b)=>
+    b.points-a.points||b.lineups-a.lineups||a.name.localeCompare(b.name,'es')
+  );
+  const efficientCracks=cracks.filter(player=>player.lineups>=20).sort((a,b)=>
+    b.average-a.average||b.points-a.points||a.name.localeCompare(b.name,'es')
+  );
+  const singleCampaign=[...records].sort((a,b)=>
+    b.points-a.points||b.lineups-a.lineups||a.name.localeCompare(b.name,'es')
+  );
+  return {
+    records,
+    teams,
+    totalCampaigns:teams.reduce((sum,team)=>sum+(team.legacy.seasons||[]).length,0),
+    totalCareers:teams.reduce((sum,team)=>sum+team.careers.length,0),
+    conservative:byContinuity[0]||null,
+    rotator:byContinuity[byContinuity.length-1]||null,
+    dependent:byDependence[0]||null,
+    coral:byDependence[byDependence.length-1]||null,
+    ironMen,
+    leagueIronMan:ironMen[0]||null,
+    cracks,
+    bestCrack:cracks[0]||null,
+    efficientCrack:efficientCracks[0]||null,
+    singleCampaign:singleCampaign[0]||null
+  };
+}
+
+function crazyStatsTeamLink(name){
+  const safe=crazyStatsEscape(name);
+  return `<button type="button" class="crazy-team-link" data-profile-player="${crazyStatsEscape(name)}"><span>${safe}</span><small>Ver perfil →</small></button>`;
+}
+
+function crazyStatsRecordCard({icon='sparkles',label,title,value,detail,tone='green',manager=''}){
+  return `<article class="crazy-record-card tone-${tone}">
+    <div class="crazy-record-card-top"><span>${uiIcon(icon)}</span><small class="crazy-record-kicker">${crazyStatsEscape(label)}</small></div>
+    <h4>${crazyStatsEscape(title)}</h4>
+    <strong class="crazy-record-card-value">${crazyStatsEscape(value)}</strong>
+    <p>${crazyStatsEscape(detail)}</p>
+    ${manager?crazyStatsTeamLink(manager):''}
+  </article>`;
+}
+
+function crazyStatsIronCard(team,index){
+  const player=team.ironMan;
+  return `<article class="crazy-team-card crazy-iron-card">
+    <span class="crazy-rank">${String(index+1).padStart(2,'0')}</span>
+    <div class="crazy-team-card-copy">
+      ${crazyStatsTeamLink(team.name)}
+      <h4>${crazyStatsEscape(player.name)}</h4>
+      <p>El futbolista más utilizado por este equipo en el archivo disponible.</p>
+    </div>
+    <div class="crazy-team-card-metrics">
+      <div class="crazy-metric"><span>alineaciones</span><strong>${crazyStatsNumber(player.lineups)}</strong></div>
+      <div class="crazy-metric"><span>puntos</span><strong>${crazyStatsNumber(player.points)}</strong></div>
+      <div class="crazy-metric"><span>${player.campaigns===1?'campaña':'campañas'}</span><strong>${crazyStatsNumber(player.campaigns)}</strong></div>
+    </div>
+  </article>`;
+}
+
+function crazyStatsStyleCard(team,index){
+  const metrics=team.metrics;
+  return `<article class="crazy-team-card crazy-style-card">
+    <span class="crazy-rank">${String(index+1).padStart(2,'0')}</span>
+    <div class="crazy-team-card-copy">
+      ${crazyStatsTeamLink(team.name)}
+      <h4>${crazyStatsEscape(metrics.style)}</h4>
+      <p>${crazyStatsEscape(metrics.lineIdentity)} · línea dominante: ${crazyStatsEscape(metrics.dominantLine?.label||'sin dato')}.</p>
+    </div>
+    <div class="crazy-style-bars">
+      <div><span class="crazy-style-bar-head"><b>Continuidad</b><strong>${crazyStatsNumber(metrics.continuity,1)}%</strong></span><i class="crazy-style-track"><u style="width:${Math.max(0,Math.min(100,metrics.continuity))}%"></u></i></div>
+      <div><span class="crazy-style-bar-head"><b>Rotación estimada</b><strong>${crazyStatsNumber(metrics.rotation,1)}%</strong></span><i class="crazy-style-track"><u style="width:${Math.max(0,Math.min(100,metrics.rotation))}%"></u></i></div>
+      <div><span class="crazy-style-bar-head"><b>Dependencia del crack</b><strong>${crazyStatsNumber(metrics.crackDependence,1)}%</strong></span><i class="crazy-style-track"><u style="width:${Math.max(0,Math.min(100,metrics.crackDependence))}%"></u></i></div>
+    </div>
+  </article>`;
+}
+
+function crazyStatsCrackCard(team,index){
+  const crack=team.bestCrack;
+  return `<article class="crazy-team-card crazy-crack-card">
+    <span class="crazy-rank">${String(index+1).padStart(2,'0')}</span>
+    <div class="crazy-team-card-copy">
+      ${crazyStatsTeamLink(team.name)}
+      <h4>${crazyStatsEscape(crack.name)}</h4>
+      <p>El crack que más puntos MVP acumuló para este equipo.</p>
+    </div>
+    <div class="crazy-team-card-metrics">
+      <div class="crazy-metric"><span>puntos MVP</span><strong>${crazyStatsNumber(crack.points)}</strong></div>
+      <div class="crazy-metric"><span>alineaciones</span><strong>${crazyStatsNumber(crack.lineups)}</strong></div>
+      <div class="crazy-metric"><span>pts/alineación</span><strong>${crazyStatsNumber(crack.average,1)}</strong></div>
+      <div class="crazy-metric"><span>del equipo</span><strong>${crazyStatsNumber(team.metrics.crackDependence,1)}%</strong></div>
+    </div>
+  </article>`;
+}
+
+function renderCrazyStats(){
+  const root=$('crazyStatsRoot');
+  if(!root)return;
+  const stats=crazyStatsDataset();
+  const conservative=stats.conservative;
+  const rotator=stats.rotator;
+  const dependent=stats.dependent;
+  const coral=stats.coral;
+  const iron=stats.leagueIronMan;
+  const bestCrack=stats.bestCrack;
+  const efficient=stats.efficientCrack;
+  const campaign=stats.singleCampaign;
+  const styleTeams=[...stats.teams].sort((a,b)=>b.metrics.continuity-a.metrics.continuity||a.name.localeCompare(b.name,'es'));
+  const crackTeams=stats.teams.filter(team=>team.bestCrack).sort((a,b)=>
+    b.bestCrack.points-a.bestCrack.points||b.bestCrack.lineups-a.bestCrack.lineups||a.name.localeCompare(b.name,'es')
+  );
+  root.innerHTML=`
+    <div class="crazy-stats-overview">
+      <div class="crazy-stats-overview-copy">
+        <span class="eyebrow">RADAR HISTÓRICO</span>
+        <h3>La liga entera, de un vistazo.</h3>
+        <p>Una lectura acumulada y directa: sin selector de temporada y sin cambiar ningún dato del historial.</p>
+      </div>
+      <div class="crazy-stats-counts" aria-label="Cobertura de las estadísticas">
+        <span class="crazy-stats-count"><strong>${stats.teams.length}</strong><span>equipos</span></span>
+        <span class="crazy-stats-count"><strong>${stats.totalCampaigns}</strong><span>campañas</span></span>
+        <span class="crazy-stats-count"><strong>${stats.totalCareers}</strong><span>jugadores</span></span>
+      </div>
+    </div>
+
+    <div class="crazy-stats-tabs" role="tablist" aria-label="Categorías de estadísticas locas">
+      <button id="crazyStatsTabRecords" type="button" class="crazy-stats-tab is-active" role="tab" aria-selected="true" aria-controls="crazyStatsRecords" data-crazy-stats-tab="records">${uiIcon('sparkles')}<span>Lo más loco</span></button>
+      <button id="crazyStatsTabIron" type="button" class="crazy-stats-tab" role="tab" aria-selected="false" aria-controls="crazyStatsIron" data-crazy-stats-tab="iron">${uiIcon('shield')}<span>Jugadores de hierro</span></button>
+      <button id="crazyStatsTabStyles" type="button" class="crazy-stats-tab" role="tab" aria-selected="false" aria-controls="crazyStatsStyles" data-crazy-stats-tab="styles">${uiIcon('chart')}<span>Estilos de equipo</span></button>
+      <button id="crazyStatsTabCracks" type="button" class="crazy-stats-tab" role="tab" aria-selected="false" aria-controls="crazyStatsCracks" data-crazy-stats-tab="cracks">${uiIcon('star')}<span>Cracks</span></button>
+    </div>
+
+    <section id="crazyStatsRecords" class="crazy-stats-panel is-active" role="tabpanel" aria-labelledby="crazyStatsTabRecords" data-crazy-stats-panel="records">
+      <div class="crazy-panel-head"><div><span class="eyebrow">RÉCORDS GENERALES</span><h3>Los extremos de la liga</h3></div><p>Ocho datos rápidos con su significado visible.</p></div>
+      <div class="crazy-record-grid">
+        ${crazyStatsRecordCard({icon:'shield',label:'MAYOR CONTINUIDAD',title:conservative?.name||'Sin dato',value:`${crazyStatsNumber(conservative?.metrics.continuity,1)}%`,detail:`${conservative?.metrics.style||'Sin estilo'} en ${conservative?.legacy.seasons.length||0} campañas.`,tone:'green',manager:conservative?.name})}
+        ${crazyStatsRecordCard({icon:'chart',label:'MAYOR ROTACIÓN',title:rotator?.name||'Sin dato',value:`${crazyStatsNumber(rotator?.metrics.rotation,1)}%`,detail:`Rotación estimada según el uso de sus cuatro referentes.`,tone:'cyan',manager:rotator?.name})}
+        ${crazyStatsRecordCard({icon:'star',label:'MEJOR CRACK ACUMULADO',title:bestCrack?.name||'Sin dato',value:`${crazyStatsNumber(bestCrack?.points)} pts`,detail:`Con ${bestCrack?.manager||'sin equipo'}: ${crazyStatsNumber(bestCrack?.lineups)} alineaciones MVP.`,tone:'gold',manager:bestCrack?.manager})}
+        ${crazyStatsRecordCard({icon:'ball',label:'MÁS CRACK-DEPENDIENTE',title:dependent?.name||'Sin dato',value:`${crazyStatsNumber(dependent?.metrics.crackDependence,1)}%`,detail:`Porcentaje de los puntos oficiales aportados por sus MVP.`,tone:'orange',manager:dependent?.name})}
+        ${crazyStatsRecordCard({icon:'users',label:'JUEGO MÁS CORAL',title:coral?.name||'Sin dato',value:`${crazyStatsNumber(coral?.metrics.crackDependence,1)}%`,detail:`La menor dependencia acumulada de un solo crack.`,tone:'violet',manager:coral?.name})}
+        ${crazyStatsRecordCard({icon:'trophy',label:'JUGADOR DE HIERRO',title:iron?.ironMan?.name||'Sin dato',value:`${crazyStatsNumber(iron?.ironMan?.lineups)} alineaciones`,detail:`Acumuladas con ${iron?.name||'sin equipo'} en ${iron?.ironMan?.campaigns||0} campañas.`,tone:'green',manager:iron?.name})}
+        ${crazyStatsRecordCard({icon:'medal',label:'MEJOR CAMPAÑA INDIVIDUAL',title:campaign?.name||'Sin dato',value:`${crazyStatsNumber(campaign?.points)} pts`,detail:`${campaign?.manager||'Sin equipo'} · temporada ${campaign?.season||'—'} · ${crazyStatsNumber(campaign?.lineups)} alineaciones.`,tone:'gold',manager:campaign?.manager})}
+        ${crazyStatsRecordCard({icon:'chart',label:'CRACK MÁS RENTABLE',title:efficient?.name||'Sin dato',value:`${crazyStatsNumber(efficient?.average,1)} pts/al.`,detail:`${efficient?.manager||'Sin equipo'} · mínimo 20 alineaciones MVP acumuladas.`,tone:'cyan',manager:efficient?.manager})}
+      </div>
+    </section>
+
+    <section id="crazyStatsIron" class="crazy-stats-panel" role="tabpanel" aria-labelledby="crazyStatsTabIron" data-crazy-stats-panel="iron" hidden>
+      <div class="crazy-panel-head"><div><span class="eyebrow">UNO POR EQUIPO</span><h3>Los jugadores de hierro</h3></div><p>El jugador que más alineaciones acumuló con cada equipo.</p></div>
+      <div class="crazy-team-list">${stats.ironMen.map(crazyStatsIronCard).join('')}</div>
+    </section>
+
+    <section id="crazyStatsStyles" class="crazy-stats-panel" role="tabpanel" aria-labelledby="crazyStatsTabStyles" data-crazy-stats-panel="styles" hidden>
+      <div class="crazy-panel-head"><div><span class="eyebrow">COMPARADOR DE BANQUILLOS</span><h3>¿Conservar o rotar?</h3></div><p>Ordenado de mayor a menor continuidad histórica.</p></div>
+      <div class="crazy-team-list">${styleTeams.map(crazyStatsStyleCard).join('')}</div>
+    </section>
+
+    <section id="crazyStatsCracks" class="crazy-stats-panel" role="tabpanel" aria-labelledby="crazyStatsTabCracks" data-crazy-stats-panel="cracks" hidden>
+      <div class="crazy-panel-head"><div><span class="eyebrow">FIGURA POR EQUIPO</span><h3>El mejor crack de cada banquillo</h3></div><p>Ordenado por puntos acumulados como MVP del equipo.</p></div>
+      <div class="crazy-team-list">${crackTeams.map(crazyStatsCrackCard).join('')}</div>
+    </section>
+
+    <details class="crazy-stats-method">
+      <summary><span>${uiIcon('shield')} Cómo se calculan estas estadísticas</span><b>Ver método</b></summary>
+      <div>
+        <p><b>Continuidad:</b> promedio de alineaciones de los referentes PT, DF, MC y DL frente a las jornadas posibles. <b>Rotación estimada:</b> el porcentaje restante; es una tendencia, no el recuento de todos los fichajes.</p>
+        <p><b>Dependencia del crack:</b> puntos de los MVP divididos entre los puntos oficiales del equipo. <b>Jugador de hierro:</b> alineaciones acumuladas de un mismo futbolista con el mismo equipo.</p>
+        <p>Cuando un MVP también aparece como mejor jugador de su posición en una campaña, se cuenta una sola vez. Los datos históricos originales permanecen intactos.</p>
+      </div>
+    </details>`;
+}
+
+function setCrazyStatsTab(tab){
+  const allowed=['records','iron','styles','cracks'];
+  const selected=allowed.includes(tab)?tab:'records';
+  document.querySelectorAll('[data-crazy-stats-tab]').forEach(button=>{
+    const active=button.dataset.crazyStatsTab===selected;
+    button.classList.toggle('is-active',active);
+    button.setAttribute('aria-selected',String(active));
+    button.tabIndex=active?0:-1;
+  });
+  document.querySelectorAll('[data-crazy-stats-panel]').forEach(panel=>{
+    const active=panel.dataset.crazyStatsPanel===selected;
+    panel.classList.toggle('is-active',active);
+    panel.hidden=!active;
+  });
+}
 
 const SHARE_CARD_WIDTH=1080;
 const SHARE_CARD_HEIGHT=1350;
@@ -3449,7 +3761,7 @@ async function init(){
   renderPlayers();
   renderRecords();
   renderChampions();
-  renderNews();
+  renderCrazyStats();
   setupShareCardStudio();
 
   const syncPublishedData=async()=>{
@@ -3481,6 +3793,11 @@ async function init(){
       go(route.dataset.go,route.dataset.historyView);
       return;
     }
+    const crazyStatsTab=e.target.closest('[data-crazy-stats-tab]');
+    if(crazyStatsTab){
+      setCrazyStatsTab(crazyStatsTab.dataset.crazyStatsTab);
+      return;
+    }
     const managerBoardToggle=e.target.closest('[data-manager-board-toggle]');
     if(managerBoardToggle){
       toggleManagerBoard(managerBoardToggle);
@@ -3506,6 +3823,20 @@ async function init(){
     }
   });
   document.addEventListener('keydown',e=>{
+    const crazyStatsTab=e.target.closest?.('[data-crazy-stats-tab]');
+    if(crazyStatsTab&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
+      e.preventDefault();
+      const tabs=[...document.querySelectorAll('[data-crazy-stats-tab]')];
+      const current=tabs.indexOf(crazyStatsTab);
+      let next=current;
+      if(e.key==='ArrowRight')next=(current+1)%tabs.length;
+      else if(e.key==='ArrowLeft')next=(current-1+tabs.length)%tabs.length;
+      else if(e.key==='Home')next=0;
+      else if(e.key==='End')next=tabs.length-1;
+      setCrazyStatsTab(tabs[next].dataset.crazyStatsTab);
+      tabs[next].focus();
+      return;
+    }
     const team=e.target.closest?.('[data-profile-player]');
     if(team&&(e.key==='Enter'||e.key===' ')){
       e.preventDefault();
@@ -3538,7 +3869,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','champions','rules','cards','news'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','champions','rules','cards','statistics'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }

@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=105-20260803">
+<link rel="stylesheet" href="styles.css?v=106-20260804">
 <style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
@@ -127,6 +127,7 @@
   <symbol id="icon-news" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4H8v16a2 2 0 0 1-4 0V6H2v14a2 2 0 0 0 2 2Z"/><path d="M12 8h6M12 12h6M12 16h6"/></symbol>
   <symbol id="icon-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 4 5 5-8 5 8 4-5-2 12H5Z"/><path d="M5 19h14"/></symbol>
   <symbol id="icon-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z"/></symbol>
+  <symbol id="icon-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.35 3.65L7 8l3.65 1.35L12 13l1.35-3.65L17 8l-3.65-1.35Z"/><path d="m5 14-.9 2.1L2 17l2.1.9L5 20l.9-2.1L8 17l-2.1-.9Z"/><path d="m19 13-.9 2.1L16 16l2.1.9L19 19l.9-2.1L22 16l-2.1-.9Z"/></symbol>
   <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V5l8-3 8 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="icon-ball" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9.2 8.4 2.8-2 2.8 2-1.1 3.3h-3.4Z"/><path d="m10.3 11.7-3.5 2.5.9 3.4M13.7 11.7l3.5 2.5-.9 3.4M9.2 8.4 6.1 7.2M14.8 8.4l3.1-1.2M7.7 17.6l4.3 2.1 4.3-2.1"/></symbol>
   <symbol id="icon-red-card" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="1.5" transform="rotate(-6 12 12)" fill="currentColor"/></symbol>
@@ -139,7 +140,7 @@
 <button type="button" class="navtab" data-section="matchdays"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Jornadas</span></button>
 <button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
 <button type="button" class="navtab" data-section="history"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Historia</span></button>
-<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="rules"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span>Reglamento</span></button><button type="button" class="navtab" data-section="cards"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg><span>Tarjetas</span></button><button type="button" class="navtab" data-section="news"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg><span>Noticias</span></button>
+<button type="button" class="navtab" data-section="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Champions</span></button><button type="button" class="navtab" data-section="rules"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span>Reglamento</span></button><button type="button" class="navtab" data-section="cards"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg><span>Tarjetas</span></button><button type="button" class="navtab" data-section="statistics"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg><span>Estadísticas</span></button>
 </nav>
 
 <section class="hero-photo">
@@ -194,6 +195,7 @@
     <button type="button" data-go="players"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span><b>Participantes</b><small>Todos los perfiles</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="history" data-history-view="historical"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span><b>Historia</b><small>Temporadas, rankings y récords</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="rules"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span><span><b>Reglamento oficial</b><small>Normas de Liga y Champions</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" class="home-shortcut-stats" data-go="statistics"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg></span><span><b>Estadísticas locas</b><small>Récords, cracks, estilos y jugadores de hierro</small></span><span aria-hidden="true">→</span></button>
     <button type="button" class="home-shortcut-share" data-go="cards"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg></span><span><b>Tarjetas para WhatsApp</b><small>Podios, clasificación, líderes y Champions listos para compartir</small></span><span aria-hidden="true">→</span></button>
   </nav>
 </div>
@@ -620,9 +622,13 @@
   </div>
 </section>
 
-<section id="news" class="page">
-<div class="minimal-page-banner news-page-banner"><div><span class="eyebrow">ACTUALIDAD</span><h2>Todo lo que pasa en la liga.</h2><p>Novedades, jornadas, anuncios y momentos importantes de la Cuban League.</p></div><span class="page-banner-mark"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg></span></div>
-<div class="section-head"><div><span class="eyebrow">ÚLTIMAS PUBLICACIONES</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-news"></use></svg></span><span>Noticias y jornadas</span></h2></div></div><div id="newsGrid" class="news-grid"></div></section>
+<section id="statistics" class="page crazy-stats-page">
+  <div class="minimal-page-banner crazy-stats-page-banner">
+    <div><span class="eyebrow">TODO EL ARCHIVO · SIN FILTROS</span><h2>Estadísticas locas.</h2><p>Los récords, cracks y estilos de juego que aparecen al juntar todas las temporadas disponibles.</p></div>
+    <span class="page-banner-mark"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg></span>
+  </div>
+  <div id="crazyStatsRoot" class="crazy-stats-root" aria-live="polite"><p class="crazy-stats-loading">Preparando los récords de la liga…</p></div>
+</section>
 </main>
 
 <div id="installModal" class="modal install-modal" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
@@ -659,4 +665,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=105-20260803"></script><script src="app.js?v=105-20260803"></script></body></html>
+<script src="supabase-config.js?v=106-20260804"></script><script src="app.js?v=106-20260804"></script></body></html>
