@@ -1,4 +1,4 @@
-const APP_VERSION='106-20260804';
+const APP_VERSION='107-20260804';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -2893,7 +2893,11 @@ function crazyStatsDataset(){
 
 function crazyStatsTeamLink(name){
   const safe=crazyStatsEscape(name);
-  return `<button type="button" class="crazy-team-link" data-profile-player="${crazyStatsEscape(name)}"><span>${safe}</span><small>Ver perfil →</small></button>`;
+  const photo=imageMap()[name]||'';
+  return `<button type="button" class="crazy-team-link" data-profile-player="${crazyStatsEscape(name)}">
+    ${photo?`<img class="crazy-team-photo" src="${crazyStatsEscape(photo)}" alt="" loading="lazy" decoding="async">`:''}
+    <span>${safe}</span><small>Ver perfil →</small>
+  </button>`;
 }
 
 function crazyStatsRecordCard({icon='sparkles',label,title,value,detail,tone='green',manager=''}){

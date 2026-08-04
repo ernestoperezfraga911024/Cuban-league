@@ -21058,3 +21058,302 @@ footer{
     padding-inline:14px;
   }
 }
+
+/* =========================================================
+   V107 — Estadísticas compactas + identidad visual de equipo
+   ========================================================= */
+
+.crazy-stats-page-banner{
+  width:min(100%,1460px);
+}
+
+.crazy-stats-page-banner .page-banner-mark svg{
+  width:29px;
+  height:29px;
+}
+
+.crazy-stats-root{
+  width:min(100%,1460px);
+  padding:0 clamp(16px,3vw,48px) clamp(68px,7vw,108px);
+}
+
+.crazy-stats-overview{
+  gap:20px;
+  margin-bottom:18px;
+  padding:clamp(15px,1.8vw,24px);
+  border-radius:20px;
+}
+
+.crazy-stats-overview-copy h3{
+  font-size:clamp(1.22rem,1.85vw,1.8rem);
+}
+
+.crazy-stats-overview-copy p{
+  font-size:clamp(.72rem,.82vw,.86rem);
+}
+
+.crazy-stats-counts{
+  grid-template-columns:repeat(3,minmax(82px,1fr));
+  gap:7px;
+}
+
+.crazy-stats-count{
+  min-width:88px;
+  padding:12px 11px 10px;
+  border-radius:14px;
+}
+
+.crazy-stats-count strong{
+  font-size:clamp(1.02rem,1.35vw,1.35rem);
+}
+
+.crazy-stats-tabs{
+  margin-bottom:21px;
+  padding:6px;
+  border-radius:16px;
+}
+
+.crazy-stats-tab{
+  min-height:43px;
+  padding:8px 11px;
+  font-size:clamp(.61rem,.7vw,.74rem);
+}
+
+.crazy-stats-tab svg{
+  width:15px;
+  height:15px;
+}
+
+.crazy-panel-head{
+  margin-bottom:14px;
+}
+
+.crazy-panel-head h3{
+  font-size:clamp(1.18rem,1.65vw,1.65rem);
+}
+
+.crazy-panel-head p{
+  font-size:clamp(.67rem,.75vw,.79rem);
+}
+
+.crazy-record-grid{
+  gap:10px;
+}
+
+.crazy-record-card{
+  min-height:210px;
+  padding:17px;
+  border-radius:18px;
+}
+
+.crazy-record-card-top>span{
+  width:28px;
+  height:28px;
+  border-radius:9px;
+}
+
+.crazy-record-card-top svg{
+  width:14px;
+  height:14px;
+}
+
+.crazy-record-card h4{
+  font-size:clamp(.9rem,1vw,1.08rem);
+}
+
+.crazy-record-card-value{
+  padding-top:17px;
+  font-size:clamp(1.45rem,2vw,2.15rem);
+}
+
+.crazy-record-card>p{
+  min-height:37px;
+  margin-bottom:11px;
+  font-size:.66rem;
+}
+
+.crazy-team-link{
+  gap:7px;
+  min-width:0;
+  padding:5px 8px 5px 5px;
+  font-size:.58rem;
+}
+
+.crazy-team-photo{
+  width:27px;
+  height:27px;
+  flex:0 0 auto;
+  border:1px solid rgba(139,255,163,.24);
+  border-radius:8px;
+  background:rgba(255,255,255,.06);
+  object-fit:cover;
+}
+
+.crazy-team-link>span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.crazy-team-link>small{
+  flex:0 0 auto;
+  color:#7f9aa4;
+  font-size:.52rem;
+}
+
+.crazy-team-card{
+  grid-template-columns:38px minmax(170px,1fr) minmax(250px,.92fr);
+  gap:13px;
+  min-height:116px;
+  padding:13px 15px;
+  border-radius:17px;
+}
+
+.crazy-style-card{
+  grid-template-columns:38px minmax(180px,.78fr) minmax(295px,1.22fr);
+}
+
+.crazy-rank{
+  width:33px;
+  height:33px;
+  border-radius:10px;
+  font-size:.69rem;
+}
+
+.crazy-team-card-copy h4{
+  margin:5px 0 4px;
+  font-size:clamp(.83rem,.95vw,1rem);
+}
+
+.crazy-team-card-copy>p{
+  font-size:.62rem;
+}
+
+.crazy-team-card-copy .crazy-team-link{
+  margin-top:8px;
+}
+
+.crazy-team-card-metrics{
+  gap:6px;
+}
+
+.crazy-metric{
+  padding:8px 9px;
+  border-radius:11px;
+}
+
+.crazy-metric span{
+  font-size:.47rem;
+}
+
+.crazy-metric strong{
+  margin-top:4px;
+  font-size:clamp(.78rem,.88vw,.91rem);
+}
+
+.crazy-style-bars{
+  gap:8px;
+}
+
+.crazy-style-bar-head{
+  font-size:.52rem;
+}
+
+.crazy-style-track{
+  height:6px;
+}
+
+.crazy-stats-method{
+  margin-top:19px;
+  border-radius:15px;
+}
+
+.crazy-stats-method summary{
+  padding:12px 15px;
+  font-size:.64rem;
+}
+
+.crazy-stats-method div{
+  padding:0 15px 14px;
+}
+
+.crazy-stats-method p{
+  font-size:.62rem;
+}
+
+@media(max-width:900px){
+  .crazy-stats-root{
+    padding-inline:16px;
+  }
+
+  .crazy-stats-tab{
+    min-width:145px;
+  }
+
+  .crazy-team-card,
+  .crazy-style-card{
+    grid-template-columns:38px minmax(0,1fr);
+  }
+
+  .crazy-team-card-metrics,
+  .crazy-style-bars{
+    grid-column:2;
+  }
+}
+
+@media(max-width:620px){
+  .crazy-stats-root{
+    padding:0 10px 68px;
+  }
+
+  .crazy-stats-overview{
+    gap:14px;
+    padding:14px;
+    border-radius:17px;
+  }
+
+  .crazy-stats-count{
+    padding:9px 6px 8px;
+  }
+
+  .crazy-stats-tab{
+    min-width:130px;
+    min-height:41px;
+    padding:7px 9px;
+    font-size:.61rem;
+  }
+
+  .crazy-record-card{
+    min-height:190px;
+    padding:15px;
+    border-radius:16px;
+  }
+
+  .crazy-record-card-value{
+    font-size:1.7rem;
+  }
+
+  .crazy-team-card,
+  .crazy-style-card{
+    grid-template-columns:33px minmax(0,1fr);
+    gap:9px;
+    padding:12px 10px;
+    border-radius:15px;
+  }
+
+  .crazy-rank{
+    width:31px;
+    height:31px;
+  }
+
+  .crazy-team-photo{
+    width:25px;
+    height:25px;
+    border-radius:7px;
+  }
+
+  .crazy-team-card-metrics,
+  .crazy-style-bars{
+    grid-column:1 / -1;
+  }
+}
