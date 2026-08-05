@@ -1,4 +1,4 @@
-const APP_VERSION='109-20260805';
+const APP_VERSION='110-20260805';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -7,6 +7,10 @@ let PUBLISHED_MATCHDAYS=[];
 let MATCHDAY_MILESTONES=[];
 let SELECTED_MATCHDAY=null;
 let SELECTED_CLASSIFICATION_MATCHDAY=null;
+const CUP_START_MATCHDAY=4;
+const CUP_FINAL_MATCHDAY=22;
+let SELECTED_CUP_MATCHDAY=null;
+let CUP_SELECTION_MANUAL=false;
 const CHAMPIONS_MATCHDAY_COUNT=8;
 let CHAMPIONS_MATCHDAY_ROWS=[];
 let CHAMPIONS_PUBLISHED_MATCHDAYS=[];
@@ -224,6 +228,88 @@ function cumulativeStandings(matchday){
   }).sort(sortStandings).map((participant,index)=>({...participant,position:index+1}));
 }
 
+function cupMatchdays(){
+  return Array.from(
+    {length:CUP_FINAL_MATCHDAY-CUP_START_MATCHDAY+1},
+    (_,index)=>CUP_START_MATCHDAY+index
+  );
+}
+
+function cupRoundStandings(matchday,eligibleNames,{includeStats=true,leagueMatchday=matchday}={}){
+  const rowMap=new Map(
+    (includeStats?LIVE_MATCHDAY_ROWS:[])
+      .filter(row=>row.matchday===matchday)
+      .map(row=>[row.participantName,row])
+  );
+  const leaguePositions=new Map(
+    cumulativeStandings(leagueMatchday).map(participant=>[participant.name,participant.position])
+  );
+  return activeParticipants()
+    .filter(participant=>eligibleNames.has(participant.name))
+    .map(participant=>{
+      const row=rowMap.get(participant.name);
+      return {
+        ...participant,
+        points:row?.points||0,
+        goals:row?.goals||0,
+        cleanSheets:row?.cleanSheets||0,
+        leaguePosition:leaguePositions.get(participant.name)||activeParticipants().length
+      };
+    })
+    .sort((a,b)=>
+      b.points-a.points
+      ||b.goals-a.goals
+      ||b.cleanSheets-a.cleanSheets
+      ||a.leaguePosition-b.leaguePosition
+      ||a.id-b.id
+    )
+    .map((participant,index)=>({...participant,position:index+1}));
+}
+
+function buildCupTournament(){
+  const survivors=new Set(activeParticipants().map(participant=>participant.name));
+  let sequenceOpen=true;
+  let latestLeagueMatchday=Math.max(
+    0,
+    ...PUBLISHED_MATCHDAYS.filter(matchday=>matchday<CUP_START_MATCHDAY)
+  );
+  const rounds=cupMatchdays().map(matchday=>{
+    const hasPublishedStats=PUBLISHED_MATCHDAYS.includes(matchday);
+    const published=sequenceOpen&&hasPublishedStats;
+    if(!hasPublishedStats)sequenceOpen=false;
+    if(published)latestLeagueMatchday=matchday;
+    const entrants=[...survivors];
+    const rows=cupRoundStandings(matchday,survivors,{
+      includeStats:published,
+      leagueMatchday:published?matchday:latestLeagueMatchday
+    });
+    let eliminated=null;
+    if(published&&survivors.size>1){
+      eliminated=rows.at(-1)||null;
+      if(eliminated)survivors.delete(eliminated.name);
+    }
+    return {
+      matchday,
+      published,
+      rows,
+      eliminated,
+      entrants,
+      survivorsAfter:[...survivors]
+    };
+  });
+  const lastCompleted=rounds.filter(round=>round.published).at(-1)||null;
+  const champion=lastCompleted?.matchday===CUP_FINAL_MATCHDAY&&survivors.size===1
+    ?activeParticipants().find(participant=>survivors.has(participant.name))||null
+    :null;
+  return {rounds,survivors:[...survivors],champion};
+}
+
+function defaultCupMatchday(tournament){
+  const lastCompleted=tournament.rounds.filter(round=>round.published).at(-1);
+  if(!lastCompleted)return CUP_START_MATCHDAY;
+  return Math.min(lastCompleted.matchday+1,CUP_FINAL_MATCHDAY);
+}
+
 function previousPublishedMatchday(matchday){
   const index=PUBLISHED_MATCHDAYS.indexOf(matchday);
   return index>0?PUBLISHED_MATCHDAYS[index-1]:null;
@@ -299,6 +385,7 @@ async function syncLiveCurrentStats({render=true}={}){
       renderCurrent();
       renderMatchdayCenter();
       renderHomeLive();
+      renderCup();
       renderPlayers($('playerSearch')?.value||'');
       if(SHARE_CARD_BOUND)renderShareCardStudio();
     }
@@ -2736,6 +2823,114 @@ function renderChampions(){
   }).join('');
   $('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('');
 }
+
+function renderCup(){
+  const rowsHost=$('cupRows');
+  if(!rowsHost)return;
+
+  const tournament=buildCupTournament();
+  const matchdays=cupMatchdays();
+  if(!CUP_SELECTION_MANUAL||!matchdays.includes(SELECTED_CUP_MATCHDAY)){
+    SELECTED_CUP_MATCHDAY=defaultCupMatchday(tournament);
+  }
+
+  const selectedRound=tournament.rounds.find(round=>round.matchday===SELECTED_CUP_MATCHDAY)||tournament.rounds[0];
+  const completedRounds=tournament.rounds.filter(round=>round.published);
+  const eliminatedRounds=completedRounds.filter(round=>round.eliminated);
+  const nextRound=tournament.rounds.find(round=>!round.published)||null;
+  const selectedIsNext=nextRound?.matchday===selectedRound.matchday;
+
+  $('cupHeroStatus').textContent=tournament.champion
+    ?'Copa finalizada'
+    :completedRounds.length
+      ?`${tournament.survivors.length} equipos siguen en pie`
+      :'Empieza en la Jornada 4';
+  $('cupAliveCount').textContent=tournament.survivors.length.toLocaleString('es');
+  $('cupEliminatedCount').textContent=eliminatedRounds.length.toLocaleString('es');
+  $('cupNextMatchday').textContent=tournament.champion
+    ?'Campeón'
+    :nextRound
+      ?`J${nextRound.matchday}`
+      :'J22';
+  $('cupProgressCopy').textContent=`J4–J22 · ${eliminatedRounds.length} de 19 eliminaciones completadas`;
+
+  const championHost=$('cupChampion');
+  championHost.hidden=!tournament.champion;
+  championHost.innerHTML=tournament.champion?`<article class="cup-champion-card team-profile-link" ${profileTriggerAttrs(tournament.champion.name)}>
+    <span class="cup-champion-crown">${uiIcon('trophy')}</span>
+    <img src="${imageMap()[tournament.champion.name]||''}" alt="Foto de ${profileAttr(tournament.champion.name)}">
+    <div><span>CAMPEÓN DE COPA</span><h3>${profileAttr(tournament.champion.name)}</h3><p>El último equipo en pie después de 19 eliminaciones.</p></div>
+    <strong>J22</strong>
+  </article>`:'';
+
+  $('cupTimeline').innerHTML=tournament.rounds.map(round=>{
+    const isSelected=round.matchday===selectedRound.matchday;
+    const isNext=round.matchday===nextRound?.matchday;
+    const stateCopy=round.published
+      ?round.eliminated?`Sale ${profileAttr(round.eliminated.name)}`:'Cerrada'
+      :isNext?'Próxima':'Pendiente';
+    return `<button type="button" class="cup-timeline-step${round.published?' is-complete':''}${isNext?' is-next':''}${isSelected?' is-selected':''}" data-cup-matchday="${round.matchday}" aria-pressed="${isSelected}">
+      <span>J${round.matchday}</span><small>${stateCopy}</small>
+    </button>`;
+  }).join('');
+
+  $('cupRoundTitle').textContent=`Jornada ${selectedRound.matchday}`;
+  const roundState=$('cupRoundState');
+  roundState.textContent=selectedRound.published
+    ?'Jornada cerrada'
+    :selectedIsNext
+      ?'Próxima eliminación'
+      :'Ronda pendiente';
+  roundState.className=`cup-round-state ${selectedRound.published?'is-closed':'is-pending'}`;
+
+  const dangerHost=$('cupDanger');
+  if(selectedRound.published&&selectedRound.eliminated){
+    const eliminated=selectedRound.eliminated;
+    dangerHost.innerHTML=`<article class="cup-danger-card is-eliminated team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
+      <span class="cup-danger-icon">${uiIcon('red-card')}</span>
+      <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
+      <div><span>ELIMINADO EN J${selectedRound.matchday}</span><h3>${profileAttr(eliminated.name)}</h3><p>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.goals.toLocaleString('es')} goles · ${eliminated.cleanSheets.toLocaleString('es')} clean sheets · ${eliminated.leaguePosition}º de Liga</p></div>
+      <strong>Fuera</strong>
+    </article>`;
+  }else{
+    dangerHost.innerHTML=`<article class="cup-danger-card is-pending">
+      <span class="cup-danger-icon">${uiIcon('shield')}</span>
+      <div><span>${selectedIsNext?'PRÓXIMA ELIMINACIÓN':'RONDA PENDIENTE'}</span><h3>${selectedIsNext?`Todo empieza en cero en la J${selectedRound.matchday}`:'Aún no se ha llegado a esta ronda'}</h3><p>Los puntos, goles y clean sheets de jornadas anteriores no se arrastran.</p></div>
+      <strong>${selectedIsNext?'0 PTS':'—'}</strong>
+    </article>`;
+  }
+
+  rowsHost.innerHTML=selectedRound.rows.map(participant=>{
+    const safeName=profileAttr(participant.name);
+    const eliminated=selectedRound.eliminated?.name===participant.name;
+    const status=eliminated?'Eliminado':selectedRound.published?'Clasificado':'En Copa';
+    return `<div class="cup-row cup-table-grid${eliminated?' is-eliminated':''}">
+      <span class="cup-rank">${participant.position}</span>
+      <div class="cup-team-cell team-profile-link" ${profileTriggerAttrs(participant.name)}>
+        <img src="${imageMap()[participant.name]||''}" alt="Foto de ${safeName}">
+        <span><b>${safeName}</b><small>${eliminated?'Último de la ronda':selectedRound.published?'Supera la ronda':'Sigue en pie'}</small></span>
+      </div>
+      <span class="cup-stat cup-stat-points"><small>PTS</small><b>${participant.points.toLocaleString('es')}</b></span>
+      <span class="cup-stat cup-stat-goals"><small>GOL</small><b>${participant.goals.toLocaleString('es')}</b></span>
+      <span class="cup-stat cup-stat-clean"><small>CS</small><b>${participant.cleanSheets.toLocaleString('es')}</b></span>
+      <span class="cup-league-position"><small>Liga</small><b>${participant.leaguePosition}º</b></span>
+      <span class="cup-row-status">${status}</span>
+    </div>`;
+  }).join('');
+
+  $('cupHistory').innerHTML=eliminatedRounds.length
+    ?eliminatedRounds.slice().reverse().map(round=>{
+      const eliminated=round.eliminated;
+      return `<article class="cup-history-item team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
+        <span>J${round.matchday}</span>
+        <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
+        <div><b>${profileAttr(eliminated.name)}</b><small>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.goals.toLocaleString('es')} GOL · ${eliminated.cleanSheets.toLocaleString('es')} CS</small></div>
+        <strong>Eliminado</strong>
+      </article>`;
+    }).join('')
+    :`<div class="cup-history-empty"><span>${uiIcon('trophy')}</span><div><b>La Copa todavía no ha comenzado</b><small>El primer eliminado se conocerá al cerrar la Jornada 4.</small></div></div>`;
+}
+
 function crazyStatsNormalizeName(value){
   return String(value||'')
     .normalize('NFD')
@@ -3772,6 +3967,7 @@ async function init(){
   renderPlayers();
   renderRecords();
   renderChampions();
+  renderCup();
   setupShareCardStudio();
 
   const syncPublishedData=async()=>{
@@ -3785,6 +3981,7 @@ async function init(){
     renderHomeLive();
     renderPlayers($('playerSearch')?.value||'');
     renderChampions();
+    renderCup();
     if(SHARE_CARD_BOUND)renderShareCardStudio();
     checkForNewAchievementUnlocks();
   };
@@ -3801,6 +3998,13 @@ async function init(){
     const route=e.target.closest('[data-go]');
     if(route){
       go(route.dataset.go,route.dataset.historyView);
+      return;
+    }
+    const cupMatchday=e.target.closest('[data-cup-matchday]');
+    if(cupMatchday){
+      SELECTED_CUP_MATCHDAY=Number(cupMatchday.dataset.cupMatchday);
+      CUP_SELECTION_MANUAL=true;
+      renderCup();
       return;
     }
     const managerBoardToggle=e.target.closest('[data-manager-board-toggle]');
@@ -3860,7 +4064,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','champions','rules','cards'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }
