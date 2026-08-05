@@ -1,4 +1,4 @@
-const APP_VERSION='112-20260805';
+const APP_VERSION='113-20260805';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -2852,7 +2852,9 @@ function renderCup(){
     :nextRound
       ?`J${nextRound.matchday}`
       :'J22';
-  $('cupProgressCopy').textContent=`J4–J22 · ${eliminatedRounds.length} de 19 eliminaciones completadas`;
+  $('cupProgressCopy').textContent=tournament.champion
+    ?'Copa completada · consulta el recorrido ronda a ronda.'
+    :'Selecciona una jornada para revisar su clasificación.';
 
   const championHost=$('cupChampion');
   championHost.hidden=!tournament.champion;
@@ -2889,31 +2891,30 @@ function renderCup(){
     dangerHost.innerHTML=`<article class="cup-danger-card is-eliminated team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
       <span class="cup-danger-icon">${uiIcon('red-card')}</span>
       <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
-      <div><span>ELIMINADO EN J${selectedRound.matchday}</span><h3>${profileAttr(eliminated.name)}</h3><p>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.goals.toLocaleString('es')} goles · ${eliminated.cleanSheets.toLocaleString('es')} clean sheets · ${eliminated.leaguePosition}º de Liga</p></div>
+      <div><span>ELIMINADO EN J${selectedRound.matchday}</span><h3>${profileAttr(eliminated.name)}</h3><p>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.leaguePosition}º de Liga en esa jornada</p></div>
       <strong>Fuera</strong>
     </article>`;
   }else{
     dangerHost.innerHTML=`<article class="cup-danger-card is-pending">
       <span class="cup-danger-icon">${uiIcon('shield')}</span>
-      <div><span>${selectedIsNext?'PRÓXIMA ELIMINACIÓN':'RONDA PENDIENTE'}</span><h3>${selectedIsNext?`Todo empieza en cero en la J${selectedRound.matchday}`:'Aún no se ha llegado a esta ronda'}</h3><p>Los puntos, goles y clean sheets de jornadas anteriores no se arrastran.</p></div>
-      <strong>${selectedIsNext?'0 PTS':'—'}</strong>
+      <div><span>${selectedIsNext?'PRÓXIMA ELIMINACIÓN':'RONDA PENDIENTE'}</span><h3>${selectedIsNext?`J${selectedRound.matchday} · todos parten de cero`:'Aún no se ha llegado a esta ronda'}</h3></div>
+      <strong>${selectedIsNext?`J${selectedRound.matchday}`:'—'}</strong>
     </article>`;
   }
 
   rowsHost.innerHTML=selectedRound.rows.map(participant=>{
     const safeName=profileAttr(participant.name);
     const eliminated=selectedRound.eliminated?.name===participant.name;
-    const status=eliminated?'Eliminado':selectedRound.published?'Clasificado':'En Copa';
+    const status=eliminated?'Eliminado':selectedRound.published?'Clasifica':'En juego';
     return `<div class="cup-row cup-table-grid${eliminated?' is-eliminated':''}">
       <span class="cup-rank">${participant.position}</span>
       <div class="cup-team-cell team-profile-link" ${profileTriggerAttrs(participant.name)}>
         <img src="${imageMap()[participant.name]||''}" alt="Foto de ${safeName}">
-        <span><b>${safeName}</b><small>${eliminated?'Último de la ronda':selectedRound.published?'Supera la ronda':'Sigue en pie'}</small></span>
+        <span><b>${safeName}</b><small class="cup-team-meta"><span>Liga ${participant.leaguePosition}º</span><span class="cup-mobile-extra"> · ${participant.goals.toLocaleString('es')} GOL · ${participant.cleanSheets.toLocaleString('es')} CS</span></small></span>
       </div>
-      <span class="cup-stat cup-stat-points"><small>PTS</small><b>${participant.points.toLocaleString('es')}</b></span>
-      <span class="cup-stat cup-stat-goals"><small>GOL</small><b>${participant.goals.toLocaleString('es')}</b></span>
-      <span class="cup-stat cup-stat-clean"><small>CS</small><b>${participant.cleanSheets.toLocaleString('es')}</b></span>
-      <span class="cup-league-position"><small>Liga</small><b>${participant.leaguePosition}º</b></span>
+      <span class="cup-stat cup-stat-points"><b>${participant.points.toLocaleString('es')}</b></span>
+      <span class="cup-stat cup-stat-goals"><b>${participant.goals.toLocaleString('es')}</b></span>
+      <span class="cup-stat cup-stat-clean"><b>${participant.cleanSheets.toLocaleString('es')}</b></span>
       <span class="cup-row-status">${status}</span>
     </div>`;
   }).join('');
@@ -2924,8 +2925,8 @@ function renderCup(){
       return `<article class="cup-history-item team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
         <span>J${round.matchday}</span>
         <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
-        <div><b>${profileAttr(eliminated.name)}</b><small>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.goals.toLocaleString('es')} GOL · ${eliminated.cleanSheets.toLocaleString('es')} CS</small></div>
-        <strong>Eliminado</strong>
+        <div><b>${profileAttr(eliminated.name)}</b><small>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.leaguePosition}º de Liga</small></div>
+        <strong>Fuera</strong>
       </article>`;
     }).join('')
     :`<div class="cup-history-empty"><span>${uiIcon('trophy')}</span><div><b>La Copa todavía no ha comenzado</b><small>El primer eliminado se conocerá al cerrar la Jornada 4.</small></div></div>`;

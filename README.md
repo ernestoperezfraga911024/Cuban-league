@@ -1,7 +1,12 @@
-# Cuban League V112
+# Cuban League V113
 
 Sitio oficial de la Cuban League con:
 
+- La Copa adopta una presentación más directa: «La última silla» deja de estar
+  encerrada en una tarjeta, el resumen se compacta, se eliminan datos repetidos
+  y la tabla de supervivencia comparte el lenguaje visual de la clasificación.
+- Los accesos principales de Inicio ahora son Clasificación, Reglamento,
+  Champions y Copa; Centro de Jornada deja de ocupar uno de esos botones.
 - El calendario oficial de «Champions» ahora aparece como una pestaña compacta,
   cerrada al entrar para que la fase de grupos quede visible inmediatamente. Se
   abre y se cierra con una transición suave, cambia su indicación y conserva la

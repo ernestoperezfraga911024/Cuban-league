@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=112-20260805">
+<link rel="stylesheet" href="styles.css?v=113-20260805">
 <style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
@@ -152,9 +152,10 @@
     <span class="hero-accent-line" aria-hidden="true"></span>
     <p>Clasificación, jornadas y récords de una competición que se escribe cada temporada.</p>
     <div class="actions">
-      <button type="button" data-go="current"><span>Ver clasificación</span><span class="action-arrow" aria-hidden="true">→</span></button>
-      <button type="button" class="secondary" data-go="matchdays"><span>Centro de jornada</span><span class="action-arrow" aria-hidden="true">→</span></button>
-      <button type="button" class="secondary hero-rules-action" data-go="rules"><span>Ver reglamento</span><span class="action-arrow" aria-hidden="true">→</span></button>
+      <button type="button" data-go="current"><span>Clasificación</span><span class="action-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="secondary" data-go="rules"><span>Reglamento</span><span class="action-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="secondary" data-go="champions"><span>Champions</span><span class="action-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="secondary" data-go="cup"><span>Copa</span><span class="action-arrow" aria-hidden="true">→</span></button>
     </div>
   </div>
   <div id="heroKpis" class="hero-kpis" aria-live="polite">
@@ -556,26 +557,20 @@
     <span id="cupHeroStatus" class="cup-hero-status">Empieza en la Jornada 4</span>
   </div>
 
-  <div class="cup-format-strip" role="group" aria-label="Formato de la Copa">
-    <article><span>Comienzo</span><b>J4</b><small>20 equipos</small></article>
-    <article><span>Cada ronda</span><b>Todo a cero</b><small>PTS · goles · clean sheets</small></article>
-    <article><span>Final</span><b>J22</b><small>Un campeón</small></article>
-  </div>
-
   <div id="cupChampion" class="cup-champion" hidden></div>
 
   <div class="cup-dashboard">
-    <div class="cup-summary-grid">
-      <article><span>Siguen en pie</span><b id="cupAliveCount">20</b><small>equipos activos</small></article>
-      <article><span>Eliminados</span><b id="cupEliminatedCount">0</b><small>de 19 posibles</small></article>
-      <article><span>Próxima ronda</span><b id="cupNextMatchday">J4</b><small>estadísticas a cero</small></article>
+    <div class="cup-summary-bar" role="group" aria-label="Resumen de la Copa">
+      <div><span>En competición</span><b id="cupAliveCount">20</b></div>
+      <div><span>Eliminados</span><b id="cupEliminatedCount">0</b></div>
+      <div><span>Próxima</span><b id="cupNextMatchday">J4</b></div>
     </div>
 
     <div class="cup-timeline-shell">
       <div>
         <span class="eyebrow">CAMINO A LA FINAL</span>
         <h3>Ronda a ronda</h3>
-        <p id="cupProgressCopy">J4–J22 · 0 de 19 eliminaciones completadas</p>
+        <p id="cupProgressCopy">Selecciona una jornada para revisar su clasificación.</p>
       </div>
       <div id="cupTimeline" class="cup-timeline" aria-label="Seleccionar ronda de Copa"></div>
     </div>
@@ -586,8 +581,8 @@
     </div>
     <div id="cupDanger"></div>
 
-    <div class="cup-table">
-      <div class="cup-table-head cup-table-grid"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span><span>Liga</span><span>Estado</span></div>
+    <div class="card cup-table">
+      <div class="thead cup-table-head cup-table-grid"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span><span>Estado</span></div>
       <div id="cupRows"></div>
     </div>
     <p class="cup-note">Desempate: menos puntos, luego menos goles, menos clean sheets y, si persiste, peor puesto de Liga.</p>
@@ -811,4 +806,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=112-20260805"></script><script src="app.js?v=112-20260805"></script></body></html>
+<script src="supabase-config.js?v=113-20260805"></script><script src="app.js?v=113-20260805"></script></body></html>
