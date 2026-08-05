@@ -1,7 +1,10 @@
-# Cuban League V105
+# Cuban League V109
 
 Sitio oficial de la Cuban League con:
 
+- El apartado independiente «Estadísticas» queda retirado temporalmente de la
+  navegación, la portada y las rutas directas. Se conservan intactas las
+  estadísticas propias de clasificación, perfiles y Pizarra del Míster.
 - La Pizarra del Míster de Andy incorpora su temporada de Primera 2025/26.
   Pablo Fornals es su MVP con 135 puntos, mientras Dakonam Djené lidera sus
   Hombres de hierro con 30 jornadas. Ya participa en el Duelo de Banquillos.

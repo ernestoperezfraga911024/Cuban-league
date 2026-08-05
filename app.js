@@ -1,4 +1,4 @@
-const APP_VERSION='108-20260804';
+const APP_VERSION='109-20260805';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -3772,7 +3772,6 @@ async function init(){
   renderPlayers();
   renderRecords();
   renderChampions();
-  renderCrazyStats();
   setupShareCardStudio();
 
   const syncPublishedData=async()=>{
@@ -3804,11 +3803,6 @@ async function init(){
       go(route.dataset.go,route.dataset.historyView);
       return;
     }
-    const crazyStatsTab=e.target.closest('[data-crazy-stats-tab]');
-    if(crazyStatsTab){
-      setCrazyStatsTab(crazyStatsTab.dataset.crazyStatsTab);
-      return;
-    }
     const managerBoardToggle=e.target.closest('[data-manager-board-toggle]');
     if(managerBoardToggle){
       toggleManagerBoard(managerBoardToggle);
@@ -3834,20 +3828,6 @@ async function init(){
     }
   });
   document.addEventListener('keydown',e=>{
-    const crazyStatsTab=e.target.closest?.('[data-crazy-stats-tab]');
-    if(crazyStatsTab&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
-      e.preventDefault();
-      const tabs=[...document.querySelectorAll('[data-crazy-stats-tab]')];
-      const current=tabs.indexOf(crazyStatsTab);
-      let next=current;
-      if(e.key==='ArrowRight')next=(current+1)%tabs.length;
-      else if(e.key==='ArrowLeft')next=(current-1+tabs.length)%tabs.length;
-      else if(e.key==='Home')next=0;
-      else if(e.key==='End')next=tabs.length-1;
-      setCrazyStatsTab(tabs[next].dataset.crazyStatsTab);
-      tabs[next].focus();
-      return;
-    }
     const team=e.target.closest?.('[data-profile-player]');
     if(team&&(e.key==='Enter'||e.key===' ')){
       e.preventDefault();
@@ -3880,7 +3860,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','champions','rules','cards','statistics'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','champions','rules','cards'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }
