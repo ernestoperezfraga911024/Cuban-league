@@ -1,12 +1,7 @@
-# Cuban League V110
+# Cuban League V109
 
 Sitio oficial de la Cuban League con:
 
-- Nuevo apartado «Copa»: competición eliminatoria desde la Jornada 4 hasta la
-  Jornada 22. Cada ronda usa únicamente los puntos, goles y clean sheets de esa
-  jornada; el último queda eliminado y los supervivientes comienzan la ronda
-  siguiente desde cero. Los empates se resuelven por puntos, goles, clean
-  sheets y, si persisten, por la posición de la clasificación general de Liga.
 - El apartado independiente «Estadísticas» queda retirado temporalmente de la
   navegación, la portada y las rutas directas. Se conservan intactas las
   estadísticas propias de clasificación, perfiles y Pizarra del Míster.
