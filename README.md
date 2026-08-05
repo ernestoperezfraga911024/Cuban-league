@@ -1,11 +1,11 @@
-# Cuban League V111
+# Cuban League V112
 
 Sitio oficial de la Cuban League con:
 
-- Calendario oficial dentro del apartado «Champions». La fase de grupos se
-  disputa en las jornadas de Liga J3, J6, J9, J12, J15, J18, J21 y J24; los
-  cuartos en J27–J28, las semifinales en J32–J33 y la final en J37. La ruta se
-  adapta a móvil y PC sin modificar la lógica ni los datos de la competición.
+- El calendario oficial de «Champions» ahora aparece como una pestaña compacta,
+  cerrada al entrar para que la fase de grupos quede visible inmediatamente. Se
+  abre y se cierra con una transición suave, cambia su indicación y conserva la
+  misma ruta de jornadas en móvil y PC sin modificar los datos de competición.
 - Nuevo apartado «Copa»: competición eliminatoria desde la Jornada 4 hasta la
   Jornada 22. Cada ronda usa únicamente los puntos, goles y clean sheets de esa
   jornada; el último queda eliminado y los supervivientes comienzan la ronda

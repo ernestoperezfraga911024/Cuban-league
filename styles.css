@@ -22447,3 +22447,273 @@ footer{
     grid-template-columns:1fr;
   }
 }
+
+/* V112 — Calendario de Champions plegable */
+.champions-calendar{
+  margin:22px 0 26px;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(117,255,141,.24);
+  border-radius:20px;
+  background:
+    linear-gradient(110deg,rgba(51,255,111,.085),transparent 42%),
+    rgba(4,17,27,.7);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 16px 42px rgba(0,0,0,.12);
+}
+
+.champions-calendar-toggle{
+  width:100%;
+  min-height:82px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:15px 18px;
+  border:0;
+  color:inherit;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  background:
+    linear-gradient(90deg,rgba(117,255,141,.09),transparent 46%),
+    rgba(2,14,23,.38);
+  transition:background-color .24s ease,border-color .24s ease;
+}
+
+.champions-calendar-toggle:hover{
+  background:
+    linear-gradient(90deg,rgba(117,255,141,.13),transparent 52%),
+    rgba(4,21,32,.55);
+}
+
+.champions-calendar-toggle:focus-visible{
+  outline:2px solid var(--calendar-accent);
+  outline-offset:-3px;
+}
+
+.champions-calendar-toggle-main,
+.champions-calendar-toggle-action{
+  display:flex;
+  align-items:center;
+}
+
+.champions-calendar-toggle-main{
+  min-width:0;
+  gap:13px;
+}
+
+.champions-calendar-toggle-icon{
+  width:46px;
+  height:46px;
+  flex:0 0 46px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(117,255,141,.3);
+  border-radius:14px;
+  color:var(--calendar-accent);
+  background:rgba(117,255,141,.075);
+}
+
+.champions-calendar-toggle-icon .ui-icon{
+  width:21px;
+  height:21px;
+}
+
+.champions-calendar-toggle-copy{
+  min-width:0;
+  display:block;
+}
+
+.champions-calendar-toggle-copy .eyebrow{
+  display:block;
+  margin-bottom:3px;
+  font-size:.57rem;
+}
+
+.champions-calendar-toggle-copy > strong{
+  display:block;
+  color:#fff;
+  font-size:1.08rem;
+  line-height:1.12;
+  letter-spacing:-.02em;
+}
+
+.champions-calendar-toggle-copy > small{
+  display:block;
+  margin-top:4px;
+  color:#9eb0bb;
+  font-size:.7rem;
+  font-weight:700;
+}
+
+.champions-calendar-toggle-action{
+  flex:0 0 auto;
+  gap:12px;
+}
+
+.champions-calendar-action-copy{
+  display:grid;
+  justify-items:end;
+}
+
+.champions-calendar-action-copy b{
+  color:#e8ffec;
+  font-size:.72rem;
+  line-height:1.1;
+}
+
+.champions-calendar-action-copy small{
+  margin-top:4px;
+  color:#7f949f;
+  font-size:.58rem;
+  font-weight:700;
+}
+
+.champions-calendar-action-close{
+  display:none;
+}
+
+.champions-calendar-chevron{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(117,255,141,.28);
+  border-radius:50%;
+  color:var(--calendar-accent);
+  background:rgba(117,255,141,.07);
+  transition:transform .36s cubic-bezier(.2,.8,.2,1),background-color .24s ease;
+}
+
+.champions-calendar-chevron svg{
+  width:17px;
+  height:17px;
+}
+
+.champions-calendar-reveal{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  visibility:hidden;
+  transition:grid-template-rows .42s cubic-bezier(.2,.8,.2,1),opacity .28s ease,visibility 0s linear .42s;
+}
+
+.champions-calendar-reveal-inner{
+  min-height:0;
+  overflow:hidden;
+}
+
+.champions-calendar.is-open .champions-calendar-toggle{
+  border-bottom:1px solid rgba(117,255,141,.16);
+  background:
+    linear-gradient(90deg,rgba(117,255,141,.13),transparent 52%),
+    rgba(4,21,32,.62);
+}
+
+.champions-calendar.is-open .champions-calendar-action-open{
+  display:none;
+}
+
+.champions-calendar.is-open .champions-calendar-action-close{
+  display:block;
+}
+
+.champions-calendar.is-open .champions-calendar-chevron{
+  transform:rotate(180deg);
+  background:rgba(117,255,141,.13);
+}
+
+.champions-calendar.is-open .champions-calendar-reveal{
+  grid-template-rows:1fr;
+  opacity:1;
+  visibility:visible;
+  transition:grid-template-rows .42s cubic-bezier(.2,.8,.2,1),opacity .32s ease,visibility 0s;
+}
+
+.champions-calendar .champions-calendar-head{
+  margin:0;
+  padding:23px 22px 19px;
+}
+
+.champions-calendar .champions-calendar-head h2{
+  font-size:clamp(1.45rem,2.3vw,2rem);
+}
+
+.champions-calendar .champions-calendar-route{
+  padding:0 22px 22px;
+}
+
+@media(max-width:700px){
+  .champions-calendar{
+    margin:17px 0 20px;
+    border-radius:17px;
+  }
+
+  .champions-calendar-toggle{
+    min-height:74px;
+    gap:12px;
+    padding:12px 13px;
+  }
+
+  .champions-calendar-toggle-main{
+    gap:10px;
+  }
+
+  .champions-calendar-toggle-icon{
+    width:40px;
+    height:40px;
+    flex-basis:40px;
+    border-radius:12px;
+  }
+
+  .champions-calendar-toggle-copy .eyebrow{
+    font-size:.5rem;
+  }
+
+  .champions-calendar-toggle-copy > strong{
+    font-size:.96rem;
+  }
+
+  .champions-calendar-toggle-copy > small{
+    font-size:.61rem;
+  }
+
+  .champions-calendar-action-copy{
+    display:none;
+  }
+
+  .champions-calendar-chevron{
+    width:34px;
+    height:34px;
+  }
+
+  .champions-calendar .champions-calendar-head{
+    gap:13px;
+    padding:19px 14px 15px;
+  }
+
+  .champions-calendar .champions-calendar-summary{
+    padding:11px 13px;
+  }
+
+  .champions-calendar .champions-calendar-route{
+    padding:0 14px 15px;
+  }
+}
+
+@media(max-width:390px){
+  .champions-calendar-toggle-copy > small{
+    max-width:180px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .champions-calendar-reveal,
+  .champions-calendar.is-open .champions-calendar-reveal,
+  .champions-calendar-chevron{
+    transition:none;
+  }
+}

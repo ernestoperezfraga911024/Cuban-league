@@ -1,4 +1,4 @@
-const APP_VERSION='111-20260805';
+const APP_VERSION='112-20260805';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -3953,6 +3953,24 @@ window.addEventListener('appinstalled',()=>{
   updateInstallUI();
 });
 
+function setupChampionsCalendarToggle(){
+  const calendar=$('championsCalendar');
+  const toggle=$('championsCalendarToggle');
+  const panel=$('championsCalendarPanel');
+  if(!calendar||!toggle||!panel)return;
+
+  const setCalendarOpen=open=>{
+    calendar.classList.toggle('is-open',open);
+    toggle.setAttribute('aria-expanded',String(open));
+    panel.setAttribute('aria-hidden',String(!open));
+  };
+
+  setCalendarOpen(false);
+  toggle.addEventListener('click',()=>{
+    setCalendarOpen(toggle.getAttribute('aria-expanded')!=='true');
+  });
+}
+
 async function init(){
   trackSiteVisit();
   DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();
@@ -3967,6 +3985,7 @@ async function init(){
   renderPlayers();
   renderRecords();
   renderChampions();
+  setupChampionsCalendarToggle();
   renderCup();
   setupShareCardStudio();
 
