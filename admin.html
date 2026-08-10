@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=71-20260728">
+  <link rel="stylesheet" href="admin.css?v=114-20260810">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -220,9 +220,9 @@
             <svg viewBox="0 0 24 24"><path d="M8 4h8v3c0 4-1.7 7-4 7s-4-3-4-7V4Z"/><path d="M8 6H4c0 4 1.8 6 5.1 6M16 6h4c0 4-1.8 6-5.1 6M12 14v4m-4 2h8"/></svg>
           </span>
           <div>
-            <span class="admin-kicker">INSIGNIAS AUTOMÁTICAS</span>
-            <h2 id="achievementSettingsTitle">Fecha y cierre de premios</h2>
-            <p>Estos datos permiten entregar Jugador del Mes y Campeón de Invierno exactamente en la jornada correcta.</p>
+            <span class="admin-kicker">CONTROL DE JORNADA</span>
+            <h2 id="achievementSettingsTitle">Fecha, premios y partidos aplazados</h2>
+            <p>Define la fecha, los cierres de premios y si la eliminación de Copa debe quedar pendiente.</p>
           </div>
         </header>
         <div class="achievement-settings-fields">
@@ -239,6 +239,11 @@
             <input id="yearEndToggle" type="checkbox">
             <span class="achievement-switch-control" aria-hidden="true"><i></i></span>
             <span><b>Última jornada de diciembre</b><small>Entrega Campeón de Invierno</small></span>
+          </label>
+          <label class="achievement-switch postponed-switch">
+            <input id="postponedToggle" type="checkbox">
+            <span class="achievement-switch-control" aria-hidden="true"><i></i></span>
+            <span><b>Esta jornada tiene partidos aplazados</b><small>La Liga se publica, pero la Copa no confirma eliminados hasta completarla</small></span>
           </label>
         </div>
         <p id="achievementSettingsMessage" class="achievement-settings-message">La fecha se guarda con el borrador de esta jornada.</p>
@@ -389,7 +394,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=71-20260728"></script>
-  <script src="admin.js?v=71-20260728"></script>
+  <script src="supabase-config.js?v=114-20260810"></script>
+  <script src="admin.js?v=114-20260810"></script>
 </body>
 </html>

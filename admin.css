@@ -605,6 +605,7 @@ body.install-open{overflow:hidden}
 
 .matchday-meta{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   justify-content:flex-end;
   gap:13px;
@@ -634,6 +635,12 @@ body.install-open{overflow:hidden}
   border-color:rgba(159,255,124,.24);
   color:var(--green);
   background:rgba(159,255,124,.07);
+}
+
+.publication-badge.published.pending{
+  border-color:rgba(255,190,92,.34);
+  color:#ffc66d;
+  background:rgba(255,172,64,.09);
 }
 
 .saved-at{color:var(--muted);font-size:.7rem}
@@ -2121,6 +2128,18 @@ body.preview-open{overflow:hidden}
   box-shadow:0 0 16px rgba(255,211,106,.25);
 }
 
+.postponed-switch{grid-column:1/-1}
+.postponed-switch input:checked+.achievement-switch-control{
+  border-color:rgba(255,174,72,.38);
+  background:rgba(255,151,55,.16);
+}
+.postponed-switch input:checked+.achievement-switch-control i{
+  background:#ffb352;
+  box-shadow:0 0 16px rgba(255,159,61,.3);
+}
+.postponed-switch input:checked~span b{color:#ffd59b}
+.achievement-switch.postponed-switch small{font-size:.6rem;line-height:1.4}
+
 .achievement-switch input:focus-visible+.achievement-switch-control{outline:2px solid var(--cyan);outline-offset:3px}
 .achievement-switch b,.achievement-switch small{display:block}
 .achievement-switch b{font-size:.67rem}
@@ -2149,4 +2168,6 @@ body.preview-open{overflow:hidden}
   .achievement-settings-fields{grid-template-columns:1fr;padding:11px}
   .matchday-date-field{grid-column:auto}
   .achievement-switch{min-height:64px}
+  .postponed-switch{grid-column:auto}
+  .matchday-meta{justify-content:flex-start}
 }

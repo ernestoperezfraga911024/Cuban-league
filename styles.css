@@ -23128,3 +23128,83 @@ footer{
     gap:2px;
   }
 }
+
+/* ===== CUBAN LEAGUE V114 · JORNADAS APLAZADAS ===== */
+
+.cup-timeline-step.is-provisional{
+  border-color:rgba(255,184,83,.32);
+  color:#ffd49a;
+  background:rgba(255,153,52,.08);
+}
+
+.cup-timeline-step.is-provisional small{color:#e7b66f}
+
+.cup-timeline-step.is-provisional.is-next,
+.cup-timeline-step.is-provisional.is-selected{
+  border-color:rgba(255,190,92,.58);
+  background:linear-gradient(145deg,rgba(255,169,67,.18),rgba(255,116,48,.08));
+  box-shadow:0 0 0 1px rgba(255,176,72,.08),0 12px 25px rgba(0,0,0,.16);
+}
+
+.cup-round-state.is-provisional{
+  border-color:rgba(255,183,83,.32);
+  color:#ffd190;
+  background:rgba(255,157,57,.1);
+}
+
+.cup-danger-card.is-provisional{
+  border-top-color:rgba(255,183,83,.24);
+  border-bottom-color:rgba(255,183,83,.24);
+}
+
+.cup-danger-card.is-provisional .cup-danger-icon{
+  color:#ffc46d;
+  background:rgba(255,163,62,.11);
+}
+
+.cup-danger-card.is-provisional > strong{
+  color:#ffd08a;
+}
+
+.cup-row.is-provisional-candidate{
+  background:linear-gradient(90deg,rgba(255,151,48,.1),rgba(255,151,48,.025));
+}
+
+.cup-row-status.is-provisional{
+  border-color:rgba(255,182,83,.28);
+  color:#ffd08a;
+  background:rgba(255,153,52,.1);
+}
+
+.cup-row-status.is-waiting{
+  border-color:rgba(164,181,188,.2);
+  color:#aebfc5;
+  background:rgba(142,163,172,.08);
+}
+
+.cup-row-status.is-invalid{
+  border-color:rgba(255,105,105,.27);
+  color:#ffaaaa;
+  background:rgba(255,79,79,.09);
+}
+
+.matchday-status.pending{
+  border-color:rgba(255,184,83,.34);
+  color:#ffd08a;
+  background:rgba(255,153,52,.1);
+}
+
+.matchday-archive-card.is-pending{
+  border-color:rgba(255,184,83,.25);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(255,169,67,.07),transparent 10rem),
+    linear-gradient(145deg,rgba(31,29,25,.98),rgba(16,22,25,.99));
+}
+
+.matchday-archive-card.is-pending .matchday-archive-number{
+  border-color:rgba(255,184,83,.3);
+  color:#ffd08a;
+  background:rgba(255,153,52,.08);
+}
+
+.matchday-archive-card.is-pending .matchday-archive-copy small{color:#edb96d}

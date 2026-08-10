@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '71-20260728';
+  const VERSION = '114-20260810';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
@@ -22,6 +22,7 @@
     saving: false,
     schemaReady: true,
     redCardsSchemaReady: true,
+    postponedSchemaReady: true,
     achievementSchemaReady: true,
     history: [],
     previewRows: [],
@@ -166,6 +167,11 @@
     return /matchday_milestones|save_matchday_milestone|achievement milestone/i.test(message);
   }
 
+  function isPostponedUpgradeError(error) {
+    const message = String(error?.message || error || '');
+    return /has_postponed_matches|partidos aplazados|postponed matches/i.test(message);
+  }
+
   function isRedCardsUpgradeError(error) {
     const message = String(error?.message || error || '');
     return /red_cards|tarjetas rojas|tarjeta roja/i.test(message);
@@ -176,6 +182,7 @@
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
+    if (isPostponedUpgradeError(error)) return 'Falta activar los partidos aplazados. Ejecuta “SUPABASE-V114-APLAZADOS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isRedCardsUpgradeError(error)) return 'Falta activar las tarjetas rojas. Ejecuta “SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAchievementUpgradeError(error)) return 'Falta activar las insignias. Ejecuta “SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAnalyticsUpgradeError(error)) return 'Falta activar el contador de visitas. Ejecuta “SUPABASE-V58-VISITAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
@@ -225,6 +232,14 @@
     };
   }
 
+  function hasPostponedMatches() {
+    return !isChampionsMode() && $('postponedToggle')?.checked === true;
+  }
+
+  function publishedWasPostponed() {
+    return state.publishedRows.some(row => row?.has_postponed_matches === true);
+  }
+
   function milestoneValidation({ required = true } = {}) {
     if (isChampionsMode()) return { valid: true, milestone: null, message: '' };
     const milestone = gatherMilestone();
@@ -241,13 +256,20 @@
     if (isChampionsMode()) return;
     const node = $('achievementSettingsMessage');
     const result = milestoneValidation({ required: false });
-    node.classList.toggle('warning', !result.valid || !state.achievementSchemaReady);
-    node.classList.toggle('success', result.valid && state.achievementSchemaReady && (result.milestone?.isMonthEnd || result.milestone?.isYearEnd));
+    const postponed = hasPostponedMatches();
+    node.classList.toggle('warning', !result.valid || !state.achievementSchemaReady || !state.postponedSchemaReady || postponed);
+    node.classList.toggle('success', result.valid && state.achievementSchemaReady && state.postponedSchemaReady && !postponed && (result.milestone?.isMonthEnd || result.milestone?.isYearEnd));
 
     if (!state.achievementSchemaReady) {
       node.textContent = 'Activa V59 en Supabase para guardar fechas y entregar las nuevas insignias.';
+    } else if (!state.postponedSchemaReady) {
+      node.textContent = postponed
+        ? 'Activa V114 en Supabase antes de publicar esta jornada como pendiente.'
+        : 'Activa V114 en Supabase para poder marcar jornadas con partidos aplazados.';
     } else if (!result.valid) {
       node.textContent = result.message;
+    } else if (postponed) {
+      node.textContent = 'La Liga podrá continuar, pero la Copa mantendrá esta eliminación y las siguientes como provisionales.';
     } else if (result.milestone?.isYearEnd) {
       node.textContent = 'Al publicar la última jornada de diciembre se entregarán Jugador del Mes y Campeón de Invierno.';
     } else if (result.milestone?.isMonthEnd) {
@@ -267,6 +289,15 @@
     updateAchievementSettingsMessage();
   }
 
+  function setPostponedForm(...rowSources) {
+    const rows = rowSources.find(source =>
+      Array.isArray(source)
+      && source.some(row => Object.prototype.hasOwnProperty.call(row || {}, 'has_postponed_matches'))
+    ) || [];
+    $('postponedToggle').checked = !isChampionsMode() && rows.some(row => row?.has_postponed_matches === true);
+    updateAchievementSettingsMessage();
+  }
+
   function setButtonsBusy(busy) {
     state.saving = busy;
     [
@@ -281,7 +312,7 @@
       button.disabled = busy;
     });
     $('matchdaySelect').disabled = busy;
-    ['matchdayDate', 'monthEndToggle', 'yearEndToggle'].forEach(id => {
+    ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = busy;
     });
     if (busy) {
@@ -362,18 +393,30 @@
     $('editPublishedButton').hidden = !locked;
 
     if (locked) {
-      $('completionTitle').textContent = 'Jornada publicada y protegida';
-      $('completionMessage').textContent = 'La web pública no cambiará por accidente. Pulsa “Corregir jornada” para preparar una nueva versión.';
-      $('missingParticipants').textContent = 'Publicación activa · edición bloqueada';
+      const postponed = hasPostponedMatches();
+      $('completionTitle').textContent = postponed ? 'Jornada publicada y pendiente' : 'Jornada publicada y protegida';
+      $('completionMessage').textContent = postponed
+        ? 'La Liga sigue visible y la Copa está en pausa. Cuando se juegue el partido, pulsa “Corregir jornada”, completa los datos y desmarca la opción.'
+        : 'La web pública no cambiará por accidente. Pulsa “Corregir jornada” para preparar una nueva versión.';
+      $('missingParticipants').textContent = postponed
+        ? 'Partido aplazado · eliminación de Copa sin confirmar'
+        : 'Publicación activa · edición bloqueada';
     } else if (result.missing.length) {
       $('completionTitle').textContent = `Faltan ${result.missing.length} de ${result.total} participantes`;
       $('completionMessage').textContent = 'Completa PTS, GOL, CS y TR de todos. Cuando no haya datos, escribe 0.';
       const visible = result.missing.slice(0, 6);
       $('missingParticipants').textContent = `Pendientes: ${visible.join(', ')}${result.missing.length > visible.length ? ` y ${result.missing.length - visible.length} más` : ''}`;
     } else {
-      $('completionTitle').textContent = `Los ${result.total} participantes están completos`;
-      $('completionMessage').textContent = 'Todo está listo. Abre la vista previa y revisa los datos antes de publicarlos.';
-      $('missingParticipants').textContent = 'Validación completa · sin participantes pendientes';
+      const postponed = hasPostponedMatches();
+      $('completionTitle').textContent = postponed
+        ? `Datos de los ${result.total} participantes cargados`
+        : `Los ${result.total} participantes están completos`;
+      $('completionMessage').textContent = postponed
+        ? 'Puedes publicar los datos actuales. La jornada seguirá pendiente y la Copa no confirmará eliminados.'
+        : 'Todo está listo. Abre la vista previa y revisa los datos antes de publicarlos.';
+      $('missingParticipants').textContent = postponed
+        ? 'Datos cargados · jornada pendiente por partido aplazado'
+        : 'Validación completa · sin participantes pendientes';
     }
 
     if (!state.redCardsSchemaReady && !locked) {
@@ -382,7 +425,12 @@
       $('missingParticipants').textContent = 'Actualización V65 pendiente';
     }
 
-    const canPreview = !locked && result.missing.length === 0 && state.schemaReady && state.redCardsSchemaReady && !state.saving;
+    const canPreview = !locked
+      && result.missing.length === 0
+      && state.schemaReady
+      && state.redCardsSchemaReady
+      && (!hasPostponedMatches() || state.postponedSchemaReady)
+      && !state.saving;
     $('publishButton').disabled = !canPreview;
     return result;
   }
@@ -392,7 +440,7 @@
     document.querySelectorAll('.stat-input').forEach(input => {
       input.disabled = locked;
     });
-    ['matchdayDate', 'monthEndToggle', 'yearEndToggle'].forEach(id => {
+    ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = locked || isChampionsMode();
     });
     $('entryTitle').closest('.entry-card').classList.toggle('is-locked', locked && state.published);
@@ -405,10 +453,11 @@
     badge.classList.toggle('published', state.published);
     badge.classList.toggle('draft', !state.published || state.editingPublished);
     badge.classList.toggle('editing', state.editingPublished);
+    badge.classList.toggle('pending', state.published && hasPostponedMatches());
     badge.querySelector('b').textContent = state.editingPublished
       ? 'Corrección en borrador'
       : state.published
-        ? 'Publicada'
+        ? hasPostponedMatches() ? 'Publicada · pendiente' : 'Publicada · completa'
         : 'Borrador';
 
     $('saveDraftButton').querySelector('span').textContent = state.saving
@@ -424,8 +473,12 @@
     $('confirmPublishButton').querySelector('span').textContent = state.saving
       ? 'Publicando…'
       : state.published
-        ? 'Confirmar corrección'
-        : 'Confirmar publicación';
+        ? hasPostponedMatches()
+          ? 'Guardar como pendiente'
+          : publishedWasPostponed()
+            ? 'Completar jornada'
+            : 'Confirmar corrección'
+        : hasPostponedMatches() ? 'Publicar como pendiente' : 'Confirmar publicación';
 
     $('dockMatchday').textContent = state.matchday;
     $('dockSeason').textContent = isChampionsMode() ? 'Champions · fase de grupos' : config.season;
@@ -543,6 +596,7 @@
         goals,
         clean_sheets: cleanSheets,
         red_cards: redCards,
+        has_postponed_matches: hasPostponedMatches(),
         published
       };
     });
@@ -640,14 +694,16 @@
     saveLocalDraft(rows);
     state.hasDraft = true;
 
-    if (!state.schemaReady || !state.redCardsSchemaReady) {
+    if (!state.schemaReady || !state.redCardsSchemaReady || (hasPostponedMatches() && !state.postponedSchemaReady)) {
       markDirty(false, 'Borrador guardado en este dispositivo');
       $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
       if (manual) {
         flashMessage(
-          state.redCardsSchemaReady
+          !state.schemaReady
             ? 'Borrador guardado en este dispositivo. Activa la actualización V57 de Supabase para sincronizarlo.'
-            : 'Borrador guardado en este dispositivo. Activa la actualización V65 de Supabase para guardar tarjetas rojas.',
+            : !state.redCardsSchemaReady
+              ? 'Borrador guardado en este dispositivo. Activa la actualización V65 de Supabase para guardar tarjetas rojas.'
+              : 'Borrador guardado en este dispositivo. Activa la actualización V114 de Supabase para guardar el estado aplazado.',
           'error'
         );
       }
@@ -722,6 +778,10 @@
     return count;
   }
 
+  function snapshotHasPostponedMatches(snapshot) {
+    return (Array.isArray(snapshot) ? snapshot : []).some(row => row?.has_postponed_matches === true);
+  }
+
   function renderHistory(records = []) {
     state.history = Array.isArray(records) ? records : [];
     const list = $('revisionList');
@@ -735,10 +795,15 @@
       const correction = record.action === 'correction';
       const undone = record.undone === true;
       const changes = countSnapshotChanges(record.before_snapshot, record.after_snapshot);
+      const postponedChanged = snapshotHasPostponedMatches(record.before_snapshot) !== snapshotHasPostponedMatches(record.after_snapshot);
       const title = correction ? 'Corrección publicada' : 'Publicación inicial';
       const badge = undone ? 'Deshecha' : correction ? 'Corrección' : 'Publicada';
+      const correctionDetails = [
+        changes ? `${changes} participante${changes === 1 ? '' : 's'} modificado${changes === 1 ? '' : 's'}` : '',
+        postponedChanged ? 'estado de jornada actualizado' : ''
+      ].filter(Boolean).join(' · ');
       const detail = correction
-        ? `${changes} participante${changes === 1 ? '' : 's'} modificado${changes === 1 ? '' : 's'}`
+        ? correctionDetails || 'Publicación revisada sin cambios estadísticos'
         : `${Array.isArray(record.after_snapshot) ? record.after_snapshot.length : changes} participantes publicados`;
       return `<article class="revision-item${correction ? ' correction' : ''}${undone ? ' undone' : ''}">
         <span class="revision-number">V${state.history.length - index}</span>
@@ -758,20 +823,48 @@
     $('playerRows').innerHTML = '<div class="state-card"><span class="loader" aria-hidden="true"></span><div><b>Cargando jornada</b><small>Un momento…</small></div></div>';
 
     const season = currentSeasonKey();
-    let statsResult = await state.client
-      .from('matchday_stats')
-      .select('participant_name,points,goals,clean_sheets,red_cards,published,updated_at')
-      .eq('season', season)
-      .eq('matchday', state.matchday);
+    state.redCardsSchemaReady = true;
+    state.postponedSchemaReady = true;
 
-    state.redCardsSchemaReady = !statsResult.error;
-    if (statsResult.error && isRedCardsUpgradeError(statsResult.error)) {
-      statsResult = await state.client
-        .from('matchday_stats')
-        .select('participant_name,points,goals,clean_sheets,published,updated_at')
-        .eq('season', season)
-        .eq('matchday', state.matchday);
-    }
+    const queryMatchdayRows = async (table, { includePublished = false } = {}) => {
+      let includeRedCards = state.redCardsSchemaReady;
+      let includePostponed = state.postponedSchemaReady;
+      let result = null;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const fields = [
+          'participant_name',
+          'points',
+          'goals',
+          'clean_sheets',
+          ...(includeRedCards ? ['red_cards'] : []),
+          ...(includePostponed ? ['has_postponed_matches'] : []),
+          ...(includePublished ? ['published'] : []),
+          'updated_at'
+        ].join(',');
+        result = await state.client
+          .from(table)
+          .select(fields)
+          .eq('season', season)
+          .eq('matchday', state.matchday);
+        if (!result.error) break;
+
+        let retry = false;
+        if (includePostponed && isPostponedUpgradeError(result.error)) {
+          includePostponed = false;
+          state.postponedSchemaReady = false;
+          retry = true;
+        }
+        if (includeRedCards && isRedCardsUpgradeError(result.error)) {
+          includeRedCards = false;
+          state.redCardsSchemaReady = false;
+          retry = true;
+        }
+        if (!retry) break;
+      }
+      return result;
+    };
+
+    const statsResult = await queryMatchdayRows('matchday_stats', { includePublished: true });
 
     if (statsResult.error) {
       renderPlayerRows();
@@ -780,11 +873,7 @@
     }
 
     let [draftResult, historyResult, milestoneResult] = await Promise.all([
-      state.client
-        .from('matchday_drafts')
-        .select('participant_name,points,goals,clean_sheets,red_cards,updated_at')
-        .eq('season', season)
-        .eq('matchday', state.matchday),
+      queryMatchdayRows('matchday_drafts'),
       state.client
         .from('matchday_change_log')
         .select('id,action,before_snapshot,after_snapshot,changed_by_email,created_at,undone,undone_at')
@@ -801,15 +890,6 @@
           .eq('matchday', state.matchday)
           .limit(1)
     ]);
-
-    if (draftResult.error && isRedCardsUpgradeError(draftResult.error)) {
-      state.redCardsSchemaReady = false;
-      draftResult = await state.client
-        .from('matchday_drafts')
-        .select('participant_name,points,goals,clean_sheets,updated_at')
-        .eq('season', season)
-        .eq('matchday', state.matchday);
-    }
 
     state.schemaReady = !draftResult.error && !historyResult.error;
     state.achievementSchemaReady = isChampionsMode() || !milestoneResult.error;
@@ -840,6 +920,7 @@
     state.editingPublished = state.published && state.hasDraft;
     const rowsToRender = draftRows.length ? draftRows : publishedRows;
     setMilestoneForm(localDraft?.milestone || cloudMilestone || {});
+    setPostponedForm(rowsToRender, cloudDraftRows, publishedRows);
 
     $('savedAt').textContent = localDraft?.savedAt
       ? formatDate(localDraft.savedAt, 'Guardada ')
@@ -860,6 +941,7 @@
 
     if (state.matchday > matchdayCount) state.matchday = 1;
     $('panelView').classList.toggle('competition-champions', champions);
+    if (champions) $('postponedToggle').checked = false;
     $('leagueModeButton').classList.toggle('active', !champions);
     $('championsModeButton').classList.toggle('active', champions);
     $('leagueModeButton').setAttribute('aria-pressed', String(!champions));
@@ -929,6 +1011,11 @@
       $('completionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    if (hasPostponedMatches() && !state.postponedSchemaReady) {
+      flashMessage('Primero activa la actualización V114 de Supabase para publicar una jornada con partidos aplazados.', 'error');
+      $('achievementSettings').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     const milestoneCheck = milestoneValidation({ required: !isChampionsMode() });
     if (!milestoneCheck.valid) {
       flashMessage(milestoneCheck.message, 'error');
@@ -959,7 +1046,8 @@
       : milestone?.isMonthEnd
         ? ' · cierre mensual'
         : '';
-    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}`;
+    const postponedLabel = hasPostponedMatches() ? ' · partidos aplazados · Copa pendiente' : ' · jornada completa';
+    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}${isChampionsMode() ? '' : postponedLabel}`;
     $('previewSummary').innerHTML = `
       <article><small>Participantes</small><b>${rows.length}</b></article>
       <article><small>Puntos</small><b>${total('points').toLocaleString()}</b></article>
@@ -974,7 +1062,13 @@
         <span>${row.points}</span><span>${row.goals}</span><span>${row.clean_sheets}</span><span>${row.red_cards}</span>
       </div>`;
     }).join('');
-    $('confirmPublishButton').querySelector('span').textContent = state.published ? 'Confirmar corrección' : 'Confirmar publicación';
+    $('confirmPublishButton').querySelector('span').textContent = state.published
+      ? hasPostponedMatches()
+        ? 'Guardar como pendiente'
+        : publishedWasPostponed()
+          ? 'Completar jornada'
+          : 'Confirmar corrección'
+      : hasPostponedMatches() ? 'Publicar como pendiente' : 'Confirmar publicación';
     $('previewModal').hidden = false;
     document.body.classList.add('preview-open');
     state.previewOpen = true;
@@ -1001,6 +1095,8 @@
     try {
       setButtonsBusy(true);
       const wasCorrection = state.published;
+      const wasPostponed = state.publishedRows.some(row => row?.has_postponed_matches === true);
+      const remainsPostponed = hasPostponedMatches();
       await persistMatchdayMilestone({ required: !isChampionsMode() });
       const { data, error } = await state.client.rpc('publish_matchday_revision', {
         p_season: currentSeasonKey(),
@@ -1017,8 +1113,14 @@
       await loadMatchday();
       flashMessage(
         wasCorrection
-          ? `Corrección de la jornada ${state.matchday} publicada. La versión anterior quedó guardada en el historial.`
-          : `Jornada ${state.matchday} publicada correctamente. Ya está visible en la web.`
+          ? remainsPostponed
+            ? `Corrección publicada. La jornada ${state.matchday} sigue pendiente y la Copa no confirmará eliminados.`
+            : wasPostponed
+              ? `Jornada ${state.matchday} completada. La Copa se recalculó desde esta ronda y la versión anterior quedó en el historial.`
+              : `Corrección de la jornada ${state.matchday} publicada. La versión anterior quedó guardada en el historial.`
+          : remainsPostponed
+            ? `Jornada ${state.matchday} publicada como pendiente. La Liga continúa y la Copa espera el partido aplazado.`
+            : `Jornada ${state.matchday} publicada correctamente. Ya está visible en la web.`
       );
     } catch (error) {
       if (isUpgradeError(error)) state.schemaReady = false;
@@ -1279,6 +1381,13 @@
       if (event.target.checked) $('monthEndToggle').checked = true;
       state.milestone = gatherMilestone();
       updateAchievementSettingsMessage();
+      scheduleAutoSave();
+    });
+
+    $('postponedToggle').addEventListener('change', () => {
+      updateAchievementSettingsMessage();
+      updateCompletionState();
+      syncPublicationUI();
       scheduleAutoSave();
     });
 

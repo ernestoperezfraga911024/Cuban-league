@@ -1,7 +1,15 @@
-# Cuban League V113
+# Cuban League V114
 
 Sitio oficial de la Cuban League con:
 
+- El panel privado permite marcar una jornada de Liga como «Tiene partidos
+  aplazados». La Liga puede seguir publicándose y las jornadas posteriores se
+  cargan normalmente, mientras la Copa conserva como provisionales todas las
+  eliminaciones desde la primera jornada pendiente.
+- Al completar el partido aplazado, se corrige la jornada original, se desmarca
+  la opción y la Copa se recalcula cronológicamente desde esa ronda. El estado
+  también forma parte del historial, por lo que «Deshacer» restaura juntos los
+  puntos y la condición pendiente anterior.
 - La Copa adopta una presentación más directa: «La última silla» deja de estar
   encerrada en una tarjeta, el resumen se compacta, se eliminan datos repetidos
   y la tabla de supervivencia comparte el lenguaje visual de la clasificación.
@@ -275,5 +283,9 @@ Para activar las fechas y premios automáticos de V59, ejecuta finalmente
 Para activar la estadística de tarjetas rojas de V65, ejecuta después
 `SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor.
 Las jornadas antiguas se conservan y reciben automáticamente el valor 0.
+
+Para activar el control de partidos aplazados de V114, ejecuta finalmente
+`SUPABASE-V114-APLAZADOS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor. Las
+jornadas anteriores se conservan y quedan marcadas como completas.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.
