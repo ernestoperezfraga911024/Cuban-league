@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=114-20260810">
+  <link rel="stylesheet" href="admin.css?v=115-20260810">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -309,6 +309,50 @@
         <div id="playerRows" class="player-entry-list"></div>
       </section>
 
+      <section id="lineupManagement" class="lineup-management" aria-labelledby="lineupManagementTitle">
+        <header class="lineup-management-head">
+          <span class="lineup-management-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 3h16v18H4Z"/><path d="M8 3v3a4 4 0 0 0 8 0V3M8 21v-3a4 4 0 0 1 8 0v3M4 12h16"/></svg>
+          </span>
+          <div>
+            <span class="admin-kicker">ALINEACIONES DE LA JORNADA</span>
+            <h2 id="lineupManagementTitle">El once de cada participante</h2>
+            <p>Registra los jugadores exactamente como aparecen en la captura. Los puntos del capitán ya incluyen su multiplicador.</p>
+          </div>
+          <span id="lineupPublishedCount" class="lineup-progress-badge">0/20 completas</span>
+        </header>
+
+        <div id="lineupSchemaNotice" class="lineup-schema-notice" role="status" hidden>
+          <b>Falta activar las alineaciones en Supabase</b>
+          <span>Ejecuta “SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt”. Mientras tanto, el borrador puede conservarse en este dispositivo.</span>
+        </div>
+
+        <div class="lineup-workspace">
+          <div class="lineup-toolbar">
+            <label for="lineupParticipantSelect">
+              <span>Seleccionar participante</span>
+              <select id="lineupParticipantSelect" aria-label="Participante cuya alineación se editará"></select>
+            </label>
+            <div id="lineupEditorSummary" class="lineup-editor-summary" aria-live="polite"></div>
+          </div>
+
+          <div class="lineup-helper">
+            <span class="lineup-helper-mark">C</span>
+            <p><b>Capitán:</b> marca un solo jugador e indica x1,5, x2 o x3. Escribe en PTS la cifra final de la imagen; el sistema calculará la base y el aporte del brazalete.</p>
+          </div>
+
+          <div class="lineup-entry-head" aria-hidden="true">
+            <span>#</span><span>Pos.</span><span>Jugador y club</span><span>PTS</span><span>Capitán</span><span>Multip.</span>
+          </div>
+          <div id="lineupPlayerRows" class="lineup-player-rows"></div>
+
+          <footer class="lineup-editor-footer">
+            <p id="lineupEditorMessage" role="status" aria-live="polite">La alineación se guardará junto con el borrador de la jornada.</p>
+            <button id="clearLineupButton" class="clear-lineup-button" type="button">Vaciar esta alineación</button>
+          </footer>
+        </div>
+      </section>
+
       <section class="revision-card">
         <header>
           <div>
@@ -394,7 +438,7 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=114-20260810"></script>
-  <script src="admin.js?v=114-20260810"></script>
+  <script src="supabase-config.js?v=115-20260810"></script>
+  <script src="admin.js?v=115-20260810"></script>
 </body>
 </html>

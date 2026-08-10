@@ -2171,3 +2171,374 @@ body.preview-open{overflow:hidden}
   .postponed-switch{grid-column:auto}
   .matchday-meta{justify-content:flex-start}
 }
+
+/* ===== CUBAN LEAGUE V115 · EDITOR DE ALINEACIONES ===== */
+
+.lineup-management{
+  overflow:hidden;
+  border:1px solid rgba(87,225,180,.16);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(85,241,185,.06),transparent 24rem),
+    linear-gradient(145deg,rgba(7,25,20,.98),rgba(5,17,15,.98));
+  box-shadow:0 24px 60px rgba(0,0,0,.18);
+}
+
+.competition-champions .lineup-management{display:none}
+
+.lineup-management-head{
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) auto;
+  align-items:center;
+  gap:14px;
+  padding:19px 20px;
+  border-bottom:1px solid rgba(87,225,180,.11);
+}
+
+.lineup-management-head h2,
+.lineup-management-head p{margin:0}
+
+.lineup-management-head h2{margin-top:3px;font-size:1.02rem}
+.lineup-management-head p{max-width:720px;margin-top:6px;color:#7f998e;font-size:.64rem;line-height:1.55}
+
+.lineup-management-icon{
+  display:grid;
+  width:52px;
+  height:52px;
+  place-items:center;
+  border:1px solid rgba(87,225,180,.2);
+  border-radius:15px;
+  color:#72e7ba;
+  background:rgba(67,216,164,.075);
+}
+
+.lineup-management-icon svg{width:27px;fill:none;stroke:currentColor;stroke-width:1.6}
+
+.lineup-progress-badge{
+  display:inline-flex;
+  min-height:35px;
+  align-items:center;
+  padding:8px 12px;
+  border:1px solid rgba(255,204,96,.23);
+  border-radius:999px;
+  color:#f2cc78;
+  background:rgba(255,193,69,.07);
+  font-size:.6rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.lineup-progress-badge.complete{
+  border-color:rgba(91,231,166,.28);
+  color:#8cf0bc;
+  background:rgba(65,219,151,.08);
+}
+
+.lineup-schema-notice{
+  display:grid;
+  gap:4px;
+  margin:15px 17px 0;
+  padding:12px 14px;
+  border:1px solid rgba(255,174,72,.25);
+  border-radius:13px;
+  color:#f2c075;
+  background:rgba(255,149,49,.075);
+}
+
+.lineup-schema-notice[hidden]{display:none}
+.lineup-schema-notice b{font-size:.68rem}
+.lineup-schema-notice span{color:#c99f68;font-size:.58rem;line-height:1.5}
+
+.lineup-workspace{padding:17px}
+
+.lineup-toolbar{
+  display:grid;
+  grid-template-columns:minmax(210px,320px) minmax(0,1fr);
+  align-items:end;
+  gap:14px;
+}
+
+.lineup-toolbar label>span{
+  display:block;
+  margin-bottom:7px;
+  color:#839b90;
+  font-size:.59rem;
+  font-weight:850;
+}
+
+.lineup-toolbar select{
+  width:100%;
+  min-height:46px;
+  padding:0 13px;
+  border:1px solid rgba(101,234,187,.18);
+  border-radius:12px;
+  color:#eafff6;
+  background:#071a15;
+  font-size:.69rem;
+  font-weight:850;
+}
+
+.lineup-editor-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+
+.lineup-editor-summary>span{
+  display:grid;
+  min-height:46px;
+  align-content:center;
+  gap:2px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:11px;
+  background:rgba(255,255,255,.025);
+}
+
+.lineup-editor-summary small{color:#6f887d;font-size:.49rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.lineup-editor-summary b{color:#eafff5;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lineup-editor-summary .is-warning b{color:#f0bd6b}
+.lineup-editor-summary .is-ready b{color:#82eeb8}
+
+.lineup-helper{
+  display:grid;
+  grid-template-columns:35px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  margin:14px 0;
+  padding:10px 12px;
+  border:1px solid rgba(190,139,255,.15);
+  border-radius:12px;
+  background:rgba(170,106,242,.05);
+}
+
+.lineup-helper-mark{
+  display:grid;
+  width:35px;
+  height:27px;
+  place-items:center;
+  border-radius:999px;
+  color:#f3e7ff;
+  background:#9a65cb;
+  font-size:.63rem;
+  font-weight:950;
+}
+
+.lineup-helper p{margin:0;color:#9b8da9;font-size:.58rem;line-height:1.5}
+.lineup-helper b{color:#d9bee9}
+
+.lineup-entry-head,
+.lineup-player-row{
+  display:grid;
+  grid-template-columns:32px 70px minmax(190px,1fr) 82px 86px 90px;
+  align-items:center;
+  gap:8px;
+}
+
+.lineup-entry-head{
+  padding:0 10px 7px;
+  color:#60776d;
+  font-size:.48rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.lineup-player-rows{
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:15px;
+}
+
+.lineup-player-row{
+  min-height:62px;
+  padding:8px 10px;
+  border-top:1px solid rgba(255,255,255,.055);
+  background:rgba(255,255,255,.012);
+}
+
+.lineup-player-row:first-child{border-top:0}
+.lineup-player-row.has-captain{background:linear-gradient(90deg,rgba(162,99,215,.095),rgba(162,99,215,.018))}
+.lineup-player-row.is-incomplete{box-shadow:inset 3px 0 0 rgba(255,176,77,.5)}
+
+.lineup-slot-number{color:#577067;font-size:.58rem;font-weight:900;text-align:center}
+
+.lineup-position-select,
+.lineup-player-row input{
+  width:100%;
+  min-width:0;
+  min-height:41px;
+  padding:8px 9px;
+  border:1px solid rgba(112,229,186,.13);
+  border-radius:10px;
+  color:#e9fff5;
+  background:#071913;
+  font-size:.65rem;
+  font-weight:800;
+}
+
+.lineup-position-select:focus,
+.lineup-player-row input:focus{
+  border-color:rgba(78,229,174,.58);
+  outline:2px solid rgba(78,229,174,.12);
+  outline-offset:1px;
+}
+
+.lineup-player-fields{display:grid;grid-template-columns:minmax(115px,1.25fr) minmax(80px,.75fr);gap:7px}
+.lineup-player-fields input:last-child{color:#8fa69c;font-weight:700}
+.lineup-points-input{text-align:center}
+
+.lineup-captain-choice{
+  display:flex;
+  min-height:41px;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:1px solid rgba(166,109,220,.14);
+  border-radius:10px;
+  color:#a996b7;
+  background:rgba(162,99,215,.035);
+  cursor:pointer;
+  font-size:.57rem;
+  font-weight:900;
+}
+
+.lineup-captain-choice input{width:16px;min-height:16px;accent-color:#a868dc}
+.lineup-captain-choice:has(input:checked){border-color:rgba(185,125,236,.42);color:#e1c9f2;background:rgba(162,99,215,.12)}
+.lineup-multiplier-input:disabled{opacity:.38}
+
+.lineup-editor-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding-top:13px;
+}
+
+.lineup-editor-footer p{margin:0;color:#71887e;font-size:.57rem;line-height:1.45}
+.lineup-editor-footer p.error{color:#f09b8f}
+.lineup-editor-footer p.success{color:#7ee9ae}
+
+.clear-lineup-button{
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid rgba(255,120,111,.16);
+  border-radius:10px;
+  color:#c9948f;
+  background:rgba(255,91,84,.045);
+  font-size:.57rem;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+.clear-lineup-button:hover{border-color:rgba(255,120,111,.32);color:#f1aaa3}
+
+.preview-player>span{display:grid;min-width:0;gap:2px}
+.preview-player>span small{color:#71877d;font-size:.48rem;font-weight:750}
+.preview-summary{grid-template-columns:repeat(6,minmax(0,1fr))}
+.competition-champions .preview-summary{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+@media(max-width:700px){
+  .preview-summary,
+  .competition-champions .preview-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .preview-summary article:last-child{grid-column:auto}
+  .competition-champions .preview-summary article:last-child{grid-column:1/-1}
+}
+
+@media(max-width:980px){
+  .lineup-toolbar{grid-template-columns:1fr}
+  .lineup-editor-summary{grid-template-columns:repeat(4,minmax(100px,1fr))}
+  .lineup-entry-head{display:none}
+  .lineup-player-row{
+    grid-template-columns:30px 68px minmax(150px,1fr) 75px 82px;
+  }
+  .lineup-player-row>.lineup-multiplier-input{grid-column:5}
+}
+
+@media(max-width:700px){
+  .lineup-management{border-radius:17px}
+  .lineup-management-head{grid-template-columns:44px minmax(0,1fr);padding:15px}
+  .lineup-management-icon{width:44px;height:44px;border-radius:13px}
+  .lineup-progress-badge{grid-column:1/-1;justify-self:start}
+  .lineup-workspace{padding:12px}
+  .lineup-editor-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lineup-player-row{
+    grid-template-columns:28px 66px minmax(0,1fr) 74px;
+    gap:7px;
+    padding:9px 8px;
+  }
+  .lineup-player-fields{grid-column:3/-1}
+  .lineup-points-input{grid-column:4}
+  .lineup-captain-choice{grid-column:2/4}
+  .lineup-player-row>.lineup-multiplier-input{grid-column:4}
+  .lineup-editor-footer{align-items:stretch;flex-direction:column}
+  .clear-lineup-button{align-self:flex-start}
+}
+
+@media(max-width:430px){
+  .lineup-management-head p{font-size:.58rem}
+  .lineup-helper{align-items:start}
+  .lineup-player-row{
+    position:relative;
+    grid-template-columns:24px 64px minmax(0,1fr) 50px 68px;
+    grid-template-rows:minmax(41px,auto) 41px;
+    gap:6px 5px;
+    padding:8px;
+  }
+  .lineup-player-row::before{
+    content:"PTS";
+    z-index:1;
+    grid-column:1;
+    grid-row:2;
+    align-self:center;
+    justify-self:start;
+    margin-left:8px;
+    color:#6f887d;
+    font-size:.45rem;
+    font-weight:950;
+    letter-spacing:.04em;
+    pointer-events:none;
+  }
+  .lineup-player-row>.lineup-slot-number{grid-column:1;grid-row:1}
+  .lineup-player-row>.lineup-position-select:not(.lineup-multiplier-input){grid-column:2;grid-row:1}
+  .lineup-player-fields{
+    grid-column:3/-1;
+    grid-row:1;
+    grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);
+    gap:5px;
+  }
+  .lineup-points-input{
+    grid-column:1/3;
+    grid-row:2;
+    padding-left:34px!important;
+    text-align:right;
+  }
+  .lineup-captain-choice{
+    min-width:0;
+    grid-column:3;
+    grid-row:2;
+    gap:4px;
+  }
+  .lineup-player-row>.lineup-multiplier-input{
+    grid-column:4/-1;
+    grid-row:2;
+    min-width:0;
+    color:#dfc4ef;
+    border-color:rgba(185,125,236,.22);
+    background:rgba(162,99,215,.065);
+  }
+}
+
+@media(max-width:360px){
+  .lineup-player-row{
+    grid-template-columns:22px 58px minmax(52px,1fr) 44px 60px;
+    gap:5px 4px;
+    padding:8px 6px;
+  }
+  .lineup-player-row::before{margin-left:6px;font-size:.42rem}
+  .lineup-player-fields{gap:4px}
+  .lineup-position-select,
+  .lineup-player-row input:not([type="radio"]){padding-right:6px;padding-left:6px;font-size:.61rem}
+  .lineup-points-input{padding-left:29px!important}
+  .lineup-captain-choice{gap:3px;font-size:.53rem}
+}

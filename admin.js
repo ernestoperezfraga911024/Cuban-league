@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '114-20260810';
+  const VERSION = '115-20260810';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
@@ -23,6 +23,7 @@
     schemaReady: true,
     redCardsSchemaReady: true,
     postponedSchemaReady: true,
+    lineupSchemaReady: true,
     achievementSchemaReady: true,
     history: [],
     previewRows: [],
@@ -36,6 +37,8 @@
     autoSaveRevision: 0,
     suspendAutoSave: false,
     analyticsLoading: false,
+    lineups: new Map(),
+    lineupParticipantName: '',
     milestone: {
       matchdayDate: '',
       isMonthEnd: false,
@@ -172,6 +175,11 @@
     return /has_postponed_matches|partidos aplazados|postponed matches/i.test(message);
   }
 
+  function isLineupUpgradeError(error) {
+    const message = String(error?.message || error || '');
+    return /column[^\n]*lineup[^\n]*does not exist|could not find[^\n]*lineup|schema cache[^\n]*lineup|matchday lineup schema|SUPABASE-V115/i.test(message);
+  }
+
   function isRedCardsUpgradeError(error) {
     const message = String(error?.message || error || '');
     return /red_cards|tarjetas rojas|tarjeta roja/i.test(message);
@@ -182,6 +190,7 @@
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
+    if (isLineupUpgradeError(error)) return 'Falta activar las alineaciones. Ejecuta “SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isPostponedUpgradeError(error)) return 'Falta activar los partidos aplazados. Ejecuta “SUPABASE-V114-APLAZADOS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isRedCardsUpgradeError(error)) return 'Falta activar las tarjetas rojas. Ejecuta “SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAchievementUpgradeError(error)) return 'Falta activar las insignias. Ejecuta “SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
@@ -298,6 +307,313 @@
     updateAchievementSettingsMessage();
   }
 
+  const LINEUP_DEFAULT_POSITIONS = ['DL', 'DL', 'DL', 'MC', 'MC', 'MC', 'MC', 'DF', 'DF', 'DF', 'PT'];
+  const LINEUP_POSITION_LABELS = {
+    PT: 'Portero',
+    DF: 'Defensa',
+    MC: 'Medio',
+    DL: 'Delantero'
+  };
+  const LINEUP_CAPTAIN_MULTIPLIERS = [1.5, 2, 3];
+
+  function lineupNumber(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function validCaptainMultiplier(value) {
+    return LINEUP_CAPTAIN_MULTIPLIERS.includes(lineupNumber(value));
+  }
+
+  function normalizeLineupPlayers(value) {
+    if (!Array.isArray(value)) return value === null ? null : [];
+    const seenSlots = new Set();
+    return value.map((player, index) => {
+      const slot = Number(player?.slot_number ?? index + 1);
+      const captain = player?.is_captain === true;
+      const multiplier = lineupNumber(player?.captain_multiplier);
+      return {
+        slot_number: Number.isInteger(slot) && slot >= 1 && slot <= 11 ? slot : index + 1,
+        player_name: String(player?.player_name || '').trim(),
+        club_name: String(player?.club_name || '').trim(),
+        position: ['PT', 'DF', 'MC', 'DL'].includes(player?.position) ? player.position : LINEUP_DEFAULT_POSITIONS[index] || 'MC',
+        displayed_points: lineupNumber(player?.displayed_points),
+        is_captain: captain,
+        captain_multiplier: captain ? (validCaptainMultiplier(multiplier) ? multiplier : 2) : 1
+      };
+    }).filter(player => {
+      if (seenSlots.has(player.slot_number)) return false;
+      seenSlots.add(player.slot_number);
+      return true;
+    }).sort((a, b) => a.slot_number - b.slot_number).slice(0, 11);
+  }
+
+  function lineupMetrics(players) {
+    const lineup = Array.isArray(players) ? players : [];
+    const validPositions = new Set(['PT', 'DF', 'MC', 'DL']);
+    const names = lineup.map(player => String(player.player_name || '').trim().toLowerCase()).filter(Boolean);
+    const slots = lineup.map(player => Number(player.slot_number));
+    const captains = lineup.filter(player => player.is_captain === true);
+    const filled = lineup.filter(player => String(player.player_name || '').trim()).length;
+    const pointsComplete = lineup.every(player => lineupNumber(player.displayed_points) !== null);
+    const counts = { PT: 0, DF: 0, MC: 0, DL: 0 };
+    lineup.forEach(player => {
+      if (Object.prototype.hasOwnProperty.call(counts, player.position)) counts[player.position] += 1;
+    });
+    const duplicateNames = names.length !== new Set(names).size;
+    const validFormation = counts.PT === 1
+      && counts.DF >= 3
+      && counts.DF <= 5
+      && counts.MC >= 2
+      && counts.MC <= 6
+      && counts.DL >= 0
+      && counts.DL <= 4;
+    const captainMultiplierValid = captains.length === 1 && validCaptainMultiplier(captains[0]?.captain_multiplier);
+    const issues = [];
+    if (lineup.length !== 11) issues.push(`hay ${lineup.length}/11 jugadores iniciados`);
+    if (filled !== lineup.length || (lineup.length === 11 && filled !== 11)) issues.push('faltan nombres');
+    if (duplicateNames) issues.push('hay nombres repetidos');
+    if (!pointsComplete) issues.push('faltan puntos');
+    if (new Set(slots).size !== lineup.length) issues.push('hay puestos repetidos');
+    if (!lineup.every(player => validPositions.has(player.position))) issues.push('hay posiciones no válidas');
+    if (counts.PT !== 1) issues.push(counts.PT ? 'debe haber un solo portero' : 'falta el portero');
+    if (lineup.length === 11 && !validFormation) issues.push('formación no permitida (DF 3–5, MC 2–6, DL 0–4)');
+    if (captains.length !== 1) issues.push(captains.length ? 'debe haber un solo capitán' : 'falta elegir capitán');
+    else if (!captainMultiplierValid) issues.push('el capitán debe usar x1,5, x2 o x3');
+    const complete = lineup.length === 11
+      && filled === 11
+      && pointsComplete
+      && new Set(slots).size === 11
+      && !duplicateNames
+      && lineup.every(player => validPositions.has(player.position))
+      && validFormation
+      && captains.length === 1
+      && captainMultiplierValid;
+    const totals = { PT: 0, DF: 0, MC: 0, DL: 0 };
+    lineup.forEach(player => {
+      if (Object.prototype.hasOwnProperty.call(totals, player.position)) {
+        totals[player.position] += lineupNumber(player.displayed_points) || 0;
+      }
+    });
+    return {
+      lineup,
+      hasContent: lineup.length > 0,
+      complete,
+      filled,
+      captain: captains[0] || null,
+      captainCount: captains.length,
+      totals,
+      total: Object.values(totals).reduce((sum, value) => sum + value, 0),
+      formation: lineup.length === 11 ? `${counts.DF}-${counts.MC}-${counts.DL}` : '—',
+      issues
+    };
+  }
+
+  function lineupForParticipant(name) {
+    return state.lineups.has(name) ? state.lineups.get(name) : null;
+  }
+
+  function setLineupData(...rowSources) {
+    const next = new Map();
+    state.participants.forEach(participant => {
+      let resolved = null;
+      let found = false;
+      for (const source of rowSources) {
+        if (!Array.isArray(source)) continue;
+        const row = source.find(item => item?.participant_name === participant.name);
+        if (!row || !Object.prototype.hasOwnProperty.call(row, 'lineup')) continue;
+        // Igual que las RPC: null/ausente conserva la fuente anterior;
+        // solo [] significa borrar la alineación de forma explícita.
+        if (row.lineup === null || row.lineup === undefined) continue;
+        resolved = normalizeLineupPlayers(row.lineup);
+        found = true;
+        break;
+      }
+      next.set(participant.name, found ? resolved : null);
+    });
+    state.lineups = next;
+    if (!state.participants.some(participant => participant.name === state.lineupParticipantName)) {
+      state.lineupParticipantName = state.participants[0]?.name || '';
+    }
+  }
+
+  function lineupRowsForEditor(players) {
+    const bySlot = new Map((Array.isArray(players) ? players : []).map(player => [Number(player.slot_number), player]));
+    return Array.from({ length: 11 }, (_, index) => {
+      const slot = index + 1;
+      return bySlot.get(slot) || {
+        slot_number: slot,
+        player_name: '',
+        club_name: '',
+        position: LINEUP_DEFAULT_POSITIONS[index],
+        displayed_points: null,
+        is_captain: false,
+        captain_multiplier: 2
+      };
+    });
+  }
+
+  function formatLineupNumber(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return '—';
+    return number.toLocaleString('es', { maximumFractionDigits: 2 });
+  }
+
+  function currentOfficialPoints() {
+    const participant = state.participantIndex.get(state.lineupParticipantName);
+    const row = participant
+      ? document.querySelector(`.admin-player[data-player-id="${participant.id}"]`)
+      : null;
+    return inputNumberOrNull(row?.querySelector('[data-stat="points"]'));
+  }
+
+  function setLineupEditorMessage(message, type = '') {
+    const node = $('lineupEditorMessage');
+    if (!node) return;
+    node.textContent = message;
+    node.classList.toggle('error', type === 'error');
+    node.classList.toggle('success', type === 'success');
+  }
+
+  function updateLineupSummary() {
+    if (!$('lineupEditorSummary')) return;
+    const metrics = lineupMetrics(lineupForParticipant(state.lineupParticipantName));
+    const official = currentOfficialPoints();
+    const captainLabel = metrics.captain?.player_name
+      ? `${metrics.captain.player_name} · x${formatLineupNumber(metrics.captain.captain_multiplier)}`
+      : 'Sin elegir';
+    const totalTone = official !== null && metrics.hasContent && Math.abs(metrics.total - official) > 0.01 ? ' is-warning' : '';
+    $('lineupEditorSummary').innerHTML = `
+      <span class="${metrics.complete ? 'is-ready' : 'is-warning'}"><small>Estado</small><b>${metrics.complete ? 'Lista' : metrics.hasContent ? `${metrics.filled}/11` : 'Sin cargar'}</b></span>
+      <span><small>Formación</small><b>${metrics.formation}</b></span>
+      <span class="${totalTone.trim()}"><small>Total del XI</small><b>${metrics.hasContent ? formatLineupNumber(metrics.total) : '—'} pts</b></span>
+      <span><small>Capitán</small><b>${escapeHtml(captainLabel)}</b></span>`;
+
+    if (metrics.complete && official !== null && Math.abs(metrics.total - official) > 0.01) {
+      setLineupEditorMessage(`Revisa la suma: el XI da ${formatLineupNumber(metrics.total)} puntos y el resultado oficial tiene ${formatLineupNumber(official)}. Puedes guardarlo, pero conviene comprobar la captura.`, 'error');
+    } else if (metrics.complete) {
+      setLineupEditorMessage('Alineación completa. Se guardará y publicará junto con esta jornada.', 'success');
+    } else if (metrics.hasContent) {
+      setLineupEditorMessage(`Alineación incompleta: ${metrics.issues.join(' · ')}. Puedes guardarla como borrador, pero complétala o vacíala antes de publicar.`, '');
+    } else {
+      setLineupEditorMessage('La alineación se guardará junto con el borrador de la jornada.', '');
+    }
+  }
+
+  function updateLineupProgress() {
+    if (!$('lineupPublishedCount')) return;
+    const complete = state.participants.filter(participant => lineupMetrics(lineupForParticipant(participant.name)).complete).length;
+    const partial = state.participants.filter(participant => {
+      const metrics = lineupMetrics(lineupForParticipant(participant.name));
+      return metrics.hasContent && !metrics.complete;
+    }).length;
+    $('lineupPublishedCount').textContent = `${complete}/${state.participants.length} completas${partial ? ` · ${partial} parcial${partial === 1 ? '' : 'es'}` : ''}`;
+    $('lineupPublishedCount').classList.toggle('complete', complete === state.participants.length);
+    const select = $('lineupParticipantSelect');
+    if (select) {
+      const selected = state.lineupParticipantName;
+      select.innerHTML = state.participants.map(participant => {
+        const metrics = lineupMetrics(lineupForParticipant(participant.name));
+        const status = metrics.complete ? '✓' : metrics.hasContent ? '…' : '○';
+        return `<option value="${escapeHtml(participant.name)}">${status} ${escapeHtml(participant.name)}</option>`;
+      }).join('');
+      select.value = selected;
+    }
+  }
+
+  function renderLineupEditor() {
+    if (!$('lineupPlayerRows')) return;
+    const players = lineupRowsForEditor(lineupForParticipant(state.lineupParticipantName));
+    $('lineupPlayerRows').innerHTML = players.map(player => {
+      const slot = Number(player.slot_number);
+      const captain = player.is_captain === true;
+      const points = lineupNumber(player.displayed_points);
+      const multiplier = captain && validCaptainMultiplier(player.captain_multiplier)
+        ? lineupNumber(player.captain_multiplier)
+        : 2;
+      return `<article class="lineup-player-row${captain ? ' has-captain' : ''}" data-lineup-slot="${slot}">
+        <span class="lineup-slot-number">${String(slot).padStart(2, '0')}</span>
+        <select class="lineup-position-select" data-lineup-field="position" aria-label="Posición del jugador ${slot}">
+          ${Object.entries(LINEUP_POSITION_LABELS).map(([value, label]) => `<option value="${value}"${player.position === value ? ' selected' : ''}>${value} · ${label}</option>`).join('')}
+        </select>
+        <span class="lineup-player-fields">
+          <input data-lineup-field="player_name" type="text" maxlength="80" autocomplete="off" value="${escapeHtml(player.player_name || '')}" placeholder="Nombre del jugador" aria-label="Nombre del jugador ${slot}">
+          <input data-lineup-field="club_name" type="text" maxlength="80" autocomplete="off" value="${escapeHtml(player.club_name || '')}" placeholder="Club (opcional)" aria-label="Club del jugador ${slot}">
+        </span>
+        <input class="lineup-points-input" data-lineup-field="displayed_points" type="number" inputmode="decimal" step="0.1" value="${points === null ? '' : points}" placeholder="—" aria-label="Puntos finales del jugador ${slot}">
+        <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="radio" name="lineupCaptain" value="${slot}"${captain ? ' checked' : ''}><span>C</span></label>
+        <select class="lineup-position-select lineup-multiplier-input" data-lineup-field="captain_multiplier"${captain ? '' : ' disabled'} aria-label="Multiplicador del capitán en la posición ${slot}">
+          ${LINEUP_CAPTAIN_MULTIPLIERS.map(value => `<option value="${value}"${multiplier === value ? ' selected' : ''}>x${String(value).replace('.', ',')}</option>`).join('')}
+        </select>
+      </article>`;
+    }).join('');
+    updateLineupProgress();
+    updateLineupSummary();
+    syncInputLock();
+  }
+
+  function gatherLineupEditor() {
+    const players = [...document.querySelectorAll('.lineup-player-row')].map(row => {
+      const slot = Number(row.dataset.lineupSlot);
+      const playerName = row.querySelector('[data-lineup-field="player_name"]').value.trim();
+      const clubName = row.querySelector('[data-lineup-field="club_name"]').value.trim();
+      const pointsInput = row.querySelector('[data-lineup-field="displayed_points"]');
+      const points = pointsInput.value.trim() === '' ? null : Number(pointsInput.value);
+      const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
+      const multiplierInput = row.querySelector('[data-lineup-field="captain_multiplier"]');
+      const multiplier = Number(multiplierInput.value);
+      const hasContent = Boolean(playerName || clubName || pointsInput.value.trim() || captain);
+      if (!hasContent) return null;
+      return {
+        slot_number: slot,
+        player_name: playerName,
+        club_name: clubName,
+        position: row.querySelector('[data-lineup-field="position"]').value,
+        displayed_points: Number.isFinite(points) ? points : null,
+        is_captain: captain,
+        captain_multiplier: captain && Number.isFinite(multiplier) ? multiplier : 1
+      };
+    }).filter(Boolean);
+    return normalizeLineupPlayers(players);
+  }
+
+  function updateLineupFromEditor() {
+    if (!state.lineupParticipantName) return;
+    state.lineups.set(state.lineupParticipantName, gatherLineupEditor());
+    document.querySelectorAll('.lineup-player-row').forEach(row => {
+      const name = row.querySelector('[data-lineup-field="player_name"]').value.trim();
+      const points = row.querySelector('[data-lineup-field="displayed_points"]').value.trim();
+      const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
+      const hasAny = Boolean(name || points || row.querySelector('[data-lineup-field="club_name"]').value.trim() || captain);
+      row.classList.toggle('has-captain', captain);
+      row.classList.toggle('is-incomplete', hasAny && (!name || points === ''));
+      const multiplier = row.querySelector('[data-lineup-field="captain_multiplier"]');
+      multiplier.disabled = !captain || state.saving || (state.published && !state.editingPublished);
+    });
+    updateLineupProgress();
+    updateLineupSummary();
+  }
+
+  function renderLineupManagement() {
+    if (!$('lineupManagement')) return;
+    $('lineupSchemaNotice').hidden = state.lineupSchemaReady;
+    updateLineupProgress();
+    renderLineupEditor();
+  }
+
+  function lineupPublicationValidation() {
+    const details = state.participants.map(participant => {
+      const metrics = lineupMetrics(lineupForParticipant(participant.name));
+      return { name: participant.name, metrics };
+    }).filter(item => item.metrics.hasContent && !item.metrics.complete);
+    return { valid: details.length === 0, partial: details.map(item => item.name), details };
+  }
+
+  function hasAnyLineupChange() {
+    return [...state.lineups.values()].some(value => Array.isArray(value));
+  }
+
   function setButtonsBusy(busy) {
     state.saving = busy;
     [
@@ -312,6 +628,8 @@
       button.disabled = busy;
     });
     $('matchdaySelect').disabled = busy;
+    if ($('lineupParticipantSelect')) $('lineupParticipantSelect').disabled = busy;
+    if ($('clearLineupButton')) $('clearLineupButton').disabled = busy;
     ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = busy;
     });
@@ -425,11 +743,14 @@
       $('missingParticipants').textContent = 'Actualización V65 pendiente';
     }
 
+    const lineupCheck = isChampionsMode() ? { valid: true } : lineupPublicationValidation();
     const canPreview = !locked
       && result.missing.length === 0
       && state.schemaReady
       && state.redCardsSchemaReady
       && (!hasPostponedMatches() || state.postponedSchemaReady)
+      && lineupCheck.valid
+      && (!hasAnyLineupChange() || state.lineupSchemaReady)
       && !state.saving;
     $('publishButton').disabled = !canPreview;
     return result;
@@ -445,6 +766,13 @@
     });
     $('entryTitle').closest('.entry-card').classList.toggle('is-locked', locked && state.published);
     $('achievementSettings').classList.toggle('is-locked', locked && state.published);
+    document.querySelectorAll('[data-lineup-field]').forEach(input => {
+      const captainMultiplier = input.dataset.lineupField === 'captain_multiplier';
+      const captainChecked = input.closest('.lineup-player-row')?.querySelector('[data-lineup-field="is_captain"]')?.checked === true;
+      input.disabled = locked || (captainMultiplier && !captainChecked);
+    });
+    if ($('clearLineupButton')) $('clearLineupButton').disabled = locked;
+    $('lineupManagement')?.classList.toggle('is-locked', locked && state.published);
   }
 
   function syncPublicationUI() {
@@ -597,6 +925,7 @@
         clean_sheets: cleanSheets,
         red_cards: redCards,
         has_postponed_matches: hasPostponedMatches(),
+        lineup: state.lineups.has(participant.name) ? state.lineups.get(participant.name) : null,
         published
       };
     });
@@ -694,7 +1023,10 @@
     saveLocalDraft(rows);
     state.hasDraft = true;
 
-    if (!state.schemaReady || !state.redCardsSchemaReady || (hasPostponedMatches() && !state.postponedSchemaReady)) {
+    if (!state.schemaReady
+      || !state.redCardsSchemaReady
+      || (hasPostponedMatches() && !state.postponedSchemaReady)
+      || (!state.lineupSchemaReady && hasAnyLineupChange())) {
       markDirty(false, 'Borrador guardado en este dispositivo');
       $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
       if (manual) {
@@ -703,7 +1035,9 @@
             ? 'Borrador guardado en este dispositivo. Activa la actualización V57 de Supabase para sincronizarlo.'
             : !state.redCardsSchemaReady
               ? 'Borrador guardado en este dispositivo. Activa la actualización V65 de Supabase para guardar tarjetas rojas.'
-              : 'Borrador guardado en este dispositivo. Activa la actualización V114 de Supabase para guardar el estado aplazado.',
+              : hasPostponedMatches() && !state.postponedSchemaReady
+                ? 'Borrador guardado en este dispositivo. Activa la actualización V114 de Supabase para guardar el estado aplazado.'
+                : 'Borrador guardado en este dispositivo. Activa la actualización V115 de Supabase para guardar las alineaciones.',
           'error'
         );
       }
@@ -733,6 +1067,8 @@
         return true;
       } catch (error) {
         if (isUpgradeError(error)) state.schemaReady = false;
+        if (isLineupUpgradeError(error)) state.lineupSchemaReady = false;
+        renderLineupManagement();
         markDirty(false, 'Borrador guardado en este dispositivo');
         $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
         if (manual || isUpgradeError(error)) flashMessage(friendlyError(error), 'error');
@@ -773,7 +1109,8 @@
     names.forEach(name => {
       const a = before.get(name);
       const b = after.get(name);
-      if (!a || !b || ['points', 'goals', 'clean_sheets', 'red_cards', 'published'].some(key => a[key] !== b[key])) count += 1;
+      const lineupChanged = JSON.stringify(a?.lineup ?? null) !== JSON.stringify(b?.lineup ?? null);
+      if (!a || !b || lineupChanged || ['points', 'goals', 'clean_sheets', 'red_cards', 'published'].some(key => a[key] !== b[key])) count += 1;
     });
     return count;
   }
@@ -825,12 +1162,14 @@
     const season = currentSeasonKey();
     state.redCardsSchemaReady = true;
     state.postponedSchemaReady = true;
+    state.lineupSchemaReady = true;
 
     const queryMatchdayRows = async (table, { includePublished = false } = {}) => {
       let includeRedCards = state.redCardsSchemaReady;
       let includePostponed = state.postponedSchemaReady;
+      let includeLineup = !isChampionsMode() && state.lineupSchemaReady;
       let result = null;
-      for (let attempt = 0; attempt < 3; attempt += 1) {
+      for (let attempt = 0; attempt < 4; attempt += 1) {
         const fields = [
           'participant_name',
           'points',
@@ -838,6 +1177,7 @@
           'clean_sheets',
           ...(includeRedCards ? ['red_cards'] : []),
           ...(includePostponed ? ['has_postponed_matches'] : []),
+          ...(includeLineup ? ['lineup'] : []),
           ...(includePublished ? ['published'] : []),
           'updated_at'
         ].join(',');
@@ -849,6 +1189,11 @@
         if (!result.error) break;
 
         let retry = false;
+        if (includeLineup && isLineupUpgradeError(result.error)) {
+          includeLineup = false;
+          state.lineupSchemaReady = false;
+          retry = true;
+        }
         if (includePostponed && isPostponedUpgradeError(result.error)) {
           includePostponed = false;
           state.postponedSchemaReady = false;
@@ -921,11 +1266,13 @@
     const rowsToRender = draftRows.length ? draftRows : publishedRows;
     setMilestoneForm(localDraft?.milestone || cloudMilestone || {});
     setPostponedForm(rowsToRender, cloudDraftRows, publishedRows);
+    setLineupData(rowsToRender, cloudDraftRows, publishedRows);
 
     $('savedAt').textContent = localDraft?.savedAt
       ? formatDate(localDraft.savedAt, 'Guardada ')
       : formatSavedAt(draftRows.length ? draftRows : publishedRows);
     renderPlayerRows(rowsToRender);
+    renderLineupManagement();
     renderHistory(!historyResult.error && Array.isArray(historyResult.data) ? historyResult.data : []);
     markDirty(false, state.hasDraft ? 'Borrador recuperado y protegido' : state.published ? 'Publicación protegida' : 'Lista para comenzar');
     syncPublicationUI();
@@ -1002,6 +1349,19 @@
       $('completionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    const lineupCheck = isChampionsMode() ? { valid: true, partial: [] } : lineupPublicationValidation();
+    if (!lineupCheck.valid) {
+      const first = lineupCheck.details[0];
+      const reason = first?.metrics?.issues?.join(' · ') || 'revisa sus datos';
+      flashMessage(`Alineación incompleta de ${first?.name || lineupCheck.partial[0]}: ${reason}${lineupCheck.partial.length > 1 ? ` · y ${lineupCheck.partial.length - 1} más` : ''}. Complétala o vacíala antes de publicar.`, 'error');
+      $('lineupManagement').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (!isChampionsMode() && hasAnyLineupChange() && !state.lineupSchemaReady) {
+      flashMessage('Primero activa la actualización V115 de Supabase para publicar las alineaciones.', 'error');
+      $('lineupManagement').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     if (!state.schemaReady) {
       flashMessage('Primero activa la actualización V57 de Supabase para publicar con historial y deshacer.', 'error');
       return;
@@ -1036,6 +1396,7 @@
       a.participant_name.localeCompare(b.participant_name, 'es')
     );
     const total = key => rows.reduce((sum, row) => sum + row[key], 0);
+    const lineupCount = rows.filter(row => lineupMetrics(row.lineup).complete).length;
     $('previewTitle').textContent = state.published ? 'Revisar corrección' : 'Vista previa de la jornada';
     const milestone = milestoneCheck.milestone;
     const matchdayDateLabel = milestone?.matchdayDate
@@ -1047,18 +1408,19 @@
         ? ' · cierre mensual'
         : '';
     const postponedLabel = hasPostponedMatches() ? ' · partidos aplazados · Copa pendiente' : ' · jornada completa';
-    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}${isChampionsMode() ? '' : postponedLabel}`;
+    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${isChampionsMode() ? '' : ` · ${lineupCount} alineaciones`}${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}${isChampionsMode() ? '' : postponedLabel}`;
     $('previewSummary').innerHTML = `
       <article><small>Participantes</small><b>${rows.length}</b></article>
       <article><small>Puntos</small><b>${total('points').toLocaleString()}</b></article>
       <article><small>Goles</small><b>${total('goals').toLocaleString()}</b></article>
       <article><small>Clean sheets</small><b>${total('clean_sheets').toLocaleString()}</b></article>
-      <article><small>Tarjetas rojas</small><b>${total('red_cards').toLocaleString()}</b></article>`;
+      <article><small>Tarjetas rojas</small><b>${total('red_cards').toLocaleString()}</b></article>
+      ${isChampionsMode() ? '' : `<article><small>Alineaciones</small><b>${lineupCount}/${rows.length}</b></article>`}`;
     $('previewRows').innerHTML = state.previewRows.map((row, index) => {
       const participant = state.participantIndex.get(row.participant_name);
       return `<div class="preview-row">
         <span>${index + 1}</span>
-        <span class="preview-player"><img src="${escapeHtml(participant?.shield || '')}" alt=""><b>${escapeHtml(row.participant_name)}</b></span>
+        <span class="preview-player"><img src="${escapeHtml(participant?.shield || '')}" alt=""><span><b>${escapeHtml(row.participant_name)}</b>${isChampionsMode() ? '' : `<small>${lineupMetrics(row.lineup).complete ? 'XI completo' : 'Sin alineación'}</small>`}</span></span>
         <span>${row.points}</span><span>${row.goals}</span><span>${row.clean_sheets}</span><span>${row.red_cards}</span>
       </div>`;
     }).join('');
@@ -1124,6 +1486,7 @@
       );
     } catch (error) {
       if (isUpgradeError(error)) state.schemaReady = false;
+      if (isLineupUpgradeError(error)) state.lineupSchemaReady = false;
       flashMessage(friendlyError(error), 'error');
     } finally {
       state.suspendAutoSave = false;
@@ -1160,6 +1523,7 @@
       );
     } catch (error) {
       if (isUpgradeError(error)) state.schemaReady = false;
+      if (isLineupUpgradeError(error)) state.lineupSchemaReady = false;
       flashMessage(friendlyError(error), 'error');
     } finally {
       state.suspendAutoSave = false;
@@ -1391,10 +1755,40 @@
       scheduleAutoSave();
     });
 
+    $('lineupParticipantSelect').addEventListener('change', event => {
+      state.lineupParticipantName = event.target.value;
+      renderLineupEditor();
+    });
+
+    const handleLineupInput = () => {
+      updateLineupFromEditor();
+      updateCompletionState();
+      scheduleAutoSave();
+    };
+    $('lineupPlayerRows').addEventListener('input', event => {
+      if (!event.target.matches('[data-lineup-field]')) return;
+      if (event.target.matches('select')) return;
+      handleLineupInput();
+    });
+    $('lineupPlayerRows').addEventListener('change', event => {
+      if (!event.target.matches('select[data-lineup-field]')) return;
+      handleLineupInput();
+    });
+    $('clearLineupButton').addEventListener('click', () => {
+      if (!state.lineupParticipantName) return;
+      const current = lineupMetrics(lineupForParticipant(state.lineupParticipantName));
+      if (current.hasContent && !window.confirm(`¿Vaciar la alineación de ${state.lineupParticipantName}? El cambio quedará en el borrador hasta publicar.`)) return;
+      state.lineups.set(state.lineupParticipantName, []);
+      renderLineupEditor();
+      updateCompletionState();
+      scheduleAutoSave();
+    });
+
     $('playerRows').addEventListener('input', event => {
       if (!event.target.matches('.stat-input')) return;
       if (event.target.dataset.stat !== 'points' && valueFor(event.target) < 0) event.target.value = 0;
       updateTotals();
+      updateLineupSummary();
       updateCompletionState();
       scheduleAutoSave();
     });

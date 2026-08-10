@@ -1,6 +1,21 @@
-# Cuban League V114
+# Cuban League V115
 
 Sitio oficial de la Cuban League con:
+
+- Cada participante puede guardar su alineación de 11 jugadores dentro de una
+  jornada, con nombre, club opcional, posición, puntos finales, capitán y
+  multiplicador x1,5, x2 o x3. Los puntos mostrados del capitán ya incluyen
+  ese multiplicador y nunca se multiplican una segunda vez.
+- Al tocar un equipo en la tabla de una jornada se abre su campo: formación,
+  estadísticas oficiales de esa fecha, capitán y aporte del brazalete, MVP del
+  equipo, total por portería/defensa/medio/delantera y línea más productiva.
+- El panel privado permite completar las alineaciones poco a poco. Una jornada
+  puede publicarse aunque todavía falten fotos, pero una alineación empezada
+  debe completarse o vaciarse antes de publicar. Borradores, correcciones y
+  «Deshacer» conservan juntos estadísticas y alineaciones.
+- Para activar esta fase, ejecuta una sola vez
+  `SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt` en Supabase > SQL Editor,
+  después de V114.
 
 - El panel privado permite marcar una jornada de Liga como «Tiene partidos
   aplazados». La Liga puede seguir publicándose y las jornadas posteriores se
@@ -287,5 +302,10 @@ Las jornadas antiguas se conservan y reciben automáticamente el valor 0.
 Para activar el control de partidos aplazados de V114, ejecuta finalmente
 `SUPABASE-V114-APLAZADOS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor. Las
 jornadas anteriores se conservan y quedan marcadas como completas.
+
+Para activar las alineaciones por jornada de V115, abre después
+`SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt`, copia todo su contenido en
+Supabase > SQL Editor y pulsa **Run** una sola vez. No borra las jornadas ya
+publicadas.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.
