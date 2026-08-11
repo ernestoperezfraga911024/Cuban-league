@@ -1,6 +1,7 @@
 -- CUBAN LEAGUE · ACTUALIZACIÓN V116 · CATÁLOGO MAESTRO EN ALINEACIONES
 -- Abre este archivo, selecciona todo, copia y pega en Supabase > SQL Editor.
--- Pulsa Run una sola vez.
+-- Pulsa Run. Si un intento anterior falló solo en la comprobación final,
+-- puedes ejecutar este archivo completo de nuevo sin duplicar datos.
 -- Requiere haber ejecutado antes V57, V65 y V114.
 -- Es acumulativa: reemplaza V115 si aún no la ejecutaste.
 -- Conserva todos los datos y añade un once opcional con player_id y club_id estables.
@@ -844,5 +845,12 @@ commit;
 
 select
   'Catálogo y alineaciones V116 activados correctamente' as resultado,
-  count(*) filter (where lineup is not null and jsonb_array_length(lineup) = 11) as alineaciones_publicadas
-from public.matchday_stats;
+  116 as version_catalogo,
+  count(*) filter (
+    where case
+      when jsonb_typeof(to_jsonb(stats) -> 'lineup') = 'array'
+        then jsonb_array_length(to_jsonb(stats) -> 'lineup') = 11
+      else false
+    end
+  ) as alineaciones_publicadas
+from public.matchday_stats as stats;
