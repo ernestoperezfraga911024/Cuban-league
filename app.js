@@ -1,4 +1,4 @@
-const APP_VERSION='118-20260811';
+const APP_VERSION='119-20260811';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -41,6 +41,10 @@ const LEAGUE_STATS_STATE={
   linePosition:'all',
   data:null,
   error:''
+};
+const LEAGUE_COMPARATOR_STATE={
+  leftName:'',
+  rightName:''
 };
 const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
@@ -493,7 +497,8 @@ async function syncLiveCurrentStats({render=true}={}){
     if(publishedStatsChanged&&PROFILE_SEASON_STATE?.view==='season'&&!$('playerModal')?.hidden){
       ensureProfileSeasonData({force:true});
     }
-    if(publishedStatsChanged&&document.body.dataset.section==='current'&&document.querySelector('[data-standings-view="statistics"]')?.getAttribute('aria-selected')==='true'){
+    const activeStandingsView=document.querySelector('[data-standings-view][aria-selected="true"]')?.dataset.standingsView;
+    if(publishedStatsChanged&&document.body.dataset.section==='current'&&['statistics','comparator'].includes(activeStandingsView)){
       ensureLeagueStatsData({force:true});
     }
     return true;
@@ -943,7 +948,7 @@ function setStandingsView(view,{focus=false}={}){
     panel.hidden=panel.dataset.standingsPanel!==validView;
   });
   document.querySelector('.relegation-legend')?.toggleAttribute('hidden',validView!=='general');
-  if(validView==='statistics')ensureLeagueStatsData();
+  if(['statistics','comparator'].includes(validView))ensureLeagueStatsData();
 }
 
 function setupStandingsSwitcher(){
@@ -3228,7 +3233,7 @@ async function fetchPublishedLeagueStatsRows(signal){
   const rows=[];
   for(let offset=0;offset<10000;offset+=pageSize){
     const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
-    endpoint.searchParams.set('select','participant_name,matchday,lineup,updated_at');
+    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,lineup,updated_at');
     endpoint.searchParams.set('season',`eq.${season}`);
     endpoint.searchParams.set('published','eq.true');
     endpoint.searchParams.set('order','matchday.asc,participant_name.asc');
@@ -3268,6 +3273,9 @@ function buildLeagueStats(rawRows){
     shield:participant.shield||'',
     publishedRows:0,
     lineupMatchdays:0,
+    officialPoints:0,
+    goals:0,
+    cleanSheets:0,
     positionTotals:{PT:0,DF:0,MC:0,DL:0},
     playersByKey:new Map()
   }]));
@@ -3289,6 +3297,9 @@ function buildLeagueStats(rawRows){
     const team=teamsByName.get(row.participantName);
     if(!team)return;
     team.publishedRows+=1;
+    team.officialPoints+=matchdayLineupNumericValue(row.points);
+    team.goals+=Math.max(0,Math.trunc(matchdayLineupNumericValue(row.goals)));
+    team.cleanSheets+=Math.max(0,Math.trunc(matchdayLineupNumericValue(row.clean_sheets)));
     publishedMatchdays.add(row.matchday);
     const lineup=normalizePublishedMatchdayLineup(row.lineup);
     if(lineup.length!==11)return;
@@ -3369,6 +3380,9 @@ function buildLeagueStats(rawRows){
       shield:team.shield,
       publishedRows:team.publishedRows,
       lineupMatchdays:team.lineupMatchdays,
+      officialPoints:team.officialPoints,
+      goals:team.goals,
+      cleanSheets:team.cleanSheets,
       positionTotals:team.positionTotals,
       totalLinePoints,
       players,
@@ -3415,6 +3429,230 @@ function leagueStatsTiedPlayerVisual(players,emptyLabel='Sin capitán registrado
   const first=records[0];
   const tiedNames=records.length>1?records.map(player=>player.playerName).join(' / '):'';
   return `<div class="league-stats-player-wrap">${profileSeasonPlayerVisual(first)}${records.length>1?`<span class="league-stats-tie">Empate: ${profileAttr(tiedNames)} · métricas mostradas de ${profileAttr(first.playerName)}</span>`:''}</div>`;
+}
+
+function leagueComparatorResolveTeams(data){
+  const teams=[...(data?.teams||[])];
+  const names=new Set(teams.map(team=>team.name));
+  const ordered=[...teams].sort((a,b)=>
+    Number(b.publishedRows>0)-Number(a.publishedRows>0)
+    ||Number(b.lineupMatchdays>0)-Number(a.lineupMatchdays>0)
+    ||b.officialPoints-a.officialPoints
+    ||b.publishedRows-a.publishedRows
+    ||a.name.localeCompare(b.name,'es')
+  );
+  if(!names.has(LEAGUE_COMPARATOR_STATE.leftName)){
+    LEAGUE_COMPARATOR_STATE.leftName=ordered[0]?.name||'';
+  }
+  if(!names.has(LEAGUE_COMPARATOR_STATE.rightName)||LEAGUE_COMPARATOR_STATE.rightName===LEAGUE_COMPARATOR_STATE.leftName){
+    LEAGUE_COMPARATOR_STATE.rightName=ordered.find(team=>team.name!==LEAGUE_COMPARATOR_STATE.leftName)?.name||'';
+  }
+  return {
+    teams,
+    left:teams.find(team=>team.name===LEAGUE_COMPARATOR_STATE.leftName)||null,
+    right:teams.find(team=>team.name===LEAGUE_COMPARATOR_STATE.rightName)||null
+  };
+}
+
+function leagueComparatorResult(leftValue,rightValue,leftAvailable=true,rightAvailable=true){
+  if(!leftAvailable||!rightAvailable)return 'unavailable';
+  const left=matchdayLineupNumericValue(leftValue);
+  const right=matchdayLineupNumericValue(rightValue);
+  if(Math.abs(left-right)<.0001)return 'tie';
+  return left>right?'left':'right';
+}
+
+function leagueComparatorLeaderBadge(side,result){
+  if(result==='tie')return '<span class="league-comparator-leader is-tie">EMPATE</span>';
+  if(result!==side)return '';
+  return '<span class="league-comparator-leader">★ LÍDER</span>';
+}
+
+function leagueComparatorSelectMarkup(teams,selected,disabled,label,side){
+  return `<label class="league-comparator-select is-${side}"><span>${label}</span><select data-league-comparator-side="${side}" aria-label="${label}">
+      ${teams.map(team=>`<option value="${profileAttr(team.name)}"${team.name===selected?' selected':''}${team.name===disabled?' disabled':''}>${profileAttr(team.name)}</option>`).join('')}
+    </select></label>`;
+}
+
+function leagueComparatorHeroTeamMarkup(team,side,result){
+  const safeName=profileAttr(team.name);
+  const shield=profileAttr(team.shield||'');
+  const available=team.publishedRows>0;
+  return `<article class="league-comparator-hero-team is-${side}${result===side?' is-winner':''}" ${profileTriggerAttrs(team.name)}>
+      <div class="league-comparator-avatar">${shield?`<img src="${shield}" alt="Foto de ${safeName}">`:`<span>${profileAttr(matchdayLineupInitials(team.name))}</span>`}</div>
+      <h3>${safeName}</h3>
+      <strong>${available?profileSeasonFormat(team.officialPoints):'—'}<small> pts</small></strong>
+      ${leagueComparatorLeaderBadge(side,result)}
+      <span class="league-comparator-games">${team.publishedRows} ${team.publishedRows===1?'jornada oficial':'jornadas oficiales'}</span>
+    </article>`;
+}
+
+function leagueComparatorPlayerCard(team,side,type,result){
+  const isCaptain=type==='captain';
+  const records=isCaptain?team.topCaptainsByPoints:team.mvps;
+  const player=records[0]||null;
+  const points=player?(isCaptain?player.captainPoints:player.contributionPoints):0;
+  const uses=player?(isCaptain?player.captainUses:player.appearances):0;
+  const average=player?(isCaptain?player.captainAverage:player.average):0;
+  const title=isCaptain?'MEJOR CAPITÁN':'MVP';
+  return `<article class="league-comparator-player-card is-${side}${result===side?' is-winner':''}">
+      <header><span>${isCaptain?uiIcon('crown'):uiIcon('star')}</span><b>${title}</b>${leagueComparatorLeaderBadge(side,result)}</header>
+      ${player?`<div class="league-comparator-player">${profileSeasonPlayerVisual(player)}</div>
+        <div class="league-comparator-player-numbers"><strong>${profileSeasonFormat(points)} pts</strong><span>${uses} ${uses===1?'jornada':'jornadas'} · ${profileSeasonFormat(average)} prom.</span></div>
+        ${records.length>1?`<small class="league-comparator-shared">Liderato compartido entre ${records.length} jugadores</small>`:''}`
+        :`<div class="league-comparator-player-empty"><b>Sin ${isCaptain?'capitán':'MVP'} registrado</b><span>Esperando un XI completo</span></div>`}
+    </article>`;
+}
+
+function leagueComparatorLineMarkup(left,right){
+  const labels={PT:'Portería',DF:'Defensa',MC:'Mediocampo',DL:'Delantera'};
+  return ['PT','DF','MC','DL'].map(position=>{
+    const leftAvailable=left.lineupMatchdays>0;
+    const rightAvailable=right.lineupMatchdays>0;
+    const leftValue=left.positionTotals[position];
+    const rightValue=right.positionTotals[position];
+    const result=leagueComparatorResult(leftValue,rightValue,leftAvailable,rightAvailable);
+    const scaleMinimum=Math.min(0,leftValue,rightValue);
+    const scaleMaximum=Math.max(0,leftValue,rightValue);
+    const scaleRange=scaleMaximum-scaleMinimum;
+    const visualWidth=(value,available)=>{
+      if(!available)return 0;
+      if(scaleRange<.0001)return Math.abs(value)<.0001?0:100;
+      if(scaleMinimum<0)return Math.min(100,Math.max(12,12+(value-scaleMinimum)/scaleRange*88));
+      return scaleMaximum>0?Math.min(100,Math.max(0,value/scaleMaximum*100)):0;
+    };
+    const leftWidth=visualWidth(leftValue,leftAvailable);
+    const rightWidth=visualWidth(rightValue,rightAvailable);
+    const resultText=result==='left'?`${left.name} lidera`:result==='right'?`${right.name} lidera`:result==='tie'?'empate':'comparación no disponible';
+    const aria=`${labels[position]}: ${left.name}, ${leftAvailable?`${profileSeasonFormat(leftValue)} puntos`:'sin XI'}; ${right.name}, ${rightAvailable?`${profileSeasonFormat(rightValue)} puntos`:'sin XI'}. Resultado: ${resultText}`;
+    return `<div class="league-comparator-line" role="img" aria-label="${profileAttr(aria)}">
+      <strong class="is-left${result==='left'?' is-winner':''}">${leftAvailable?profileSeasonFormat(leftValue):'—'}${result==='left'?'<span aria-hidden="true">★</span>':''}</strong>
+      <span class="league-comparator-track is-left${leftValue<0?' is-negative':''}"><i style="--compare-width:${leftWidth.toFixed(2)}%"></i></span>
+      <b title="${labels[position]}">${position}</b>
+      <span class="league-comparator-track is-right${rightValue<0?' is-negative':''}"><i style="--compare-width:${rightWidth.toFixed(2)}%"></i></span>
+      <strong class="is-right${result==='right'?' is-winner':''}">${result==='right'?'<span aria-hidden="true">★</span>':''}${rightAvailable?profileSeasonFormat(rightValue):'—'}</strong>
+      ${result==='tie'?'<small>EMPATE</small>':''}
+    </div>`;
+  }).join('');
+}
+
+function leagueComparatorOfficialMetricMarkup(label,icon,left,right,key){
+  const leftAvailable=left.publishedRows>0;
+  const rightAvailable=right.publishedRows>0;
+  const leftValue=left[key];
+  const rightValue=right[key];
+  const result=leagueComparatorResult(leftValue,rightValue,leftAvailable,rightAvailable);
+  const resultText=result==='left'?`${left.name} lidera`:result==='right'?`${right.name} lidera`:result==='tie'?'empate':'comparación no disponible';
+  return `<article class="league-comparator-official-metric" aria-label="${profileAttr(`${label}: ${left.name}, ${leftAvailable?profileSeasonFormat(leftValue):'sin datos'}; ${right.name}, ${rightAvailable?profileSeasonFormat(rightValue):'sin datos'}. Resultado: ${resultText}`)}">
+    <span class="league-comparator-official-icon">${uiIcon(icon)}</span>
+    <div class="is-left${result==='left'?' is-winner':''}"><strong>${leftAvailable?profileSeasonFormat(leftValue):'—'}</strong>${result==='left'?'<small>★ LÍDER</small>':''}</div>
+    <b>${label}</b>
+    <div class="is-right${result==='right'?' is-winner':''}"><strong>${rightAvailable?profileSeasonFormat(rightValue):'—'}</strong>${result==='right'?'<small>★ LÍDER</small>':''}</div>
+    ${result==='tie'?'<span class="league-comparator-metric-tie">EMPATE</span>':''}
+  </article>`;
+}
+
+function renderLeagueComparatorContent(){
+  const host=$('leagueComparatorContent');
+  if(!host)return;
+  if(LEAGUE_STATS_STATE.status==='idle'||(LEAGUE_STATS_STATE.status==='loading'&&!LEAGUE_STATS_STATE.data)){
+    host.innerHTML=leagueStatsLoadingMarkup().replace('Calculando la competición','Preparando el cara a cara').replace('Sumando capitanes, líneas y MVP de todos los XI publicados…','Reuniendo los datos oficiales de ambos participantes…');
+    return;
+  }
+  if(LEAGUE_STATS_STATE.status==='error'&&!LEAGUE_STATS_STATE.data){
+    host.innerHTML=leagueStatsErrorMarkup(LEAGUE_STATS_STATE.error);
+    return;
+  }
+  const data=LEAGUE_STATS_STATE.data;
+  if(!data){
+    host.innerHTML=leagueStatsLoadingMarkup();
+    return;
+  }
+  const {teams,left,right}=leagueComparatorResolveTeams(data);
+  if(!left||!right){
+    host.innerHTML='<div class="league-stats-empty"><span>VS</span><h3>Faltan participantes</h3><p>El comparador necesita al menos dos participantes activos.</p></div>';
+    return;
+  }
+  const pointsResult=leagueComparatorResult(left.officialPoints,right.officialPoints,left.publishedRows>0,right.publishedRows>0);
+  const leftMvp=left.mvps[0]||null;
+  const rightMvp=right.mvps[0]||null;
+  const mvpResult=leagueComparatorResult(leftMvp?.contributionPoints,rightMvp?.contributionPoints,Boolean(leftMvp),Boolean(rightMvp));
+  const leftCaptain=left.topCaptainsByPoints[0]||null;
+  const rightCaptain=right.topCaptainsByPoints[0]||null;
+  const captainResult=leagueComparatorResult(leftCaptain?.captainPoints,rightCaptain?.captainPoints,Boolean(leftCaptain),Boolean(rightCaptain));
+  const officialCoverageDiffers=left.publishedRows!==right.publishedRows;
+  const lineupCoverageDiffers=left.lineupMatchdays!==right.lineupMatchdays;
+  const unequalCoverage=officialCoverageDiffers||lineupCoverageDiffers;
+  host.innerHTML=`<section class="league-comparator-shell">
+    <header class="league-comparator-heading">
+      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Comparador de participantes</h3><p>Enfrenta su temporada, sus figuras y el rendimiento de cada línea.</p></div>
+      <span class="league-comparator-heading-mark">VS</span>
+    </header>
+    <div class="league-comparator-selectors">
+      ${leagueComparatorSelectMarkup(teams,left.name,right.name,'Participante izquierdo','left')}
+      <button type="button" class="league-comparator-swap" data-league-comparator-swap aria-label="Intercambiar participantes" title="Intercambiar participantes"><span aria-hidden="true">⇄</span></button>
+      ${leagueComparatorSelectMarkup(teams,right.name,left.name,'Participante derecho','right')}
+    </div>
+    <div class="league-comparator-faceoff">
+      ${leagueComparatorHeroTeamMarkup(left,'left',pointsResult)}
+      <div class="league-comparator-vs" aria-hidden="true"><span>VS</span><small>PTS</small></div>
+      ${leagueComparatorHeroTeamMarkup(right,'right',pointsResult)}
+    </div>
+    <div class="league-comparator-player-grid">
+      ${leagueComparatorPlayerCard(left,'left','mvp',mvpResult)}
+      ${leagueComparatorPlayerCard(right,'right','mvp',mvpResult)}
+      ${leagueComparatorPlayerCard(left,'left','captain',captainResult)}
+      ${leagueComparatorPlayerCard(right,'right','captain',captainResult)}
+    </div>
+    <section class="league-comparator-lines">
+      <div class="league-comparator-section-title"><span class="eyebrow">XI PUBLICADOS</span><h4>Rendimiento por líneas</h4></div>
+      <div class="league-comparator-line-head"><span>${profileAttr(left.name)}</span><span>${profileAttr(right.name)}</span></div>
+      ${leagueComparatorLineMarkup(left,right)}
+    </section>
+    <div class="league-comparator-official-grid">
+      ${leagueComparatorOfficialMetricMarkup('GOLES','ball',left,right,'goals')}
+      ${leagueComparatorOfficialMetricMarkup('CLEAN SHEETS','shield',left,right,'cleanSheets')}
+    </div>
+    <div class="league-comparator-coverage${unequalCoverage?' is-unequal':''}">
+      <span><b>${left.publishedRows}</b> jornadas oficiales · <b>${left.lineupMatchdays}</b> XI completos</span>
+      <span><b>${right.publishedRows}</b> jornadas oficiales · <b>${right.lineupMatchdays}</b> XI completos</span>
+      ${unequalCoverage?`<small>La cobertura ${officialCoverageDiffers&&lineupCoverageDiffers?'de jornadas oficiales y XI':officialCoverageDiffers?'de jornadas oficiales':'de XI'} es diferente; compara los acumulados con cautela.</small>`:''}
+    </div>
+    <p class="league-comparator-updated">${LEAGUE_STATS_STATE.status==='loading'
+      ?'Actualizando…'
+      :LEAGUE_STATS_STATE.error
+        ?`Mostrando datos anteriores · ${profileAttr(LEAGUE_STATS_STATE.error)}`
+        :`Datos publicados${data.latestUpdate?` · ${new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(data.latestUpdate)}`:''}`}</p>
+  </section>`;
+}
+
+function setLeagueComparatorParticipant(side,name,{focus=false}={}){
+  const data=LEAGUE_STATS_STATE.data;
+  if(!data||!['left','right'].includes(side))return;
+  const names=new Set(data.teams.map(team=>team.name));
+  if(!names.has(name))return;
+  const currentKey=side==='left'?'leftName':'rightName';
+  const otherKey=side==='left'?'rightName':'leftName';
+  const previous=LEAGUE_COMPARATOR_STATE[currentKey];
+  if(name===LEAGUE_COMPARATOR_STATE[otherKey]){
+    LEAGUE_COMPARATOR_STATE[otherKey]=previous;
+  }
+  LEAGUE_COMPARATOR_STATE[currentKey]=name;
+  leagueComparatorResolveTeams(data);
+  renderLeagueComparatorContent();
+  if(focus){
+    requestAnimationFrame(()=>document.querySelector(`[data-league-comparator-side="${side}"]`)?.focus());
+  }
+}
+
+function swapLeagueComparatorParticipants({focus=false}={}){
+  const previous=LEAGUE_COMPARATOR_STATE.leftName;
+  LEAGUE_COMPARATOR_STATE.leftName=LEAGUE_COMPARATOR_STATE.rightName;
+  LEAGUE_COMPARATOR_STATE.rightName=previous;
+  renderLeagueComparatorContent();
+  if(focus){
+    requestAnimationFrame(()=>document.querySelector('[data-league-comparator-swap]')?.focus());
+  }
 }
 
 function leagueStatsCompetitionRanks(rows,valueFor){
@@ -3538,6 +3776,7 @@ function leagueStatsErrorMarkup(message){
 }
 
 function renderLeagueStatsContent(){
+  renderLeagueComparatorContent();
   const host=$('leagueStatsContent');
   if(!host)return;
   if(LEAGUE_STATS_STATE.status==='idle'||(LEAGUE_STATS_STATE.status==='loading'&&!LEAGUE_STATS_STATE.data)){
@@ -5584,6 +5823,11 @@ async function init(){
       setLeagueStatsSection(leagueStatsSection.dataset.leagueStatsSection,{focus:true});
       return;
     }
+    const leagueComparatorSwap=e.target.closest('[data-league-comparator-swap]');
+    if(leagueComparatorSwap){
+      swapLeagueComparatorParticipants({focus:true});
+      return;
+    }
     const leagueCaptainMode=e.target.closest('[data-league-captain-mode]');
     if(leagueCaptainMode){
       setLeagueCaptainMode(leagueCaptainMode.dataset.leagueCaptainMode,{focus:true});
@@ -5643,6 +5887,11 @@ async function init(){
     if(team)openPlayer(team.dataset.profilePlayer);
   });
   document.addEventListener('change',e=>{
+    const leagueComparatorSelect=e.target.closest?.('[data-league-comparator-side]');
+    if(leagueComparatorSelect){
+      setLeagueComparatorParticipant(leagueComparatorSelect.dataset.leagueComparatorSide,leagueComparatorSelect.value,{focus:true});
+      return;
+    }
     const managerCompare=e.target.closest?.('[data-manager-compare-select]');
     if(managerCompare){
       renderManagerComparison(managerCompare.dataset.managerPrimary,managerCompare.value);
