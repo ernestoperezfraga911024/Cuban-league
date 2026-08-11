@@ -1,7 +1,13 @@
-# Cuban League V117
+# Cuban League V118
 
 Sitio oficial de la Cuban League con:
 
+- Clasificación incorpora «Estadísticas» con tres comparativas globales: el
+  capitán con más puntos y el de mejor promedio de cada participante, los
+  acumulados PT/DF/MC/DL para descubrir las mejores líneas de la competición y
+  el MVP histórico de cada equipo. Los registros se separan por pareja
+  futbolista–participante: un traspaso inicia un acumulado nuevo sin borrar lo
+  conseguido con el equipo anterior.
 - Al tocar un participante en Clasificación, su perfil incorpora la pestaña
   «Temporada 2026-2027». El resumen acumula jornadas, puntos, goles, clean
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores

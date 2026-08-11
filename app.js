@@ -1,4 +1,4 @@
-const APP_VERSION='117-20260811';
+const APP_VERSION='118-20260811';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -31,6 +31,17 @@ let PROFILE_SEASON_REQUEST_TOKEN=0;
 let PROFILE_SEASON_ABORT_CONTROLLER=null;
 const PROFILE_SEASON_CACHE=new Map();
 let PROFILE_SEASON_STATE=null;
+let LEAGUE_STATS_REQUEST_TOKEN=0;
+let LEAGUE_STATS_ABORT_CONTROLLER=null;
+const LEAGUE_STATS_CACHE=new Map();
+const LEAGUE_STATS_STATE={
+  status:'idle',
+  section:'captains',
+  captainMode:'points',
+  linePosition:'all',
+  data:null,
+  error:''
+};
 const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DATA.participants.map(p=>[p.name,p.shield]));const statMap=()=>Object.fromEntries(DATA.general.map(p=>[p.name,p]));
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -437,7 +448,15 @@ async function syncLiveCurrentStats({render=true}={}){
     const nextRows=normalizeMatchdayRows(rows);
     const publishedStatsChanged=previousSignature!==profileSeasonPublishedRowsSignature(nextRows);
     LIVE_MATCHDAY_ROWS=nextRows;
-    if(publishedStatsChanged)PROFILE_SEASON_CACHE.clear();
+    if(publishedStatsChanged){
+      PROFILE_SEASON_CACHE.clear();
+      LEAGUE_STATS_CACHE.clear();
+      LEAGUE_STATS_ABORT_CONTROLLER?.abort();
+      LEAGUE_STATS_ABORT_CONTROLLER=null;
+      LEAGUE_STATS_REQUEST_TOKEN+=1;
+      LEAGUE_STATS_STATE.status=LEAGUE_STATS_STATE.data?'ready':'idle';
+      LEAGUE_STATS_STATE.error='';
+    }
     PUBLISHED_MATCHDAYS=[...new Set(LIVE_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
     if(!PUBLISHED_MATCHDAYS.includes(SELECTED_MATCHDAY)){
       SELECTED_MATCHDAY=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
@@ -473,6 +492,9 @@ async function syncLiveCurrentStats({render=true}={}){
     }
     if(publishedStatsChanged&&PROFILE_SEASON_STATE?.view==='season'&&!$('playerModal')?.hidden){
       ensureProfileSeasonData({force:true});
+    }
+    if(publishedStatsChanged&&document.body.dataset.section==='current'&&document.querySelector('[data-standings-view="statistics"]')?.getAttribute('aria-selected')==='true'){
+      ensureLeagueStatsData({force:true});
     }
     return true;
   }catch{
@@ -921,6 +943,7 @@ function setStandingsView(view,{focus=false}={}){
     panel.hidden=panel.dataset.standingsPanel!==validView;
   });
   document.querySelector('.relegation-legend')?.toggleAttribute('hidden',validView!=='general');
+  if(validView==='statistics')ensureLeagueStatsData();
 }
 
 function setupStandingsSwitcher(){
@@ -3187,6 +3210,445 @@ function profileSeasonPlayerVisual(player){
     </span>`;
 }
 
+function leagueStatsPlayerKey(player){
+  const playerId=String(player?.playerId||'').trim().toLowerCase();
+  if(playerId)return `id:${playerId}`;
+  const name=String(player?.playerName||'').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const club=String(player?.clubId||player?.clubName||'').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  return `legacy:${name}|${club}`;
+}
+
+async function fetchPublishedLeagueStatsRows(signal){
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!config?.url||!config?.publishableKey)throw new Error('Supabase no está configurado');
+  const season=config.season||DATA.currentSeason;
+  const pageSize=500;
+  const rows=[];
+  for(let offset=0;offset<10000;offset+=pageSize){
+    const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
+    endpoint.searchParams.set('select','participant_name,matchday,lineup,updated_at');
+    endpoint.searchParams.set('season',`eq.${season}`);
+    endpoint.searchParams.set('published','eq.true');
+    endpoint.searchParams.set('order','matchday.asc,participant_name.asc');
+    endpoint.searchParams.set('limit',String(pageSize));
+    endpoint.searchParams.set('offset',String(offset));
+    const response=await fetch(endpoint,{
+      cache:'no-store',
+      signal,
+      headers:{
+        apikey:config.publishableKey,
+        Authorization:`Bearer ${config.publishableKey}`,
+        Accept:'application/json'
+      }
+    });
+    if(!response.ok){
+      const errorText=await response.text().catch(()=>'');
+      if((response.status===400||response.status===404)&&/lineup|schema cache|column/i.test(errorText)){
+        const error=new Error('La base de datos todavía no expone las alineaciones V116');
+        error.code='LINEUP_SCHEMA_MISSING';
+        throw error;
+      }
+      throw new Error('No se pudieron cargar las estadísticas de la competición');
+    }
+    const page=await response.json();
+    if(!Array.isArray(page))throw new Error('La respuesta de estadísticas no es válida');
+    rows.push(...page);
+    if(page.length<pageSize)return rows;
+  }
+  throw new Error('La respuesta de estadísticas superó el límite de seguridad');
+}
+
+function buildLeagueStats(rawRows){
+  const participants=activeParticipants();
+  const validNames=new Set(participants.map(participant=>participant.name));
+  const teamsByName=new Map(participants.map(participant=>[participant.name,{
+    name:participant.name,
+    shield:participant.shield||'',
+    publishedRows:0,
+    lineupMatchdays:0,
+    positionTotals:{PT:0,DF:0,MC:0,DL:0},
+    playersByKey:new Map()
+  }]));
+  const uniqueRows=new Map();
+  (Array.isArray(rawRows)?rawRows:[]).forEach(row=>{
+    const participantName=String(row?.participant_name||'').trim();
+    const matchday=Math.trunc(matchdayLineupNumericValue(row?.matchday));
+    if(!validNames.has(participantName)||!Number.isInteger(matchday)||matchday<1)return;
+    const key=`${participantName}\u0000${matchday}`;
+    const current=uniqueRows.get(key);
+    const currentTime=new Date(current?.updated_at||0).getTime()||0;
+    const nextTime=new Date(row?.updated_at||0).getTime()||0;
+    if(!current||nextTime>=currentTime)uniqueRows.set(key,{...row,participantName,matchday});
+  });
+  const rows=[...uniqueRows.values()].sort((a,b)=>a.matchday-b.matchday||a.participantName.localeCompare(b.participantName,'es'));
+  const publishedMatchdays=new Set();
+  let lineupRows=0;
+  rows.forEach(row=>{
+    const team=teamsByName.get(row.participantName);
+    if(!team)return;
+    team.publishedRows+=1;
+    publishedMatchdays.add(row.matchday);
+    const lineup=normalizePublishedMatchdayLineup(row.lineup);
+    if(lineup.length!==11)return;
+    team.lineupMatchdays+=1;
+    lineupRows+=1;
+    lineup.forEach(player=>{
+      const finalPoints=matchdayLineupNumericValue(player.displayedPoints);
+      const multiplier=player.isCaptain?Math.max(1,matchdayLineupNumericValue(player.captainMultiplier,1)):1;
+      const basePoints=player.isCaptain?finalPoints/multiplier:finalPoints;
+      team.positionTotals[player.position]+=finalPoints;
+      const key=leagueStatsPlayerKey(player);
+      const existing=team.playersByKey.get(key)||{
+        key,
+        playerId:player.playerId||'',
+        playerName:player.playerName,
+        clubId:player.clubId||'',
+        clubName:player.clubName||'',
+        photo:player.photo||'',
+        crest:player.crest||'',
+        position:player.position,
+        appearances:0,
+        contributionPoints:0,
+        basePoints:0,
+        captainUses:0,
+        captainPoints:0,
+        captainBasePoints:0,
+        captainBonus:0,
+        bestPoints:null,
+        bestMatchday:null,
+        latestMatchday:0
+      };
+      existing.appearances+=1;
+      existing.contributionPoints+=finalPoints;
+      existing.basePoints+=basePoints;
+      if(existing.bestPoints===null||finalPoints>existing.bestPoints){
+        existing.bestPoints=finalPoints;
+        existing.bestMatchday=row.matchday;
+      }
+      if(player.isCaptain){
+        existing.captainUses+=1;
+        existing.captainPoints+=finalPoints;
+        existing.captainBasePoints+=basePoints;
+        existing.captainBonus+=finalPoints-basePoints;
+      }
+      if(row.matchday>=existing.latestMatchday){
+        existing.playerName=player.playerName;
+        existing.clubId=player.clubId||existing.clubId;
+        existing.clubName=player.clubName||existing.clubName;
+        existing.photo=player.photo||existing.photo;
+        existing.crest=player.crest||existing.crest;
+        existing.position=player.position;
+        existing.latestMatchday=row.matchday;
+      }
+      team.playersByKey.set(key,existing);
+    });
+  });
+  const tiedMaximum=(records,valueFor)=>{
+    if(!records.length)return [];
+    const maximum=Math.max(...records.map(valueFor));
+    return records.filter(record=>Math.abs(valueFor(record)-maximum)<.0001);
+  };
+  const teams=[...teamsByName.values()].map(team=>{
+    const players=[...team.playersByKey.values()].map(player=>({
+      ...player,
+      average:player.appearances?player.contributionPoints/player.appearances:0,
+      captainAverage:player.captainUses?player.captainPoints/player.captainUses:0
+    }));
+    const captains=players.filter(player=>player.captainUses>0);
+    const topCaptainsByPoints=tiedMaximum(captains,player=>player.captainPoints)
+      .sort((a,b)=>b.captainUses-a.captainUses||b.captainAverage-a.captainAverage||a.playerName.localeCompare(b.playerName,'es'));
+    const topCaptainsByAverage=tiedMaximum(captains,player=>player.captainAverage)
+      .sort((a,b)=>b.captainUses-a.captainUses||b.captainPoints-a.captainPoints||a.playerName.localeCompare(b.playerName,'es'));
+    const mvps=tiedMaximum(players,player=>player.contributionPoints)
+      .sort((a,b)=>b.appearances-a.appearances||a.playerName.localeCompare(b.playerName,'es'));
+    const totalLinePoints=Object.values(team.positionTotals).reduce((sum,value)=>sum+value,0);
+    return {
+      name:team.name,
+      shield:team.shield,
+      publishedRows:team.publishedRows,
+      lineupMatchdays:team.lineupMatchdays,
+      positionTotals:team.positionTotals,
+      totalLinePoints,
+      players,
+      captains,
+      topCaptainsByPoints,
+      topCaptainsByAverage,
+      mvps
+    };
+  });
+  const lineRankings=Object.fromEntries(['PT','DF','MC','DL'].map(position=>[
+    position,
+    [...teams].filter(team=>team.lineupMatchdays>0).sort((a,b)=>
+      b.positionTotals[position]-a.positionTotals[position]
+      ||b.lineupMatchdays-a.lineupMatchdays
+      ||a.name.localeCompare(b.name,'es')
+    )
+  ]));
+  const latestUpdate=rows.map(row=>new Date(row.updated_at)).filter(date=>!Number.isNaN(date.getTime()))
+    .sort((a,b)=>b-a)[0]||null;
+  return {
+    season:window.CUBAN_LEAGUE_SUPABASE?.season||DATA.currentSeason,
+    publishedRows:rows.length,
+    publishedMatchdays:publishedMatchdays.size,
+    lineupRows,
+    teamsWithLineups:teams.filter(team=>team.lineupMatchdays>0).length,
+    teams,
+    lineRankings,
+    latestUpdate
+  };
+}
+
+function leagueStatsTeamVisual(team){
+  const safeName=profileAttr(team.name);
+  const shield=profileAttr(team.shield||'');
+  return `<div class="league-stats-team" ${profileTriggerAttrs(team.name)}>
+    ${shield?`<img src="${shield}" alt="">`:''}
+    <span><strong>${safeName}</strong><small>${team.lineupMatchdays} ${team.lineupMatchdays===1?'XI registrado':'XI registrados'}</small></span>
+  </div>`;
+}
+
+function leagueStatsTiedPlayerVisual(players,emptyLabel='Sin capitán registrado'){
+  const records=Array.isArray(players)?players:[];
+  if(!records.length)return `<div class="league-stats-no-player"><b>${emptyLabel}</b><small>Esperando una alineación publicada</small></div>`;
+  const first=records[0];
+  const tiedNames=records.length>1?records.map(player=>player.playerName).join(' / '):'';
+  return `<div class="league-stats-player-wrap">${profileSeasonPlayerVisual(first)}${records.length>1?`<span class="league-stats-tie">Empate: ${profileAttr(tiedNames)} · métricas mostradas de ${profileAttr(first.playerName)}</span>`:''}</div>`;
+}
+
+function leagueStatsCompetitionRanks(rows,valueFor){
+  let previous=null;
+  let rank=0;
+  return rows.map((row,index)=>{
+    const value=valueFor(row);
+    if(index===0||Math.abs(value-previous)>.0001)rank=index+1;
+    previous=value;
+    return {row,rank};
+  });
+}
+
+function leagueStatsCaptainMarkup(data){
+  const mode=LEAGUE_STATS_STATE.captainMode==='average'?'average':'points';
+  const leadersFor=team=>mode==='average'?team.topCaptainsByAverage:team.topCaptainsByPoints;
+  const metricFor=team=>{
+    const leader=leadersFor(team)[0];
+    return leader?(mode==='average'?leader.captainAverage:leader.captainPoints):Number.NEGATIVE_INFINITY;
+  };
+  const teams=[...data.teams].sort((a,b)=>metricFor(b)-metricFor(a)||b.lineupMatchdays-a.lineupMatchdays||a.name.localeCompare(b.name,'es'));
+  const ranked=leagueStatsCompetitionRanks(teams,team=>metricFor(team));
+  return `<div class="league-stats-toolbar" role="group" aria-label="Orden de capitanes">
+      <span>Comparar por</span>
+      <button type="button" data-league-captain-mode="points" aria-pressed="${mode==='points'}">Más puntos</button>
+      <button type="button" data-league-captain-mode="average" aria-pressed="${mode==='average'}">Mejor promedio</button>
+    </div>
+    <div class="league-stats-explainer"><b>Un líder por equipo</b><span>${mode==='points'?'El capitán que más puntos finales generó para cada participante.':'El capitán con mejor promedio final de cada participante; las jornadas utilizadas siempre quedan visibles.'}</span></div>
+    <div class="league-stats-ranking" role="list">
+      ${ranked.map(({row:team,rank})=>{
+        const leaders=leadersFor(team);
+        const player=leaders[0]||null;
+        const both=player&&team.topCaptainsByPoints.some(item=>item.key===player.key)&&team.topCaptainsByAverage.some(item=>item.key===player.key);
+        return `<article class="league-stats-captain-card${player?'':' is-empty'}" role="listitem">
+          <span class="league-stats-rank">${player?rank:'—'}</span>
+          ${leagueStatsTeamVisual(team)}
+          <div class="league-stats-captain-player">
+            ${leagueStatsTiedPlayerVisual(leaders)}
+            ${player?`<div class="league-stats-tags"><span>${mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
+          </div>
+          <div class="league-stats-metrics">
+            <div><span>Puntos</span><b>${player?profileSeasonFormat(player.captainPoints):'—'}</b></div>
+            <div><span>Jornadas</span><b>${player?player.captainUses:'—'}</b></div>
+            <div><span>Promedio</span><b>${player?profileSeasonFormat(player.captainAverage):'—'}</b></div>
+            <div><span>Bono</span><b class="${player?.captainBonus<0?'is-negative':'is-positive'}">${player?profileSeasonFormat(player.captainBonus,{signed:true}):'—'}</b></div>
+          </div>
+        </article>`;
+      }).join('')}
+    </div>
+    <p class="league-stats-note">Los puntos del capitán son los finales, ya multiplicados. El bono indica el efecto estimado del brazalete.</p>`;
+}
+
+function leagueStatsLineMarkup(data){
+  const position=['PT','DF','MC','DL'].includes(LEAGUE_STATS_STATE.linePosition)?LEAGUE_STATS_STATE.linePosition:'all';
+  const positions=['PT','DF','MC','DL'];
+  const positionLabels={PT:'Portería',DF:'Defensa',MC:'Mediocampo',DL:'Delantera'};
+  const valueFor=team=>position==='all'?team.totalLinePoints:team.positionTotals[position];
+  const teams=[...data.teams].sort((a,b)=>{
+    const aMissing=a.lineupMatchdays===0;
+    const bMissing=b.lineupMatchdays===0;
+    if(aMissing!==bMissing)return aMissing?1:-1;
+    return valueFor(b)-valueFor(a)||b.lineupMatchdays-a.lineupMatchdays||a.name.localeCompare(b.name,'es');
+  });
+  const ranked=leagueStatsCompetitionRanks(teams,team=>team.lineupMatchdays?valueFor(team):Number.NEGATIVE_INFINITY);
+  return `<div class="league-stats-line-leaders">
+      ${positions.map(line=>{
+        const ranking=data.lineRankings[line]||[];
+        const best=ranking[0]?.positionTotals[line];
+        const leaders=ranking.filter(team=>Math.abs(team.positionTotals[line]-best)<.0001);
+        return `<article><span>${line}</span><b>${leaders.length?profileSeasonFormat(best):'—'}</b><small>${leaders.length?profileAttr(leaders.map(team=>team.name).join(' / ')):'Sin XI registrados'}</small></article>`;
+      }).join('')}
+    </div>
+    <div class="league-stats-toolbar" role="group" aria-label="Ordenar líneas">
+      <span>Ordenar por</span>
+      ${[['all','Todas'],...positions.map(line=>[line,line])].map(([value,label])=>`<button type="button" data-league-line-position="${value}" aria-pressed="${position===value}">${label}</button>`).join('')}
+    </div>
+    <div class="league-stats-explainer"><b>${position==='all'?'Todas las líneas':positionLabels[position]}</b><span>Puntos acumulados de los XI publicados; el aporte del capitán permanece dentro de su posición.</span></div>
+    <div class="league-stats-ranking" role="list">
+      ${ranked.map(({row:team,rank})=>`<article class="league-stats-line-card${team.lineupMatchdays?'':' is-empty'}" role="listitem">
+        <span class="league-stats-rank">${team.lineupMatchdays?rank:'—'}</span>
+        ${leagueStatsTeamVisual(team)}
+        <div class="league-stats-line-metrics">
+          ${positions.map(line=>`<div class="${position===line?'is-selected':''}"><span>${line}</span><b>${team.lineupMatchdays?profileSeasonFormat(team.positionTotals[line]):'—'}</b></div>`).join('')}
+        </div>
+        <div class="league-stats-line-total"><span>${position==='all'?'Total del XI':positionLabels[position]}</span><b>${team.lineupMatchdays?profileSeasonFormat(valueFor(team)):'—'}</b><small>${team.lineupMatchdays?`${profileSeasonFormat(valueFor(team)/team.lineupMatchdays)} pts por XI`:'Sin alineaciones'}</small></div>
+      </article>`).join('')}
+    </div>
+    <p class="league-stats-note">PT + DF + MC + DL equivale a todos los puntos registrados en las alineaciones de ese participante.</p>`;
+}
+
+function leagueStatsMvpMarkup(data){
+  const teams=[...data.teams].sort((a,b)=>{
+    const aValue=a.mvps[0]?.contributionPoints??Number.NEGATIVE_INFINITY;
+    const bValue=b.mvps[0]?.contributionPoints??Number.NEGATIVE_INFINITY;
+    return bValue-aValue||b.lineupMatchdays-a.lineupMatchdays||a.name.localeCompare(b.name,'es');
+  });
+  const ranked=leagueStatsCompetitionRanks(teams,team=>team.mvps[0]?.contributionPoints??Number.NEGATIVE_INFINITY);
+  return `<div class="league-stats-explainer"><b>MVP histórico de cada equipo</b><span>Es el futbolista que más puntos aportó mientras pertenecía a ese participante. Un traspaso inicia un acumulado separado en el nuevo equipo.</span></div>
+    <div class="league-stats-ranking" role="list">
+      ${ranked.map(({row:team,rank})=>`<article class="league-stats-mvp-card${team.mvps.length?'':' is-empty'}" role="listitem">
+        <span class="league-stats-rank">${team.mvps.length?rank:'—'}</span>
+        ${leagueStatsTeamVisual(team)}
+        <div class="league-stats-mvp-players">
+          ${team.mvps.length?team.mvps.slice(0,1).map(player=>`<div class="league-stats-mvp-player">
+            ${profileSeasonPlayerVisual(player)}
+            <div class="league-stats-mvp-metrics"><span><small>Puntos</small><b>${profileSeasonFormat(player.contributionPoints)}</b></span><span><small>Jornadas</small><b>${player.appearances}</b></span><span><small>Promedio</small><b>${profileSeasonFormat(player.average)}</b></span></div>
+          </div>`).join(''):'<div class="league-stats-no-player"><b>Sin MVP registrado</b><small>Esperando un XI publicado</small></div>'}
+          ${team.mvps.length>1?`<span class="league-stats-tie">MVP compartido entre ${team.mvps.length} jugadores · se muestra una referencia</span>`:''}
+        </div>
+      </article>`).join('')}
+    </div>
+    <p class="league-stats-note">Si el mismo futbolista cambia de participante, sus puntos anteriores permanecen en el equipo donde los consiguió.</p>`;
+}
+
+function leagueStatsLoadingMarkup(){
+  return `<div class="league-stats-loading" role="status" aria-live="polite"><span class="lineup-loader" aria-hidden="true"></span><div><b>Calculando la competición</b><small>Sumando capitanes, líneas y MVP de todos los XI publicados…</small></div></div>`;
+}
+
+function leagueStatsErrorMarkup(message){
+  return `<div class="league-stats-empty is-error" role="alert"><span>!</span><h3>No pudimos cargar las estadísticas</h3><p>${profileAttr(message||'Inténtalo nuevamente.')}</p><button type="button" data-league-stats-retry>Volver a intentar</button></div>`;
+}
+
+function renderLeagueStatsContent(){
+  const host=$('leagueStatsContent');
+  if(!host)return;
+  if(LEAGUE_STATS_STATE.status==='idle'||(LEAGUE_STATS_STATE.status==='loading'&&!LEAGUE_STATS_STATE.data)){
+    host.innerHTML=leagueStatsLoadingMarkup();
+    return;
+  }
+  if(LEAGUE_STATS_STATE.status==='error'&&!LEAGUE_STATS_STATE.data){
+    host.innerHTML=leagueStatsErrorMarkup(LEAGUE_STATS_STATE.error);
+    return;
+  }
+  const data=LEAGUE_STATS_STATE.data;
+  if(!data){
+    host.innerHTML=leagueStatsLoadingMarkup();
+    return;
+  }
+  const section=['captains','lines','mvp'].includes(LEAGUE_STATS_STATE.section)?LEAGUE_STATS_STATE.section:'captains';
+  const updated=data.latestUpdate
+    ?new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(data.latestUpdate)
+    :'Sin actualizaciones registradas';
+  const panelMarkup=data.lineupRows
+    ?section==='lines'
+      ?leagueStatsLineMarkup(data)
+      :section==='mvp'
+        ?leagueStatsMvpMarkup(data)
+        :leagueStatsCaptainMarkup(data)
+    :`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
+  host.innerHTML=`<header class="league-stats-head">
+      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Radiografía de la competición</h3><p>Capitanes destacados, rendimiento por líneas y MVP de cada participante.</p></div>
+      <div class="league-stats-coverage"><b>${data.lineupRows}</b><span>XI publicados</span><small>${data.teamsWithLineups}/${data.teams.length} equipos con datos</small></div>
+    </header>
+    <nav class="league-stats-subtabs" role="tablist" aria-label="Estadísticas generales de jugadores">
+      ${[['captains','Capitanes'],['lines','Líneas'],['mvp','MVP']].map(([value,label])=>`<button id="leagueStats${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-league-stats-section="${value}" aria-controls="leagueStatsSectionPanel" aria-selected="${section===value}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
+    </nav>
+    <section id="leagueStatsSectionPanel" class="league-stats-section" role="tabpanel" aria-labelledby="leagueStats${section[0].toUpperCase()}${section.slice(1)}Tab">
+      ${panelMarkup}
+    </section>
+    <p class="league-stats-updated">${LEAGUE_STATS_STATE.status==='loading'
+      ?'Actualizando…'
+      :LEAGUE_STATS_STATE.error
+        ?`Mostrando datos anteriores · ${profileAttr(LEAGUE_STATS_STATE.error)}`
+        :`Datos publicados · ${updated}`}</p>`;
+}
+
+async function ensureLeagueStatsData({force=false}={}){
+  if(!DATA)return;
+  if(!force&&LEAGUE_STATS_STATE.status==='loading'&&LEAGUE_STATS_ABORT_CONTROLLER)return;
+  const season=window.CUBAN_LEAGUE_SUPABASE?.season||DATA.currentSeason;
+  if(!force&&LEAGUE_STATS_CACHE.has(season)){
+    LEAGUE_STATS_STATE.data=LEAGUE_STATS_CACHE.get(season);
+    LEAGUE_STATS_STATE.status='ready';
+    LEAGUE_STATS_STATE.error='';
+    renderLeagueStatsContent();
+    return;
+  }
+  LEAGUE_STATS_ABORT_CONTROLLER?.abort();
+  const controller=new AbortController();
+  LEAGUE_STATS_ABORT_CONTROLLER=controller;
+  const token=++LEAGUE_STATS_REQUEST_TOKEN;
+  const keepCurrentData=force&&Boolean(LEAGUE_STATS_STATE.data);
+  if(!keepCurrentData)LEAGUE_STATS_STATE.data=null;
+  LEAGUE_STATS_STATE.status='loading';
+  LEAGUE_STATS_STATE.error='';
+  renderLeagueStatsContent();
+  try{
+    const rows=await fetchPublishedLeagueStatsRows(controller.signal);
+    if(token!==LEAGUE_STATS_REQUEST_TOKEN)return;
+    const data=buildLeagueStats(rows);
+    LEAGUE_STATS_CACHE.set(season,data);
+    LEAGUE_STATS_STATE.data=data;
+    LEAGUE_STATS_STATE.status='ready';
+    renderLeagueStatsContent();
+  }catch(error){
+    if(error?.name==='AbortError'||token!==LEAGUE_STATS_REQUEST_TOKEN)return;
+    if(keepCurrentData){
+      LEAGUE_STATS_STATE.status='ready';
+      LEAGUE_STATS_STATE.error=navigator.onLine===false
+        ?'No se pudo actualizar sin conexión.'
+        :error?.message||'No se pudo completar la actualización.';
+      renderLeagueStatsContent();
+      return;
+    }
+    LEAGUE_STATS_STATE.status='error';
+    LEAGUE_STATS_STATE.error=navigator.onLine===false
+      ?'Las estadísticas no están disponibles sin conexión.'
+      :error?.message||'Inténtalo nuevamente.';
+    renderLeagueStatsContent();
+  }finally{
+    if(token===LEAGUE_STATS_REQUEST_TOKEN&&LEAGUE_STATS_ABORT_CONTROLLER===controller){
+      LEAGUE_STATS_ABORT_CONTROLLER=null;
+    }
+  }
+}
+
+function setLeagueStatsSection(section,{focus=false}={}){
+  LEAGUE_STATS_STATE.section=['captains','lines','mvp'].includes(section)?section:'captains';
+  renderLeagueStatsContent();
+  if(focus)document.querySelector(`[data-league-stats-section="${LEAGUE_STATS_STATE.section}"]`)?.focus();
+}
+
+function setLeagueCaptainMode(mode,{focus=false}={}){
+  LEAGUE_STATS_STATE.captainMode=mode==='average'?'average':'points';
+  renderLeagueStatsContent();
+  if(focus)document.querySelector(`[data-league-captain-mode="${LEAGUE_STATS_STATE.captainMode}"]`)?.focus();
+}
+
+function setLeagueLinePosition(position,{focus=false}={}){
+  LEAGUE_STATS_STATE.linePosition=['PT','DF','MC','DL'].includes(position)?position:'all';
+  renderLeagueStatsContent();
+  if(focus)document.querySelector(`[data-league-line-position="${LEAGUE_STATS_STATE.linePosition}"]`)?.focus();
+}
+
 function profileSeasonSortControls(kind,active){
   const label=kind==='captains'?'capitanes':'jugadores';
   return `<div class="profile-season-sort" role="group" aria-label="Ordenar ${label}">
@@ -3412,7 +3874,7 @@ function setProfileSeasonSort(kind,sort,{focus=false}={}){
 
 function handleProfileTabsKeydown(event){
   const tab=event.target.closest?.('[role="tab"]');
-  const tablist=tab?.closest?.('.profile-view-tabs,.profile-season-subtabs');
+  const tablist=tab?.closest?.('.profile-view-tabs,.profile-season-subtabs,.league-stats-subtabs');
   if(!tablist||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return false;
   const tabs=[...tablist.querySelectorAll('[role="tab"]')];
   const current=Math.max(0,tabs.indexOf(tab));
@@ -5115,6 +5577,26 @@ async function init(){
       SELECTED_CUP_MATCHDAY=Number(cupMatchday.dataset.cupMatchday);
       CUP_SELECTION_MANUAL=true;
       renderCup();
+      return;
+    }
+    const leagueStatsSection=e.target.closest('[data-league-stats-section]');
+    if(leagueStatsSection){
+      setLeagueStatsSection(leagueStatsSection.dataset.leagueStatsSection,{focus:true});
+      return;
+    }
+    const leagueCaptainMode=e.target.closest('[data-league-captain-mode]');
+    if(leagueCaptainMode){
+      setLeagueCaptainMode(leagueCaptainMode.dataset.leagueCaptainMode,{focus:true});
+      return;
+    }
+    const leagueLinePosition=e.target.closest('[data-league-line-position]');
+    if(leagueLinePosition){
+      setLeagueLinePosition(leagueLinePosition.dataset.leagueLinePosition,{focus:true});
+      return;
+    }
+    const leagueStatsRetry=e.target.closest('[data-league-stats-retry]');
+    if(leagueStatsRetry){
+      ensureLeagueStatsData({force:true});
       return;
     }
     const profileView=e.target.closest('[data-profile-view]');
