@@ -24949,32 +24949,45 @@ footer{
 }
 
 /* =========================================================
-   V119 · COMPARADOR DE PARTICIPANTES
+   V120 · COMPARADOR UNIFICADO DE PARTICIPANTES
    ========================================================= */
 .league-comparator-content{min-height:540px}
-.league-comparator-shell{display:grid;gap:13px}
+.league-comparator-shell{
+  position:relative;
+  display:grid;
+  gap:0;
+  overflow:hidden;
+  border:1px solid rgba(92,224,190,.2);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 0 8%,rgba(105,235,84,.1),transparent 24rem),
+    radial-gradient(circle at 100% 18%,rgba(48,174,229,.1),transparent 25rem),
+    linear-gradient(155deg,rgba(4,26,27,.98),rgba(2,13,20,.99) 58%,rgba(4,19,25,.99));
+  box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.025);
+  isolation:isolate;
+}
 
 .league-comparator-heading{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:18px;
-  padding:20px 22px;
+  padding:20px 22px 17px;
   overflow:hidden;
-  border:1px solid rgba(92,224,190,.19);
-  border-radius:20px;
+  border:0;
+  border-bottom:1px solid rgba(82,210,188,.11);
+  border-radius:0;
   background:
-    radial-gradient(circle at 8% 0,rgba(111,241,95,.13),transparent 17rem),
-    radial-gradient(circle at 95% 100%,rgba(54,178,235,.12),transparent 18rem),
-    linear-gradient(135deg,rgba(5,27,27,.98),rgba(3,13,22,.98));
-  box-shadow:0 20px 48px rgba(0,0,0,.2);
+    radial-gradient(circle at 8% 0,rgba(111,241,95,.08),transparent 17rem),
+    radial-gradient(circle at 95% 100%,rgba(54,178,235,.07),transparent 18rem);
+  box-shadow:none;
 }
 .league-comparator-heading>div{min-width:0}
 .league-comparator-heading h3{margin:5px 0 0;color:#f2fff7;font-family:Sora,Manrope,sans-serif;font-size:1.38rem;letter-spacing:-.035em}
 .league-comparator-heading p{margin:7px 0 0;color:#80988f;font-size:.76rem;line-height:1.45}
 .league-comparator-heading-mark{color:rgba(150,255,128,.82);font-family:Sora,Manrope,sans-serif;font-size:2.4rem;font-weight:950;font-style:italic;letter-spacing:-.12em;text-shadow:0 0 24px rgba(108,255,115,.18)}
 
-.league-comparator-selectors{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);align-items:end;gap:9px}
+.league-comparator-selectors{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);align-items:end;gap:9px;padding:14px 20px 16px;border-bottom:1px solid rgba(82,210,188,.11);background:rgba(2,14,19,.34)}
 .league-comparator-select{display:grid;gap:6px;min-width:0}
 .league-comparator-select>span{color:#7e978d;font-size:.62rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
 .league-comparator-select.is-right>span{text-align:right}
@@ -25005,14 +25018,17 @@ footer{
   align-items:stretch;
   min-height:310px;
   overflow:hidden;
-  border:1px solid rgba(82,210,188,.17);
-  border-radius:22px;
+  border:0;
+  border-bottom:1px solid rgba(82,210,188,.11);
+  border-radius:0;
   background:
     linear-gradient(90deg,rgba(40,120,46,.2),transparent 43%,transparent 57%,rgba(20,100,145,.22)),
     linear-gradient(180deg,rgba(5,23,28,.93),rgba(2,12,19,.98));
 }
 .league-comparator-faceoff:after{position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.8%,rgba(121,222,197,.14) 50%,transparent 50.2%);content:"";pointer-events:none}
 .league-comparator-hero-team{position:relative;z-index:1;display:grid;min-width:0;padding:26px 18px 18px;justify-items:center;align-content:center;border-radius:19px;cursor:pointer;text-align:center}
+.league-comparator-hero-team:focus-visible{outline:2px solid #9cff83;outline-offset:-4px;box-shadow:inset 0 0 0 5px rgba(156,255,131,.08)}
+.league-comparator-hero-team.is-right:focus-visible{outline-color:#5cccf6;box-shadow:inset 0 0 0 5px rgba(92,204,246,.08)}
 .league-comparator-hero-team.is-winner{background:radial-gradient(circle at 50% 42%,rgba(116,240,83,.115),transparent 58%)}
 .league-comparator-hero-team.is-right.is-winner{background:radial-gradient(circle at 50% 42%,rgba(58,188,239,.13),transparent 58%)}
 .league-comparator-avatar{display:grid;width:126px;height:126px;place-items:center;overflow:hidden;border:2px solid rgba(122,241,90,.56);border-radius:31px;background:#10262a;box-shadow:0 15px 34px rgba(0,0,0,.3)}
@@ -25031,14 +25047,15 @@ footer{
 .league-comparator-leader{display:inline-flex;min-height:23px;align-items:center;margin-top:8px;padding:4px 8px;border-radius:999px;background:rgba(108,255,115,.11);color:#a5ff97;font-size:.56rem;font-weight:950;letter-spacing:.04em}
 .league-comparator-leader.is-tie{background:rgba(255,255,255,.055);color:#b9ccc5}
 
-.league-comparator-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.league-comparator-player-card{display:grid;min-width:0;padding:14px;border:1px solid rgba(82,210,188,.15);border-radius:17px;background:rgba(4,18,24,.78)}
-.league-comparator-player-card.is-left{border-left-color:rgba(124,236,84,.45)}
-.league-comparator-player-card.is-right{border-right-color:rgba(55,183,236,.55)}
-.league-comparator-player-card:nth-child(n+3){border-color:rgba(168,93,215,.22);background:linear-gradient(145deg,rgba(38,18,52,.34),rgba(4,18,24,.8))}
-.league-comparator-player-card.is-winner{box-shadow:inset 0 0 0 1px rgba(108,255,115,.11)}
+.league-comparator-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-bottom:1px solid rgba(82,210,188,.11);background:rgba(2,14,19,.26)}
+.league-comparator-player-card{display:grid;min-width:0;padding:17px 18px;border:0;border-radius:0;background:transparent}
+.league-comparator-player-card.is-left{border-right:1px solid rgba(82,210,188,.1)}
+.league-comparator-player-card.is-captain{border-top:1px solid rgba(82,210,188,.1);background:linear-gradient(145deg,rgba(61,30,78,.17),rgba(3,17,22,.08))}
+.league-comparator-player-card.is-mvp{background:linear-gradient(145deg,rgba(34,91,49,.12),rgba(3,17,22,.08))}
+.league-comparator-player-card.is-winner{box-shadow:inset 0 0 52px rgba(98,224,80,.055)}
+.league-comparator-player-card.is-right.is-winner{box-shadow:inset 0 0 52px rgba(55,183,236,.055)}
 .league-comparator-player-card>header{display:flex;min-width:0;align-items:center;gap:7px;margin-bottom:10px;color:#d8a8ff}
-.league-comparator-player-card:nth-child(-n+2)>header{color:#9bf58a}
+.league-comparator-player-card.is-mvp>header{color:#9bf58a}
 .league-comparator-player-card>header>span:first-child{display:grid;width:28px;height:28px;place-items:center;border-radius:9px;background:currentColor}
 .league-comparator-player-card>header svg{width:14px;height:14px;color:#081319}
 .league-comparator-player-card>header b{color:currentColor;font-size:.68rem;letter-spacing:.04em}
@@ -25054,7 +25071,7 @@ footer{
 .league-comparator-player-empty{display:grid;min-height:76px;align-content:center;gap:4px;color:#83988f}
 .league-comparator-player-empty b{font-size:.75rem}.league-comparator-player-empty span{font-size:.59rem}
 
-.league-comparator-lines{padding:17px 16px;border:1px solid rgba(82,210,188,.15);border-radius:19px;background:rgba(3,16,22,.76)}
+.league-comparator-lines{padding:20px 20px 17px;border:0;border-radius:0;background:linear-gradient(180deg,rgba(2,17,22,.28),rgba(2,15,20,.1))}
 .league-comparator-section-title{text-align:center}
 .league-comparator-section-title h4{margin:4px 0 0;color:#effff6;font-family:Sora,Manrope,sans-serif;font-size:1rem}
 .league-comparator-line-head{display:grid;grid-template-columns:1fr 1fr;gap:52px;margin:14px 0 5px;padding:0 50px;color:#718a80;font-size:.58rem;font-weight:850;text-transform:uppercase}
@@ -25073,8 +25090,9 @@ footer{
 .league-comparator-track.is-negative i{background:linear-gradient(90deg,#82404c,#d56576)}
 .league-comparator-line>small{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);color:#83988f;font-size:.625rem;font-weight:900}
 
-.league-comparator-official-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.league-comparator-official-metric{position:relative;display:grid;grid-template-columns:42px minmax(60px,1fr) auto minmax(60px,1fr);align-items:center;gap:9px;padding:14px;border:1px solid rgba(82,210,188,.15);border-radius:17px;background:rgba(4,18,24,.78)}
+.league-comparator-official-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-top:1px solid rgba(82,210,188,.11);border-bottom:1px solid rgba(82,210,188,.11);background:rgba(2,14,19,.3)}
+.league-comparator-official-metric{position:relative;display:grid;grid-template-columns:42px minmax(60px,1fr) auto minmax(60px,1fr);align-items:center;gap:9px;padding:16px 18px;border:0;border-radius:0;background:transparent}
+.league-comparator-official-metric:first-child{border-right:1px solid rgba(82,210,188,.1)}
 .league-comparator-official-icon{display:grid;width:42px;height:42px;place-items:center;border-radius:13px;background:rgba(108,255,115,.09);color:#9cf58b}
 .league-comparator-official-icon svg{width:21px;height:21px}
 .league-comparator-official-metric>div{text-align:center}
@@ -25084,33 +25102,33 @@ footer{
 .league-comparator-official-metric>b{color:#94aaa2;font-size:.6rem;text-align:center}
 .league-comparator-metric-tie{position:absolute;right:9px;bottom:6px;color:#83998f;font-size:.625rem;font-weight:900}
 
-.league-comparator-coverage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:11px 13px;border:1px solid rgba(82,210,188,.11);border-radius:13px;background:rgba(3,15,20,.66);color:#7f968d;font-size:.625rem}
+.league-comparator-coverage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:13px 18px 9px;border:0;border-radius:0;background:transparent;color:#7f968d;font-size:.625rem}
 .league-comparator-coverage span:last-of-type{text-align:right}
 .league-comparator-coverage b{color:#dff7e8}
 .league-comparator-coverage small{grid-column:1/-1;color:#e0a76f;font-size:.625rem;text-align:center}
-.league-comparator-updated{margin:0 2px;color:#80988f;font-size:.625rem;text-align:right}
+.league-comparator-updated{margin:0;padding:0 18px 15px;color:#80988f;font-size:.625rem;text-align:right}
 
 @media(max-width:820px){
   .league-comparator-faceoff{grid-template-columns:minmax(0,1fr) 68px minmax(0,1fr);min-height:280px}
   .league-comparator-avatar{width:105px;height:105px;border-radius:27px}
   .league-comparator-hero-team{padding-right:11px;padding-left:11px}
   .league-comparator-hero-team>strong{font-size:1.8rem}
-  .league-comparator-player-card{padding:12px}
+  .league-comparator-player-card{padding:15px}
 }
 
 @media(max-width:620px){
   .standings-switcher{grid-template-columns:repeat(3,minmax(0,1fr))}
   .standings-switcher button:last-child{grid-column:2}
-  .league-comparator-shell{gap:9px}
-  .league-comparator-heading{padding:14px 13px;border-radius:17px}
+  .league-comparator-shell{gap:0;border-radius:20px}
+  .league-comparator-heading{padding:14px 13px 12px;border-radius:0}
   .league-comparator-heading h3{font-size:1.08rem}
   .league-comparator-heading p{font-size:.64rem}
   .league-comparator-heading-mark{font-size:1.8rem}
-  .league-comparator-selectors{grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:6px}
+  .league-comparator-selectors{grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:6px;padding:11px 10px 13px}
   .league-comparator-select>span{font-size:.58rem}
   .league-comparator-select select{min-height:46px;padding-right:24px;padding-left:8px;font-size:.62rem}
   .league-comparator-swap{width:44px;height:46px}
-  .league-comparator-faceoff{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);min-height:245px;border-radius:18px}
+  .league-comparator-faceoff{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);min-height:245px;border-radius:0}
   .league-comparator-avatar{width:82px;height:82px;border-radius:22px}
   .league-comparator-hero-team{padding:18px 5px 13px}
   .league-comparator-hero-team h3{margin-top:10px;font-size:.68rem}
@@ -25119,8 +25137,8 @@ footer{
   .league-comparator-vs span{font-size:1.75rem}
   .league-comparator-games{font-size:.625rem}
   .league-comparator-leader{min-height:21px;padding:3px 6px;font-size:.625rem}
-  .league-comparator-player-grid{gap:7px}
-  .league-comparator-player-card{padding:10px 8px;border-radius:14px}
+  .league-comparator-player-grid{gap:0}
+  .league-comparator-player-card{padding:12px 9px;border-radius:0}
   .league-comparator-player-card>header{gap:5px}
   .league-comparator-player-card>header>span:first-child{width:25px;height:25px}
   .league-comparator-player-card>header b{font-size:.625rem}
@@ -25134,18 +25152,18 @@ footer{
   .league-comparator-player-numbers strong{font-size:.78rem}
   .league-comparator-player-numbers span{text-align:left;font-size:.625rem}
   .league-comparator-shared{font-size:.625rem}
-  .league-comparator-lines{padding:14px 8px;border-radius:16px}
+  .league-comparator-lines{padding:16px 9px 13px;border-radius:0}
   .league-comparator-line-head{gap:32px;padding:0 37px;font-size:.625rem}
   .league-comparator-line{grid-template-columns:minmax(35px,auto) minmax(0,1fr) 28px minmax(0,1fr) minmax(35px,auto);gap:4px;min-height:49px}
   .league-comparator-line>strong{font-size:.68rem}
   .league-comparator-track{height:10px}
-  .league-comparator-official-grid{gap:7px}
+  .league-comparator-official-grid{gap:0}
   .league-comparator-official-metric{grid-template-columns:minmax(38px,1fr) auto minmax(38px,1fr);gap:5px;padding:11px 7px}
   .league-comparator-official-icon{display:none}
   .league-comparator-official-metric>div strong{font-size:.92rem}
   .league-comparator-official-metric>b{font-size:.625rem}
-  .league-comparator-coverage{padding:10px 9px;font-size:.625rem}
-  .league-comparator-updated{text-align:left}
+  .league-comparator-coverage{padding:11px 10px 8px;font-size:.625rem}
+  .league-comparator-updated{padding:0 10px 12px;text-align:left}
 }
 
 @media(max-width:360px){
@@ -25160,6 +25178,7 @@ footer{
   .league-comparator-vs span{font-size:1.42rem}
   .league-comparator-player .profile-season-player-copy small{display:none}
   .league-comparator-official-grid{grid-template-columns:1fr}
+  .league-comparator-official-metric:first-child{border-right:0;border-bottom:1px solid rgba(82,210,188,.1)}
   .league-comparator-coverage{grid-template-columns:1fr}
   .league-comparator-coverage span:last-of-type{text-align:left}
 }

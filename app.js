@@ -1,4 +1,4 @@
-const APP_VERSION='119-20260811';
+const APP_VERSION='120-20260811';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -3495,7 +3495,7 @@ function leagueComparatorPlayerCard(team,side,type,result){
   const uses=player?(isCaptain?player.captainUses:player.appearances):0;
   const average=player?(isCaptain?player.captainAverage:player.average):0;
   const title=isCaptain?'MEJOR CAPITÁN':'MVP';
-  return `<article class="league-comparator-player-card is-${side}${result===side?' is-winner':''}">
+  return `<article class="league-comparator-player-card is-${side} is-${type}${result===side?' is-winner':''}">
       <header><span>${isCaptain?uiIcon('crown'):uiIcon('star')}</span><b>${title}</b>${leagueComparatorLeaderBadge(side,result)}</header>
       ${player?`<div class="league-comparator-player">${profileSeasonPlayerVisual(player)}</div>
         <div class="league-comparator-player-numbers"><strong>${profileSeasonFormat(points)} pts</strong><span>${uses} ${uses===1?'jornada':'jornadas'} · ${profileSeasonFormat(average)} prom.</span></div>
@@ -3583,9 +3583,9 @@ function renderLeagueComparatorContent(){
   const officialCoverageDiffers=left.publishedRows!==right.publishedRows;
   const lineupCoverageDiffers=left.lineupMatchdays!==right.lineupMatchdays;
   const unequalCoverage=officialCoverageDiffers||lineupCoverageDiffers;
-  host.innerHTML=`<section class="league-comparator-shell">
+  host.innerHTML=`<section class="league-comparator-shell league-comparator-panel" aria-labelledby="leagueComparatorTitle">
     <header class="league-comparator-heading">
-      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Comparador de participantes</h3><p>Enfrenta su temporada, sus figuras y el rendimiento de cada línea.</p></div>
+      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3 id="leagueComparatorTitle">Comparador de participantes</h3><p>Enfrenta su temporada, sus figuras y el rendimiento de cada línea.</p></div>
       <span class="league-comparator-heading-mark">VS</span>
     </header>
     <div class="league-comparator-selectors">

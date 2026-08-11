@@ -1,8 +1,9 @@
-# Cuban League V119
+# Cuban League V120
 
 Sitio oficial de la Cuban League con:
 
-- Clasificación incorpora «Comparador»: permite escoger dos participantes y
+- Clasificación incorpora «Comparador» dentro de una sola ficha visual continua:
+  permite escoger dos participantes y
   enfrentarlos visualmente por puntos oficiales, goles, clean sheets, MVP,
   mejor capitán y acumulados de PT/DF/MC/DL. Las barras y etiquetas señalan qué
   equipo lidera cada métrica, sin mezclar el histórico de un futbolista entre
