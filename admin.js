@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '116-20260810';
+  const VERSION = '116-20260811';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
@@ -582,7 +582,7 @@
         ${selected ? portrait : '<span class="lineup-picker-plus" aria-hidden="true">＋</span>'}
         <span class="lineup-player-picker-copy">
           <b>${selected ? escapeHtml(playerName) : state.catalog ? 'Buscar jugador' : 'Catálogo no disponible'}</b>
-          <small>${selected ? `${crest}<span>${escapeHtml(clubName || 'Club no registrado')}</span>` : state.catalog ? 'Catálogo Maestro · 499 disponibles' : 'Recarga el panel para intentarlo de nuevo'}</small>
+          <small>${selected ? `${crest}<span>${escapeHtml(clubName || 'Club no registrado')}</span>` : state.catalog ? `Catálogo Maestro · ${state.catalog.recordCount} disponibles` : 'Recarga el panel para intentarlo de nuevo'}</small>
         </span>
         <em>${selected ? 'Cambiar' : 'Elegir'}</em>
       </button>
@@ -599,7 +599,7 @@
       .filter(player => player.slot_number !== state.catalogSlot)
       .map(player => player.player_id)
       .filter(Boolean);
-    const matches = state.catalog.search(query, { position, clubId, excludeIds: excludedIds, limit: 500 });
+    const matches = state.catalog.search(query, { position, clubId, excludeIds: excludedIds, limit: state.catalog.recordCount });
     const visible = matches.slice(0, 60);
     $('playerCatalogResultCount').textContent = matches.length === 1
       ? '1 resultado'
@@ -2045,8 +2045,13 @@
       ]);
       if (!response.ok) throw new Error('No se pudo cargar la lista de participantes.');
       const league = await response.json();
-      state.catalog = loadedCatalog?.recordCount === 499 ? loadedCatalog : null;
+      state.catalog = loadedCatalog
+        && loadedCatalog.declaredRecordCount > 0
+        && loadedCatalog.recordCount === loadedCatalog.declaredRecordCount
+        ? loadedCatalog
+        : null;
       if (state.catalog) {
+        $('playerCatalogKicker').textContent = `CATÁLOGO MAESTRO · ${state.catalog.recordCount} JUGADORES`;
         $('playerCatalogClub').innerHTML = '<option value="">Todos los clubes</option>' + state.catalog.clubs
           .slice()
           .sort((a, b) => a.name.localeCompare(b.name, 'es'))
