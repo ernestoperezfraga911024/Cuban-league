@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=117-20260811">
+<link rel="stylesheet" href="styles.css?v=118-20260811">
 <style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
@@ -221,6 +221,9 @@
   <button type="button" id="standingsTabMatchday" role="tab" aria-selected="false" aria-controls="currentMatchdayPanel" data-standings-view="matchday">
     <svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Jornada</span>
   </button>
+  <button type="button" id="standingsTabStatistics" role="tab" aria-selected="false" aria-controls="currentStatisticsPanel" data-standings-view="statistics">
+    <svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg><span>Estadísticas</span>
+  </button>
   <button type="button" id="standingsTabGoals" role="tab" aria-selected="false" aria-controls="currentGoalsPanel" data-standings-view="goals">
     <svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Goleadores</span>
   </button>
@@ -254,6 +257,15 @@
       <div id="classificationMatchdayRows"></div>
     </div>
     <p class="season-stat-note">Resultados exclusivos de la jornada seleccionada, sin acumular fechas anteriores.</p>
+  </div>
+</div>
+
+<div id="currentStatisticsPanel" class="standings-panel" role="tabpanel" aria-labelledby="standingsTabStatistics" data-standings-panel="statistics" hidden>
+  <div id="leagueStatsContent" class="league-stats-content">
+    <div class="league-stats-loading" role="status" aria-live="polite">
+      <span class="lineup-loader" aria-hidden="true"></span>
+      <div><b>Preparando las estadísticas</b><small>Se cargarán al abrir este apartado.</small></div>
+    </div>
   </div>
 </div>
 
@@ -812,4 +824,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=117-20260811"></script><script src="player-catalog.js?v=117-20260811"></script><script src="app.js?v=117-20260811"></script></body></html>
+<script src="supabase-config.js?v=118-20260811"></script><script src="player-catalog.js?v=118-20260811"></script><script src="app.js?v=118-20260811"></script></body></html>
