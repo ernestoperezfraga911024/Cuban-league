@@ -1,7 +1,12 @@
-# Cuban League V116
+# Cuban League V117
 
 Sitio oficial de la Cuban League con:
 
+- Al tocar un participante en Clasificación, su perfil incorpora la pestaña
+  «Temporada 2026-2027». El resumen acumula jornadas, puntos, goles, clean
+  sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
+  reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
+  jornadas o promedio.
 - El Catálogo Maestro incorpora 505 jugadores de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
