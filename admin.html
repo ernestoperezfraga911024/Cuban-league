@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=115-20260810">
+  <link rel="stylesheet" href="admin.css?v=116-20260810">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -317,14 +317,18 @@
           <div>
             <span class="admin-kicker">ALINEACIONES DE LA JORNADA</span>
             <h2 id="lineupManagementTitle">El once de cada participante</h2>
-            <p>Registra los jugadores exactamente como aparecen en la captura. Los puntos del capitán ya incluyen su multiplicador.</p>
+            <p>Busca cada jugador en el Catálogo Maestro. El club y la posición se completan automáticamente; tú solo escribes los puntos.</p>
           </div>
           <span id="lineupPublishedCount" class="lineup-progress-badge">0/20 completas</span>
         </header>
 
         <div id="lineupSchemaNotice" class="lineup-schema-notice" role="status" hidden>
-          <b>Falta activar las alineaciones en Supabase</b>
-          <span>Ejecuta “SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt”. Mientras tanto, el borrador puede conservarse en este dispositivo.</span>
+          <b>Falta activar las alineaciones con catálogo en Supabase</b>
+          <span>Ejecuta “SUPABASE-V116-CATALOGO-ALINEACIONES-COPIAR-Y-PEGAR.txt”. Mientras tanto, el borrador puede conservarse en este dispositivo.</span>
+        </div>
+        <div id="playerCatalogAvailabilityNotice" class="lineup-schema-notice catalog-availability-notice" role="status" hidden>
+          <b>El Catálogo Maestro no está disponible ahora</b>
+          <span>Puedes seguir administrando las estadísticas. Recarga el panel cuando recuperes la conexión para seleccionar jugadores.</span>
         </div>
 
         <div class="lineup-workspace">
@@ -342,7 +346,7 @@
           </div>
 
           <div class="lineup-entry-head" aria-hidden="true">
-            <span>#</span><span>Pos.</span><span>Jugador y club</span><span>PTS</span><span>Capitán</span><span>Multip.</span>
+            <span>#</span><span>Pos.</span><span>Jugador del catálogo</span><span>PTS</span><span>Capitán</span><span>Multip.</span>
           </div>
           <div id="lineupPlayerRows" class="lineup-player-rows"></div>
 
@@ -411,6 +415,35 @@
     </section>
   </div>
 
+  <div id="playerCatalogModal" class="player-catalog-modal" role="dialog" aria-modal="true" aria-labelledby="playerCatalogTitle" hidden>
+    <section class="player-catalog-card">
+      <header class="player-catalog-head">
+        <div>
+          <span class="admin-kicker">CATÁLOGO MAESTRO · 499 JUGADORES</span>
+          <h2 id="playerCatalogTitle">Seleccionar jugador</h2>
+          <p id="playerCatalogSlotLabel">Elige el futbolista para esta posición.</p>
+        </div>
+        <button id="closePlayerCatalog" class="preview-close" type="button" aria-label="Cerrar catálogo">✕</button>
+      </header>
+
+      <div class="player-catalog-controls">
+        <label class="player-catalog-search" for="playerCatalogSearch">
+          <span class="catalog-visually-hidden">Buscar jugador por nombre o club</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="playerCatalogSearch" type="search" autocomplete="off" spellcheck="false" placeholder="Buscar por nombre o club…">
+        </label>
+        <label><span>Posición</span><select id="playerCatalogPosition"><option value="">Todas</option><option value="PT">PT · Portero</option><option value="DF">DF · Defensa</option><option value="MC">MC · Medio</option><option value="DL">DL · Delantero</option></select></label>
+        <label><span>Club</span><select id="playerCatalogClub"><option value="">Todos los clubes</option></select></label>
+      </div>
+
+      <div class="player-catalog-status">
+        <span id="playerCatalogResultCount" aria-live="polite">0 resultados</span>
+        <small>Los jugadores ya usados en este XI no aparecen.</small>
+      </div>
+      <div id="playerCatalogResults" class="player-catalog-results" aria-label="Resultados del catálogo"></div>
+    </section>
+  </div>
+
   <div id="adminInstallModal" class="admin-install-modal" role="dialog" aria-modal="true" aria-labelledby="adminInstallTitle" hidden>
     <section class="admin-install-card">
       <button id="closeAdminInstall" class="admin-install-close" type="button" aria-label="Cerrar instrucciones">✕</button>
@@ -438,7 +471,8 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=115-20260810"></script>
-  <script src="admin.js?v=115-20260810"></script>
+  <script src="supabase-config.js?v=116-20260810"></script>
+  <script src="player-catalog.js?v=116-20260810"></script>
+  <script src="admin.js?v=116-20260810"></script>
 </body>
 </html>

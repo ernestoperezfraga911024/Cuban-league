@@ -1,0 +1,848 @@
+-- CUBAN LEAGUE · ACTUALIZACIÓN V116 · CATÁLOGO MAESTRO EN ALINEACIONES
+-- Abre este archivo, selecciona todo, copia y pega en Supabase > SQL Editor.
+-- Pulsa Run una sola vez.
+-- Requiere haber ejecutado antes V57, V65 y V114.
+-- Es acumulativa: reemplaza V115 si aún no la ejecutaste.
+-- Conserva todos los datos y añade un once opcional con player_id y club_id estables.
+-- Después de instalar V116 no vuelvas a ejecutar el archivo V115 histórico.
+
+begin;
+
+alter table public.matchday_stats
+  add column if not exists lineup jsonb;
+
+alter table public.matchday_drafts
+  add column if not exists lineup jsonb;
+
+update public.matchday_stats
+set lineup = null
+where lineup = 'null'::jsonb;
+
+update public.matchday_drafts
+set lineup = null
+where lineup = 'null'::jsonb;
+
+alter table public.matchday_stats
+  drop constraint if exists matchday_stats_lineup_shape;
+
+alter table public.matchday_stats
+  add constraint matchday_stats_lineup_shape check (
+    case
+      when lineup is null then true
+      when jsonb_typeof(lineup) = 'array' then jsonb_array_length(lineup) in (0, 11)
+      else false
+    end
+  );
+
+alter table public.matchday_drafts
+  drop constraint if exists matchday_drafts_lineup_shape;
+
+alter table public.matchday_drafts
+  add constraint matchday_drafts_lineup_shape check (
+    case
+      when lineup is null then true
+      when jsonb_typeof(lineup) = 'array' then jsonb_array_length(lineup) between 0 and 11
+      else false
+    end
+  );
+
+create or replace function private.normalize_matchday_lineup(
+  p_lineup jsonb,
+  p_require_complete boolean
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  normalized jsonb;
+  player_count integer;
+  distinct_slots integer;
+  distinct_players integer;
+  captain_count integer;
+  goalkeeper_count integer;
+  defender_count integer;
+  midfielder_count integer;
+  forward_count integer;
+begin
+  if p_lineup is null or p_lineup = 'null'::jsonb then
+    return null;
+  end if;
+
+  if jsonb_typeof(p_lineup) <> 'array' then
+    raise exception 'La alineación debe ser una lista de jugadores';
+  end if;
+
+  player_count := jsonb_array_length(p_lineup);
+  if player_count = 0 then
+    return '[]'::jsonb;
+  end if;
+
+  if player_count > 11 then
+    raise exception 'Una alineación no puede tener más de 11 jugadores';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_array_elements(p_lineup) as item(value)
+    where jsonb_typeof(item.value) <> 'object'
+       or not (item.value ? 'slot_number')
+       or jsonb_typeof(item.value -> 'slot_number') <> 'number'
+       or (
+         item.value ? 'player_id'
+         and item.value -> 'player_id' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'player_id') <> 'string'
+       )
+       or (
+         item.value ? 'player_name'
+         and item.value -> 'player_name' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'player_name') <> 'string'
+       )
+       or (
+         item.value ? 'club_id'
+         and item.value -> 'club_id' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'club_id') <> 'string'
+       )
+       or (
+         item.value ? 'club_name'
+         and item.value -> 'club_name' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'club_name') <> 'string'
+       )
+       or (
+         item.value ? 'position'
+         and item.value -> 'position' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'position') <> 'string'
+       )
+       or (
+         item.value ? 'displayed_points'
+         and item.value -> 'displayed_points' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'displayed_points') <> 'number'
+       )
+       or (
+         item.value ? 'is_captain'
+         and item.value -> 'is_captain' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'is_captain') <> 'boolean'
+       )
+       or (
+         item.value ? 'captain_multiplier'
+         and item.value -> 'captain_multiplier' <> 'null'::jsonb
+         and jsonb_typeof(item.value -> 'captain_multiplier') <> 'number'
+       )
+  ) then
+    raise exception 'Uno de los jugadores tiene un formato no válido';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_to_recordset(p_lineup) as player(
+      slot_number integer,
+      player_id text,
+      player_name text,
+      club_id text,
+      club_name text,
+      position text,
+      displayed_points numeric,
+      is_captain boolean,
+      captain_multiplier numeric
+    )
+    where player.slot_number not between 1 and 11
+       or (player.position is not null and player.position not in ('PT', 'DF', 'MC', 'DL'))
+       or (nullif(btrim(player.player_id), '') is not null and btrim(player.player_id) !~ '^[a-z0-9][a-z0-9-]{0,119}$')
+       or (nullif(btrim(player.club_id), '') is not null and btrim(player.club_id) !~ '^[a-z0-9][a-z0-9-]{0,119}$')
+       or (player.player_name is not null and length(btrim(player.player_name)) > 80)
+       or (player.club_name is not null and length(btrim(player.club_name)) > 80)
+       or (
+         coalesce(player.is_captain, false)
+         and player.captain_multiplier is not null
+         and player.captain_multiplier not in (1.5, 2, 3)
+       )
+  ) then
+    raise exception 'Revisa las posiciones, nombres o multiplicadores de la alineación';
+  end if;
+
+  select
+    count(*),
+    count(distinct player.slot_number),
+    count(distinct coalesce(
+      nullif(btrim(player.player_id), ''),
+      'legacy:' || lower(btrim(player.player_name)) || '|' || coalesce(
+        nullif(lower(btrim(player.club_name)), ''),
+        nullif(lower(btrim(player.club_id)), ''),
+        ''
+      )
+    )) filter (where btrim(coalesce(player.player_name, '')) <> ''),
+    count(*) filter (where coalesce(player.is_captain, false)),
+    count(*) filter (where player.position = 'PT'),
+    count(*) filter (where player.position = 'DF'),
+    count(*) filter (where player.position = 'MC'),
+    count(*) filter (where player.position = 'DL')
+  into
+    player_count,
+    distinct_slots,
+    distinct_players,
+    captain_count,
+    goalkeeper_count,
+    defender_count,
+    midfielder_count,
+    forward_count
+  from jsonb_to_recordset(p_lineup) as player(
+    slot_number integer,
+    player_id text,
+    player_name text,
+    club_id text,
+    club_name text,
+    position text,
+    displayed_points numeric,
+    is_captain boolean,
+    captain_multiplier numeric
+  );
+
+  if distinct_slots <> player_count then
+    raise exception 'Los puestos de la alineación no pueden repetirse';
+  end if;
+
+  if captain_count > 1 then
+    raise exception 'Solo puede existir un capitán';
+  end if;
+
+  if p_require_complete then
+    if player_count <> 11 then
+      raise exception 'La alineación debe tener exactamente 11 jugadores';
+    end if;
+    if distinct_players <> 11 then
+      raise exception 'Completa los 11 jugadores sin repetirlos';
+    end if;
+    if goalkeeper_count <> 1 then
+      raise exception 'La alineación debe tener exactamente un portero';
+    end if;
+    if defender_count not between 3 and 5
+       or midfielder_count not between 2 and 6
+       or forward_count not between 0 and 4 then
+      raise exception 'La formación debe tener 3-5 defensas, 2-6 medios y 0-4 delanteros';
+    end if;
+    if captain_count <> 1 then
+      raise exception 'Selecciona exactamente un capitán';
+    end if;
+    if exists (
+      select 1
+      from jsonb_to_recordset(p_lineup) as player(
+        slot_number integer,
+        player_id text,
+        player_name text,
+        club_id text,
+        club_name text,
+        position text,
+        displayed_points numeric,
+        is_captain boolean,
+        captain_multiplier numeric
+      )
+      where btrim(coalesce(player.player_name, '')) = ''
+         or player.position not in ('PT', 'DF', 'MC', 'DL')
+         or player.displayed_points is null
+         or (
+           coalesce(player.is_captain, false)
+           and (player.captain_multiplier is null or player.captain_multiplier not in (1.5, 2, 3))
+         )
+    ) then
+      raise exception 'Completa nombre, posición, puntos y multiplicador del capitán';
+    end if;
+  end if;
+
+  select coalesce(
+    jsonb_agg(
+      jsonb_strip_nulls(
+        jsonb_build_object(
+          'slot_number', player.slot_number,
+          'player_id', nullif(btrim(coalesce(player.player_id, '')), ''),
+          'player_name', nullif(btrim(coalesce(player.player_name, '')), ''),
+          'club_id', nullif(btrim(coalesce(player.club_id, '')), ''),
+          'club_name', nullif(btrim(coalesce(player.club_name, '')), ''),
+          'position', player.position,
+          'displayed_points', player.displayed_points,
+          'is_captain', coalesce(player.is_captain, false),
+          'captain_multiplier', case
+            when coalesce(player.is_captain, false) then player.captain_multiplier
+            else 1
+          end
+        )
+      )
+      order by player.slot_number
+    ),
+    '[]'::jsonb
+  )
+  into normalized
+  from jsonb_to_recordset(p_lineup) as player(
+    slot_number integer,
+    player_id text,
+    player_name text,
+    club_id text,
+    club_name text,
+    position text,
+    displayed_points numeric,
+    is_captain boolean,
+    captain_multiplier numeric
+  );
+
+  return normalized;
+end;
+$$;
+
+revoke all on function private.normalize_matchday_lineup(jsonb, boolean) from public;
+revoke all on function private.normalize_matchday_lineup(jsonb, boolean) from anon;
+revoke all on function private.normalize_matchday_lineup(jsonb, boolean) from authenticated;
+
+create or replace function public.get_player_catalog_schema_version()
+returns integer
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select 116;
+$$;
+
+revoke all on function public.get_player_catalog_schema_version() from public;
+revoke all on function public.get_player_catalog_schema_version() from anon;
+grant execute on function public.get_player_catalog_schema_version() to authenticated;
+
+create or replace function public.save_matchday_draft(
+  p_season text,
+  p_matchday integer,
+  p_rows jsonb
+)
+returns setof public.matchday_drafts
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  current_postponed boolean;
+  submitted_postponed boolean;
+  postponed_values integer;
+  effective_rows jsonb;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  if p_season is null or btrim(p_season) = '' then
+    raise exception 'Season is required';
+  end if;
+
+  if p_matchday is null or p_matchday not between 1 and 60 then
+    raise exception 'Invalid matchday';
+  end if;
+
+  if p_rows is null or jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) = 0 then
+    raise exception 'Draft rows are required';
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext(p_season), p_matchday);
+
+  if exists (
+    select 1
+    from jsonb_array_elements(p_rows) as submitted(row_object)
+    where jsonb_typeof(submitted.row_object) <> 'object'
+       or (
+         submitted.row_object ? 'lineup'
+         and submitted.row_object -> 'lineup' <> 'null'::jsonb
+         and jsonb_typeof(submitted.row_object -> 'lineup') <> 'array'
+       )
+  ) then
+    raise exception 'Invalid draft row';
+  end if;
+
+  select bool_or(existing.has_postponed_matches)
+    into current_postponed
+  from (
+    select stats.has_postponed_matches
+    from public.matchday_stats as stats
+    where stats.season = p_season
+      and stats.matchday = p_matchday
+      and stats.published = true
+    union all
+    select drafts.has_postponed_matches
+    from public.matchday_drafts as drafts
+    where drafts.season = p_season
+      and drafts.matchday = p_matchday
+  ) as existing;
+
+  select
+    bool_or(row_data.has_postponed_matches),
+    count(distinct row_data.has_postponed_matches)
+      filter (where row_data.has_postponed_matches is not null)
+    into submitted_postponed, postponed_values
+  from jsonb_to_recordset(p_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer,
+    has_postponed_matches boolean
+  );
+
+  if postponed_values > 1 then
+    raise exception 'Every participant must share the same postponed status';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_to_recordset(p_rows) as row_data(
+      participant_name text,
+      points integer,
+      goals integer,
+      clean_sheets integer,
+      red_cards integer,
+      has_postponed_matches boolean
+    )
+    where participant_name is null
+       or btrim(participant_name) = ''
+       or (goals is not null and goals < 0)
+       or (clean_sheets is not null and clean_sheets < 0)
+       or (red_cards is not null and red_cards < 0)
+  ) then
+    raise exception 'Invalid draft row';
+  end if;
+
+  select jsonb_agg(
+    submitted.row_object || jsonb_build_object(
+      'lineup',
+      private.normalize_matchday_lineup(
+        case
+          when submitted.row_object ? 'lineup'
+           and jsonb_typeof(submitted.row_object -> 'lineup') = 'array'
+            then submitted.row_object -> 'lineup'
+          else coalesce(drafts.lineup, stats.lineup)
+        end,
+        false
+      )
+    )
+    order by submitted.row_object ->> 'participant_name'
+  )
+  into effective_rows
+  from jsonb_array_elements(p_rows) as submitted(row_object)
+  left join public.matchday_drafts as drafts
+    on drafts.season = p_season
+   and drafts.matchday = p_matchday
+   and drafts.participant_name = submitted.row_object ->> 'participant_name'
+  left join public.matchday_stats as stats
+    on stats.season = p_season
+   and stats.matchday = p_matchday
+   and stats.participant_name = submitted.row_object ->> 'participant_name'
+   and stats.published = true;
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  insert into public.matchday_drafts (
+    season,
+    matchday,
+    participant_name,
+    points,
+    goals,
+    clean_sheets,
+    red_cards,
+    has_postponed_matches,
+    lineup,
+    saved_by
+  )
+  select
+    p_season,
+    p_matchday,
+    row_data.participant_name,
+    row_data.points,
+    row_data.goals,
+    row_data.clean_sheets,
+    row_data.red_cards,
+    coalesce(row_data.has_postponed_matches, submitted_postponed, current_postponed, false),
+    row_data.lineup,
+    (select auth.uid())
+  from jsonb_to_recordset(effective_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer,
+    has_postponed_matches boolean,
+    lineup jsonb
+  );
+
+  return query
+  select drafts.*
+  from public.matchday_drafts as drafts
+  where drafts.season = p_season
+    and drafts.matchday = p_matchday
+  order by drafts.participant_name;
+end;
+$$;
+
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from public;
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from anon;
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from authenticated;
+grant execute on function public.save_matchday_draft(text, integer, jsonb) to authenticated;
+
+create or replace function public.publish_matchday_revision(
+  p_season text,
+  p_matchday integer,
+  p_rows jsonb
+)
+returns setof public.matchday_stats
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  before_rows jsonb;
+  after_rows jsonb;
+  history_action text;
+  total_rows integer;
+  distinct_rows integer;
+  current_postponed boolean;
+  submitted_postponed boolean;
+  postponed_values integer;
+  effective_rows jsonb;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  if p_season is null or btrim(p_season) = '' then
+    raise exception 'Season is required';
+  end if;
+
+  if p_matchday is null or p_matchday not between 1 and 60 then
+    raise exception 'Invalid matchday';
+  end if;
+
+  if p_rows is null or jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) = 0 then
+    raise exception 'Published rows are required';
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext(p_season), p_matchday);
+
+  if exists (
+    select 1
+    from jsonb_array_elements(p_rows) as submitted(row_object)
+    where jsonb_typeof(submitted.row_object) <> 'object'
+       or (
+         submitted.row_object ? 'lineup'
+         and submitted.row_object -> 'lineup' <> 'null'::jsonb
+         and jsonb_typeof(submitted.row_object -> 'lineup') <> 'array'
+       )
+  ) then
+    raise exception 'Invalid published row';
+  end if;
+
+  select
+    count(*),
+    count(distinct row_data.participant_name),
+    bool_or(row_data.has_postponed_matches),
+    count(distinct row_data.has_postponed_matches)
+      filter (where row_data.has_postponed_matches is not null)
+    into total_rows, distinct_rows, submitted_postponed, postponed_values
+  from jsonb_to_recordset(p_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer,
+    has_postponed_matches boolean
+  );
+
+  if total_rows <> distinct_rows then
+    raise exception 'Participants cannot be repeated';
+  end if;
+
+  if postponed_values > 1 then
+    raise exception 'Every participant must share the same postponed status';
+  end if;
+
+  if exists (
+    select 1
+    from jsonb_to_recordset(p_rows) as row_data(
+      participant_name text,
+      points integer,
+      goals integer,
+      clean_sheets integer,
+      red_cards integer,
+      has_postponed_matches boolean
+    )
+    where participant_name is null
+       or btrim(participant_name) = ''
+       or points is null
+       or goals is null
+       or clean_sheets is null
+       or red_cards is null
+       or goals < 0
+       or clean_sheets < 0
+       or red_cards < 0
+  ) then
+    raise exception 'Every participant needs points, goals, clean sheets and red cards';
+  end if;
+
+  select
+    bool_or(stats.has_postponed_matches),
+    coalesce(
+      jsonb_agg(
+        jsonb_build_object(
+          'participant_name', stats.participant_name,
+          'points', stats.points,
+          'goals', stats.goals,
+          'clean_sheets', stats.clean_sheets,
+          'red_cards', stats.red_cards,
+          'has_postponed_matches', stats.has_postponed_matches,
+          'lineup', stats.lineup,
+          'published', stats.published
+        )
+        order by stats.participant_name
+      ),
+      '[]'::jsonb
+    )
+    into current_postponed, before_rows
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday
+    and stats.published = true;
+
+  current_postponed := coalesce(
+    (
+      select bool_or(drafts.has_postponed_matches)
+      from public.matchday_drafts as drafts
+      where drafts.season = p_season
+        and drafts.matchday = p_matchday
+    ),
+    current_postponed,
+    false
+  );
+
+  select jsonb_agg(
+    submitted.row_object || jsonb_build_object(
+      'lineup',
+      private.normalize_matchday_lineup(
+        case
+          when submitted.row_object ? 'lineup'
+           and jsonb_typeof(submitted.row_object -> 'lineup') = 'array'
+            then submitted.row_object -> 'lineup'
+          else coalesce(drafts.lineup, stats.lineup)
+        end,
+        true
+      )
+    )
+    order by submitted.row_object ->> 'participant_name'
+  )
+  into effective_rows
+  from jsonb_array_elements(p_rows) as submitted(row_object)
+  left join public.matchday_drafts as drafts
+    on drafts.season = p_season
+   and drafts.matchday = p_matchday
+   and drafts.participant_name = submitted.row_object ->> 'participant_name'
+  left join public.matchday_stats as stats
+    on stats.season = p_season
+   and stats.matchday = p_matchday
+   and stats.participant_name = submitted.row_object ->> 'participant_name'
+   and stats.published = true;
+
+  history_action := case
+    when jsonb_array_length(before_rows) = 0 then 'publish'
+    else 'correction'
+  end;
+
+  delete from public.matchday_stats
+  where season = p_season
+    and matchday = p_matchday;
+
+  insert into public.matchday_stats (
+    season,
+    matchday,
+    participant_name,
+    points,
+    goals,
+    clean_sheets,
+    red_cards,
+    has_postponed_matches,
+    lineup,
+    published
+  )
+  select
+    p_season,
+    p_matchday,
+    row_data.participant_name,
+    row_data.points,
+    row_data.goals,
+    row_data.clean_sheets,
+    row_data.red_cards,
+    coalesce(row_data.has_postponed_matches, submitted_postponed, current_postponed, false),
+    row_data.lineup,
+    true
+  from jsonb_to_recordset(effective_rows) as row_data(
+    participant_name text,
+    points integer,
+    goals integer,
+    clean_sheets integer,
+    red_cards integer,
+    has_postponed_matches boolean,
+    lineup jsonb
+  );
+
+  select jsonb_agg(
+    jsonb_build_object(
+      'participant_name', stats.participant_name,
+      'points', stats.points,
+      'goals', stats.goals,
+      'clean_sheets', stats.clean_sheets,
+      'red_cards', stats.red_cards,
+      'has_postponed_matches', stats.has_postponed_matches,
+      'lineup', stats.lineup,
+      'published', stats.published
+    )
+    order by stats.participant_name
+  )
+  into after_rows
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday;
+
+  insert into public.matchday_change_log (
+    season,
+    matchday,
+    action,
+    before_snapshot,
+    after_snapshot,
+    changed_by,
+    changed_by_email
+  )
+  values (
+    p_season,
+    p_matchday,
+    history_action,
+    before_rows,
+    after_rows,
+    (select auth.uid()),
+    coalesce((select auth.jwt() ->> 'email'), 'Administrador')
+  );
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  return query
+  select stats.*
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday
+  order by stats.participant_name;
+end;
+$$;
+
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from public;
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from anon;
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from authenticated;
+grant execute on function public.publish_matchday_revision(text, integer, jsonb) to authenticated;
+
+create or replace function public.undo_last_matchday_publication(
+  p_season text,
+  p_matchday integer
+)
+returns setof public.matchday_stats
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  last_change public.matchday_change_log%rowtype;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext(p_season), p_matchday);
+
+  select *
+    into last_change
+  from public.matchday_change_log
+  where season = p_season
+    and matchday = p_matchday
+    and undone = false
+  order by created_at desc
+  limit 1
+  for update;
+
+  if not found then
+    raise exception 'There is no publication to undo';
+  end if;
+
+  delete from public.matchday_stats
+  where season = p_season
+    and matchday = p_matchday;
+
+  if jsonb_array_length(last_change.before_snapshot) > 0 then
+    insert into public.matchday_stats (
+      season,
+      matchday,
+      participant_name,
+      points,
+      goals,
+      clean_sheets,
+      red_cards,
+      has_postponed_matches,
+      lineup,
+      published
+    )
+    select
+      p_season,
+      p_matchday,
+      row_data.participant_name,
+      row_data.points,
+      row_data.goals,
+      row_data.clean_sheets,
+      coalesce(row_data.red_cards, 0),
+      coalesce(row_data.has_postponed_matches, false),
+      row_data.lineup,
+      coalesce(row_data.published, true)
+    from jsonb_to_recordset(last_change.before_snapshot) as row_data(
+      participant_name text,
+      points integer,
+      goals integer,
+      clean_sheets integer,
+      red_cards integer,
+      has_postponed_matches boolean,
+      lineup jsonb,
+      published boolean
+    );
+  end if;
+
+  update public.matchday_change_log
+  set
+    undone = true,
+    undone_at = now(),
+    undone_by = (select auth.uid())
+  where id = last_change.id;
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  return query
+  select stats.*
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday
+  order by stats.participant_name;
+end;
+$$;
+
+revoke all on function public.undo_last_matchday_publication(text, integer) from public;
+revoke all on function public.undo_last_matchday_publication(text, integer) from anon;
+revoke all on function public.undo_last_matchday_publication(text, integer) from authenticated;
+grant execute on function public.undo_last_matchday_publication(text, integer) to authenticated;
+
+notify pgrst, 'reload schema';
+
+commit;
+
+select
+  'Catálogo y alineaciones V116 activados correctamente' as resultado,
+  count(*) filter (where lineup is not null and jsonb_array_length(lineup) = 11) as alineaciones_publicadas
+from public.matchday_stats;

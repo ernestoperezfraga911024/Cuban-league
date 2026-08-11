@@ -1,11 +1,15 @@
-# Cuban League V115
+# Cuban League V116
 
 Sitio oficial de la Cuban League con:
 
+- El Catálogo Maestro incorpora 499 jugadores de 20 clubes, con rostro, escudo,
+  posición e identidad estable. En el panel se busca y selecciona al jugador;
+  club y posición se completan automáticamente, y el administrador escribe
+  únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3.
 - Cada participante puede guardar su alineación de 11 jugadores dentro de una
-  jornada, con nombre, club opcional, posición, puntos finales, capitán y
-  multiplicador x1,5, x2 o x3. Los puntos mostrados del capitán ya incluyen
-  ese multiplicador y nunca se multiplican una segunda vez.
+  jornada. Las identidades `player_id` y `club_id` distinguen homónimos, mientras
+  nombre, club y posición quedan como snapshot histórico. La web pública muestra
+  los rostros y escudos, con iniciales como respaldo para alineaciones antiguas.
 - Al tocar un equipo en la tabla de una jornada se abre su campo: formación,
   estadísticas oficiales de esa fecha, capitán y aporte del brazalete, MVP del
   equipo, total por portería/defensa/medio/delantera y línea más productiva.
@@ -14,8 +18,8 @@ Sitio oficial de la Cuban League con:
   debe completarse o vaciarse antes de publicar. Borradores, correcciones y
   «Deshacer» conservan juntos estadísticas y alineaciones.
 - Para activar esta fase, ejecuta una sola vez
-  `SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt` en Supabase > SQL Editor,
-  después de V114.
+  `SUPABASE-V116-CATALOGO-ALINEACIONES-COPIAR-Y-PEGAR.txt` en Supabase > SQL
+  Editor, después de V114. Es acumulativa: no hace falta ejecutar V115 antes.
 
 - El panel privado permite marcar una jornada de Liga como «Tiene partidos
   aplazados». La Liga puede seguir publicándose y las jornadas posteriores se
@@ -303,9 +307,11 @@ Para activar el control de partidos aplazados de V114, ejecuta finalmente
 `SUPABASE-V114-APLAZADOS-COPIAR-Y-PEGAR.txt` desde Supabase > SQL Editor. Las
 jornadas anteriores se conservan y quedan marcadas como completas.
 
-Para activar las alineaciones por jornada de V115, abre después
-`SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt`, copia todo su contenido en
-Supabase > SQL Editor y pulsa **Run** una sola vez. No borra las jornadas ya
-publicadas.
+Para activar el Catálogo Maestro y las alineaciones por jornada de V116, abre
+después `SUPABASE-V116-CATALOGO-ALINEACIONES-COPIAR-Y-PEGAR.txt`, copia todo su
+contenido en Supabase > SQL Editor y pulsa **Run** una sola vez. No borra las
+jornadas ya publicadas y también sirve si V115 nunca se ejecutó. Una vez
+instalada V116, no vuelvas a ejecutar el archivo V115 antiguo porque ya fue
+reemplazado por esta versión.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.

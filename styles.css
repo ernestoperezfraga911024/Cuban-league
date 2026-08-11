@@ -23642,6 +23642,57 @@ footer{
   font-variant-numeric:tabular-nums;
 }
 
+/* V116 · Rostros y escudos del Catálogo Maestro */
+.matchday-field-player-marker.has-photo{
+  position:relative;
+  overflow:hidden;
+  color:#d9f8e8;
+  background:#163d2d;
+}
+
+.matchday-field-player-marker.has-photo>span{
+  display:grid;
+  position:absolute;
+  inset:0;
+  place-items:center;
+}
+
+.matchday-field-player-marker.has-photo img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+}
+
+.matchday-field-player.is-mvp .matchday-field-player-marker.has-photo{
+  border-color:#f5db6a;
+  box-shadow:0 0 0 3px rgba(245,219,106,.2),0 9px 20px rgba(0,0,0,.25);
+}
+
+.matchday-field-player>small.has-crest{
+  display:flex;
+  min-height:18px;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+}
+
+.matchday-field-player>small.has-crest img{
+  width:12px;
+  height:12px;
+  flex:0 0 auto;
+  object-fit:contain;
+}
+
+.matchday-field-player>small.has-crest span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
 .matchday-lineup-analysis{
   display:grid;
   gap:11px;
@@ -24082,6 +24133,10 @@ footer{
   }
 
   .matchday-field-player>small{
+    display:none;
+  }
+
+  .matchday-field-player>small.has-crest{
     display:none;
   }
 
