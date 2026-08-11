@@ -49,6 +49,7 @@
 
     return {
       schemaVersion: Number(raw?.schema_version) || 1,
+      declaredRecordCount: Number(raw?.record_count) || players.length,
       recordCount: players.length,
       clubs,
       clubsById,

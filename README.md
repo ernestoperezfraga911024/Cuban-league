@@ -2,7 +2,7 @@
 
 Sitio oficial de la Cuban League con:
 
-- El Catálogo Maestro incorpora 499 jugadores de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 505 jugadores de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3.
