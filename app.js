@@ -1,7 +1,8 @@
-const APP_VERSION='115-20260810';
+const APP_VERSION='116-20260810';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
+let PLAYER_CATALOG=null;
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
 let MATCHDAY_MILESTONES=[];
@@ -1317,15 +1318,27 @@ function normalizePublishedMatchdayLineup(rawLineup){
       ?lineup.players
       :[];
   return rows.map((row,index)=>{
-    const position=String(row?.position||'').trim().toUpperCase();
-    const playerName=String(row?.player_name||'').trim();
+    const playerId=String(row?.player_id||'').trim();
+    const clubId=String(row?.club_id||'').trim();
+    const catalogPlayer=PLAYER_CATALOG?.resolve({
+      playerId,
+      playerName:row?.player_name,
+      clubId,
+      clubName:row?.club_name
+    })||null;
+    const position=String(row?.position||catalogPlayer?.position||'').trim().toUpperCase();
+    const playerName=String(row?.player_name||catalogPlayer?.displayName||'').trim();
     const isCaptain=row?.is_captain===true||row?.is_captain==='true';
     const slotNumber=Math.trunc(matchdayLineupNumericValue(row?.slot_number,index+1));
     const captainMultiplier=matchdayLineupNumericValue(row?.captain_multiplier,1);
     return {
       slotNumber:slotNumber>0?slotNumber:index+1,
+      playerId:playerId||catalogPlayer?.id||'',
       playerName,
-      clubName:String(row?.club_name||'').trim(),
+      clubId:clubId||catalogPlayer?.clubId||'',
+      clubName:String(row?.club_name||catalogPlayer?.clubName||'').trim(),
+      photo:catalogPlayer?.photo||'',
+      crest:catalogPlayer?.crest||'',
       position,
       displayedPoints:matchdayLineupNumericValue(row?.displayed_points),
       isCaptain,
@@ -1460,12 +1473,19 @@ function matchdayLineupPlayerMarkup(player,isMvp){
   const safeClub=profileAttr(player.clubName||'Club no registrado');
   const points=matchdayLineupNumber(player.displayedPoints);
   const captainLabel=player.isCaptain?`, capitán por ${matchdayLineupMultiplier(player.captainMultiplier)}`:'';
+  const initials=profileAttr(matchdayLineupInitials(player.playerName));
+  const marker=player.photo
+    ?`<span class="matchday-field-player-marker has-photo" aria-hidden="true"><span>${initials}</span><img data-player-catalog-image src="${profileAttr(player.photo)}" alt="" loading="lazy"></span>`
+    :`<span class="matchday-field-player-marker" aria-hidden="true">${initials}</span>`;
+  const club=player.crest
+    ?`<small class="has-crest" title="${safeClub}"><img data-player-catalog-image src="${profileAttr(player.crest)}" alt="" loading="lazy"><span>${safeClub}</span></small>`
+    :`<small title="${safeClub}">${safeClub}</small>`;
   return `<article class="matchday-field-player${player.isCaptain?' is-captain':''}${isMvp?' is-mvp':''}" aria-label="${safeName}, ${MATCHDAY_LINEUP_POSITION_LABELS[player.position]}, ${points} puntos${captainLabel}">
-    <span class="matchday-field-player-marker" aria-hidden="true">${profileAttr(matchdayLineupInitials(player.playerName))}</span>
+    ${marker}
     ${player.isCaptain?`<span class="matchday-field-captain">C ×${matchdayLineupMultiplier(player.captainMultiplier)}</span>`:''}
     ${isMvp?'<span class="matchday-field-mvp" title="MVP del equipo" aria-hidden="true">★</span>':''}
     <strong title="${safeName}">${safeName}</strong>
-    <small title="${safeClub}">${safeClub}</small>
+    ${club}
     <b>${points}</b>
   </article>`;
 }
@@ -4499,7 +4519,15 @@ function setupChampionsCalendarToggle(){
 
 async function init(){
   trackSiteVisit();
-  DATA=await(await fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'})).json();
+  const catalogPromise=window.CubanLeaguePlayerCatalog
+    ?window.CubanLeaguePlayerCatalog.load(APP_VERSION).catch(()=>null)
+    :Promise.resolve(null);
+  const [dataResponse,catalog]=await Promise.all([
+    fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'}),
+    catalogPromise
+  ]);
+  DATA=await dataResponse.json();
+  PLAYER_CATALOG=catalog;
   renderCurrent();
   renderMatchdayCenter();
   renderHomeLive();

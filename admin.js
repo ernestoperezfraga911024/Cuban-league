@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '115-20260810';
+  const VERSION = '116-20260810';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
@@ -24,6 +24,7 @@
     redCardsSchemaReady: true,
     postponedSchemaReady: true,
     lineupSchemaReady: true,
+    catalogSchemaReady: true,
     achievementSchemaReady: true,
     history: [],
     previewRows: [],
@@ -39,6 +40,10 @@
     analyticsLoading: false,
     lineups: new Map(),
     lineupParticipantName: '',
+    catalog: null,
+    catalogSlot: null,
+    catalogParticipantName: '',
+    catalogReturnFocus: null,
     milestone: {
       matchdayDate: '',
       isMonthEnd: false,
@@ -177,7 +182,7 @@
 
   function isLineupUpgradeError(error) {
     const message = String(error?.message || error || '');
-    return /column[^\n]*lineup[^\n]*does not exist|could not find[^\n]*lineup|schema cache[^\n]*lineup|matchday lineup schema|SUPABASE-V115/i.test(message);
+    return /column[^\n]*lineup[^\n]*does not exist|could not find[^\n]*lineup|schema cache[^\n]*lineup|matchday lineup schema|get_player_catalog_schema_version|SUPABASE-V11[56]/i.test(message);
   }
 
   function isRedCardsUpgradeError(error) {
@@ -190,7 +195,7 @@
     if (/invalid login credentials/i.test(message)) return 'El correo o la contraseña no son correctos.';
     if (/email not confirmed/i.test(message)) return 'Primero debes confirmar el correo en Supabase.';
     if (/failed to fetch|networkerror|load failed/i.test(message)) return 'No se pudo conectar. Comprueba tu conexión a internet e inténtalo otra vez.';
-    if (isLineupUpgradeError(error)) return 'Falta activar las alineaciones. Ejecuta “SUPABASE-V115-ALINEACIONES-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
+    if (isLineupUpgradeError(error)) return 'Falta activar las alineaciones con catálogo. Ejecuta “SUPABASE-V116-CATALOGO-ALINEACIONES-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isPostponedUpgradeError(error)) return 'Falta activar los partidos aplazados. Ejecuta “SUPABASE-V114-APLAZADOS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isRedCardsUpgradeError(error)) return 'Falta activar las tarjetas rojas. Ejecuta “SUPABASE-V65-TARJETAS-ROJAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
     if (isAchievementUpgradeError(error)) return 'Falta activar las insignias. Ejecuta “SUPABASE-V59-INSIGNIAS-COPIAR-Y-PEGAR.txt” una sola vez en Supabase.';
@@ -333,11 +338,21 @@
       const slot = Number(player?.slot_number ?? index + 1);
       const captain = player?.is_captain === true;
       const multiplier = lineupNumber(player?.captain_multiplier);
+      const catalogPlayer = state.catalog?.resolve({
+        playerId: player?.player_id,
+        playerName: player?.player_name,
+        clubId: player?.club_id,
+        clubName: player?.club_name
+      });
       return {
         slot_number: Number.isInteger(slot) && slot >= 1 && slot <= 11 ? slot : index + 1,
-        player_name: String(player?.player_name || '').trim(),
-        club_name: String(player?.club_name || '').trim(),
-        position: ['PT', 'DF', 'MC', 'DL'].includes(player?.position) ? player.position : LINEUP_DEFAULT_POSITIONS[index] || 'MC',
+        player_id: String(player?.player_id || catalogPlayer?.id || '').trim(),
+        player_name: String(player?.player_name || catalogPlayer?.displayName || '').trim(),
+        club_id: String(player?.club_id || catalogPlayer?.clubId || '').trim(),
+        club_name: String(player?.club_name || catalogPlayer?.clubName || '').trim(),
+        position: ['PT', 'DF', 'MC', 'DL'].includes(player?.position)
+          ? player.position
+          : catalogPlayer?.position || LINEUP_DEFAULT_POSITIONS[index] || 'MC',
         displayed_points: lineupNumber(player?.displayed_points),
         is_captain: captain,
         captain_multiplier: captain ? (validCaptainMultiplier(multiplier) ? multiplier : 2) : 1
@@ -352,7 +367,13 @@
   function lineupMetrics(players) {
     const lineup = Array.isArray(players) ? players : [];
     const validPositions = new Set(['PT', 'DF', 'MC', 'DL']);
-    const names = lineup.map(player => String(player.player_name || '').trim().toLowerCase()).filter(Boolean);
+    const identities = lineup.map(player => {
+      const playerId = String(player.player_id || '').trim().toLowerCase();
+      if (playerId) return `id:${playerId}`;
+      const name = String(player.player_name || '').trim().toLowerCase();
+      const club = String(player.club_name || '').trim().toLowerCase();
+      return name ? `legacy:${name}|${club}` : '';
+    }).filter(Boolean);
     const slots = lineup.map(player => Number(player.slot_number));
     const captains = lineup.filter(player => player.is_captain === true);
     const filled = lineup.filter(player => String(player.player_name || '').trim()).length;
@@ -361,7 +382,7 @@
     lineup.forEach(player => {
       if (Object.prototype.hasOwnProperty.call(counts, player.position)) counts[player.position] += 1;
     });
-    const duplicateNames = names.length !== new Set(names).size;
+    const duplicatePlayers = identities.length !== new Set(identities).size;
     const validFormation = counts.PT === 1
       && counts.DF >= 3
       && counts.DF <= 5
@@ -373,7 +394,7 @@
     const issues = [];
     if (lineup.length !== 11) issues.push(`hay ${lineup.length}/11 jugadores iniciados`);
     if (filled !== lineup.length || (lineup.length === 11 && filled !== 11)) issues.push('faltan nombres');
-    if (duplicateNames) issues.push('hay nombres repetidos');
+    if (duplicatePlayers) issues.push('hay jugadores repetidos');
     if (!pointsComplete) issues.push('faltan puntos');
     if (new Set(slots).size !== lineup.length) issues.push('hay puestos repetidos');
     if (!lineup.every(player => validPositions.has(player.position))) issues.push('hay posiciones no válidas');
@@ -385,7 +406,7 @@
       && filled === 11
       && pointsComplete
       && new Set(slots).size === 11
-      && !duplicateNames
+      && !duplicatePlayers
       && lineup.every(player => validPositions.has(player.position))
       && validFormation
       && captains.length === 1
@@ -444,7 +465,9 @@
       const slot = index + 1;
       return bySlot.get(slot) || {
         slot_number: slot,
+        player_id: '',
         player_name: '',
+        club_id: '',
         club_name: '',
         position: LINEUP_DEFAULT_POSITIONS[index],
         displayed_points: null,
@@ -522,6 +545,167 @@
     }
   }
 
+  function lineupPlayerInitials(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return (parts.slice(0, 2).map(part => part.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]/g, '')[0] || '').join('') || 'CL').toUpperCase();
+  }
+
+  function lineupCatalogPlayer(player) {
+    return state.catalog?.resolve({
+      playerId: player?.player_id,
+      playerName: player?.player_name,
+      clubId: player?.club_id,
+      clubName: player?.club_name
+    }) || null;
+  }
+
+  function lineupPlayerPickerMarkup(player, slot) {
+    const catalogPlayer = lineupCatalogPlayer(player);
+    const playerId = String(player?.player_id || catalogPlayer?.id || '').trim();
+    const playerName = String(player?.player_name || catalogPlayer?.displayName || '').trim();
+    const clubId = String(player?.club_id || catalogPlayer?.clubId || '').trim();
+    const clubName = String(player?.club_name || catalogPlayer?.clubName || '').trim();
+    const selected = Boolean(playerName);
+    const initials = escapeHtml(lineupPlayerInitials(playerName));
+    const portrait = catalogPlayer?.photo
+      ? `<span class="lineup-selected-face" aria-hidden="true"><span>${initials}</span><img data-player-catalog-image src="${escapeHtml(catalogPlayer.photo)}" alt="" loading="lazy"></span>`
+      : `<span class="lineup-selected-face is-initials" aria-hidden="true"><span>${initials}</span></span>`;
+    const crest = catalogPlayer?.crest
+      ? `<img data-player-catalog-image src="${escapeHtml(catalogPlayer.crest)}" alt="" loading="lazy">`
+      : '';
+    return `<span class="lineup-player-fields${selected ? ' has-player' : ''}">
+      <input data-lineup-field="player_id" type="hidden" value="${escapeHtml(playerId)}">
+      <input data-lineup-field="player_name" type="hidden" value="${escapeHtml(playerName)}">
+      <input data-lineup-field="club_id" type="hidden" value="${escapeHtml(clubId)}">
+      <input data-lineup-field="club_name" type="hidden" value="${escapeHtml(clubName)}">
+      <button class="lineup-player-picker" data-open-player-catalog type="button" aria-label="${selected ? `Cambiar a ${escapeHtml(playerName)}` : `Buscar jugador para la posición ${slot}`}">
+        ${selected ? portrait : '<span class="lineup-picker-plus" aria-hidden="true">＋</span>'}
+        <span class="lineup-player-picker-copy">
+          <b>${selected ? escapeHtml(playerName) : state.catalog ? 'Buscar jugador' : 'Catálogo no disponible'}</b>
+          <small>${selected ? `${crest}<span>${escapeHtml(clubName || 'Club no registrado')}</span>` : state.catalog ? 'Catálogo Maestro · 499 disponibles' : 'Recarga el panel para intentarlo de nuevo'}</small>
+        </span>
+        <em>${selected ? 'Cambiar' : 'Elegir'}</em>
+      </button>
+      ${selected ? `<button class="lineup-player-clear" data-clear-lineup-player type="button" aria-label="Quitar a ${escapeHtml(playerName)}">✕</button>` : ''}
+    </span>`;
+  }
+
+  function renderPlayerCatalogResults() {
+    if (!$('playerCatalogResults') || !state.catalog || !state.catalogSlot) return;
+    const query = $('playerCatalogSearch').value;
+    const position = $('playerCatalogPosition').value;
+    const clubId = $('playerCatalogClub').value;
+    const excludedIds = gatherLineupEditor()
+      .filter(player => player.slot_number !== state.catalogSlot)
+      .map(player => player.player_id)
+      .filter(Boolean);
+    const matches = state.catalog.search(query, { position, clubId, excludeIds: excludedIds, limit: 500 });
+    const visible = matches.slice(0, 60);
+    $('playerCatalogResultCount').textContent = matches.length === 1
+      ? '1 resultado'
+      : `${matches.length} resultados${matches.length > visible.length ? ` · mostrando ${visible.length}` : ''}`;
+    $('playerCatalogResults').innerHTML = visible.length
+      ? visible.map(player => `<button class="player-catalog-result" type="button" data-catalog-player-id="${escapeHtml(player.id)}">
+          <span class="player-catalog-face" aria-hidden="true"><span>${escapeHtml(lineupPlayerInitials(player.displayName))}</span><img data-player-catalog-image src="${escapeHtml(player.photo)}" alt="" loading="lazy"></span>
+          <span class="player-catalog-result-copy">
+            <b>${escapeHtml(player.displayName)}</b>
+            <small>${player.crest ? `<img data-player-catalog-image src="${escapeHtml(player.crest)}" alt="" loading="lazy">` : ''}<span>${escapeHtml(player.clubName)}</span></small>
+          </span>
+          <em class="position-${player.position.toLowerCase()}">${player.position}</em>
+        </button>`).join('')
+      : `<div class="player-catalog-empty"><b>No encontramos ese jugador</b><span>Prueba con parte del nombre, cambia la posición o selecciona otro club.</span></div>`;
+  }
+
+  function openPlayerCatalog(slot, returnFocus) {
+    if (!state.catalog || state.saving || (state.published && !state.editingPublished)) return;
+    updateLineupFromEditor();
+    state.catalogSlot = Number(slot);
+    state.catalogParticipantName = state.lineupParticipantName;
+    state.catalogReturnFocus = returnFocus || null;
+    const row = document.querySelector(`.lineup-player-row[data-lineup-slot="${state.catalogSlot}"]`);
+    $('playerCatalogSearch').value = '';
+    $('playerCatalogPosition').value = row?.querySelector('[data-lineup-field="position"]')?.value || '';
+    $('playerCatalogClub').value = '';
+    $('playerCatalogSlotLabel').textContent = `Posición ${String(state.catalogSlot).padStart(2, '0')} · ${LINEUP_POSITION_LABELS[$('playerCatalogPosition').value] || 'elige cualquier posición'}`;
+    $('playerCatalogModal').hidden = false;
+    document.body.classList.add('catalog-open');
+    document.querySelectorAll('.admin-topbar,.admin-main').forEach(node => { node.inert = true; });
+    renderPlayerCatalogResults();
+    requestAnimationFrame(() => $('playerCatalogSearch').focus());
+  }
+
+  function closePlayerCatalog(returnFocus = true) {
+    if (!$('playerCatalogModal') || $('playerCatalogModal').hidden) return;
+    $('playerCatalogModal').hidden = true;
+    document.body.classList.remove('catalog-open');
+    document.querySelectorAll('.admin-topbar,.admin-main').forEach(node => { node.inert = false; });
+    const focus = state.catalogReturnFocus;
+    state.catalogSlot = null;
+    state.catalogParticipantName = '';
+    state.catalogReturnFocus = null;
+    if (returnFocus) focus?.focus?.();
+  }
+
+  function trapPlayerCatalogFocus(event) {
+    if (event.key !== 'Tab' || $('playerCatalogModal')?.hidden) return;
+    const focusable = [...$('playerCatalogModal').querySelectorAll('button,input,select,[tabindex]:not([tabindex="-1"])')]
+      .filter(node => !node.disabled && !node.hidden);
+    if (!focusable.length) {
+      event.preventDefault();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function chooseCatalogPlayer(playerId) {
+    const player = state.catalog?.playersById.get(String(playerId || ''));
+    const slot = state.catalogSlot;
+    if (!player || !slot || state.catalogParticipantName !== state.lineupParticipantName) {
+      closePlayerCatalog();
+      return;
+    }
+    const current = gatherLineupEditor();
+    const existing = current.find(item => item.slot_number === slot) || {
+      slot_number: slot,
+      displayed_points: null,
+      is_captain: false,
+      captain_multiplier: 1
+    };
+    const next = current.filter(item => item.slot_number !== slot);
+    next.push({
+      ...existing,
+      player_id: player.id,
+      player_name: player.displayName,
+      club_id: player.clubId,
+      club_name: player.clubName,
+      position: player.position
+    });
+    state.lineups.set(state.lineupParticipantName, normalizeLineupPlayers(next));
+    closePlayerCatalog(false);
+    renderLineupEditor();
+    updateCompletionState();
+    scheduleAutoSave();
+    requestAnimationFrame(() => document.querySelector(`.lineup-player-row[data-lineup-slot="${slot}"] [data-open-player-catalog]`)?.focus());
+  }
+
+  function clearLineupPlayer(slot) {
+    updateLineupFromEditor();
+    const next = (lineupForParticipant(state.lineupParticipantName) || [])
+      .filter(player => Number(player.slot_number) !== Number(slot));
+    state.lineups.set(state.lineupParticipantName, normalizeLineupPlayers(next));
+    renderLineupEditor();
+    updateCompletionState();
+    scheduleAutoSave();
+  }
+
   function renderLineupEditor() {
     if (!$('lineupPlayerRows')) return;
     const players = lineupRowsForEditor(lineupForParticipant(state.lineupParticipantName));
@@ -537,10 +721,7 @@
         <select class="lineup-position-select" data-lineup-field="position" aria-label="Posición del jugador ${slot}">
           ${Object.entries(LINEUP_POSITION_LABELS).map(([value, label]) => `<option value="${value}"${player.position === value ? ' selected' : ''}>${value} · ${label}</option>`).join('')}
         </select>
-        <span class="lineup-player-fields">
-          <input data-lineup-field="player_name" type="text" maxlength="80" autocomplete="off" value="${escapeHtml(player.player_name || '')}" placeholder="Nombre del jugador" aria-label="Nombre del jugador ${slot}">
-          <input data-lineup-field="club_name" type="text" maxlength="80" autocomplete="off" value="${escapeHtml(player.club_name || '')}" placeholder="Club (opcional)" aria-label="Club del jugador ${slot}">
-        </span>
+        ${lineupPlayerPickerMarkup(player, slot)}
         <input class="lineup-points-input" data-lineup-field="displayed_points" type="number" inputmode="decimal" step="0.1" value="${points === null ? '' : points}" placeholder="—" aria-label="Puntos finales del jugador ${slot}">
         <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="radio" name="lineupCaptain" value="${slot}"${captain ? ' checked' : ''}><span>C</span></label>
         <select class="lineup-position-select lineup-multiplier-input" data-lineup-field="captain_multiplier"${captain ? '' : ' disabled'} aria-label="Multiplicador del capitán en la posición ${slot}">
@@ -556,18 +737,22 @@
   function gatherLineupEditor() {
     const players = [...document.querySelectorAll('.lineup-player-row')].map(row => {
       const slot = Number(row.dataset.lineupSlot);
+      const playerId = row.querySelector('[data-lineup-field="player_id"]')?.value.trim() || '';
       const playerName = row.querySelector('[data-lineup-field="player_name"]').value.trim();
+      const clubId = row.querySelector('[data-lineup-field="club_id"]')?.value.trim() || '';
       const clubName = row.querySelector('[data-lineup-field="club_name"]').value.trim();
       const pointsInput = row.querySelector('[data-lineup-field="displayed_points"]');
       const points = pointsInput.value.trim() === '' ? null : Number(pointsInput.value);
       const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
       const multiplierInput = row.querySelector('[data-lineup-field="captain_multiplier"]');
       const multiplier = Number(multiplierInput.value);
-      const hasContent = Boolean(playerName || clubName || pointsInput.value.trim() || captain);
+      const hasContent = Boolean(playerId || playerName || clubId || clubName || pointsInput.value.trim() || captain);
       if (!hasContent) return null;
       return {
         slot_number: slot,
+        player_id: playerId,
         player_name: playerName,
+        club_id: clubId,
         club_name: clubName,
         position: row.querySelector('[data-lineup-field="position"]').value,
         displayed_points: Number.isFinite(points) ? points : null,
@@ -597,7 +782,8 @@
 
   function renderLineupManagement() {
     if (!$('lineupManagement')) return;
-    $('lineupSchemaNotice').hidden = state.lineupSchemaReady;
+    $('lineupSchemaNotice').hidden = state.lineupSchemaReady && state.catalogSchemaReady;
+    $('playerCatalogAvailabilityNotice').hidden = Boolean(state.catalog);
     updateLineupProgress();
     renderLineupEditor();
   }
@@ -750,7 +936,7 @@
       && state.redCardsSchemaReady
       && (!hasPostponedMatches() || state.postponedSchemaReady)
       && lineupCheck.valid
-      && (!hasAnyLineupChange() || state.lineupSchemaReady)
+      && (!hasAnyLineupChange() || (state.lineupSchemaReady && state.catalogSchemaReady))
       && !state.saving;
     $('publishButton').disabled = !canPreview;
     return result;
@@ -769,7 +955,12 @@
     document.querySelectorAll('[data-lineup-field]').forEach(input => {
       const captainMultiplier = input.dataset.lineupField === 'captain_multiplier';
       const captainChecked = input.closest('.lineup-player-row')?.querySelector('[data-lineup-field="is_captain"]')?.checked === true;
-      input.disabled = locked || (captainMultiplier && !captainChecked);
+      const catalogPosition = input.dataset.lineupField === 'position'
+        && Boolean(input.closest('.lineup-player-row')?.querySelector('[data-lineup-field="player_id"]')?.value.trim());
+      input.disabled = locked || catalogPosition || (captainMultiplier && !captainChecked);
+    });
+    document.querySelectorAll('[data-open-player-catalog],[data-clear-lineup-player]').forEach(button => {
+      button.disabled = locked || !state.catalog;
     });
     if ($('clearLineupButton')) $('clearLineupButton').disabled = locked;
     $('lineupManagement')?.classList.toggle('is-locked', locked && state.published);
@@ -1026,7 +1217,7 @@
     if (!state.schemaReady
       || !state.redCardsSchemaReady
       || (hasPostponedMatches() && !state.postponedSchemaReady)
-      || (!state.lineupSchemaReady && hasAnyLineupChange())) {
+      || ((!state.lineupSchemaReady || !state.catalogSchemaReady) && hasAnyLineupChange())) {
       markDirty(false, 'Borrador guardado en este dispositivo');
       $('savedAt').textContent = formatDate(new Date(), 'Guardado localmente ');
       if (manual) {
@@ -1037,7 +1228,7 @@
               ? 'Borrador guardado en este dispositivo. Activa la actualización V65 de Supabase para guardar tarjetas rojas.'
               : hasPostponedMatches() && !state.postponedSchemaReady
                 ? 'Borrador guardado en este dispositivo. Activa la actualización V114 de Supabase para guardar el estado aplazado.'
-                : 'Borrador guardado en este dispositivo. Activa la actualización V115 de Supabase para guardar las alineaciones.',
+                : 'Borrador guardado en este dispositivo. Activa la actualización V116 de Supabase para guardar las alineaciones con identidad de catálogo.',
           'error'
         );
       }
@@ -1357,8 +1548,8 @@
       $('lineupManagement').scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
-    if (!isChampionsMode() && hasAnyLineupChange() && !state.lineupSchemaReady) {
-      flashMessage('Primero activa la actualización V115 de Supabase para publicar las alineaciones.', 'error');
+    if (!isChampionsMode() && hasAnyLineupChange() && (!state.lineupSchemaReady || !state.catalogSchemaReady)) {
+      flashMessage('Primero activa la actualización V116 de Supabase para publicar las alineaciones con el Catálogo Maestro.', 'error');
       $('lineupManagement').scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
@@ -1632,6 +1823,12 @@
     return data === true;
   }
 
+  async function detectCatalogLineupSchema() {
+    const { data, error } = await state.client.rpc('get_player_catalog_schema_version');
+    state.catalogSchemaReady = !error && Number(data) >= 116;
+    return state.catalogSchemaReady;
+  }
+
   function excludeOwnerVisitsOnThisBrowser() {
     try {
       localStorage.setItem(OWNER_VISIT_EXCLUSION_KEY, '1');
@@ -1649,6 +1846,7 @@
       }
 
       excludeOwnerVisitsOnThisBrowser();
+      await detectCatalogLineupSchema();
       $('sessionEmail').textContent = session.user.email || '';
       $('seasonLabel').textContent = config.season;
       showOnly('panelView');
@@ -1774,6 +1972,32 @@
       if (!event.target.matches('select[data-lineup-field]')) return;
       handleLineupInput();
     });
+    $('lineupPlayerRows').addEventListener('click', event => {
+      const row = event.target.closest('.lineup-player-row');
+      if (!row) return;
+      const openButton = event.target.closest('[data-open-player-catalog]');
+      if (openButton) {
+        openPlayerCatalog(Number(row.dataset.lineupSlot), openButton);
+        return;
+      }
+      if (event.target.closest('[data-clear-lineup-player]')) {
+        clearLineupPlayer(Number(row.dataset.lineupSlot));
+      }
+    });
+    $('closePlayerCatalog').addEventListener('click', () => closePlayerCatalog());
+    $('playerCatalogModal').addEventListener('click', event => {
+      if (event.target.id === 'playerCatalogModal') closePlayerCatalog();
+    });
+    $('playerCatalogSearch').addEventListener('input', renderPlayerCatalogResults);
+    $('playerCatalogPosition').addEventListener('change', () => {
+      $('playerCatalogSlotLabel').textContent = `Posición ${String(state.catalogSlot || '').padStart(2, '0')} · ${LINEUP_POSITION_LABELS[$('playerCatalogPosition').value] || 'todas las posiciones'}`;
+      renderPlayerCatalogResults();
+    });
+    $('playerCatalogClub').addEventListener('change', renderPlayerCatalogResults);
+    $('playerCatalogResults').addEventListener('click', event => {
+      const result = event.target.closest('[data-catalog-player-id]');
+      if (result) chooseCatalogPlayer(result.dataset.catalogPlayerId);
+    });
     $('clearLineupButton').addEventListener('click', () => {
       if (!state.lineupParticipantName) return;
       const current = lineupMetrics(lineupForParticipant(state.lineupParticipantName));
@@ -1794,7 +2018,9 @@
     });
 
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !$('previewModal').hidden) closePreview();
+      trapPlayerCatalogFocus(event);
+      if (event.key === 'Escape' && !$('playerCatalogModal').hidden) closePlayerCatalog();
+      else if (event.key === 'Escape' && !$('previewModal').hidden) closePreview();
       else if (event.key === 'Escape' && !$('adminInstallModal').hidden) closeInstallGuide();
     });
 
@@ -1810,9 +2036,23 @@
       if (!config?.url || !config?.publishableKey) throw new Error('Falta la configuración de Supabase.');
       if (!window.supabase?.createClient) throw new Error('No se pudo cargar la conexión segura.');
 
-      const response = await fetch(`data.json?v=${VERSION}`, { cache: 'no-store' });
+      const catalogPromise = window.CubanLeaguePlayerCatalog
+        ? window.CubanLeaguePlayerCatalog.load(VERSION).catch(() => null)
+        : Promise.resolve(null);
+      const [response, loadedCatalog] = await Promise.all([
+        fetch(`data.json?v=${VERSION}`, { cache: 'no-store' }),
+        catalogPromise
+      ]);
       if (!response.ok) throw new Error('No se pudo cargar la lista de participantes.');
       const league = await response.json();
+      state.catalog = loadedCatalog?.recordCount === 499 ? loadedCatalog : null;
+      if (state.catalog) {
+        $('playerCatalogClub').innerHTML = '<option value="">Todos los clubes</option>' + state.catalog.clubs
+          .slice()
+          .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+          .map(club => `<option value="${escapeHtml(club.id)}">${escapeHtml(club.name)}</option>`)
+          .join('');
+      }
       state.leagueParticipants = league.participants.filter(participant => participant.active !== false);
       state.participantIndex = new Map(league.participants.map(participant => [participant.name, participant]));
       state.championsGroups = Array.isArray(league.champions?.groups) ? league.champions.groups : [];

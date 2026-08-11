@@ -3,8 +3,18 @@
 -- Pulsa Run una sola vez.
 -- Requiere haber ejecutado antes V57, V65 y V114.
 -- Conserva todos los datos y añade un once opcional a cada participante/jornada.
+-- ARCHIVO HISTÓRICO: si V116 ya está instalada, este script se detendrá para
+-- evitar reemplazar la identidad player_id/club_id del Catálogo Maestro.
 
 begin;
+
+do $$
+begin
+  if to_regprocedure('public.get_player_catalog_schema_version()') is not null then
+    raise exception 'V116 ya está instalada. No ejecutes V115 después de V116.';
+  end if;
+end;
+$$;
 
 alter table public.matchday_stats
   add column if not exists lineup jsonb;
