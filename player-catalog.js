@@ -35,11 +35,13 @@
         clubId,
         clubName: String(player?.club_name || club?.name || '').trim(),
         photo: assetUrl(player?.photo),
-        crest: club?.crest || ''
+        crest: club?.crest || '',
+        active: player?.active !== false
       };
       prepared.searchText = fold(`${prepared.displayName} ${prepared.clubName} ${prepared.position}`);
       return prepared;
     }).filter(player => player.id && player.displayName && ['PT', 'DF', 'MC', 'DL'].includes(player.position));
+    const activePlayers = players.filter(player => player.active);
     const playersById = new Map(players.map(player => [player.id, player]));
     const playersByLegacyKey = new Map();
     players.forEach(player => {
@@ -49,8 +51,8 @@
 
     return {
       schemaVersion: Number(raw?.schema_version) || 1,
-      declaredRecordCount: Number(raw?.record_count) || players.length,
-      recordCount: players.length,
+      declaredRecordCount: Number(raw?.record_count) || activePlayers.length,
+      recordCount: activePlayers.length,
       clubs,
       clubsById,
       players,
@@ -74,7 +76,7 @@
         const terms = fold(query).split(' ').filter(Boolean);
         const excluded = new Set(excludeIds);
         const wantedPosition = String(position || '').toUpperCase();
-        return players.filter(player => {
+        return activePlayers.filter(player => {
           if (excluded.has(player.id)) return false;
           if (wantedPosition && player.position !== wantedPosition) return false;
           if (clubId && player.clubId !== clubId) return false;

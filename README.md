@@ -1,4 +1,4 @@
-# Cuban League V120
+# Cuban League V122
 
 Sitio oficial de la Cuban League con:
 
@@ -19,10 +19,12 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 505 jugadores de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 504 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
-  únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3.
+  únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
+  futbolistas que abandonan la competición se archivan fuera del selector para
+  conservar intactas sus alineaciones y estadísticas históricas.
 - Cada participante puede guardar su alineación de 11 jugadores dentro de una
   jornada. Las identidades `player_id` y `club_id` distinguen homónimos, mientras
   nombre, club y posición quedan como snapshot histórico. La web pública muestra
