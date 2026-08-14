@@ -1,6 +1,25 @@
-# Cuban League V123
+# Cuban League V124
 
 Sitio oficial de la Cuban League con:
+
+- Nuevo Centro de respaldos dentro de Cuban Admin. El administrador puede
+  crear una copia manual, consultar las copias automáticas, descargar cualquier
+  versión y previsualizar una restauración antes de escribir `RESTAURAR`. Los
+  borradores locales anteriores quedan archivados para que una recuperación no
+  los borre ni vuelva a aplicarlos sobre los datos restaurados. Una generación
+  compartida en Supabase bloquea también los borradores antiguos que sigan
+  abiertos en otro teléfono.
+- La actualización `SUPABASE-V124-RESPALDOS-COPIAR-Y-PEGAR.txt` conserva las
+  últimas 7 copias diarias y 4 semanales, además de 10 manuales y 5 preventivas.
+  Todas contienen jornadas, alineaciones, borradores, hitos e historial. Cada
+  restauración es atómica y crea primero una copia preventiva para que también
+  pueda revertirse.
+- GitHub Actions incorpora una segunda capa externa: exporta diariamente roles,
+  esquema y datos de Supabase, comprueba huellas SHA-256, cifra el archivo antes
+  de guardarlo y conserva además una copia semanal. Requiere configurar una
+  sola vez `SUPABASE_DB_URL` y `BACKUP_ENCRYPTION_KEY` como secretos privados.
+- La guía `RESPALDOS-V124.md` explica la activación, la prueba inmediata y los
+  dos procedimientos de recuperación sin exponer credenciales en el código.
 
 - Clasificación incorpora «Comparador» dentro de una sola ficha visual continua:
   permite escoger dos participantes y

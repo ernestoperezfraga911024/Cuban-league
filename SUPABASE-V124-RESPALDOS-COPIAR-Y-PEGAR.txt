@@ -1,0 +1,1502 @@
+-- CUBAN LEAGUE · ACTUALIZACIÓN V124 · RESPALDOS Y RESTAURACIÓN
+-- Abre este archivo, selecciona todo, copia y pega en Supabase > SQL Editor.
+-- Pulsa Run una sola vez.
+--
+-- Añade:
+--   · respaldos rápidos automáticos dentro de Supabase;
+--   · 7 copias diarias, 4 semanales, 10 manuales y 5 preventivas;
+--   · copias manuales desde Cuban Admin;
+--   · descarga JSON y previsualización;
+--   · restauración atómica con copia preventiva.
+--
+-- Las copias rápidas incluyen los datos de Liga y Champions, borradores,
+-- alineaciones, hitos e historial de correcciones. No incluyen visitas,
+-- usuarios de Authentication, fotografías ni el catálogo estático.
+-- El workflow de GitHub V124 añade además una copia externa cifrada.
+
+begin;
+
+create extension if not exists pgcrypto with schema extensions;
+create extension if not exists pg_cron;
+
+create table if not exists private.league_backups (
+  id uuid primary key default gen_random_uuid(),
+  backup_kind text not null check (backup_kind in ('daily', 'weekly', 'manual', 'pre_restore')),
+  backup_day date not null default timezone('UTC', now())::date,
+  schema_version integer not null default 124,
+  snapshot jsonb not null,
+  row_counts jsonb not null default '{}'::jsonb,
+  checksum text not null,
+  size_bytes bigint not null check (size_bytes > 0),
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  restored_at timestamptz,
+  restored_by uuid references auth.users(id) on delete set null
+);
+
+create index if not exists league_backups_created_at_idx
+on private.league_backups (created_at desc);
+
+create index if not exists league_backups_kind_created_at_idx
+on private.league_backups (backup_kind, created_at desc);
+
+revoke all on private.league_backups from public;
+revoke all on private.league_backups from anon;
+revoke all on private.league_backups from authenticated;
+
+create table if not exists private.league_backup_state (
+  state_key text primary key default 'league' check (state_key = 'league'),
+  restore_generation uuid not null default gen_random_uuid(),
+  data_revision bigint not null default 0,
+  last_restore_at timestamptz,
+  last_restore_backup_id uuid,
+  updated_by uuid references auth.users(id) on delete set null
+);
+
+alter table private.league_backup_state
+  add column if not exists data_revision bigint not null default 0;
+
+insert into private.league_backup_state as backup_state (state_key)
+values ('league')
+on conflict (state_key) do update set
+  restore_generation = gen_random_uuid(),
+  data_revision = backup_state.data_revision + 1,
+  last_restore_at = now(),
+  last_restore_backup_id = null,
+  updated_by = null;
+
+revoke all on private.league_backup_state from public;
+revoke all on private.league_backup_state from anon;
+revoke all on private.league_backup_state from authenticated;
+
+-- Token persistente por jornada. A diferencia de updated_at de los borradores,
+-- este token no desaparece al publicar; por eso también bloquea dos
+-- publicaciones o dos deshacer simultáneos desde teléfonos diferentes.
+create table if not exists private.matchday_write_state (
+  season text not null,
+  matchday integer not null check (matchday between 1 and 60),
+  write_revision uuid not null default gen_random_uuid(),
+  updated_at timestamptz not null default now(),
+  primary key (season, matchday)
+);
+
+revoke all on private.matchday_write_state from public;
+revoke all on private.matchday_write_state from anon;
+revoke all on private.matchday_write_state from authenticated;
+
+-- La fecha y los premios también necesitan una versión de borrador. Esto es
+-- especialmente importante durante una corrección, porque la fecha publicada
+-- no debe cambiar hasta confirmar la nueva versión completa de la jornada.
+create table if not exists private.matchday_milestone_drafts (
+  season text not null,
+  matchday integer not null check (matchday between 1 and 60),
+  matchday_date date,
+  is_month_end boolean not null default false,
+  is_year_end boolean not null default false,
+  saved_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (season, matchday),
+  check (not is_year_end or is_month_end)
+);
+
+revoke all on private.matchday_milestone_drafts from public;
+revoke all on private.matchday_milestone_drafts from anon;
+revoke all on private.matchday_milestone_drafts from authenticated;
+
+-- V124 guarda también la fecha/premios junto a cada revisión para que
+-- "Deshacer" revierta la publicación completa, no sólo sus estadísticas.
+alter table public.matchday_change_log
+  add column if not exists before_milestone jsonb,
+  add column if not exists after_milestone jsonb,
+  add column if not exists milestone_tracked boolean not null default false;
+
+-- Limpia firmas de borradores V124 anteriores si llegaron a probarse. Las
+-- funciones base de V59/V116 se conservan, pero nunca quedan accesibles al
+-- navegador después de los REVOKE de esta versión.
+drop function if exists public.save_matchday_draft(text, integer, jsonb, uuid);
+drop function if exists public.save_matchday_draft(text, integer, jsonb, uuid, timestamptz);
+drop function if exists public.save_matchday_milestone(text, integer, date, boolean, boolean, uuid);
+drop function if exists public.save_matchday_milestone_draft(text, integer, date, boolean, boolean, uuid);
+drop function if exists public.publish_matchday_revision(text, integer, jsonb, uuid);
+drop function if exists public.publish_matchday_revision_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid);
+drop function if exists public.publish_matchday_revision_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, timestamptz);
+drop function if exists public.undo_last_matchday_publication(text, integer, uuid);
+drop function if exists public.undo_last_matchday_publication(text, integer, uuid, timestamptz);
+drop function if exists public.undo_last_matchday_publication_v124(text, integer, uuid, uuid);
+drop function if exists public.restore_league_backup(uuid, text, uuid);
+drop function if exists private.assert_matchday_draft_revision(text, integer, timestamptz);
+
+-- Todos los cambios de jornadas hechos por V124 pasan por este candado. Así,
+-- una restauración y un autoguardado de otro teléfono nunca pueden cruzarse.
+create or replace function private.assert_league_restore_generation(
+  p_restore_generation uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  current_generation uuid;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  perform set_config('lock_timeout', '10s', true);
+  perform pg_advisory_xact_lock(hashtextextended('cuban-league:backup:v124', 0));
+
+  select restore_generation
+    into current_generation
+  from private.league_backup_state
+  where state_key = 'league';
+
+  if current_generation is null
+     or p_restore_generation is distinct from current_generation then
+    raise exception 'Restore generation changed; reload the matchday';
+  end if;
+end;
+$$;
+
+create or replace function private.assert_matchday_write_revision(
+  p_season text,
+  p_matchday integer,
+  p_expected_write_revision uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  current_write_revision uuid;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(btrim(p_season)), p_matchday);
+
+  select write_revision
+    into current_write_revision
+  from private.matchday_write_state
+  where season = btrim(p_season)
+    and matchday = p_matchday;
+
+  if current_write_revision is distinct from p_expected_write_revision then
+    raise exception 'Matchday revision changed; reload the matchday';
+  end if;
+end;
+$$;
+
+create or replace function private.rotate_matchday_write_revision(
+  p_season text,
+  p_matchday integer
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  new_write_revision uuid;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  insert into private.matchday_write_state (
+    season,
+    matchday,
+    write_revision,
+    updated_at
+  )
+  values (
+    btrim(p_season),
+    p_matchday,
+    gen_random_uuid(),
+    now()
+  )
+  on conflict (season, matchday)
+  do update set
+    write_revision = excluded.write_revision,
+    updated_at = excluded.updated_at
+  returning write_revision into new_write_revision;
+
+  update private.league_backup_state
+  set data_revision = data_revision + 1
+  where state_key = 'league';
+
+  return new_write_revision;
+end;
+$$;
+
+-- Guardado V124 completamente atómico: estadísticas, fecha y premios del
+-- borrador comparten el mismo candado y el mismo token de revisión.
+create or replace function public.save_matchday_draft_v124(
+  p_season text,
+  p_matchday integer,
+  p_rows jsonb,
+  p_include_milestone boolean,
+  p_matchday_date date,
+  p_is_month_end boolean,
+  p_is_year_end boolean,
+  p_restore_generation uuid,
+  p_expected_write_revision uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  saved_rows jsonb;
+  new_write_revision uuid;
+begin
+  perform private.assert_league_restore_generation(p_restore_generation);
+  perform private.assert_matchday_write_revision(
+    p_season,
+    p_matchday,
+    p_expected_write_revision
+  );
+
+  select coalesce(
+    jsonb_agg(to_jsonb(saved_row) order by saved_row.participant_name),
+    '[]'::jsonb
+  )
+    into saved_rows
+  from public.save_matchday_draft(p_season, p_matchday, p_rows) as saved_row;
+
+  if coalesce(p_include_milestone, false) then
+    if coalesce(p_is_year_end, false)
+       and (p_matchday_date is null or extract(month from p_matchday_date) <> 12) then
+      raise exception 'The winter champion must be awarded on the final matchday of December';
+    end if;
+
+    insert into private.matchday_milestone_drafts (
+      season, matchday, matchday_date, is_month_end, is_year_end, saved_by
+    )
+    values (
+      btrim(p_season),
+      p_matchday,
+      p_matchday_date,
+      coalesce(p_is_month_end, false) or coalesce(p_is_year_end, false),
+      coalesce(p_is_year_end, false),
+      (select auth.uid())
+    )
+    on conflict (season, matchday)
+    do update set
+      matchday_date = excluded.matchday_date,
+      is_month_end = excluded.is_month_end,
+      is_year_end = excluded.is_year_end,
+      saved_by = excluded.saved_by,
+      updated_at = now();
+  end if;
+
+  new_write_revision := private.rotate_matchday_write_revision(p_season, p_matchday);
+  return jsonb_build_object(
+    'rows', saved_rows,
+    'writeRevision', new_write_revision
+  );
+end;
+$$;
+
+create or replace function public.publish_matchday_revision_v124(
+  p_season text,
+  p_matchday integer,
+  p_rows jsonb,
+  p_include_milestone boolean,
+  p_matchday_date date,
+  p_is_month_end boolean,
+  p_is_year_end boolean,
+  p_restore_generation uuid,
+  p_expected_write_revision uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  saved_before_milestone jsonb;
+  saved_after_milestone jsonb;
+  existing_change_ids uuid[];
+  new_change_id uuid;
+  published_rows jsonb;
+  new_write_revision uuid;
+begin
+  perform private.assert_league_restore_generation(p_restore_generation);
+  perform private.assert_matchday_write_revision(
+    p_season,
+    p_matchday,
+    p_expected_write_revision
+  );
+
+  if coalesce(p_include_milestone, false) then
+    if p_matchday_date is null then
+      raise exception 'Matchday date is required';
+    end if;
+    select jsonb_build_object(
+      'matchdayDate', milestone.matchday_date,
+      'isMonthEnd', milestone.is_month_end,
+      'isYearEnd', milestone.is_year_end
+    )
+      into saved_before_milestone
+    from public.matchday_milestones as milestone
+    where milestone.season = btrim(p_season)
+      and milestone.matchday = p_matchday;
+
+    perform public.save_matchday_milestone(
+      p_season,
+      p_matchday,
+      p_matchday_date,
+      p_is_month_end,
+      p_is_year_end
+    );
+  end if;
+
+  select coalesce(array_agg(id), array[]::uuid[])
+    into existing_change_ids
+  from public.matchday_change_log
+  where season = p_season
+    and matchday = p_matchday;
+
+  perform public.publish_matchday_revision(p_season, p_matchday, p_rows);
+
+  select id
+    into new_change_id
+  from public.matchday_change_log
+  where season = p_season
+    and matchday = p_matchday
+    and not (id = any(existing_change_ids))
+  order by created_at desc
+  limit 1;
+
+  if new_change_id is null then
+    raise exception 'Publication history was not created';
+  end if;
+
+  if coalesce(p_include_milestone, false) then
+    select jsonb_build_object(
+      'matchdayDate', milestone.matchday_date,
+      'isMonthEnd', milestone.is_month_end,
+      'isYearEnd', milestone.is_year_end
+    )
+      into saved_after_milestone
+    from public.matchday_milestones as milestone
+    where milestone.season = btrim(p_season)
+      and milestone.matchday = p_matchday;
+  end if;
+
+  update public.matchday_change_log
+  set before_milestone = saved_before_milestone,
+      after_milestone = saved_after_milestone,
+      milestone_tracked = coalesce(p_include_milestone, false)
+  where id = new_change_id;
+
+  delete from private.matchday_milestone_drafts
+  where season = btrim(p_season)
+    and matchday = p_matchday;
+
+  select coalesce(
+    jsonb_agg(to_jsonb(stats) order by stats.participant_name),
+    '[]'::jsonb
+  )
+    into published_rows
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday;
+
+  new_write_revision := private.rotate_matchday_write_revision(p_season, p_matchday);
+  return jsonb_build_object(
+    'rows', published_rows,
+    'writeRevision', new_write_revision
+  );
+end;
+$$;
+
+create or replace function public.undo_last_matchday_publication_v124(
+  p_season text,
+  p_matchday integer,
+  p_restore_generation uuid,
+  p_expected_write_revision uuid,
+  p_expected_change_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  selected_change_id uuid;
+  saved_before_milestone jsonb;
+  saved_milestone_tracked boolean;
+  restored_rows jsonb;
+  new_write_revision uuid;
+begin
+  perform private.assert_league_restore_generation(p_restore_generation);
+  perform private.assert_matchday_write_revision(
+    p_season,
+    p_matchday,
+    p_expected_write_revision
+  );
+
+  select selected.id, selected.before_milestone, selected.milestone_tracked
+    into selected_change_id, saved_before_milestone, saved_milestone_tracked
+  from public.matchday_change_log as selected
+  where selected.season = p_season
+    and selected.matchday = p_matchday
+    and selected.id = p_expected_change_id
+    and selected.id = (
+      select latest.id
+      from public.matchday_change_log as latest
+      where latest.season = p_season
+        and latest.matchday = p_matchday
+        and latest.undone = false
+      order by latest.created_at desc, latest.id desc
+      limit 1
+    )
+    and selected.undone = false
+  for update;
+
+  if selected_change_id is null then
+    raise exception 'Publication revision changed; reload the matchday';
+  end if;
+
+  delete from public.matchday_stats
+  where season = p_season
+    and matchday = p_matchday;
+
+  if exists (
+    select 1
+    from public.matchday_change_log
+    where id = selected_change_id
+      and jsonb_array_length(before_snapshot) > 0
+  ) then
+    insert into public.matchday_stats (
+      season,
+      matchday,
+      participant_name,
+      points,
+      goals,
+      clean_sheets,
+      red_cards,
+      has_postponed_matches,
+      lineup,
+      published
+    )
+    select
+      p_season,
+      p_matchday,
+      row_data.participant_name,
+      row_data.points,
+      row_data.goals,
+      row_data.clean_sheets,
+      coalesce(row_data.red_cards, 0),
+      coalesce(row_data.has_postponed_matches, false),
+      row_data.lineup,
+      coalesce(row_data.published, true)
+    from public.matchday_change_log as history,
+      jsonb_to_recordset(history.before_snapshot) as row_data(
+        participant_name text,
+        points integer,
+        goals integer,
+        clean_sheets integer,
+        red_cards integer,
+        has_postponed_matches boolean,
+        lineup jsonb,
+        published boolean
+      )
+    where history.id = selected_change_id;
+  end if;
+
+  update public.matchday_change_log
+  set undone = true,
+      undone_at = now(),
+      undone_by = (select auth.uid())
+  where id = selected_change_id;
+
+  delete from public.matchday_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  if saved_milestone_tracked then
+    if saved_before_milestone is null then
+      delete from public.matchday_milestones
+      where season = btrim(p_season)
+        and matchday = p_matchday;
+    else
+      insert into public.matchday_milestones (
+        season, matchday, matchday_date, is_month_end, is_year_end, saved_by
+      )
+      values (
+        btrim(p_season),
+        p_matchday,
+        (saved_before_milestone ->> 'matchdayDate')::date,
+        coalesce((saved_before_milestone ->> 'isMonthEnd')::boolean, false),
+        coalesce((saved_before_milestone ->> 'isYearEnd')::boolean, false),
+        (select auth.uid())
+      )
+      on conflict (season, matchday)
+      do update set
+        matchday_date = excluded.matchday_date,
+        is_month_end = excluded.is_month_end,
+        is_year_end = excluded.is_year_end,
+        saved_by = excluded.saved_by,
+        updated_at = now();
+    end if;
+  end if;
+
+  delete from private.matchday_milestone_drafts
+  where season = btrim(p_season)
+    and matchday = p_matchday;
+
+  select coalesce(
+    jsonb_agg(to_jsonb(stats) order by stats.participant_name),
+    '[]'::jsonb
+  )
+    into restored_rows
+  from public.matchday_stats as stats
+  where stats.season = p_season
+    and stats.matchday = p_matchday;
+
+  new_write_revision := private.rotate_matchday_write_revision(p_season, p_matchday);
+  return jsonb_build_object(
+    'rows', restored_rows,
+    'writeRevision', new_write_revision
+  );
+end;
+$$;
+
+revoke all on function private.assert_league_restore_generation(uuid) from public;
+revoke all on function private.assert_league_restore_generation(uuid) from anon;
+revoke all on function private.assert_league_restore_generation(uuid) from authenticated;
+revoke all on function private.assert_matchday_write_revision(text, integer, uuid) from public;
+revoke all on function private.assert_matchday_write_revision(text, integer, uuid) from anon;
+revoke all on function private.assert_matchday_write_revision(text, integer, uuid) from authenticated;
+revoke all on function private.rotate_matchday_write_revision(text, integer) from public;
+revoke all on function private.rotate_matchday_write_revision(text, integer) from anon;
+revoke all on function private.rotate_matchday_write_revision(text, integer) from authenticated;
+
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from public;
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from anon;
+revoke all on function public.save_matchday_draft(text, integer, jsonb) from authenticated;
+revoke all on function public.save_matchday_draft_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) from public;
+revoke all on function public.save_matchday_draft_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) from anon;
+revoke all on function public.save_matchday_draft_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) from authenticated;
+grant execute on function public.save_matchday_draft_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) to authenticated;
+
+revoke all on function public.save_matchday_milestone(text, integer, date, boolean, boolean) from public;
+revoke all on function public.save_matchday_milestone(text, integer, date, boolean, boolean) from anon;
+revoke all on function public.save_matchday_milestone(text, integer, date, boolean, boolean) from authenticated;
+
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from public;
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from anon;
+revoke all on function public.publish_matchday_revision(text, integer, jsonb) from authenticated;
+revoke all on function public.publish_matchday_revision_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) from public;
+revoke all on function public.publish_matchday_revision_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) from anon;
+revoke all on function public.publish_matchday_revision_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) from authenticated;
+grant execute on function public.publish_matchday_revision_v124(text, integer, jsonb, boolean, date, boolean, boolean, uuid, uuid) to authenticated;
+
+revoke all on function public.undo_last_matchday_publication(text, integer) from public;
+revoke all on function public.undo_last_matchday_publication(text, integer) from anon;
+revoke all on function public.undo_last_matchday_publication(text, integer) from authenticated;
+revoke all on function public.undo_last_matchday_publication_v124(text, integer, uuid, uuid, uuid) from public;
+revoke all on function public.undo_last_matchday_publication_v124(text, integer, uuid, uuid, uuid) from anon;
+revoke all on function public.undo_last_matchday_publication_v124(text, integer, uuid, uuid, uuid) from authenticated;
+grant execute on function public.undo_last_matchday_publication_v124(text, integer, uuid, uuid, uuid) to authenticated;
+
+-- Las lecturas directas siguen disponibles, pero toda escritura administrativa
+-- debe pasar por las RPC protegidas por generación.
+revoke insert, update, delete, truncate
+on public.matchday_stats,
+   public.matchday_drafts,
+   public.matchday_change_log,
+   public.matchday_milestones
+from anon, authenticated;
+
+create or replace function private.league_backup_row_counts()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'matchday_stats', (select count(*) from public.matchday_stats),
+    'matchday_drafts', (select count(*) from public.matchday_drafts),
+    'matchday_milestone_drafts', (select count(*) from private.matchday_milestone_drafts),
+    'matchday_change_log', (select count(*) from public.matchday_change_log),
+    'matchday_milestones', (select count(*) from public.matchday_milestones)
+  );
+$$;
+
+create or replace function private.build_league_backup_snapshot()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'format', 'cuban-league-backup',
+    'schema_version', 124,
+    'created_at', now(),
+    'tables', jsonb_build_object(
+      'matchday_stats', (
+        select coalesce(
+          jsonb_agg(to_jsonb(stats) order by stats.season, stats.matchday, stats.participant_name),
+          '[]'::jsonb
+        )
+        from public.matchday_stats as stats
+      ),
+      'matchday_drafts', (
+        select coalesce(
+          jsonb_agg(to_jsonb(drafts) order by drafts.season, drafts.matchday, drafts.participant_name),
+          '[]'::jsonb
+        )
+        from public.matchday_drafts as drafts
+      ),
+      'matchday_milestone_drafts', (
+        select coalesce(
+          jsonb_agg(to_jsonb(milestone_drafts) order by milestone_drafts.season, milestone_drafts.matchday),
+          '[]'::jsonb
+        )
+        from private.matchday_milestone_drafts as milestone_drafts
+      ),
+      'matchday_change_log', (
+        select coalesce(
+          jsonb_agg(to_jsonb(history) order by history.created_at, history.id),
+          '[]'::jsonb
+        )
+        from public.matchday_change_log as history
+      ),
+      'matchday_milestones', (
+        select coalesce(
+          jsonb_agg(to_jsonb(milestones) order by milestones.season, milestones.matchday),
+          '[]'::jsonb
+        )
+        from public.matchday_milestones as milestones
+      )
+    )
+  );
+$$;
+
+create or replace function private.league_backup_checksum(p_snapshot jsonb)
+returns text
+language sql
+immutable
+security definer
+set search_path = ''
+as $$
+  select encode(
+    extensions.digest(convert_to(coalesce(p_snapshot, '{}'::jsonb)::text, 'UTF8'), 'sha256'),
+    'hex'
+  );
+$$;
+
+create or replace function private.league_backup_snapshot_counts(p_snapshot jsonb)
+returns jsonb
+language sql
+immutable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'matchday_stats', jsonb_array_length(p_snapshot #> '{tables,matchday_stats}'),
+    'matchday_drafts', jsonb_array_length(p_snapshot #> '{tables,matchday_drafts}'),
+    'matchday_milestone_drafts', jsonb_array_length(p_snapshot #> '{tables,matchday_milestone_drafts}'),
+    'matchday_change_log', jsonb_array_length(p_snapshot #> '{tables,matchday_change_log}'),
+    'matchday_milestones', jsonb_array_length(p_snapshot #> '{tables,matchday_milestones}')
+  );
+$$;
+
+create or replace function private.prune_league_backups(
+  p_preserve_id uuid default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  preserved_kind text;
+begin
+  select backup_kind
+    into preserved_kind
+  from private.league_backups
+  where id = p_preserve_id;
+
+  delete from private.league_backups
+  where id in (
+    select id
+    from private.league_backups
+    where backup_kind = 'daily'
+      and id is distinct from p_preserve_id
+    order by created_at desc
+    offset case when preserved_kind = 'daily' then 6 else 7 end
+  );
+
+  delete from private.league_backups
+  where id in (
+    select id
+    from private.league_backups
+    where backup_kind = 'weekly'
+      and id is distinct from p_preserve_id
+    order by created_at desc
+    offset case when preserved_kind = 'weekly' then 3 else 4 end
+  );
+
+  delete from private.league_backups
+  where id in (
+    select id
+    from private.league_backups
+    where backup_kind = 'pre_restore'
+      and id is distinct from p_preserve_id
+    order by created_at desc
+    offset case when preserved_kind = 'pre_restore' then 4 else 5 end
+  );
+
+  delete from private.league_backups
+  where id in (
+    select id
+    from private.league_backups
+    where backup_kind = 'manual'
+      and id is distinct from p_preserve_id
+    order by created_at desc
+    offset case when preserved_kind = 'manual' then 9 else 10 end
+  );
+end;
+$$;
+
+create or replace function private.capture_league_backup(
+  p_kind text,
+  p_created_by uuid default null,
+  p_preserve_id uuid default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  normalized_kind text := lower(btrim(coalesce(p_kind, '')));
+  today_utc date := timezone('UTC', now())::date;
+  existing_id uuid;
+  new_id uuid;
+  payload jsonb;
+  counts jsonb;
+  payload_checksum text;
+begin
+  if normalized_kind not in ('daily', 'weekly', 'manual', 'pre_restore') then
+    raise exception 'Invalid backup kind';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended('cuban-league:backup:v124', 0));
+
+  if normalized_kind in ('daily', 'weekly') then
+    select id
+      into existing_id
+    from private.league_backups
+    where backup_kind = normalized_kind
+      and backup_day = today_utc
+    order by created_at desc
+    limit 1;
+
+    if existing_id is not null then
+      return existing_id;
+    end if;
+  end if;
+
+  -- El JSON completo se construye en una sola sentencia, por lo que todas las
+  -- tablas comparten el mismo snapshot MVCC. Los conteos salen del propio JSON
+  -- y nunca pueden describir un estado diferente.
+  payload := private.build_league_backup_snapshot();
+  counts := private.league_backup_snapshot_counts(payload);
+  payload_checksum := private.league_backup_checksum(payload);
+
+  insert into private.league_backups (
+    backup_kind,
+    backup_day,
+    schema_version,
+    snapshot,
+    row_counts,
+    checksum,
+    size_bytes,
+    created_by
+  )
+  values (
+    normalized_kind,
+    today_utc,
+    124,
+    payload,
+    counts,
+    payload_checksum,
+    octet_length(payload::text),
+    p_created_by
+  )
+  returning id into new_id;
+
+  perform private.prune_league_backups(p_preserve_id);
+  return new_id;
+end;
+$$;
+
+create or replace function private.run_scheduled_league_backup(p_kind text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform private.capture_league_backup(p_kind, null);
+end;
+$$;
+
+revoke all on function private.league_backup_row_counts() from public;
+revoke all on function private.league_backup_row_counts() from anon;
+revoke all on function private.league_backup_row_counts() from authenticated;
+revoke all on function private.build_league_backup_snapshot() from public;
+revoke all on function private.build_league_backup_snapshot() from anon;
+revoke all on function private.build_league_backup_snapshot() from authenticated;
+revoke all on function private.league_backup_checksum(jsonb) from public;
+revoke all on function private.league_backup_checksum(jsonb) from anon;
+revoke all on function private.league_backup_checksum(jsonb) from authenticated;
+revoke all on function private.league_backup_snapshot_counts(jsonb) from public;
+revoke all on function private.league_backup_snapshot_counts(jsonb) from anon;
+revoke all on function private.league_backup_snapshot_counts(jsonb) from authenticated;
+revoke all on function private.prune_league_backups(uuid) from public;
+revoke all on function private.prune_league_backups(uuid) from anon;
+revoke all on function private.prune_league_backups(uuid) from authenticated;
+revoke all on function private.capture_league_backup(text, uuid, uuid) from public;
+revoke all on function private.capture_league_backup(text, uuid, uuid) from anon;
+revoke all on function private.capture_league_backup(text, uuid, uuid) from authenticated;
+revoke all on function private.run_scheduled_league_backup(text) from public;
+revoke all on function private.run_scheduled_league_backup(text) from anon;
+revoke all on function private.run_scheduled_league_backup(text) from authenticated;
+
+create or replace function public.get_league_backup_schema_version()
+returns integer
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+  return 124;
+end;
+$$;
+
+create or replace function public.get_league_restore_state()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  result jsonb;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select jsonb_build_object(
+    'restoreGeneration', restore_generation,
+    'dataRevision', data_revision,
+    'lastRestoreAt', last_restore_at,
+    'lastRestoreBackupId', last_restore_backup_id
+  )
+    into result
+  from private.league_backup_state
+  where state_key = 'league';
+
+  return coalesce(result, '{}'::jsonb);
+end;
+$$;
+
+create or replace function public.get_matchday_write_state(
+  p_season text,
+  p_matchday integer
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  current_revision uuid;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select write_revision
+    into current_revision
+  from private.matchday_write_state
+  where season = btrim(p_season)
+    and matchday = p_matchday;
+
+  return jsonb_build_object('writeRevision', current_revision);
+end;
+$$;
+
+create or replace function public.get_matchday_milestone_draft(
+  p_season text,
+  p_matchday integer
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  result jsonb;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select jsonb_build_object(
+    'exists', true,
+    'matchdayDate', matchday_date,
+    'isMonthEnd', is_month_end,
+    'isYearEnd', is_year_end,
+    'updatedAt', updated_at
+  )
+    into result
+  from private.matchday_milestone_drafts
+  where season = p_season
+    and matchday = p_matchday;
+
+  return coalesce(result, jsonb_build_object('exists', false));
+end;
+$$;
+
+create or replace function public.list_league_backups()
+returns table (
+  id uuid,
+  backup_kind text,
+  schema_version integer,
+  row_counts jsonb,
+  checksum text,
+  size_bytes bigint,
+  created_at timestamptz,
+  restored_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  return query
+  select
+    backups.id,
+    backups.backup_kind,
+    backups.schema_version,
+    backups.row_counts,
+    backups.checksum,
+    backups.size_bytes,
+    backups.created_at,
+    backups.restored_at
+  from private.league_backups as backups
+  order by backups.created_at desc
+  limit 30;
+end;
+$$;
+
+create or replace function public.create_league_backup()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  backup_id uuid;
+  result jsonb;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  backup_id := private.capture_league_backup('manual', (select auth.uid()));
+
+  select jsonb_build_object(
+    'id', backups.id,
+    'backupKind', backups.backup_kind,
+    'schemaVersion', backups.schema_version,
+    'rowCounts', backups.row_counts,
+    'checksum', backups.checksum,
+    'sizeBytes', backups.size_bytes,
+    'createdAt', backups.created_at
+  )
+  into result
+  from private.league_backups as backups
+  where backups.id = backup_id;
+
+  return result;
+end;
+$$;
+
+create or replace function public.download_league_backup(p_backup_id uuid)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  selected_backup private.league_backups%rowtype;
+  result jsonb;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select *
+    into selected_backup
+  from private.league_backups
+  where id = p_backup_id;
+
+  if selected_backup.id is null then
+    raise exception 'Backup not found';
+  end if;
+
+  if selected_backup.schema_version <> 124
+     or (selected_backup.snapshot ->> 'format') is distinct from 'cuban-league-backup'
+     or private.league_backup_checksum(selected_backup.snapshot) is distinct from selected_backup.checksum
+     or private.league_backup_snapshot_counts(selected_backup.snapshot) is distinct from selected_backup.row_counts then
+    raise exception 'Backup integrity check failed';
+  end if;
+
+  result := jsonb_build_object(
+    'format', 'cuban-league-backup-export',
+    'export_version', 124,
+    'id', selected_backup.id,
+    'backup_kind', selected_backup.backup_kind,
+    'schema_version', selected_backup.schema_version,
+    'row_counts', selected_backup.row_counts,
+    'checksum', selected_backup.checksum,
+    'created_at', selected_backup.created_at,
+    'snapshot', selected_backup.snapshot
+  );
+
+  return result;
+end;
+$$;
+
+create or replace function public.preview_league_restore(p_backup_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  selected_backup private.league_backups%rowtype;
+  current_counts jsonb;
+  current_restore_generation uuid;
+  current_data_revision bigint;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  perform set_config('lock_timeout', '10s', true);
+  perform pg_advisory_xact_lock(hashtextextended('cuban-league:backup:v124', 0));
+
+  select restore_generation, data_revision
+    into current_restore_generation, current_data_revision
+  from private.league_backup_state
+  where state_key = 'league';
+
+  select *
+    into selected_backup
+  from private.league_backups
+  where id = p_backup_id;
+
+  if selected_backup.id is null then
+    raise exception 'Backup not found';
+  end if;
+
+  if selected_backup.schema_version <> 124
+     or (selected_backup.snapshot ->> 'format') is distinct from 'cuban-league-backup'
+     or private.league_backup_checksum(selected_backup.snapshot) is distinct from selected_backup.checksum
+     or private.league_backup_snapshot_counts(selected_backup.snapshot) is distinct from selected_backup.row_counts then
+    raise exception 'Backup integrity check failed';
+  end if;
+
+  current_counts := private.league_backup_row_counts();
+
+  return jsonb_build_object(
+    'id', selected_backup.id,
+    'backupKind', selected_backup.backup_kind,
+    'createdAt', selected_backup.created_at,
+    'schemaVersion', selected_backup.schema_version,
+    'restoreGeneration', current_restore_generation,
+    'dataRevision', current_data_revision,
+    'checksumValid', true,
+    'currentCounts', current_counts,
+    'backupCounts', selected_backup.row_counts
+  );
+end;
+$$;
+
+create or replace function public.restore_league_backup(
+  p_backup_id uuid,
+  p_confirmation text,
+  p_expected_restore_generation uuid,
+  p_expected_data_revision bigint
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  selected_backup private.league_backups%rowtype;
+  tables jsonb;
+  safety_backup_id uuid;
+  restored_counts jsonb;
+  new_restore_generation uuid;
+  new_data_revision bigint;
+  completed_at timestamptz;
+begin
+  if not private.is_league_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  if btrim(coalesce(p_confirmation, '')) <> 'RESTAURAR' then
+    raise exception 'Type RESTAURAR to confirm';
+  end if;
+
+  -- Todas las operaciones adquieren primero el candado de respaldos y luego
+  -- el de restauración. Este orden evita un ciclo con el cron automático.
+  perform set_config('lock_timeout', '10s', true);
+  perform pg_advisory_xact_lock(hashtextextended('cuban-league:backup:v124', 0));
+  perform pg_advisory_xact_lock(hashtextextended('cuban-league:restore:v124', 0));
+
+  if p_expected_restore_generation is distinct from (
+    select restore_generation
+    from private.league_backup_state
+    where state_key = 'league'
+  ) then
+    raise exception 'Restore generation changed; reopen the restore preview';
+  end if;
+
+  if p_expected_data_revision is distinct from (
+    select data_revision
+    from private.league_backup_state
+    where state_key = 'league'
+  ) then
+    raise exception 'League data changed; reopen the restore preview';
+  end if;
+
+  lock table public.matchday_stats in access exclusive mode;
+  lock table public.matchday_drafts in access exclusive mode;
+  lock table private.matchday_milestone_drafts in access exclusive mode;
+  lock table public.matchday_change_log in access exclusive mode;
+  lock table public.matchday_milestones in access exclusive mode;
+
+  select *
+    into selected_backup
+  from private.league_backups
+  where id = p_backup_id
+  for update;
+
+  if selected_backup.id is null then
+    raise exception 'Backup not found';
+  end if;
+
+  if selected_backup.schema_version <> 124
+     or (selected_backup.snapshot ->> 'format') is distinct from 'cuban-league-backup'
+     or jsonb_typeof(selected_backup.snapshot -> 'tables') is distinct from 'object'
+     or private.league_backup_checksum(selected_backup.snapshot) is distinct from selected_backup.checksum
+     or private.league_backup_snapshot_counts(selected_backup.snapshot) is distinct from selected_backup.row_counts then
+    raise exception 'Backup integrity check failed';
+  end if;
+
+  tables := selected_backup.snapshot -> 'tables';
+
+  if jsonb_typeof(tables -> 'matchday_stats') is distinct from 'array'
+     or jsonb_typeof(tables -> 'matchday_drafts') is distinct from 'array'
+     or jsonb_typeof(tables -> 'matchday_milestone_drafts') is distinct from 'array'
+     or jsonb_typeof(tables -> 'matchday_change_log') is distinct from 'array'
+     or jsonb_typeof(tables -> 'matchday_milestones') is distinct from 'array' then
+    raise exception 'Backup table format is invalid';
+  end if;
+
+  safety_backup_id := private.capture_league_backup(
+    'pre_restore',
+    (select auth.uid()),
+    selected_backup.id
+  );
+
+  delete from public.matchday_milestones;
+  delete from public.matchday_change_log;
+  delete from private.matchday_milestone_drafts;
+  delete from public.matchday_drafts;
+  delete from public.matchday_stats;
+
+  with restored as (
+    select *
+    from jsonb_populate_recordset(null::public.matchday_stats, tables -> 'matchday_stats')
+  )
+  insert into public.matchday_stats (
+    id, season, matchday, participant_name, points, goals, clean_sheets,
+    published, created_at, updated_at, red_cards, has_postponed_matches, lineup
+  )
+  select
+    id, season, matchday, participant_name, points, goals, clean_sheets,
+    published, created_at, updated_at, red_cards, has_postponed_matches, lineup
+  from restored;
+
+  with restored as (
+    select *
+    from jsonb_populate_recordset(
+      null::private.matchday_milestone_drafts,
+      tables -> 'matchday_milestone_drafts'
+    )
+  )
+  insert into private.matchday_milestone_drafts (
+    season, matchday, matchday_date, is_month_end, is_year_end,
+    saved_by, created_at, updated_at
+  )
+  select
+    restored.season,
+    restored.matchday,
+    restored.matchday_date,
+    restored.is_month_end,
+    restored.is_year_end,
+    case
+      when restored.saved_by is null
+        or exists (select 1 from auth.users where auth.users.id = restored.saved_by)
+      then restored.saved_by
+      else null
+    end,
+    restored.created_at,
+    restored.updated_at
+  from restored;
+
+  with restored as (
+    select *
+    from jsonb_populate_recordset(null::public.matchday_drafts, tables -> 'matchday_drafts')
+  )
+  insert into public.matchday_drafts (
+    id, season, matchday, participant_name, points, goals, clean_sheets,
+    saved_by, created_at, updated_at, red_cards, has_postponed_matches, lineup
+  )
+  select
+    restored.id,
+    restored.season,
+    restored.matchday,
+    restored.participant_name,
+    restored.points,
+    restored.goals,
+    restored.clean_sheets,
+    case
+      when restored.saved_by is null
+        or exists (select 1 from auth.users where auth.users.id = restored.saved_by)
+      then restored.saved_by
+      else null
+    end,
+    restored.created_at,
+    restored.updated_at,
+    restored.red_cards,
+    restored.has_postponed_matches,
+    restored.lineup
+  from restored;
+
+  with restored as (
+    select *
+    from jsonb_populate_recordset(null::public.matchday_change_log, tables -> 'matchday_change_log')
+  )
+  insert into public.matchday_change_log (
+    id, season, matchday, action, before_snapshot, after_snapshot,
+    changed_by, changed_by_email, created_at, undone, undone_at, undone_by,
+    before_milestone, after_milestone, milestone_tracked
+  )
+  select
+    restored.id,
+    restored.season,
+    restored.matchday,
+    restored.action,
+    restored.before_snapshot,
+    restored.after_snapshot,
+    case
+      when restored.changed_by is null
+        or exists (select 1 from auth.users where auth.users.id = restored.changed_by)
+      then restored.changed_by
+      else null
+    end,
+    restored.changed_by_email,
+    restored.created_at,
+    restored.undone,
+    restored.undone_at,
+    case
+      when restored.undone_by is null
+        or exists (select 1 from auth.users where auth.users.id = restored.undone_by)
+      then restored.undone_by
+      else null
+    end,
+    restored.before_milestone,
+    restored.after_milestone,
+    coalesce(restored.milestone_tracked, false)
+  from restored;
+
+  with restored as (
+    select *
+    from jsonb_populate_recordset(null::public.matchday_milestones, tables -> 'matchday_milestones')
+  )
+  insert into public.matchday_milestones (
+    id, season, matchday, matchday_date, is_month_end, is_year_end,
+    saved_by, created_at, updated_at
+  )
+  select
+    restored.id,
+    restored.season,
+    restored.matchday,
+    restored.matchday_date,
+    restored.is_month_end,
+    restored.is_year_end,
+    case
+      when restored.saved_by is null
+        or exists (select 1 from auth.users where auth.users.id = restored.saved_by)
+      then restored.saved_by
+      else null
+    end,
+    restored.created_at,
+    restored.updated_at
+  from restored;
+
+  restored_counts := private.league_backup_row_counts();
+
+  if restored_counts <> selected_backup.row_counts then
+    raise exception 'Restored row counts do not match the backup';
+  end if;
+
+  update private.league_backups
+  set restored_at = now(),
+      restored_by = (select auth.uid())
+  where id = selected_backup.id;
+
+  -- El contenido de todas las jornadas acaba de cambiar de época. Rotar sus
+  -- tokens hace explícito que ninguna revisión operativa anterior sigue viva.
+  update private.matchday_write_state
+  set write_revision = gen_random_uuid(),
+      updated_at = now();
+
+  update private.league_backup_state
+  set restore_generation = gen_random_uuid(),
+      data_revision = data_revision + 1,
+      last_restore_at = now(),
+      last_restore_backup_id = selected_backup.id,
+      updated_by = (select auth.uid())
+  where state_key = 'league'
+  returning restore_generation, data_revision, last_restore_at
+    into new_restore_generation, new_data_revision, completed_at;
+
+  return jsonb_build_object(
+    'restoredBackupId', selected_backup.id,
+    'safetyBackupId', safety_backup_id,
+    'restoredCounts', restored_counts,
+    'restoreGeneration', new_restore_generation,
+    'dataRevision', new_data_revision,
+    'restoredAt', completed_at
+  );
+end;
+$$;
+
+revoke all on function public.get_league_backup_schema_version() from public;
+revoke all on function public.get_league_backup_schema_version() from anon;
+revoke all on function public.get_league_backup_schema_version() from authenticated;
+grant execute on function public.get_league_backup_schema_version() to authenticated;
+
+revoke all on function public.get_league_restore_state() from public;
+revoke all on function public.get_league_restore_state() from anon;
+revoke all on function public.get_league_restore_state() from authenticated;
+grant execute on function public.get_league_restore_state() to authenticated;
+
+revoke all on function public.get_matchday_write_state(text, integer) from public;
+revoke all on function public.get_matchday_write_state(text, integer) from anon;
+revoke all on function public.get_matchday_write_state(text, integer) from authenticated;
+grant execute on function public.get_matchday_write_state(text, integer) to authenticated;
+
+revoke all on function public.get_matchday_milestone_draft(text, integer) from public;
+revoke all on function public.get_matchday_milestone_draft(text, integer) from anon;
+revoke all on function public.get_matchday_milestone_draft(text, integer) from authenticated;
+grant execute on function public.get_matchday_milestone_draft(text, integer) to authenticated;
+
+revoke all on function public.list_league_backups() from public;
+revoke all on function public.list_league_backups() from anon;
+revoke all on function public.list_league_backups() from authenticated;
+grant execute on function public.list_league_backups() to authenticated;
+
+revoke all on function public.create_league_backup() from public;
+revoke all on function public.create_league_backup() from anon;
+revoke all on function public.create_league_backup() from authenticated;
+grant execute on function public.create_league_backup() to authenticated;
+
+revoke all on function public.download_league_backup(uuid) from public;
+revoke all on function public.download_league_backup(uuid) from anon;
+revoke all on function public.download_league_backup(uuid) from authenticated;
+grant execute on function public.download_league_backup(uuid) to authenticated;
+
+revoke all on function public.preview_league_restore(uuid) from public;
+revoke all on function public.preview_league_restore(uuid) from anon;
+revoke all on function public.preview_league_restore(uuid) from authenticated;
+grant execute on function public.preview_league_restore(uuid) to authenticated;
+
+revoke all on function public.restore_league_backup(uuid, text, uuid, bigint) from public;
+revoke all on function public.restore_league_backup(uuid, text, uuid, bigint) from anon;
+revoke all on function public.restore_league_backup(uuid, text, uuid, bigint) from authenticated;
+grant execute on function public.restore_league_backup(uuid, text, uuid, bigint) to authenticated;
+
+do $$
+declare
+  existing_job record;
+begin
+  for existing_job in
+    select jobid
+    from cron.job
+    where jobname in ('cuban-league-daily-backup', 'cuban-league-weekly-backup')
+  loop
+    perform cron.unschedule(existing_job.jobid);
+  end loop;
+
+  perform cron.schedule(
+    'cuban-league-daily-backup',
+    '15 8 * * *',
+    'select private.run_scheduled_league_backup(''daily'');'
+  );
+
+  perform cron.schedule(
+    'cuban-league-weekly-backup',
+    '30 8 * * 0',
+    'select private.run_scheduled_league_backup(''weekly'');'
+  );
+end
+$$;
+
+-- Crea la primera copia inmediatamente para que el Centro de respaldos
+-- no empiece vacío después de instalar V124.
+select private.capture_league_backup('daily', null);
+
+notify pgrst, 'reload schema';
+
+commit;
+
+select
+  'Respaldos V124 activados correctamente' as resultado,
+  (select count(*) from private.league_backups) as respaldos_iniciales,
+  (select count(*) from cron.job where jobname like 'cuban-league-%-backup') as tareas_programadas;

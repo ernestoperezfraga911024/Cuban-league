@@ -1,0 +1,152 @@
+name: Cuban League · Respaldo cifrado
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cuban-league-supabase-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Crear y verificar respaldo
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Preparar Supabase CLI
+        uses: supabase/setup-cli@ab058987d8d6c725971f6cf9d0b5c98467e30bd1
+        with:
+          version: 2.114.0
+
+      - name: Comprobar configuración privada
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${SUPABASE_DB_URL:-}" || { echo 'Falta el secreto SUPABASE_DB_URL'; exit 1; }
+          test -n "${BACKUP_ENCRYPTION_KEY:-}" || { echo 'Falta el secreto BACKUP_ENCRYPTION_KEY'; exit 1; }
+          test "${#BACKUP_ENCRYPTION_KEY}" -ge 32 || { echo 'BACKUP_ENCRYPTION_KEY debe tener al menos 32 caracteres'; exit 1; }
+
+      - name: Exportar, calcular integridad, cifrar y verificar
+        id: backup
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          set -euo pipefail
+
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          weekday="$(date -u +%u)"
+          work_dir="$(mktemp -d)"
+          dump_dir="$work_dir/dump"
+          verify_dir="$work_dir/verify"
+          archive="$work_dir/cuban-league-$stamp.tar.gz"
+          encrypted_file="cuban-league-$stamp.tar.gz.enc"
+          trap 'rm -rf "$work_dir"' EXIT
+
+          mkdir -p "$dump_dir" "$verify_dir"
+
+          supabase db dump \
+            --db-url "$SUPABASE_DB_URL" \
+            --file "$dump_dir/roles.sql" \
+            --role-only
+
+          supabase db dump \
+            --db-url "$SUPABASE_DB_URL" \
+            --file "$dump_dir/schema.sql" \
+            --schema public,private
+
+          supabase db dump \
+            --db-url "$SUPABASE_DB_URL" \
+            --file "$dump_dir/data.sql" \
+            --data-only \
+            --use-copy \
+            --schema public,private \
+            --exclude private.league_admins \
+            --exclude private.league_backups
+
+          test -s "$dump_dir/roles.sql"
+          test -s "$dump_dir/schema.sql"
+          test -s "$dump_dir/data.sql"
+          grep -q 'matchday_stats' "$dump_dir/schema.sql"
+          grep -q 'matchday_drafts' "$dump_dir/schema.sql"
+          grep -q 'matchday_milestone_drafts' "$dump_dir/schema.sql"
+          grep -q 'matchday_write_state' "$dump_dir/schema.sql"
+          grep -q 'league_backup_state' "$dump_dir/schema.sql"
+          grep -q 'matchday_change_log' "$dump_dir/schema.sql"
+          grep -q 'matchday_milestones' "$dump_dir/schema.sql"
+
+          stats_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from public.matchday_stats')"
+          drafts_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from public.matchday_drafts')"
+          milestone_drafts_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from private.matchday_milestone_drafts')"
+          write_state_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from private.matchday_write_state')"
+          backup_state_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from private.league_backup_state')"
+          history_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from public.matchday_change_log')"
+          milestones_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from public.matchday_milestones')"
+          visits_count="$(psql "$SUPABASE_DB_URL" -Atqc 'select count(*) from public.site_visits')"
+
+          printf '%s\n' \
+            'format=cuban-league-supabase-backup' \
+            'format_version=124' \
+            "created_utc=$stamp" \
+            'project_ref=pyahosamoisqcbpvzwka' \
+            "matchday_stats=$stats_count" \
+            "matchday_drafts=$drafts_count" \
+            "matchday_milestone_drafts=$milestone_drafts_count" \
+            "matchday_write_state=$write_state_count" \
+            "league_backup_state=$backup_state_count" \
+            "matchday_change_log=$history_count" \
+            "matchday_milestones=$milestones_count" \
+            "site_visits=$visits_count" \
+            > "$dump_dir/MANIFEST.txt"
+
+          (
+            cd "$dump_dir"
+            sha256sum roles.sql schema.sql data.sql MANIFEST.txt > SHA256SUMS
+          )
+
+          tar -C "$dump_dir" -czf "$archive" .
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 250000 \
+            -in "$archive" \
+            -out "$encrypted_file" \
+            -pass env:BACKUP_ENCRYPTION_KEY
+
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 250000 \
+            -in "$encrypted_file" \
+            -out "$work_dir/verify.tar.gz" \
+            -pass env:BACKUP_ENCRYPTION_KEY
+          tar -C "$verify_dir" -xzf "$work_dir/verify.tar.gz"
+          (cd "$verify_dir" && sha256sum -c SHA256SUMS)
+
+          rm -rf "$work_dir"
+          trap - EXIT
+
+          echo "stamp=$stamp" >> "$GITHUB_OUTPUT"
+          echo "weekday=$weekday" >> "$GITHUB_OUTPUT"
+          echo "file=$encrypted_file" >> "$GITHUB_OUTPUT"
+
+      - name: Conservar copia diaria · 7 días
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuban-league-daily-${{ steps.backup.outputs.stamp }}
+          path: ${{ steps.backup.outputs.file }}
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Conservar copia semanal · 4 semanas
+        if: steps.backup.outputs.weekday == '7'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuban-league-weekly-${{ steps.backup.outputs.stamp }}
+          path: ${{ steps.backup.outputs.file }}
+          retention-days: 28
+          if-no-files-found: error
