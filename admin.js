@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '122-20260813';
+  const VERSION = '123-20260814';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
