@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '124-20260814';
+  const VERSION = '125-20260815';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -374,6 +374,27 @@
     if (value === null || value === undefined || value === '') return null;
     const number = Number(value);
     return Number.isFinite(number) ? number : null;
+  }
+
+  function signedDecimalNumber(value) {
+    const normalized = String(value ?? '').trim().replace(/−/g, '-').replace(',', '.');
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(normalized)) return null;
+    const number = Number(normalized);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function lineupEditorPoints(player, captain, multiplier) {
+    const finalPoints = lineupNumber(player?.displayed_points);
+    if (finalPoints === null) return null;
+    return captain && validCaptainMultiplier(multiplier) ? finalPoints / multiplier : finalPoints;
+  }
+
+  function lineupFinalPoints(basePoints, captain, multiplier) {
+    if (basePoints === null) return null;
+    const finalPoints = captain && validCaptainMultiplier(multiplier)
+      ? basePoints * multiplier
+      : basePoints;
+    return Number(finalPoints.toFixed(6));
   }
 
   function validCaptainMultiplier(value) {
@@ -761,17 +782,20 @@
     $('lineupPlayerRows').innerHTML = players.map(player => {
       const slot = Number(player.slot_number);
       const captain = player.is_captain === true;
-      const points = lineupNumber(player.displayed_points);
       const multiplier = captain && validCaptainMultiplier(player.captain_multiplier)
         ? lineupNumber(player.captain_multiplier)
         : 2;
+      const points = lineupEditorPoints(player, captain, multiplier);
       return `<article class="lineup-player-row${captain ? ' has-captain' : ''}" data-lineup-slot="${slot}">
         <span class="lineup-slot-number">${String(slot).padStart(2, '0')}</span>
         <select class="lineup-position-select" data-lineup-field="position" aria-label="Posición del jugador ${slot}">
           ${Object.entries(LINEUP_POSITION_LABELS).map(([value, label]) => `<option value="${value}"${player.position === value ? ' selected' : ''}>${value} · ${label}</option>`).join('')}
         </select>
         ${lineupPlayerPickerMarkup(player, slot)}
-        <input class="lineup-points-input" data-lineup-field="displayed_points" type="number" inputmode="decimal" step="0.1" value="${points === null ? '' : points}" placeholder="—" aria-label="Puntos finales del jugador ${slot}">
+        <div class="lineup-points-control${points !== null && points < 0 ? ' is-negative' : ''}" data-signed-points-control>
+          <input class="lineup-points-input" data-lineup-field="displayed_points" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="${points === null ? '' : points}" placeholder="—" aria-label="Puntos base del jugador ${slot}; admite negativos">
+          <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos del jugador ${slot}" aria-pressed="${points !== null && points < 0}" title="Cambiar entre positivo y negativo">±</button>
+        </div>
         <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="radio" name="lineupCaptain" value="${slot}"${captain ? ' checked' : ''}><span>C</span></label>
         <select class="lineup-position-select lineup-multiplier-input" data-lineup-field="captain_multiplier"${captain ? '' : ' disabled'} aria-label="Multiplicador del capitán en la posición ${slot}">
           ${LINEUP_CAPTAIN_MULTIPLIERS.map(value => `<option value="${value}"${multiplier === value ? ' selected' : ''}>x${String(value).replace('.', ',')}</option>`).join('')}
@@ -791,7 +815,7 @@
       const clubId = row.querySelector('[data-lineup-field="club_id"]')?.value.trim() || '';
       const clubName = row.querySelector('[data-lineup-field="club_name"]').value.trim();
       const pointsInput = row.querySelector('[data-lineup-field="displayed_points"]');
-      const points = pointsInput.value.trim() === '' ? null : Number(pointsInput.value);
+      const basePoints = signedDecimalNumber(pointsInput.value);
       const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
       const multiplierInput = row.querySelector('[data-lineup-field="captain_multiplier"]');
       const multiplier = Number(multiplierInput.value);
@@ -804,7 +828,7 @@
         club_id: clubId,
         club_name: clubName,
         position: row.querySelector('[data-lineup-field="position"]').value,
-        displayed_points: Number.isFinite(points) ? points : null,
+        displayed_points: lineupFinalPoints(basePoints, captain, multiplier),
         is_captain: captain,
         captain_multiplier: captain && Number.isFinite(multiplier) ? multiplier : 1
       };
@@ -821,9 +845,10 @@
       const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
       const hasAny = Boolean(name || points || row.querySelector('[data-lineup-field="club_name"]').value.trim() || captain);
       row.classList.toggle('has-captain', captain);
-      row.classList.toggle('is-incomplete', hasAny && (!name || points === ''));
+      row.classList.toggle('is-incomplete', hasAny && (!name || signedDecimalNumber(points) === null));
       const multiplier = row.querySelector('[data-lineup-field="captain_multiplier"]');
       multiplier.disabled = !captain || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished);
+      syncSignedPointsControl(row.querySelector('[data-lineup-field="displayed_points"]'));
     });
     updateLineupProgress();
     updateLineupSummary();
@@ -900,8 +925,34 @@
 
   function inputNumberOrNull(input) {
     if (!input || input.value.trim() === '') return null;
-    const value = Number.parseInt(input.value, 10);
-    return Number.isFinite(value) ? value : null;
+    const value = signedDecimalNumber(input.value);
+    return Number.isInteger(value) ? value : null;
+  }
+
+  function syncSignedPointsControl(input) {
+    if (!input) return;
+    const raw = input.value.trim().replace(/−/g, '-');
+    const negative = raw.startsWith('-');
+    const control = input.closest('[data-signed-points-control]');
+    control?.classList.toggle('is-negative', negative);
+    const button = control?.querySelector('[data-toggle-points-sign]');
+    if (button) button.setAttribute('aria-pressed', String(negative));
+  }
+
+  function togglePointsSign(button) {
+    const input = button?.closest('[data-signed-points-control]')?.querySelector('input');
+    if (!input || input.disabled || button.disabled) return;
+    const raw = input.value.trim().replace(/−/g, '-');
+    const value = signedDecimalNumber(raw);
+    if (raw.startsWith('-')) input.value = raw.slice(1);
+    else if (value !== null) input.value = String(-value);
+    else input.value = '-';
+    syncSignedPointsControl(input);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+    requestAnimationFrame(() => {
+      try { input.setSelectionRange(input.value.length, input.value.length); } catch {}
+    });
   }
 
   function valueFor(input) {
@@ -957,7 +1008,7 @@
         : 'Publicación activa · edición bloqueada';
     } else if (result.missing.length) {
       $('completionTitle').textContent = `Faltan ${result.missing.length} de ${result.total} participantes`;
-      $('completionMessage').textContent = 'Completa PTS, GOL, CS y TR de todos. Cuando no haya datos, escribe 0.';
+      $('completionMessage').textContent = 'Completa PTS, GOL, CS y TR de todos. PTS admite negativos con el botón ±; los demás valores deben ser 0 o más.';
       const visible = result.missing.slice(0, 6);
       $('missingParticipants').textContent = `Pendientes: ${visible.join(', ')}${result.missing.length > visible.length ? ` y ${result.missing.length - visible.length} más` : ''}`;
     } else {
@@ -1013,6 +1064,9 @@
     });
     document.querySelectorAll('[data-open-player-catalog],[data-clear-lineup-player]').forEach(button => {
       button.disabled = locked || !state.catalog;
+    });
+    document.querySelectorAll('[data-toggle-points-sign]').forEach(button => {
+      button.disabled = locked;
     });
     if ($('clearLineupButton')) $('clearLineupButton').disabled = locked;
     $('lineupManagement')?.classList.toggle('is-locked', locked && state.published);
@@ -1099,9 +1153,10 @@
           <img src="${shield}" alt="">
           <span><b>${name}</b><small>${escapeHtml(subtitle)}</small></span>
         </div>
-        <div class="stat-input-wrap">
+        <div class="stat-input-wrap has-sign-toggle${Number(fieldValue(row, 'points')) < 0 ? ' is-negative' : ''}" data-signed-points-control>
           <label for="${inputPrefix}-points-${playerId}">PTS</label>
-          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="number" inputmode="numeric" step="1" value="${fieldValue(row, 'points')}" placeholder="—" aria-label="Puntos de ${name}">
+          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="${fieldValue(row, 'points')}" placeholder="—" aria-label="Puntos de ${name}; admite negativos">
+          <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos de ${name}" aria-pressed="${Number(fieldValue(row, 'points')) < 0}" title="Cambiar entre positivo y negativo">±</button>
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-goals-${playerId}">GOL</label>
@@ -2838,6 +2893,11 @@
     $('lineupPlayerRows').addEventListener('click', event => {
       const row = event.target.closest('.lineup-player-row');
       if (!row) return;
+      const signToggle = event.target.closest('[data-toggle-points-sign]');
+      if (signToggle) {
+        togglePointsSign(signToggle);
+        return;
+      }
       const openButton = event.target.closest('[data-open-player-catalog]');
       if (openButton) {
         openPlayerCatalog(Number(row.dataset.lineupSlot), openButton);
@@ -2874,10 +2934,15 @@
     $('playerRows').addEventListener('input', event => {
       if (!event.target.matches('.stat-input')) return;
       if (event.target.dataset.stat !== 'points' && valueFor(event.target) < 0) event.target.value = 0;
+      if (event.target.dataset.stat === 'points') syncSignedPointsControl(event.target);
       updateTotals();
       updateLineupSummary();
       updateCompletionState();
       scheduleAutoSave();
+    });
+    $('playerRows').addEventListener('click', event => {
+      const signToggle = event.target.closest('[data-toggle-points-sign]');
+      if (signToggle) togglePointsSign(signToggle);
     });
 
     document.addEventListener('keydown', event => {

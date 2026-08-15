@@ -1,6 +1,18 @@
-# Cuban League V124
+# Cuban League V125
 
 Sitio oficial de la Cuban League con:
+
+- Puntos con signo en todo el sistema: tanto los participantes como los
+  futbolistas pueden registrar valores negativos. El panel incorpora un botón
+  `±` pensado para iPhone, mantiene GOL, CS y TR en cero o más, y resalta los
+  valores negativos para evitar errores al revisar la jornada.
+- El editor de alineaciones recibe los puntos base y aplica automáticamente el
+  multiplicador x1,5, x2 o x3 del capitán. La cifra final sigue guardándose en
+  el formato histórico, por lo que borradores, publicaciones y respaldos V124
+  continúan siendo compatibles sin migración de Supabase.
+- Récord de jornada, ganador, MVP y rendimiento por líneas contemplan jornadas
+  completamente negativas: eligen el valor menos negativo y reconocen un `0`
+  real cuando supera a los demás, sin inventar resultados ni omitir líderes.
 
 - Nuevo Centro de respaldos dentro de Cuban Admin. El administrador puede
   crear una copia manual, consultar las copias automáticas, descargar cualquier
