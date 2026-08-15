@@ -23642,6 +23642,11 @@ footer{
   font-variant-numeric:tabular-nums;
 }
 
+.matchday-field-player>b.is-negative{
+  color:#ff9f9f;
+  background:rgba(64,15,22,.95);
+}
+
 /* V116 · Rostros y escudos del Catálogo Maestro */
 .matchday-field-player-marker.has-photo{
   position:relative;

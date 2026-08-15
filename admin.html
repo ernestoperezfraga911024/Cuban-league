@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=124-20260814">
+  <link rel="stylesheet" href="admin.css?v=125-20260815">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -47,7 +47,7 @@
       <div class="login-copy">
         <span class="admin-kicker"><i></i> ÁREA PRIVADA</span>
         <h1>Controla la liga desde tu celular.</h1>
-        <p>Escribe los puntos, goles, clean sheets y tarjetas rojas de cada jornada. Cuando publiques, la clasificación se actualizará automáticamente.</p>
+        <p>Escribe los puntos —también si son negativos—, goles, clean sheets y tarjetas rojas de cada jornada. Cuando publiques, la clasificación se actualizará automáticamente.</p>
         <ul class="feature-list">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Solo tú puedes editar</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7H2"/></svg>Clasificación automática</li>
@@ -361,7 +361,7 @@
         <div>
           <span class="admin-kicker">CONTROL DE DATOS</span>
           <b id="completionTitle">Faltan participantes por completar</b>
-          <small id="completionMessage">Escribe puntos, goles, clean sheets y tarjetas rojas de todos los participantes, incluso cuando el valor sea 0.</small>
+          <small id="completionMessage">PTS admite positivos, cero y negativos. GOL, CS y TR siempre deben ser 0 o más.</small>
           <div class="completion-progress"><i id="completionProgress"></i></div>
           <span id="missingParticipants" class="missing-participants"></span>
         </div>
@@ -378,7 +378,7 @@
             <h2 id="entryTitle">20 participantes</h2>
           </div>
           <div class="stat-key">
-            <span>PTS <small>Puntos</small></span>
+            <span>PTS <small>Admite negativos · usa ±</small></span>
             <span class="league-only-stat">GOL <small>Goles</small></span>
             <span class="league-only-stat">CS <small>Portería a cero</small></span>
             <span class="league-only-stat">TR <small>Tarjetas rojas</small></span>
@@ -395,7 +395,7 @@
           <div>
             <span class="admin-kicker">ALINEACIONES DE LA JORNADA</span>
             <h2 id="lineupManagementTitle">El once de cada participante</h2>
-            <p>Busca cada jugador en el Catálogo Maestro. El club y la posición se completan automáticamente; tú solo escribes los puntos.</p>
+            <p>Busca cada jugador en el Catálogo Maestro. Escribe sus puntos base, también si son negativos; el capitán se multiplica automáticamente.</p>
           </div>
           <span id="lineupPublishedCount" class="lineup-progress-badge">0/20 completas</span>
         </header>
@@ -420,7 +420,7 @@
 
           <div class="lineup-helper">
             <span class="lineup-helper-mark">C</span>
-            <p><b>Capitán:</b> marca un solo jugador e indica x1,5, x2 o x3. Escribe en PTS la cifra final de la imagen; el sistema calculará la base y el aporte del brazalete.</p>
+            <p><b>Capitán:</b> marca un solo jugador e indica x1,5, x2 o x3. Escribe sus PTS base; el sistema aplicará el multiplicador. Ejemplo: −2 ×2 se guarda como −4. Usa ± para cambiar el signo.</p>
           </div>
 
           <div class="lineup-entry-head" aria-hidden="true">
@@ -582,8 +582,8 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=124-20260814"></script>
-  <script src="player-catalog.js?v=124-20260814"></script>
-  <script src="admin.js?v=124-20260814"></script>
+  <script src="supabase-config.js?v=125-20260815"></script>
+  <script src="player-catalog.js?v=125-20260815"></script>
+  <script src="admin.js?v=125-20260815"></script>
 </body>
 </html>

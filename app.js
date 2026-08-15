@@ -1,4 +1,4 @@
-const APP_VERSION='124-20260814';
+const APP_VERSION='125-20260815';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -841,8 +841,9 @@ function renderClassificationMatchday(){
   content.hidden=false;
 
   const standings=weeklyStandings(SELECTED_CLASSIFICATION_MATCHDAY);
-  const bestPoints=standings[0]?.points||0;
-  const winners=bestPoints
+  const hasStandings=standings.length>0;
+  const bestPoints=hasStandings?standings[0].points:0;
+  const winners=hasStandings
     ?standings.filter(player=>player.points===bestPoints).map(player=>player.name)
     :[];
   const average=standings.length
@@ -856,7 +857,7 @@ function renderClassificationMatchday(){
   summary.innerHTML=`<article class="classification-matchday-winner">
       <span class="classification-matchday-summary-icon">${uiIcon('trophy')}</span>
       <div><small>${winners.length>1?'Ganadores empatados':'Ganador de la jornada'}</small>
-      ${winners.length?playerInline(winners.join(' / '),{compact:true}):'<strong>Sin puntos registrados</strong>'}</div>
+      ${winners.length?matchdayPlayerLinks(winners,3):'<strong>Sin puntos registrados</strong>'}</div>
       <b>${bestPoints.toLocaleString('es')}<span>PTS</span></b>
     </article>
     <article><small>Promedio</small><strong>${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</strong><span>PTS / jugador</span></article>
@@ -1047,7 +1048,7 @@ function heroKpiPlayerCard({label,player,name=player.name,detail,marker,tone}){
 function heroKpiScoreMarkup(detail){
   const sections=String(detail).split('·').map(section=>section.trim()).filter(Boolean);
   const score=sections.shift()||'';
-  const match=score.match(/^([\d.,]+)\s+puntos?\s*(.*)$/i);
+  const match=score.match(/^([+\-−]?[\d.,]+)\s+puntos?\s*(.*)$/i);
   if(!match)return `<small>${detail}</small>`;
   const caption=[match[2].trim(),...sections].filter(Boolean).join(' · ');
   return `<small class="hero-kpi-score"><strong><span class="hero-kpi-score-value">${match[1]}</span><span class="hero-kpi-score-unit">puntos</span></strong>${caption?`<em>${caption}</em>`:''}</small>`;
@@ -1525,7 +1526,7 @@ function matchdayLineupPlayerMarkup(player,isMvp){
     ${isMvp?'<span class="matchday-field-mvp" title="MVP del equipo" aria-hidden="true">★</span>':''}
     <strong title="${safeName}">${safeName}</strong>
     ${club}
-    <b>${points}</b>
+    <b${player.displayedPoints < 0 ? ' class="is-negative"' : ''}>${points}</b>
   </article>`;
 }
 
@@ -1762,7 +1763,7 @@ function renderMatchdayDetails(){
   const previous=previousPublishedMatchday(matchday);
   const totalPoints=weekly.reduce((sum,player)=>sum+player.points,0);
   const average=weekly.length?totalPoints/weekly.length:0;
-  const recordPoints=Math.max(0,...weekly.map(player=>player.points));
+  const recordPoints=weekly.length?Math.max(...weekly.map(player=>player.points)):0;
   const recordNames=weekly.filter(player=>player.points===recordPoints).map(player=>player.name);
   const maxGoals=Math.max(0,...weekly.map(player=>player.goals));
   const goalLeaders=maxGoals?weekly.filter(player=>player.goals===maxGoals).map(player=>player.name):[];
@@ -3154,9 +3155,10 @@ function buildProfileSeasonStats(name,rawRows){
   const redCards=rows.reduce((sum,row)=>sum+row.redCards,0);
   const favoriteFormation=[...formations.entries()]
     .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es'))[0]||null;
-  const lineEntries=Object.entries(positionTotals);
-  const strongestLinePoints=lineupMatchdays?Math.max(...lineEntries.map(([,points])=>points)):0;
-  const strongestLine=lineupMatchdays&&strongestLinePoints!==0
+  const populatedPositions=new Set(playerRows.map(player=>player.position));
+  const lineEntries=Object.entries(positionTotals).filter(([position])=>populatedPositions.has(position));
+  const strongestLinePoints=lineEntries.length?Math.max(...lineEntries.map(([,points])=>points)):0;
+  const strongestLine=lineEntries.length
     ?{
       positions:lineEntries.filter(([,points])=>Math.abs(points-strongestLinePoints)<.0001).map(([position])=>position),
       points:strongestLinePoints
@@ -4749,11 +4751,13 @@ function crazyStatsPlayerRecords(){
         if(!player?.name)return;
         const key=crazyStatsNormalizeName(player.name);
         const previous=seasonPlayers.get(key);
+        const incomingPoints=Number(player.points);
+        const points=Number.isFinite(incomingPoints)?incomingPoints:(previous?.points??0);
         seasonPlayers.set(key,{
           manager,
           season:season.season,
           name:previous?.name||player.name,
-          points:Math.max(previous?.points||0,Number(player.points)||0),
+          points:previous?Math.max(previous.points,points):points,
           lineups:Math.max(previous?.lineups||0,Number(player.lineups)||0),
           role:previous?.role||player.role||(isMvp?'MVP':'Jugador'),
           isMvp:Boolean(previous?.isMvp||isMvp)
