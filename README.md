@@ -1,7 +1,11 @@
-# Cuban League V125
+# Cuban League V126
 
 Sitio oficial de la Cuban League con:
 
+- El Catálogo Maestro incorpora a Mario Soriano, mediocampista del RC
+  Deportivo de La Coruña, con identidad estable y retrato propio. La versión
+  de la aplicación y la caché PWA se renuevan para que el alta llegue también
+  a los teléfonos que ya tenían instalado el catálogo anterior.
 - Puntos con signo en todo el sistema: tanto los participantes como los
   futbolistas pueden registrar valores negativos. El panel incorpora un botón
   `±` pensado para iPhone, mantiene GOL, CS y TR en cero o más, y resalta los
@@ -50,7 +54,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 504 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 505 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
