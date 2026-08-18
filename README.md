@@ -1,7 +1,9 @@
-# Cuban League V131
+# Cuban League V132
 
 Sitio oficial de la Cuban League con:
 
+- El Catálogo Maestro incorpora a Rodri Hernández como mediocampista del FC
+  Barcelona, con identidad estable y retrato propio.
 - Esteban Dominguez recibe el distintivo `El Pastillero del Sillón` en su
   tarjeta y en el encabezado del perfil.
 - El perfil de GNT D ZONA estrena el distintivo histórico `El Monarca`.
@@ -72,7 +74,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 507 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 508 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
