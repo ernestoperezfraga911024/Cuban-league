@@ -1,7 +1,17 @@
-# Cuban League V128
+# Cuban League V129
 
 Sitio oficial de la Cuban League con:
 
+- El histórico separa ahora los títulos de Liga y Champions y calcula un
+  palmarés total sin alterar los datos originales. ANDOBA THE BEST figura con
+  3 títulos oficiales: 2 Ligas y 1 Champions. El ranking general, el podio y
+  el récord de títulos usan esa suma, mientras las insignias de Liga conservan
+  su significado.
+- Las tres clasificaciones históricas pasan a tablas semánticas más limpias,
+  con encabezados agrupados, colores distintos para Liga, Champions y Total,
+  columnas de posición y participante fijas y desplazamiento horizontal claro
+  en teléfono. El podio móvil deja al campeón destacado arriba y evita nombres
+  comprimidos.
 - El Catálogo Maestro incorpora a Marcos Fernández como delantero del RCD
   Espanyol. Recibe una identidad permanente distinta del `M. Fernández` del
   Celta, de modo que ambos conservan por separado sus alineaciones y su
@@ -225,7 +235,8 @@ Sitio oficial de la Cuban League con:
 - En el celular las tablas históricas conservan sus encabezados y las columnas
   de posición y jugador permanecen visibles mientras se desplazan.
 - El ranking histórico elimina el Score y se ordena de forma transparente por
-  títulos, podios, Top 5 y puntos acumulados.
+  títulos totales (Liga + Champions), podios de Liga, Top 5 y puntos
+  acumulados.
 - La portada elimina el bloque decorativo de “Fútbol y datos” para dar prioridad
   al estado de la temporada, los accesos rápidos y el contenido dinámico.
 - Sección Historia unificada: Temporadas, Histórico y Récords viven ahora en un

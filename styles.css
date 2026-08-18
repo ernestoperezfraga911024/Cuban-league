@@ -25191,3 +25191,428 @@ footer{
 @media(prefers-reduced-motion:reduce){
   .league-comparator-track i{transition:none}
 }
+
+/* =========================================================
+   V129 — PALMARÉS TOTAL Y TABLAS HISTÓRICAS RESPONSIVE
+   Liga y Champions permanecen separadas; Total suma ambas.
+   ========================================================= */
+.sr-only{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+
+#history .history-title-guide{
+  display:flex;
+  min-height:48px;
+  align-items:center;
+  gap:8px;
+  margin:0 0 10px;
+  padding:9px 12px;
+  border:1px solid rgba(83,230,202,.14);
+  border-radius:14px;
+  background:linear-gradient(90deg,rgba(7,31,29,.9),rgba(5,22,27,.92));
+  color:#718b82;
+  font-size:.65rem;
+}
+
+#history .history-title-guide .history-guide-label{
+  margin-right:3px;
+  color:#98ada6;
+  font-size:.58rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+#history .history-title-guide b{
+  display:inline-flex;
+  min-height:27px;
+  align-items:center;
+  padding:4px 9px;
+  border:1px solid currentColor;
+  border-radius:999px;
+  font-size:.61rem;
+  letter-spacing:.02em;
+}
+
+#history .history-title-guide small{
+  margin-left:auto;
+  color:#758d85;
+  font-size:.61rem;
+}
+
+#history .history-guide-league,
+#history .history-title-league{color:#e7ca69!important}
+#history .history-guide-champions,
+#history .history-title-champions{color:#73c9f5!important}
+#history .history-guide-total,
+#history .history-title-total{color:#97f786!important}
+
+#history .history-data-scroll{
+  position:relative;
+  width:100%;
+  max-width:100%;
+  overflow:auto;
+  border:1px solid rgba(83,230,202,.18);
+  border-radius:18px;
+  outline:0;
+  background:#06191c;
+  box-shadow:0 20px 46px rgba(0,0,0,.2);
+  scrollbar-color:#347d70 #04130f;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+}
+
+#history .history-data-scroll:focus-visible{
+  outline:2px solid #8cf47e;
+  outline-offset:3px;
+}
+
+#history .history-data-scroll::-webkit-scrollbar{height:8px}
+#history .history-data-scroll::-webkit-scrollbar-track{background:#04130f}
+#history .history-data-scroll::-webkit-scrollbar-thumb{border-radius:999px;background:#347d70}
+
+#history .history-data-table::after{display:none!important;content:none!important}
+
+#history .history-data-table{
+  width:100%;
+  border-spacing:0;
+  border-collapse:separate;
+  table-layout:fixed;
+  color:#d9e7e1;
+  font-variant-numeric:tabular-nums;
+}
+
+#history .history-general-table{min-width:1080px}
+#history .history-palmares-table{min-width:850px}
+#history .history-points-table{min-width:700px}
+
+#history .history-general-table .history-col-rank,
+#history .history-palmares-table .history-col-rank,
+#history .history-points-table .history-col-rank{width:48px}
+#history .history-general-table .history-col-player{width:230px}
+#history .history-palmares-table .history-col-player{width:250px}
+#history .history-points-table .history-col-player{width:280px}
+#history .history-col-total{width:70px}
+#history .history-col-league{width:70px}
+#history .history-col-champions{width:92px}
+#history .history-col-compact{width:64px}
+#history .history-col-seasons{width:115px}
+#history .history-col-points{width:108px}
+#history .history-col-average{width:88px}
+
+#history .history-data-table th{
+  height:50px;
+  padding:8px 7px;
+  border-right:1px solid rgba(83,230,202,.08);
+  border-bottom:1px solid rgba(83,230,202,.13);
+  color:#8ea79e;
+  background:#0a2823;
+  font-size:.59rem;
+  font-weight:900;
+  letter-spacing:.055em;
+  line-height:1.18;
+  text-align:center;
+  text-transform:uppercase;
+  white-space:normal;
+}
+
+#history .history-data-table thead tr:first-child>th:nth-child(2){text-align:left}
+#history .history-data-table th:last-child,
+#history .history-data-table td:last-child{border-right:0}
+#history .history-data-table abbr{text-decoration:none;cursor:help}
+
+#history .history-data-table .history-column-groups th{
+  height:29px;
+  padding-top:6px;
+  padding-bottom:5px;
+  color:#66847a;
+  background:#071f1c;
+  font-size:.5rem;
+  letter-spacing:.09em;
+}
+
+#history .history-data-row{--history-row-bg:#071d1d;--history-row-accent:transparent}
+#history .history-data-row:nth-child(even){--history-row-bg:#092321}
+#history .history-data-row.history-rank-1{--history-row-bg:#17251e;--history-row-accent:#e7ca69}
+#history .history-data-row.history-rank-2{--history-row-bg:#102326;--history-row-accent:#bcd3dc}
+#history .history-data-row.history-rank-3{--history-row-bg:#17221f;--history-row-accent:#d79769}
+
+#history .history-data-row td{
+  height:70px;
+  padding:8px;
+  border-right:1px solid rgba(83,230,202,.065);
+  border-bottom:1px solid rgba(83,230,202,.09);
+  background:var(--history-row-bg);
+  color:#aebfb9;
+  font-size:.72rem;
+  font-weight:800;
+  text-align:center;
+  transition:background .18s ease,color .18s ease;
+}
+
+#history .history-data-row:last-child td{border-bottom:0}
+#history .history-data-row:hover td{background:#0d2b27}
+
+#history .history-rank-cell{
+  position:relative;
+  box-shadow:inset 3px 0 0 var(--history-row-accent);
+}
+
+#history .history-rank-cell>span{
+  display:grid;
+  width:31px;
+  height:31px;
+  margin:auto;
+  place-items:center;
+  border:1px solid rgba(83,230,202,.14);
+  border-radius:10px;
+  color:#839990;
+  background:rgba(83,230,202,.035);
+  font-family:Sora,Manrope,Inter,sans-serif;
+  font-size:.68rem;
+}
+
+#history .history-rank-1 .history-rank-cell>span{color:#241d08;border-color:#e7ca69;background:#e7ca69}
+#history .history-rank-2 .history-rank-cell>span{color:#e2eaed;border-color:rgba(194,213,221,.34);background:rgba(194,213,221,.12)}
+#history .history-rank-3 .history-rank-cell>span{color:#e9ad83;border-color:rgba(215,151,105,.35);background:rgba(215,151,105,.11)}
+
+#history .history-participant-cell{padding-right:11px;padding-left:11px;text-align:left}
+#history .history-participant-cell .standings-team{gap:9px}
+#history .history-participant-cell .standings-team img{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border:1px solid rgba(83,230,202,.16);
+  border-radius:12px;
+}
+#history .history-participant-cell .name{color:#edf7f2;font-size:.77rem}
+
+#history .history-number{font-family:Sora,Manrope,Inter,sans-serif}
+#history td.history-title-total{
+  color:#9bfa8c!important;
+  background:linear-gradient(rgba(108,255,115,.045),rgba(108,255,115,.045)),var(--history-row-bg);
+  font-size:.9rem;
+  font-weight:950;
+}
+#history td.history-title-league{font-weight:900}
+#history td.history-title-champions{font-weight:900}
+#history .history-points{color:#d8e7e1;font-weight:900}
+#history .history-average{color:#b9cdc5}
+
+#history .historical-podium-card em{
+  display:block;
+  margin-top:4px;
+  color:#7f988f;
+  font-size:.52rem;
+  font-style:normal;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.profile-major-stats small{
+  display:block;
+  margin-top:5px;
+  color:#7f978e;
+  font-size:.62rem;
+  line-height:1.25;
+}
+
+@media(max-width:760px){
+  #history .history-title-guide{
+    flex-wrap:wrap;
+    gap:6px;
+    min-height:0;
+    padding:9px 10px;
+  }
+
+  #history .history-title-guide .history-guide-label{width:100%;margin:0}
+  #history .history-title-guide small{width:100%;margin:1px 0 0;line-height:1.35}
+
+  #history .history-table-scroll-note{
+    display:flex!important;
+    align-items:center;
+    justify-content:flex-end;
+    gap:6px;
+    margin:0 2px 8px;
+    color:#75a297;
+    font-size:.61rem;
+    font-weight:800;
+    text-align:right;
+  }
+
+  #history .history-table-scroll-note span{color:#8df47e;font-size:.88rem}
+
+  #history .history-general-table{width:818px;min-width:818px}
+  #history .history-palmares-table{width:582px;min-width:582px}
+  #history .history-points-table{width:420px;min-width:420px}
+
+  #history .history-general-table .history-col-rank,
+  #history .history-palmares-table .history-col-rank,
+  #history .history-points-table .history-col-rank{width:36px}
+  #history .history-general-table .history-col-player,
+  #history .history-palmares-table .history-col-player,
+  #history .history-points-table .history-col-player{width:164px}
+  #history .history-col-total{width:62px}
+  #history .history-col-league{width:58px}
+  #history .history-col-champions{width:76px}
+  #history .history-col-compact{width:54px}
+  #history .history-col-seasons{width:68px}
+  #history .history-col-points{width:82px}
+  #history .history-col-average{width:70px}
+
+  #history .history-data-table th{
+    height:47px;
+    padding:6px 4px;
+    font-size:.53rem;
+    letter-spacing:.025em;
+  }
+
+  #history .history-data-table .history-column-groups th{height:27px;font-size:.45rem}
+  #history .history-data-row td{height:64px;padding:6px 4px;font-size:.65rem}
+  #history .history-rank-cell>span{width:26px;height:28px;border-radius:8px;font-size:.62rem}
+  #history .history-participant-cell{padding-right:6px!important;padding-left:7px!important}
+  #history .history-participant-cell .standings-team{gap:7px}
+  #history .history-participant-cell .standings-team img{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    flex-basis:34px!important;
+    border-radius:9px!important;
+  }
+  #history .history-participant-cell .name{
+    display:block;
+    width:110px;
+    max-width:110px;
+    font-size:.68rem!important;
+  }
+  #history .history-participant-cell .standings-mini-badges{display:none}
+  #history td.history-title-total{font-size:.79rem}
+
+  #history .history-data-table thead tr:first-child>th:nth-child(1),
+  #history .history-data-table tbody td:nth-child(1){
+    position:sticky!important;
+    left:0!important;
+    z-index:4!important;
+  }
+
+  #history .history-data-table thead tr:first-child>th:nth-child(2),
+  #history .history-data-table tbody td:nth-child(2){
+    position:sticky!important;
+    left:36px!important;
+    z-index:3!important;
+    box-shadow:7px 0 12px rgba(0,0,0,.28)!important;
+  }
+
+  #history .history-data-table thead tr:first-child>th:nth-child(1),
+  #history .history-data-table thead tr:first-child>th:nth-child(2){
+    z-index:7!important;
+    background:#092720!important;
+  }
+
+  #history .history-data-table tbody td:nth-child(1),
+  #history .history-data-table tbody td:nth-child(2){background:var(--history-row-bg)!important}
+  #history .history-data-row:hover td:nth-child(1),
+  #history .history-data-row:hover td:nth-child(2){background:#0d2b27!important}
+
+  #history .historical-podium{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;
+    gap:8px;
+    margin-top:25px;
+  }
+
+  #history .historical-podium-card{
+    min-height:137px;
+    padding-top:22px;
+  }
+
+  #history .historical-podium-1{
+    grid-column:1/-1;
+    grid-row:1;
+    display:grid;
+    grid-template-columns:72px minmax(0,1fr);
+    min-height:128px;
+    align-items:center;
+    gap:13px;
+    padding:17px 37px 17px 17px;
+    transform:none;
+    text-align:left;
+  }
+
+  #history .historical-podium-1:hover{transform:translateY(-2px)}
+  #history .historical-podium-1>img{width:68px;height:68px}
+  #history .historical-podium-1 strong{font-size:.76rem}
+  #history .historical-podium-1 b>span{display:inline;margin-left:4px}
+  #history .historical-podium-card em{font-size:.47rem}
+}
+
+@media(min-width:761px) and (max-width:1023px){
+  #history .history-table-scroll-note{
+    display:flex!important;
+    align-items:center;
+    justify-content:flex-end;
+    gap:6px;
+    margin:0 2px 8px;
+    color:#75a297;
+    font-size:.63rem;
+    font-weight:800;
+  }
+
+  #history .history-general-table{min-width:930px}
+  #history .history-palmares-table{min-width:680px}
+  #history .history-points-table{min-width:620px}
+
+  #history .history-general-table .history-col-rank,
+  #history .history-palmares-table .history-col-rank,
+  #history .history-points-table .history-col-rank{width:44px}
+  #history .history-general-table .history-col-player,
+  #history .history-palmares-table .history-col-player,
+  #history .history-points-table .history-col-player{width:210px}
+  #history .history-col-total{width:64px}
+  #history .history-col-league{width:64px}
+  #history .history-col-champions{width:84px}
+  #history .history-col-compact{width:56px}
+  #history .history-col-seasons{width:88px}
+  #history .history-col-points{width:100px}
+  #history .history-col-average{width:84px}
+
+  #history .history-data-table thead tr:first-child>th:nth-child(1),
+  #history .history-data-table tbody td:nth-child(1){
+    position:sticky!important;
+    left:0!important;
+    z-index:4!important;
+  }
+
+  #history .history-data-table thead tr:first-child>th:nth-child(2),
+  #history .history-data-table tbody td:nth-child(2){
+    position:sticky!important;
+    left:44px!important;
+    z-index:3!important;
+    box-shadow:7px 0 12px rgba(0,0,0,.25)!important;
+  }
+
+  #history .history-data-table thead tr:first-child>th:nth-child(1),
+  #history .history-data-table thead tr:first-child>th:nth-child(2){
+    z-index:7!important;
+    background:#092720!important;
+  }
+
+  #history .history-data-table tbody td:nth-child(1),
+  #history .history-data-table tbody td:nth-child(2){background:var(--history-row-bg)!important}
+  #history .history-data-row:hover td:nth-child(1),
+  #history .history-data-row:hover td:nth-child(2){background:#0d2b27!important}
+}
+
+@media(max-width:370px){
+  #history .history-points-table{width:410px;min-width:410px}
+  #history .historical-podium-1{grid-template-columns:62px minmax(0,1fr);padding-left:12px}
+  #history .historical-podium-1>img{width:58px;height:58px}
+}
