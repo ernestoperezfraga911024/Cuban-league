@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '131-20260818';
+  const VERSION = '132-20260818';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
