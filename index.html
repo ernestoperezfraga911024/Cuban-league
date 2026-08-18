@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=128-20260817">
+<link rel="stylesheet" href="styles.css?v=129-20260818">
 <style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
@@ -393,29 +393,55 @@
 </div>
 
 <div id="historyViewHistorical" class="history-hub-panel active" role="tabpanel" aria-labelledby="historyHubHistorical" data-history-panel="historical">
-<div class="subtabs history-subtabs">
-  <button type="button" class="subtab active" data-hist="premium"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Ranking premium</span></button>
-  <button type="button" class="subtab" data-hist="points"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Puntos acumulados</span></button>
-  <button type="button" class="subtab" data-hist="palmares"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Palmarés puro</span></button>
-  <button type="button" class="subtab" data-hist="championsHistory"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Campeones</span></button>
+<div class="subtabs history-subtabs" role="tablist" aria-label="Clasificaciones históricas">
+  <button type="button" id="historyTabPremium" class="subtab active" role="tab" aria-selected="true" aria-controls="historyPremiumPanel" tabindex="0" data-hist="premium"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg><span>Ranking general</span></button>
+  <button type="button" id="historyTabPoints" class="subtab" role="tab" aria-selected="false" aria-controls="historyPointsPanel" tabindex="-1" data-hist="points"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Puntos acumulados</span></button>
+  <button type="button" id="historyTabPalmares" class="subtab" role="tab" aria-selected="false" aria-controls="historyPalmaresPanel" tabindex="-1" data-hist="palmares"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg><span>Palmarés total</span></button>
+  <button type="button" id="historyTabChampions" class="subtab" role="tab" aria-selected="false" aria-controls="historyChampionsPanel" tabindex="-1" data-hist="championsHistory"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Campeones</span></button>
 </div>
-<div id="premiumTable" class="history-panel active">
-  <div class="section-head history-table-heading"><div><span class="eyebrow">RESUMEN HISTÓRICO</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span>Ranking histórico completo</span></h2><p>Compara dominio, regularidad, puntos, palmarés e insignias de cada competidor.</p></div><label class="history-sort-control"><span>Ordenar por</span><select id="sortGeneral"><option value="ranking">Palmarés general</option><option value="points">Puntos</option><option value="titles">Títulos</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></label></div>
+<div id="historyPremiumPanel" class="history-panel active" role="tabpanel" aria-labelledby="historyTabPremium">
+  <div class="section-head history-table-heading"><div><span class="eyebrow">RESUMEN HISTÓRICO</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span>Ranking histórico completo</span></h2><p>Compara dominio, regularidad, puntos, palmarés e insignias de cada competidor.</p></div><label class="history-sort-control"><span>Ordenar por</span><select id="sortGeneral"><option value="ranking">Palmarés general</option><option value="points">Puntos</option><option value="titles">Títulos totales</option><option value="average">Promedio</option><option value="podiums">Podios</option></select></label></div>
   <div id="historicalPodium" class="historical-podium"></div>
-  <p class="history-table-scroll-note">Desliza la tabla para ver todas las estadísticas <span aria-hidden="true">→</span></p>
-  <div class="card scroll history-table-card" id="generalTable"><div class="thead general-grid"><span>#</span><span>Jugador</span><span>Tít.</span><span>2º</span><span>3º</span><span>Pod.</span><span>Top 5</span><span>Temp.</span><span>Puntos</span><span>Prom.</span></div><div id="generalRows"></div></div>
+  <div class="history-title-guide" id="generalTitlesGuide"><span class="history-guide-label">Cómo se cuentan</span><b class="history-guide-league">Liga</b><span aria-hidden="true">+</span><b class="history-guide-champions">Champions</b><span aria-hidden="true">=</span><b class="history-guide-total">Total</b><small>2º, 3º, podios y Top 5 corresponden a Liga.</small></div>
+  <p class="history-table-scroll-note" id="generalScrollHint">Las dos primeras columnas quedan fijas. Desliza para ver el resto <span aria-hidden="true">→</span></p>
+  <div class="history-data-scroll" tabindex="0" role="region" aria-label="Ranking histórico completo" aria-describedby="generalTitlesGuide generalScrollHint">
+    <table class="history-data-table history-general-table" id="historyGeneralDataTable">
+      <caption class="sr-only">Ranking histórico con títulos totales desglosados entre Liga y Champions</caption>
+      <colgroup><col class="history-col-rank"><col class="history-col-player"><col class="history-col-total"><col class="history-col-league"><col class="history-col-champions"><col span="5" class="history-col-compact"><col class="history-col-points"><col class="history-col-average"></colgroup>
+      <thead>
+        <tr class="history-column-groups"><th rowspan="2" scope="col">#</th><th rowspan="2" scope="col">Participante</th><th colspan="3" scope="colgroup">Títulos oficiales</th><th colspan="5" scope="colgroup">Liga</th><th colspan="2" scope="colgroup">Rendimiento</th></tr>
+        <tr><th class="history-title-total" scope="col">Total</th><th class="history-title-league" scope="col">T. Liga</th><th class="history-title-champions" scope="col"><abbr title="Títulos de Champions">T. Champions</abbr></th><th scope="col">2º</th><th scope="col">3º</th><th scope="col">Podios</th><th scope="col">Top 5</th><th scope="col">Temp.</th><th scope="col">Puntos</th><th scope="col">Prom.</th></tr>
+      </thead>
+      <tbody id="historyGeneralRows"></tbody>
+    </table>
+  </div>
 </div>
-<div id="pointsTable" class="history-panel">
+<div id="historyPointsPanel" class="history-panel" role="tabpanel" aria-labelledby="historyTabPoints" hidden>
   <div class="section-head history-table-heading"><div><span class="eyebrow">RENDIMIENTO ACUMULADO</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Ranking por puntos</span></h2><p>Todos los puntos oficiales sumados a través de las temporadas.</p></div></div>
-  <p class="history-table-scroll-note">Desliza la tabla para ver todas las estadísticas <span aria-hidden="true">→</span></p>
-  <div class="card history-table-card"><div class="thead points-grid"><span>#</span><span>Jugador</span><span>Temporadas</span><span>Puntos</span><span>Promedio</span></div><div id="pointsRows"></div></div>
+  <p class="history-table-scroll-note" id="pointsScrollHint">Las dos primeras columnas quedan fijas. Desliza para ver el resto <span aria-hidden="true">→</span></p>
+  <div class="history-data-scroll" tabindex="0" role="region" aria-label="Ranking histórico por puntos" aria-describedby="pointsScrollHint">
+    <table class="history-data-table history-points-table">
+      <caption class="sr-only">Puntos acumulados por participante</caption>
+      <colgroup><col class="history-col-rank"><col class="history-col-player"><col class="history-col-seasons"><col class="history-col-points"><col class="history-col-average"></colgroup>
+      <thead><tr><th scope="col">#</th><th scope="col">Participante</th><th scope="col">Temporadas</th><th scope="col">Puntos</th><th scope="col">Promedio</th></tr></thead>
+      <tbody id="historyPointsRows"></tbody>
+    </table>
+  </div>
 </div>
-<div id="palmaresTable" class="history-panel">
-  <div class="section-head history-table-heading"><div><span class="eyebrow">HONORES DE LA LIGA</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg></span><span>Palmarés puro</span></h2><p>Títulos, subcampeonatos, terceros lugares y podios oficiales.</p></div></div>
-  <p class="history-table-scroll-note">Desliza la tabla para ver todas las estadísticas <span aria-hidden="true">→</span></p>
-  <div class="card history-table-card"><div class="thead palmares-grid"><span>#</span><span>Jugador</span><span>Títulos</span><span>2º</span><span>3º</span><span>Podios</span></div><div id="palmaresRows"></div></div>
+<div id="historyPalmaresPanel" class="history-panel" role="tabpanel" aria-labelledby="historyTabPalmares" hidden>
+  <div class="section-head history-table-heading"><div><span class="eyebrow">TODOS LOS HONORES</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-medal"></use></svg></span><span>Palmarés total</span></h2><p>El total suma Liga y Champions; los demás puestos corresponden al campeonato de Liga.</p></div></div>
+  <div class="history-title-guide" id="palmaresTitlesGuide"><span class="history-guide-label">Total oficial</span><b class="history-guide-league">Liga</b><span aria-hidden="true">+</span><b class="history-guide-champions">Champions</b><span aria-hidden="true">=</span><b class="history-guide-total">Todos los títulos</b></div>
+  <p class="history-table-scroll-note" id="palmaresScrollHint">Las dos primeras columnas quedan fijas. Desliza para ver el resto <span aria-hidden="true">→</span></p>
+  <div class="history-data-scroll" tabindex="0" role="region" aria-label="Palmarés histórico total" aria-describedby="palmaresTitlesGuide palmaresScrollHint">
+    <table class="history-data-table history-palmares-table">
+      <caption class="sr-only">Palmarés total desglosado entre Liga y Champions</caption>
+      <colgroup><col class="history-col-rank"><col class="history-col-player"><col class="history-col-total"><col class="history-col-league"><col class="history-col-champions"><col span="3" class="history-col-compact"></colgroup>
+      <thead><tr><th scope="col">#</th><th scope="col">Participante</th><th class="history-title-total" scope="col">Total</th><th class="history-title-league" scope="col">T. Liga</th><th class="history-title-champions" scope="col"><abbr title="Títulos de Champions">T. Champions</abbr></th><th scope="col">2º Liga</th><th scope="col">3º Liga</th><th scope="col">Podios Liga</th></tr></thead>
+      <tbody id="historyPalmaresRows"></tbody>
+    </table>
+  </div>
 </div>
-<div id="championsHistoryTable" class="history-panel">
+<div id="historyChampionsPanel" class="history-panel" role="tabpanel" aria-labelledby="historyTabChampions" hidden>
   <div id="championsLegacy"></div>
   <div class="section-head history-table-heading"><div><span class="eyebrow">CAMPEONES DE LIGA</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg></span><span>Campeón de cada temporada</span></h2><p>El archivo cronológico de quienes levantaron la Cuban League.</p></div></div>
   <div id="seasonChampions" class="champion-history-grid"></div>
@@ -836,4 +862,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=128-20260817"></script><script src="player-catalog.js?v=128-20260817"></script><script src="app.js?v=128-20260817"></script></body></html>
+<script src="supabase-config.js?v=129-20260818"></script><script src="player-catalog.js?v=129-20260818"></script><script src="app.js?v=129-20260818"></script></body></html>

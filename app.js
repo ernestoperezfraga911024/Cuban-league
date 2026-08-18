@@ -1,4 +1,4 @@
-const APP_VERSION='128-20260817';
+const APP_VERSION='129-20260818';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -669,6 +669,23 @@ function setHistoryHubView(view='historical'){
     const active=panel.dataset.historyPanel===selected;
     panel.classList.toggle('active',active);
     panel.hidden=!active;
+  });
+}
+
+function setHistoricalTableView(view='premium',{focus=false}={}){
+  const tabs=[...document.querySelectorAll('.history-subtabs .subtab[data-hist]')];
+  const selected=tabs.some(tab=>tab.dataset.hist===view)?view:'premium';
+  tabs.forEach(tab=>{
+    const active=tab.dataset.hist===selected;
+    tab.classList.toggle('active',active);
+    tab.setAttribute('aria-selected',String(active));
+    tab.tabIndex=active?0:-1;
+    const panel=$(tab.getAttribute('aria-controls'));
+    if(panel){
+      panel.classList.toggle('active',active);
+      panel.hidden=!active;
+    }
+    if(active&&focus)tab.focus();
   });
 }
 
@@ -1893,14 +1910,76 @@ function renderMatchdayCenter(){
   renderMatchdayArchive();
 }
 
-function sortedGeneral(mode){const x=[...DATA.general];if(mode==='points')return x.sort((a,b)=>b.points-a.points);if(mode==='titles')return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.points-a.points);if(mode==='average')return x.sort((a,b)=>b.average-a.average);if(mode==='podiums')return x.sort((a,b)=>b.podiums-a.podiums||b.titles-a.titles||b.points-a.points);return x.sort((a,b)=>b.titles-a.titles||b.podiums-a.podiums||b.top5-a.top5||b.points-a.points||b.average-a.average)}
+function historicalTitleIndex(){
+  const leagueTitles=new Map();
+  const championsTitles=new Map();
+  const championsSeasons=new Map();
+
+  const seenLeagueEditions=new Set();
+  (DATA.historicalTables?.seasonChampions||[]).forEach(entry=>{
+    const name=String(entry?.name||'').trim();
+    if(!name)return;
+    const editionKey=`${entry.season||'sin-temporada'}::${name}`;
+    if(seenLeagueEditions.has(editionKey))return;
+    seenLeagueEditions.add(editionKey);
+    leagueTitles.set(name,(leagueTitles.get(name)||0)+1);
+  });
+
+  const seenChampionsEditions=new Set();
+  (DATA.champions?.history||[]).forEach((entry,index)=>{
+    const name=String(entry?.champion||'').trim();
+    if(!name)return;
+    const editionKey=entry.edition!=null
+      ?`edicion:${entry.edition}`
+      :`temporada:${entry.season||index}::${name}`;
+    if(seenChampionsEditions.has(editionKey))return;
+    seenChampionsEditions.add(editionKey);
+    championsTitles.set(name,(championsTitles.get(name)||0)+1);
+    if(!championsSeasons.has(name))championsSeasons.set(name,[]);
+    championsSeasons.get(name).push(entry.season||'Edición histórica');
+  });
+
+  return {leagueTitles,championsTitles,championsSeasons};
+}
+
+function withHistoricalHonours(player,index=historicalTitleIndex()){
+  const name=player?.name||'';
+  const legacyLeagueTitles=Number(player?.leagueTitles??player?.titles??0)||0;
+  const leagueTitles=Math.max(legacyLeagueTitles,index.leagueTitles.get(name)||0);
+  const championsTitles=index.championsTitles.get(name)||0;
+  return {...player,leagueTitles,championsTitles,totalTitles:leagueTitles+championsTitles};
+}
+
+function titleSort(a,b){
+  return b.totalTitles-a.totalTitles
+    ||(b.podiums||0)-(a.podiums||0)
+    ||(b.points||0)-(a.points||0);
+}
+
+function generalPalmaresSort(a,b){
+  return b.totalTitles-a.totalTitles
+    ||(b.podiums||0)-(a.podiums||0)
+    ||(b.top5||0)-(a.top5||0)
+    ||(b.points||0)-(a.points||0)
+    ||(b.average||0)-(a.average||0);
+}
+
+function sortedGeneral(mode){
+  const titleIndex=historicalTitleIndex();
+  const list=DATA.general.map(player=>withHistoricalHonours(player,titleIndex));
+  if(mode==='points')return list.sort((a,b)=>b.points-a.points);
+  if(mode==='titles')return list.sort(titleSort);
+  if(mode==='average')return list.sort((a,b)=>b.average-a.average);
+  if(mode==='podiums')return list.sort((a,b)=>b.podiums-a.podiums||titleSort(a,b));
+  return list.sort(generalPalmaresSort);
+}
 
 function historicalPodiumMetric(player,mode){
   if(mode==='points')return {label:'Puntos históricos',value:player.points,unit:'PTS',decimals:0};
-  if(mode==='titles')return {label:'Palmarés',value:player.titles,unit:player.titles===1?'TÍTULO':'TÍTULOS',decimals:0};
+  if(mode==='titles')return {label:'Palmarés total',value:player.totalTitles,unit:player.totalTitles===1?'TÍTULO':'TÍTULOS',decimals:0,detail:`${player.leagueTitles} Liga · ${player.championsTitles} Champions`};
   if(mode==='average')return {label:'Promedio',value:player.average||0,unit:'PTS / TEMP.',decimals:1};
   if(mode==='podiums')return {label:'Regularidad',value:player.podiums,unit:player.podiums===1?'PODIO':'PODIOS',decimals:0};
-  return {label:'Palmarés histórico',value:player.titles,unit:player.titles===1?'TÍTULO':'TÍTULOS',decimals:0};
+  return {label:'Palmarés histórico',value:player.totalTitles,unit:player.totalTitles===1?'TÍTULO':'TÍTULOS',decimals:0,detail:`${player.leagueTitles} Liga · ${player.championsTitles} Champions`};
 }
 
 function renderHistoricalPodium(list,mode,snapshot=buildAchievementSnapshot()){
@@ -1922,7 +2001,7 @@ function renderHistoricalPodium(list,mode,snapshot=buildAchievementSnapshot()){
     return `<article class="historical-podium-card historical-podium-${rank} team-profile-link" ${profileTriggerAttrs(player.name)}>
       <span class="historical-podium-place">${rank}</span>
       <img src="${imageMap()[player.name]||''}" alt="Foto de ${player.name}">
-      <div><small>${metric.label}</small><strong>${player.name}</strong>${badges}<b>${value}<span>${metric.unit}</span></b></div>
+      <div><small>${metric.label}</small><strong>${player.name}</strong>${badges}<b>${value}<span>${metric.unit}</span></b>${metric.detail?`<em>${metric.detail}</em>`:''}</div>
     </article>`;
   }).join('');
 }
@@ -1931,48 +2010,63 @@ function renderGeneral(mode='ranking'){
   const list=sortedGeneral(mode);
   const snapshot=buildAchievementSnapshot();
   renderHistoricalPodium(list,mode,snapshot);
-  $('generalRows').innerHTML=list.map((p,i)=>`<div class="general-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
-    <span class="pos">${i+1}</span>
-    ${standingsTeamCell(p.name,snapshot)}
-    <span class="center history-metric" data-label="Títulos">${p.titles}</span>
-    <span class="center history-metric" data-label="2º lugar">${p.seconds}</span>
-    <span class="center history-metric" data-label="3º lugar">${p.thirds}</span>
-    <span class="center history-metric" data-label="Podios">${p.podiums}</span>
-    <span class="center history-metric" data-label="Top 5">${p.top5}</span>
-    <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
-    <span class="num history-metric history-metric-wide history-metric-featured" data-label="Puntos">${p.points.toLocaleString('es')}</span>
-    <span class="num history-metric history-metric-wide" data-label="Promedio">${p.average?p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1}):'—'}</span>
-  </div>`).join('');
+  $('historyGeneralRows').innerHTML=list.map((p,i)=>`<tr class="history-data-row${i<3?` history-rank-${i+1}`:''}">
+    <td class="history-rank-cell"><span>${i+1}</span></td>
+    <td class="history-participant-cell">${standingsTeamCell(p.name,snapshot)}</td>
+    <td class="history-number history-title-total">${p.totalTitles}</td>
+    <td class="history-number history-title-league">${p.leagueTitles}</td>
+    <td class="history-number history-title-champions">${p.championsTitles}</td>
+    <td class="history-number">${p.seconds}</td>
+    <td class="history-number">${p.thirds}</td>
+    <td class="history-number">${p.podiums}</td>
+    <td class="history-number">${p.top5}</td>
+    <td class="history-number">${p.seasons}</td>
+    <td class="history-number history-points">${p.points.toLocaleString('es')}</td>
+    <td class="history-number history-average">${p.average?p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1}):'—'}</td>
+  </tr>`).join('');
 }
 
 function renderPoints(){
   const snapshot=buildAchievementSnapshot();
   const ranking=[...DATA.historicalTables.pointsRanking].sort((a,b)=>b.points-a.points);
-  $('pointsRows').innerHTML=ranking.map((p,i)=>`<div class="points-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
-    <span class="pos">${i+1}</span>
-    ${standingsTeamCell(p.name,snapshot)}
-    <span class="center history-metric" data-label="Temporadas">${p.seasons}</span>
-    <span class="num history-metric history-metric-featured" data-label="Puntos">${p.points.toLocaleString('es')}</span>
-    <span class="num history-metric" data-label="Promedio">${p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</span>
-  </div>`).join('');
+  $('historyPointsRows').innerHTML=ranking.map((p,i)=>`<tr class="history-data-row${i<3?` history-rank-${i+1}`:''}">
+    <td class="history-rank-cell"><span>${i+1}</span></td>
+    <td class="history-participant-cell">${standingsTeamCell(p.name,snapshot)}</td>
+    <td class="history-number">${p.seasons}</td>
+    <td class="history-number history-points">${p.points.toLocaleString('es')}</td>
+    <td class="history-number history-average">${p.average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</td>
+  </tr>`).join('');
 }
 
 function renderPalmares(){
   const snapshot=buildAchievementSnapshot();
   const stats=statMap();
-  const ranking=[...DATA.historicalTables.palmaresRanking].sort((a,b)=>
-    b.titles-a.titles
-    ||b.podiums-a.podiums
-    ||(stats[b.name]?.points||0)-(stats[a.name]?.points||0)
-  );
-  $('palmaresRows').innerHTML=ranking.map((p,i)=>`<div class="palmares-row historical-ranking-row${i<3?` history-rank-${i+1}`:''}">
-    <span class="pos">${i+1}</span>
-    ${standingsTeamCell(p.name,snapshot)}
-    <span class="center history-metric history-metric-featured" data-label="Títulos">${p.titles}</span>
-    <span class="center history-metric" data-label="2º lugar">${p.seconds}</span>
-    <span class="center history-metric" data-label="3º lugar">${p.thirds}</span>
-    <span class="center history-metric" data-label="Podios">${p.podiums}</span>
-  </div>`).join('');
+  const titleIndex=historicalTitleIndex();
+  const rankingByName=new Map((DATA.historicalTables.palmaresRanking||[]).map(player=>[player.name,player]));
+  titleIndex.championsTitles.forEach((_,name)=>{
+    if(rankingByName.has(name))return;
+    const general=stats[name]||{name,titles:0,seconds:0,thirds:0,podiums:0,points:0};
+    rankingByName.set(name,{
+      name,
+      titles:general.titles||0,
+      seconds:general.seconds||0,
+      thirds:general.thirds||0,
+      podiums:general.podiums||0
+    });
+  });
+  const ranking=[...rankingByName.values()]
+    .map(player=>withHistoricalHonours({...player,points:stats[player.name]?.points||0},titleIndex))
+    .sort(titleSort);
+  $('historyPalmaresRows').innerHTML=ranking.map((p,i)=>`<tr class="history-data-row${i<3?` history-rank-${i+1}`:''}">
+    <td class="history-rank-cell"><span>${i+1}</span></td>
+    <td class="history-participant-cell">${standingsTeamCell(p.name,snapshot)}</td>
+    <td class="history-number history-title-total">${p.totalTitles}</td>
+    <td class="history-number history-title-league">${p.leagueTitles}</td>
+    <td class="history-number history-title-champions">${p.championsTitles}</td>
+    <td class="history-number">${p.seconds}</td>
+    <td class="history-number">${p.thirds}</td>
+    <td class="history-number">${p.podiums}</td>
+  </tr>`).join('');
 }
 function renderSeasons(){
 const list=DATA.historicalTables.seasonArchive;
@@ -2059,14 +2153,6 @@ function achievementSeasonRecord(){
   if(!results.length)return {points:0,holders:[]};
   const points=Math.max(...results.map(result=>result.points));
   return {points,holders:results.filter(result=>result.points===points)};
-}
-
-function championsWinner(){
-  const direct=DATA.champions?.champion;
-  if(typeof direct==='string'&&DATA.participants.some(player=>player.name===direct))return direct;
-  const final=(DATA.champions?.knockout||[]).find(round=>/final/i.test(round.round||''));
-  const winner=final?.winner||final?.champion;
-  return typeof winner==='string'&&DATA.participants.some(player=>player.name===winner)?winner:null;
 }
 
 function monthlyAchievementAwards(){
@@ -2181,7 +2267,7 @@ function buildAchievementSnapshot(){
   const cleanSheetRecord=Math.max(0,...[...metrics.values()].map(item=>item.cleanSheetStreak));
   const monthAwards=monthlyAchievementAwards();
   const winterAwards=winterAchievementAwards();
-  const europeChampion=championsWinner();
+  const championsSeasons=historicalTitleIndex().championsSeasons;
 
   const resolve=(player,catalog)=>{
     const stats=historical[player.name]||{};
@@ -2244,8 +2330,13 @@ function buildAchievementSnapshot(){
       earned=Boolean(currentRow&&gloveTotal>0&&currentRow.cleanSheets===gloveTotal);
       meta=earned?`${currentRow.cleanSheets} clean ${currentRow.cleanSheets===1?'sheet':'sheets'}`:'';
     }else if(catalog.id==='king_europe'){
-      earned=europeChampion===player.name;
-      meta=earned?`Campeón de Champions · ${DATA.champions?.championSeason||'edición histórica'}`:'';
+      const seasons=championsSeasons.get(player.name)||[];
+      earned=seasons.length>0;
+      meta=earned
+        ?seasons.length===1
+          ?`Campeón de Champions · ${seasons[0]}`
+          :`${seasons.length} Champions · ${seasons.join(', ')}`
+        :'';
     }else if(catalog.id==='player_month'){
       earned=monthly.length>0;
       meta=earned
@@ -4156,6 +4247,7 @@ function openPlayer(name){
     :returnFocus;
   dismissAchievementToast();
   const s=statMap()[name]||{};
+  const honours=withHistoricalHonours({name,...s});
   const m=profileMetrics(name);
   const seasonRows=m.history.map(x=>{
     const isWinner=x.division===1&&x.position===1;
@@ -4211,7 +4303,7 @@ function openPlayer(name){
     </section>
 
     <section class="profile-major-stats">
-      <article><b>${s.titles||0}</b><span>Títulos</span></article>
+      <article><b>${honours.totalTitles}</b><span>Títulos totales</span><small>${honours.leagueTitles} Liga · ${honours.championsTitles} Champions</small></article>
       <article><b>${s.seconds||0}</b><span>Subcampeonatos</span></article>
       <article><b>${s.podiums||0}</b><span>Podios</span></article>
       <article><b>${s.points?.toLocaleString()||0}</b><span>Puntos históricos</span></article>
@@ -4404,7 +4496,16 @@ function singleSeasonPointsRecord(){
 }
 
 function officialRecords(){
-  const records=DATA.records.filter(record=>record.title!=='Más puntos en una temporada').map(record=>({...record}));
+  const titleIndex=historicalTitleIndex();
+  const honours=DATA.general.map(player=>withHistoricalHonours(player,titleIndex));
+  const maximumTitles=Math.max(0,...honours.map(player=>player.totalTitles));
+  const titleLeaders=honours.filter(player=>player.totalTitles===maximumTitles).map(player=>player.name);
+  const records=DATA.records
+    .filter(record=>record.title!=='Más puntos en una temporada')
+    .map(record=>record.title==='Más títulos'
+      ?{...record,player:titleLeaders.join(' / '),value:String(maximumTitles)}
+      :{...record}
+    );
   const singleSeason=singleSeasonPointsRecord();
   if(!singleSeason)return records;
   const accumulatedIndex=records.findIndex(record=>record.title==='Más puntos acumulados');
@@ -5920,10 +6021,19 @@ async function init(){
   document.querySelectorAll('.history-hub-tab[data-history-view]').forEach(button=>{
     button.onclick=()=>setHistoryHubView(button.dataset.historyView);
   });
-  document.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{
-    document.querySelectorAll('.subtab,.history-panel').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    $(`${b.dataset.hist}Table`).classList.add('active');
+  const historySubtabs=[...document.querySelectorAll('.history-subtabs .subtab[data-hist]')];
+  historySubtabs.forEach((button,index)=>{
+    button.onclick=()=>setHistoricalTableView(button.dataset.hist);
+    button.onkeydown=event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();
+      const nextIndex=event.key==='Home'
+        ?0
+        :event.key==='End'
+          ?historySubtabs.length-1
+          :(index+(event.key==='ArrowRight'?1:-1)+historySubtabs.length)%historySubtabs.length;
+      setHistoricalTableView(historySubtabs[nextIndex].dataset.hist,{focus:true});
+    };
   });
   $('sortGeneral').onchange=e=>renderGeneral(e.target.value);
   $('playerSearch').oninput=e=>renderPlayers(e.target.value);
