@@ -1,7 +1,11 @@
-# Cuban League V127
+# Cuban League V128
 
 Sitio oficial de la Cuban League con:
 
+- El Catálogo Maestro incorpora a Marcos Fernández como delantero del RCD
+  Espanyol. Recibe una identidad permanente distinta del `M. Fernández` del
+  Celta, de modo que ambos conservan por separado sus alineaciones y su
+  historial.
 - El Catálogo Maestro incorpora a Mario Soriano, mediocampista del RC
   Deportivo de La Coruña, y a Diego Rico, defensa del CA Osasuna, con
   identidades estables y retratos propios. La versión de la aplicación y la
@@ -55,7 +59,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 506 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 507 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
