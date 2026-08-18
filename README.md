@@ -1,7 +1,8 @@
-# Cuban League V129
+# Cuban League V130
 
 Sitio oficial de la Cuban League con:
 
+- El perfil de GNT D ZONA estrena el distintivo histórico `El Monarca`.
 - El histórico separa ahora los títulos de Liga y Champions y calcula un
   palmarés total sin alterar los datos originales. ANDOBA THE BEST figura con
   3 títulos oficiales: 2 Ligas y 1 Champions. El ranking general, el podio y
