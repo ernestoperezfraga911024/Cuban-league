@@ -1,7 +1,9 @@
-# Cuban League V130
+# Cuban League V131
 
 Sitio oficial de la Cuban League con:
 
+- Esteban Dominguez recibe el distintivo `El Pastillero del Sillón` en su
+  tarjeta y en el encabezado del perfil.
 - El perfil de GNT D ZONA estrena el distintivo histórico `El Monarca`.
 - El histórico separa ahora los títulos de Liga y Champions y calcula un
   palmarés total sin alterar los datos originales. ANDOBA THE BEST figura con
