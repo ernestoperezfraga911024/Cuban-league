@@ -1,7 +1,11 @@
-# Cuban League V132
+# Cuban League V133
 
 Sitio oficial de la Cuban League con:
 
+- La vista previa del panel conserva siempre visibles los botones `Volver a
+  corregir` y `Publicar`, también en iPhone vertical u horizontal. El resumen
+  se compacta cuando hay poca altura y solo la tabla de participantes se
+  desplaza.
 - El Catálogo Maestro incorpora a Rodri Hernández como mediocampista del FC
   Barcelona, con identidad estable y retrato propio.
 - Esteban Dominguez recibe el distintivo `El Pastillero del Sillón` en su
