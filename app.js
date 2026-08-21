@@ -1,4 +1,4 @@
-const APP_VERSION='134-20260821';
+const APP_VERSION='135-20260821';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1072,12 +1072,21 @@ function heroKpiScoreMarkup(detail){
 }
 
 function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){
-  const player=names.length?DATA.participants.find(entry=>entry.name===names[0]):null;
-  const extra=Math.max(0,names.length-1);
+  const leaders=names
+    .map(name=>DATA.participants.find(entry=>entry.name===name))
+    .filter(Boolean);
+  const player=leaders[0]||null;
+  const extra=Math.max(0,leaders.length-1);
   const displayName=player?(extra?`${player.name} +${extra}`:player.name):'Por definir';
   const attrs=player?profileTriggerAttrs(player.name):'';
+  const photoColumns=Math.max(1,Math.ceil(Math.sqrt(leaders.length)));
+  const visual=leaders.length
+    ? `<span class="hero-leader-icon hero-leader-photos${leaders.length>1?' is-multiple':''}" style="--leader-photo-columns:${photoColumns}" role="img" aria-label="Fotos de ${profileAttr(leaders.map(leader=>leader.name).join(', '))}">
+        ${leaders.map(leader=>`<img src="${profileAttr(leader.shield)}" alt="" title="${profileAttr(leader.name)}">`).join('')}
+      </span>`
+    : `<span class="hero-leader-icon">${uiIcon(icon)}</span>`;
   return `<article class="hero-leader-metric hero-leader-${tone}${player?' team-profile-link':' hero-kpi-placeholder'}" ${attrs}>
-    <span class="hero-leader-icon">${uiIcon(icon)}</span>
+    ${visual}
     <span class="hero-leader-label">${label}</span>
     <b>${displayName}</b>
     <strong>${value}</strong>

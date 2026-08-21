@@ -25616,3 +25616,60 @@ footer{
   #history .historical-podium-1{grid-template-columns:62px minmax(0,1fr);padding-left:12px}
   #history .historical-podium-1>img{width:58px;height:58px}
 }
+
+/* =========================================================
+   V135 — FOTOS DE LÍDERES Y TARJETAS MÓVILES LEGIBLES
+   ========================================================= */
+.hero-leader-photos{
+  overflow:hidden;
+  grid-template-columns:repeat(var(--leader-photo-columns,1),minmax(0,1fr));
+  grid-auto-rows:minmax(0,1fr);
+  gap:2px;
+  padding:2px;
+  background:#07151b;
+}
+
+.hero-leader-photos:not(.is-multiple){
+  display:block;
+  padding:0;
+}
+
+.hero-leader-photos img{
+  display:block;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  border-radius:4px;
+  object-fit:cover;
+}
+
+.hero-leader-photos:not(.is-multiple) img{
+  border-radius:12px;
+}
+
+@media(max-width:700px){
+  .hero-kpis .hero-leaders-row article{
+    min-height:148px;
+    grid-template-rows:auto auto auto auto;
+    align-content:start;
+  }
+
+  .hero-kpis .hero-leaders-row strong{
+    min-width:0;
+    margin-top:10px;
+    font-size:clamp(.78rem,3.8vw,1rem);
+    line-height:1.05;
+    text-wrap:balance;
+  }
+
+  .hero-kpis .hero-leaders-row small{
+    position:static;
+    width:100%;
+    max-width:none;
+    grid-column:1/-1;
+    margin-top:7px;
+    line-height:1.25;
+    text-align:left;
+  }
+}

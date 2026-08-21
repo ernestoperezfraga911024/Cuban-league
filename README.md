@@ -1,7 +1,11 @@
-# Cuban League V134
+# Cuban League V135
 
 Sitio oficial de la Cuban League con:
 
+- Las tarjetas de goleador y clean sheets de la portada muestran ahora la foto
+  real del participante. Cuando hay empate, el antiguo icono se convierte en
+  un mosaico con todos los líderes; en móvil, el valor y la nota de jornada se
+  ordenan en filas separadas para que nunca se superpongan.
 - El Catálogo Maestro incorpora a Giorgi Kochorashvili como mediocampista del
   Sevilla FC y a Troy Parrott como delantero del Real Betis, ambos con
   identidad estable y retrato propio.
