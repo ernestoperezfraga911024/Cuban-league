@@ -25618,18 +25618,21 @@ footer{
 }
 
 /* =========================================================
-   V135 — FOTOS DE LÍDERES Y TARJETAS MÓVILES LEGIBLES
+   V137 — MOSAICO COMPLETO Y TARJETAS MÓVILES COMPACTAS
    ========================================================= */
-.hero-leader-photos{
+.hero-kpis .hero-leader-photos{
+  display:grid;
   overflow:hidden;
   grid-template-columns:repeat(var(--leader-photo-columns,1),minmax(0,1fr));
-  grid-auto-rows:minmax(0,1fr);
+  grid-template-rows:repeat(var(--leader-photo-rows,1),minmax(0,1fr));
+  grid-auto-flow:row;
+  place-items:stretch;
   gap:2px;
   padding:2px;
   background:#07151b;
 }
 
-.hero-leader-photos:not(.is-multiple){
+.hero-kpis .hero-leader-photos:not(.is-multiple){
   display:block;
   padding:0;
 }
@@ -25665,18 +25668,58 @@ footer{
 
 @media(max-width:700px){
   .hero-kpis .hero-leaders-row article{
-    min-height:148px;
+    min-height:126px;
+    grid-template-columns:42px minmax(0,1fr);
+    column-gap:7px;
+    padding:10px 8px;
+  }
+
+  .hero-kpis .hero-leaders-row .hero-leader-icon{
+    width:42px;
+    height:42px;
+  }
+
+  .hero-kpis .hero-leader-label{
+    font-size:.4rem;
+    letter-spacing:.035em;
+  }
+
+  .hero-kpis .hero-leaders-row b{
+    font-size:.61rem;
+    line-height:1.1;
   }
 
   .hero-kpis .hero-leaders-row strong{
     min-width:0;
-    margin-top:10px;
-    font-size:clamp(.78rem,3.8vw,1rem);
+    margin-top:7px;
+    font-size:clamp(.68rem,3.25vw,.86rem);
     line-height:1.05;
     text-wrap:balance;
   }
 
   .hero-kpis .hero-leaders-row small{
+    margin-top:5px;
+    font-size:.37rem;
+    line-height:1.2;
     text-align:left;
   }
+}
+
+@media(max-width:370px){
+  .hero-kpis .hero-leaders-row article{
+    min-height:122px;
+    grid-template-columns:38px minmax(0,1fr);
+    column-gap:6px;
+    padding-inline:7px;
+  }
+
+  .hero-kpis .hero-leaders-row .hero-leader-icon{
+    width:38px;
+    height:38px;
+  }
+
+  .hero-kpis .hero-leader-label{font-size:.36rem}
+  .hero-kpis .hero-leaders-row b{font-size:.56rem}
+  .hero-kpis .hero-leaders-row strong{font-size:clamp(.64rem,3.1vw,.78rem)}
+  .hero-kpis .hero-leaders-row small{font-size:.34rem}
 }

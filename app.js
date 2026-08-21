@@ -1,4 +1,4 @@
-const APP_VERSION='136-20260821';
+const APP_VERSION='137-20260821';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1080,8 +1080,9 @@ function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){
   const displayName=player?(extra?`${player.name} +${extra}`:player.name):'Por definir';
   const attrs=player?profileTriggerAttrs(player.name):'';
   const photoColumns=Math.max(1,Math.ceil(Math.sqrt(leaders.length)));
+  const photoRows=Math.max(1,Math.ceil(leaders.length/photoColumns));
   const visual=leaders.length
-    ? `<span class="hero-leader-icon hero-leader-photos${leaders.length>1?' is-multiple':''}" style="--leader-photo-columns:${photoColumns}" role="img" aria-label="Fotos de ${profileAttr(leaders.map(leader=>leader.name).join(', '))}">
+    ? `<span class="hero-leader-icon hero-leader-photos${leaders.length>1?' is-multiple':''}" style="--leader-photo-columns:${photoColumns};--leader-photo-rows:${photoRows}" data-leader-photo-count="${leaders.length}" role="img" aria-label="Fotos de ${profileAttr(leaders.map(leader=>leader.name).join(', '))}">
         ${leaders.map(leader=>`<img src="${profileAttr(leader.shield)}" alt="" title="${profileAttr(leader.name)}">`).join('')}
       </span>`
     : `<span class="hero-leader-icon">${uiIcon(icon)}</span>`;

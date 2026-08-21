@@ -1,7 +1,11 @@
-# Cuban League V136
+# Cuban League V137
 
 Sitio oficial de la Cuban League con:
 
+- El empate de clean sheets muestra ahora a todos sus líderes en un mosaico
+  real de fotos. La cuadrícula declara sus filas y columnas de forma explícita
+  para evitar que reglas antiguas oculten participantes; en móvil, las tarjetas
+  usan tipografía y espacios más compactos sin superponer el valor ni la nota.
 - Las tarjetas de goleador y clean sheets de la portada muestran ahora la foto
   real del participante. Cuando hay empate, el antiguo icono se convierte en
   un mosaico con todos los líderes; en móvil, el valor y la nota de jornada se
