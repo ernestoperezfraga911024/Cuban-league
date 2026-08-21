@@ -1,7 +1,10 @@
-# Cuban League V133
+# Cuban League V134
 
 Sitio oficial de la Cuban League con:
 
+- El Catálogo Maestro incorpora a Giorgi Kochorashvili como mediocampista del
+  Sevilla FC y a Troy Parrott como delantero del Real Betis, ambos con
+  identidad estable y retrato propio.
 - La vista previa del panel conserva siempre visibles los botones `Volver a
   corregir` y `Publicar`, también en iPhone vertical u horizontal. El resumen
   se compacta cuando hay poca altura y solo la tabla de participantes se
@@ -78,7 +81,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 508 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 510 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
