@@ -25648,11 +25648,24 @@ footer{
   border-radius:12px;
 }
 
+.hero-kpis .hero-leaders-row article{
+  grid-template-rows:auto auto auto auto;
+  align-content:start;
+}
+
+.hero-kpis .hero-leaders-row small{
+  position:static;
+  width:100%;
+  max-width:none;
+  grid-column:1/-1;
+  margin-top:7px;
+  line-height:1.25;
+  text-align:right;
+}
+
 @media(max-width:700px){
   .hero-kpis .hero-leaders-row article{
     min-height:148px;
-    grid-template-rows:auto auto auto auto;
-    align-content:start;
   }
 
   .hero-kpis .hero-leaders-row strong{
@@ -25664,12 +25677,6 @@ footer{
   }
 
   .hero-kpis .hero-leaders-row small{
-    position:static;
-    width:100%;
-    max-width:none;
-    grid-column:1/-1;
-    margin-top:7px;
-    line-height:1.25;
     text-align:left;
   }
 }
