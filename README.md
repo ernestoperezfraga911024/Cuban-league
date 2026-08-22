@@ -1,7 +1,11 @@
-# Cuban League V137
+# Cuban League V138
 
 Sitio oficial de la Cuban League con:
 
+- El editor de alineaciones permite elegir `Posición vacía` desde el selector
+  del Catálogo Maestro. El hueco aplica −4 puntos automáticamente, conserva la
+  posición táctica, no puede ser capitán y se muestra claramente en el XI
+  publicado sin contaminar estadísticas, MVP ni récords de futbolistas.
 - El empate de clean sheets muestra ahora a todos sus líderes en un mosaico
   real de fotos. La cuadrícula declara sus filas y columnas de forma explícita
   para evitar que reglas antiguas oculten participantes; en móvil, las tarjetas

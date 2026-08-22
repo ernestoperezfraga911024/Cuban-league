@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '137-20260821';
+  const VERSION = '138-20260822';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -369,6 +369,22 @@
     DL: 'Delantero'
   };
   const LINEUP_CAPTAIN_MULTIPLIERS = [1.5, 2, 3];
+  const LINEUP_EMPTY_PLAYER_ID_PREFIX = 'empty-slot-';
+  const LINEUP_EMPTY_PLAYER_NAME = 'Posición vacía';
+  const LINEUP_EMPTY_CLUB_NAME = 'Penalización automática';
+  const LINEUP_EMPTY_POINTS = -4;
+
+  function lineupEmptyPlayerId(slot) {
+    const safeSlot = Number.isInteger(Number(slot)) ? Number(slot) : 0;
+    return `${LINEUP_EMPTY_PLAYER_ID_PREFIX}${String(safeSlot).padStart(2, '0')}`;
+  }
+
+  function isLineupEmptyPlayer(player) {
+    const playerId = String(player?.player_id || '').trim().toLowerCase();
+    const playerName = String(player?.player_name || '').trim().toLocaleLowerCase('es');
+    return playerId.startsWith(LINEUP_EMPTY_PLAYER_ID_PREFIX)
+      || playerName === LINEUP_EMPTY_PLAYER_NAME.toLocaleLowerCase('es');
+  }
 
   function lineupNumber(value) {
     if (value === null || value === undefined || value === '') return null;
@@ -406,24 +422,26 @@
     const seenSlots = new Set();
     return value.map((player, index) => {
       const slot = Number(player?.slot_number ?? index + 1);
-      const captain = player?.is_captain === true;
+      const normalizedSlot = Number.isInteger(slot) && slot >= 1 && slot <= 11 ? slot : index + 1;
+      const emptyPosition = isLineupEmptyPlayer(player);
+      const captain = !emptyPosition && player?.is_captain === true;
       const multiplier = lineupNumber(player?.captain_multiplier);
-      const catalogPlayer = state.catalog?.resolve({
+      const catalogPlayer = emptyPosition ? null : state.catalog?.resolve({
         playerId: player?.player_id,
         playerName: player?.player_name,
         clubId: player?.club_id,
         clubName: player?.club_name
       });
       return {
-        slot_number: Number.isInteger(slot) && slot >= 1 && slot <= 11 ? slot : index + 1,
-        player_id: String(player?.player_id || catalogPlayer?.id || '').trim(),
-        player_name: String(player?.player_name || catalogPlayer?.displayName || '').trim(),
-        club_id: String(player?.club_id || catalogPlayer?.clubId || '').trim(),
-        club_name: String(player?.club_name || catalogPlayer?.clubName || '').trim(),
+        slot_number: normalizedSlot,
+        player_id: emptyPosition ? lineupEmptyPlayerId(normalizedSlot) : String(player?.player_id || catalogPlayer?.id || '').trim(),
+        player_name: emptyPosition ? LINEUP_EMPTY_PLAYER_NAME : String(player?.player_name || catalogPlayer?.displayName || '').trim(),
+        club_id: emptyPosition ? '' : String(player?.club_id || catalogPlayer?.clubId || '').trim(),
+        club_name: emptyPosition ? LINEUP_EMPTY_CLUB_NAME : String(player?.club_name || catalogPlayer?.clubName || '').trim(),
         position: ['PT', 'DF', 'MC', 'DL'].includes(player?.position)
           ? player.position
           : catalogPlayer?.position || LINEUP_DEFAULT_POSITIONS[index] || 'MC',
-        displayed_points: lineupNumber(player?.displayed_points),
+        displayed_points: emptyPosition ? LINEUP_EMPTY_POINTS : lineupNumber(player?.displayed_points),
         is_captain: captain,
         captain_multiplier: captain ? (validCaptainMultiplier(multiplier) ? multiplier : 2) : 1
       };
@@ -445,7 +463,8 @@
       return name ? `legacy:${name}|${club}` : '';
     }).filter(Boolean);
     const slots = lineup.map(player => Number(player.slot_number));
-    const captains = lineup.filter(player => player.is_captain === true);
+    const captains = lineup.filter(player => !isLineupEmptyPlayer(player) && player.is_captain === true);
+    const emptyCount = lineup.filter(isLineupEmptyPlayer).length;
     const filled = lineup.filter(player => String(player.player_name || '').trim()).length;
     const pointsComplete = lineup.every(player => lineupNumber(player.displayed_points) !== null);
     const counts = { PT: 0, DF: 0, MC: 0, DL: 0 };
@@ -494,6 +513,7 @@
       filled,
       captain: captains[0] || null,
       captainCount: captains.length,
+      emptyCount,
       totals,
       total: Object.values(totals).reduce((sum, value) => sum + value, 0),
       formation: lineup.length === 11 ? `${counts.DF}-${counts.MC}-${counts.DL}` : '—',
@@ -576,9 +596,12 @@
     const captainLabel = metrics.captain?.player_name
       ? `${metrics.captain.player_name} · x${formatLineupNumber(metrics.captain.captain_multiplier)}`
       : 'Sin elegir';
+    const statusLabel = metrics.complete
+      ? `Lista${metrics.emptyCount ? ` · ${metrics.emptyCount} vacía${metrics.emptyCount === 1 ? '' : 's'}` : ''}`
+      : metrics.hasContent ? `${metrics.filled}/11` : 'Sin cargar';
     const totalTone = official !== null && metrics.hasContent && Math.abs(metrics.total - official) > 0.01 ? ' is-warning' : '';
     $('lineupEditorSummary').innerHTML = `
-      <span class="${metrics.complete ? 'is-ready' : 'is-warning'}"><small>Estado</small><b>${metrics.complete ? 'Lista' : metrics.hasContent ? `${metrics.filled}/11` : 'Sin cargar'}</b></span>
+      <span class="${metrics.complete ? 'is-ready' : 'is-warning'}"><small>Estado</small><b>${statusLabel}</b></span>
       <span><small>Formación</small><b>${metrics.formation}</b></span>
       <span class="${totalTone.trim()}"><small>Total del XI</small><b>${metrics.hasContent ? formatLineupNumber(metrics.total) : '—'} pts</b></span>
       <span><small>Capitán</small><b>${escapeHtml(captainLabel)}</b></span>`;
@@ -621,6 +644,7 @@
   }
 
   function lineupCatalogPlayer(player) {
+    if (isLineupEmptyPlayer(player)) return null;
     return state.catalog?.resolve({
       playerId: player?.player_id,
       playerName: player?.player_name,
@@ -630,20 +654,23 @@
   }
 
   function lineupPlayerPickerMarkup(player, slot) {
+    const emptyPosition = isLineupEmptyPlayer(player);
     const catalogPlayer = lineupCatalogPlayer(player);
-    const playerId = String(player?.player_id || catalogPlayer?.id || '').trim();
-    const playerName = String(player?.player_name || catalogPlayer?.displayName || '').trim();
-    const clubId = String(player?.club_id || catalogPlayer?.clubId || '').trim();
-    const clubName = String(player?.club_name || catalogPlayer?.clubName || '').trim();
+    const playerId = emptyPosition ? lineupEmptyPlayerId(slot) : String(player?.player_id || catalogPlayer?.id || '').trim();
+    const playerName = emptyPosition ? LINEUP_EMPTY_PLAYER_NAME : String(player?.player_name || catalogPlayer?.displayName || '').trim();
+    const clubId = emptyPosition ? '' : String(player?.club_id || catalogPlayer?.clubId || '').trim();
+    const clubName = emptyPosition ? LINEUP_EMPTY_CLUB_NAME : String(player?.club_name || catalogPlayer?.clubName || '').trim();
     const selected = Boolean(playerName);
     const initials = escapeHtml(lineupPlayerInitials(playerName));
-    const portrait = catalogPlayer?.photo
+    const portrait = emptyPosition
+      ? '<span class="lineup-selected-face is-empty-position" aria-hidden="true">−4</span>'
+      : catalogPlayer?.photo
       ? `<span class="lineup-selected-face" aria-hidden="true"><span>${initials}</span><img data-player-catalog-image src="${escapeHtml(catalogPlayer.photo)}" alt="" loading="lazy"></span>`
       : `<span class="lineup-selected-face is-initials" aria-hidden="true"><span>${initials}</span></span>`;
     const crest = catalogPlayer?.crest
       ? `<img data-player-catalog-image src="${escapeHtml(catalogPlayer.crest)}" alt="" loading="lazy">`
       : '';
-    return `<span class="lineup-player-fields${selected ? ' has-player' : ''}">
+    return `<span class="lineup-player-fields${selected ? ' has-player' : ''}${emptyPosition ? ' is-empty-position' : ''}">
       <input data-lineup-field="player_id" type="hidden" value="${escapeHtml(playerId)}">
       <input data-lineup-field="player_name" type="hidden" value="${escapeHtml(playerName)}">
       <input data-lineup-field="club_id" type="hidden" value="${escapeHtml(clubId)}">
@@ -697,6 +724,9 @@
     $('playerCatalogPosition').value = row?.querySelector('[data-lineup-field="position"]')?.value || '';
     $('playerCatalogClub').value = '';
     $('playerCatalogSlotLabel').textContent = `Posición ${String(state.catalogSlot).padStart(2, '0')} · ${LINEUP_POSITION_LABELS[$('playerCatalogPosition').value] || 'elige cualquier posición'}`;
+    if ($('emptyLineupPositionLabel')) {
+      $('emptyLineupPositionLabel').textContent = `${LINEUP_POSITION_LABELS[$('playerCatalogPosition').value] || 'Puesto'} sin futbolista · −4 pts`;
+    }
     $('playerCatalogModal').hidden = false;
     document.body.classList.add('catalog-open');
     document.querySelectorAll('.admin-topbar,.admin-main').forEach(node => { node.inert = true; });
@@ -749,6 +779,7 @@
       is_captain: false,
       captain_multiplier: 1
     };
+    const replacingEmptyPosition = isLineupEmptyPlayer(existing);
     const next = current.filter(item => item.slot_number !== slot);
     next.push({
       ...existing,
@@ -756,7 +787,44 @@
       player_name: player.displayName,
       club_id: player.clubId,
       club_name: player.clubName,
-      position: player.position
+      position: player.position,
+      displayed_points: replacingEmptyPosition ? null : existing.displayed_points,
+      is_captain: replacingEmptyPosition ? false : existing.is_captain,
+      captain_multiplier: replacingEmptyPosition ? 1 : existing.captain_multiplier
+    });
+    state.lineups.set(state.lineupParticipantName, normalizeLineupPlayers(next));
+    closePlayerCatalog(false);
+    renderLineupEditor();
+    updateCompletionState();
+    scheduleAutoSave();
+    requestAnimationFrame(() => document.querySelector(`.lineup-player-row[data-lineup-slot="${slot}"] [data-open-player-catalog]`)?.focus());
+  }
+
+  function chooseEmptyLineupSlot() {
+    const slot = state.catalogSlot;
+    const locked = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished);
+    if (locked || !slot || state.catalogParticipantName !== state.lineupParticipantName) {
+      closePlayerCatalog();
+      return;
+    }
+    const current = gatherLineupEditor();
+    const row = document.querySelector(`.lineup-player-row[data-lineup-slot="${slot}"]`);
+    const existing = current.find(item => item.slot_number === slot) || {};
+    const position = row?.querySelector('[data-lineup-field="position"]')?.value
+      || existing.position
+      || LINEUP_DEFAULT_POSITIONS[slot - 1]
+      || 'MC';
+    const next = current.filter(item => item.slot_number !== slot);
+    next.push({
+      slot_number: slot,
+      player_id: lineupEmptyPlayerId(slot),
+      player_name: LINEUP_EMPTY_PLAYER_NAME,
+      club_id: '',
+      club_name: LINEUP_EMPTY_CLUB_NAME,
+      position,
+      displayed_points: LINEUP_EMPTY_POINTS,
+      is_captain: false,
+      captain_multiplier: 1
     });
     state.lineups.set(state.lineupParticipantName, normalizeLineupPlayers(next));
     closePlayerCatalog(false);
@@ -781,23 +849,24 @@
     const players = lineupRowsForEditor(lineupForParticipant(state.lineupParticipantName));
     $('lineupPlayerRows').innerHTML = players.map(player => {
       const slot = Number(player.slot_number);
-      const captain = player.is_captain === true;
+      const emptyPosition = isLineupEmptyPlayer(player);
+      const captain = !emptyPosition && player.is_captain === true;
       const multiplier = captain && validCaptainMultiplier(player.captain_multiplier)
         ? lineupNumber(player.captain_multiplier)
         : 2;
       const points = lineupEditorPoints(player, captain, multiplier);
-      return `<article class="lineup-player-row${captain ? ' has-captain' : ''}" data-lineup-slot="${slot}">
+      return `<article class="lineup-player-row${captain ? ' has-captain' : ''}${emptyPosition ? ' is-empty-position' : ''}" data-lineup-slot="${slot}">
         <span class="lineup-slot-number">${String(slot).padStart(2, '0')}</span>
         <select class="lineup-position-select" data-lineup-field="position" aria-label="Posición del jugador ${slot}">
           ${Object.entries(LINEUP_POSITION_LABELS).map(([value, label]) => `<option value="${value}"${player.position === value ? ' selected' : ''}>${value} · ${label}</option>`).join('')}
         </select>
         ${lineupPlayerPickerMarkup(player, slot)}
         <div class="lineup-points-control${points !== null && points < 0 ? ' is-negative' : ''}" data-signed-points-control>
-          <input class="lineup-points-input" data-lineup-field="displayed_points" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="${points === null ? '' : points}" placeholder="—" aria-label="Puntos base del jugador ${slot}; admite negativos">
-          <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos del jugador ${slot}" aria-pressed="${points !== null && points < 0}" title="Cambiar entre positivo y negativo">±</button>
+          <input class="lineup-points-input" data-lineup-field="displayed_points" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="${points === null ? '' : points}" placeholder="—" aria-label="${emptyPosition ? `Penalización automática de la posición vacía ${slot}` : `Puntos base del jugador ${slot}; admite negativos`}"${emptyPosition ? ' disabled' : ''}>
+          <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos del jugador ${slot}" aria-pressed="${points !== null && points < 0}" title="${emptyPosition ? 'La posición vacía siempre vale −4' : 'Cambiar entre positivo y negativo'}"${emptyPosition ? ' disabled' : ''}>±</button>
         </div>
-        <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="radio" name="lineupCaptain" value="${slot}"${captain ? ' checked' : ''}><span>C</span></label>
-        <select class="lineup-position-select lineup-multiplier-input" data-lineup-field="captain_multiplier"${captain ? '' : ' disabled'} aria-label="Multiplicador del capitán en la posición ${slot}">
+        <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="radio" name="lineupCaptain" value="${slot}"${captain ? ' checked' : ''}${emptyPosition ? ' disabled' : ''}><span>C</span></label>
+        <select class="lineup-position-select lineup-multiplier-input" data-lineup-field="captain_multiplier"${captain && !emptyPosition ? '' : ' disabled'} aria-label="Multiplicador del capitán en la posición ${slot}">
           ${LINEUP_CAPTAIN_MULTIPLIERS.map(value => `<option value="${value}"${multiplier === value ? ' selected' : ''}>x${String(value).replace('.', ',')}</option>`).join('')}
         </select>
       </article>`;
@@ -819,6 +888,21 @@
       const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
       const multiplierInput = row.querySelector('[data-lineup-field="captain_multiplier"]');
       const multiplier = Number(multiplierInput.value);
+      const emptyPosition = isLineupEmptyPlayer({ player_id: playerId, player_name: playerName });
+      const position = row.querySelector('[data-lineup-field="position"]').value;
+      if (emptyPosition) {
+        return {
+          slot_number: slot,
+          player_id: lineupEmptyPlayerId(slot),
+          player_name: LINEUP_EMPTY_PLAYER_NAME,
+          club_id: '',
+          club_name: LINEUP_EMPTY_CLUB_NAME,
+          position,
+          displayed_points: LINEUP_EMPTY_POINTS,
+          is_captain: false,
+          captain_multiplier: 1
+        };
+      }
       const hasContent = Boolean(playerId || playerName || clubId || clubName || pointsInput.value.trim() || captain);
       if (!hasContent) return null;
       return {
@@ -827,7 +911,7 @@
         player_name: playerName,
         club_id: clubId,
         club_name: clubName,
-        position: row.querySelector('[data-lineup-field="position"]').value,
+        position,
         displayed_points: lineupFinalPoints(basePoints, captain, multiplier),
         is_captain: captain,
         captain_multiplier: captain && Number.isFinite(multiplier) ? multiplier : 1
@@ -843,11 +927,12 @@
       const name = row.querySelector('[data-lineup-field="player_name"]').value.trim();
       const points = row.querySelector('[data-lineup-field="displayed_points"]').value.trim();
       const captain = row.querySelector('[data-lineup-field="is_captain"]').checked;
+      const emptyPosition = row.classList.contains('is-empty-position');
       const hasAny = Boolean(name || points || row.querySelector('[data-lineup-field="club_name"]').value.trim() || captain);
       row.classList.toggle('has-captain', captain);
-      row.classList.toggle('is-incomplete', hasAny && (!name || signedDecimalNumber(points) === null));
+      row.classList.toggle('is-incomplete', hasAny && !emptyPosition && (!name || signedDecimalNumber(points) === null));
       const multiplier = row.querySelector('[data-lineup-field="captain_multiplier"]');
-      multiplier.disabled = !captain || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished);
+      multiplier.disabled = emptyPosition || !captain || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished);
       syncSignedPointsControl(row.querySelector('[data-lineup-field="displayed_points"]'));
     });
     updateLineupProgress();
@@ -1057,17 +1142,22 @@
     $('achievementSettings').classList.toggle('is-locked', locked && state.published);
     document.querySelectorAll('[data-lineup-field]').forEach(input => {
       const captainMultiplier = input.dataset.lineupField === 'captain_multiplier';
-      const captainChecked = input.closest('.lineup-player-row')?.querySelector('[data-lineup-field="is_captain"]')?.checked === true;
+      const row = input.closest('.lineup-player-row');
+      const emptyPosition = row?.classList.contains('is-empty-position') === true;
+      const captainChecked = row?.querySelector('[data-lineup-field="is_captain"]')?.checked === true;
       const catalogPosition = input.dataset.lineupField === 'position'
-        && Boolean(input.closest('.lineup-player-row')?.querySelector('[data-lineup-field="player_id"]')?.value.trim());
-      input.disabled = locked || catalogPosition || (captainMultiplier && !captainChecked);
+        && Boolean(row?.querySelector('[data-lineup-field="player_id"]')?.value.trim())
+        && !emptyPosition;
+      const emptyLockedField = emptyPosition && ['displayed_points', 'is_captain', 'captain_multiplier'].includes(input.dataset.lineupField);
+      input.disabled = locked || catalogPosition || emptyLockedField || (captainMultiplier && !captainChecked);
     });
     document.querySelectorAll('[data-open-player-catalog],[data-clear-lineup-player]').forEach(button => {
       button.disabled = locked || !state.catalog;
     });
     document.querySelectorAll('[data-toggle-points-sign]').forEach(button => {
-      button.disabled = locked;
+      button.disabled = locked || button.closest('.lineup-player-row')?.classList.contains('is-empty-position');
     });
+    if ($('selectEmptyLineupSlot')) $('selectEmptyLineupSlot').disabled = locked;
     if ($('clearLineupButton')) $('clearLineupButton').disabled = locked;
     $('lineupManagement')?.classList.toggle('is-locked', locked && state.published);
   }
@@ -2921,6 +3011,7 @@
       const result = event.target.closest('[data-catalog-player-id]');
       if (result) chooseCatalogPlayer(result.dataset.catalogPlayerId);
     });
+    $('selectEmptyLineupSlot').addEventListener('click', chooseEmptyLineupSlot);
     $('clearLineupButton').addEventListener('click', () => {
       if (!state.lineupParticipantName) return;
       const current = lineupMetrics(lineupForParticipant(state.lineupParticipantName));
