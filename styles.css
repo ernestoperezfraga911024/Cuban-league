@@ -23647,6 +23647,17 @@ footer{
   background:rgba(64,15,22,.95);
 }
 
+.matchday-field-player.is-empty-position .matchday-field-player-marker{
+  color:#ffd9d2;
+  border-color:rgba(255,159,143,.76);
+  border-style:dashed;
+  background:linear-gradient(145deg,#7b2924,#3e1715);
+  box-shadow:0 0 0 3px rgba(255,112,94,.1),0 9px 20px rgba(0,0,0,.25);
+}
+
+.matchday-field-player.is-empty-position>strong{color:#ffe2dc;background:rgba(68,22,20,.95)}
+.matchday-field-player.is-empty-position>small{color:#dfa59a;background:rgba(68,22,20,.95)}
+
 /* V116 · Rostros y escudos del Catálogo Maestro */
 .matchday-field-player-marker.has-photo{
   position:relative;
