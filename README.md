@@ -1,7 +1,12 @@
-# Cuban League V140
+# Cuban League V141
 
 Sitio oficial de la Cuban League con:
 
+- La Clasificación elimina el bloque editorial que retrasaba el acceso a la
+  tabla y organiza sus siete consultas por importancia: Tabla, Jornada y
+  Estadísticas como accesos principales; Comparador, Goleadores, Clean sheets
+  y Tarjetas rojas como accesos secundarios. No se añade un bloque especial
+  para el líder y la tabla conserva íntegramente sus columnas, filas y lógica.
 - El Catálogo Maestro incorpora a Adama Traoré, Arnau Martínez, Couhaib
   Driouech y Nathan Saliba, todos con identidad estable, club, posición y
   retrato propio extraído de las capturas originales.

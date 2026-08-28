@@ -1,4 +1,4 @@
-const APP_VERSION='140-20260827';
+const APP_VERSION='141-20260828';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
