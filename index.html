@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=140-20260827">
+<link rel="stylesheet" href="styles.css?v=141-20260828">
 <style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
@@ -211,31 +211,34 @@
 </section>
 
 <section id="current" class="page">
-<div class="minimal-page-banner current-page-banner"><div><span class="eyebrow">COMPETICIÓN EN VIVO</span><h2>La tabla que cambia cada jornada.</h2><p>Puntos, goles, clean sheets, tarjetas rojas, movimientos y forma reciente en una sola clasificación.</p></div><span class="page-banner-mark"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span></div>
-<div class="section-head"><div><span class="eyebrow">2026/27</span><h2 class="title-with-icon"><span class="section-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg></span><span>Clasificación actual</span></h2></div><div class="current-standings-meta"><small>Actualizado: <b id="updated"></b></small><span class="relegation-legend"><span class="relegation-dot" aria-hidden="true"></span><b>16–20</b> Descenso</span></div></div>
+<div class="section-head current-classification-head"><div><span class="eyebrow">TEMPORADA 2026/27</span><h2>Clasificación actual</h2></div><div class="current-standings-meta"><small>Actualizado: <b id="updated"></b></small><span class="relegation-legend"><span class="relegation-dot" aria-hidden="true"></span><b>16–20</b> Descenso</span></div></div>
 
-<div class="standings-switcher" role="tablist" aria-label="Seleccionar clasificación">
-  <button type="button" id="standingsTabGeneral" class="active" role="tab" aria-selected="true" aria-controls="currentGeneralPanel" data-standings-view="general">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Tabla general</span>
-  </button>
-  <button type="button" id="standingsTabMatchday" role="tab" aria-selected="false" aria-controls="currentMatchdayPanel" data-standings-view="matchday">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Jornada</span>
-  </button>
-  <button type="button" id="standingsTabStatistics" role="tab" aria-selected="false" aria-controls="currentStatisticsPanel" data-standings-view="statistics">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg><span>Estadísticas</span>
-  </button>
-  <button type="button" id="standingsTabComparator" role="tab" aria-selected="false" aria-controls="currentComparatorPanel" data-standings-view="comparator">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Comparador</span>
-  </button>
-  <button type="button" id="standingsTabGoals" role="tab" aria-selected="false" aria-controls="currentGoalsPanel" data-standings-view="goals">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Goleadores</span>
-  </button>
-  <button type="button" id="standingsTabCleanSheets" role="tab" aria-selected="false" aria-controls="currentCleanSheetsPanel" data-standings-view="clean-sheets">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span>Clean sheets</span>
-  </button>
-  <button type="button" id="standingsTabRedCards" role="tab" aria-selected="false" aria-controls="currentRedCardsPanel" data-standings-view="red-cards">
-    <svg class="ui-icon" aria-hidden="true"><use href="#icon-red-card"></use></svg><span>Tarjetas rojas</span>
-  </button>
+<div class="classification-switcher" role="tablist" aria-label="Seleccionar clasificación">
+  <div class="standings-switcher-primary" role="presentation">
+    <button type="button" id="standingsTabGeneral" class="active" role="tab" aria-selected="true" aria-controls="currentGeneralPanel" data-standings-view="general">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Tabla</span>
+    </button>
+    <button type="button" id="standingsTabMatchday" role="tab" aria-selected="false" aria-controls="currentMatchdayPanel" data-standings-view="matchday">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg><span>Jornada</span>
+    </button>
+    <button type="button" id="standingsTabStatistics" role="tab" aria-selected="false" aria-controls="currentStatisticsPanel" data-standings-view="statistics">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg><span>Estadísticas</span>
+    </button>
+  </div>
+  <div class="standings-switcher-secondary" role="presentation">
+    <button type="button" id="standingsTabComparator" role="tab" aria-selected="false" aria-controls="currentComparatorPanel" data-standings-view="comparator">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Comparador</span>
+    </button>
+    <button type="button" id="standingsTabGoals" role="tab" aria-selected="false" aria-controls="currentGoalsPanel" data-standings-view="goals">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Goleadores</span>
+    </button>
+    <button type="button" id="standingsTabCleanSheets" role="tab" aria-selected="false" aria-controls="currentCleanSheetsPanel" data-standings-view="clean-sheets">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg><span>Clean sheets</span>
+    </button>
+    <button type="button" id="standingsTabRedCards" role="tab" aria-selected="false" aria-controls="currentRedCardsPanel" data-standings-view="red-cards">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-red-card"></use></svg><span>Tarjetas rojas</span>
+    </button>
+  </div>
 </div>
 
 <div id="currentGeneralPanel" class="standings-panel" role="tabpanel" aria-labelledby="standingsTabGeneral" data-standings-panel="general">
@@ -862,4 +865,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=140-20260827"></script><script src="player-catalog.js?v=140-20260827"></script><script src="app.js?v=140-20260827"></script></body></html>
+<script src="supabase-config.js?v=141-20260828"></script><script src="player-catalog.js?v=141-20260828"></script><script src="app.js?v=141-20260828"></script></body></html>

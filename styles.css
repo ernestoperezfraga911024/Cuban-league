@@ -25734,3 +25734,230 @@ footer{
   .hero-kpis .hero-leaders-row strong{font-size:clamp(.64rem,3.1vw,.78rem)}
   .hero-kpis .hero-leaders-row small{font-size:.34rem}
 }
+
+/* =========================================================
+   V141 — CLASIFICACIÓN COMPACTA Y NAVEGACIÓN JERÁRQUICA
+   ========================================================= */
+#current>.current-classification-head{
+  position:relative;
+  display:flex!important;
+  align-items:flex-end!important;
+  gap:24px;
+  margin:0 0 18px!important;
+  padding:clamp(24px,3.4vw,44px) 0 20px;
+}
+
+#current .current-classification-head>div:first-child{
+  min-width:0;
+}
+
+#current .current-classification-head .eyebrow{
+  color:#50e6d0;
+  font-size:.68rem;
+  letter-spacing:.15em;
+}
+
+#current .current-classification-head h2{
+  margin:8px 0 0!important;
+  color:#f7fff9;
+  font-family:Sora,Manrope,Inter,system-ui,sans-serif;
+  font-size:clamp(2.15rem,4.5vw,4rem)!important;
+  font-weight:850;
+  letter-spacing:-.055em;
+  line-height:.98;
+  text-wrap:balance;
+}
+
+#current .current-classification-head .current-standings-meta{
+  flex:1 0 auto;
+  gap:10px!important;
+}
+
+#current .classification-switcher{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:12px!important;
+  margin:0 0 18px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+#current .standings-switcher-primary,
+#current .standings-switcher-secondary{
+  display:grid;
+  min-width:0;
+}
+
+#current .standings-switcher-primary{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px;
+  padding:5px;
+  border:1px solid rgba(80,230,208,.2);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(6,25,35,.96),rgba(4,17,25,.96));
+  box-shadow:0 16px 38px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.025);
+}
+
+#current .standings-switcher-secondary{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+}
+
+#current .classification-switcher button{
+  position:relative;
+  display:flex;
+  min-width:0;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:1px solid transparent!important;
+  color:#93a8b0;
+  background:transparent!important;
+  font-family:Manrope,Inter,system-ui,sans-serif;
+  font-weight:850;
+  line-height:1.1;
+  text-align:center;
+  box-shadow:none!important;
+}
+
+#current .classification-switcher button::after{
+  content:none!important;
+}
+
+#current .standings-switcher-primary button{
+  min-height:60px;
+  padding:10px 12px;
+  border-radius:13px!important;
+  font-size:.79rem;
+}
+
+#current .standings-switcher-secondary button{
+  min-height:52px;
+  grid-column:auto!important;
+  padding:9px 10px;
+  border-color:rgba(91,136,151,.22)!important;
+  border-radius:15px!important;
+  background:linear-gradient(145deg,rgba(8,27,38,.9),rgba(5,19,29,.92))!important;
+  color:#8fa4b0;
+  font-size:.73rem;
+  box-shadow:0 11px 24px rgba(0,0,0,.12)!important;
+}
+
+#current .classification-switcher button:hover{
+  border-color:rgba(80,230,208,.28)!important;
+  color:#e8fff5;
+  background:rgba(80,230,208,.055)!important;
+}
+
+#current .classification-switcher button.active{
+  border-color:rgba(108,255,115,.48)!important;
+  color:#a1ff91;
+  background:
+    radial-gradient(circle at 18% 15%,rgba(108,255,115,.15),transparent 6rem),
+    rgba(43,139,66,.1)!important;
+  box-shadow:inset 0 0 0 1px rgba(108,255,115,.06),0 10px 26px rgba(13,97,52,.14)!important;
+}
+
+#current .classification-switcher button:focus-visible{
+  outline:2px solid rgba(108,255,115,.78);
+  outline-offset:2px;
+}
+
+#current .classification-switcher .ui-icon{
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+}
+
+#current .standings-switcher-secondary .ui-icon{
+  width:18px;
+  height:18px;
+  flex-basis:18px;
+}
+
+@media(max-width:700px){
+  #current>.current-classification-head{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+    padding:20px 0 16px;
+  }
+
+  #current .current-classification-head h2{
+    font-size:clamp(2rem,9.3vw,3rem)!important;
+  }
+
+  #current .current-classification-head .current-standings-meta{
+    display:flex;
+    width:100%;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px!important;
+  }
+
+  #current .current-classification-head .current-standings-meta small{
+    min-width:0;
+    font-size:.61rem;
+    white-space:nowrap;
+  }
+
+  #current .classification-switcher{
+    gap:10px!important;
+    margin-bottom:14px!important;
+  }
+
+  #current .standings-switcher-primary{
+    gap:3px;
+    padding:4px;
+    border-radius:16px;
+  }
+
+  #current .standings-switcher-primary button{
+    min-height:58px;
+    flex-direction:column;
+    gap:5px;
+    padding:7px 3px;
+    border-radius:12px!important;
+    font-size:.69rem;
+  }
+
+  #current .standings-switcher-secondary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+
+  #current .standings-switcher-secondary button{
+    min-height:48px;
+    justify-content:flex-start;
+    gap:8px;
+    padding:8px 11px;
+    border-radius:13px!important;
+    font-size:.64rem;
+  }
+
+  #current .classification-switcher .ui-icon{
+    width:18px;
+    height:18px;
+    flex-basis:18px;
+  }
+}
+
+@media(max-width:360px){
+  #current .current-classification-head .current-standings-meta{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  #current .standings-switcher-primary button{
+    font-size:.64rem;
+  }
+
+  #current .standings-switcher-secondary button{
+    padding-inline:8px;
+    font-size:.6rem;
+  }
+}
