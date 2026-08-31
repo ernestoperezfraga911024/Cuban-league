@@ -1,16 +1,16 @@
-const CACHE_NAME = 'cuban-league-v141-standings-navigation-pwa';
+const CACHE_NAME = 'cuban-league-v142-admin-ios-focus-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=141-20260828',
-  './app.js?v=141-20260828',
-  './data.json?v=141-20260828',
-  './catalog/players.json?v=141-20260828',
-  './player-catalog.js?v=141-20260828',
-  './supabase-config.js?v=141-20260828',
+  './styles.css?v=142-20260831',
+  './app.js?v=142-20260831',
+  './data.json?v=142-20260831',
+  './catalog/players.json?v=142-20260831',
+  './player-catalog.js?v=142-20260831',
+  './supabase-config.js?v=142-20260831',
   './admin.html',
-  './admin.css?v=141-20260828',
-  './admin.js?v=141-20260828',
+  './admin.css?v=142-20260831',
+  './admin.js?v=142-20260831',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
@@ -107,12 +107,12 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=141-20260828'));
+    event.respondWith(networkFirst(request, './data.json?v=142-20260831'));
     return;
   }
 
   if (url.pathname.endsWith('/catalog/players.json')) {
-    event.respondWith(networkFirst(request, './catalog/players.json?v=141-20260828'));
+    event.respondWith(networkFirst(request, './catalog/players.json?v=142-20260831'));
     return;
   }
 
