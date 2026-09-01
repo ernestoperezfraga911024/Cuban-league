@@ -26507,3 +26507,38 @@ footer{
     font-size:.6rem;
   }
 }
+
+/* V150 · La navegación mensual debe prevalecer sobre las reglas históricas. */
+#current .standings-switcher-secondary{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+@media(max-width:700px){
+  #current .standings-switcher-secondary{
+    display:flex;
+    gap:7px;
+    overflow-x:auto;
+    padding:0 1px 3px;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #current .standings-switcher-secondary::-webkit-scrollbar{
+    display:none;
+  }
+
+  #current .standings-switcher-secondary button{
+    min-width:max-content;
+    flex:0 0 auto;
+    justify-content:center;
+    padding-inline:13px;
+    scroll-snap-align:start;
+  }
+}
+
+@media(max-width:360px){
+  #current .standings-switcher-secondary button{
+    padding-inline:11px;
+  }
+}
