@@ -1,6 +1,16 @@
-# Cuban League V145
+# Cuban League V146
 
 Sitio oficial de la Cuban League con:
+
+- El panel de administración incorpora `Copiar alineación anterior`: recupera
+  el último XI completo y publicado del participante, conserva jugadores,
+  posiciones, capitán y multiplicador, y deja vacíos los puntos de la jornada
+  nueva para impedir reutilizar resultados por accidente. Las posiciones
+  vacías mantienen su penalización automática de −4.
+- Audiencia y respaldos quedan agrupados como `Herramientas del panel` en dos
+  tarjetas plegables. El trabajo principal —jornada, progreso, modo uno por
+  uno, estadísticas, alineación y publicación— aparece antes y con menos ruido,
+  sin perder los controles de seguridad ni el historial de modificaciones.
 
 - El Catálogo Maestro incorpora a Adam Aznou, Aarón Martín, Romain Del
   Castillo e Iván Martín con identidad, club, posición y retrato propios. Aarón
