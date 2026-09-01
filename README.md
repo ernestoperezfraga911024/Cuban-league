@@ -1,6 +1,17 @@
-# Cuban League V150
+# Cuban League V151
 
 Sitio oficial de la Cuban League con:
+
+- El Centro de Tarjetas incorpora `Jugador del mes` en formato vertical
+  1080×1350: selecciona cualquier mes cerrado y genera una imagen oficial con
+  foto, PTS, jornadas, goles, clean sheets y tarjetas rojas. Los empates se
+  presentan juntos como co-ganadores y el estado provisional queda identificado
+  antes de descargar o compartir por WhatsApp.
+- La tabla general distingue al último Jugador del mes oficial con una insignia
+  dorada y un halo moderno de baja intensidad. El título pasa automáticamente al
+  siguiente ganador al cerrar un nuevo mes, incluye a todos los empatados y
+  conserva el estilo de descenso; la animación se detiene si el dispositivo
+  solicita movimiento reducido.
 
 - Clasificación incorpora `Jugador del mes` junto al Comparador y las demás
   consultas. El historial se completa automáticamente al publicar el cierre

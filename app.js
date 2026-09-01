@@ -1,4 +1,4 @@
-const APP_VERSION='150-20260901-r2';
+const APP_VERSION='151-20260901';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -17,6 +17,7 @@ let CHAMPIONS_MATCHDAY_ROWS=[];
 let CHAMPIONS_PUBLISHED_MATCHDAYS=[];
 let SHARE_CARD_TYPE='podium';
 let SHARE_CARD_GROUP_INDEX=0;
+let SHARE_CARD_MONTH_KEY='';
 let SHARE_CARD_RENDER_TOKEN=0;
 let SHARE_CARD_READY=false;
 let SECTION_TRANSITION_TOKEN=0;
@@ -813,12 +814,16 @@ function renderCurrent(){
     :cumulativeStandings(latest);
   const movements=latest==null?new Map():movementForMatchday(latest);
   const achievementSnapshot=buildAchievementSnapshot();
+  const monthGroups=monthlyAchievementGroups();
+  const currentMonthTitle=latestOfficialPlayerMonthGroup(monthGroups);
+  const monthWinners=new Set(currentMonthTitle?.winners.map(winner=>winner.name)||[]);
   $('updated').textContent=DATA.lastUpdated;
   $('currentRows').innerHTML=rows.map(p=>{
     const isRelegation=p.position>=16&&p.position<=20;
-    return `<div class="row current-row${isRelegation?' is-relegation':''}">
+    const isPlayerMonth=monthWinners.has(p.name);
+    return `<div class="row current-row${isRelegation?' is-relegation':''}${isPlayerMonth?' is-player-month':''}">
     <span class="pos"${isRelegation?` aria-label="Puesto ${p.position}, zona de descenso"`:''}>${p.position}</span>
-    ${standingsTeamCell(p.name,achievementSnapshot)}
+    ${standingsTeamCell(p.name,achievementSnapshot,{playerMonthLabel:isPlayerMonth?currentMonthTitle.label:''})}
     <span class="center">${p.played}</span>
     <span class="num">${p.points.toLocaleString('es')}</span>
     <span class="current-stat current-goals" aria-label="${p.goals??0} goles">${p.goals??0}</span>
@@ -856,7 +861,7 @@ function renderCurrent(){
     rowsId:'currentRedCardsRows'
   });
   renderClassificationMatchday();
-  renderPlayerOfMonth();
+  renderPlayerOfMonth(monthGroups);
 }
 
 function renderClassificationMatchday(){
@@ -2328,6 +2333,10 @@ function monthlyAchievementGroups(awards=monthlyAchievementAwards()){
   return [...groups.values()].sort((a,b)=>b.month.localeCompare(a.month));
 }
 
+function latestOfficialPlayerMonthGroup(groups=monthlyAchievementGroups()){
+  return groups.find(group=>!group.provisional)||null;
+}
+
 function monthlyMatchdayLabel(matchdays){
   const days=[...matchdays].sort((a,b)=>a-b);
   if(!days.length)return 'Sin jornadas';
@@ -2338,10 +2347,9 @@ function monthlyMatchdayLabel(matchdays){
     :`Jornadas ${days.join(', ')}`;
 }
 
-function renderPlayerOfMonth(){
+function renderPlayerOfMonth(groups=monthlyAchievementGroups()){
   const host=$('currentPlayerMonthContent');
   if(!host)return;
-  const groups=monthlyAchievementGroups();
   if(!groups.length){
     host.innerHTML=`<div class="player-month-empty">
       <span class="player-month-empty-icon">${uiIcon('medal')}</span>
@@ -2599,12 +2607,18 @@ function compactAchievementBadges(name,snapshot,{limit=3,className=''}={}){
   </span>`;
 }
 
-function standingsTeamCell(name,snapshot){
+function standingsTeamCell(name,snapshot,{playerMonthLabel=''}={}){
+  const badges=compactAchievementBadges(name,snapshot,{limit:playerMonthLabel?2:3});
+  const monthTitle=playerMonthLabel
+    ?`<span class="standings-player-month-pill" title="Jugador del mes · ${profileAttr(playerMonthLabel)}" aria-label="Jugador del mes · ${profileAttr(playerMonthLabel)}">
+        ${uiIcon('medal')}<span class="standings-player-month-long">Jugador del mes</span><span class="standings-player-month-short">Del mes</span>
+      </span>`
+    :'';
   return `<div class="team standings-team team-profile-link" ${profileTriggerAttrs(name)}>
     <img src="${imageMap()[name]||''}" alt="Foto de ${profileAttr(name)}">
     <div class="standings-team-copy">
       <span class="name">${name}</span>
-      ${compactAchievementBadges(name,snapshot)}
+      ${playerMonthLabel?`<span class="standings-title-meta">${monthTitle}${badges}</span>`:badges}
     </div>
   </div>`;
 }
@@ -5763,6 +5777,178 @@ async function drawLeadersShareCard(ctx,matchday){
   return true;
 }
 
+function drawPlayerMonthMetric(ctx,{x,y,width=216,label,value,tone='#e7ca69'}){
+  fillRounded(ctx,x,y,width,142,23,'rgba(3,18,24,.86)');
+  strokeRounded(ctx,x,y,width,142,23,`${tone}38`,2);
+  drawCardText(ctx,label,x+width/2,y+45,width-28,14,11,850,'center','#7f999d');
+  drawCardText(ctx,value,x+width/2,y+102,width-28,34,24,900,'center',tone);
+}
+
+function drawPlayerMonthStar(ctx,cx,cy,outerRadius=22,innerRadius=10){
+  ctx.save();
+  ctx.beginPath();
+  for(let point=0;point<10;point++){
+    const radius=point%2===0?outerRadius:innerRadius;
+    const angle=-Math.PI/2+point*Math.PI/5;
+    const x=cx+Math.cos(angle)*radius;
+    const y=cy+Math.sin(angle)*radius;
+    if(point===0)ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle='#071015';
+  ctx.fill();
+  ctx.restore();
+}
+
+function playerMonthCanvasLabel(group){
+  return String(group?.label||group?.month||'MES CERRADO').toLocaleUpperCase('es').replace(' DE ',' ');
+}
+
+async function drawSinglePlayerMonthWinner(ctx,group,winner){
+  const tone=group.provisional?'#efb75d':'#e7ca69';
+  const panel=ctx.createLinearGradient(60,365,1020,1200);
+  panel.addColorStop(0,group.provisional?'rgba(239,183,93,.13)':'rgba(231,202,105,.14)');
+  panel.addColorStop(.48,'rgba(8,35,36,.93)');
+  panel.addColorStop(1,'rgba(3,17,24,.97)');
+  fillRounded(ctx,60,365,960,855,38,panel);
+  strokeRounded(ctx,60,365,960,855,38,group.provisional?'rgba(239,183,93,.45)':'rgba(231,202,105,.48)',3);
+
+  ctx.save();
+  roundedPath(ctx,60,365,960,855,38);
+  ctx.clip();
+  const halo=ctx.createRadialGradient(540,535,20,540,535,390);
+  halo.addColorStop(0,group.provisional?'rgba(239,183,93,.24)':'rgba(231,202,105,.27)');
+  halo.addColorStop(.48,'rgba(80,230,208,.07)');
+  halo.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=halo;
+  ctx.fillRect(60,365,960,690);
+  ctx.restore();
+
+  await drawPlayerAvatar(ctx,winner.name,390,405,300,62);
+  strokeRounded(ctx,378,393,324,324,72,'rgba(231,202,105,.38)',5);
+  strokeRounded(ctx,369,384,342,342,79,'rgba(80,230,208,.12)',2);
+  fillRounded(ctx,492,680,96,62,24,tone);
+  drawPlayerMonthStar(ctx,540,711,23,10);
+
+  fillRounded(ctx,382,754,316,45,22,group.provisional?'rgba(239,183,93,.13)':'rgba(231,202,105,.11)');
+  strokeRounded(ctx,382,754,316,45,22,group.provisional?'rgba(239,183,93,.32)':'rgba(231,202,105,.32)',2);
+  drawCardText(ctx,group.provisional?'RESULTADO PROVISIONAL':'GANADOR OFICIAL',540,784,282,15,11,900,'center',tone);
+  drawCardText(ctx,winner.name,540,860,860,58,34,900,'center','#f8fbf8');
+  drawCardText(ctx,`${winner.points.toLocaleString('es')} PTS`,540,952,700,76,50,900,'center',tone);
+
+  const metrics=[
+    {x:72,label:'JORNADAS',value:winner.played.toLocaleString('es'),tone:'#76e8da'},
+    {x:306,label:'GOLES',value:winner.goals.toLocaleString('es'),tone:'#6cff73'},
+    {x:540,label:'CLEAN SHEETS',value:winner.cleanSheets.toLocaleString('es'),tone:'#50e6d0'},
+    {x:774,label:'TARJETAS ROJAS',value:winner.redCards.toLocaleString('es'),tone:'#ff7180'}
+  ];
+  metrics.forEach(metric=>drawPlayerMonthMetric(ctx,{...metric,y:1000,width:216}));
+  drawCardText(ctx,`${monthlyMatchdayLabel(group.matchdays).toLocaleUpperCase('es')} · CIERRE J${group.matchday}`,540,1198,840,17,12,850,'center','#90a8a8');
+}
+
+async function drawTwoPlayerMonthWinners(ctx,group){
+  const tone=group.provisional?'#efb75d':'#e7ca69';
+  for(let index=0;index<2;index++){
+    const winner=group.winners[index];
+    const x=index===0?60:560;
+    const gradient=ctx.createLinearGradient(x,375,x+460,1115);
+    gradient.addColorStop(0,index===0?'rgba(231,202,105,.14)':'rgba(80,230,208,.105)');
+    gradient.addColorStop(1,'rgba(3,18,25,.96)');
+    fillRounded(ctx,x,375,460,745,34,gradient);
+    strokeRounded(ctx,x,375,460,745,34,index===0?'rgba(231,202,105,.42)':'rgba(80,230,208,.31)',3);
+    await drawPlayerAvatar(ctx,winner.name,x+125,421,210,50);
+    strokeRounded(ctx,x+116,412,228,228,58,index===0?'rgba(231,202,105,.4)':'rgba(80,230,208,.3)',4);
+    fillRounded(ctx,x+178,610,104,46,19,tone);
+    drawPlayerMonthStar(ctx,x+230,633,18,8);
+    drawCardText(ctx,winner.name,x+230,726,402,42,25,900,'center','#f7faf8');
+    drawCardText(ctx,`${winner.points.toLocaleString('es')} PTS`,x+230,798,390,50,34,900,'center',tone);
+    fillRounded(ctx,x+28,848,404,116,22,'rgba(5,24,30,.82)');
+    strokeRounded(ctx,x+28,848,404,116,22,'rgba(80,230,208,.13)',2);
+    drawCardText(ctx,`${winner.played} J`,x+78,914,80,25,18,900,'center','#76e8da');
+    drawCardText(ctx,`${winner.goals} GOL`,x+178,914,95,25,18,900,'center','#6cff73');
+    drawCardText(ctx,`${winner.cleanSheets} CS`,x+282,914,82,25,18,900,'center','#50e6d0');
+    drawCardText(ctx,`${winner.redCards} TR`,x+382,914,74,25,18,900,'center','#ff7180');
+    drawCardText(ctx,group.provisional?'CO-GANADOR PROVISIONAL':'CO-GANADOR OFICIAL',x+230,1042,390,16,11,900,'center',tone);
+  }
+  fillRounded(ctx,160,1158,760,58,22,group.provisional?'rgba(239,183,93,.075)':'rgba(231,202,105,.06)');
+  strokeRounded(ctx,160,1158,760,58,22,group.provisional?'rgba(239,183,93,.2)':'rgba(231,202,105,.18)',2);
+  drawCardText(ctx,`${monthlyMatchdayLabel(group.matchdays).toLocaleUpperCase('es')} · CIERRE J${group.matchday}`,540,1195,720,17,12,850,'center','#a5aa91');
+}
+
+async function drawPlayerMonthWinnerGrid(ctx,group){
+  const count=group.winners.length;
+  const columns=count<=4?2:count<=9?3:4;
+  const rows=Math.ceil(count/columns);
+  const gap=14;
+  const gridX=60;
+  const gridY=375;
+  const gridWidth=960;
+  const gridHeight=770;
+  const tileWidth=(gridWidth-gap*(columns-1))/columns;
+  const tileHeight=(gridHeight-gap*(rows-1))/rows;
+  const spacious=count<=4;
+
+  for(let index=0;index<count;index++){
+    const winner=group.winners[index];
+    const column=index%columns;
+    const row=Math.floor(index/columns);
+    const x=gridX+column*(tileWidth+gap);
+    const y=gridY+row*(tileHeight+gap);
+    const gradient=ctx.createLinearGradient(x,y,x+tileWidth,y+tileHeight);
+    gradient.addColorStop(0,index%2?'rgba(80,230,208,.09)':'rgba(231,202,105,.105)');
+    gradient.addColorStop(1,'rgba(3,18,25,.96)');
+    fillRounded(ctx,x,y,tileWidth,tileHeight,spacious?28:20,gradient);
+    strokeRounded(ctx,x,y,tileWidth,tileHeight,spacious?28:20,index%2?'rgba(80,230,208,.24)':'rgba(231,202,105,.28)',2);
+
+    if(spacious){
+      const avatar=Math.min(150,tileHeight-128);
+      await drawPlayerAvatar(ctx,winner.name,x+30,y+58,avatar,38);
+      const copyX=x+avatar+52;
+      const copyWidth=tileWidth-avatar-76;
+      drawCardText(ctx,winner.name,copyX,y+106,copyWidth,31,17,900,'left','#f7faf8');
+      drawCardText(ctx,`${winner.points.toLocaleString('es')} PTS`,copyX,y+158,copyWidth,36,22,900,'left','#e7ca69');
+      drawCardText(ctx,group.provisional?'PROVISIONAL':'CO-GANADOR',copyX,y+198,copyWidth,14,10,900,'left',group.provisional?'#efb75d':'#7fe3d7');
+      fillRounded(ctx,x+28,y+tileHeight-94,tileWidth-56,66,18,'rgba(3,18,24,.68)');
+      strokeRounded(ctx,x+28,y+tileHeight-94,tileWidth-56,66,18,'rgba(80,230,208,.12)',2);
+      drawCardText(ctx,`${winner.played} J  ·  ${winner.goals} GOL  ·  ${winner.cleanSheets} CS  ·  ${winner.redCards} TR`,x+tileWidth/2,y+tileHeight-52,tileWidth-78,17,11,850,'center','#83aaa6');
+    }else{
+      const avatar=Math.max(52,Math.min(88,tileHeight-58));
+      await drawPlayerAvatar(ctx,winner.name,x+14,y+18,avatar,22);
+      const copyX=x+avatar+27;
+      const copyWidth=tileWidth-avatar-39;
+      drawCardText(ctx,winner.name,copyX,y+44,copyWidth,22,10,900,'left','#f7faf8');
+      drawCardText(ctx,`${winner.points.toLocaleString('es')} PTS`,copyX,y+78,copyWidth,25,13,900,'left','#e7ca69');
+      drawCardText(ctx,`${winner.played}J · ${winner.goals}G · ${winner.cleanSheets}CS · ${winner.redCards}TR`,x+14,y+tileHeight-17,tileWidth-28,13,8,850,'left','#78a29e');
+    }
+  }
+
+  fillRounded(ctx,160,1168,760,48,20,group.provisional?'rgba(239,183,93,.075)':'rgba(231,202,105,.06)');
+  drawCardText(ctx,`${count} CO-GANADORES · ${monthlyMatchdayLabel(group.matchdays).toLocaleUpperCase('es')} · CIERRE J${group.matchday}`,540,1200,730,15,9,850,'center',group.provisional?'#efb75d':'#dcca7e');
+}
+
+async function drawPlayerMonthShareCard(ctx,group){
+  const winnerCount=group?.winners?.length||0;
+  await drawShareCardBase(ctx,{
+    eyebrow:'PREMIO MENSUAL',
+    title:winnerCount>1?'CO-GANADORES DEL MES':'JUGADOR DEL MES',
+    subtitle:group?`${monthlyMatchdayLabel(group.matchdays)} · Cierre J${group.matchday}${group.provisional?' · Resultado provisional':''}`:'Se activa al publicar el cierre de un mes.',
+    badge:group?playerMonthCanvasLabel(group):'SIN PREMIOS'
+  });
+  if(!group||!winnerCount){
+    drawShareCardEmpty(ctx,'Esperando el primer cierre mensual','Publica la jornada de cierre para generar esta tarjeta.');
+    drawShareCardFooter(ctx);
+    return false;
+  }
+
+  await preloadShareCardPlayers(group.winners.map(winner=>winner.name));
+  if(winnerCount===1)await drawSinglePlayerMonthWinner(ctx,group,group.winners[0]);
+  else if(winnerCount===2)await drawTwoPlayerMonthWinners(ctx,group);
+  else await drawPlayerMonthWinnerGrid(ctx,group);
+  drawShareCardFooter(ctx);
+  return true;
+}
+
 async function drawChampionsShareCard(ctx,groupIndex){
   const group=DATA.champions.groups[groupIndex]||DATA.champions.groups[0];
   const publishedCount=CHAMPIONS_PUBLISHED_MATCHDAYS.length;
@@ -5831,6 +6017,11 @@ function selectedShareCardMatchday(){
   return PUBLISHED_MATCHDAYS.includes(value)?value:null;
 }
 
+function selectedShareCardMonthGroup(groups=monthlyAchievementGroups()){
+  const selectedKey=$('cardMonthSelect')?.value||SHARE_CARD_MONTH_KEY;
+  return groups.find(group=>group.month===selectedKey)||groups[0]||null;
+}
+
 function setShareCardStatus(message,error=false){
   const status=$('shareCardStatus');
   if(!status)return;
@@ -5874,17 +6065,25 @@ async function renderShareCardPreview(){
     if(SHARE_CARD_TYPE==='podium')ready=await drawPodiumShareCard(ctx,matchday);
     else if(SHARE_CARD_TYPE==='standings')ready=await drawStandingsShareCard(ctx,matchday);
     else if(SHARE_CARD_TYPE==='leaders')ready=await drawLeadersShareCard(ctx,matchday);
-    else ready=await drawChampionsShareCard(ctx,SHARE_CARD_GROUP_INDEX);
+    else if(SHARE_CARD_TYPE==='champions')ready=await drawChampionsShareCard(ctx,SHARE_CARD_GROUP_INDEX);
+    else if(SHARE_CARD_TYPE==='player-month')ready=await drawPlayerMonthShareCard(ctx,selectedShareCardMonthGroup());
+    else throw new Error('Tipo de tarjeta desconocido');
     if(token!==SHARE_CARD_RENDER_TOKEN)return;
     previewCtx.clearRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
     previewCtx.drawImage(workCanvas.__shareCardSurface||workCanvas,0,0);
+    const monthGroup=SHARE_CARD_TYPE==='player-month'?selectedShareCardMonthGroup():null;
+    canvas.setAttribute('aria-label',monthGroup
+      ?`Tarjeta de ${monthGroup.winners.length>1?'co-ganadores':'Jugador del mes'} de ${monthGroup.label}: ${monthGroup.winners.map(winner=>winner.name).join(', ')}`
+      :'Vista previa de la tarjeta para compartir');
     SHARE_CARD_READY=ready;
     $('downloadShareCard').disabled=!ready;
     $('shareShareCard').disabled=!ready;
     setShareCardStatus(
       ready
         ?'Tarjeta lista para descargar o compartir.'
-        :'Publica una jornada desde el panel privado para activar esta tarjeta.'
+        :SHARE_CARD_TYPE==='player-month'
+          ?'Publica el cierre de un mes para activar esta tarjeta.'
+          :'Publica una jornada desde el panel privado para activar esta tarjeta.'
     );
   }catch{
     if(token!==SHARE_CARD_RENDER_TOKEN)return;
@@ -5908,9 +6107,31 @@ function renderShareCardStudio(){
 
   $('cardGroupSelect').innerHTML=DATA.champions.groups.map((group,index)=>`<option value="${index}">${group.name}</option>`).join('');
   $('cardGroupSelect').value=String(SHARE_CARD_GROUP_INDEX);
+
+  const monthGroups=monthlyAchievementGroups();
+  const monthSelect=$('cardMonthSelect');
+  const previousMonth=SHARE_CARD_MONTH_KEY||monthSelect.value;
+  const selectedMonth=monthGroups.some(group=>group.month===previousMonth)
+    ?previousMonth
+    :monthGroups[0]?.month||'';
+  monthSelect.disabled=!monthGroups.length;
+  monthSelect.innerHTML=monthGroups.length
+    ?monthGroups.map(group=>`<option value="${profileAttr(group.month)}">${profileAttr(group.label)}${group.provisional?' · Provisional':' · Oficial'}</option>`).join('')
+    :'<option value="">Sin meses cerrados</option>';
+  monthSelect.value=selectedMonth;
+  SHARE_CARD_MONTH_KEY=selectedMonth;
+
   const champions=SHARE_CARD_TYPE==='champions';
-  $('cardMatchdayField').hidden=champions;
+  const playerMonth=SHARE_CARD_TYPE==='player-month';
+  const usesMatchday=!champions&&!playerMonth;
+  $('cardMatchdayField').hidden=!usesMatchday;
   $('cardGroupField').hidden=!champions;
+  $('cardMonthField').hidden=!playerMonth;
+  $('shareCardDataHint').textContent=playerMonth
+    ?'Solo aparecen meses cerrados y publicados.'
+    :champions
+      ?'La tabla usa los datos automáticos de Champions.'
+      :'Solo aparecen jornadas publicadas.';
   document.querySelectorAll('[data-card-type]').forEach(button=>{
     const active=button.dataset.cardType===SHARE_CARD_TYPE;
     button.classList.toggle('active',active);
@@ -5920,7 +6141,8 @@ function renderShareCardStudio(){
     podium:'Podio de la jornada',
     standings:'Top 10 de la temporada',
     leaders:'Líderes y destacados',
-    champions:'Tabla del grupo de Champions'
+    champions:'Tabla del grupo de Champions',
+    'player-month':'Jugador del mes'
   };
   $('shareCardPreviewTitle').textContent=titles[SHARE_CARD_TYPE];
   renderShareCardPreview();
@@ -5928,13 +6150,23 @@ function renderShareCardStudio(){
 
 function shareCardFilename(){
   const matchday=selectedShareCardMatchday();
+  const monthGroup=selectedShareCardMonthGroup();
   const parts={
     podium:`Podio-Jornada-${matchday||'Sin-Datos'}`,
     standings:`Top-10-Jornada-${matchday||'Sin-Datos'}`,
     leaders:`Lideres-Jornada-${matchday||'Sin-Datos'}`,
-    champions:`Champions-${(DATA.champions.groups[SHARE_CARD_GROUP_INDEX]?.name||'Grupo').replace(/\s+/g,'-')}`
+    champions:`Champions-${(DATA.champions.groups[SHARE_CARD_GROUP_INDEX]?.name||'Grupo').replace(/\s+/g,'-')}`,
+    'player-month':`Jugador-del-Mes-${monthGroup?.month||'Sin-Datos'}`
   };
   return `Cuban-League-${parts[SHARE_CARD_TYPE]}.png`;
+}
+
+function shareCardMessage(){
+  if(SHARE_CARD_TYPE!=='player-month')return 'Tarjeta oficial de Cuban League';
+  const group=selectedShareCardMonthGroup();
+  if(!group)return 'Jugador del mes de Cuban League';
+  const winners=group.winners.map(winner=>winner.name).join(' y ');
+  return `${group.winners.length>1?'Co-ganadores':'Jugador del mes'} de ${group.label}: ${winners} · Cuban League`;
 }
 
 function shareCardBlob(){
@@ -5975,7 +6207,7 @@ async function shareGeneratedCard(){
       await navigator.share({
         files:[file],
         title:'Cuban League',
-        text:'Tarjeta oficial de Cuban League'
+        text:shareCardMessage()
       });
       setShareCardStatus('Tarjeta compartida correctamente.');
       return;
@@ -6001,6 +6233,10 @@ function setupShareCardStudio(){
   $('cardMatchdaySelect').onchange=renderShareCardPreview;
   $('cardGroupSelect').onchange=()=>{
     SHARE_CARD_GROUP_INDEX=Number($('cardGroupSelect').value)||0;
+    renderShareCardPreview();
+  };
+  $('cardMonthSelect').onchange=()=>{
+    SHARE_CARD_MONTH_KEY=$('cardMonthSelect').value;
     renderShareCardPreview();
   };
   $('generateShareCard').onclick=renderShareCardPreview;
