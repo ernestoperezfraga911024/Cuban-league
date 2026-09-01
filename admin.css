@@ -3889,3 +3889,131 @@ body.backup-restore-open{overflow:hidden}
 @media(max-height:600px) and (min-width:1051px){
   .participant-single-mode .participant-editor-grid>.entry-card{position:static}
 }
+
+/* ===== CUBAN ADMIN V149 · CHAMPIONS AUTOMÁTICA ===== */
+.champions-automation-notice{
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) auto;
+  align-items:center;
+  gap:15px;
+  margin:14px 0;
+  padding:16px;
+  border:1px solid rgba(92,229,215,.2);
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(92,229,215,.08),transparent 42%),
+    rgba(92,229,215,.035);
+}
+
+.champions-automation-icon{
+  display:grid;
+  width:52px;
+  height:52px;
+  place-items:center;
+  border:1px solid rgba(92,229,215,.25);
+  border-radius:15px;
+  color:var(--cyan);
+  background:rgba(92,229,215,.065);
+}
+
+.champions-automation-icon svg,
+.champions-source-button svg{
+  width:23px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.champions-automation-notice>div{min-width:0}
+.champions-automation-heading{display:flex;min-width:0;align-items:center;gap:10px;margin-top:5px}
+.champions-automation-heading h2{min-width:0;margin:0;font-size:1rem;letter-spacing:-.025em}
+.champions-automation-notice p{margin:5px 0 0;color:#83a095;font-size:.66rem;line-height:1.5}
+
+.champions-automation-status{
+  display:inline-flex;
+  min-height:27px;
+  flex:0 0 auto;
+  align-items:center;
+  gap:6px;
+  padding:5px 9px;
+  border:1px solid rgba(255,211,106,.22);
+  border-radius:999px;
+  color:#ffe09a;
+  background:rgba(255,211,106,.065);
+  font-size:.54rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.035em;
+}
+
+.champions-automation-status i{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 9px currentColor}
+.champions-automation-status.synced{border-color:rgba(159,255,124,.22);color:var(--green);background:rgba(159,255,124,.06)}
+.champions-automation-status.provisional{border-color:rgba(255,171,83,.27);color:#ffc273;background:rgba(255,154,65,.07)}
+
+.champions-source-button{
+  display:inline-flex;
+  min-height:45px;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:10px 13px;
+  border:1px solid rgba(92,229,215,.25);
+  border-radius:13px;
+  color:#b5faf2;
+  background:rgba(92,229,215,.07);
+  font-size:.65rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.champions-source-button:hover,
+.champions-source-button:focus-visible{border-color:rgba(159,255,124,.38);color:#e7ffe0;outline:0;background:rgba(159,255,124,.075)}
+
+.preview-champions-automation{
+  margin:0 16px 12px;
+  padding:10px 12px;
+  border:1px solid rgba(92,229,215,.17);
+  border-radius:12px;
+  color:#9de9df;
+  background:rgba(92,229,215,.045);
+  font-size:.61rem;
+  font-weight:800;
+  line-height:1.45;
+}
+
+.admin-preview-card:has(.preview-champions-automation:not([hidden])){
+  grid-template-rows:auto auto auto minmax(0,1fr) auto;
+}
+
+.publication-badge.automatic{font-weight:850}
+.competition-champions .admin-workflow,
+.competition-champions #participantWorkflow,
+.competition-champions .revision-card,
+.competition-champions .action-dock,
+.competition-champions .action-spacer{display:none}
+
+.competition-champions .participant-editor-grid{display:block!important}
+.competition-champions .participant-editor-grid>.entry-card{position:static!important;width:100%!important}
+.competition-champions .champions-admin-group{display:block!important}
+.competition-champions .champions-admin-group>header{display:flex!important}
+.competition-champions .champions-admin-group>div{padding:2px 10px 6px!important}
+.competition-champions .admin-player{display:grid!important}
+.competition-champions .entry-card-head .stat-key{display:grid}
+.competition-champions .stat-input{cursor:default;opacity:.78;color:#c8d8d0;background:rgba(255,255,255,.02);pointer-events:none}
+.competition-champions .stat-input-wrap.has-sign-toggle .stat-input{padding-right:5px;padding-left:5px}
+.competition-champions .points-sign-toggle{display:none}
+.competition-champions .admin-player.is-incomplete{background:transparent}
+.competition-champions .admin-player.is-incomplete .admin-player-info b::after{content:none}
+.competition-champions .completion-card.champions-automatic-state .edit-published-button{display:none}
+
+@media(max-width:700px){
+  .champions-automation-notice{grid-template-columns:44px minmax(0,1fr);gap:11px;padding:13px;border-radius:17px}
+  .champions-automation-icon{width:44px;height:44px;border-radius:13px}
+  .champions-automation-heading{align-items:flex-start;flex-direction:column;gap:6px}
+  .champions-automation-heading h2{font-size:.83rem;line-height:1.3}
+  .champions-automation-notice p{font-size:.61rem}
+  .champions-source-button{grid-column:1/-1;width:100%;min-height:44px}
+  .preview-champions-automation{margin:0 10px 9px;font-size:.57rem}
+}

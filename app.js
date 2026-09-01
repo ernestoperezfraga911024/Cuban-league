@@ -1,4 +1,4 @@
-const APP_VERSION='148-20260901';
+const APP_VERSION='149-20260901';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -142,31 +142,70 @@ function normalizeMatchdayRows(rows){
   })).filter(row=>validNames.has(row.participantName)&&Number.isInteger(row.matchday)&&row.matchday>0);
 }
 
-function championsSeasonKey(){
-  const season=window.CUBAN_LEAGUE_SUPABASE?.season||DATA?.currentSeason||'2026/27';
-  return `${season}-CHAMPIONS`;
+function championsConfiguration(){
+  const leagueMatchdays=DATA?.champions?.format?.leagueMatchdays;
+  const groups=DATA?.champions?.groups;
+  if(!Array.isArray(leagueMatchdays)||leagueMatchdays.length!==CHAMPIONS_MATCHDAY_COUNT)return null;
+  const normalizedMatchdays=leagueMatchdays.map(Number);
+  if(
+    normalizedMatchdays.some(matchday=>!Number.isInteger(matchday)||matchday<1||matchday>38)
+    ||new Set(normalizedMatchdays).size!==CHAMPIONS_MATCHDAY_COUNT
+  )return null;
+  if(!Array.isArray(groups)||groups.length!==4||groups.some(group=>
+    !group
+    ||typeof group.name!=='string'
+    ||!Array.isArray(group.teams)
+    ||group.teams.length!==5
+  ))return null;
+
+  const groupNames=groups.flatMap(group=>group.teams.map(name=>String(name||'').trim()));
+  const uniqueGroupNames=new Set(groupNames);
+  const activeNames=new Set(activeParticipants().map(participant=>participant.name));
+  if(
+    uniqueGroupNames.size!==groupNames.length
+    ||groupNames.some(name=>!name||!activeNames.has(name))
+    ||activeNames.size!==uniqueGroupNames.size
+    ||[...activeNames].some(name=>!uniqueGroupNames.has(name))
+  )return null;
+
+  return {
+    leagueMatchdays:normalizedMatchdays,
+    leagueToChampions:new Map(normalizedMatchdays.map((leagueMatchday,index)=>[leagueMatchday,index+1])),
+    participantNames:uniqueGroupNames
+  };
 }
 
-function championsParticipantNames(){
-  return new Set((DATA?.champions?.groups||[]).flatMap(group=>group.teams));
-}
-
-function normalizeChampionsMatchdayRows(rows){
-  const validNames=championsParticipantNames();
-  return rows.map(row=>({
-    participantName:String(row.participant_name||'').trim(),
-    matchday:Number(row.matchday),
-    points:Number(row.points)||0,
-    goals:Math.max(0,Number(row.goals)||0),
-    cleanSheets:Math.max(0,Number(row.clean_sheets)||0),
-    redCards:Math.max(0,Number(row.red_cards)||0),
-    updatedAt:row.updated_at||null
-  })).filter(row=>
-    validNames.has(row.participantName)
-    &&Number.isInteger(row.matchday)
-    &&row.matchday>=1
-    &&row.matchday<=CHAMPIONS_MATCHDAY_COUNT
-  );
+function deriveChampionsStatsFromLeague(){
+  const configuration=championsConfiguration();
+  if(!configuration)return null;
+  const derivedRows=new Map();
+  LIVE_MATCHDAY_ROWS.forEach(row=>{
+    const championsMatchday=configuration.leagueToChampions.get(row.matchday);
+    if(!championsMatchday||!configuration.participantNames.has(row.participantName))return;
+    derivedRows.set(`${row.participantName}:${championsMatchday}`,{
+      participantName:row.participantName,
+      matchday:championsMatchday,
+      leagueMatchday:row.matchday,
+      points:row.points,
+      goals:row.goals,
+      cleanSheets:row.cleanSheets,
+      redCards:row.redCards,
+      hasPostponedMatches:row.hasPostponedMatches,
+      updatedAt:row.updatedAt
+    });
+  });
+  const rows=[...derivedRows.values()].sort((a,b)=>a.matchday-b.matchday||a.participantName.localeCompare(b.participantName,'es'));
+  const participantCountByMatchday=rows.reduce((counts,row)=>{
+    counts.set(row.matchday,(counts.get(row.matchday)||0)+1);
+    return counts;
+  },new Map());
+  return {
+    rows,
+    publishedMatchdays:[...participantCountByMatchday]
+      .filter(([,participantCount])=>participantCount===configuration.participantNames.size)
+      .map(([matchday])=>matchday)
+      .sort((a,b)=>a-b)
+  };
 }
 
 async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatchday=null}={}){
@@ -201,24 +240,17 @@ async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatch
   return rows;
 }
 
-async function syncChampionsStats({render=true}={}){
-  const config=window.CUBAN_LEAGUE_SUPABASE;
-  if(!DATA||!config?.url||!config?.publishableKey)return false;
-  try{
-    const rows=await fetchPublishedStatsRows(championsSeasonKey(),{
-      minimumMatchday:1,
-      maximumMatchday:CHAMPIONS_MATCHDAY_COUNT
-    });
-    CHAMPIONS_MATCHDAY_ROWS=normalizeChampionsMatchdayRows(rows);
-    CHAMPIONS_PUBLISHED_MATCHDAYS=[...new Set(CHAMPIONS_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
-    if(render){
-      renderChampions();
-      if(SHARE_CARD_BOUND)renderShareCardStudio();
-    }
-    return true;
-  }catch{
-    return false;
+function syncChampionsStats({render=true}={}){
+  if(!DATA)return false;
+  const derived=deriveChampionsStatsFromLeague();
+  if(!derived)return false;
+  CHAMPIONS_MATCHDAY_ROWS=derived.rows;
+  CHAMPIONS_PUBLISHED_MATCHDAYS=derived.publishedMatchdays;
+  if(render){
+    renderChampions();
+    if(SHARE_CARD_BOUND)renderShareCardStudio();
   }
+  return true;
 }
 
 function weeklyStandings(matchday){
@@ -4593,6 +4625,8 @@ function renderRecords(){
   </article>`).join('');
 }
 function championsGroupStandings(group){
+  const leagueMatchdays=championsConfiguration()?.leagueMatchdays||[];
+  const progress=championsMatchdayProgress();
   const rowMap=new Map(CHAMPIONS_MATCHDAY_ROWS.map(row=>[`${row.participantName}:${row.matchday}`,row]));
   return group.teams.map((name,sourceIndex)=>{
     const matchdays=Array.from({length:CHAMPIONS_MATCHDAY_COUNT},(_,index)=>{
@@ -4600,11 +4634,18 @@ function championsGroupStandings(group){
       const row=rowMap.get(`${name}:${matchday}`);
       return {
         matchday,
+        leagueMatchday:row?.leagueMatchday||leagueMatchdays[index]||null,
         played:Boolean(row),
         points:row?.points||0,
         goals:row?.goals||0,
         cleanSheets:row?.cleanSheets||0,
-        redCards:row?.redCards||0
+        redCards:row?.redCards||0,
+        provisional:progress.provisional.has(matchday),
+        provisionalReason:progress.partial.has(matchday)
+          ?'pendiente: faltan participantes'
+          :progress.postponed.has(matchday)
+            ?'provisional por partido aplazado'
+            :''
       };
     });
     return {
@@ -4626,8 +4667,45 @@ function championsGroupStandings(group){
   );
 }
 
+function championsMatchdayProgress(){
+  const configuration=championsConfiguration();
+  const expectedParticipants=configuration?.participantNames.size||0;
+  const participantCountByMatchday=CHAMPIONS_MATCHDAY_ROWS.reduce((counts,row)=>{
+    counts.set(row.matchday,(counts.get(row.matchday)||0)+1);
+    return counts;
+  },new Map());
+  const partial=new Set(
+    [...participantCountByMatchday]
+      .filter(([,participantCount])=>participantCount>0&&participantCount<expectedParticipants)
+      .map(([matchday])=>matchday)
+  );
+  const postponed=new Set(
+    CHAMPIONS_MATCHDAY_ROWS
+      .filter(row=>row.hasPostponedMatches)
+      .map(row=>row.matchday)
+  );
+  return {
+    partial,
+    postponed,
+    provisional:new Set([...partial,...postponed])
+  };
+}
+
+function renderChampionsGroupCalendar(configuration=championsConfiguration()){
+  const list=document.querySelector('#championsCalendarPanel .champions-calendar-phase.is-groups .champions-calendar-dates');
+  if(!list||!configuration)return false;
+  list.innerHTML=configuration.leagueMatchdays.map((leagueMatchday,index)=>
+    `<li><span>Champions J${index+1}</span><strong>Liga J${leagueMatchday}</strong></li>`
+  ).join('');
+  return true;
+}
+
 function renderChampions(){
   const publishedCount=CHAMPIONS_PUBLISHED_MATCHDAYS.length;
+  const progress=championsMatchdayProgress();
+  const partialMatchdays=[...progress.partial].sort((a,b)=>a-b);
+  const postponedMatchdays=[...progress.postponed].sort((a,b)=>a-b);
+  renderChampionsGroupCalendar();
   const championsHolder=DATA.champions?.defendingChampion||DATA.champions?.champion;
   const defendingHost=$('championsDefendingChampion');
   if(defendingHost){
@@ -4641,11 +4719,16 @@ function renderChampions(){
   }
   const status=$('championsStatus');
   if(status){
-    status.textContent=publishedCount===0
-      ?DATA.champions.status
-      :publishedCount===CHAMPIONS_MATCHDAY_COUNT
-        ?'Fase completada'
-        :`${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT} jornadas`;
+    status.textContent=partialMatchdays.length
+      ?`${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT} completas · pendiente J${partialMatchdays.join(', J')}`
+      :postponedMatchdays.length
+        ?`${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT} jornadas · provisional J${postponedMatchdays.join(', J')}`
+      :publishedCount===0
+        ?DATA.champions.status
+        :publishedCount===CHAMPIONS_MATCHDAY_COUNT
+          ?'Fase completada'
+          :`${publishedCount}/${CHAMPIONS_MATCHDAY_COUNT} jornadas`;
+    status.classList.toggle('pending',progress.provisional.size>0);
   }
 
   $('groupGrid').innerHTML=DATA.champions.groups.map(group=>{
@@ -4653,7 +4736,7 @@ function renderChampions(){
     const headerDays=Array.from({length:CHAMPIONS_MATCHDAY_COUNT},(_,index)=>`<span class="champions-day-head">J${index+1}</span>`).join('');
     const rows=standings.map((team,index)=>{
       const safeName=profileAttr(team.name);
-      const points=team.matchdays.map(day=>`<span class="champions-points-cell${day.played?' is-played':''}" title="${day.played?`Jornada ${day.matchday}: ${day.points.toLocaleString('es')} puntos`:`Jornada ${day.matchday}: pendiente`}">${day.played?day.points.toLocaleString('es'):'—'}</span>`).join('');
+      const points=team.matchdays.map(day=>`<span class="champions-points-cell${day.played?' is-played':''}${day.provisional?' is-provisional':''}" title="${day.played?`Champions J${day.matchday} · Liga J${day.leagueMatchday}: ${day.points.toLocaleString('es')} puntos${day.provisionalReason?` · ${day.provisionalReason}`:''}`:`Champions J${day.matchday} · Liga J${day.leagueMatchday}: pendiente`}">${day.played?day.points.toLocaleString('es'):'—'}</span>`).join('');
       return `<div class="champions-score-row champions-score-grid${index<2?' is-qualifying':''}">
         <span class="champions-rank">${index+1}</span>
         <div class="champions-team-cell team-profile-link" ${profileTriggerAttrs(team.name)}>
@@ -5559,11 +5642,22 @@ async function drawLeadersShareCard(ctx,matchday){
 async function drawChampionsShareCard(ctx,groupIndex){
   const group=DATA.champions.groups[groupIndex]||DATA.champions.groups[0];
   const publishedCount=CHAMPIONS_PUBLISHED_MATCHDAYS.length;
+  const progress=championsMatchdayProgress();
+  const partialMatchdays=[...progress.partial].sort((a,b)=>a-b);
+  const postponedMatchdays=[...progress.postponed].sort((a,b)=>a-b);
   await drawShareCardBase(ctx,{
     eyebrow:'CUBAN LEAGUE CHAMPIONS',
     title:`${group.name.toUpperCase()} · FASE DE GRUPOS`,
-    subtitle:'Ocho partidos por competidor · Ida y vuelta.',
-    badge:`${publishedCount}/8 JORNADAS`
+    subtitle:partialMatchdays.length
+      ?`Datos automáticos de Liga · Pendiente Champions J${partialMatchdays.join(', J')}.`
+      :postponedMatchdays.length
+        ?`Datos automáticos de Liga · Provisional Champions J${postponedMatchdays.join(', J')}.`
+        :'Ocho partidos por competidor · Ida y vuelta.',
+    badge:partialMatchdays.length
+      ?'DATOS PENDIENTES'
+      :postponedMatchdays.length
+        ?'PROVISIONAL'
+        :`${publishedCount}/8 JORNADAS`
   });
   const standings=championsGroupStandings(group);
   await preloadShareCardPlayers(standings.map(player=>player.name));
@@ -5931,10 +6025,8 @@ async function init(){
 
   const syncPublishedData=async()=>{
     const liveStatsSynced=await syncLiveCurrentStats({render:false});
-    await Promise.all([
-      syncAchievementMilestones({render:false}),
-      syncChampionsStats({render:false})
-    ]);
+    syncChampionsStats({render:false});
+    await syncAchievementMilestones({render:false});
     renderCurrent();
     renderMatchdayCenter();
     renderHomeLive();
