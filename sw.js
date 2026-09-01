@@ -1,16 +1,16 @@
-const CACHE_NAME = 'cuban-league-v153-catalog-movements-pwa';
+const CACHE_NAME = 'cuban-league-v154-golden-boot-pwa';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=153-20260901',
-  './app.js?v=153-20260901',
-  './data.json?v=153-20260901',
-  './catalog/players.json?v=153-20260901',
-  './player-catalog.js?v=153-20260901',
-  './supabase-config.js?v=153-20260901',
+  './styles.css?v=154-20260901',
+  './app.js?v=154-20260901',
+  './data.json?v=154-20260901',
+  './catalog/players.json?v=154-20260901',
+  './player-catalog.js?v=154-20260901',
+  './supabase-config.js?v=154-20260901',
   './admin.html',
-  './admin.css?v=153-20260901',
-  './admin.js?v=153-20260901',
+  './admin.css?v=154-20260901',
+  './admin.js?v=154-20260901',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
@@ -20,6 +20,7 @@ const APP_SHELL = [
   './icon-green-512.png',
   './apple-touch-icon-green.png',
   './favicon-green-32.png',
+  './golden-boot-pichichi.png',
   './bernabeu-bg.jpg',
   './stadium-bg.jpg',
   './home-stadium-night.jpg',
@@ -107,12 +108,12 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=153-20260901'));
+    event.respondWith(networkFirst(request, './data.json?v=154-20260901'));
     return;
   }
 
   if (url.pathname.endsWith('/catalog/players.json')) {
-    event.respondWith(networkFirst(request, './catalog/players.json?v=153-20260901'));
+    event.respondWith(networkFirst(request, './catalog/players.json?v=154-20260901'));
     return;
   }
 

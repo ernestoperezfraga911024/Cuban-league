@@ -1,4 +1,4 @@
-const APP_VERSION='153-20260901';
+const APP_VERSION='154-20260901';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -659,7 +659,7 @@ function showAchievementUnlockToast(unlocks){
   if(!toast||!first)return;
   clearTimeout(ACHIEVEMENT_UNLOCK_TIMER);
   clearTimeout(ACHIEVEMENT_UNLOCK_HIDE_TIMER);
-  $('achievementUnlockIcon').textContent=first.item.icon;
+  $('achievementUnlockIcon').innerHTML=achievementIconMarkup(first.item);
   $('achievementUnlockTitle').textContent='Insignia desbloqueada';
   $('achievementUnlockCopy').textContent=unlocks.length===1
     ?`${first.playerName} consiguió “${first.item.name}”.`
@@ -2211,7 +2211,7 @@ const ACHIEVEMENT_CATALOG=[
   {id:'manita',icon:'⚽',name:'La Manita',rarity:'rare',type:'Jornada',requirement:'Marcar 5 goles o más en una jornada.'},
   {id:'wall',icon:'🧤',name:'El Muro',rarity:'legendary',type:'Récord',requirement:'Tener la mayor racha de clean sheets seguidos (mínimo 2).'},
   {id:'leader',icon:'⭐',name:'Líder actual',rarity:'rare',type:'Dinámica',requirement:'Ocupar el 1.º puesto de la clasificación actual.'},
-  {id:'pichichi',icon:'🥇',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar los goles de la temporada.'},
+  {id:'pichichi',icon:'🥇',iconAsset:'golden-boot-pichichi.png',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar los goles de la temporada.'},
   {id:'golden_glove',icon:'🛡️',name:'Guante de Oro',rarity:'rare',type:'Dinámica',requirement:'Liderar los clean sheets de la temporada.'},
   {id:'king_europe',icon:'🌟',name:'Rey de Europa',rarity:'legendary',type:'Champions',requirement:'Ganar la Cuban League Champions.'},
   {id:'player_month',icon:'📅',name:'Jugador del Mes',rarity:'epic',type:'Mensual',requirement:'Sumar más puntos en las jornadas del mes.'},
@@ -2219,6 +2219,12 @@ const ACHIEVEMENT_CATALOG=[
 ];
 
 const ACHIEVEMENT_RARITY_WEIGHT={legendary:4,epic:3,rare:2,common:1};
+
+function achievementIconMarkup(item){
+  return item.iconAsset
+    ?`<img class="achievement-icon-image" src="${item.iconAsset}" alt="">`
+    :item.icon;
+}
 
 function achievementMonthLabel(dateValue){
   const date=new Date(`${dateValue}T12:00:00`);
@@ -2606,7 +2612,7 @@ function compactAchievementBadges(name,snapshot,{limit=3,className=''}={}){
   const badgeLabel=badges.length===1?'1 insignia conseguida':`${badges.length} insignias conseguidas`;
   const classes=`standings-mini-badges${className?` ${className}`:''}`;
   return `<span class="${classes}" aria-label="${badgeLabel}">
-    ${visible.map(item=>`<span class="standings-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
+    ${visible.map(item=>`<span class="standings-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${achievementIconMarkup(item)}</span>`).join('')}
     ${remaining?`<span class="standings-mini-more" aria-label="${remaining} insignias más">+${remaining}</span>`:''}
   </span>`;
 }
@@ -2649,7 +2655,7 @@ function renderAchievementHub(snapshot=buildAchievementSnapshot()){
     </div>
     <div class="achievement-catalog-scroll" role="list" aria-label="Colección de insignias">
       ${snapshot.catalog.map(item=>`<article class="achievement-catalog-card achievement-${item.rarity}${item.achievers.length?' is-unlocked':' is-locked'}" role="listitem">
-        <span class="achievement-catalog-icon" aria-hidden="true">${item.icon}</span>
+        <span class="achievement-catalog-icon" aria-hidden="true">${achievementIconMarkup(item)}</span>
         <div><small>${item.type}</small><b>${item.name}</b><p>${item.requirement}</p></div>
         <span class="achievement-owner-count">${item.achievers.length?`${item.achievers.length} ${item.achievers.length===1?'jugador':'jugadores'}`:'Sin estrenar'}</span>
       </article>`).join('')}
@@ -2675,7 +2681,7 @@ function renderPlayers(filter=''){
         <p style="grid-column:2!important;grid-row:3!important">${statsRow.points?.toLocaleString()||0} puntos · ${statsRow.podiums||0} podios</p>
       </div>
       <div class="player-card-badges${visible.length?'':' is-empty'}" style="grid-column:2!important;grid-row:4!important"${visible.length?` aria-label="${badges.length} insignias conseguidas"`:' aria-hidden="true"'}>
-        ${visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${item.icon}</span>`).join('')}
+        ${visible.map(item=>`<span class="player-mini-badge achievement-${item.rarity}" title="${item.name}: ${profileAttr(item.detail)}" aria-label="${item.name}">${achievementIconMarkup(item)}</span>`).join('')}
         ${badges.length>visible.length?`<b>+${badges.length-visible.length}</b>`:''}
       </div>
       <span class="profile-card-cta" style="grid-column:3!important;grid-row:1 / 5!important" aria-hidden="true">→</span>
@@ -2805,14 +2811,14 @@ function profileHeroAwards(name,earnedAchievements){
     const item=earnedAchievements.find(achievement=>achievement.id===id);
     if(item&&selected.length<2)selected.push(item);
   });
-  return selected.map(item=>`<span class="profile-hero-award achievement-${item.rarity}"><span aria-hidden="true">${item.icon}</span>${profileAttr(item.name)}</span>`).join('');
+  return selected.map(item=>`<span class="profile-hero-award achievement-${item.rarity}"><span aria-hidden="true">${achievementIconMarkup(item)}</span>${profileAttr(item.name)}</span>`).join('');
 }
 
 function profileAchievementPreviewMarkup(earnedAchievements){
   const visible=earnedAchievements.slice(0,2);
   if(!visible.length)return '<p class="profile-summary-empty">Aún no tiene insignias desbloqueadas.</p>';
   return visible.map(item=>`<article class="profile-featured-achievement achievement-${item.rarity}">
-      <span aria-hidden="true">${item.icon}</span>
+      <span aria-hidden="true">${achievementIconMarkup(item)}</span>
       <div><small>${item.type}</small><b>${item.name}</b></div>
     </article>`).join('');
 }
@@ -4658,7 +4664,7 @@ function profileAchievementsPanelMarkup(achievements,earnedAchievements,achievem
     <div class="profile-achievement-grid">
       ${achievements.map(item=>`<article class="profile-achievement-card achievement-${item.rarity} achievement-${item.id}${item.earned?' is-earned':' is-locked'}" data-achievement-id="${item.id}">
         <div class="profile-achievement-card-top">
-          <span class="profile-achievement-icon" aria-hidden="true">${item.icon}</span>
+          <span class="profile-achievement-icon" aria-hidden="true">${achievementIconMarkup(item)}</span>
           <span class="profile-achievement-status">${item.earned?'DESBLOQUEADA':'BLOQUEADA'}</span>
         </div>
         <small>${item.type}</small>
