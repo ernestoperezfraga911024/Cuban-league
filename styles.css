@@ -207,15 +207,21 @@ html{
 
 .achievement-icon-image{
   display:block;
-  width:1.5em;
-  height:1.5em;
-  object-fit:contain;
+  width:1.5em!important;
+  height:1.5em!important;
+  min-width:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  flex:0 0 auto!important;
+  border-radius:0!important;
+  object-fit:contain!important;
+  transform:none!important;
   filter:drop-shadow(0 3px 5px rgba(231,197,93,.3));
 }
 
 .profile-hero-award .achievement-icon-image{
-  width:1.25rem;
-  height:1.25rem;
+  width:1.25rem!important;
+  height:1.25rem!important;
 }
 
 .achievement-catalog-card small{
