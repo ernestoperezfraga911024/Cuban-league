@@ -1,6 +1,14 @@
-# Cuban League V149
+# Cuban League V150
 
 Sitio oficial de la Cuban League con:
+
+- Clasificación incorpora `Jugador del mes` junto al Comparador y las demás
+  consultas. El historial se completa automáticamente al publicar el cierre
+  de cada mes, muestra sus jornadas, PTS, GOL, CS y TR, abre el perfil de cada
+  ganador y conserva a todos los co-ganadores cuando hay empate en puntos. La
+  vista y la insignia mensual comparten el mismo cálculo oficial, por lo que
+  correcciones, deshacer y partidos aplazados se reflejan sin duplicar datos ni
+  añadir otra tabla o carga manual.
 
 - La fase de grupos de Champions toma automáticamente PTS, GOL, CS y TR de
   las jornadas publicadas de Liga: J3, J6, J9, J12, J15, J18, J21 y J24 se
