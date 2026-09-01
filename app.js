@@ -1,4 +1,4 @@
-const APP_VERSION='149-20260901';
+const APP_VERSION='150-20260901';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -856,6 +856,7 @@ function renderCurrent(){
     rowsId:'currentRedCardsRows'
   });
   renderClassificationMatchday();
+  renderPlayerOfMonth();
 }
 
 function renderClassificationMatchday(){
@@ -2228,23 +2229,45 @@ function achievementSeasonRecord(){
   return {points,holders:results.filter(result=>result.points===points)};
 }
 
-function monthlyAchievementAwards(){
-  const milestonesByDay=new Map(MATCHDAY_MILESTONES.map(item=>[item.matchday,item]));
+function buildMonthlyAchievementAwards({participants,rows,milestones,publishedMatchdays,season}){
+  const published=new Set(publishedMatchdays);
+  const roster=[...participants];
+  const rosterNames=new Set(roster.map(player=>player.name));
+  const visibleMilestones=milestones
+    .filter(item=>published.has(item.matchday))
+    .sort((a,b)=>a.matchday-b.matchday);
+  const milestonesByDay=new Map(visibleMilestones.map(item=>[item.matchday,item]));
   const closingByMonth=new Map();
-  MATCHDAY_MILESTONES.filter(item=>item.isMonthEnd).forEach(item=>{
-    closingByMonth.set(item.matchdayDate.slice(0,7),item);
+  visibleMilestones.filter(item=>item.isMonthEnd).forEach(item=>{
+    const monthKey=item.matchdayDate.slice(0,7);
+    const current=closingByMonth.get(monthKey);
+    if(!current||item.matchday>current.matchday)closingByMonth.set(monthKey,item);
   });
 
-  return [...closingByMonth.entries()].map(([monthKey,closing])=>{
-    const monthDays=new Set(MATCHDAY_MILESTONES
+  const uniqueRows=new Map();
+  rows.forEach(row=>{
+    if(!rosterNames.has(row.participantName)||!published.has(row.matchday))return;
+    uniqueRows.set(`${row.matchday}\u0000${row.participantName}`,row);
+  });
+
+  return [...closingByMonth.entries()].flatMap(([monthKey,closing])=>{
+    const matchdays=visibleMilestones
       .filter(item=>item.matchdayDate.startsWith(monthKey)&&item.matchday<=closing.matchday)
-      .map(item=>item.matchday));
-    const totals=new Map(activeParticipants().map(player=>[
+      .map(item=>item.matchday);
+    if(!matchdays.length)return [];
+    const complete=matchdays.every(matchday=>
+      roster.every(player=>uniqueRows.has(`${matchday}\u0000${player.name}`))
+    );
+    if(!complete)return [];
+
+    const monthDays=new Set(matchdays);
+    const monthRows=[...uniqueRows.values()].filter(row=>monthDays.has(row.matchday));
+    const totals=new Map(roster.map(player=>[
       player.name,
       {...player,points:0,goals:0,cleanSheets:0,redCards:0,played:0}
     ]));
-    LIVE_MATCHDAY_ROWS.forEach(row=>{
-      if(!monthDays.has(row.matchday)||!milestonesByDay.has(row.matchday)||!totals.has(row.participantName))return;
+    monthRows.forEach(row=>{
+      if(!milestonesByDay.has(row.matchday)||!totals.has(row.participantName))return;
       const total=totals.get(row.participantName);
       total.points+=row.points;
       total.goals+=row.goals;
@@ -2253,14 +2276,115 @@ function monthlyAchievementAwards(){
       total.played+=1;
     });
     const ranking=[...totals.values()].filter(player=>player.played>0).sort(sortStandings);
-    return ranking.length?{
-      name:ranking[0].name,
-      month:monthKey,
-      label:achievementMonthLabel(closing.matchdayDate),
-      matchday:closing.matchday,
-      points:ranking[0].points
-    }:null;
-  }).filter(Boolean).sort((a,b)=>a.month.localeCompare(b.month));
+    if(!ranking.length)return [];
+    const winningPoints=ranking[0].points;
+    const provisional=monthRows.some(row=>row.hasPostponedMatches);
+    return ranking
+      .filter(player=>player.points===winningPoints)
+      .sort((a,b)=>(a.id??0)-(b.id??0)||a.name.localeCompare(b.name,'es'))
+      .map(player=>({
+        key:`${season}:${monthKey}:${player.id??player.name}`,
+        season,
+        name:player.name,
+        month:monthKey,
+        label:achievementMonthLabel(closing.matchdayDate),
+        matchday:closing.matchday,
+        closingDate:closing.matchdayDate,
+        matchdays:[...matchdays],
+        points:player.points,
+        goals:player.goals,
+        cleanSheets:player.cleanSheets,
+        redCards:player.redCards,
+        played:player.played,
+        provisional
+      }));
+  }).sort((a,b)=>a.month.localeCompare(b.month)||a.name.localeCompare(b.name,'es'));
+}
+
+function monthlyAchievementAwards(){
+  return buildMonthlyAchievementAwards({
+    participants:activeParticipants(),
+    rows:LIVE_MATCHDAY_ROWS,
+    milestones:MATCHDAY_MILESTONES,
+    publishedMatchdays:PUBLISHED_MATCHDAYS,
+    season:DATA.currentSeason
+  });
+}
+
+function monthlyAchievementGroups(awards=monthlyAchievementAwards()){
+  const groups=new Map();
+  awards.forEach(award=>{
+    if(!groups.has(award.month))groups.set(award.month,{
+      month:award.month,
+      label:award.label,
+      matchday:award.matchday,
+      closingDate:award.closingDate,
+      matchdays:award.matchdays,
+      provisional:award.provisional,
+      winners:[]
+    });
+    groups.get(award.month).winners.push(award);
+  });
+  return [...groups.values()].sort((a,b)=>b.month.localeCompare(a.month));
+}
+
+function monthlyMatchdayLabel(matchdays){
+  const days=[...matchdays].sort((a,b)=>a-b);
+  if(!days.length)return 'Sin jornadas';
+  if(days.length===1)return `Jornada ${days[0]}`;
+  const consecutive=days.every((day,index)=>index===0||day===days[index-1]+1);
+  return consecutive
+    ?`Jornadas ${days[0]}–${days.at(-1)}`
+    :`Jornadas ${days.join(', ')}`;
+}
+
+function renderPlayerOfMonth(){
+  const host=$('currentPlayerMonthContent');
+  if(!host)return;
+  const groups=monthlyAchievementGroups();
+  if(!groups.length){
+    host.innerHTML=`<div class="player-month-empty">
+      <span class="player-month-empty-icon">${uiIcon('medal')}</span>
+      <span class="eyebrow">HISTORIAL MENSUAL</span>
+      <strong>Todavía no hay premios publicados</strong>
+      <p>Cuando se publique la última jornada de un mes, sus ganadores aparecerán aquí automáticamente.</p>
+    </div>`;
+    return;
+  }
+
+  const uniqueWinners=new Set(groups.flatMap(group=>group.winners.map(winner=>winner.name))).size;
+  const awardCount=groups.reduce((total,group)=>total+group.winners.length,0);
+  host.innerHTML=`<section class="player-month-hero" aria-labelledby="playerMonthTitle">
+    <div class="player-month-hero-copy">
+      <span class="player-month-hero-icon">${uiIcon('medal')}</span>
+      <div><span class="eyebrow">HISTORIAL OFICIAL</span><h3 id="playerMonthTitle">Ganadores mensuales</h3><p>El premio se calcula con los puntos de todas las jornadas del mes cuando se publica su cierre.</p></div>
+    </div>
+    <div class="player-month-overview" aria-label="Resumen de premios mensuales">
+      <span><strong>${groups.length}</strong><small>${groups.length===1?'mes entregado':'meses entregados'}</small></span>
+      <span><strong>${uniqueWinners}</strong><small>${uniqueWinners===1?'ganador distinto':'ganadores distintos'}</small></span>
+      <span><strong>${awardCount}</strong><small>${awardCount===1?'premio':'premios'}</small></span>
+    </div>
+  </section>
+  <div class="player-month-list">${groups.map(group=>{
+    const tied=group.winners.length>1;
+    return `<article class="player-month-card${group.provisional?' is-provisional':''}">
+      <header class="player-month-card-head">
+        <div><span class="eyebrow">CIERRE MENSUAL</span><h4>${group.label}</h4><p>${monthlyMatchdayLabel(group.matchdays)} · Cierre J${group.matchday}</p></div>
+        <div class="player-month-card-status"><span>${group.provisional?'PROVISIONAL':'OFICIAL'}</span><small>${tied?`${group.winners.length} co-ganadores`:'1 ganador'}</small></div>
+      </header>
+      <div class="player-month-winners">${group.winners.map(winner=>{
+        const safeName=profileAttr(winner.name);
+        return `<button type="button" class="player-month-winner team-profile-link" ${profileTriggerAttrs(winner.name)}>
+          <span class="player-month-winner-medal" aria-hidden="true">${uiIcon('medal')}</span>
+          <img src="${imageMap()[winner.name]||''}" alt="Foto de ${safeName}">
+          <span class="player-month-winner-copy"><small>${tied?'CO-GANADOR':'GANADOR DEL MES'}</small><strong>${safeName}</strong><span>${winner.played} J · ${winner.goals} GOL · ${winner.cleanSheets} CS · ${winner.redCards} TR</span></span>
+          <span class="player-month-winner-points"><b>${winner.points.toLocaleString('es')}</b><small>PTS</small></span>
+        </button>`;
+      }).join('')}</div>
+      ${group.provisional?'<p class="player-month-provisional-note">Hay resultados aplazados en este cierre. El ganador se actualizará automáticamente al publicar la corrección.</p>':''}
+    </article>`;
+  }).join('')}</div>
+  <p class="player-month-note">Solo aparecen meses cerrados y publicados. Si corriges o deshaces una jornada, este historial se recalcula sin duplicar premios.</p>`;
 }
 
 function winterAchievementAwards(){
