@@ -205,6 +205,19 @@ html{
   font-size:1.42rem;
 }
 
+.achievement-icon-image{
+  display:block;
+  width:1.5em;
+  height:1.5em;
+  object-fit:contain;
+  filter:drop-shadow(0 3px 5px rgba(231,197,93,.3));
+}
+
+.profile-hero-award .achievement-icon-image{
+  width:1.25rem;
+  height:1.25rem;
+}
+
 .achievement-catalog-card small{
   color:#66e7cf;
   font-size:.63rem;
