@@ -1,11 +1,13 @@
 (() => {
   'use strict';
 
-  const VERSION = '142-20260831';
+  const VERSION = '143-20260901';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
   const LOCAL_DRAFT_RESTORE_CUTOFF_KEY = 'cuban-admin-restore-cutoff';
+  const PARTICIPANT_ENTRY_MODE_KEY = 'cuban-admin-participant-entry-mode';
+  const ACTIVE_PARTICIPANT_PREFIX = 'cuban-admin-active-participant:';
   const AUTO_SAVE_DELAY = 900;
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
@@ -65,6 +67,7 @@
     matchdayWriteRevision: '',
     lineups: new Map(),
     lineupParticipantName: '',
+    participantEntryMode: 'single',
     catalog: null,
     catalogSlot: null,
     catalogParticipantName: '',
@@ -922,7 +925,14 @@
 
   function updateLineupFromEditor() {
     if (!state.lineupParticipantName) return;
-    state.lineups.set(state.lineupParticipantName, gatherLineupEditor());
+    const previous = lineupForParticipant(state.lineupParticipantName);
+    const next = gatherLineupEditor();
+    // Abrir o recorrer una alineación intacta no debe convertir null en [].
+    // [] se reserva para un vaciado explícito o para una alineación ya editada.
+    state.lineups.set(
+      state.lineupParticipantName,
+      (next.length > 0 || Array.isArray(previous)) ? next : null
+    );
     document.querySelectorAll('.lineup-player-row').forEach(row => {
       const name = row.querySelector('[data-lineup-field="player_name"]').value.trim();
       const points = row.querySelector('[data-lineup-field="displayed_points"]').value.trim();
@@ -959,6 +969,245 @@
     return [...state.lineups.values()].some(value => Array.isArray(value));
   }
 
+  function restoreParticipantEntryMode() {
+    try {
+      state.participantEntryMode = localStorage.getItem(PARTICIPANT_ENTRY_MODE_KEY) === 'all' ? 'all' : 'single';
+    } catch {
+      state.participantEntryMode = 'single';
+    }
+  }
+
+  function activeParticipantStorageKey() {
+    return `${ACTIVE_PARTICIPANT_PREFIX}${currentSeasonKey()}:${state.matchday}`;
+  }
+
+  function restoreWorkParticipantSelection() {
+    const names = state.participants.map(participant => participant.name);
+    if (!names.length) {
+      state.lineupParticipantName = '';
+      return;
+    }
+    let stored = '';
+    try {
+      stored = localStorage.getItem(activeParticipantStorageKey()) || '';
+    } catch {}
+    if (names.includes(stored)) state.lineupParticipantName = stored;
+    else if (!names.includes(state.lineupParticipantName)) state.lineupParticipantName = names[0];
+  }
+
+  function rememberWorkParticipantSelection() {
+    if (!state.lineupParticipantName) return;
+    try {
+      localStorage.setItem(activeParticipantStorageKey(), state.lineupParticipantName);
+    } catch {}
+  }
+
+  function participantStatMetrics(participant) {
+    const row = participant
+      ? document.querySelector(`.admin-player[data-player-id="${participant.id}"]`)
+      : null;
+    const inputs = row ? [...row.querySelectorAll('.stat-input')] : [];
+    const values = inputs.map(input => inputNumberOrNull(input));
+    return {
+      row,
+      started: values.some(value => value !== null),
+      complete: inputs.length === 4 && values.every(value => value !== null)
+    };
+  }
+
+  function participantWorkMetrics(participant) {
+    const stats = participantStatMetrics(participant);
+    const lineup = isChampionsMode()
+      ? { hasContent: false, complete: true }
+      : lineupMetrics(lineupForParticipant(participant?.name));
+    const ready = stats.complete && (isChampionsMode() || lineup.complete);
+    let tone = 'pending';
+    let label = 'Sin comenzar';
+    if (ready) {
+      tone = 'complete';
+      label = isChampionsMode() ? 'Estadísticas completas' : 'Estadísticas y XI completos';
+    } else if (!stats.complete) {
+      tone = stats.started || lineup.hasContent ? 'partial' : 'pending';
+      label = stats.started ? 'Faltan estadísticas' : lineup.hasContent ? 'Faltan estadísticas' : 'Sin comenzar';
+    } else if (lineup.hasContent) {
+      tone = 'partial';
+      label = 'XI incompleto';
+    } else {
+      tone = 'stats-ready';
+      label = 'Estadísticas listas · XI sin cargar';
+    }
+    return { stats, lineup, ready, tone, label };
+  }
+
+  function nextParticipantName({ pendingOnly = false } = {}) {
+    const names = state.participants.map(participant => participant.name);
+    if (names.length < 2) return '';
+    const currentIndex = Math.max(0, names.indexOf(state.lineupParticipantName));
+    for (let offset = 1; offset < names.length; offset += 1) {
+      const name = names[(currentIndex + offset) % names.length];
+      const participant = state.participantIndex.get(name);
+      if (!pendingOnly || !participantWorkMetrics(participant).ready) return name;
+    }
+    return '';
+  }
+
+  function updateParticipantWorkflow() {
+    if (!$('participantWorkflow')) return;
+    restoreWorkParticipantSelection();
+    const single = state.participantEntryMode === 'single';
+    const panel = $('panelView');
+    panel.classList.toggle('participant-single-mode', single);
+    panel.classList.toggle('participant-general-mode', !single);
+    $('singleParticipantModeButton').classList.toggle('active', single);
+    $('allParticipantsModeButton').classList.toggle('active', !single);
+    $('singleParticipantModeButton').setAttribute('aria-pressed', String(single));
+    $('allParticipantsModeButton').setAttribute('aria-pressed', String(!single));
+    $('participantWorkflowTitle').textContent = single ? 'Completar uno por uno' : 'Vista general';
+    $('participantWorkflowDescription').textContent = single
+      ? 'Trabaja las estadísticas y la alineación del mismo participante, guarda y continúa sin volver a buscarlo.'
+      : 'Revisa todos los participantes juntos y elige manualmente la alineación que deseas editar.';
+
+    const participants = state.participants;
+    const metrics = participants.map(participant => ({
+      participant,
+      work: participantWorkMetrics(participant)
+    }));
+    const statsComplete = metrics.filter(item => item.work.stats.complete).length;
+    const lineupsComplete = isChampionsMode()
+      ? participants.length
+      : metrics.filter(item => item.work.lineup.complete).length;
+    const total = participants.length;
+    $('participantStatsProgress').textContent = `${statsComplete}/${total}`;
+    $('participantLineupsProgress').textContent = `${lineupsComplete}/${total}`;
+    $('participantStatsProgressBar').style.width = `${total ? (statsComplete / total) * 100 : 0}%`;
+    $('participantLineupsProgressBar').style.width = `${total ? (lineupsComplete / total) * 100 : 0}%`;
+    $('participantStatsProgressBar').setAttribute('aria-valuemax', String(total));
+    $('participantStatsProgressBar').setAttribute('aria-valuenow', String(statsComplete));
+    $('participantLineupsProgressBar').setAttribute('aria-valuemax', String(total));
+    $('participantLineupsProgressBar').setAttribute('aria-valuenow', String(lineupsComplete));
+
+    const selectedName = state.lineupParticipantName;
+    const selectedIndex = participants.findIndex(participant => participant.name === selectedName);
+    const selectedItem = metrics.find(item => item.participant.name === selectedName) || null;
+    const select = $('singleParticipantSelect');
+    select.innerHTML = metrics.map(item => {
+      const prefix = item.work.ready
+        ? '✓'
+        : item.work.stats.complete
+          ? '•'
+          : item.work.stats.started || item.work.lineup.hasContent
+            ? '…'
+            : '○';
+      return `<option value="${escapeHtml(item.participant.name)}">${prefix} ${escapeHtml(item.participant.name)}</option>`;
+    }).join('');
+    select.value = selectedName;
+
+    document.querySelectorAll('.admin-player').forEach(row => {
+      const participant = state.participants.find(item => item.id === Number(row.dataset.playerId));
+      row.classList.toggle('is-current', participant?.name === selectedName);
+    });
+    document.querySelectorAll('.champions-admin-group').forEach(group => {
+      group.classList.toggle('has-current', Boolean(group.querySelector('.admin-player.is-current')));
+    });
+
+    $('entryTitle').textContent = single && selectedName
+      ? `Estadísticas de ${selectedName}`
+      : isChampionsMode()
+        ? `${total} competidores · 4 grupos`
+        : `${total} participantes`;
+    $('lineupManagementTitle').textContent = single && selectedName
+      ? `El once de ${selectedName}`
+      : 'El once de cada participante';
+
+    const status = selectedItem?.work || { tone: 'pending', label: 'Sin comenzar', ready: false };
+    const statusNode = $('activeParticipantStatus');
+    statusNode.className = `participant-status-badge ${status.tone}`;
+    statusNode.innerHTML = `<i></i> ${escapeHtml(status.label)}`;
+    $('activeParticipantPosition').textContent = total
+      ? `Participante ${Math.max(0, selectedIndex) + 1} de ${total}`
+      : 'Sin participantes';
+
+    const busy = state.saving || state.matchdayLoading || state.matchdayLoadBlocked;
+    const nextPending = nextParticipantName({ pendingOnly: true });
+    $('previousParticipantButton').disabled = busy || total < 2;
+    $('nextParticipantButton').disabled = busy || total < 2;
+    select.disabled = busy || total === 0;
+    $('singleParticipantModeButton').disabled = state.saving || state.matchdayLoading;
+    $('allParticipantsModeButton').disabled = state.saving || state.matchdayLoading;
+    $('nextPendingParticipantButton').disabled = busy || !nextPending;
+    $('nextPendingParticipantButton').textContent = nextPending
+      ? 'Ir al próximo pendiente'
+      : status.ready ? 'Todo listo' : 'Último pendiente';
+  }
+
+  function setParticipantEntryMode(mode) {
+    const normalized = mode === 'all' ? 'all' : 'single';
+    if (normalized === state.participantEntryMode) return;
+    state.participantEntryMode = normalized;
+    try {
+      localStorage.setItem(PARTICIPANT_ENTRY_MODE_KEY, normalized);
+    } catch {}
+    syncPublicationUI();
+  }
+
+  function selectWorkParticipant(name, { scroll = false } = {}) {
+    if (!state.participants.some(participant => participant.name === name)) return false;
+    const changed = name !== state.lineupParticipantName;
+    if (changed && !isChampionsMode() && document.querySelector('.lineup-player-row')) {
+      updateLineupFromEditor();
+    }
+    state.lineupParticipantName = name;
+    rememberWorkParticipantSelection();
+    if (!isChampionsMode() && changed) renderLineupEditor();
+    updateParticipantWorkflow();
+    if (scroll) {
+      requestAnimationFrame(() => $('participantWorkflow').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
+    return true;
+  }
+
+  function moveWorkParticipant(direction, { scroll = false } = {}) {
+    const participants = state.participants;
+    if (participants.length < 2) return false;
+    const currentIndex = Math.max(0, participants.findIndex(participant => participant.name === state.lineupParticipantName));
+    const nextIndex = (currentIndex + direction + participants.length) % participants.length;
+    return selectWorkParticipant(participants[nextIndex].name, { scroll });
+  }
+
+  function moveToNextPendingParticipant() {
+    const name = nextParticipantName({ pendingOnly: true });
+    if (!name) return false;
+    return selectWorkParticipant(name);
+  }
+
+  async function saveDraftAndContinue() {
+    const selectedBeforeSave = state.lineupParticipantName;
+    const loadRequestBeforeSave = state.loadRequestId;
+    if (state.participantEntryMode === 'single' && !isChampionsMode()) updateLineupFromEditor();
+    const waitingForAutoSave = Boolean(state.autoSavePromise);
+    if (waitingForAutoSave) setButtonsBusy(true);
+    try {
+      // Si el autoguardado anterior sigue en curso, espera y vuelve a guardar
+      // la versión más reciente antes de cambiar de participante.
+      if (state.autoSavePromise) {
+        const autoSaved = await state.autoSavePromise;
+        if (autoSaved === false
+          || loadRequestBeforeSave !== state.loadRequestId
+          || selectedBeforeSave !== state.lineupParticipantName) return;
+      }
+      const saved = await persistDraft({ manual: true });
+      if (!saved
+        || loadRequestBeforeSave !== state.loadRequestId
+        || selectedBeforeSave !== state.lineupParticipantName) return;
+      moveWorkParticipant(1, { scroll: true });
+    } finally {
+      if (waitingForAutoSave && state.saving) {
+        setButtonsBusy(false);
+        syncPublicationUI();
+      }
+    }
+  }
+
   function setButtonsBusy(busy) {
     state.saving = busy;
     [
@@ -968,12 +1217,18 @@
       $('championsModeButton'),
       $('editPublishedButton'),
       $('undoPublicationButton'),
-      $('confirmPublishButton')
+      $('confirmPublishButton'),
+      $('singleParticipantModeButton'),
+      $('allParticipantsModeButton'),
+      $('previousParticipantButton'),
+      $('nextParticipantButton'),
+      $('nextPendingParticipantButton')
     ].filter(Boolean).forEach(button => {
       button.disabled = busy;
     });
     $('matchdaySelect').disabled = busy || state.matchdayLoading;
     if ($('lineupParticipantSelect')) $('lineupParticipantSelect').disabled = busy;
+    if ($('singleParticipantSelect')) $('singleParticipantSelect').disabled = busy;
     if ($('clearLineupButton')) $('clearLineupButton').disabled = busy;
     ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = busy || state.matchdayLoading;
@@ -1127,6 +1382,7 @@
       && !state.matchdayLoading
       && !state.matchdayLoadBlocked;
     $('publishButton').disabled = !canPreview;
+    updateParticipantWorkflow();
     return result;
   }
 
@@ -1177,7 +1433,9 @@
 
     $('saveDraftButton').querySelector('span').textContent = state.saving
       ? 'Guardando…'
-      : 'Guardar ahora';
+      : state.participantEntryMode === 'single'
+        ? 'Guardar y siguiente'
+        : 'Guardar ahora';
     $('publishButton').querySelector('span').textContent = state.saving
       ? 'Procesando…'
       : state.editingPublished
@@ -1936,12 +2194,14 @@
     setMilestoneForm(localDraft?.milestone || cloudMilestoneDraft || cloudMilestone || {});
     setPostponedForm(rowsToRender, cloudDraftRows, publishedRows);
     setLineupData(rowsToRender, cloudDraftRows, publishedRows);
+    restoreWorkParticipantSelection();
 
     $('savedAt').textContent = localDraft?.savedAt
       ? formatDate(localDraft.savedAt, 'Guardada ')
       : formatSavedAt(draftRows.length ? draftRows : publishedRows);
     renderPlayerRows(rowsToRender);
     renderLineupManagement();
+    updateParticipantWorkflow();
     renderHistory(!historyResult.error && Array.isArray(historyResult.data) ? historyResult.data : []);
     state.matchdayLoadBlocked = false;
     const localDraftNeedsSync = Boolean(localDraft && !localDraft.cloudSynced);
@@ -2032,7 +2292,9 @@
     syncPublicationUI();
     scheduleAutoSave();
     flashMessage('Modo corrección activado. La web pública seguirá mostrando la versión anterior hasta que confirmes la nueva.');
-    requestAnimationFrame(() => document.querySelector('.stat-input')?.focus());
+    if (window.matchMedia?.('(pointer:fine)').matches) {
+      requestAnimationFrame(() => document.querySelector('.admin-player.is-current .stat-input, .stat-input')?.focus());
+    }
   }
 
   function openPreview() {
@@ -2912,7 +3174,16 @@
     $('confirmBackupRestore').addEventListener('click', confirmBackupRestore);
     $('leagueModeButton').addEventListener('click', () => switchCompetition('league'));
     $('championsModeButton').addEventListener('click', () => switchCompetition('champions'));
-    $('saveDraftButton').addEventListener('click', () => persistDraft({ manual: true }));
+    $('saveDraftButton').addEventListener('click', () => {
+      if (state.participantEntryMode === 'single') saveDraftAndContinue();
+      else persistDraft({ manual: true });
+    });
+    $('singleParticipantModeButton').addEventListener('click', () => setParticipantEntryMode('single'));
+    $('allParticipantsModeButton').addEventListener('click', () => setParticipantEntryMode('all'));
+    $('previousParticipantButton').addEventListener('click', () => moveWorkParticipant(-1));
+    $('nextParticipantButton').addEventListener('click', () => moveWorkParticipant(1));
+    $('nextPendingParticipantButton').addEventListener('click', moveToNextPendingParticipant);
+    $('singleParticipantSelect').addEventListener('change', event => selectWorkParticipant(event.target.value));
     $('publishButton').addEventListener('click', openPreview);
     $('editPublishedButton').addEventListener('click', startCorrection);
     $('undoPublicationButton').addEventListener('click', undoLastPublication);
@@ -2962,8 +3233,7 @@
     });
 
     $('lineupParticipantSelect').addEventListener('change', event => {
-      state.lineupParticipantName = event.target.value;
-      renderLineupEditor();
+      selectWorkParticipant(event.target.value);
     });
 
     const handleLineupInput = () => {
@@ -3083,6 +3353,7 @@
       state.leagueParticipants = league.participants.filter(participant => participant.active !== false);
       state.participantIndex = new Map(league.participants.map(participant => [participant.name, participant]));
       state.championsGroups = Array.isArray(league.champions?.groups) ? league.champions.groups : [];
+      restoreParticipantEntryMode();
       const missingChampionsPlayers = state.championsGroups
         .flatMap(group => group.teams)
         .filter(name => !state.participantIndex.has(name));
