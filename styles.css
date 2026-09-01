@@ -26542,3 +26542,175 @@ footer{
     padding-inline:11px;
   }
 }
+
+/* =========================================================
+   V151 · TARJETA Y DISTINTIVO DE JUGADOR DEL MES
+   ========================================================= */
+.share-card-types .share-card-type-month{
+  min-height:82px;
+  grid-column:1/-1;
+  border-color:rgba(231,202,105,.2);
+  background:
+    radial-gradient(circle at 88% 20%,rgba(231,202,105,.09),transparent 7rem),
+    rgba(255,255,255,.022);
+}
+
+.share-card-types .share-card-type-month:hover,
+.share-card-types .share-card-type-month.active{
+  border-color:rgba(231,202,105,.42);
+  color:#f2d978;
+  background:
+    radial-gradient(circle at 88% 20%,rgba(231,202,105,.16),transparent 8rem),
+    rgba(231,202,105,.055);
+}
+
+.share-card-types .share-card-type-month.active .ui-icon{
+  color:#f2d978;
+}
+
+#currentRows .current-row.is-player-month{
+  position:relative;
+  isolation:isolate;
+}
+
+#currentRows .current-row.is-player-month>*{
+  position:relative;
+  z-index:1;
+}
+
+#currentRows .current-row.is-player-month::after{
+  position:absolute;
+  z-index:0;
+  inset:4px 6px;
+  border:1px solid rgba(231,202,105,.58);
+  border-radius:14px;
+  background:linear-gradient(90deg,rgba(231,202,105,.085),rgba(80,230,208,.028) 48%,transparent 86%);
+  box-shadow:inset 0 0 27px rgba(231,202,105,.055),0 0 14px rgba(231,202,105,.09);
+  content:"";
+  opacity:.62;
+  pointer-events:none;
+  animation:player-month-aura 4.8s ease-in-out infinite;
+}
+
+.standings-title-meta{
+  display:flex;
+  min-width:0;
+  min-height:20px;
+  align-items:center;
+  gap:5px;
+}
+
+.standings-title-meta .standings-mini-badges{
+  min-width:0;
+  min-height:20px;
+  flex:0 1 auto;
+}
+
+.standings-player-month-pill{
+  display:inline-flex;
+  min-width:0;
+  min-height:22px;
+  flex:0 0 auto;
+  align-items:center;
+  gap:4px;
+  padding:3px 7px;
+  border:1px solid rgba(231,202,105,.4);
+  border-radius:999px;
+  color:#ffe58d;
+  background:linear-gradient(135deg,rgba(231,202,105,.14),rgba(80,230,208,.055));
+  box-shadow:0 0 12px rgba(231,202,105,.11),inset 0 1px rgba(255,255,255,.055);
+  font-size:.55rem;
+  font-weight:900;
+  letter-spacing:.025em;
+  line-height:1;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.standings-player-month-pill .ui-icon{
+  width:12px;
+  height:12px;
+  flex:0 0 12px;
+  color:#f3d66b;
+  filter:drop-shadow(0 0 5px rgba(231,202,105,.4));
+  animation:player-month-medal 4.8s ease-in-out infinite;
+}
+
+.standings-player-month-short{
+  display:none;
+}
+
+@keyframes player-month-aura{
+  0%,100%{
+    opacity:.6;
+    box-shadow:inset 0 0 27px rgba(231,202,105,.055),0 0 14px rgba(231,202,105,.09);
+  }
+  50%{
+    opacity:1;
+    box-shadow:inset 0 0 36px rgba(231,202,105,.105),0 0 23px rgba(231,202,105,.18);
+  }
+}
+
+@keyframes player-month-medal{
+  0%,38%,62%,100%{transform:scale(1) rotate(0deg)}
+  48%{transform:scale(1.14) rotate(-7deg)}
+  54%{transform:scale(1.1) rotate(7deg)}
+}
+
+@media(max-width:620px){
+  .share-card-types .share-card-type-month{
+    min-height:74px;
+  }
+
+  #currentRows .current-row.is-player-month::after{
+    inset:3px 4px;
+    border-radius:12px;
+  }
+
+  .standings-title-meta{
+    gap:3px;
+  }
+
+  .standings-player-month-pill{
+    min-height:19px;
+    gap:3px;
+    padding:2px 5px;
+    font-size:.48rem;
+  }
+
+  .standings-player-month-pill .ui-icon{
+    width:11px;
+    height:11px;
+    flex-basis:11px;
+  }
+
+  .standings-player-month-long{
+    display:none;
+  }
+
+  .standings-player-month-short{
+    display:inline;
+  }
+}
+
+@media(max-width:370px){
+  .standings-player-month-pill{
+    padding-inline:4px;
+  }
+
+  .standings-player-month-short{
+    font-size:0;
+  }
+
+  .standings-player-month-short::after{
+    content:"Mes";
+    font-size:.46rem;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #currentRows .current-row.is-player-month::after,
+  .standings-player-month-pill .ui-icon{
+    animation:none!important;
+  }
+}
