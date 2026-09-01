@@ -1,6 +1,11 @@
-# Cuban League V146
+# Cuban League V147
 
 Sitio oficial de la Cuban League con:
+
+- El Catálogo Maestro incorpora a João Cancelo como defensa del FC Barcelona
+  y a Mariano Díaz como delantero del Deportivo Alavés, con identidades y
+  retratos propios. Sergio Martínez conserva su identidad estable y actualiza
+  su club del Racing de Santander al Real Madrid sin crear un duplicado.
 
 - El panel de administración incorpora `Copiar alineación anterior`: recupera
   el último XI completo y publicado del participante, conserva jugadores,
@@ -121,7 +126,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 521 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 523 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
