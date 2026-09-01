@@ -213,9 +213,14 @@ html{
   max-width:none!important;
   max-height:none!important;
   flex:0 0 auto!important;
+  padding:0!important;
+  border:0!important;
   border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
   object-fit:contain!important;
   transform:none!important;
+  box-shadow:none!important;
   filter:drop-shadow(0 3px 5px rgba(231,197,93,.3));
 }
 
