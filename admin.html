@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=142-20260831">
+  <link rel="stylesheet" href="admin.css?v=143-20260901">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -371,6 +371,56 @@
         </button>
       </section>
 
+      <section id="participantWorkflow" class="participant-workflow" aria-labelledby="participantWorkflowTitle">
+        <header class="participant-workflow-head">
+          <div>
+            <span class="admin-kicker"><i></i> MODO DE TRABAJO</span>
+            <h2 id="participantWorkflowTitle">Completar uno por uno</h2>
+            <p id="participantWorkflowDescription">Trabaja las estadísticas y la alineación del mismo participante, guarda y continúa sin volver a buscarlo.</p>
+          </div>
+          <div class="participant-mode-switcher" role="group" aria-label="Forma de administrar los participantes">
+            <button id="singleParticipantModeButton" class="active" type="button" aria-pressed="true">Uno por uno</button>
+            <button id="allParticipantsModeButton" type="button" aria-pressed="false">Vista general</button>
+          </div>
+        </header>
+
+        <div id="participantWorkflowBody" class="participant-workflow-body">
+          <div class="participant-workflow-progress" aria-label="Progreso de los participantes">
+            <article>
+              <span><small>Estadísticas</small><b id="participantStatsProgress">0/20</b></span>
+              <span class="participant-progress-track"><i id="participantStatsProgressBar" role="progressbar" aria-label="Estadísticas completas" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0"></i></span>
+            </article>
+            <article class="league-only-workflow-progress">
+              <span><small>Alineaciones</small><b id="participantLineupsProgress">0/20</b></span>
+              <span class="participant-progress-track"><i id="participantLineupsProgressBar" role="progressbar" aria-label="Alineaciones completas" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0"></i></span>
+            </article>
+          </div>
+
+          <div class="participant-workflow-navigation">
+            <button id="previousParticipantButton" class="participant-arrow-button" type="button" aria-label="Participante anterior">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              <span>Anterior</span>
+            </button>
+            <label for="singleParticipantSelect">
+              <span>Participante activo</span>
+              <select id="singleParticipantSelect" aria-label="Participante que deseas completar"></select>
+            </label>
+            <button id="nextParticipantButton" class="participant-arrow-button" type="button" aria-label="Participante siguiente">
+              <span>Siguiente</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <footer class="participant-workflow-status" aria-live="polite">
+            <span id="activeParticipantStatus" class="participant-status-badge pending"><i></i> Sin comenzar</span>
+            <span id="activeParticipantPosition">Participante 1 de 20</span>
+            <button id="nextPendingParticipantButton" type="button">Ir al próximo pendiente</button>
+          </footer>
+        </div>
+      </section>
+
+      <div id="participantEditorGrid" class="participant-editor-grid">
+
       <section class="entry-card">
         <div class="entry-card-head">
           <div>
@@ -434,6 +484,7 @@
           </footer>
         </div>
       </section>
+      </div>
 
       <section class="revision-card">
         <header>
@@ -591,8 +642,8 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=142-20260831"></script>
-  <script src="player-catalog.js?v=142-20260831"></script>
-  <script src="admin.js?v=142-20260831"></script>
+  <script src="supabase-config.js?v=143-20260901"></script>
+  <script src="player-catalog.js?v=143-20260901"></script>
+  <script src="admin.js?v=143-20260901"></script>
 </body>
 </html>
