@@ -3345,6 +3345,12 @@ main{
   box-shadow:var(--ring);
 }
 
+.status.pending{
+  border-color:rgba(255,196,92,.3);
+  color:#ffd27a;
+  background:rgba(255,176,59,.09);
+}
+
 .round{
   border-color:var(--line);
   border-radius:20px;
@@ -6185,6 +6191,13 @@ body.is-offline::after{
   border-color:rgba(92,229,215,.2);
   color:#82eee2;
   background:rgba(92,229,215,.065);
+}
+
+.champions-points-cell.is-provisional{
+  border-color:rgba(255,196,92,.34);
+  color:#ffd27a;
+  background:rgba(255,176,59,.09);
+  box-shadow:inset 0 0 0 1px rgba(255,196,92,.06);
 }
 
 .champions-total{

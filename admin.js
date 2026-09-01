@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '148-20260901';
+  const VERSION = '149-20260901';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -16,6 +16,9 @@
     participants: [],
     leagueParticipants: [],
     championsGroups: [],
+    championsLeagueMatchdays: [],
+    championsSyncStatus: 'pending',
+    championsRowsCache: new Map(),
     participantIndex: new Map(),
     competition: 'league',
     matchday: 1,
@@ -184,7 +187,41 @@
   }
 
   function currentMatchdayCount() {
-    return isChampionsMode() ? 8 : 38;
+    return isChampionsMode() ? state.championsLeagueMatchdays.length || 8 : 38;
+  }
+
+  function championsSourceMatchday(championsMatchday = state.matchday) {
+    const value = Number(state.championsLeagueMatchdays[Number(championsMatchday) - 1]);
+    return Number.isInteger(value) && value > 0 ? value : null;
+  }
+
+  function championsMatchdayForLeague(leagueMatchday = state.matchday) {
+    const index = state.championsLeagueMatchdays.indexOf(Number(leagueMatchday));
+    return index >= 0 ? index + 1 : null;
+  }
+
+  function championsSyncDetails(rows = state.publishedRows) {
+    const sourceMatchday = championsSourceMatchday();
+    const sourceRows = Array.isArray(rows) ? rows : [];
+    const availableNames = new Set(sourceRows.map(row => row?.participant_name).filter(Boolean));
+    const completeRows = sourceRows.filter(row =>
+      ['points', 'goals', 'clean_sheets', 'red_cards'].every(field =>
+        row?.[field] !== null
+        && row?.[field] !== undefined
+        && row?.[field] !== ''
+        && Number.isInteger(Number(row[field]))
+      )
+    );
+    const uniqueNames = new Set(completeRows.map(row => row?.participant_name).filter(Boolean));
+    const synchronized = state.participants.filter(participant => uniqueNames.has(participant.name)).length;
+    const available = state.participants.filter(participant => availableNames.has(participant.name)).length;
+    const postponed = sourceRows.some(row => row?.has_postponed_matches === true);
+    const status = available === 0
+      ? 'pending'
+      : postponed || synchronized < state.participants.length
+        ? 'provisional'
+        : 'synced';
+    return { sourceMatchday, available, synchronized, total: state.participants.length, postponed, status };
   }
 
   function localDraftKey() {
@@ -1245,7 +1282,7 @@
   function updateParticipantWorkflow() {
     if (!$('participantWorkflow')) return;
     restoreWorkParticipantSelection();
-    const single = state.participantEntryMode === 'single';
+    const single = !isChampionsMode() && state.participantEntryMode === 'single';
     const panel = $('panelView');
     panel.classList.toggle('participant-single-mode', single);
     panel.classList.toggle('participant-general-mode', !single);
@@ -1373,7 +1410,7 @@
   }
 
   async function saveDraftAndContinue() {
-    if (state.copyingPreviousLineup) return;
+    if (isChampionsMode() || state.copyingPreviousLineup) return;
     const selectedBeforeSave = state.lineupParticipantName;
     const loadRequestBeforeSave = state.loadRequestId;
     if (state.participantEntryMode === 'single' && !isChampionsMode()) updateLineupFromEditor();
@@ -1508,12 +1545,13 @@
   function validationState() {
     const missing = [];
     const complete = [];
+    const automatic = isChampionsMode();
     document.querySelectorAll('.admin-player').forEach(node => {
       const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
       const inputs = [...node.querySelectorAll('.stat-input')];
       const rowComplete = inputs.length === 4 && inputs.every(input => inputNumberOrNull(input) !== null);
-      node.classList.toggle('is-incomplete', !rowComplete);
-      inputs.forEach(input => input.classList.toggle('is-missing', inputNumberOrNull(input) === null));
+      node.classList.toggle('is-incomplete', !automatic && !rowComplete);
+      inputs.forEach(input => input.classList.toggle('is-missing', !automatic && inputNumberOrNull(input) === null));
       if (rowComplete) complete.push(participant?.name);
       else if (participant) missing.push(participant.name);
     });
@@ -1524,6 +1562,40 @@
     const result = validationState();
     const locked = state.published && !state.editingPublished;
     const card = $('completionCard');
+
+    if (isChampionsMode()) {
+      const details = championsSyncDetails();
+      const championsLabel = `Champions J${state.matchday}`;
+      const sourceLabel = `Liga J${details.sourceMatchday || '—'}`;
+      card.classList.toggle('warning', details.status !== 'synced');
+      card.classList.toggle('complete', details.status === 'synced');
+      card.classList.toggle('published-locked', details.status !== 'pending');
+      card.classList.add('champions-automatic-state');
+      $('completionProgress').style.width = `${details.total ? (details.synchronized / details.total) * 100 : 0}%`;
+      $('editPublishedButton').hidden = true;
+      if (details.status === 'synced') {
+        $('completionTitle').textContent = `${championsLabel} sincronizada`;
+        $('completionMessage').textContent = `${championsLabel} se alimenta de ${sourceLabel}. Los datos publicados están protegidos y no se vuelven a introducir aquí.`;
+        $('missingParticipants').textContent = `${details.synchronized}/${details.total} participantes · 4 grupos actualizados`;
+      } else if (details.status === 'provisional') {
+        $('completionTitle').textContent = `${championsLabel} provisional`;
+        $('completionMessage').textContent = details.postponed
+          ? `${championsLabel} se alimenta de ${sourceLabel}. La jornada fuente tiene partidos aplazados y seguirá provisional hasta corregirla en Liga.`
+          : `${championsLabel} se alimenta de ${sourceLabel}. Solo hay ${details.synchronized} de ${details.total} participantes con estadísticas completas.`;
+        $('missingParticipants').textContent = details.postponed
+          ? `${details.synchronized}/${details.total} participantes · partidos aplazados`
+          : `${details.synchronized}/${details.total} participantes sincronizados`;
+      } else {
+        $('completionTitle').textContent = `${championsLabel} pendiente`;
+        $('completionMessage').textContent = `${championsLabel} se alimenta de ${sourceLabel}. Publica esa jornada de Liga para llenar automáticamente los cuatro grupos.`;
+        $('missingParticipants').textContent = `Esperando ${sourceLabel} · no se creó ningún borrador de Champions`;
+      }
+      $('publishButton').disabled = true;
+      updateParticipantWorkflow();
+      return result;
+    }
+
+    card.classList.remove('champions-automatic-state');
     const percent = result.total ? Math.round((result.complete.length / result.total) * 100) : 0;
     card.classList.toggle('warning', result.missing.length > 0 && !locked);
     card.classList.toggle('complete', result.missing.length === 0 && !locked);
@@ -1586,6 +1658,7 @@
       || state.matchdayLoading
       || state.matchdayLoadBlocked
       || state.copyingPreviousLineup
+      || isChampionsMode()
       || (state.published && !state.editingPublished);
     document.querySelectorAll('.stat-input').forEach(input => {
       input.disabled = locked;
@@ -1593,7 +1666,7 @@
     ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = locked || isChampionsMode();
     });
-    $('entryTitle').closest('.entry-card').classList.toggle('is-locked', locked && state.published);
+    $('entryTitle').closest('.entry-card').classList.toggle('is-locked', isChampionsMode() || (locked && state.published));
     $('achievementSettings').classList.toggle('is-locked', locked && state.published);
     document.querySelectorAll('[data-lineup-field]').forEach(input => {
       const captainMultiplier = input.dataset.lineupField === 'captain_multiplier';
@@ -1627,6 +1700,45 @@
   function syncPublicationUI() {
     const locked = state.published && !state.editingPublished;
     const badge = $('publicationBadge');
+
+    if (isChampionsMode()) {
+      const details = championsSyncDetails();
+      const label = details.status === 'synced'
+        ? 'Sincronizada'
+        : details.status === 'provisional'
+          ? 'Provisional'
+          : 'Pendiente';
+      state.championsSyncStatus = details.status;
+      badge.classList.toggle('published', details.status === 'synced');
+      badge.classList.toggle('draft', details.status === 'pending');
+      badge.classList.remove('editing');
+      badge.classList.toggle('pending', details.status === 'provisional');
+      badge.classList.add('automatic');
+      badge.querySelector('b').textContent = label;
+      $('dockMatchday').textContent = state.matchday;
+      $('dockSeason').textContent = `Champions · fuente Liga J${details.sourceMatchday || '—'}`;
+      $('saveDraftButton').querySelector('span').textContent = 'Automática';
+      $('publishButton').querySelector('span').textContent = 'Se publica desde Liga';
+      $('saveDraftButton').disabled = true;
+      $('publishButton').disabled = true;
+      $('editPublishedButton').hidden = true;
+      $('editPublishedButton').disabled = true;
+      $('undoPublicationButton').disabled = true;
+      $('confirmPublishButton').disabled = true;
+      $('matchdaySelect').disabled = state.saving || state.matchdayLoading;
+      $('leagueModeButton').disabled = state.saving || state.matchdayLoading;
+      $('championsModeButton').disabled = state.saving || state.matchdayLoading;
+      $('logoutButton').disabled = state.copyingPreviousLineup;
+      syncInputLock();
+      updateCompletionState();
+      setWorkflowStep(details.status === 'pending' ? 'draft' : 'published');
+      markDirty(false, details.status === 'pending' ? 'Esperando la jornada de Liga' : 'Sincronización automática protegida');
+      updateChampionsAutomationNotice();
+      if ($('backupContent')) setBackupControlsBusy(state.backupLoading);
+      return;
+    }
+
+    badge.classList.remove('automatic');
     badge.classList.toggle('published', state.published);
     badge.classList.toggle('draft', !state.published || state.editingPublished);
     badge.classList.toggle('editing', state.editingPublished);
@@ -1658,6 +1770,7 @@
             ? 'Completar jornada'
             : 'Confirmar corrección'
         : hasPostponedMatches() ? 'Publicar como pendiente' : 'Confirmar publicación';
+    $('confirmPublishButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked;
 
     $('dockMatchday').textContent = state.matchday;
     $('dockSeason').textContent = isChampionsMode() ? 'Champions · fase de grupos' : config.season;
@@ -1677,6 +1790,7 @@
     if (locked && !state.saving) {
       markDirty(false, 'Publicación protegida');
     }
+    updateChampionsAutomationNotice();
     if ($('backupContent')) setBackupControlsBusy(state.backupLoading);
   }
 
@@ -1702,6 +1816,7 @@
     const shield = escapeHtml(participant.shield);
     const playerId = Number(participant.id);
     const inputPrefix = champions ? 'champions' : 'league';
+    const protectedAttributes = champions ? ' disabled aria-readonly="true"' : '';
     return `
       <article class="admin-player${champions ? ' champions-admin-player' : ''}" data-player-id="${playerId}">
         <div class="admin-player-info">
@@ -1710,20 +1825,20 @@
         </div>
         <div class="stat-input-wrap has-sign-toggle${Number(fieldValue(row, 'points')) < 0 ? ' is-negative' : ''}" data-signed-points-control>
           <label for="${inputPrefix}-points-${playerId}">PTS</label>
-          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="${fieldValue(row, 'points')}" placeholder="—" aria-label="Puntos de ${name}; admite negativos">
-          <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos de ${name}" aria-pressed="${Number(fieldValue(row, 'points')) < 0}" title="Cambiar entre positivo y negativo">±</button>
+          <input class="stat-input" id="${inputPrefix}-points-${playerId}" data-stat="points" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="${fieldValue(row, 'points')}" placeholder="—" aria-label="Puntos de ${name}; admite negativos"${protectedAttributes}>
+          <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos de ${name}" aria-pressed="${Number(fieldValue(row, 'points')) < 0}" title="Cambiar entre positivo y negativo"${champions ? ' disabled' : ''}>±</button>
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-goals-${playerId}">GOL</label>
-          <input class="stat-input" id="${inputPrefix}-goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'goals')}" placeholder="—" aria-label="Goles de ${name}">
+          <input class="stat-input" id="${inputPrefix}-goals-${playerId}" data-stat="goals" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'goals')}" placeholder="—" aria-label="Goles de ${name}"${protectedAttributes}>
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-clean-sheets-${playerId}">CS</label>
-          <input class="stat-input" id="${inputPrefix}-clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'clean_sheets')}" placeholder="—" aria-label="Clean sheets de ${name}">
+          <input class="stat-input" id="${inputPrefix}-clean-sheets-${playerId}" data-stat="clean_sheets" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'clean_sheets')}" placeholder="—" aria-label="Clean sheets de ${name}"${protectedAttributes}>
         </div>
         <div class="stat-input-wrap">
           <label for="${inputPrefix}-red-cards-${playerId}">TR</label>
-          <input class="stat-input" id="${inputPrefix}-red-cards-${playerId}" data-stat="red_cards" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'red_cards')}" placeholder="—" aria-label="Tarjetas rojas de ${name}">
+          <input class="stat-input" id="${inputPrefix}-red-cards-${playerId}" data-stat="red_cards" type="number" inputmode="numeric" min="0" step="1" value="${fieldValue(row, 'red_cards')}" placeholder="—" aria-label="Tarjetas rojas de ${name}"${protectedAttributes}>
         </div>
       </article>`;
   }
@@ -1740,7 +1855,7 @@
             <span class="champions-admin-shield">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.8 3 7.9 7.5 9.5 4.5-1.6 7.5-4.7 7.5-9.5V6L12 3Z"/></svg>
             </span>
-            <span><b>${escapeHtml(group.name)}</b><small>5 competidores · jornada ${state.matchday} de 8</small></span>
+            <span><b>${escapeHtml(group.name)}</b><small>5 competidores · Champions J${state.matchday} · fuente Liga J${championsSourceMatchday() || '—'}</small></span>
           </header>
           <div>${groupPlayers.map(participant =>
             renderAdminPlayer(participant, recordMap.get(participant.name) || {}, group.name)
@@ -1794,6 +1909,7 @@
     milestone = null,
     cloudWriteRevision = state.matchdayWriteRevision
   } = {}) {
+    if (isChampionsMode()) return;
     try {
       localStorage.setItem(localDraftKey(), JSON.stringify({
         savedAt: new Date().toISOString(),
@@ -1870,7 +1986,7 @@
   }
 
   function scheduleAutoSave() {
-    if (state.suspendAutoSave || (state.published && !state.editingPublished)) return;
+    if (isChampionsMode() || state.suspendAutoSave || (state.published && !state.editingPublished)) return;
     const rows = gatherRows(false, true);
     saveLocalDraft(rows);
     state.hasDraft = true;
@@ -1950,6 +2066,7 @@
   }
 
   async function persistDraft({ manual = false } = {}) {
+    if (isChampionsMode()) return false;
     if (manual && state.copyingPreviousLineup) return false;
     if (state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished)) return false;
     if (state.autoSaveInFlight) {
@@ -2179,6 +2296,96 @@
     syncPublicationUI();
   }
 
+  async function loadAutomaticChampionsMatchday(isStaleRequest) {
+    const sourceMatchday = championsSourceMatchday();
+    if (!sourceMatchday) {
+      state.schemaReady = false;
+      state.publishedRows = [];
+      state.published = false;
+      state.hasDraft = false;
+      state.editingPublished = false;
+      state.matchdayLoadBlocked = false;
+      renderPlayerRows();
+      flashMessage('No se encontró la jornada de Liga vinculada con esta jornada de Champions.', 'error');
+      return;
+    }
+
+    let includeRedCards = true;
+    let includePostponed = true;
+    let result = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const fields = [
+        'participant_name',
+        'points',
+        'goals',
+        'clean_sheets',
+        ...(includeRedCards ? ['red_cards'] : []),
+        ...(includePostponed ? ['has_postponed_matches'] : []),
+        'updated_at'
+      ].join(',');
+      result = await state.client
+        .from('matchday_stats')
+        .select(fields)
+        .eq('season', config.season)
+        .eq('matchday', sourceMatchday)
+        .eq('published', true);
+      if (!result.error) break;
+      if (includePostponed && isPostponedUpgradeError(result.error)) {
+        includePostponed = false;
+        state.postponedSchemaReady = false;
+        continue;
+      }
+      if (includeRedCards && isRedCardsUpgradeError(result.error)) {
+        includeRedCards = false;
+        state.redCardsSchemaReady = false;
+        continue;
+      }
+      break;
+    }
+
+    if (isStaleRequest()) return;
+    if (result?.error) {
+      const cachedRows = state.championsRowsCache.get(state.matchday) || [];
+      state.schemaReady = false;
+      state.publishedRows = cachedRows;
+      state.published = cachedRows.length > 0;
+      state.hasDraft = false;
+      state.editingPublished = false;
+      state.matchdayLoadBlocked = false;
+      $('savedAt').textContent = cachedRows.length
+        ? 'Mostrando la última sincronización disponible'
+        : `Sin conexión con Liga J${sourceMatchday}`;
+      renderPlayerRows(cachedRows);
+      flashMessage(friendlyError(result.error), 'error');
+      return;
+    }
+
+    const allowedNames = new Set(state.participants.map(participant => participant.name));
+    const rowsByName = new Map();
+    (Array.isArray(result?.data) ? result.data : []).forEach(row => {
+      if (allowedNames.has(row?.participant_name)) rowsByName.set(row.participant_name, row);
+    });
+    const publishedRows = [...rowsByName.values()];
+    state.championsRowsCache.set(state.matchday, publishedRows.map(row => ({ ...row })));
+    state.schemaReady = true;
+    state.publishedRows = publishedRows;
+    state.published = publishedRows.length > 0;
+    state.hasDraft = false;
+    state.editingPublished = false;
+    state.history = [];
+    state.matchdayWriteRevision = '';
+    setLineupData();
+    restoreWorkParticipantSelection();
+    state.matchdayLoadBlocked = false;
+    $('savedAt').textContent = publishedRows.length
+      ? formatSavedAt(publishedRows).replace(/^Guardada/, 'Fuente publicada')
+      : `Esperando Liga J${sourceMatchday}`;
+    renderPlayerRows(publishedRows);
+    renderHistory([]);
+    markDirty(false, publishedRows.length ? 'Sincronización automática protegida' : 'Esperando la jornada de Liga');
+    syncPublicationUI();
+  }
+
   async function loadMatchday() {
     if (!state.client) return;
     const requestId = ++state.loadRequestId;
@@ -2208,6 +2415,10 @@
     syncPublicationUI();
 
     try {
+    if (champions) {
+      await loadAutomaticChampionsMatchday(isStaleRequest);
+      return;
+    }
     try {
       const restoreStateAvailable = await refreshRestoreState();
       state.matchdayRestoreGeneration = restoreStateAvailable ? state.serverRestoreGeneration : '';
@@ -2442,6 +2653,58 @@
     }
   }
 
+  function updateChampionsAutomationNotice() {
+    const notice = $('championsAutomationNotice');
+    if (!notice) return;
+    const title = $('championsAutomationTitle');
+    const message = $('championsAutomationMessage');
+    const status = $('championsAutomationStatus');
+    const sourceButton = $('goToChampionsSourceButton');
+    let tone = 'pending';
+    let label = 'Pendiente';
+
+    if (isChampionsMode()) {
+      const details = championsSyncDetails();
+      tone = details.status;
+      label = details.status === 'synced'
+        ? 'Sincronizada'
+        : details.status === 'provisional'
+          ? 'Provisional'
+          : 'Pendiente';
+      notice.hidden = false;
+      notice.classList.add('is-champions-view');
+      title.textContent = `Champions J${state.matchday} se alimenta de Liga J${details.sourceMatchday || '—'}`;
+      message.textContent = details.status === 'synced'
+        ? `Los ${details.total} participantes publicados se distribuyen automáticamente en los 4 grupos. Para cambiar un dato, corrige Liga J${details.sourceMatchday}.`
+        : details.status === 'provisional'
+          ? details.postponed
+            ? `Los 4 grupos muestran los datos publicados, pero seguirán provisionales porque Liga J${details.sourceMatchday} tiene partidos aplazados.`
+            : `Hay ${details.synchronized} de ${details.total} participantes con estadísticas completas. Completa y publica Liga J${details.sourceMatchday}.`
+          : `Todavía no hay datos publicados. Completa y publica Liga J${details.sourceMatchday} para llenar automáticamente los 4 grupos.`;
+      sourceButton.hidden = false;
+      sourceButton.querySelector('span').textContent = `Ir a Liga J${details.sourceMatchday || '—'}`;
+    } else {
+      const championsMatchday = championsMatchdayForLeague();
+      if (!championsMatchday) {
+        notice.hidden = true;
+        return;
+      }
+      const postponed = publishedWasPostponed() || hasPostponedMatches();
+      tone = state.published && !postponed ? 'synced' : postponed ? 'provisional' : 'pending';
+      label = state.published && !postponed ? 'Vinculada' : postponed ? 'Provisional' : 'Automática';
+      notice.hidden = false;
+      notice.classList.remove('is-champions-view');
+      title.textContent = `Liga J${state.matchday} también cuenta para Champions J${championsMatchday}`;
+      message.textContent = postponed
+        ? `Al publicar o corregir esta jornada, PTS, GOL, CS y TR actualizarán automáticamente los 4 grupos de Champions J${championsMatchday}, que permanecerá provisional por los partidos aplazados.`
+        : `Al publicar o corregir esta jornada, PTS, GOL, CS y TR actualizarán automáticamente los 4 grupos de Champions J${championsMatchday}. No tendrás que introducirlos otra vez.`;
+      sourceButton.hidden = true;
+    }
+
+    status.className = `champions-automation-status ${tone}`;
+    status.innerHTML = `<i></i> ${label}`;
+  }
+
   function updateCompetitionUI() {
     const champions = isChampionsMode();
     const matchdayCount = currentMatchdayCount();
@@ -2457,22 +2720,39 @@
     $('championsModeButton').classList.toggle('active', champions);
     $('leagueModeButton').setAttribute('aria-pressed', String(!champions));
     $('championsModeButton').setAttribute('aria-pressed', String(champions));
-    $('panelTitle').textContent = champions ? 'Administrar Champions' : 'Administrar jornadas';
+    $('panelTitle').textContent = champions ? 'Champions automática' : 'Administrar jornadas';
     $('panelDescription').textContent = champions
-      ? 'Registra cada fecha con guardado automático, revisión previa y un historial seguro de correcciones.'
+      ? 'Consulta los datos publicados de Liga ya distribuidos en sus cuatro grupos. Para corregirlos, vuelve a la jornada fuente.'
       : 'Prepara, revisa y publica cada jornada sin riesgo de perder datos ni modificar la web por accidente.';
     $('entryTitle').textContent = champions
       ? `${state.participants.length} competidores · 4 grupos`
       : `${state.participants.length} participantes`;
     $('matchdaySelect').innerHTML = Array.from({ length: matchdayCount }, (_, index) => {
       const matchday = index + 1;
-      return `<option value="${matchday}">Jornada ${matchday}</option>`;
+      const sourceMatchday = championsSourceMatchday(matchday);
+      return `<option value="${matchday}">${champions ? `Champions J${matchday} · Liga J${sourceMatchday || '—'}` : `Jornada ${matchday}`}</option>`;
     }).join('');
     $('matchdaySelect').value = String(state.matchday);
     $('savedAt').textContent = 'Todavía no guardada';
     if (!champions && !$('matchdayDate').value) setMilestoneForm({});
     else updateAchievementSettingsMessage();
     syncPublicationUI();
+  }
+
+  async function goToChampionsSourceMatchday() {
+    if (!isChampionsMode() || state.saving || state.matchdayLoading) return;
+    const sourceMatchday = championsSourceMatchday();
+    if (!sourceMatchday) return;
+    state.competition = 'league';
+    state.matchday = sourceMatchday;
+    state.published = false;
+    state.publishedRows = [];
+    state.editingPublished = false;
+    state.hasDraft = false;
+    markDirty(false);
+    updateCompetitionUI();
+    await loadMatchday();
+    requestAnimationFrame(() => $('championsAutomationNotice').scrollIntoView({ behavior: 'smooth', block: 'center' }));
   }
 
   async function prepareNavigation() {
@@ -2495,7 +2775,7 @@
   }
 
   function startCorrection() {
-    if (!state.published || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
+    if (isChampionsMode() || !state.published || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     state.editingPublished = true;
     state.hasDraft = true;
     state.autoSaveRevision += 1;
@@ -2509,7 +2789,7 @@
   }
 
   function openPreview() {
-    if (state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
+    if (isChampionsMode() || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     const validation = updateCompletionState();
     if (validation.missing.length) {
       flashMessage(`Faltan ${validation.missing.length} participantes. Completa todos los campos antes de revisar.`, 'error');
@@ -2575,7 +2855,12 @@
         ? ' · cierre mensual'
         : '';
     const postponedLabel = hasPostponedMatches() ? ' · partidos aplazados · Copa pendiente' : ' · jornada completa';
-    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${isChampionsMode() ? '' : ` · ${lineupCount} alineaciones`}${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}${isChampionsMode() ? '' : postponedLabel}`;
+    const linkedChampionsMatchday = championsMatchdayForLeague();
+    $('previewSubtitle').textContent = `Jornada ${state.matchday} · ${currentCompetitionLabel()} · ${rows.length} participantes${isChampionsMode() ? '' : ` · ${lineupCount} alineaciones`}${matchdayDateLabel ? ` · ${matchdayDateLabel}` : ''}${prizeLabel}${isChampionsMode() ? '' : postponedLabel}${linkedChampionsMatchday ? ` · actualizará Champions J${linkedChampionsMatchday}` : ''}`;
+    $('previewChampionsAutomation').hidden = !linkedChampionsMatchday;
+    $('previewChampionsAutomation').textContent = linkedChampionsMatchday
+      ? `Esta publicación actualizará automáticamente PTS, GOL, CS y TR de los 4 grupos de Champions J${linkedChampionsMatchday}.`
+      : '';
     $('previewSummary').innerHTML = `
       <article><small>Participantes</small><b>${rows.length}</b></article>
       <article><small>Puntos</small><b>${total('points').toLocaleString()}</b></article>
@@ -2640,11 +2925,12 @@
   }
 
   async function publishPreview() {
-    if (state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.previewRows.length) return;
+    if (isChampionsMode() || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.previewRows.length) return;
     const season = currentSeasonKey();
     const matchday = state.matchday;
     const competition = state.competition;
     const champions = isChampionsMode();
+    const linkedChampionsMatchday = champions ? null : championsMatchdayForLeague(matchday);
     const previewRows = state.previewRows.map(row => ({ ...row }));
     const milestoneCheck = champions ? { valid: true, milestone: null } : milestoneValidation({ required: true });
     if (!milestoneCheck.valid || previewRows.length !== state.participants.length) {
@@ -2699,8 +2985,7 @@
       state.published = publishedRows.length > 0;
       closePreview(false);
       await loadMatchday();
-      flashMessage(
-        wasCorrection
+      const publicationMessage = wasCorrection
           ? remainsPostponed
             ? `Corrección publicada. La jornada ${matchday} sigue pendiente y la Copa no confirmará eliminados.`
             : wasPostponed
@@ -2708,8 +2993,13 @@
               : `Corrección de la jornada ${matchday} publicada. La versión anterior quedó guardada en el historial.`
           : remainsPostponed
             ? `Jornada ${matchday} publicada como pendiente. La Liga continúa y la Copa espera el partido aplazado.`
-            : `Jornada ${matchday} publicada correctamente. Ya está visible en la web.`
-      );
+            : `Jornada ${matchday} publicada correctamente. Ya está visible en la web.`;
+      const championsMessage = linkedChampionsMatchday
+        ? remainsPostponed
+          ? ` Champions J${linkedChampionsMatchday} actualizó automáticamente sus 4 grupos y quedó provisional.`
+          : ` Champions J${linkedChampionsMatchday} actualizó automáticamente sus 4 grupos.`
+        : '';
+      flashMessage(`${publicationMessage}${championsMessage}`);
     } catch (error) {
       if (isRestoreGenerationError(error)) {
         closePreview(false);
@@ -2730,6 +3020,7 @@
   }
 
   async function undoLastPublication() {
+    if (isChampionsMode()) return;
     const latest = state.history.find(item => !item.undone);
     if (!latest || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     const accepted = window.confirm(
@@ -2738,6 +3029,7 @@
     );
     if (!accepted) return;
 
+    const linkedChampionsMatchday = championsMatchdayForLeague();
     try {
       state.suspendAutoSave = true;
       setButtonsBusy(true);
@@ -2763,11 +3055,10 @@
       state.dirty = false;
       state.editingPublished = false;
       await loadMatchday();
-      flashMessage(
-        restoredRows.length
+      const undoMessage = restoredRows.length
           ? `Última modificación deshecha. La jornada ${state.matchday} volvió a su versión anterior.`
-          : `Publicación deshecha. La jornada ${state.matchday} dejó de estar visible en la web.`
-      );
+          : `Publicación deshecha. La jornada ${state.matchday} dejó de estar visible en la web.`;
+      flashMessage(`${undoMessage}${linkedChampionsMatchday ? ` Champions J${linkedChampionsMatchday} se sincronizó automáticamente con ese cambio.` : ''}`);
     } catch (error) {
       if (isRestoreGenerationError(error)) {
         archiveCurrentLocalDraft();
@@ -3386,6 +3677,7 @@
     $('confirmBackupRestore').addEventListener('click', confirmBackupRestore);
     $('leagueModeButton').addEventListener('click', () => switchCompetition('league'));
     $('championsModeButton').addEventListener('click', () => switchCompetition('champions'));
+    $('goToChampionsSourceButton').addEventListener('click', goToChampionsSourceMatchday);
     $('saveDraftButton').addEventListener('click', () => {
       if (state.participantEntryMode === 'single') saveDraftAndContinue();
       else persistDraft({ manual: true });
@@ -3570,12 +3862,34 @@
       state.leagueParticipants = league.participants.filter(participant => participant.active !== false);
       state.participantIndex = new Map(league.participants.map(participant => [participant.name, participant]));
       state.championsGroups = Array.isArray(league.champions?.groups) ? league.champions.groups : [];
+      state.championsLeagueMatchdays = Array.isArray(league.champions?.format?.leagueMatchdays)
+        ? league.champions.format.leagueMatchdays.map(Number)
+        : [];
+      if (state.championsLeagueMatchdays.length !== 8
+        || state.championsLeagueMatchdays.some(matchday => !Number.isInteger(matchday) || matchday < 1 || matchday > 38)
+        || new Set(state.championsLeagueMatchdays).size !== state.championsLeagueMatchdays.length) {
+        throw new Error('El calendario automático de Champions no está configurado correctamente.');
+      }
       restoreParticipantEntryMode();
-      const missingChampionsPlayers = state.championsGroups
-        .flatMap(group => group.teams)
-        .filter(name => !state.participantIndex.has(name));
-      if (missingChampionsPlayers.length) {
-        throw new Error(`Faltan participantes de Champions: ${missingChampionsPlayers.join(', ')}.`);
+      const validChampionsGroups = state.championsGroups.length === 4
+        && state.championsGroups.every(group =>
+          group
+          && typeof group.name === 'string'
+          && Array.isArray(group.teams)
+          && group.teams.length === 5
+        );
+      const championsNames = validChampionsGroups
+        ? state.championsGroups.flatMap(group => group.teams.map(name => String(name || '').trim()))
+        : [];
+      const uniqueChampionsNames = new Set(championsNames);
+      const activeLeagueNames = new Set(state.leagueParticipants.map(participant => participant.name));
+      if (!validChampionsGroups
+        || uniqueChampionsNames.size !== 20
+        || uniqueChampionsNames.size !== championsNames.length
+        || championsNames.some(name => !name || !activeLeagueNames.has(name))
+        || activeLeagueNames.size !== uniqueChampionsNames.size
+        || [...activeLeagueNames].some(name => !uniqueChampionsNames.has(name))) {
+        throw new Error('Los cuatro grupos de Champions deben contener exactamente una vez a los 20 participantes activos.');
       }
       state.participants = [...state.leagueParticipants];
       updateCompetitionUI();

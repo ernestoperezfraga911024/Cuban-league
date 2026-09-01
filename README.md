@@ -1,6 +1,14 @@
-# Cuban League V148
+# Cuban League V149
 
 Sitio oficial de la Cuban League con:
+
+- La fase de grupos de Champions toma automáticamente PTS, GOL, CS y TR de
+  las jornadas publicadas de Liga: J3, J6, J9, J12, J15, J18, J21 y J24 se
+  convierten respectivamente en Champions J1–J8. El panel de Champions queda
+  protegido como vista de consulta, indica su jornada fuente y permite saltar
+  directamente a ella. Publicaciones, correcciones, jornadas aplazadas y
+  deshacer se reflejan sin volver a introducir datos ni crear copias en la base
+  de datos.
 
 - Thiago Fernández conserva su identidad estable y su historial, pero actualiza
   su club del Villarreal CF al Levante UD sin crear un duplicado.

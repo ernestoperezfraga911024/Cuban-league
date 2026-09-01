@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=148-20260901">
+  <link rel="stylesheet" href="admin.css?v=149-20260901">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -319,6 +319,24 @@
         </div>
       </section>
 
+      <section id="championsAutomationNotice" class="champions-automation-notice" aria-labelledby="championsAutomationTitle" hidden>
+        <span class="champions-automation-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 4h8v3c0 4-1.7 7-4 7s-4-3-4-7V4Z"/><path d="M8 6H4c0 4 1.8 6 5.1 6M16 6h4c0 4-1.8 6-5.1 6M12 14v4m-4 2h8"/></svg>
+        </span>
+        <div>
+          <span class="admin-kicker">CHAMPIONS AUTOMÁTICA</span>
+          <div class="champions-automation-heading">
+            <h2 id="championsAutomationTitle">Champions conectada con la Liga</h2>
+            <span id="championsAutomationStatus" class="champions-automation-status pending"><i></i> Pendiente</span>
+          </div>
+          <p id="championsAutomationMessage">Los datos aparecerán aquí cuando publiques la jornada correspondiente de Liga.</p>
+        </div>
+        <button id="goToChampionsSourceButton" class="champions-source-button" type="button" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          <span>Ir a la jornada de Liga</span>
+        </button>
+      </section>
+
       <section id="achievementSettings" class="achievement-settings" aria-labelledby="achievementSettingsTitle">
         <header>
           <span class="achievement-settings-icon" aria-hidden="true">
@@ -566,6 +584,7 @@
         <button id="closePreview" class="preview-close" type="button" aria-label="Cerrar vista previa">✕</button>
       </header>
       <div id="previewSummary" class="preview-summary"></div>
+      <p id="previewChampionsAutomation" class="preview-champions-automation" hidden></p>
       <div class="preview-table-shell">
         <div class="preview-table-head"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span><span>TR</span></div>
         <div id="previewRows" class="preview-rows"></div>
@@ -678,8 +697,8 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=148-20260901"></script>
-  <script src="player-catalog.js?v=148-20260901"></script>
-  <script src="admin.js?v=148-20260901"></script>
+  <script src="supabase-config.js?v=149-20260901"></script>
+  <script src="player-catalog.js?v=149-20260901"></script>
+  <script src="admin.js?v=149-20260901"></script>
 </body>
 </html>

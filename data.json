@@ -3364,7 +3364,17 @@
     "format": {
       "legs": 2,
       "matchesPerParticipant": 8,
-      "qualifiedPerGroup": 2
+      "qualifiedPerGroup": 2,
+      "leagueMatchdays": [
+        3,
+        6,
+        9,
+        12,
+        15,
+        18,
+        21,
+        24
+      ]
     },
     "groups": [
       {
