@@ -1,6 +1,9 @@
-# Cuban League V147
+# Cuban League V148
 
 Sitio oficial de la Cuban League con:
+
+- Thiago Fernández conserva su identidad estable y su historial, pero actualiza
+  su club del Villarreal CF al Levante UD sin crear un duplicado.
 
 - El Catálogo Maestro incorpora a João Cancelo como defensa del FC Barcelona
   y a Mariano Díaz como delantero del Deportivo Alavés, con identidades y
