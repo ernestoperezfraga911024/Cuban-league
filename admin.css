@@ -116,7 +116,7 @@ body.install-open{overflow:hidden}
   display:inline-flex;
   align-items:center;
   gap:8px;
-  min-height:42px;
+  min-height:44px;
   padding:9px 14px;
   border:1px solid var(--line);
   border-radius:13px;
@@ -1584,6 +1584,73 @@ body.preview-open{overflow:hidden}
   .admin-preview-card>footer button{padding:8px;font-size:.68rem}
 }
 
+/* ===== CUBAN ADMIN V146 · HERRAMIENTAS AGRUPADAS ===== */
+
+.admin-tools{
+  margin:0 0 20px;
+  padding:16px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:24px;
+  background:rgba(4,15,12,.56);
+}
+
+.admin-tools-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:18px;
+  padding:2px 3px 14px;
+}
+
+.admin-tools-head h2{margin:6px 0 4px;font-size:1.12rem;letter-spacing:-.025em}
+.admin-tools-head p{margin:0;color:#738b80;font-size:.65rem;line-height:1.45}
+.admin-tools-count{
+  flex:0 0 auto;
+  padding:7px 10px;
+  border:1px solid rgba(159,255,124,.14);
+  border-radius:999px;
+  color:#95b9a7;
+  background:rgba(159,255,124,.035);
+  font-size:.56rem;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.admin-tools-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:11px;
+}
+
+.admin-tools-grid>.visitor-analytics,
+.admin-tools-grid>.backup-center{min-width:0;margin:0}
+.admin-tools-grid:has(.admin-tool-details[open]){grid-template-columns:1fr}
+.admin-tool-details[open]{grid-column:1/-1}
+.admin-tool-summary{position:relative;z-index:2;min-height:116px}
+.admin-tool-summary:focus-visible{
+  border-radius:20px;
+  outline:2px solid rgba(159,255,124,.6);
+  outline-offset:-3px;
+}
+.visitor-analytics:not([open]) .admin-tool-summary{border-bottom-color:transparent}
+.visitor-analytics-body{position:relative;z-index:1}
+.admin-tool-details[open] .backup-summary-open{display:none}
+.admin-tool-details[open] .backup-summary-close{display:inline}
+.admin-tool-details[open] .backup-summary-toggle svg{transform:rotate(180deg)}
+
+@media(max-width:760px){
+  .admin-tools{padding:12px;border-radius:20px}
+  .admin-tools-grid{grid-template-columns:1fr}
+  .admin-tool-details[open]{grid-column:auto}
+  .admin-tool-summary{min-height:0}
+}
+
+@media(max-width:520px){
+  .admin-tools-head{align-items:flex-start;flex-direction:column;gap:9px;padding:2px 2px 12px}
+  .admin-tools-count{display:none}
+}
+
 /* ===== CUBAN ADMIN V58 · VISITOR ANALYTICS ===== */
 
 .visitor-analytics{
@@ -1756,7 +1823,7 @@ body.preview-open{overflow:hidden}
   align-items:center;
   justify-content:center;
   gap:8px;
-  min-height:42px;
+  min-height:44px;
   padding:9px 13px;
   border:1px solid rgba(92,229,215,.2);
   border-radius:13px;
@@ -2423,14 +2490,38 @@ body.preview-open{overflow:hidden}
 .lineup-editor-footer p.error{color:#f09b8f}
 .lineup-editor-footer p.success{color:#7ee9ae}
 
+.lineup-editor-status{display:grid;min-width:0;gap:4px}
+.lineup-editor-status small{color:#5f786c;font-size:.6rem;line-height:1.45}
+.lineup-editor-actions{display:flex;flex:0 0 auto;align-items:center;justify-content:flex-end;gap:8px}
+
+.copy-previous-lineup-button{
+  display:inline-flex;
+  min-height:44px;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:8px 12px;
+  border:1px solid rgba(91,231,166,.24);
+  border-radius:10px;
+  color:#9becc0;
+  background:rgba(65,219,151,.065);
+  font-size:.68rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+.copy-previous-lineup-button svg{width:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.copy-previous-lineup-button:hover:not(:disabled){border-color:rgba(91,231,166,.45);color:#c8ffde;background:rgba(65,219,151,.1)}
+.copy-previous-lineup-button:disabled{cursor:not-allowed;filter:saturate(.45);opacity:.42}
+.copy-previous-lineup-button.loading svg{animation:spin .8s linear infinite}
+
 .clear-lineup-button{
-  min-height:38px;
+  min-height:44px;
   padding:8px 12px;
   border:1px solid rgba(255,120,111,.16);
   border-radius:10px;
   color:#c9948f;
   background:rgba(255,91,84,.045);
-  font-size:.57rem;
+  font-size:.68rem;
   font-weight:850;
   white-space:nowrap;
 }
@@ -2476,7 +2567,12 @@ body.preview-open{overflow:hidden}
   .lineup-captain-choice{grid-column:2/4}
   .lineup-player-row>.lineup-multiplier-input{grid-column:4}
   .lineup-editor-footer{align-items:stretch;flex-direction:column}
-  .clear-lineup-button{align-self:flex-start}
+  .lineup-editor-actions{display:grid;grid-template-columns:1fr 1fr}
+  .copy-previous-lineup-button,.clear-lineup-button{width:100%;white-space:normal}
+}
+
+@media(max-width:430px){
+  .lineup-editor-actions{grid-template-columns:1fr}
 }
 
 @media(max-width:430px){

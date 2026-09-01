@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=145-20260901">
+  <link rel="stylesheet" href="admin.css?v=146-20260901">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -102,18 +102,42 @@
         </div>
       </div>
 
-      <section class="visitor-analytics" aria-labelledby="visitorAnalyticsTitle">
-        <header class="visitor-analytics-head">
+      <section id="adminTools" class="admin-tools" aria-labelledby="adminToolsTitle">
+        <header class="admin-tools-head">
           <div>
-            <span class="admin-kicker"><i></i> AUDIENCIA</span>
-            <h2 id="visitorAnalyticsTitle">Visitas de la página</h2>
-            <p>Consulta cuántas personas están entrando a Cuban League y cómo se mueve la audiencia cada día.</p>
+            <span class="admin-kicker"><i></i> ACCESOS RÁPIDOS</span>
+            <h2 id="adminToolsTitle">Herramientas del panel</h2>
+            <p>Audiencia y protección de datos agrupadas para dejar libre el área de trabajo.</p>
           </div>
-          <button id="refreshAnalyticsButton" class="refresh-analytics-button" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M6.1 9A7 7 0 0 1 18.5 6.5L20 8M4 16l1.5 1.5A7 7 0 0 0 17.9 15"/></svg>
-            <span>Actualizar</span>
-          </button>
+          <span class="admin-tools-count">2 herramientas</span>
         </header>
+
+        <div class="admin-tools-grid">
+      <details id="analyticsTool" class="visitor-analytics admin-tool-details" aria-labelledby="visitorAnalyticsTitle">
+        <summary class="backup-center-head admin-tool-summary">
+          <span class="backup-summary-copy">
+            <span class="admin-kicker"><i></i> AUDIENCIA</span>
+            <span id="visitorAnalyticsTitle" class="backup-summary-title" role="heading" aria-level="3">Visitas de la página</span>
+            <span class="backup-summary-description">Personas únicas, actividad reciente y visitas por día.</span>
+          </span>
+          <span class="backup-summary-toggle" aria-hidden="true">
+            <span class="backup-summary-open">Ver visitas</span>
+            <span class="backup-summary-close">Cerrar</span>
+            <svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+          </span>
+        </summary>
+
+        <div class="visitor-analytics-body">
+          <header class="visitor-analytics-head">
+            <div>
+              <span class="admin-kicker">RESUMEN ACTUAL</span>
+              <p>Consulta cómo se mueve la audiencia de Cuban League sin salir del panel.</p>
+            </div>
+            <button id="refreshAnalyticsButton" class="refresh-analytics-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M6.1 9A7 7 0 0 1 18.5 6.5L20 8M4 16l1.5 1.5A7 7 0 0 0 17.9 15"/></svg>
+              <span>Actualizar</span>
+            </button>
+          </header>
 
         <div id="analyticsUnavailable" class="analytics-unavailable" hidden>
           <span class="analytics-unavailable-icon" aria-hidden="true">
@@ -169,13 +193,14 @@
           <span>Las personas únicas se calculan por navegador y dispositivo, sin guardar nombres ni direcciones IP. Tus visitas desde este navegador no se cuentan.</span>
           <b id="analyticsUpdatedAt">Cargando estadísticas…</b>
         </footer>
-      </section>
+        </div>
+      </details>
 
-      <details class="backup-center" aria-labelledby="backupCenterTitle">
-        <summary class="backup-center-head">
+      <details id="backupCenter" class="backup-center admin-tool-details" aria-labelledby="backupCenterTitle">
+        <summary class="backup-center-head admin-tool-summary">
           <span class="backup-summary-copy">
             <span class="admin-kicker"><i></i> PROTECCIÓN DE DATOS</span>
-            <span id="backupCenterTitle" class="backup-summary-title" role="heading" aria-level="2">Centro de respaldos</span>
+            <span id="backupCenterTitle" class="backup-summary-title" role="heading" aria-level="3">Centro de respaldos</span>
             <span class="backup-summary-description">Copias automáticas de jornadas, alineaciones, borradores e historial, listas para recuperar la liga.</span>
           </span>
           <span class="backup-summary-toggle" aria-hidden="true">
@@ -248,6 +273,8 @@
         </div>
         </div>
       </details>
+        </div>
+      </section>
 
       <nav class="competition-switcher" aria-label="Competición que deseas administrar">
         <button id="leagueModeButton" class="competition-option active" type="button" aria-pressed="true">
@@ -479,8 +506,17 @@
           <div id="lineupPlayerRows" class="lineup-player-rows"></div>
 
           <footer class="lineup-editor-footer">
-            <p id="lineupEditorMessage" role="status" aria-live="polite">La alineación se guardará junto con el borrador de la jornada.</p>
-            <button id="clearLineupButton" class="clear-lineup-button" type="button">Vaciar esta alineación</button>
+            <div class="lineup-editor-status">
+              <p id="lineupEditorMessage" role="status" aria-live="polite">La alineación se guardará junto con el borrador de la jornada.</p>
+              <small id="copyPreviousLineupHint">La copia conserva jugadores, posiciones y capitán; los puntos comienzan vacíos.</small>
+            </div>
+            <div class="lineup-editor-actions">
+              <button id="copyPreviousLineupButton" class="copy-previous-lineup-button" type="button" aria-describedby="copyPreviousLineupHint">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+                <span>Copiar alineación anterior</span>
+              </button>
+              <button id="clearLineupButton" class="clear-lineup-button" type="button">Vaciar esta alineación</button>
+            </div>
           </footer>
         </div>
       </section>
@@ -642,8 +678,8 @@
 
   <noscript>Necesitas activar JavaScript para usar el panel de administración.</noscript>
   <script src="supabase.js"></script>
-  <script src="supabase-config.js?v=145-20260901"></script>
-  <script src="player-catalog.js?v=145-20260901"></script>
-  <script src="admin.js?v=145-20260901"></script>
+  <script src="supabase-config.js?v=146-20260901"></script>
+  <script src="player-catalog.js?v=146-20260901"></script>
+  <script src="admin.js?v=146-20260901"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '145-20260901';
+  const VERSION = '146-20260901';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -67,6 +67,9 @@
     matchdayWriteRevision: '',
     lineups: new Map(),
     lineupParticipantName: '',
+    copyingPreviousLineup: false,
+    previousLineupRequestId: 0,
+    previousLineupCache: new Map(),
     participantEntryMode: 'single',
     catalog: null,
     catalogSlot: null,
@@ -528,6 +531,194 @@
     return state.lineups.has(name) ? state.lineups.get(name) : null;
   }
 
+  function previousLineupCacheKey({ season = currentSeasonKey(), matchday = state.matchday, name = state.lineupParticipantName } = {}) {
+    return `${season}:${matchday}:${name}`;
+  }
+
+  function copyablePreviousLineupFromCache() {
+    return state.previousLineupCache.get(previousLineupCacheKey()) || null;
+  }
+
+  function lineupRosterForNewMatchday(players) {
+    return normalizeLineupPlayers(players).map(player => {
+      const emptyPosition = isLineupEmptyPlayer(player);
+      return {
+        ...player,
+        displayed_points: emptyPosition ? LINEUP_EMPTY_POINTS : null,
+        is_captain: emptyPosition ? false : player.is_captain === true,
+        captain_multiplier: emptyPosition
+          ? 1
+          : player.is_captain === true && validCaptainMultiplier(player.captain_multiplier)
+            ? lineupNumber(player.captain_multiplier)
+            : 1
+      };
+    });
+  }
+
+  function updateCopyPreviousLineupControl() {
+    const button = $('copyPreviousLineupButton');
+    const hint = $('copyPreviousLineupHint');
+    if (!button || !hint) return;
+
+    const champions = isChampionsMode();
+    const locked = state.saving
+      || state.matchdayLoading
+      || state.matchdayLoadBlocked
+      || state.previewOpen
+      || state.suspendAutoSave
+      || state.backupRestoreOpen
+      || state.backupCreating
+      || state.backupRestoring
+      || (state.published && !state.editingPublished);
+    const cached = copyablePreviousLineupFromCache();
+    const unavailable = champions
+      || state.matchday <= 1
+      || !state.lineupParticipantName
+      || !state.lineupSchemaReady
+      || !state.catalogSchemaReady;
+
+    button.hidden = champions;
+    button.disabled = locked || unavailable || state.copyingPreviousLineup;
+    button.classList.toggle('loading', state.copyingPreviousLineup);
+    button.querySelector('span').textContent = state.copyingPreviousLineup
+      ? 'Buscando alineación…'
+      : cached
+        ? `Copiar alineación de J${cached.matchday}`
+        : 'Copiar alineación anterior';
+
+    if (champions) {
+      hint.textContent = '';
+    } else if (state.matchday <= 1) {
+      hint.textContent = 'La Jornada 1 no tiene una alineación anterior.';
+    } else if (!state.lineupSchemaReady || !state.catalogSchemaReady) {
+      hint.textContent = 'Activa la actualización V116 para copiar alineaciones entre jornadas.';
+    } else if (state.published && !state.editingPublished) {
+      hint.textContent = 'Pulsa “Corregir jornada” antes de reemplazar esta alineación.';
+    } else if (cached) {
+      hint.textContent = `Fuente disponible: Jornada ${cached.matchday}. Se copiarán jugadores, posiciones y capitán; los PTS quedarán vacíos.`;
+    } else {
+      hint.textContent = 'Busca la última alineación completa y publicada; copia jugadores y capitán, pero nunca sus puntos.';
+    }
+  }
+
+  async function findPreviousPublishedLineup({ season, matchday, name }) {
+    const cacheKey = previousLineupCacheKey({ season, matchday, name });
+    const cached = state.previousLineupCache.get(cacheKey);
+    if (cached) return cached;
+
+    const { data, error } = await state.client
+      .from('matchday_stats')
+      .select('matchday,lineup')
+      .eq('season', season)
+      .eq('participant_name', name)
+      .eq('published', true)
+      .lt('matchday', matchday)
+      .order('matchday', { ascending: false });
+    if (error) throw error;
+
+    const sourceRow = (Array.isArray(data) ? data : []).find(row => {
+      const normalized = normalizeLineupPlayers(row?.lineup);
+      return lineupMetrics(normalized).complete;
+    });
+    if (!sourceRow) return null;
+
+    const source = {
+      matchday: Number(sourceRow.matchday),
+      lineup: normalizeLineupPlayers(sourceRow.lineup)
+    };
+    state.previousLineupCache.set(cacheKey, source);
+    return source;
+  }
+
+  async function copyPreviousPublishedLineup() {
+    if (state.copyingPreviousLineup
+      || isChampionsMode()
+      || state.matchday <= 1
+      || !state.lineupParticipantName
+      || state.saving
+      || state.matchdayLoading
+      || state.matchdayLoadBlocked
+      || state.previewOpen
+      || state.suspendAutoSave
+      || state.backupRestoreOpen
+      || state.backupCreating
+      || state.backupRestoring
+      || (state.published && !state.editingPublished)) return;
+
+    updateLineupFromEditor();
+    const context = {
+      season: currentSeasonKey(),
+      matchday: state.matchday,
+      name: state.lineupParticipantName,
+      loadRequestId: state.loadRequestId,
+      copyRequestId: ++state.previousLineupRequestId
+    };
+    state.copyingPreviousLineup = true;
+    syncPublicationUI();
+    const contextChanged = () => context.copyRequestId !== state.previousLineupRequestId
+      || !state.copyingPreviousLineup
+      || context.loadRequestId !== state.loadRequestId
+      || context.season !== currentSeasonKey()
+      || context.matchday !== state.matchday
+      || context.name !== state.lineupParticipantName
+      || state.matchdayLoading
+      || state.matchdayLoadBlocked
+      || state.previewOpen
+      || state.suspendAutoSave
+      || state.backupRestoreOpen
+      || state.backupCreating
+      || state.backupRestoring
+      || (state.published && !state.editingPublished);
+
+    try {
+      const source = await findPreviousPublishedLineup(context);
+      if (contextChanged()) return;
+
+      if (!source) {
+        const message = `No hay una alineación completa y publicada anterior a la Jornada ${context.matchday} para ${context.name}.`;
+        setLineupEditorMessage(message, 'error');
+        flashMessage(message, 'error');
+        return;
+      }
+
+      updateLineupFromEditor();
+      const current = lineupMetrics(lineupForParticipant(context.name));
+      if (current.hasContent && !window.confirm(
+        `¿Reemplazar la alineación actual de ${context.name} por la publicada en la Jornada ${source.matchday}? `
+        + 'Los puntos que ya escribiste en este XI se borrarán.'
+      )) return;
+
+      const copiedLineup = lineupRosterForNewMatchday(source.lineup);
+      state.lineups.set(context.name, copiedLineup);
+      renderLineupEditor();
+      updateCompletionState();
+      scheduleAutoSave();
+      const captain = copiedLineup.find(player => player.is_captain === true);
+      const captainCopy = captain
+        ? ` Capitán: ${captain.player_name} · x${formatLineupNumber(captain.captain_multiplier)}.`
+        : '';
+      setLineupEditorMessage(
+        `Alineación copiada desde la Jornada ${source.matchday}.${captainCopy} Escribe los PTS de esta jornada.`,
+        'success'
+      );
+      flashMessage(`Alineación de ${context.name} copiada desde la Jornada ${source.matchday}. Los puntos anteriores no se copiaron.`);
+    } catch (error) {
+      if (contextChanged()) return;
+      if (isLineupUpgradeError(error)) {
+        state.lineupSchemaReady = false;
+        renderLineupManagement();
+      }
+      const message = `No se pudo copiar la alineación anterior. ${friendlyError(error)}`;
+      setLineupEditorMessage(message, 'error');
+      flashMessage(message, 'error');
+    } finally {
+      if (context.copyRequestId === state.previousLineupRequestId) {
+        state.copyingPreviousLineup = false;
+        syncPublicationUI();
+      }
+    }
+  }
+
   function setLineupData(...rowSources) {
     const next = new Map();
     state.participants.forEach(participant => {
@@ -717,7 +908,7 @@
   }
 
   function openPlayerCatalog(slot, returnFocus) {
-    if (!state.catalog || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished)) return;
+    if (!state.catalog || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || (state.published && !state.editingPublished)) return;
     updateLineupFromEditor();
     state.catalogSlot = Number(slot);
     state.catalogParticipantName = state.lineupParticipantName;
@@ -805,7 +996,7 @@
 
   function chooseEmptyLineupSlot() {
     const slot = state.catalogSlot;
-    const locked = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished);
+    const locked = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || (state.published && !state.editingPublished);
     if (locked || !slot || state.catalogParticipantName !== state.lineupParticipantName) {
       closePlayerCatalog();
       return;
@@ -1127,13 +1318,13 @@
       ? `Participante ${Math.max(0, selectedIndex) + 1} de ${total}`
       : 'Sin participantes';
 
-    const busy = state.saving || state.matchdayLoading || state.matchdayLoadBlocked;
+    const busy = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup;
     const nextPending = nextParticipantName({ pendingOnly: true });
     $('previousParticipantButton').disabled = busy || total < 2;
     $('nextParticipantButton').disabled = busy || total < 2;
     select.disabled = busy || total === 0;
-    $('singleParticipantModeButton').disabled = state.saving || state.matchdayLoading;
-    $('allParticipantsModeButton').disabled = state.saving || state.matchdayLoading;
+    $('singleParticipantModeButton').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
+    $('allParticipantsModeButton').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
     $('nextPendingParticipantButton').disabled = busy || !nextPending;
     $('nextPendingParticipantButton').textContent = nextPending
       ? 'Ir al próximo pendiente'
@@ -1151,6 +1342,7 @@
   }
 
   function selectWorkParticipant(name, { scroll = false } = {}) {
+    if (state.copyingPreviousLineup) return false;
     if (!state.participants.some(participant => participant.name === name)) return false;
     const changed = name !== state.lineupParticipantName;
     if (changed && !isChampionsMode() && document.querySelector('.lineup-player-row')) {
@@ -1181,6 +1373,7 @@
   }
 
   async function saveDraftAndContinue() {
+    if (state.copyingPreviousLineup) return;
     const selectedBeforeSave = state.lineupParticipantName;
     const loadRequestBeforeSave = state.loadRequestId;
     if (state.participantEntryMode === 'single' && !isChampionsMode()) updateLineupFromEditor();
@@ -1222,7 +1415,8 @@
       $('allParticipantsModeButton'),
       $('previousParticipantButton'),
       $('nextParticipantButton'),
-      $('nextPendingParticipantButton')
+      $('nextPendingParticipantButton'),
+      $('copyPreviousLineupButton')
     ].filter(Boolean).forEach(button => {
       button.disabled = busy;
     });
@@ -1380,14 +1574,19 @@
       && (!hasAnyLineupChange() || (state.lineupSchemaReady && state.catalogSchemaReady))
       && !state.saving
       && !state.matchdayLoading
-      && !state.matchdayLoadBlocked;
+      && !state.matchdayLoadBlocked
+      && !state.copyingPreviousLineup;
     $('publishButton').disabled = !canPreview;
     updateParticipantWorkflow();
     return result;
   }
 
   function syncInputLock() {
-    const locked = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished);
+    const locked = state.saving
+      || state.matchdayLoading
+      || state.matchdayLoadBlocked
+      || state.copyingPreviousLineup
+      || (state.published && !state.editingPublished);
     document.querySelectorAll('.stat-input').forEach(input => {
       input.disabled = locked;
     });
@@ -1414,7 +1613,14 @@
       button.disabled = locked || button.closest('.lineup-player-row')?.classList.contains('is-empty-position');
     });
     if ($('selectEmptyLineupSlot')) $('selectEmptyLineupSlot').disabled = locked;
+    if ($('lineupParticipantSelect')) {
+      $('lineupParticipantSelect').disabled = state.saving
+        || state.matchdayLoading
+        || state.matchdayLoadBlocked
+        || state.copyingPreviousLineup;
+    }
     if ($('clearLineupButton')) $('clearLineupButton').disabled = locked;
+    updateCopyPreviousLineupControl();
     $('lineupManagement')?.classList.toggle('is-locked', locked && state.published);
   }
 
@@ -1455,16 +1661,17 @@
 
     $('dockMatchday').textContent = state.matchday;
     $('dockSeason').textContent = isChampionsMode() ? 'Champions · fase de grupos' : config.season;
-    $('saveDraftButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || locked;
-    $('matchdaySelect').disabled = state.saving || state.matchdayLoading;
-    $('leagueModeButton').disabled = state.saving || state.matchdayLoading;
-    $('championsModeButton').disabled = state.saving || state.matchdayLoading;
-    $('editPublishedButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || !state.published;
+    $('saveDraftButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || locked;
+    $('matchdaySelect').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
+    $('leagueModeButton').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
+    $('championsModeButton').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
+    $('editPublishedButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.published;
+    $('logoutButton').disabled = state.copyingPreviousLineup;
     syncInputLock();
     updateCompletionState();
 
     const activeRevision = state.history.find(item => !item.undone);
-    $('undoPublicationButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || !activeRevision || state.editingPublished || !state.schemaReady;
+    $('undoPublicationButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !activeRevision || state.editingPublished || !state.schemaReady;
     setWorkflowStep(state.previewOpen ? 'review' : locked ? 'published' : 'draft');
 
     if (locked && !state.saving) {
@@ -1743,6 +1950,7 @@
   }
 
   async function persistDraft({ manual = false } = {}) {
+    if (manual && state.copyingPreviousLineup) return false;
     if (state.matchdayLoading || state.matchdayLoadBlocked || (state.published && !state.editingPublished)) return false;
     if (state.autoSaveInFlight) {
       state.autoSaveQueued = true;
@@ -1984,6 +2192,9 @@
     state.matchdayLoadBlocked = true;
     state.localDraftArchivedOnLoad = false;
     state.history = [];
+    state.previousLineupCache.clear();
+    state.previousLineupRequestId += 1;
+    state.copyingPreviousLineup = false;
     state.matchdayWriteRevision = '';
     clearTimeout(state.autoSaveTimer);
     state.autoSaveQueued = false;
@@ -2270,7 +2481,7 @@
   }
 
   async function switchCompetition(competition) {
-    if (competition === state.competition || state.saving || state.matchdayLoading) return;
+    if (competition === state.competition || state.saving || state.matchdayLoading || state.copyingPreviousLineup) return;
     await prepareNavigation();
     state.competition = competition;
     state.matchday = 1;
@@ -2284,7 +2495,7 @@
   }
 
   function startCorrection() {
-    if (!state.published || state.saving || state.matchdayLoading || state.matchdayLoadBlocked) return;
+    if (!state.published || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     state.editingPublished = true;
     state.hasDraft = true;
     state.autoSaveRevision += 1;
@@ -2298,7 +2509,7 @@
   }
 
   function openPreview() {
-    if (state.saving || state.matchdayLoading || state.matchdayLoadBlocked) return;
+    if (state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     const validation = updateCompletionState();
     if (validation.missing.length) {
       flashMessage(`Faltan ${validation.missing.length} participantes. Completa todos los campos antes de revisar.`, 'error');
@@ -2429,7 +2640,7 @@
   }
 
   async function publishPreview() {
-    if (state.saving || state.matchdayLoading || state.matchdayLoadBlocked || !state.previewRows.length) return;
+    if (state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.previewRows.length) return;
     const season = currentSeasonKey();
     const matchday = state.matchday;
     const competition = state.competition;
@@ -2520,7 +2731,7 @@
 
   async function undoLastPublication() {
     const latest = state.history.find(item => !item.undone);
-    if (!latest || state.saving || state.matchdayLoading || state.matchdayLoadBlocked) return;
+    if (!latest || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     const accepted = window.confirm(
       `¿Deshacer la última publicación de la jornada ${state.matchday}? ` +
       'La tabla pública volverá inmediatamente a la versión anterior.'
@@ -2722,13 +2933,13 @@
     const refresh = $('refreshBackupsButton');
     const create = $('createBackupButton');
     if (refresh) {
-      refresh.disabled = busy || state.backupCreating || state.backupRestoring || state.saving || state.matchdayLoading;
+      refresh.disabled = busy || state.backupCreating || state.backupRestoring || state.saving || state.matchdayLoading || state.copyingPreviousLineup;
       refresh.classList.toggle('loading', busy);
       refresh.querySelector('span').textContent = busy ? 'Actualizando…' : 'Actualizar';
     }
-    if (create) create.disabled = busy || state.backupCreating || state.backupRestoring || state.saving || state.matchdayLoading || !state.backupSchemaReady;
+    if (create) create.disabled = busy || state.backupCreating || state.backupRestoring || state.saving || state.matchdayLoading || state.copyingPreviousLineup || !state.backupSchemaReady;
     document.querySelectorAll('.backup-item-action').forEach(button => {
-      button.disabled = busy || state.backupCreating || state.backupRestoring || state.saving || state.matchdayLoading;
+      button.disabled = busy || state.backupCreating || state.backupRestoring || state.saving || state.matchdayLoading || state.copyingPreviousLineup;
     });
   }
 
@@ -2789,7 +3000,7 @@
   }
 
   async function loadBackups({ manual = false } = {}) {
-    if (!state.client || state.backupLoading || state.backupCreating) return false;
+    if (!state.client || state.backupLoading || state.backupCreating || state.copyingPreviousLineup) return false;
     setBackupControlsBusy(true);
     if ($('backupListStatus')) $('backupListStatus').textContent = 'Actualizando historial…';
 
@@ -2822,7 +3033,7 @@
   }
 
   async function createBackup() {
-    if (!state.client || state.saving || state.matchdayLoading || state.backupLoading || state.backupCreating || state.backupRestoring || !state.backupSchemaReady) return;
+    if (!state.client || state.saving || state.matchdayLoading || state.backupLoading || state.backupCreating || state.backupRestoring || state.copyingPreviousLineup || !state.backupSchemaReady) return;
     state.backupCreating = true;
     setButtonsBusy(true);
     setBackupControlsBusy(false);
@@ -2857,7 +3068,7 @@
   }
 
   async function downloadBackup(backupId) {
-    if (!backupId || state.saving || state.matchdayLoading || state.backupLoading || state.backupCreating || state.backupRestoring) return;
+    if (!backupId || state.saving || state.matchdayLoading || state.backupLoading || state.backupCreating || state.backupRestoring || state.copyingPreviousLineup) return;
     const backup = state.backups.find(item => item.id === backupId);
     setBackupControlsBusy(true);
     try {
@@ -2892,7 +3103,7 @@
   }
 
   async function openBackupRestore(backupId, trigger = null) {
-    if (!backupId || state.saving || state.matchdayLoading || state.backupLoading || state.backupCreating || state.backupRestoring) return;
+    if (!backupId || state.saving || state.matchdayLoading || state.backupLoading || state.backupCreating || state.backupRestoring || state.copyingPreviousLineup) return;
     setButtonsBusy(true);
     setBackupControlsBusy(true);
     try {
@@ -2998,7 +3209,7 @@
   async function confirmBackupRestore() {
     const backupId = state.backupRestoreId;
     const confirmation = $('backupRestoreConfirmation').value.trim();
-    if (!backupId || confirmation !== 'RESTAURAR' || state.saving || state.backupRestoring) return;
+    if (!backupId || confirmation !== 'RESTAURAR' || state.saving || state.backupRestoring || state.copyingPreviousLineup) return;
 
     state.backupRestoring = true;
     clearTimeout(state.autoSaveTimer);
@@ -3132,6 +3343,7 @@
   }
 
   async function logout() {
+    if (state.copyingPreviousLineup) return;
     await prepareNavigation();
     closeBackupRestore(false);
     await state.client.auth.signOut();
@@ -3195,6 +3407,10 @@
     });
 
     $('matchdaySelect').addEventListener('change', async event => {
+      if (state.copyingPreviousLineup) {
+        event.target.value = String(state.matchday);
+        return;
+      }
       const nextMatchday = Number(event.target.value);
       await prepareNavigation();
       state.matchday = nextMatchday;
@@ -3282,6 +3498,7 @@
       if (result) chooseCatalogPlayer(result.dataset.catalogPlayerId);
     });
     $('selectEmptyLineupSlot').addEventListener('click', chooseEmptyLineupSlot);
+    $('copyPreviousLineupButton').addEventListener('click', copyPreviousPublishedLineup);
     $('clearLineupButton').addEventListener('click', () => {
       if (!state.lineupParticipantName) return;
       const current = lineupMetrics(lineupForParticipant(state.lineupParticipantName));
