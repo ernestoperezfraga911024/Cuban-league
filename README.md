@@ -1,6 +1,10 @@
-# Cuban League V144
+# Cuban League V145
 
 Sitio oficial de la Cuban League con:
+
+- El Catálogo Maestro incorpora a Adam Aznou, Aarón Martín, Romain Del
+  Castillo e Iván Martín con identidad, club, posición y retrato propios. Aarón
+  Martín conserva una identidad distinta de `A. Martín`, delantero del Racing.
 
 - El Catálogo Maestro incorpora a Marc Santos como defensa del Levante UD,
   con identidad estable y retrato propio extraído de la captura original.
@@ -107,7 +111,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 517 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 521 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
