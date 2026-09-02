@@ -27260,3 +27260,430 @@ footer{
     animation:none!important;
   }
 }
+
+/* =========================================================
+   V158 · PERFIL COMPACTO CON INSIGNIAS EN PRIMER PLANO
+   ========================================================= */
+#playerModal .profile-v152{
+  --profile-line-strong:rgba(93,231,154,.25);
+  --profile-gold:rgba(231,202,105,.92);
+}
+
+#playerModal .profile-v152 .profile-hero-v152{
+  grid-template-columns:88px minmax(0,1fr);
+  gap:14px;
+  padding:4px 58px 14px 0;
+  border-bottom:0;
+}
+
+#playerModal .profile-v152 .profile-avatar{
+  width:88px;
+  height:88px;
+  border-radius:22px;
+}
+
+#playerModal .profile-v152 .profile-identity h2{
+  margin-top:5px;
+  font-size:clamp(1.55rem,4vw,2.05rem);
+  line-height:1;
+}
+
+#playerModal .profile-earned-achievements{
+  position:relative;
+  margin:0 0 10px;
+  padding:14px 15px;
+  overflow:hidden;
+  border-color:rgba(231,202,105,.24);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(231,202,105,.105),transparent 13rem),
+    linear-gradient(145deg,rgba(25,32,31,.94),rgba(5,23,28,.96));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+#playerModal .profile-earned-achievements .profile-summary-section-head{
+  margin-bottom:10px;
+}
+
+#playerModal .profile-earned-achievements .profile-summary-section-head>div>span{
+  color:var(--profile-gold);
+  font-size:.7rem;
+}
+
+#playerModal .profile-earned-achievements .profile-summary-section-head h3{
+  margin-top:3px;
+  font-size:1rem;
+}
+
+#playerModal .profile-earned-achievements .profile-summary-section-head button{
+  display:inline-flex;
+  min-width:44px;
+  min-height:44px;
+  flex:0 0 auto;
+  align-items:center;
+  gap:6px;
+  padding:7px 11px;
+  border:1px solid rgba(231,202,105,.28);
+  border-radius:12px;
+  background:rgba(231,202,105,.07);
+  color:#f2db8c;
+  touch-action:manipulation;
+}
+
+#playerModal .profile-earned-achievements .profile-summary-section-head button span{
+  color:inherit;
+  font-size:1rem;
+  line-height:1;
+}
+
+#playerModal .profile-earned-achievements .profile-summary-section-head button:focus-visible{
+  outline:2px solid rgba(242,219,140,.78);
+  outline-offset:2px;
+}
+
+#playerModal .profile-earned-achievements .profile-featured-achievement-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+
+#playerModal .profile-earned-achievements .profile-featured-achievement{
+  grid-template-columns:36px minmax(0,1fr);
+  gap:9px;
+  min-height:62px;
+  padding:9px;
+  border-radius:13px;
+  background:rgba(231,202,105,.045);
+}
+
+#playerModal .profile-earned-achievements .profile-featured-achievement>span{
+  width:36px;
+  height:36px;
+  border-radius:11px;
+  font-size:1.02rem;
+}
+
+#playerModal .profile-earned-achievements .profile-featured-achievement small{
+  font-size:.7rem;
+}
+
+#playerModal .profile-earned-achievements .profile-featured-achievement b{
+  display:-webkit-box;
+  margin-top:3px;
+  overflow:hidden;
+  font-size:.78rem;
+  line-height:1.18;
+  white-space:normal;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+}
+
+#playerModal .profile-earned-achievements .profile-summary-empty{
+  grid-column:1/-1;
+  margin:0;
+  padding:12px;
+  border:1px dashed rgba(231,202,105,.18);
+  border-radius:12px;
+}
+
+#playerModal .profile-v152 .profile-score-hero{
+  margin:0 0 10px;
+  border-radius:17px;
+}
+
+#playerModal .profile-v152 .profile-score-rank,
+#playerModal .profile-v152 .profile-score-points{
+  padding:17px 19px;
+}
+
+#playerModal .profile-v152 .profile-score-rank>b,
+#playerModal .profile-v152 .profile-score-points>b{
+  font-size:clamp(2.15rem,5vw,3.15rem);
+}
+
+#playerModal .profile-v152 .profile-score-rank>span,
+#playerModal .profile-v152 .profile-score-points>small{
+  margin-top:9px;
+  font-size:.7rem;
+}
+
+#playerModal .profile-v152 .profile-score-points>span{
+  font-size:.82rem;
+}
+
+#playerModal .profile-v152 .profile-score-distance{
+  gap:7px;
+  padding:9px 14px;
+  font-size:.7rem;
+}
+
+#playerModal .profile-v152 .profile-view-tabs{
+  margin:10px 0 12px;
+}
+
+#playerModal .profile-summary-grid{
+  grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);
+  gap:9px;
+}
+
+#playerModal .profile-summary-metrics,
+#playerModal .profile-form-card{
+  border-radius:16px;
+}
+
+#playerModal .profile-summary-metrics{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+#playerModal .profile-summary-metrics article{
+  min-height:76px;
+  padding:13px;
+  border-right:1px solid rgba(116,175,153,.13);
+  border-bottom:0;
+}
+
+#playerModal .profile-summary-metrics article:nth-child(even){
+  border-right:1px solid rgba(116,175,153,.13);
+}
+
+#playerModal .profile-summary-metrics article:last-child{
+  border-right:0;
+}
+
+#playerModal .profile-summary-metrics article>span{
+  display:block;
+  min-height:2.35em;
+  font-size:.7rem;
+  line-height:1.18;
+}
+
+#playerModal .profile-summary-metrics article>b{
+  margin-top:7px;
+  font-size:1.32rem;
+}
+
+#playerModal .profile-form-card{
+  padding:14px 15px 10px;
+}
+
+#playerModal .profile-form-card h3{
+  margin-bottom:9px;
+  font-size:.92rem;
+}
+
+#playerModal .profile-form-bars{
+  min-height:112px;
+  gap:6px;
+}
+
+#playerModal .profile-form-bar{
+  grid-template-rows:18px 72px 18px;
+}
+
+#playerModal .profile-form-bar i{
+  width:min(25px,78%);
+}
+
+#playerModal .profile-form-average{
+  margin-top:7px;
+  padding-top:7px;
+  font-size:.66rem;
+}
+
+#playerModal .profile-form-average b{
+  font-size:.88rem;
+}
+
+@media(max-width:700px){
+  #playerModal .player-profile-modal{
+    padding:calc(8px + env(safe-area-inset-top)) 10px calc(14px + env(safe-area-inset-bottom))!important;
+  }
+
+  #playerModal .profile-close{
+    width:44px;
+    height:44px;
+  }
+
+  #playerModal .profile-v152 .profile-hero-v152{
+    grid-template-columns:66px minmax(0,1fr);
+    gap:10px;
+    padding:2px 47px 11px 0;
+  }
+
+  #playerModal .profile-v152 .profile-avatar{
+    width:66px;
+    height:66px;
+    border-radius:17px;
+  }
+
+  #playerModal .profile-v152 .profile-identity .eyebrow{
+    font-size:.7rem;
+    letter-spacing:.12em;
+  }
+
+  #playerModal .profile-v152 .profile-identity h2{
+    margin-top:4px;
+    font-size:clamp(1.22rem,6vw,1.48rem);
+    line-height:1.02;
+  }
+
+  #playerModal .profile-earned-achievements{
+    margin-bottom:8px;
+    padding:11px;
+    border-radius:15px;
+  }
+
+  #playerModal .profile-earned-achievements .profile-summary-section-head{
+    gap:9px;
+    margin-bottom:8px;
+  }
+
+  #playerModal .profile-earned-achievements .profile-summary-section-head h3{
+    font-size:.92rem;
+  }
+
+  #playerModal .profile-earned-achievements .profile-summary-section-head button{
+    min-height:44px;
+    padding:6px 9px;
+    font-size:.7rem;
+  }
+
+  #playerModal .profile-earned-achievements .profile-featured-achievement-grid{
+    grid-template-columns:none;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(145px,46%);
+    gap:7px;
+    padding-bottom:2px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+  }
+
+  #playerModal .profile-earned-achievements .profile-featured-achievement-grid::-webkit-scrollbar{
+    display:none;
+  }
+
+  #playerModal .profile-earned-achievements .profile-featured-achievement-grid.is-empty{
+    grid-template-columns:1fr;
+    grid-auto-flow:row;
+  }
+
+  #playerModal .profile-earned-achievements .profile-featured-achievement{
+    grid-template-columns:34px minmax(0,1fr);
+    min-height:60px;
+    padding:8px;
+    scroll-snap-align:start;
+  }
+
+  #playerModal .profile-earned-achievements .profile-featured-achievement>span{
+    width:34px;
+    height:34px;
+  }
+
+  #playerModal .profile-earned-achievements .profile-summary-empty{
+    width:auto;
+    padding:11px;
+  }
+
+  #playerModal .profile-v152 .profile-score-hero{
+    margin-bottom:8px;
+    border-radius:15px;
+  }
+
+  #playerModal .profile-v152 .profile-score-rank,
+  #playerModal .profile-v152 .profile-score-points{
+    padding:14px 13px;
+  }
+
+  #playerModal .profile-v152 .profile-score-rank>b,
+  #playerModal .profile-v152 .profile-score-points>b{
+    font-size:clamp(2.08rem,10vw,2.55rem);
+  }
+
+  #playerModal .profile-v152 .profile-score-rank>span,
+  #playerModal .profile-v152 .profile-score-points>small{
+    margin-top:8px;
+    font-size:.7rem;
+  }
+
+  #playerModal .profile-v152 .profile-score-distance{
+    padding:8px 9px;
+    font-size:.7rem;
+  }
+
+  #playerModal .profile-v152 .profile-view-tabs{
+    margin:9px -10px 12px;
+    padding:6px 62px 6px 10px;
+  }
+
+  #playerModal .profile-v152 .profile-view-tabs button{
+    font-size:.7rem;
+  }
+
+  #playerModal .profile-summary-grid{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  #playerModal .profile-summary-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  #playerModal .profile-summary-metrics article,
+  #playerModal .profile-summary-metrics article:nth-child(even){
+    min-height:68px;
+    padding:11px 12px;
+    border-right:1px solid rgba(116,175,153,.13);
+    border-bottom:1px solid rgba(116,175,153,.13);
+  }
+
+  #playerModal .profile-summary-metrics article:nth-child(even){
+    border-right:0;
+  }
+
+  #playerModal .profile-summary-metrics article:nth-child(n+3){
+    border-bottom:0;
+  }
+
+  #playerModal .profile-summary-metrics article>span{
+    min-height:0;
+    font-size:.7rem;
+  }
+
+  #playerModal .profile-summary-metrics article>b{
+    margin-top:6px;
+    font-size:1.23rem;
+  }
+
+  #playerModal .profile-form-card{
+    padding:13px 13px 9px;
+  }
+
+  #playerModal .profile-form-bars{
+    min-height:106px;
+  }
+
+  #playerModal .profile-form-bar{
+    grid-template-rows:18px 67px 18px;
+  }
+
+  #playerModal .profile-v152 #profileAchievementsPanel .profile-achievements-section{
+    padding:14px 0!important;
+  }
+}
+
+@media(max-width:360px){
+  #playerModal .profile-earned-achievements .profile-featured-achievement-grid{
+    grid-auto-columns:72%;
+  }
+
+  #playerModal .profile-v152 .profile-score-rank,
+  #playerModal .profile-v152 .profile-score-points{
+    padding:13px 10px;
+  }
+
+  #playerModal .profile-v152 .profile-score-rank>b,
+  #playerModal .profile-v152 .profile-score-points>b{
+    font-size:clamp(1.9rem,10vw,2.3rem);
+  }
+}

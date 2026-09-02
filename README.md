@@ -1,6 +1,13 @@
-# Cuban League V157
+# Cuban League V158
 
 Sitio oficial de la Cuban League con:
+
+- Los perfiles individuales estrenan una jerarquía más clara y compacta: las
+  insignias ganadas aparecen en la parte superior con contador y acceso a
+  `Ver todas`, las estadísticas evitan repetir posición y puntos, y los
+  números, tarjetas y gráfica de forma ocupan menos espacio sin perder
+  legibilidad. Se elimina la vista previa de `Última alineación` del resumen;
+  el análisis completo del equipo continúa disponible bajo la pestaña Equipo.
 
 - El Catálogo Maestro incorpora a Sebastián Cáceres, Harvey Elliott, Jeanuël
   Belocian, Iván Azón, Félix Correia, Lucas Stassin, Roy Revivo, Jonathan

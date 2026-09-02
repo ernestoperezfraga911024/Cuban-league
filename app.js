@@ -1,4 +1,4 @@
-const APP_VERSION='157-20260902';
+const APP_VERSION='158-20260902';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -2798,24 +2798,8 @@ function profileRecentFormMarkup(snapshot){
     <p class="profile-form-average">Promedio <b>${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</b></p>`;
 }
 
-function profileHeroAwards(name,earnedAchievements){
-  const latestMonth=latestOfficialPlayerMonthGroup(monthlyAchievementGroups());
-  const isCurrentMonth=latestMonth?.winners.some(winner=>winner.name===name);
-  const priority=['pichichi','golden_glove','leader','champion','king_europe'];
-  const selected=[];
-  if(isCurrentMonth){
-    const monthly=earnedAchievements.find(item=>item.id==='player_month');
-    if(monthly)selected.push({...monthly,name:`Jugador del mes · ${latestMonth.label}`});
-  }
-  priority.forEach(id=>{
-    const item=earnedAchievements.find(achievement=>achievement.id===id);
-    if(item&&selected.length<2)selected.push(item);
-  });
-  return selected.map(item=>`<span class="profile-hero-award achievement-${item.rarity}"><span aria-hidden="true">${achievementIconMarkup(item)}</span>${profileAttr(item.name)}</span>`).join('');
-}
-
 function profileAchievementPreviewMarkup(earnedAchievements){
-  const visible=earnedAchievements.slice(0,2);
+  const visible=sortFeaturedAchievements(earnedAchievements).slice(0,3);
   if(!visible.length)return '<p class="profile-summary-empty">Aún no tiene insignias desbloqueadas.</p>';
   return visible.map(item=>`<article class="profile-featured-achievement achievement-${item.rarity}">
       <span aria-hidden="true">${achievementIconMarkup(item)}</span>
@@ -2823,20 +2807,16 @@ function profileAchievementPreviewMarkup(earnedAchievements){
     </article>`).join('');
 }
 
-function profileLatestLineupMarkup(data){
-  if(!data)return '<div class="profile-lineup-loading"><span class="lineup-loader" aria-hidden="true"></span><small>Preparando la última alineación…</small></div>';
-  const row=[...data.rows].reverse().find(item=>item.players.length===11);
-  if(!row)return '<div class="profile-summary-empty">Todavía no hay un XI completo publicado.</div>';
-  const counts={PT:0,DF:0,MC:0,DL:0};
-  row.players.forEach(player=>{if(counts[player.position]!=null)counts[player.position]+=1});
-  const formation=`${counts.DF}-${counts.MC}-${counts.DL}`;
-  const captain=row.players.find(player=>player.isCaptain&&!player.isEmptyPosition)||null;
-  const lines=['DL','MC','DF','PT'].map(position=>`<span class="profile-lineup-line is-${position.toLowerCase()}">
-      ${row.players.filter(player=>player.position===position).map(player=>`<i class="${player.isCaptain?'is-captain':''}${player.isEmptyPosition?' is-empty':''}" title="${profileAttr(player.playerName)}" aria-label="${profileAttr(player.playerName)}${player.isCaptain?', capitán':''}"></i>`).join('')}
-    </span>`).join('');
-  return `<div class="profile-lineup-preview-head"><div><b>${formation}</b>${captain?`<span><i>C</i>${profileAttr(captain.playerName)}</span>`:'<span>Sin capitán</span>'}</div><small>J${row.matchday}</small></div>
-    <div class="profile-lineup-pitch" aria-label="Vista previa de la alineación de la jornada ${row.matchday}">${lines}</div>
-    <button type="button" class="profile-lineup-open" ${matchdayLineupTriggerAttrs(data.name,row.matchday,row.hasPostponedMatches)}>Ver XI completo</button>`;
+function profileEarnedAchievementsMarkup(name,earnedAchievements){
+  const count=earnedAchievements.length;
+  const countLabel=count===1?'1 INSIGNIA':`${count} INSIGNIAS`;
+  return `<section id="profileEarnedAchievements" class="profile-featured-achievements profile-earned-achievements" aria-labelledby="profileEarnedAchievementsTitle">
+    <div class="profile-summary-section-head">
+      <div><span>${countLabel} GANADA${count===1?'':'S'}</span><h3 id="profileEarnedAchievementsTitle">Insignias ganadas</h3></div>
+      <button type="button" data-profile-jump="achievements" aria-label="Ver todas las insignias de ${profileAttr(name)}">Ver todas <span aria-hidden="true">›</span></button>
+    </div>
+    <div class="profile-featured-achievement-grid${count?'':' is-empty'}">${profileAchievementPreviewMarkup(earnedAchievements)}</div>
+  </section>`;
 }
 
 function profileCurrentLabel(m,current){
@@ -2859,13 +2839,12 @@ function profileScoreHeroMarkup(name,snapshot,current,currentLabel,latestLabel){
   </section>`;
 }
 
-function profileSummaryMetricsMarkup(current,currentLabel){
+function profileSummaryMetricsMarkup(current){
   return `<section id="profileCurrentMetrics" class="profile-summary-metrics" aria-label="Resumen de temporada">
-    <article><span>Posición</span><b>${currentLabel}</b></article>
-    <article><span>Puntos</span><b>${Number(current.points||0).toLocaleString('es')}</b></article>
     <article><span>Jornadas</span><b>${current.played||0}</b></article>
     <article><span>Goles</span><b>${current.goals||0}</b></article>
-    <div class="profile-summary-secondary"><span>CS <b>${current.cleanSheets||0}</b></span><span>TR <b>${current.redCards||0}</b></span></div>
+    <article><span>Porterías a cero</span><b>${current.cleanSheets||0}</b></article>
+    <article><span>Tarjetas rojas</span><b>${current.redCards||0}</b></article>
   </section>`;
 }
 
@@ -2884,29 +2863,23 @@ function refreshOpenProfileCurrentSummary(){
   const achievements=playerAchievementState(name);
   const earnedAchievements=achievements.filter(item=>item.earned);
   const achievementPercent=Math.round((earnedAchievements.length/ACHIEVEMENT_CATALOG.length)*100);
-  const heroAwards=document.querySelector('#playerModal .profile-hero-awards');
+  const earnedPanel=$('profileEarnedAchievements');
+  const restoreEarnedFocus=Boolean(earnedPanel?.contains(document.activeElement));
   const score=$('profileCurrentScore');
   const metrics=$('profileCurrentMetrics');
   const form=$('profileCurrentForm');
-  const featured=document.querySelector('#playerModal .profile-featured-achievement-grid');
   const achievementPanel=$('profileAchievementsPanel');
-  if(heroAwards)heroAwards.innerHTML=profileHeroAwards(name,earnedAchievements);
+  if(earnedPanel){
+    earnedPanel.outerHTML=profileEarnedAchievementsMarkup(name,earnedAchievements);
+    if(restoreEarnedFocus){
+      requestAnimationFrame(()=>document.querySelector('#profileEarnedAchievements [data-profile-jump="achievements"]')?.focus());
+    }
+  }
   if(score)score.outerHTML=profileScoreHeroMarkup(name,snapshot,current,currentLabel,latestLabel);
-  if(metrics)metrics.outerHTML=profileSummaryMetricsMarkup(current,currentLabel);
+  if(metrics)metrics.outerHTML=profileSummaryMetricsMarkup(current);
   if(form)form.outerHTML=profileFormCardMarkup(snapshot);
-  if(featured)featured.innerHTML=profileAchievementPreviewMarkup(earnedAchievements);
   if(achievementPanel)achievementPanel.innerHTML=profileAchievementsPanelMarkup(achievements,earnedAchievements,achievementPercent);
   if(PROFILE_SEASON_STATE.view==='achievements')requestAnimationFrame(animateProfileAchievementUnlocks);
-}
-
-function renderProfileSummarySeasonData(){
-  const host=$('profileLatestLineup');
-  if(!host||!PROFILE_SEASON_STATE)return;
-  if(PROFILE_SEASON_STATE.status==='error'){
-    host.innerHTML='<div class="profile-summary-empty">No pudimos cargar la alineación. Puedes intentarlo desde Equipo.</div>';
-    return;
-  }
-  host.innerHTML=profileLatestLineupMarkup(PROFILE_SEASON_STATE.data);
 }
 
 const MANAGER_LEGACY_POSITIONS={
@@ -4496,17 +4469,14 @@ function renderProfileSeasonContent(){
   if(!host||!state)return;
   if(state.status==='loading'){
     host.innerHTML=profileSeasonLoadingMarkup();
-    renderProfileSummarySeasonData();
     return;
   }
   if(state.status==='error'){
     host.innerHTML=profileSeasonErrorMarkup(state.error);
-    renderProfileSummarySeasonData();
     return;
   }
   if(!state.data){
     host.innerHTML=profileSeasonLoadingMarkup();
-    renderProfileSummarySeasonData();
     return;
   }
   const section=state.section||'summary';
@@ -4529,7 +4499,6 @@ function renderProfileSeasonContent(){
       ${section==='captains'?profileSeasonCaptainsMarkup(data):section==='players'?profileSeasonPlayersMarkup(data):profileSeasonSummaryMarkup(data)}
     </section>
     <p class="profile-season-updated">Actualizado con datos publicados · ${updated}</p>`;
-  renderProfileSummarySeasonData();
 }
 
 async function ensureProfileSeasonData({force=false}={}){
@@ -4751,9 +4720,10 @@ function openPlayer(name){
       <div class="profile-identity">
         <span class="eyebrow">${s.label||'PARTICIPANTE'}</span>
         <h2 id="profileTitle">${name}</h2>
-        <div class="profile-hero-awards">${profileHeroAwards(name,earnedAchievements)}</div>
       </div>
     </section>
+
+    ${profileEarnedAchievementsMarkup(name,earnedAchievements)}
 
     ${profileScoreHeroMarkup(name,snapshot,current,currentLabel,latestLabel)}
 
@@ -4766,17 +4736,9 @@ function openPlayer(name){
 
     <section id="profileSummaryPanel" class="profile-view-panel is-active" role="tabpanel" aria-labelledby="profileSummaryTab" data-profile-panel="summary">
       <div class="profile-summary-grid">
-        ${profileSummaryMetricsMarkup(current,currentLabel)}
+        ${profileSummaryMetricsMarkup(current)}
         ${profileFormCardMarkup(snapshot)}
       </div>
-      <section class="profile-latest-lineup-card">
-        <div class="profile-summary-section-head"><div><span>ÚLTIMO XI PUBLICADO</span><h3>Última alineación</h3></div></div>
-        <div id="profileLatestLineup" aria-live="polite">${profileLatestLineupMarkup(null)}</div>
-      </section>
-      <section class="profile-featured-achievements">
-        <div class="profile-summary-section-head"><div><span>VITRINA PERSONAL</span><h3>Logros destacados</h3></div><button type="button" data-profile-jump="achievements">Ver todos <span aria-hidden="true">›</span></button></div>
-        <div class="profile-featured-achievement-grid">${profileAchievementPreviewMarkup(earnedAchievements)}</div>
-      </section>
     </section>
 
     <section id="profileTeamPanel" class="profile-view-panel profile-season-panel" role="tabpanel" aria-labelledby="profileTeamTab" data-profile-panel="team" hidden>
@@ -4796,7 +4758,6 @@ function openPlayer(name){
   requestAnimationFrame(()=>{
     $('closeModal').focus();
   });
-  ensureProfileSeasonData();
 }
 
 let evolutionSelected=[];
