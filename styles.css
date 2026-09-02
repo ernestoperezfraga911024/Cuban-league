@@ -14052,10 +14052,6 @@ footer{
   font-size:1rem;
 }
 
-.champions-prize-row.prize-row-late{
-  background:rgba(108,255,115,.035);
-}
-
 .prize-payment-note{
   display:flex;
   align-items:center;
@@ -14109,7 +14105,7 @@ footer{
 
 .knockout-prize-grid{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:11px;
 }
 
@@ -14149,16 +14145,6 @@ footer{
   color:var(--rules-green);
   font-family:Sora,Inter,sans-serif;
   font-size:1.25rem;
-}
-
-.knockout-prize-grid .champion-prize{
-  border-color:rgba(242,207,99,.38);
-  background:linear-gradient(145deg,rgba(242,207,99,.1),rgba(4,18,20,.75));
-}
-
-.knockout-prize-grid .champion-prize .ui-icon,
-.knockout-prize-grid .champion-prize b{
-  color:var(--rules-gold);
 }
 
 @media(max-width:820px){
