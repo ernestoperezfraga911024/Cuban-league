@@ -1,4 +1,6 @@
-# Cuban League V160
+# Cuban League V161
+
+- La vitrina superior de cada perfil muestra todas las insignias ganadas en un carrusel horizontal. Cada insignia abre un detalle ampliado, accesible y adaptado a móvil con su categoría, rareza, requisito y el logro concreto del participante.
 
 - En móvil, la barra fija de `Resumen`, `Equipo`, `Logros` e `Historia` queda alineada justo debajo del área segura superior al desplazarse. El botón de cerrar permanece centrado en la misma franja, sin aplicar dos veces el espacio del notch ni dejar la barra flotando sobre el contenido.
 
