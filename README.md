@@ -1,6 +1,12 @@
-# Cuban League V158
+# Cuban League V159
 
 Sitio oficial de la Cuban League con:
+
+- La segunda fecha de la fase de grupos de Champions pasa a Liga J7 en la
+  configuración automática, el calendario público y el panel de
+  administración. Las bonificaciones de las ocho jornadas quedan unificadas:
+  $400 mil para el primero y $300 mil para el segundo de cada grupo. También
+  se elimina el premio de $5 millones para el campeón en la próxima temporada.
 
 - Los perfiles individuales estrenan una jerarquía más clara y compacta: las
   insignias ganadas aparecen en la parte superior con contador y acceso a
@@ -41,7 +47,7 @@ Sitio oficial de la Cuban League con:
   añadir otra tabla o carga manual.
 
 - La fase de grupos de Champions toma automáticamente PTS, GOL, CS y TR de
-  las jornadas publicadas de Liga: J3, J6, J9, J12, J15, J18, J21 y J24 se
+  las jornadas publicadas de Liga: J3, J7, J9, J12, J15, J18, J21 y J24 se
   convierten respectivamente en Champions J1–J8. El panel de Champions queda
   protegido como vista de consulta, indica su jornada fuente y permite saltar
   directamente a ella. Publicaciones, correcciones, jornadas aplazadas y
