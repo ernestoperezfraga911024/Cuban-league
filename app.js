@@ -1,4 +1,4 @@
-const APP_VERSION='160-20260902';
+const APP_VERSION='161-20260902';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -32,6 +32,7 @@ let PROFILE_SEASON_REQUEST_TOKEN=0;
 let PROFILE_SEASON_ABORT_CONTROLLER=null;
 const PROFILE_SEASON_CACHE=new Map();
 let PROFILE_SEASON_STATE=null;
+let ACHIEVEMENT_DETAIL_STATE=null;
 let LEAGUE_STATS_REQUEST_TOKEN=0;
 let LEAGUE_STATS_ABORT_CONTROLLER=null;
 const LEAGUE_STATS_CACHE=new Map();
@@ -2219,6 +2220,7 @@ const ACHIEVEMENT_CATALOG=[
 ];
 
 const ACHIEVEMENT_RARITY_WEIGHT={legendary:4,epic:3,rare:2,common:1};
+const ACHIEVEMENT_RARITY_LABEL={legendary:'Legendaria',epic:'Épica',rare:'Rara',common:'Común'};
 
 function achievementIconMarkup(item){
   return item.iconAsset
@@ -2798,13 +2800,14 @@ function profileRecentFormMarkup(snapshot){
     <p class="profile-form-average">Promedio <b>${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</b></p>`;
 }
 
-function profileAchievementPreviewMarkup(earnedAchievements){
-  const visible=sortFeaturedAchievements(earnedAchievements).slice(0,3);
+function profileAchievementPreviewMarkup(name,earnedAchievements){
+  const visible=sortFeaturedAchievements(earnedAchievements);
   if(!visible.length)return '<p class="profile-summary-empty">Aún no tiene insignias desbloqueadas.</p>';
-  return visible.map(item=>`<article class="profile-featured-achievement achievement-${item.rarity}">
-      <span aria-hidden="true">${achievementIconMarkup(item)}</span>
-      <div><small>${item.type}</small><b>${item.name}</b></div>
-    </article>`).join('');
+  return visible.map(item=>`<button type="button" class="profile-featured-achievement achievement-${item.rarity}" data-profile-achievement-detail="${item.id}" aria-haspopup="dialog" aria-controls="achievementDetailModal" aria-label="Abrir la insignia ${profileAttr(item.name)} de ${profileAttr(name)}">
+      <span class="profile-featured-achievement-icon" aria-hidden="true">${achievementIconMarkup(item)}</span>
+      <span class="profile-featured-achievement-copy"><small>${item.type}</small><b>${item.name}</b></span>
+      <span class="profile-featured-achievement-open" aria-hidden="true">›</span>
+    </button>`).join('');
 }
 
 function profileEarnedAchievementsMarkup(name,earnedAchievements){
@@ -2815,7 +2818,8 @@ function profileEarnedAchievementsMarkup(name,earnedAchievements){
       <div><span>${countLabel} GANADA${count===1?'':'S'}</span><h3 id="profileEarnedAchievementsTitle">Insignias ganadas</h3></div>
       <button type="button" data-profile-jump="achievements" aria-label="Ver todas las insignias de ${profileAttr(name)}">Ver todas <span aria-hidden="true">›</span></button>
     </div>
-    <div class="profile-featured-achievement-grid${count?'':' is-empty'}">${profileAchievementPreviewMarkup(earnedAchievements)}</div>
+    <div class="profile-featured-achievement-grid${count?'':' is-empty'}" aria-label="Insignias ganadas por ${profileAttr(name)}">${profileAchievementPreviewMarkup(name,earnedAchievements)}</div>
+    ${count?`<p class="profile-achievement-swipe-hint"><span aria-hidden="true">↔</span>${count===1?'Toca la insignia para verla en grande.':'Desliza y toca una insignia para verla en grande.'}</p>`:''}
   </section>`;
 }
 
@@ -2865,20 +2869,31 @@ function refreshOpenProfileCurrentSummary(){
   const achievementPercent=Math.round((earnedAchievements.length/ACHIEVEMENT_CATALOG.length)*100);
   const earnedPanel=$('profileEarnedAchievements');
   const restoreEarnedFocus=Boolean(earnedPanel?.contains(document.activeElement));
+  const focusedAchievementId=document.activeElement?.closest?.('[data-profile-achievement-detail]')?.dataset.profileAchievementDetail||'';
+  const earnedCarouselScrollLeft=earnedPanel?.querySelector('.profile-featured-achievement-grid')?.scrollLeft||0;
   const score=$('profileCurrentScore');
   const metrics=$('profileCurrentMetrics');
   const form=$('profileCurrentForm');
   const achievementPanel=$('profileAchievementsPanel');
   if(earnedPanel){
     earnedPanel.outerHTML=profileEarnedAchievementsMarkup(name,earnedAchievements);
-    if(restoreEarnedFocus){
-      requestAnimationFrame(()=>document.querySelector('#profileEarnedAchievements [data-profile-jump="achievements"]')?.focus());
-    }
+    requestAnimationFrame(()=>{
+      const carousel=document.querySelector('#profileEarnedAchievements .profile-featured-achievement-grid');
+      if(carousel)carousel.scrollLeft=earnedCarouselScrollLeft;
+      if(restoreEarnedFocus){
+        const focusedAchievement=focusedAchievementId
+          ?document.querySelector(`#profileEarnedAchievements [data-profile-achievement-detail="${focusedAchievementId}"]`)
+          :null;
+        const fallback=document.querySelector('#profileEarnedAchievements [data-profile-jump="achievements"]');
+        (focusedAchievement||fallback)?.focus({preventScroll:true});
+      }
+    });
   }
   if(score)score.outerHTML=profileScoreHeroMarkup(name,snapshot,current,currentLabel,latestLabel);
   if(metrics)metrics.outerHTML=profileSummaryMetricsMarkup(current);
   if(form)form.outerHTML=profileFormCardMarkup(snapshot);
   if(achievementPanel)achievementPanel.innerHTML=profileAchievementsPanelMarkup(achievements,earnedAchievements,achievementPercent);
+  refreshOpenAchievementDetail(earnedAchievements);
   if(PROFILE_SEASON_STATE.view==='achievements')requestAnimationFrame(animateProfileAchievementUnlocks);
 }
 
@@ -4604,14 +4619,120 @@ function handleProfileTabsKeydown(event){
   return true;
 }
 
+function achievementDetailMarkup(name,item){
+  const rarityLabel=ACHIEVEMENT_RARITY_LABEL[item.rarity]||'Especial';
+  const evidence=item.meta||item.detail||item.requirement;
+  return `<section class="achievement-detail-content">
+    <div class="achievement-detail-hero">
+      <span class="achievement-detail-icon" aria-hidden="true">${achievementIconMarkup(item)}</span>
+      <div class="achievement-detail-heading">
+        <span class="achievement-detail-unlocked">✓ Desbloqueada</span>
+        <p><span>${profileAttr(item.type)}</span><i aria-hidden="true">•</i><span>${rarityLabel}</span></p>
+        <h2 id="achievementDetailTitle">${profileAttr(item.name)}</h2>
+      </div>
+    </div>
+    <div class="achievement-detail-panels">
+      <article>
+        <span>Cómo se consigue</span>
+        <p id="achievementDetailDescription">${profileAttr(item.requirement)}</p>
+      </article>
+      <article class="achievement-detail-earned">
+        <span>Logro de ${profileAttr(name)}</span>
+        <strong>${profileAttr(evidence)}</strong>
+      </article>
+    </div>
+  </section>`;
+}
+
+function setAchievementDetailContent(name,item){
+  const card=$('achievementDetailCard');
+  const content=$('achievementDetailContent');
+  if(!card||!content)return;
+  card.dataset.achievementRarity=item.rarity||'common';
+  content.innerHTML=achievementDetailMarkup(name,item);
+}
+
+function openAchievementDetail(achievementId,trigger=document.activeElement){
+  const name=PROFILE_SEASON_STATE?.name;
+  const modal=$('achievementDetailModal');
+  if(!name||!modal)return;
+  const item=playerAchievementState(name).find(achievement=>achievement.id===achievementId&&achievement.earned);
+  if(!item)return;
+  if(ACHIEVEMENT_DETAIL_STATE)closeAchievementDetail({restoreFocus:false});
+  ACHIEVEMENT_DETAIL_STATE={name,achievementId,returnFocus:trigger};
+  setAchievementDetailContent(name,item);
+  modal.hidden=false;
+  $('closeAchievementDetail')?.focus({preventScroll:true});
+  const playerModal=$('playerModal');
+  if(playerModal){
+    playerModal.inert=true;
+    playerModal.setAttribute('aria-hidden','true');
+  }
+  syncModalLock();
+}
+
+function closeAchievementDetail({restoreFocus=true}={}){
+  const modal=$('achievementDetailModal');
+  if(!modal||modal.hidden)return;
+  const state=ACHIEVEMENT_DETAIL_STATE;
+  modal.hidden=true;
+  const playerModal=$('playerModal');
+  if(playerModal){
+    playerModal.inert=false;
+    playerModal.removeAttribute('aria-hidden');
+  }
+  $('achievementDetailContent').innerHTML='';
+  $('achievementDetailCard')?.removeAttribute('data-achievement-rarity');
+  ACHIEVEMENT_DETAIL_STATE=null;
+  syncModalLock();
+  if(!restoreFocus)return;
+  requestAnimationFrame(()=>{
+    const current=state?.achievementId
+      ?document.querySelector(`#profileEarnedAchievements [data-profile-achievement-detail="${state.achievementId}"]`)
+      :null;
+    const fallback=document.querySelector('#profileEarnedAchievements [data-profile-jump="achievements"]')||$('closeModal');
+    const target=current||(state?.returnFocus?.isConnected?state.returnFocus:null)||fallback;
+    current?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
+    target?.focus({preventScroll:true});
+  });
+}
+
+function refreshOpenAchievementDetail(earnedAchievements){
+  const state=ACHIEVEMENT_DETAIL_STATE;
+  const modal=$('achievementDetailModal');
+  if(!state||!modal||modal.hidden)return;
+  const item=earnedAchievements.find(achievement=>achievement.id===state.achievementId);
+  if(!item){
+    closeAchievementDetail();
+    return;
+  }
+  setAchievementDetailContent(state.name,item);
+  const current=document.querySelector(`#profileEarnedAchievements [data-profile-achievement-detail="${state.achievementId}"]`);
+  if(current)state.returnFocus=current;
+}
+
+function trapAchievementDetailFocus(event){
+  if(event.key!=='Tab')return;
+  const modal=$('achievementDetailModal');
+  if(!modal||modal.hidden)return;
+  const focusable=[...modal.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')]
+    .filter(element=>!element.disabled&&!element.hidden&&element.getClientRects().length);
+  if(!focusable.length){event.preventDefault();return}
+  const first=focusable[0];
+  const last=focusable[focusable.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+}
+
 let profileReturnFocus=null;
 function syncModalLock(){
-  const anyOpen=['playerModal','lineupModal','installModal'].some(id=>$(id)&&!$(id).hidden);
+  const anyOpen=['playerModal','lineupModal','achievementDetailModal','installModal'].some(id=>$(id)&&!$(id).hidden);
   document.body.classList.toggle('modal-open',anyOpen);
 }
 function closePlayer(){
   const modal=$('playerModal');
   if(modal.hidden)return;
+  if(!$('achievementDetailModal')?.hidden)closeAchievementDetail({restoreFocus:false});
   PROFILE_SEASON_ABORT_CONTROLLER?.abort();
   PROFILE_SEASON_ABORT_CONTROLLER=null;
   PROFILE_SEASON_REQUEST_TOKEN+=1;
@@ -4675,6 +4796,7 @@ function profileHistoryPanelMarkup(name,s,honours,m,seasonRows){
     </details>`;
 }
 function openPlayer(name){
+  if(!$('achievementDetailModal')?.hidden)closeAchievementDetail({restoreFocus:false});
   const p=DATA.participants.find(x=>x.name===name);
   if(!p)return;
   const returnFocus=document.activeElement;
@@ -6625,6 +6747,11 @@ async function init(){
       ensureLeagueStatsData({force:true});
       return;
     }
+    const achievementDetail=e.target.closest('[data-profile-achievement-detail]');
+    if(achievementDetail){
+      openAchievementDetail(achievementDetail.dataset.profileAchievementDetail,achievementDetail);
+      return;
+    }
     const profileJump=e.target.closest('[data-profile-jump]');
     if(profileJump){
       setProfileView(profileJump.dataset.profileJump,{focus:true});
@@ -6685,7 +6812,12 @@ async function init(){
     }
   });
   document.addEventListener('keydown',e=>{
+    trapAchievementDetailFocus(e);
     trapMatchdayLineupFocus(e);
+    if(e.key==='Escape'&&!$('achievementDetailModal').hidden){
+      closeAchievementDetail();
+      return;
+    }
     if(handleProfileTabsKeydown(e))return;
     const team=e.target.closest?.('[data-profile-player]');
     if(team&&(e.key==='Enter'||e.key===' ')){
@@ -6721,6 +6853,8 @@ async function init(){
   $('playerSearch').oninput=e=>renderPlayers(e.target.value);
   $('closeLineupModal').onclick=closeMatchdayLineup;
   $('lineupModal').onclick=e=>{if(e.target.id==='lineupModal')closeMatchdayLineup()};
+  $('closeAchievementDetail').onclick=()=>closeAchievementDetail();
+  $('achievementDetailModal').onclick=e=>{if(e.target.id==='achievementDetailModal')closeAchievementDetail()};
   $('closeModal').onclick=closePlayer;
   $('playerModal').onclick=e=>{if(e.target.id==='playerModal')closePlayer()};
   $('share').onclick=()=>navigator.share
