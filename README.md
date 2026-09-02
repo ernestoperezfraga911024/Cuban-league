@@ -1,6 +1,25 @@
-# Cuban League V156
+# Cuban League V158
 
 Sitio oficial de la Cuban League con:
+
+- Los perfiles individuales estrenan una jerarquía más clara y compacta: las
+  insignias ganadas aparecen en la parte superior con contador y acceso a
+  `Ver todas`, las estadísticas evitan repetir posición y puntos, y los
+  números, tarjetas y gráfica de forma ocupan menos espacio sin perder
+  legibilidad. Se elimina la vista previa de `Última alineación` del resumen;
+  el análisis completo del equipo continúa disponible bajo la pestaña Equipo.
+
+- El Catálogo Maestro incorpora a Sebastián Cáceres, Harvey Elliott, Jeanuël
+  Belocian, Iván Azón, Félix Correia, Lucas Stassin, Roy Revivo, Jonathan
+  David, Mujaid Sadick, Petar Ratkov, Jens-Lys Cajuste, Emil Audero, Youssouf
+  Fofana, Kevin Lomónaco y Brian Fariñas, todos con identidad estable,
+  posición, club y retrato propio extraído de las capturas originales.
+- José Giménez conserva su identidad e historial al pasar del Atlético de
+  Madrid al Deportivo de La Coruña, y Pablo García hace lo mismo al cambiar
+  del Betis al Racing de Santander. David Affengruber queda archivado fuera
+  del selector sin borrar alineaciones ni estadísticas anteriores; André
+  Almeida y Gustavo Puerta mantienen correctamente los movimientos ya
+  aplicados en la versión anterior.
 
 - El Centro de Tarjetas incorpora `Jugador del mes` en formato vertical
   1080×1350: selecciona cualquier mes cerrado y genera una imagen oficial con
@@ -156,7 +175,7 @@ Sitio oficial de la Cuban League con:
   sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
   reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
   jornadas o promedio.
-- El Catálogo Maestro incorpora 523 jugadores activos de 20 clubes, con rostro, escudo,
+- El Catálogo Maestro incorpora 536 jugadores activos de 20 clubes, con rostro, escudo,
   posición e identidad estable. En el panel se busca y selecciona al jugador;
   club y posición se completan automáticamente, y el administrador escribe
   únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
