@@ -4017,3 +4017,31 @@ body.backup-restore-open{overflow:hidden}
   .champions-source-button{grid-column:1/-1;width:100%;min-height:44px}
   .preview-champions-automation{margin:0 10px 9px;font-size:.57rem}
 }
+
+
+.forgot-password-button{
+  width:100%;
+  margin-top:12px;
+  padding:10px 14px;
+  border:0;
+  border-radius:12px;
+  color:var(--green);
+  background:transparent;
+  font:inherit;
+  font-size:.9rem;
+  font-weight:700;
+  cursor:pointer;
+}
+.forgot-password-button:hover,
+.forgot-password-button:focus-visible{
+  outline:none;
+  background:rgba(159,255,124,.08);
+}
+.forgot-password-button:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+#recoveryForm[hidden],
+#loginForm[hidden]{
+  display:none;
+}
