@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '161-20260902';
+  const VERSION = '161-20260903-access';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -304,6 +304,22 @@
     node.hidden = !message;
   }
 
+  function setRecoveryMessage(message = '') {
+    const node = $('recoveryMessage');
+    node.textContent = message;
+    node.hidden = !message;
+  }
+
+  function showRecoveryForm(show) {
+    $('loginForm').hidden = show;
+    $('recoveryForm').hidden = !show;
+    if (!show) {
+      $('recoveryPassword').value = '';
+      $('recoveryPasswordConfirm').value = '';
+      setRecoveryMessage();
+    }
+  }
+
   function flashMessage(message, type = 'success') {
     const node = $('panelMessage');
     clearTimeout(state.messageTimer);
@@ -522,7 +538,8 @@
       && counts.MC <= 6
       && counts.DL >= 0
       && counts.DL <= 4;
-    const captainMultiplierValid = captains.length === 1 && validCaptainMultiplier(captains[0]?.captain_multiplier);
+    const captainMultiplierValid = captains.length === 0
+      || (captains.length === 1 && validCaptainMultiplier(captains[0]?.captain_multiplier));
     const issues = [];
     if (lineup.length !== 11) issues.push(`hay ${lineup.length}/11 jugadores iniciados`);
     if (filled !== lineup.length || (lineup.length === 11 && filled !== 11)) issues.push('faltan nombres');
@@ -532,8 +549,8 @@
     if (!lineup.every(player => validPositions.has(player.position))) issues.push('hay posiciones no válidas');
     if (counts.PT !== 1) issues.push(counts.PT ? 'debe haber un solo portero' : 'falta el portero');
     if (lineup.length === 11 && !validFormation) issues.push('formación no permitida (DF 3–5, MC 2–6, DL 0–4)');
-    if (captains.length !== 1) issues.push(captains.length ? 'debe haber un solo capitán' : 'falta elegir capitán');
-    else if (!captainMultiplierValid) issues.push('el capitán debe usar x1,5, x2 o x3');
+    if (captains.length > 1) issues.push('debe haber como máximo un capitán');
+    else if (captains.length === 1 && !captainMultiplierValid) issues.push('el capitán debe usar x1,5, x2 o x3');
     const complete = lineup.length === 11
       && filled === 11
       && pointsComplete
@@ -541,7 +558,7 @@
       && !duplicatePlayers
       && lineup.every(player => validPositions.has(player.position))
       && validFormation
-      && captains.length === 1
+      && captains.length <= 1
       && captainMultiplierValid;
     const totals = { PT: 0, DF: 0, MC: 0, DL: 0 };
     lineup.forEach(player => {
@@ -826,7 +843,7 @@
     const official = currentOfficialPoints();
     const captainLabel = metrics.captain?.player_name
       ? `${metrics.captain.player_name} · x${formatLineupNumber(metrics.captain.captain_multiplier)}`
-      : 'Sin elegir';
+      : 'Sin capitán';
     const statusLabel = metrics.complete
       ? `Lista${metrics.emptyCount ? ` · ${metrics.emptyCount} vacía${metrics.emptyCount === 1 ? '' : 's'}` : ''}`
       : metrics.hasContent ? `${metrics.filled}/11` : 'Sin cargar';
@@ -1096,7 +1113,7 @@
           <input class="lineup-points-input" data-lineup-field="displayed_points" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="${points === null ? '' : points}" placeholder="—" aria-label="${emptyPosition ? `Penalización automática de la posición vacía ${slot}` : `Puntos base del jugador ${slot}; admite negativos`}"${emptyPosition ? ' disabled' : ''}>
           <button class="points-sign-toggle" data-toggle-points-sign type="button" aria-label="Cambiar el signo de los puntos del jugador ${slot}" aria-pressed="${points !== null && points < 0}" title="${emptyPosition ? 'La posición vacía siempre vale −4' : 'Cambiar entre positivo y negativo'}"${emptyPosition ? ' disabled' : ''}>±</button>
         </div>
-        <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="radio" name="lineupCaptain" value="${slot}"${captain ? ' checked' : ''}${emptyPosition ? ' disabled' : ''}><span>C</span></label>
+        <label class="lineup-captain-choice"><input data-lineup-field="is_captain" type="checkbox" name="lineupCaptain" value="${slot}" aria-label="Marcar o quitar capitán en la posición ${slot}"${captain ? ' checked' : ''}${emptyPosition ? ' disabled' : ''}><span>C</span></label>
         <select class="lineup-position-select lineup-multiplier-input" data-lineup-field="captain_multiplier"${captain && !emptyPosition ? '' : ' disabled'} aria-label="Multiplicador del capitán en la posición ${slot}">
           ${LINEUP_CAPTAIN_MULTIPLIERS.map(value => `<option value="${value}"${multiplier === value ? ' selected' : ''}>x${String(value).replace('.', ',')}</option>`).join('')}
         </select>
@@ -3610,6 +3627,67 @@
     }
   }
 
+  async function requestPasswordReset() {
+    setLoginMessage();
+    const email = $('adminEmail').value.trim();
+    if (!email || !$('adminEmail').checkValidity()) {
+      setLoginMessage('Escribe el correo administrador válido antes de solicitar el enlace.');
+      $('adminEmail').focus();
+      return;
+    }
+
+    const button = $('forgotPasswordButton');
+    button.disabled = true;
+    button.textContent = 'Enviando enlace…';
+    try {
+      const redirectTo = new URL('admin.html?recovery=1', location.href).href;
+      const { error } = await state.client.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw error;
+      setLoginMessage('Revisa tu correo. Supabase envió un enlace seguro para crear una contraseña nueva.');
+    } catch (error) {
+      setLoginMessage(friendlyError(error));
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Olvidé mi contraseña';
+    }
+  }
+
+  async function saveRecoveredPassword(event) {
+    event.preventDefault();
+    setRecoveryMessage();
+    const password = $('recoveryPassword').value;
+    const confirmation = $('recoveryPasswordConfirm').value;
+    if (password.length < 8) {
+      setRecoveryMessage('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (password !== confirmation) {
+      setRecoveryMessage('Las contraseñas no coinciden.');
+      return;
+    }
+
+    const button = $('saveRecoveredPassword');
+    button.disabled = true;
+    button.querySelector('span').textContent = 'Guardando…';
+    try {
+      const { error } = await state.client.auth.updateUser({ password });
+      if (error) throw error;
+      history.replaceState({}, '', 'admin.html');
+      const { data, error: sessionError } = await state.client.auth.getSession();
+      if (sessionError) throw sessionError;
+      showRecoveryForm(false);
+      if (data.session) await openPanel(data.session);
+      else showOnly('loginView');
+    } catch (error) {
+      setRecoveryMessage(friendlyError(error));
+      showOnly('loginView');
+      showRecoveryForm(true);
+    } finally {
+      button.disabled = false;
+      button.querySelector('span').textContent = 'Guardar contraseña nueva';
+    }
+  }
+
   async function login(event) {
     event.preventDefault();
     setLoginMessage();
@@ -3645,6 +3723,13 @@
 
   function bindEvents() {
     $('loginForm').addEventListener('submit', login);
+    $('forgotPasswordButton').addEventListener('click', requestPasswordReset);
+    $('recoveryForm').addEventListener('submit', saveRecoveredPassword);
+    $('cancelRecovery').addEventListener('click', () => {
+      history.replaceState({}, '', 'admin.html');
+      showRecoveryForm(false);
+      showOnly('loginView');
+    });
     $('togglePassword').addEventListener('click', () => {
       const input = $('adminPassword');
       const visible = input.type === 'text';
@@ -3751,11 +3836,19 @@
     };
     $('lineupPlayerRows').addEventListener('input', event => {
       if (!event.target.matches('[data-lineup-field]')) return;
-      if (event.target.matches('select')) return;
+      if (event.target.matches('select, [data-lineup-field="is_captain"]')) return;
       handleLineupInput();
     });
     $('lineupPlayerRows').addEventListener('change', event => {
-      if (!event.target.matches('select[data-lineup-field]')) return;
+      const captainInput = event.target.matches('[data-lineup-field="is_captain"]')
+        ? event.target
+        : null;
+      if (captainInput?.checked) {
+        document.querySelectorAll('[data-lineup-field="is_captain"]').forEach(input => {
+          if (input !== captainInput) input.checked = false;
+        });
+      }
+      if (!captainInput && !event.target.matches('select[data-lineup-field]')) return;
       handleLineupInput();
     });
     $('lineupPlayerRows').addEventListener('click', event => {
@@ -3904,17 +3997,33 @@
       bindEvents();
       setupInstallableAdmin();
 
+      state.client.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY' && session) {
+          showOnly('loginView');
+          showRecoveryForm(true);
+          setRecoveryMessage('Enlace verificado. Crea ahora tu contraseña nueva.');
+          return;
+        }
+        if (event === 'SIGNED_OUT' || !session) {
+          showRecoveryForm(false);
+          showOnly('loginView');
+        }
+      });
+
       const { data, error } = await state.client.auth.getSession();
       if (error) throw error;
-      if (data.session) {
+      const recoveryRequested = new URLSearchParams(location.search).get('recovery') === '1'
+        || new URLSearchParams(location.hash.replace(/^#/, '')).get('type') === 'recovery';
+      if (data.session && recoveryRequested) {
+        showOnly('loginView');
+        showRecoveryForm(true);
+        setRecoveryMessage('Enlace verificado. Crea ahora tu contraseña nueva.');
+      } else if (data.session) {
         await openPanel(data.session);
       } else {
+        showRecoveryForm(false);
         showOnly('loginView');
       }
-
-      state.client.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_OUT' || !session) showOnly('loginView');
-      });
     } catch (error) {
       setLoginMessage(friendlyError(error));
       showOnly('loginView');
