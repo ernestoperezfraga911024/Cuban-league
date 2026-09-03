@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v161-profile-achievement-detail-pwa';
+const CACHE_NAME = 'cuban-league-v161-admin-access-recovery';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,8 +9,8 @@ const APP_SHELL = [
   './player-catalog.js?v=161-20260902',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=161-20260902',
-  './admin.js?v=161-20260902',
+  './admin.css?v=161-20260903-access',
+  './admin.js?v=161-20260903-access',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
