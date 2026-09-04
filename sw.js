@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v162-mister-import';
+const CACHE_NAME = 'cuban-league-v163-negative-balance';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,9 +9,9 @@ const APP_SHELL = [
   './player-catalog.js?v=161-20260902',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=162-20260904-mister-import',
-  './admin.js?v=162-20260904-mister-import',
-  './mister-import-helper.js?v=162',
+  './admin.css?v=163-20260904-negative-balance',
+  './admin.js?v=163-20260904-negative-balance',
+  './mister-import-helper.js?v=163',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
