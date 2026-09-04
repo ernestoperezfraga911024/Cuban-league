@@ -245,13 +245,13 @@
     state.misterImportRequest = null;
     state.misterImportBusy = false;
     syncMisterImportUI();
-    if (active?.requestId && state.client) {
-      await state.client.rpc('cancel_mister_import_request', {
-        p_request_id: active.requestId
-      }).catch(() => null);
-    }
     if (!keepPanel) $('misterImportPanel').hidden = true;
     if (!silent) setMisterImportStatus('Importación cancelada. No se guardó ni publicó nada.');
+    if (active?.requestId && state.client) {
+      Promise.resolve(state.client.rpc('cancel_mister_import_request', {
+        p_request_id: active.requestId
+      })).catch(() => null);
+    }
   }
 
   async function copyMisterHelper() {
