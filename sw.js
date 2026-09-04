@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v161-admin-access-recovery';
+const CACHE_NAME = 'cuban-league-v162-mister-import';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,8 +9,9 @@ const APP_SHELL = [
   './player-catalog.js?v=161-20260902',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=161-20260903-access',
-  './admin.js?v=161-20260903-access',
+  './admin.css?v=162-20260904-mister-import',
+  './admin.js?v=162-20260904-mister-import',
+  './mister-import-helper.js?v=162',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
@@ -122,6 +123,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/app.js') ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
+    url.pathname.endsWith('/mister-import-helper.js') ||
     url.pathname.endsWith('/player-catalog.js') ||
     url.pathname.endsWith('/supabase-config.js')
   ) {
