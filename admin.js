@@ -219,7 +219,6 @@
   function syncMisterImportUI() {
     const button = $('importMisterButton');
     if (!button) return;
-    $('importMisterMatchday').textContent = state.matchday;
     button.disabled = state.misterImportBusy
       || state.saving
       || state.matchdayLoading
@@ -231,7 +230,7 @@
       || !state.catalogSchemaReady
       || !misterGameweekForMatchday();
     button.querySelector('span').innerHTML = state.misterImportBusy
-      ? 'Importando Jornada <b>' + state.matchday + '</b>…'
+      ? 'Importando Jornada <b id="importMisterMatchday">' + state.matchday + '</b>…'
       : 'Importar Jornada <b id="importMisterMatchday">' + state.matchday + '</b> desde Mister';
   }
 
