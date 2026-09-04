@@ -4045,3 +4045,76 @@ body.backup-restore-open{overflow:hidden}
 #loginForm[hidden]{
   display:none;
 }
+
+
+/* ===== CUBAN ADMIN V162 · IMPORTACIÓN SEGURA DESDE MISTER ===== */
+.mister-import-button{
+  display:inline-flex;
+  min-height:50px;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:11px 16px;
+  border:1px solid rgba(92,229,215,.3);
+  border-radius:14px;
+  color:#c9fff8;
+  background:linear-gradient(135deg,rgba(92,229,215,.12),rgba(66,220,140,.08));
+  box-shadow:0 10px 28px rgba(0,0,0,.13);
+  font-size:.75rem;
+  font-weight:900;
+  cursor:pointer;
+}
+.mister-import-button svg{width:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.mister-import-button b{color:var(--green)}
+.mister-import-button:hover,.mister-import-button:focus-visible{border-color:rgba(159,255,124,.46);color:#efffeb;outline:0}
+.mister-import-button:disabled{cursor:not-allowed;filter:grayscale(.35);opacity:.48}
+
+.mister-import-panel{
+  margin:14px 0;
+  padding:20px;
+  border:1px solid rgba(92,229,215,.22);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(92,229,215,.1),transparent 42%),
+    linear-gradient(145deg,rgba(8,38,31,.98),rgba(5,20,25,.98));
+  box-shadow:0 18px 52px rgba(0,0,0,.22);
+}
+.mister-import-panel>header{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:14px}
+.mister-import-mark{display:grid;width:48px;height:48px;place-items:center;border:1px solid rgba(92,229,215,.3);border-radius:15px;color:#051a15;background:linear-gradient(135deg,var(--cyan),var(--green));font-size:1.15rem;font-weight:950}
+.mister-import-panel h2{margin:5px 0 3px;font-size:1.12rem}
+.mister-import-panel header p{margin:0;color:#9fc3b7;font-size:.69rem;line-height:1.5}
+.mister-import-panel.is-error{border-color:rgba(255,140,140,.32)}
+.mister-import-panel.is-success{border-color:rgba(159,255,124,.36)}
+.mister-import-panel.is-success #misterImportStatus{color:var(--green)}
+.mister-import-panel.is-error #misterImportStatus{color:#ffb4b4}
+
+.mister-import-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+.mister-import-steps>div{display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.025)}
+.mister-import-steps>div>span{display:grid;width:28px;height:28px;place-items:center;border:1px solid rgba(159,255,124,.25);border-radius:9px;color:var(--green);background:rgba(159,255,124,.06);font-size:.68rem;font-weight:950}
+.mister-import-steps p{margin:0}
+.mister-import-steps b,.mister-import-steps small{display:block}
+.mister-import-steps b{font-size:.68rem}
+.mister-import-steps small{margin-top:4px;color:#7f9d91;font-size:.59rem;line-height:1.45}
+
+.mister-import-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.mister-import-actions .primary-button,.mister-import-actions .secondary-button,.mister-helper-bookmark{min-height:44px;padding:10px 14px;border-radius:12px;font-size:.66rem;text-decoration:none}
+.mister-helper-bookmark{display:inline-flex;align-items:center;justify-content:center;border:1px dashed rgba(159,255,124,.48);color:#dffff6;background:rgba(159,255,124,.08);font-weight:900;cursor:grab}
+.mister-helper-bookmark:active{cursor:grabbing}
+.mister-import-cancel{min-height:44px;padding:10px 12px;border:0;color:#93aaa0;background:transparent;font-size:.64rem;font-weight:850;cursor:pointer}
+.mister-import-privacy{margin:13px 0 0;color:#6f8c80;font-size:.59rem;line-height:1.55}
+
+.competition-champions .mister-import-button,
+.competition-champions .mister-import-panel{display:none!important}
+
+@media(max-width:900px){
+  .matchday-toolbar{align-items:stretch;flex-wrap:wrap}
+  .mister-import-button{order:3;width:100%}
+  .mister-import-steps{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .mister-import-panel{padding:15px;border-radius:18px}
+  .mister-import-panel>header{grid-template-columns:42px minmax(0,1fr)}
+  .mister-import-mark{width:42px;height:42px;border-radius:13px}
+  .mister-import-actions>*{width:100%}
+  .mister-import-privacy{font-size:.61rem}
+}
