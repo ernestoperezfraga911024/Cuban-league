@@ -5,7 +5,7 @@
   window.__CUBAN_LEAGUE_MISTER_IMPORT_RUNNING__ = true;
 
   const ENDPOINT = 'https://pyahosamoisqcbpvzwka.supabase.co/functions/v1/mister-import-collector';
-  const IMPORT_VERSION = 1;
+  const IMPORT_VERSION = 2;
   const parameters = new URLSearchParams(window.location.search);
   const requestId = parameters.get('cuban_request') || '';
   let token = parameters.get('cuban_token') || '';
@@ -180,7 +180,8 @@
         link,
         managerId,
         name: text(link.querySelector('.info .name')),
-        points: pointValue(pointsNode?.childNodes?.[0]?.textContent || text(pointsNode))
+        points: pointValue(pointsNode?.childNodes?.[0]?.textContent || text(pointsNode)),
+        negativeBalanceNoScore: /saldo negativo,\s*no punt[uú]a/i.test(text(link.querySelector('.info .played')))
       };
     });
     if (managers.some(manager => !manager.managerId || !manager.name)) {
@@ -195,6 +196,25 @@
       const manager = managers[managerIndex];
       setProgress('Leyendo ' + manager.name + ' (' + (managerIndex + 1) + '/20)…', 7 + (managerIndex / managers.length) * 84);
       await closePlayerPopup();
+
+      if (manager.negativeBalanceNoScore) {
+        if (manager.points !== 0) {
+          throw new Error(manager.name + ' aparece con saldo negativo, pero Mister no muestra 0 puntos.');
+        }
+        output.push({
+          misterManagerId: manager.managerId,
+          name: manager.name,
+          points: 0,
+          goals: 0,
+          cleanSheets: 0,
+          redCards: 0,
+          negativeBalanceNoScore: true,
+          lineup: []
+        });
+        setProgress(manager.name + ': saldo negativo detectado, todo queda en 0.', 7 + ((managerIndex + 1) / managers.length) * 84);
+        continue;
+      }
+
       manager.link.click();
 
       const cards = await waitFor(() => {
@@ -270,6 +290,7 @@
         goals,
         cleanSheets,
         redCards,
+        negativeBalanceNoScore: false,
         lineup
       });
     }
