@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=161-20260903-access">
+  <link rel="stylesheet" href="admin.css?v=162-20260904-mister-import">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -341,10 +341,38 @@
             <select id="matchdaySelect"></select>
           </div>
         </div>
+        <button id="importMisterButton" class="mister-import-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 19h14"/><path d="M4 7V5a2 2 0 0 1 2-2h3m11 4V5a2 2 0 0 0-2-2h-3"/></svg>
+          <span>Importar Jornada <b id="importMisterMatchday">1</b> desde Mister</span>
+        </button>
         <div class="matchday-meta">
           <span id="publicationBadge" class="publication-badge draft"><i></i><b>Borrador</b></span>
           <span id="savedAt" class="saved-at">Todavía no guardada</span>
         </div>
+      </section>
+
+      <section id="misterImportPanel" class="mister-import-panel" aria-labelledby="misterImportTitle" hidden>
+        <header>
+          <span class="mister-import-mark" aria-hidden="true">M</span>
+          <div>
+            <span class="admin-kicker">IMPORTACIÓN SEGURA · SOLO BORRADOR</span>
+            <h2 id="misterImportTitle">Importar desde Mister</h2>
+            <p id="misterImportStatus" role="status" aria-live="polite">Preparando el enlace de la jornada…</p>
+          </div>
+        </header>
+        <div class="mister-import-steps">
+          <div><span>1</span><p><b>Instala el ayudante una sola vez</b><small>Arrastra “Enviar a Cuban League” a la barra de marcadores. Si no puedes arrastrarlo, usa “Copiar ayudante” y crea un marcador con ese contenido.</small></p></div>
+          <div><span>2</span><p><b>Abre la jornada en Mister</b><small>El enlace lleva a la jornada seleccionada y caduca en 15 minutos.</small></p></div>
+          <div><span>3</span><p><b>Pulsa el marcador dentro de Mister</b><small>Se recopilarán participantes, XI, capitanes, puntos, goles, clean sheets y tarjetas rojas. “—” se guarda como 0.</small></p></div>
+        </div>
+        <div class="mister-import-actions">
+          <a id="misterHelperBookmark" class="mister-helper-bookmark" href="#" draggable="true">Enviar a Cuban League</a>
+          <button id="copyMisterHelperButton" class="secondary-button" type="button">Copiar ayudante</button>
+          <a id="openMisterImportLink" class="primary-button" href="https://mister.mundodeportivo.com/standings" target="_blank" rel="noopener noreferrer">Abrir Mister</a>
+          <button id="cancelMisterImportButton" class="mister-import-cancel" type="button">Cancelar</button>
+        </div>
+        <p id="misterHelperCopyStatus" class="copy-admin-status" role="status" aria-live="polite"></p>
+        <p class="mister-import-privacy">La contraseña y la sesión de Mister no salen de Mister. Cuban League recibe solamente los datos deportivos de la jornada y nunca publica automáticamente.</p>
       </section>
 
       <section id="championsAutomationNotice" class="champions-automation-notice" aria-labelledby="championsAutomationTitle" hidden>
@@ -727,6 +755,6 @@
   <script src="supabase.js"></script>
   <script src="supabase-config.js?v=161-20260902"></script>
   <script src="player-catalog.js?v=161-20260902"></script>
-  <script src="admin.js?v=161-20260903-access"></script>
+  <script src="admin.js?v=162-20260904-mister-import"></script>
 </body>
 </html>
