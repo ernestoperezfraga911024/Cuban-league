@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '162-20260904-mister-import';
+  const VERSION = '163-20260904-negative-balance';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -9,7 +9,7 @@
   const PARTICIPANT_ENTRY_MODE_KEY = 'cuban-admin-participant-entry-mode';
   const ACTIVE_PARTICIPANT_PREFIX = 'cuban-admin-active-participant:';
   const AUTO_SAVE_DELAY = 900;
-  const MISTER_HELPER_URL = 'https://ernestoperezfraga911024.github.io/Cuban-league/mister-import-helper.js?v=162';
+  const MISTER_HELPER_URL = 'https://ernestoperezfraga911024.github.io/Cuban-league/mister-import-helper.js?v=163';
   const MISTER_HELPER_BOOKMARKLET = "javascript:(()=>{if(window.__CUBAN_LEAGUE_MISTER_IMPORT_RUNNING__)return;const s=document.createElement('script');s.src='" + MISTER_HELPER_URL + "&t='+Date.now();document.documentElement.appendChild(s)})()";
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
@@ -281,7 +281,7 @@
 
   function normalizeMisterPayload(payload, expectedGameweekId) {
     if (!state.catalog) throw new Error('El Catálogo Maestro de jugadores no está disponible.');
-    if (!payload || Number(payload.schemaVersion) !== 1
+    if (!payload || Number(payload.schemaVersion) !== 2
         || payload.source !== 'mister.mundodeportivo.com'
         || Number(payload.matchday) !== state.matchday
         || Number(payload.gameweekId) !== expectedGameweekId
@@ -321,6 +321,28 @@
 
     return state.participants.map(participant => {
       const manager = managerByParticipant.get(participant.name);
+      if (typeof manager?.negativeBalanceNoScore !== 'boolean') {
+        throw new Error('Falta el estado de saldo de ' + participant.name + '. Actualiza el ayudante de Mister.');
+      }
+      if (manager.negativeBalanceNoScore) {
+        if (Number(manager.points) !== 0
+            || Number(manager.goals) !== 0
+            || Number(manager.cleanSheets) !== 0
+            || Number(manager.redCards) !== 0
+            || !Array.isArray(manager.lineup)
+            || manager.lineup.length !== 0) {
+          throw new Error('Mister marcó saldo negativo para ' + participant.name + ', pero la captura no llegó completamente a cero.');
+        }
+        return {
+          participant,
+          points: 0,
+          goals: 0,
+          cleanSheets: 0,
+          redCards: 0,
+          negativeBalanceNoScore: true,
+          lineup: []
+        };
+      }
       if (!Array.isArray(manager?.lineup) || manager.lineup.length !== 11) {
         throw new Error('La alineación de ' + participant.name + ' no tiene exactamente 11 jugadores.');
       }
@@ -384,6 +406,7 @@
         goals: validateIntegerStat(manager.goals, 'Total de goles', participant.name),
         cleanSheets: validateIntegerStat(manager.cleanSheets, 'Total de clean sheets', participant.name),
         redCards: validateIntegerStat(manager.redCards, 'Total de tarjetas rojas', participant.name),
+        negativeBalanceNoScore: false,
         lineup
       };
     });
@@ -396,6 +419,10 @@
     rows.forEach(imported => {
       const card = document.querySelector('.admin-player[data-player-id="' + imported.participant.id + '"]');
       if (!card) throw new Error('No se encontró el formulario de ' + imported.participant.name + '.');
+      const negativeBalanceCheckbox = card.querySelector('[data-negative-balance-no-score]');
+      if (!negativeBalanceCheckbox) throw new Error('Falta la opción de saldo negativo de ' + imported.participant.name + '.');
+      negativeBalanceCheckbox.checked = imported.negativeBalanceNoScore === true;
+      syncNegativeBalanceCard(card);
       const values = {
         points: imported.points,
         goals: imported.goals,
@@ -408,10 +435,14 @@
         input.value = String(value);
         if (field === 'points') syncSignedPointsControl(input);
       });
-      state.lineups.set(imported.participant.name, normalizeLineupPlayers(imported.lineup));
+      state.lineups.set(
+        imported.participant.name,
+        imported.negativeBalanceNoScore ? [] : normalizeLineupPlayers(imported.lineup)
+      );
     });
     state.hasDraft = true;
     renderLineupEditor();
+    syncInputLock();
     updateTotals();
     updateLineupSummary();
     updateCompletionState();
@@ -974,7 +1005,9 @@
       || state.backupRestoring
       || (state.published && !state.editingPublished);
     const cached = copyablePreviousLineupFromCache();
+    const negativeBalance = isNegativeBalanceParticipant(state.lineupParticipantName);
     const unavailable = champions
+      || negativeBalance
       || state.matchday <= 1
       || !state.lineupParticipantName
       || !state.lineupSchemaReady
@@ -991,6 +1024,8 @@
 
     if (champions) {
       hint.textContent = '';
+    } else if (negativeBalance) {
+      hint.textContent = 'Saldo negativo: esta alineación no contabiliza y queda vacía.';
     } else if (state.matchday <= 1) {
       hint.textContent = 'La Jornada 1 no tiene una alineación anterior.';
     } else if (!state.lineupSchemaReady || !state.catalogSchemaReady) {
@@ -1038,6 +1073,7 @@
       || isChampionsMode()
       || state.matchday <= 1
       || !state.lineupParticipantName
+      || isNegativeBalanceParticipant(state.lineupParticipantName)
       || state.saving
       || state.matchdayLoading
       || state.matchdayLoadBlocked
@@ -1188,6 +1224,15 @@
 
   function updateLineupSummary() {
     if (!$('lineupEditorSummary')) return;
+    if (isNegativeBalanceParticipant(state.lineupParticipantName)) {
+      $('lineupEditorSummary').innerHTML = `
+        <span class="is-ready"><small>Estado</small><b>Saldo negativo</b></span>
+        <span><small>Formación</small><b>No contabiliza</b></span>
+        <span><small>Total del XI</small><b>0 pts</b></span>
+        <span><small>Capitán</small><b>No contabiliza</b></span>`;
+      setLineupEditorMessage('Mister indica “Saldo negativo, no puntúa”. Puntos, goles, clean sheets, rojas y alineación quedan oficialmente en 0.', 'success');
+      return;
+    }
     const metrics = lineupMetrics(lineupForParticipant(state.lineupParticipantName));
     const official = currentOfficialPoints();
     const captainLabel = metrics.captain?.player_name
@@ -1216,19 +1261,24 @@
 
   function updateLineupProgress() {
     if (!$('lineupPublishedCount')) return;
-    const complete = state.participants.filter(participant => lineupMetrics(lineupForParticipant(participant.name)).complete).length;
+    const complete = state.participants.filter(participant =>
+      isNegativeBalanceParticipant(participant.name)
+      || lineupMetrics(lineupForParticipant(participant.name)).complete
+    ).length;
     const partial = state.participants.filter(participant => {
+      if (isNegativeBalanceParticipant(participant.name)) return false;
       const metrics = lineupMetrics(lineupForParticipant(participant.name));
       return metrics.hasContent && !metrics.complete;
     }).length;
-    $('lineupPublishedCount').textContent = `${complete}/${state.participants.length} completas${partial ? ` · ${partial} parcial${partial === 1 ? '' : 'es'}` : ''}`;
+    $('lineupPublishedCount').textContent = `${complete}/${state.participants.length} completas o exentas${partial ? ` · ${partial} parcial${partial === 1 ? '' : 'es'}` : ''}`;
     $('lineupPublishedCount').classList.toggle('complete', complete === state.participants.length);
     const select = $('lineupParticipantSelect');
     if (select) {
       const selected = state.lineupParticipantName;
       select.innerHTML = state.participants.map(participant => {
+        const negativeBalance = isNegativeBalanceParticipant(participant.name);
         const metrics = lineupMetrics(lineupForParticipant(participant.name));
-        const status = metrics.complete ? '✓' : metrics.hasContent ? '…' : '○';
+        const status = negativeBalance ? '⊘' : metrics.complete ? '✓' : metrics.hasContent ? '…' : '○';
         return `<option value="${escapeHtml(participant.name)}">${status} ${escapeHtml(participant.name)}</option>`;
       }).join('');
       select.value = selected;
@@ -1443,6 +1493,14 @@
 
   function renderLineupEditor() {
     if (!$('lineupPlayerRows')) return;
+    if (isNegativeBalanceParticipant(state.lineupParticipantName)) {
+      state.lineups.set(state.lineupParticipantName, []);
+      $('lineupPlayerRows').innerHTML = '<div class="negative-balance-lineup-notice"><b>Saldo negativo · no puntúa</b><span>Esta jornada no contabiliza jugadores, capitán ni estadísticas. Todo queda en 0.</span></div>';
+      updateLineupProgress();
+      updateLineupSummary();
+      syncInputLock();
+      return;
+    }
     const players = lineupRowsForEditor(lineupForParticipant(state.lineupParticipantName));
     $('lineupPlayerRows').innerHTML = players.map(player => {
       const slot = Number(player.slot_number);
@@ -1519,6 +1577,12 @@
 
   function updateLineupFromEditor() {
     if (!state.lineupParticipantName) return;
+    if (isNegativeBalanceParticipant(state.lineupParticipantName)) {
+      state.lineups.set(state.lineupParticipantName, []);
+      updateLineupProgress();
+      updateLineupSummary();
+      return;
+    }
     const previous = lineupForParticipant(state.lineupParticipantName);
     const next = gatherLineupEditor();
     // Abrir o recorrer una alineación intacta no debe convertir null en [].
@@ -1554,8 +1618,8 @@
   function lineupPublicationValidation() {
     const details = state.participants.map(participant => {
       const metrics = lineupMetrics(lineupForParticipant(participant.name));
-      return { name: participant.name, metrics };
-    }).filter(item => item.metrics.hasContent && !item.metrics.complete);
+      return { name: participant.name, metrics, negativeBalance: isNegativeBalanceParticipant(participant.name) };
+    }).filter(item => !item.negativeBalance && item.metrics.hasContent && !item.metrics.complete);
     return { valid: details.length === 0, partial: details.map(item => item.name), details };
   }
 
@@ -1611,13 +1675,17 @@
 
   function participantWorkMetrics(participant) {
     const stats = participantStatMetrics(participant);
-    const lineup = isChampionsMode()
+    const negativeBalance = !isChampionsMode() && isNegativeBalanceParticipant(participant?.name);
+    const lineup = isChampionsMode() || negativeBalance
       ? { hasContent: false, complete: true }
       : lineupMetrics(lineupForParticipant(participant?.name));
     const ready = stats.complete && (isChampionsMode() || lineup.complete);
     let tone = 'pending';
     let label = 'Sin comenzar';
-    if (ready) {
+    if (negativeBalance) {
+      tone = 'complete';
+      label = 'Saldo negativo · todo en 0';
+    } else if (ready) {
       tone = 'complete';
       label = isChampionsMode() ? 'Estadísticas completas' : 'Estadísticas y XI completos';
     } else if (!stats.complete) {
@@ -1630,7 +1698,7 @@
       tone = 'stats-ready';
       label = 'Estadísticas listas · XI sin cargar';
     }
-    return { stats, lineup, ready, tone, label };
+    return { stats, lineup, ready, tone, label, negativeBalance };
   }
 
   function nextParticipantName({ pendingOnly = false } = {}) {
@@ -2027,14 +2095,21 @@
       || state.copyingPreviousLineup
       || isChampionsMode()
       || (state.published && !state.editingPublished);
-    document.querySelectorAll('.stat-input').forEach(input => {
-      input.disabled = locked;
+    document.querySelectorAll('.admin-player').forEach(card => {
+      const checkbox = card.querySelector('[data-negative-balance-no-score]');
+      const negativeBalance = checkbox?.checked === true;
+      card.classList.toggle('is-negative-balance-no-score', negativeBalance);
+      card.querySelectorAll('.stat-input').forEach(input => {
+        input.disabled = locked || negativeBalance;
+      });
+      if (checkbox) checkbox.disabled = locked;
     });
     ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = locked || isChampionsMode();
     });
     $('entryTitle').closest('.entry-card').classList.toggle('is-locked', isChampionsMode() || (locked && state.published));
     $('achievementSettings').classList.toggle('is-locked', locked && state.published);
+    const negativeBalanceLineup = isNegativeBalanceParticipant(state.lineupParticipantName);
     document.querySelectorAll('[data-lineup-field]').forEach(input => {
       const captainMultiplier = input.dataset.lineupField === 'captain_multiplier';
       const row = input.closest('.lineup-player-row');
@@ -2044,22 +2119,24 @@
         && Boolean(row?.querySelector('[data-lineup-field="player_id"]')?.value.trim())
         && !emptyPosition;
       const emptyLockedField = emptyPosition && ['displayed_points', 'is_captain', 'captain_multiplier'].includes(input.dataset.lineupField);
-      input.disabled = locked || catalogPosition || emptyLockedField || (captainMultiplier && !captainChecked);
+      input.disabled = locked || negativeBalanceLineup || catalogPosition || emptyLockedField || (captainMultiplier && !captainChecked);
     });
     document.querySelectorAll('[data-open-player-catalog],[data-clear-lineup-player]').forEach(button => {
-      button.disabled = locked || !state.catalog;
+      button.disabled = locked || negativeBalanceLineup || !state.catalog;
     });
     document.querySelectorAll('[data-toggle-points-sign]').forEach(button => {
-      button.disabled = locked || button.closest('.lineup-player-row')?.classList.contains('is-empty-position');
+      button.disabled = locked
+        || button.closest('.admin-player')?.classList.contains('is-negative-balance-no-score')
+        || button.closest('.lineup-player-row')?.classList.contains('is-empty-position');
     });
-    if ($('selectEmptyLineupSlot')) $('selectEmptyLineupSlot').disabled = locked;
+    if ($('selectEmptyLineupSlot')) $('selectEmptyLineupSlot').disabled = locked || negativeBalanceLineup;
     if ($('lineupParticipantSelect')) {
       $('lineupParticipantSelect').disabled = state.saving
         || state.matchdayLoading
         || state.matchdayLoadBlocked
         || state.copyingPreviousLineup;
     }
-    if ($('clearLineupButton')) $('clearLineupButton').disabled = locked;
+    if ($('clearLineupButton')) $('clearLineupButton').disabled = locked || negativeBalanceLineup;
     updateCopyPreviousLineupControl();
     $('lineupManagement')?.classList.toggle('is-locked', locked && state.published);
   }
@@ -2178,6 +2255,36 @@
     return Number.isFinite(value) ? value : '';
   }
 
+  function negativeBalanceCardForParticipant(name) {
+    const participant = state.participantIndex.get(name);
+    return participant
+      ? document.querySelector(`.admin-player[data-player-id="${participant.id}"]`)
+      : null;
+  }
+
+  function isNegativeBalanceParticipant(name) {
+    return negativeBalanceCardForParticipant(name)
+      ?.querySelector('[data-negative-balance-no-score]')
+      ?.checked === true;
+  }
+
+  function syncNegativeBalanceCard(card, { clearLineup = false } = {}) {
+    const checkbox = card?.querySelector('[data-negative-balance-no-score]');
+    const participant = state.participants.find(item => item.id === Number(card?.dataset.playerId));
+    const active = checkbox?.checked === true;
+    if (!card || !checkbox || !participant) return false;
+
+    card.classList.toggle('is-negative-balance-no-score', active);
+    if (active) {
+      card.querySelectorAll('.stat-input').forEach(input => {
+        input.value = '0';
+        if (input.dataset.stat === 'points') syncSignedPointsControl(input);
+      });
+      if (clearLineup) state.lineups.set(participant.name, []);
+    }
+    return active;
+  }
+
   function renderAdminPlayer(participant, row, subtitle) {
     const champions = isChampionsMode();
     const name = escapeHtml(participant.name);
@@ -2185,11 +2292,19 @@
     const playerId = Number(participant.id);
     const inputPrefix = champions ? 'champions' : 'league';
     const protectedAttributes = champions ? ' disabled aria-readonly="true"' : '';
+    const negativeBalance = row?.negative_balance_no_score === true;
     return `
-      <article class="admin-player${champions ? ' champions-admin-player' : ''}" data-player-id="${playerId}">
+      <article class="admin-player${champions ? ' champions-admin-player' : ''}${negativeBalance ? ' is-negative-balance-no-score' : ''}" data-player-id="${playerId}">
         <div class="admin-player-info">
           <img src="${shield}" alt="">
-          <span><b>${name}</b><small>${escapeHtml(subtitle)}</small></span>
+          <span class="admin-player-copy">
+            <b>${name}</b>
+            <small>${escapeHtml(subtitle)}</small>
+            <label class="negative-balance-option">
+              <input data-negative-balance-no-score type="checkbox"${negativeBalance ? ' checked' : ''}${champions ? ' disabled' : ''}>
+              <span>Saldo negativo · no puntúa</span>
+            </label>
+          </span>
         </div>
         <div class="stat-input-wrap has-sign-toggle${Number(fieldValue(row, 'points')) < 0 ? ' is-negative' : ''}" data-signed-points-control>
           <label for="${inputPrefix}-points-${playerId}">PTS</label>
@@ -2246,10 +2361,11 @@
   function gatherRows(published, allowIncomplete = false) {
     return [...document.querySelectorAll('.admin-player')].map(node => {
       const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
-      const points = inputNumberOrNull(node.querySelector('[data-stat="points"]'));
-      const goals = inputNumberOrNull(node.querySelector('[data-stat="goals"]'));
-      const cleanSheets = inputNumberOrNull(node.querySelector('[data-stat="clean_sheets"]'));
-      const redCards = inputNumberOrNull(node.querySelector('[data-stat="red_cards"]'));
+      const negativeBalanceNoScore = node.querySelector('[data-negative-balance-no-score]')?.checked === true;
+      const points = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="points"]'));
+      const goals = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="goals"]'));
+      const cleanSheets = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="clean_sheets"]'));
+      const redCards = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="red_cards"]'));
       if (!participant) throw new Error('No se pudo identificar uno de los participantes.');
       if (!allowIncomplete && (points === null || goals === null || cleanSheets === null || redCards === null)) {
         throw new Error(`Faltan datos de ${participant.name}.`);
@@ -2266,7 +2382,10 @@
         clean_sheets: cleanSheets,
         red_cards: redCards,
         has_postponed_matches: hasPostponedMatches(),
-        lineup: state.lineups.has(participant.name) ? state.lineups.get(participant.name) : null,
+        negative_balance_no_score: negativeBalanceNoScore,
+        lineup: negativeBalanceNoScore
+          ? []
+          : state.lineups.has(participant.name) ? state.lineups.get(participant.name) : null,
         published
       };
     });
@@ -2689,6 +2808,7 @@
         'clean_sheets',
         ...(includeRedCards ? ['red_cards'] : []),
         ...(includePostponed ? ['has_postponed_matches'] : []),
+          'negative_balance_no_score',
         'updated_at'
       ].join(',');
       result = await state.client
@@ -2826,6 +2946,7 @@
           'clean_sheets',
           ...(includeRedCards ? ['red_cards'] : []),
           ...(includePostponed ? ['has_postponed_matches'] : []),
+          'negative_balance_no_score',
           ...(includeLineup ? ['lineup'] : []),
           ...(includePublished ? ['published'] : []),
           'updated_at'
@@ -4257,6 +4378,26 @@
       updateLineupSummary();
       updateCompletionState();
       scheduleAutoSave();
+    });
+    $('playerRows').addEventListener('change', event => {
+      const checkbox = event.target.closest('[data-negative-balance-no-score]');
+      if (!checkbox) return;
+      const card = checkbox.closest('.admin-player');
+      const participant = state.participants.find(item => item.id === Number(card?.dataset.playerId));
+      if (!card || !participant) return;
+      const active = syncNegativeBalanceCard(card, { clearLineup: checkbox.checked });
+      if (participant.name === state.lineupParticipantName) renderLineupEditor();
+      else {
+        updateLineupProgress();
+        syncInputLock();
+      }
+      updateTotals();
+      updateLineupSummary();
+      updateCompletionState();
+      scheduleAutoSave();
+      flashMessage(active
+        ? participant.name + ' quedó exento por saldo negativo: todo se guardará en 0.'
+        : 'Se quitó el saldo negativo de ' + participant.name + '. Completa sus estadísticas y alineación.');
     });
     $('playerRows').addEventListener('click', event => {
       const signToggle = event.target.closest('[data-toggle-points-sign]');
