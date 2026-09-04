@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '161-20260903-access';
+  const VERSION = '162-20260904-mister-import';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -9,6 +9,8 @@
   const PARTICIPANT_ENTRY_MODE_KEY = 'cuban-admin-participant-entry-mode';
   const ACTIVE_PARTICIPANT_PREFIX = 'cuban-admin-active-participant:';
   const AUTO_SAVE_DELAY = 900;
+  const MISTER_HELPER_URL = 'https://ernestoperezfraga911024.github.io/Cuban-league/mister-import-helper.js?v=162';
+  const MISTER_HELPER_BOOKMARKLET = "javascript:(()=>{if(window.__CUBAN_LEAGUE_MISTER_IMPORT_RUNNING__)return;const s=document.createElement('script');s.src='" + MISTER_HELPER_URL + "&t='+Date.now();document.documentElement.appendChild(s)})()";
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
   const state = {
@@ -39,6 +41,9 @@
     previewOpen: false,
     previewReturnFocus: null,
     messageTimer: null,
+    misterImportRequest: null,
+    misterImportPollTimer: null,
+    misterImportBusy: false,
     deferredInstallPrompt: null,
     autoSaveTimer: null,
     autoSaveInFlight: false,
@@ -184,6 +189,351 @@
 
   function currentCompetitionLabel() {
     return isChampionsMode() ? 'Champions' : 'Liga';
+  }
+
+
+  function misterGameweekForMatchday(matchday = state.matchday) {
+    const value = Number(matchday);
+    if (!Number.isInteger(value) || value < 1 || value > 38) return null;
+    if (config.season !== '2026/27') return null;
+    return value === 1 ? 3968 : 4041 + value;
+  }
+
+  function misterManagerKey(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '');
+  }
+
+  function setMisterImportStatus(message, tone = '') {
+    const panel = $('misterImportPanel');
+    const status = $('misterImportStatus');
+    if (!panel || !status) return;
+    status.textContent = message;
+    panel.classList.toggle('is-error', tone === 'error');
+    panel.classList.toggle('is-success', tone === 'success');
+  }
+
+  function syncMisterImportUI() {
+    const button = $('importMisterButton');
+    if (!button) return;
+    $('importMisterMatchday').textContent = state.matchday;
+    button.disabled = state.misterImportBusy
+      || state.saving
+      || state.matchdayLoading
+      || state.matchdayLoadBlocked
+      || state.copyingPreviousLineup
+      || isChampionsMode()
+      || !state.catalog
+      || !state.lineupSchemaReady
+      || !state.catalogSchemaReady
+      || !misterGameweekForMatchday();
+    button.querySelector('span').innerHTML = state.misterImportBusy
+      ? 'Importando Jornada <b>' + state.matchday + '</b>…'
+      : 'Importar Jornada <b id="importMisterMatchday">' + state.matchday + '</b> desde Mister';
+  }
+
+  function clearMisterImportPoll() {
+    clearTimeout(state.misterImportPollTimer);
+    state.misterImportPollTimer = null;
+  }
+
+  async function cancelMisterImport({ silent = false, keepPanel = false } = {}) {
+    clearMisterImportPoll();
+    const active = state.misterImportRequest;
+    state.misterImportRequest = null;
+    state.misterImportBusy = false;
+    syncMisterImportUI();
+    if (active?.requestId && state.client) {
+      await state.client.rpc('cancel_mister_import_request', {
+        p_request_id: active.requestId
+      }).catch(() => null);
+    }
+    if (!keepPanel) $('misterImportPanel').hidden = true;
+    if (!silent) setMisterImportStatus('Importación cancelada. No se guardó ni publicó nada.');
+  }
+
+  async function copyMisterHelper() {
+    try {
+      await navigator.clipboard.writeText(MISTER_HELPER_BOOKMARKLET);
+    } catch {
+      const input = document.createElement('textarea');
+      input.value = MISTER_HELPER_BOOKMARKLET;
+      input.setAttribute('readonly', '');
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      input.remove();
+    }
+    $('misterHelperCopyStatus').textContent = 'Ayudante copiado. Crea un marcador llamado “Enviar a Cuban League” y pega el contenido como dirección.';
+  }
+
+  function validateIntegerStat(value, label, managerName) {
+    const number = Number(value);
+    if (!Number.isInteger(number) || number < 0) {
+      throw new Error(label + ' no válido para ' + managerName + '.');
+    }
+    return number;
+  }
+
+  function normalizeMisterPayload(payload, expectedGameweekId) {
+    if (!state.catalog) throw new Error('El Catálogo Maestro de jugadores no está disponible.');
+    if (!payload || Number(payload.schemaVersion) !== 1
+        || payload.source !== 'mister.mundodeportivo.com'
+        || Number(payload.matchday) !== state.matchday
+        || Number(payload.gameweekId) !== expectedGameweekId
+        || !Array.isArray(payload.managers)
+        || payload.managers.length !== state.participants.length) {
+      throw new Error('La captura no corresponde a esta jornada o está incompleta.');
+    }
+
+    const participantByKey = new Map();
+    state.participants.forEach(participant => {
+      const key = misterManagerKey(participant.name);
+      if (!key || participantByKey.has(key)) throw new Error('Hay participantes duplicados en Cuban League.');
+      participantByKey.set(key, participant);
+    });
+
+    const managerByParticipant = new Map();
+    payload.managers.forEach(manager => {
+      const participant = participantByKey.get(misterManagerKey(manager?.name));
+      if (!participant) throw new Error('El participante de Mister “' + String(manager?.name || 'sin nombre') + '” no existe en Cuban League.');
+      if (managerByParticipant.has(participant.name)) throw new Error('Mister devolvió dos veces a ' + participant.name + '.');
+      managerByParticipant.set(participant.name, manager);
+    });
+    const missing = state.participants.filter(participant => !managerByParticipant.has(participant.name));
+    if (missing.length) throw new Error('Faltan participantes: ' + missing.map(item => item.name).join(', ') + '.');
+
+    const misterClubMap = new Map();
+    payload.managers.flatMap(manager => Array.isArray(manager?.lineup) ? manager.lineup : []).forEach(player => {
+      const resolved = state.catalog.resolve({ playerName: player?.playerName });
+      const misterClubId = String(player?.misterClubId || '');
+      if (!resolved || !misterClubId) return;
+      const previous = misterClubMap.get(misterClubId);
+      if (previous && previous !== resolved.clubId) {
+        throw new Error('Mister devolvió un club contradictorio para ' + String(player?.playerName || 'un jugador') + '.');
+      }
+      misterClubMap.set(misterClubId, resolved.clubId);
+    });
+
+    return state.participants.map(participant => {
+      const manager = managerByParticipant.get(participant.name);
+      if (!Array.isArray(manager?.lineup) || manager.lineup.length !== 11) {
+        throw new Error('La alineación de ' + participant.name + ' no tiene exactamente 11 jugadores.');
+      }
+      const seenMisterPlayers = new Set();
+      const lineup = manager.lineup.map((rawPlayer, index) => {
+        const misterPlayerId = String(rawPlayer?.misterPlayerId || '');
+        if (!misterPlayerId || seenMisterPlayers.has(misterPlayerId)) {
+          throw new Error('La alineación de ' + participant.name + ' contiene un jugador repetido o sin identidad.');
+        }
+        seenMisterPlayers.add(misterPlayerId);
+        const mappedClubId = misterClubMap.get(String(rawPlayer?.misterClubId || '')) || '';
+        const catalogPlayer = state.catalog.resolve({
+          playerName: rawPlayer?.playerName,
+          clubId: mappedClubId
+        });
+        if (!catalogPlayer) {
+          throw new Error('No se pudo relacionar “' + String(rawPlayer?.playerName || 'jugador sin nombre') + '” de ' + participant.name + ' con el Catálogo Maestro.');
+        }
+        const position = String(rawPlayer?.position || '').toUpperCase();
+        if (!['PT', 'DF', 'MC', 'DL'].includes(position) || catalogPlayer.position !== position) {
+          throw new Error('La posición de ' + catalogPlayer.displayName + ' no coincide entre Mister y el catálogo.');
+        }
+        const displayedPoints = Number(rawPlayer?.displayedPoints);
+        if (!Number.isFinite(displayedPoints) || Math.abs(displayedPoints * 2 - Math.round(displayedPoints * 2)) > 0.0001) {
+          throw new Error('Los puntos de ' + catalogPlayer.displayName + ' no son válidos.');
+        }
+        if (rawPlayer?.didPlay === false && displayedPoints !== 0) {
+          throw new Error('Un jugador marcado con “—” debe tener 0 puntos.');
+        }
+        const isCaptain = rawPlayer?.isCaptain === true;
+        const multiplier = Number(rawPlayer?.captainMultiplier);
+        if (isCaptain && !validCaptainMultiplier(multiplier)) {
+          throw new Error('El multiplicador del capitán de ' + participant.name + ' no es válido.');
+        }
+        return {
+          slot_number: index + 1,
+          player_id: catalogPlayer.id,
+          player_name: catalogPlayer.displayName,
+          club_id: catalogPlayer.clubId,
+          club_name: catalogPlayer.clubName,
+          position: catalogPlayer.position,
+          displayed_points: displayedPoints,
+          is_captain: isCaptain,
+          captain_multiplier: isCaptain ? multiplier : 1
+        };
+      });
+
+      const points = Number(manager.points);
+      if (!Number.isInteger(points)) throw new Error('Los puntos totales de ' + participant.name + ' no son un entero válido.');
+      const metrics = lineupMetrics(lineup);
+      if (!metrics.complete) {
+        throw new Error('Alineación no válida de ' + participant.name + ': ' + metrics.issues.join(' · ') + '.');
+      }
+      if (Math.abs(metrics.total - points) > 0.01) {
+        throw new Error('El XI de ' + participant.name + ' suma ' + metrics.total + ' puntos, pero Mister muestra ' + points + '.');
+      }
+
+      return {
+        participant,
+        points,
+        goals: validateIntegerStat(manager.goals, 'Total de goles', participant.name),
+        cleanSheets: validateIntegerStat(manager.cleanSheets, 'Total de clean sheets', participant.name),
+        redCards: validateIntegerStat(manager.redCards, 'Total de tarjetas rojas', participant.name),
+        lineup
+      };
+    });
+  }
+
+  function applyMisterRows(rows) {
+    if (state.published && !state.editingPublished) startCorrection();
+    clearTimeout(state.autoSaveTimer);
+    state.autoSaveRevision += 1;
+    rows.forEach(imported => {
+      const card = document.querySelector('.admin-player[data-player-id="' + imported.participant.id + '"]');
+      if (!card) throw new Error('No se encontró el formulario de ' + imported.participant.name + '.');
+      const values = {
+        points: imported.points,
+        goals: imported.goals,
+        clean_sheets: imported.cleanSheets,
+        red_cards: imported.redCards
+      };
+      Object.entries(values).forEach(([field, value]) => {
+        const input = card.querySelector('[data-stat="' + field + '"]');
+        if (!input) throw new Error('Falta el campo ' + field + ' de ' + imported.participant.name + '.');
+        input.value = String(value);
+        if (field === 'points') syncSignedPointsControl(input);
+      });
+      state.lineups.set(imported.participant.name, normalizeLineupPlayers(imported.lineup));
+    });
+    state.hasDraft = true;
+    renderLineupEditor();
+    updateTotals();
+    updateLineupSummary();
+    updateCompletionState();
+    markDirty(true, 'Datos de Mister listos para guardar…');
+  }
+
+  async function finishMisterImport(payload, request) {
+    try {
+      setMisterImportStatus('Validando los 20 participantes y sus alineaciones…');
+      const rows = normalizeMisterPayload(payload, request.gameweekId);
+      applyMisterRows(rows);
+      setMisterImportStatus('Datos verificados. Guardando el borrador en Supabase…');
+      const saved = await persistDraft({ manual: true });
+      if (!saved) throw new Error('Los datos se cargaron en pantalla, pero el borrador no pudo sincronizarse. Usa “Guardar ahora” para reintentarlo.');
+
+      await state.client.rpc('consume_mister_import_request', {
+        p_request_id: request.requestId
+      }).catch(() => null);
+      state.misterImportRequest = null;
+      state.misterImportBusy = false;
+      clearMisterImportPoll();
+      syncMisterImportUI();
+      $('cancelMisterImportButton').textContent = 'Cerrar';
+      setMisterImportStatus(
+        'Jornada ' + state.matchday + ' importada y guardada como borrador: ' + rows.length + ' participantes. La web pública no cambió.',
+        'success'
+      );
+      flashMessage('Importación completada. La Jornada ' + state.matchday + ' quedó en borrador; tú decides cuándo publicarla.');
+    } catch (error) {
+      state.misterImportBusy = false;
+      clearMisterImportPoll();
+      syncMisterImportUI();
+      $('cancelMisterImportButton').textContent = 'Cerrar';
+      setMisterImportStatus(String(error?.message || error || 'No se pudo guardar la importación.'), 'error');
+      flashMessage(String(error?.message || error || 'No se pudo guardar la importación.'), 'error');
+    }
+  }
+
+  async function pollMisterImport(request) {
+    if (!state.misterImportRequest || state.misterImportRequest.requestId !== request.requestId) return;
+    const { data, error } = await state.client.rpc('get_mister_import_request', {
+      p_request_id: request.requestId
+    });
+    if (!state.misterImportRequest || state.misterImportRequest.requestId !== request.requestId) return;
+    if (error) {
+      state.misterImportBusy = false;
+      syncMisterImportUI();
+      setMisterImportStatus(friendlyError(error), 'error');
+      return;
+    }
+    if (data?.status === 'ready' && data.payload) {
+      await finishMisterImport(data.payload, request);
+      return;
+    }
+    if (['failed', 'expired', 'cancelled'].includes(data?.status)) {
+      state.misterImportRequest = null;
+      state.misterImportBusy = false;
+      syncMisterImportUI();
+      $('cancelMisterImportButton').textContent = 'Cerrar';
+      setMisterImportStatus(data?.error || 'La importación no pudo completarse.', 'error');
+      return;
+    }
+    setMisterImportStatus('Esperando la captura de Mister para la Jornada ' + state.matchday + '…');
+    state.misterImportPollTimer = setTimeout(() => pollMisterImport(request), 2000);
+  }
+
+  async function startMisterImport() {
+    if (state.misterImportBusy || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || isChampionsMode()) return;
+    const gameweekId = misterGameweekForMatchday();
+    if (!gameweekId) {
+      flashMessage('Todavía no está configurado el calendario de Mister para esta temporada.', 'error');
+      return;
+    }
+    if (!state.catalog || !state.lineupSchemaReady || !state.catalogSchemaReady) {
+      flashMessage('La importación necesita el Catálogo Maestro y el guardado de alineaciones activos.', 'error');
+      return;
+    }
+    if (state.dirty && !window.confirm('Esta importación sustituirá los datos todavía no guardados de la Jornada ' + state.matchday + '. ¿Continuar?')) return;
+
+    await cancelMisterImport({ silent: true, keepPanel: true });
+    state.misterImportBusy = true;
+    syncMisterImportUI();
+    $('misterImportPanel').hidden = false;
+    $('cancelMisterImportButton').textContent = 'Cancelar';
+    $('misterHelperCopyStatus').textContent = '';
+    setMisterImportStatus('Creando un enlace seguro de un solo uso…');
+    $('misterImportPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const { data, error } = await state.client.rpc('start_mister_import', {
+      p_season: currentSeasonKey(),
+      p_matchday: state.matchday,
+      p_gameweek_id: gameweekId
+    });
+    if (error || !data?.requestId || !data?.token) {
+      state.misterImportBusy = false;
+      syncMisterImportUI();
+      setMisterImportStatus(friendlyError(error || new Error('No se pudo iniciar la importación.')), 'error');
+      return;
+    }
+
+    const misterUrl = new URL('https://mister.mundodeportivo.com/standings');
+    misterUrl.searchParams.set('gw', String(gameweekId));
+    misterUrl.searchParams.set('cuban_request', String(data.requestId));
+    misterUrl.searchParams.set('cuban_token', String(data.token));
+    misterUrl.searchParams.set('cuban_matchday', String(state.matchday));
+    const request = {
+      requestId: String(data.requestId),
+      gameweekId,
+      matchday: state.matchday,
+      expiresAt: String(data.expiresAt || '')
+    };
+    state.misterImportRequest = request;
+    $('openMisterImportLink').href = misterUrl.toString();
+    setMisterImportStatus('Enlace listo. Abre Mister y pulsa allí el marcador “Enviar a Cuban League”.');
+    window.open(misterUrl.toString(), '_blank', 'noopener,noreferrer');
+    pollMisterImport(request);
+  }
+
+  function setupMisterImportControls() {
+    $('misterHelperBookmark').href = MISTER_HELPER_BOOKMARKLET;
+    syncMisterImportUI();
   }
 
   function currentMatchdayCount() {
@@ -1470,7 +1820,8 @@
       $('previousParticipantButton'),
       $('nextParticipantButton'),
       $('nextPendingParticipantButton'),
-      $('copyPreviousLineupButton')
+      $('copyPreviousLineupButton'),
+      $('importMisterButton')
     ].filter(Boolean).forEach(button => {
       button.disabled = busy;
     });
@@ -1716,6 +2067,7 @@
 
   function syncPublicationUI() {
     const locked = state.published && !state.editingPublished;
+    syncMisterImportUI();
     const badge = $('publicationBadge');
 
     if (isChampionsMode()) {
@@ -2773,6 +3125,7 @@
   }
 
   async function prepareNavigation() {
+    if (state.misterImportRequest) await cancelMisterImport({ silent: true });
     if (!state.dirty) return;
     await flushAutoSave();
   }
@@ -3763,6 +4116,9 @@
     $('leagueModeButton').addEventListener('click', () => switchCompetition('league'));
     $('championsModeButton').addEventListener('click', () => switchCompetition('champions'));
     $('goToChampionsSourceButton').addEventListener('click', goToChampionsSourceMatchday);
+    $('importMisterButton').addEventListener('click', startMisterImport);
+    $('copyMisterHelperButton').addEventListener('click', copyMisterHelper);
+    $('cancelMisterImportButton').addEventListener('click', () => cancelMisterImport());
     $('saveDraftButton').addEventListener('click', () => {
       if (state.participantEntryMode === 'single') saveDraftAndContinue();
       else persistDraft({ manual: true });
@@ -3916,6 +4272,7 @@
       else if (event.key === 'Escape' && !$('playerCatalogModal').hidden) closePlayerCatalog();
       else if (event.key === 'Escape' && !$('previewModal').hidden) closePreview();
       else if (event.key === 'Escape' && !$('adminInstallModal').hidden) closeInstallGuide();
+      else if (event.key === 'Escape' && !$('misterImportPanel').hidden) cancelMisterImport();
     });
 
     window.addEventListener('beforeunload', event => {
@@ -3996,6 +4353,7 @@
       });
       bindEvents();
       setupInstallableAdmin();
+      setupMisterImportControls();
 
       state.client.auth.onAuthStateChange((event, session) => {
         if (event === 'PASSWORD_RECOVERY' && session) {
