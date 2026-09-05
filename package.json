@@ -1,0 +1,1 @@
+{"name":"cuban-league-import-checks","version":"1.0.0","private":true,"scripts":{"test":"node --test tests/*.test.cjs","package:extension":"python3 scripts/package-mister-extension.py"},"devDependencies":{"jsdom":"26.1.0"}}

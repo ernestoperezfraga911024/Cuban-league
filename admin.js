@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '163-20260904-negative-balance';
+  const VERSION = '164-20260905-mister-extension';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -9,8 +9,6 @@
   const PARTICIPANT_ENTRY_MODE_KEY = 'cuban-admin-participant-entry-mode';
   const ACTIVE_PARTICIPANT_PREFIX = 'cuban-admin-active-participant:';
   const AUTO_SAVE_DELAY = 900;
-  const MISTER_HELPER_URL = 'https://ernestoperezfraga911024.github.io/Cuban-league/mister-import-helper.js?v=163';
-  const MISTER_HELPER_BOOKMARKLET = "javascript:(()=>{if(window.__CUBAN_LEAGUE_MISTER_IMPORT_RUNNING__)return;const s=document.createElement('script');s.src='" + MISTER_HELPER_URL + "&t='+Date.now();document.documentElement.appendChild(s)})()";
   const config = window.CUBAN_LEAGUE_SUPABASE;
   const $ = id => document.getElementById(id);
   const state = {
@@ -192,97 +190,90 @@
   }
 
 
-  function misterGameweekForMatchday(matchday = state.matchday) {
-    const value = Number(matchday);
-    if (!Number.isInteger(value) || value < 1 || value > 38) return null;
-    if (config.season !== '2026/27') return null;
-    return value === 1 ? 3968 : 4041 + value;
+  const MISTER_LEAGUE_ID = '649733';
+  const MISTER_SESSION_KEY = 'cuban-mister-active-import';
+  const importCore = window.CubanMisterImportCore;
+  const extensionCalls = new Map();
+  window.addEventListener('message', event => {
+    if (event.source !== window || event.origin !== location.origin || event.data?.channel !== 'cuban-mister-extension-v1') return;
+    const pending = extensionCalls.get(event.data.id);
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    extensionCalls.delete(event.data.id);
+    if (event.data.ok) pending.resolve(event.data);
+    else pending.reject(new Error(event.data.error || 'La extensión no pudo completar la operación.'));
+  });
+
+  function extensionCall(type, input = {}) {
+    return new Promise((resolve, reject) => {
+      const id = crypto.randomUUID();
+      const timer = setTimeout(() => {
+        extensionCalls.delete(id);
+        reject(new Error('No se detecta la extensión. Instálala y recarga esta página.'));
+      }, 8000);
+      extensionCalls.set(id, {resolve, reject, timer});
+      window.postMessage({channel:'cuban-mister-panel-v1',id,type,input}, location.origin);
+    });
   }
 
-  function misterManagerKey(value) {
-    return String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '');
+  function misterManagerKey(value) { return importCore.key(value); }
+  function misterBaselineKey() { return 'cuban-mister-baseline:' + currentSeasonKey() + ':' + state.matchday; }
+  function misterBindingKey() { return 'cuban-mister-participants:' + currentSeasonKey() + ':' + MISTER_LEAGUE_ID; }
+  function readImportJSON(key, storage = localStorage) {
+    try { return JSON.parse(storage.getItem(key) || 'null'); } catch { return null; }
   }
-
   function setMisterImportStatus(message, tone = '') {
     const panel = $('misterImportPanel');
-    const status = $('misterImportStatus');
-    if (!panel || !status) return;
-    status.textContent = message;
+    if (!panel) return;
+    $('misterImportStatus').textContent = message;
     panel.classList.toggle('is-error', tone === 'error');
     panel.classList.toggle('is-success', tone === 'success');
   }
-
   function syncMisterImportUI() {
     const button = $('importMisterButton');
     if (!button) return;
-    button.disabled = state.misterImportBusy
-      || state.saving
-      || state.matchdayLoading
-      || state.matchdayLoadBlocked
-      || state.copyingPreviousLineup
-      || isChampionsMode()
-      || !state.catalog
-      || !state.lineupSchemaReady
-      || !state.catalogSchemaReady
-      || !misterGameweekForMatchday();
-    button.querySelector('span').innerHTML = state.misterImportBusy
-      ? 'Importando Jornada <b id="importMisterMatchday">' + state.matchday + '</b>…'
-      : 'Importar Jornada <b id="importMisterMatchday">' + state.matchday + '</b> desde Mister';
+    button.disabled = state.misterImportBusy || state.saving || state.matchdayLoading || state.matchdayLoadBlocked
+      || state.copyingPreviousLineup || isChampionsMode() || !state.catalog || !state.lineupSchemaReady || !state.catalogSchemaReady;
+    button.querySelector('span').textContent = (state.misterImportBusy ? 'Importando Jornada ' : 'Importar Jornada ')
+      + state.matchday + (state.misterImportBusy ? '…' : ' desde Mister');
+    if (state.misterImportBusy) {
+      $('matchdaySelect').disabled = true;
+      $('publishButton').disabled = true;
+      $('leagueModeButton').disabled = true;
+      $('championsModeButton').disabled = true;
+    }
   }
-
-  function clearMisterImportPoll() {
-    clearTimeout(state.misterImportPollTimer);
-    state.misterImportPollTimer = null;
-  }
-
-  async function cancelMisterImport({ silent = false, keepPanel = false } = {}) {
+  function clearMisterImportPoll() { clearTimeout(state.misterImportPollTimer); state.misterImportPollTimer = null; }
+  async function cancelMisterImport({silent = false, keepPanel = false} = {}) {
+    if (state.misterImportSaving) return;
+    state.misterImportAttempt = null;
     clearMisterImportPoll();
-    const active = state.misterImportRequest;
+    const request = state.misterImportRequest;
     state.misterImportRequest = null;
+    state.misterImportPending = null;
     state.misterImportBusy = false;
+    sessionStorage.removeItem(MISTER_SESSION_KEY);
+    $('misterImportReview').hidden = true;
     syncMisterImportUI();
+    syncPublicationUI();
     if (!keepPanel) $('misterImportPanel').hidden = true;
-    if (!silent) setMisterImportStatus('Importación cancelada. No se guardó ni publicó nada.');
-    if (active?.requestId && state.client) {
-      Promise.resolve(state.client.rpc('cancel_mister_import_request', {
-        p_request_id: active.requestId
-      })).catch(() => null);
-    }
+    if (!silent) setMisterImportStatus('Lectura cancelada. Se conserva el borrador que ya estuviera guardado.');
+    if (request?.requestId) await extensionCall('CANCEL', {id:request.requestId}).catch(() => {});
   }
-
-  async function copyMisterHelper() {
-    try {
-      await navigator.clipboard.writeText(MISTER_HELPER_BOOKMARKLET);
-    } catch {
-      const input = document.createElement('textarea');
-      input.value = MISTER_HELPER_BOOKMARKLET;
-      input.setAttribute('readonly', '');
-      input.style.position = 'fixed';
-      input.style.opacity = '0';
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      input.remove();
-    }
-    $('misterHelperCopyStatus').textContent = 'Ayudante copiado. Crea un marcador llamado “Enviar a Cuban League” y pega el contenido como dirección.';
-  }
-
+  function copyMisterHelper() { window.open('./mister-extension-install.html', '_blank', 'noopener'); }
   function validateIntegerStat(value, label, managerName) {
-    const number = Number(value);
-    if (!Number.isInteger(number) || number < 0) {
-      throw new Error(label + ' no válido para ' + managerName + '.');
-    }
-    return number;
+    if (value === null) return null; // An unavailable statistic stays visibly incomplete in a draft.
+    const n = importCore.number(value);
+    if (!Number.isInteger(n) || n < 0) throw new Error(label + ' no válido para ' + managerName + '.');
+    return n;
   }
 
   function normalizeMisterPayload(payload, expectedGameweekId) {
     if (!state.catalog) throw new Error('El Catálogo Maestro de jugadores no está disponible.');
-    if (!payload || Number(payload.schemaVersion) !== 2
+    if (!payload || Number(payload.schemaVersion) !== 3
         || payload.source !== 'mister.mundodeportivo.com'
+        || payload.season !== currentSeasonKey()
+        || payload.league?.id !== MISTER_LEAGUE_ID
         || Number(payload.matchday) !== state.matchday
         || Number(payload.gameweekId) !== expectedGameweekId
         || !Array.isArray(payload.managers)
@@ -297,9 +288,13 @@
       participantByKey.set(key, participant);
     });
 
+    const bindings = readImportJSON(misterBindingKey()) || {};
     const managerByParticipant = new Map();
     payload.managers.forEach(manager => {
-      const participant = participantByKey.get(misterManagerKey(manager?.name));
+      const boundName = bindings[String(manager?.misterManagerId || '')];
+      const participant = boundName
+        ? state.participants.find(p => p.name === boundName)
+        : participantByKey.get(misterManagerKey(manager?.name));
       if (!participant) throw new Error('El participante de Mister “' + String(manager?.name || 'sin nombre') + '” no existe en Cuban League.');
       if (managerByParticipant.has(participant.name)) throw new Error('Mister devolvió dos veces a ' + participant.name + '.');
       managerByParticipant.set(participant.name, manager);
@@ -348,6 +343,11 @@
       }
       const seenMisterPlayers = new Set();
       const lineup = manager.lineup.map((rawPlayer, index) => {
+        if (rawPlayer?.isEmpty === true) {
+          if (rawPlayer.displayedPoints !== -4 || rawPlayer.isCaptain || !['PT','DF','MC','DL'].includes(rawPlayer.position)) throw new Error('Posición vacía no válida.');
+          return {slot_number:index+1,player_id:lineupEmptyPlayerId(index+1),player_name:LINEUP_EMPTY_PLAYER_NAME,
+            club_id:'',club_name:LINEUP_EMPTY_CLUB_NAME,position:rawPlayer.position,displayed_points:-4,is_captain:false,captain_multiplier:1};
+        }
         const misterPlayerId = String(rawPlayer?.misterPlayerId || '');
         if (!misterPlayerId || seenMisterPlayers.has(misterPlayerId)) {
           throw new Error('La alineación de ' + participant.name + ' contiene un jugador repetido o sin identidad.');
@@ -365,8 +365,8 @@
         if (!['PT', 'DF', 'MC', 'DL'].includes(position) || catalogPlayer.position !== position) {
           throw new Error('La posición de ' + catalogPlayer.displayName + ' no coincide entre Mister y el catálogo.');
         }
-        const displayedPoints = Number(rawPlayer?.displayedPoints);
-        if (!Number.isFinite(displayedPoints) || Math.abs(displayedPoints * 2 - Math.round(displayedPoints * 2)) > 0.0001) {
+        const displayedPoints = importCore.number(rawPlayer?.displayedPoints);
+        if (displayedPoints === null || !Number.isFinite(displayedPoints) || Math.abs(displayedPoints * 2 - Math.round(displayedPoints * 2)) > 0.0001) {
           throw new Error('Los puntos de ' + catalogPlayer.displayName + ' no son válidos.');
         }
         if (rawPlayer?.didPlay === false && displayedPoints !== 0) {
@@ -390,15 +390,14 @@
         };
       });
 
-      const points = Number(manager.points);
+      const points = importCore.number(manager.points);
       if (!Number.isInteger(points)) throw new Error('Los puntos totales de ' + participant.name + ' no son un entero válido.');
       const metrics = lineupMetrics(lineup);
       if (!metrics.complete) {
         throw new Error('Alineación no válida de ' + participant.name + ': ' + metrics.issues.join(' · ') + '.');
       }
-      if (Math.abs(metrics.total - points) > 0.01) {
-        throw new Error('El XI de ' + participant.name + ' suma ' + metrics.total + ' puntos, pero Mister muestra ' + points + '.');
-      }
+      // Preserve the official table total and visible cards separately. Differences
+      // remain visible in the capture report and lineup editor for manual review.
 
       return {
         participant,
@@ -432,7 +431,7 @@
       Object.entries(values).forEach(([field, value]) => {
         const input = card.querySelector('[data-stat="' + field + '"]');
         if (!input) throw new Error('Falta el campo ' + field + ' de ' + imported.participant.name + '.');
-        input.value = String(value);
+        input.value = value === null ? '' : String(value);
         if (field === 'points') syncSignedPointsControl(input);
       });
       state.lineups.set(
@@ -449,121 +448,204 @@
     markDirty(true, 'Datos de Mister listos para guardar…');
   }
 
-  async function finishMisterImport(payload, request) {
-    try {
-      setMisterImportStatus('Validando los 20 participantes y sus alineaciones…');
-      const rows = normalizeMisterPayload(payload, request.gameweekId);
-      applyMisterRows(rows);
-      setMisterImportStatus('Datos verificados. Guardando el borrador en Supabase…');
-      const saved = await persistDraft({ manual: true });
-      if (!saved) throw new Error('Los datos se cargaron en pantalla, pero el borrador no pudo sincronizarse. Usa “Guardar ahora” para reintentarlo.');
-
-      await state.client.rpc('consume_mister_import_request', {
-        p_request_id: request.requestId
-      }).catch(() => null);
-      state.misterImportRequest = null;
-      state.misterImportBusy = false;
-      clearMisterImportPoll();
-      syncMisterImportUI();
-      $('cancelMisterImportButton').textContent = 'Cerrar';
-      setMisterImportStatus(
-        'Jornada ' + state.matchday + ' importada y guardada como borrador: ' + rows.length + ' participantes. La web pública no cambió.',
-        'success'
-      );
-      flashMessage('Importación completada. La Jornada ' + state.matchday + ' quedó en borrador; tú decides cuándo publicarla.');
-    } catch (error) {
-      state.misterImportBusy = false;
-      clearMisterImportPoll();
-      syncMisterImportUI();
-      $('cancelMisterImportButton').textContent = 'Cerrar';
-      setMisterImportStatus(String(error?.message || error || 'No se pudo guardar la importación.'), 'error');
-      flashMessage(String(error?.message || error || 'No se pudo guardar la importación.'), 'error');
-    }
+  function importedRowData(row) {
+    return {participant_name:row.participant.name,points:row.points,goals:row.goals,clean_sheets:row.cleanSheets,
+      red_cards:row.redCards,negative_balance_no_score:row.negativeBalanceNoScore,lineup:row.lineup};
   }
-
-  async function pollMisterImport(request) {
-    if (!state.misterImportRequest || state.misterImportRequest.requestId !== request.requestId) return;
-    const { data, error } = await state.client.rpc('get_mister_import_request', {
-      p_request_id: request.requestId
+  function importFingerprint() {
+    return JSON.stringify({rows:gatherRows(false,true).map(importCore.canonical),milestone:gatherMilestone(),pending:hasPostponedMatches()});
+  }
+  function isCurrentImport(request) {
+    return state.misterImportRequest?.requestId === request.requestId && state.matchday === request.matchday
+      && currentSeasonKey() === request.season && !isChampionsMode();
+  }
+  function displayMisterReview(payload, rows, request) {
+    const current = new Map(gatherRows(false,true).map(row => [row.participant_name,row]));
+    const baseline = readImportJSON(misterBaselineKey()) || {};
+    const conflicts = rows.filter(row => importCore.conflict(current.get(row.participant.name), importedRowData(row),
+      baseline[row.participant.name], request.protectExisting || request.startFingerprint !== importFingerprint()));
+    const messages = Array.isArray(payload.warnings) ? payload.warnings.map(String) : [];
+    $('misterImportDetails').textContent = 'Captura: ' + new Date(payload.capturedAt).toLocaleString('es')
+      + ' · ' + (payload.provisional ? 'Provisional' : 'Revisar antes de publicar')
+      + (messages.length ? '\n' + messages.join('\n') : '\nSin incidencias detectadas en la captura.');
+    state.misterImportPending = {payload,rows,request,fingerprint:importFingerprint()};
+    const list = $('misterImportConflicts');
+    list.replaceChildren();
+    conflicts.forEach(row => {
+      const name = row.participant.name;
+      const existing = current.get(name);
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.dataset.misterUseIncoming = name;
+      const summary = document.createElement('span');
+      const shown = value => value === null || value === undefined ? 'pendiente' : value;
+      summary.textContent = name + ': usar datos de Mister (PTS ' + shown(existing?.points) + ' → ' + shown(row.points)
+        + ', G ' + shown(existing?.goals) + ' → ' + shown(row.goals) + ', CS ' + shown(existing?.clean_sheets)
+        + ' → ' + shown(row.cleanSheets) + ', TR ' + shown(existing?.red_cards) + ' → ' + shown(row.redCards)
+        + '; incluye XI y capitán). Sin marcar: conservar borrador.';
+      label.append(checkbox,summary);
+      list.append(label);
     });
-    if (!state.misterImportRequest || state.misterImportRequest.requestId !== request.requestId) return;
-    if (error) {
-      state.misterImportBusy = false;
-      syncMisterImportUI();
-      setMisterImportStatus(friendlyError(error), 'error');
-      return;
+    $('misterImportReview').hidden = conflicts.length === 0;
+    if (conflicts.length) {
+      setMisterImportStatus('Hay ' + conflicts.length + ' participantes con datos propios o un borrador anterior. Revisa qué conservar.');
+      return false;
     }
-    if (data?.status === 'ready' && data.payload) {
-      await finishMisterImport(data.payload, request);
-      return;
-    }
-    if (['failed', 'expired', 'cancelled'].includes(data?.status)) {
-      state.misterImportRequest = null;
-      state.misterImportBusy = false;
-      syncMisterImportUI();
-      $('cancelMisterImportButton').textContent = 'Cerrar';
-      setMisterImportStatus(data?.error || 'La importación no pudo completarse.', 'error');
-      return;
-    }
-    setMisterImportStatus('Esperando la captura de Mister para la Jornada ' + state.matchday + '…');
-    state.misterImportPollTimer = setTimeout(() => pollMisterImport(request), 2000);
+    return true;
   }
-
+  async function finishMisterImport(payload, request, decisions = false) {
+    if (!isCurrentImport(request) || state.misterImportFinishing) return;
+    state.misterImportFinishing = true;
+    try {
+      if (!(await flushAutoSave())) throw new Error('Primero guarda los cambios actuales. La captura sigue disponible en la extensión.');
+      if (!isCurrentImport(request)) return;
+      const rows = normalizeMisterPayload(payload, request.gameweekId);
+      if (!decisions && !displayMisterReview(payload,rows,request)) return;
+      const pending = state.misterImportPending;
+      if (!pending || pending.fingerprint !== importFingerprint()) {
+        displayMisterReview(payload,rows,request);
+        throw new Error('El borrador cambió durante la revisión. Comprueba de nuevo las decisiones.');
+      }
+      const keep = new Set([...document.querySelectorAll('[data-mister-use-incoming]')]
+        .filter(input => !input.checked).map(input => input.dataset.misterUseIncoming));
+      const chosen = rows.filter(row => !keep.has(row.participant.name));
+      // A recoverable local snapshot is mandatory before changing existing rows.
+      const before = {savedAt:new Date().toISOString(),rows:gatherRows(false,true),milestone:gatherMilestone(),
+        restoreGeneration:state.matchdayRestoreGeneration,cloudWriteRevision:state.matchdayWriteRevision,cloudSynced:false};
+      localStorage.setItem('cuban-mister-before:' + request.season + ':' + request.matchday,JSON.stringify(before));
+      state.misterImportSaving = true;
+      $('cancelMisterImportButton').disabled = true;
+      state.suspendAutoSave = true;
+      applyMisterRows(chosen);
+      if (payload.provisional) $('postponedToggle').checked = true;
+      setMisterImportStatus('Guardando el borrador…');
+      const saved = await persistDraft({manual:true});
+      state.suspendAutoSave = false;
+      if (!saved) throw new Error('La captura está en pantalla, pero no se confirmó el guardado. Revisa el aviso y usa Guardar ahora.');
+      const baseline = readImportJSON(misterBaselineKey()) || {};
+      chosen.forEach(row => { baseline[row.participant.name] = importedRowData(row); });
+      // Bookkeeping failure must never turn a confirmed draft save into a false error.
+      try { localStorage.setItem(misterBaselineKey(),JSON.stringify(baseline)); } catch {}
+      await extensionCall('CONSUME',{id:request.requestId}).catch(() => {});
+      sessionStorage.removeItem(MISTER_SESSION_KEY);
+      state.misterImportRequest = null;
+      state.misterImportPending = null;
+      state.misterImportBusy = false;
+      clearMisterImportPoll();
+      $('misterImportReview').hidden = true;
+      $('cancelMisterImportButton').textContent = 'Cerrar';
+      setMisterImportStatus('Borrador guardado: Jornada ' + request.matchday + '. ' + chosen.length + ' participantes importados'
+        + (keep.size ? '; ' + keep.size + ' conservados' : '') + '. Solo tú publicas.', 'success');
+      flashMessage('Jornada ' + request.matchday + ' guardada en borrador. Revisa los datos antes de publicar.');
+    } catch (error) {
+      setMisterImportStatus(String(error.message || error), 'error');
+      $('retryMisterImportButton').hidden = false;
+    } finally {
+      state.misterImportFinishing = false;
+      state.suspendAutoSave = false;
+      state.misterImportSaving = false;
+      $('cancelMisterImportButton').disabled = false;
+      syncMisterImportUI();
+      syncPublicationUI();
+    }
+  }
+  async function pollMisterImport(request) {
+    if (!isCurrentImport(request)) return;
+    try {
+      const {job} = await extensionCall('STATUS',{id:request.requestId});
+      if (!isCurrentImport(request)) return;
+      if (job.status === 'discovered') {
+        const discovery = job.discovery;
+        if (discovery.league?.id !== MISTER_LEAGUE_ID) throw new Error('Mister tiene otra liga activa. Selecciona 1ra div Cubanleague (código ' + MISTER_LEAGUE_ID + ') y repite.');
+        const bindings = readImportJSON(misterBindingKey()) || {};
+        const next = {};
+        const seen = new Set();
+        discovery.managers.forEach(manager => {
+          const participant = state.participants.find(p => p.name === bindings[manager.id])
+            || state.participants.find(p => misterManagerKey(p.name) === misterManagerKey(manager.name));
+          if (!participant || seen.has(participant.name)) throw new Error('No se pudo relacionar a ' + manager.name + ' con un participante único.');
+          seen.add(participant.name);
+          next[manager.id] = participant.name;
+        });
+        if (seen.size !== state.participants.length) throw new Error('Faltan participantes en Mister.');
+        localStorage.setItem(misterBindingKey(),JSON.stringify(next));
+        request.gameweekId = discovery.gameweekId;
+        sessionStorage.setItem(MISTER_SESSION_KEY,JSON.stringify(request));
+        await extensionCall('CAPTURE',{id:request.requestId});
+      } else if (job.status === 'ready' && job.payload) {
+        request.gameweekId = job.discovery.gameweekId;
+        await finishMisterImport(job.payload,request);
+        return;
+      } else if (['failed','cancelled','consumed'].includes(job.status)) {
+        throw new Error(job.error || 'La lectura terminó. Puedes iniciar otra importación.');
+      }
+      setMisterImportStatus(job.progress || 'Esperando a Mister…');
+      state.misterImportPollTimer = setTimeout(() => pollMisterImport(request),2000);
+    } catch (error) {
+      setMisterImportStatus(String(error.message || error),'error');
+      $('retryMisterImportButton').hidden = false;
+    }
+  }
   async function startMisterImport() {
     if (state.misterImportBusy || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || isChampionsMode()) return;
-    const gameweekId = misterGameweekForMatchday();
-    if (!gameweekId) {
-      flashMessage('Todavía no está configurado el calendario de Mister para esta temporada.', 'error');
-      return;
-    }
-    if (!state.catalog || !state.lineupSchemaReady || !state.catalogSchemaReady) {
-      flashMessage('La importación necesita el Catálogo Maestro y el guardado de alineaciones activos.', 'error');
-      return;
-    }
-    if (state.dirty && !window.confirm('Esta importación sustituirá los datos todavía no guardados de la Jornada ' + state.matchday + '. ¿Continuar?')) return;
-
-    await cancelMisterImport({ silent: true, keepPanel: true });
+    if (!state.catalog || !state.lineupSchemaReady || !state.catalogSchemaReady) return;
+    $('misterImportPanel').hidden = false;
+    $('misterImportReview').hidden = true;
+    $('retryMisterImportButton').hidden = true;
+    $('misterImportDetails').textContent = '';
+    const attempt = crypto.randomUUID();
+    state.misterImportAttempt = attempt;
     state.misterImportBusy = true;
     syncMisterImportUI();
-    $('misterImportPanel').hidden = false;
-    $('cancelMisterImportButton').textContent = 'Cancelar';
-    $('misterHelperCopyStatus').textContent = '';
-    setMisterImportStatus('Creando un enlace seguro de un solo uso…');
-    $('misterImportPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    const { data, error } = await state.client.rpc('start_mister_import', {
-      p_season: currentSeasonKey(),
-      p_matchday: state.matchday,
-      p_gameweek_id: gameweekId
-    });
-    if (error || !data?.requestId || !data?.token) {
+    try {
+      await extensionCall('HELLO');
+      if (state.misterImportAttempt !== attempt) return;
+      if (!(await flushAutoSave())) throw new Error('Guarda los cambios actuales antes de importar.');
+      if (state.misterImportAttempt !== attempt) return;
+      const request = {extension:true,matchday:state.matchday,season:currentSeasonKey(),protectExisting:state.hasDraft,startFingerprint:importFingerprint()};
+      state.misterImportBusy = true;
+      syncMisterImportUI();
+      const answer = await extensionCall('START',{matchday:request.matchday,season:request.season});
+      if (state.misterImportAttempt !== attempt) {
+        await extensionCall('CANCEL',{id:answer.id}).catch(() => {});
+        return;
+      }
+      request.requestId = answer.id;
+      state.misterImportRequest = request;
+      sessionStorage.setItem(MISTER_SESSION_KEY,JSON.stringify(request));
+      $('cancelMisterImportButton').textContent = 'Cancelar';
+      setMisterImportStatus('Mister se abrió en otra pestaña. La lectura se guardará en el borrador de esta jornada.');
+      pollMisterImport(request);
+    } catch (error) {
+      if (state.misterImportAttempt !== attempt) return;
       state.misterImportBusy = false;
       syncMisterImportUI();
-      setMisterImportStatus(friendlyError(error || new Error('No se pudo iniciar la importación.')), 'error');
-      return;
+      syncPublicationUI();
+      setMisterImportStatus(String(error.message || error),'error');
     }
-
-    const misterUrl = new URL('https://mister.mundodeportivo.com/standings');
-    misterUrl.searchParams.set('gw', String(gameweekId));
-    misterUrl.searchParams.set('cuban_request', String(data.requestId));
-    misterUrl.searchParams.set('cuban_token', String(data.token));
-    misterUrl.searchParams.set('cuban_matchday', String(state.matchday));
-    const request = {
-      requestId: String(data.requestId),
-      gameweekId,
-      matchday: state.matchday,
-      expiresAt: String(data.expiresAt || '')
-    };
-    state.misterImportRequest = request;
-    $('openMisterImportLink').href = misterUrl.toString();
-    setMisterImportStatus('Enlace listo. Abre Mister y pulsa allí el marcador “Enviar a Cuban League”.');
-    window.open(misterUrl.toString(), '_blank', 'noopener,noreferrer');
-    pollMisterImport(request);
+  }
+  function setupMisterImportControls() {
+    $('saveMisterImportDecisions').addEventListener('click', () => {
+      const pending = state.misterImportPending;
+      if (pending && !state.saving) finishMisterImport(pending.payload,pending.request,true);
+    });
+    $('retryMisterImportButton').addEventListener('click', () => {
+      $('retryMisterImportButton').hidden = true;
+      if (state.misterImportRequest) pollMisterImport(state.misterImportRequest);
+    });
+    syncMisterImportUI();
   }
 
-  function setupMisterImportControls() {
-    $('misterHelperBookmark').href = MISTER_HELPER_BOOKMARKLET;
-    syncMisterImportUI();
+  function resumeMisterImport() {
+    const request = readImportJSON(MISTER_SESSION_KEY,sessionStorage);
+    if (request && request.season === currentSeasonKey() && request.matchday === state.matchday) {
+      state.misterImportRequest = request;
+      state.misterImportBusy = true;
+      $('misterImportPanel').hidden = false;
+      syncMisterImportUI();
+      pollMisterImport(request);
+    }
   }
 
   function currentMatchdayCount() {
@@ -2082,7 +2164,8 @@
       && !state.saving
       && !state.matchdayLoading
       && !state.matchdayLoadBlocked
-      && !state.copyingPreviousLineup;
+      && !state.copyingPreviousLineup
+      && !state.misterImportBusy;
     $('publishButton').disabled = !canPreview;
     updateParticipantWorkflow();
     return result;
@@ -2170,9 +2253,9 @@
       $('editPublishedButton').disabled = true;
       $('undoPublicationButton').disabled = true;
       $('confirmPublishButton').disabled = true;
-      $('matchdaySelect').disabled = state.saving || state.matchdayLoading;
-      $('leagueModeButton').disabled = state.saving || state.matchdayLoading;
-      $('championsModeButton').disabled = state.saving || state.matchdayLoading;
+      $('matchdaySelect').disabled = state.saving || state.misterImportBusy || state.matchdayLoading;
+      $('leagueModeButton').disabled = state.saving || state.misterImportBusy || state.matchdayLoading;
+      $('championsModeButton').disabled = state.saving || state.misterImportBusy || state.matchdayLoading;
       $('logoutButton').disabled = state.copyingPreviousLineup;
       syncInputLock();
       updateCompletionState();
@@ -2220,9 +2303,9 @@
     $('dockMatchday').textContent = state.matchday;
     $('dockSeason').textContent = isChampionsMode() ? 'Champions · fase de grupos' : config.season;
     $('saveDraftButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || locked;
-    $('matchdaySelect').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
-    $('leagueModeButton').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
-    $('championsModeButton').disabled = state.saving || state.matchdayLoading || state.copyingPreviousLineup;
+    $('matchdaySelect').disabled = state.saving || state.misterImportBusy || state.matchdayLoading || state.copyingPreviousLineup;
+    $('leagueModeButton').disabled = state.saving || state.misterImportBusy || state.matchdayLoading || state.copyingPreviousLineup;
+    $('championsModeButton').disabled = state.saving || state.misterImportBusy || state.matchdayLoading || state.copyingPreviousLineup;
     $('editPublishedButton').disabled = state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.published;
     $('logoutButton').disabled = state.copyingPreviousLineup;
     syncInputLock();
@@ -3251,7 +3334,7 @@
   }
 
   async function switchCompetition(competition) {
-    if (competition === state.competition || state.saving || state.matchdayLoading || state.copyingPreviousLineup) return;
+    if (competition === state.competition || state.saving || state.misterImportBusy || state.matchdayLoading || state.copyingPreviousLineup) return;
     await prepareNavigation();
     state.competition = competition;
     state.matchday = 1;
@@ -3279,7 +3362,7 @@
   }
 
   function openPreview() {
-    if (isChampionsMode() || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
+    if (isChampionsMode() || state.saving || state.misterImportBusy || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup) return;
     const validation = updateCompletionState();
     if (validation.missing.length) {
       flashMessage(`Faltan ${validation.missing.length} participantes. Completa todos los campos antes de revisar.`, 'error');
@@ -3415,7 +3498,7 @@
   }
 
   async function publishPreview() {
-    if (isChampionsMode() || state.saving || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.previewRows.length) return;
+    if (isChampionsMode() || state.saving || state.misterImportBusy || state.matchdayLoading || state.matchdayLoadBlocked || state.copyingPreviousLineup || !state.previewRows.length) return;
     const season = currentSeasonKey();
     const matchday = state.matchday;
     const competition = state.competition;
@@ -4091,7 +4174,13 @@
       $('seasonLabel').textContent = config.season;
       showOnly('panelView');
       updateCompetitionUI();
+      const pendingImport = readImportJSON(MISTER_SESSION_KEY,sessionStorage);
+      if (pendingImport?.season === currentSeasonKey() && Number.isInteger(pendingImport.matchday)) {
+        state.matchday = pendingImport.matchday;
+        $('matchdaySelect').value = String(state.matchday);
+      }
       await loadMatchday();
+      resumeMisterImport();
       loadVisitorAnalytics();
       loadBackups();
     } catch (error) {
@@ -4260,7 +4349,7 @@
     });
 
     $('matchdaySelect').addEventListener('change', async event => {
-      if (state.copyingPreviousLineup) {
+      if (state.copyingPreviousLineup || state.misterImportBusy || state.saving) {
         event.target.value = String(state.matchday);
         return;
       }

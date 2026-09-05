@@ -1,0 +1,45 @@
+CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.0.0
+
+INSTALAR (CHROME EN COMPUTADORA)
+1. Extrae el ZIP en una carpeta permanente, por ejemplo Documentos/Cuban-League-Mister.
+2. Abre chrome://extensions en Chrome.
+3. Activa Modo de desarrollador.
+4. Pulsa Cargar descomprimida y selecciona la carpeta que contiene manifest.json.
+5. Recarga el panel de administración. Inicia sesión en Mister si hace falta.
+6. En el panel selecciona Jornada 3 y pulsa Importar Jornada 3 desde Mister.
+7. Deja abiertas las dos pestañas. Al terminar, vuelve al panel y espera Borrador guardado.
+8. Si aparece revisión de datos existentes, marca cuáles sustituir y guarda las decisiones.
+
+Publicar es siempre una acción tuya desde administración.
+
+LECTURA Y LÍMITES
+- Liga configurada: 1ra div Cubanleague, código Mister 649733; 20 participantes.
+- Solo se importan jornadas que aparecen en el calendario de Mister.
+- Lee las alineaciones de esa jornada, no la plantilla actual ni los suplentes.
+- Copia puntos ya multiplicados del capitán. No multiplica goles ni tarjetas.
+- Sin capitán es válido. «−» de no jugó = 0 puntos.
+- El reloj/pendiente se registra con 0 provisional y un aviso; no prueba que el jugador no haya jugado.
+- Saldo negativo, no puntúa: todos los datos contabilizables de ese participante quedan en 0.
+- Clean sheet sigue la regla actual del importador: portero con minutos, cero goles recibidos y crédito positivo de portería a cero en Mister.
+- Estadísticas ausentes quedan sin completar. Diferencias entre tarjetas y total se señalan para revisión.
+- Posiciones vacías: exige señal explícita y −4. Si Mister usa un formato desconocido, detiene la captura.
+- Una lectura es una captura de un intervalo, no una sincronización en tiempo real. Reimporta cuando quieras actualizar.
+- La jornada provisional activa «partidos pendientes o aplazados». Cuando esté completa, revisa y desmarca esa opción antes de publicar como definitiva.
+
+RECUPERACIÓN
+- El borrador no cambia si la captura falla antes de finalizar.
+- El resultado permanece temporalmente en la extensión, máximo 1 hora mientras el navegador siga abierto.
+- Si recargas la misma pestaña de administración, se intenta recuperar la captura.
+- Si hay un error de anuncio o página, cancela en el panel, cierra el anuncio y repite.
+- No hay continuación automática desde el jugador donde falló: se repite la lectura completa.
+- Se conserva una copia local del borrador anterior a la importación en esa computadora.
+- Al reimportar, un participante que hayas corregido se conserva salvo que marques usar Mister.
+- Desde otro dispositivo, si no hay una referencia de la importación anterior, se pide revisión conservadora de las diferencias.
+
+PRIVACIDAD
+La extensión solo se ejecuta en Mister y en el panel de Cuban League.
+No solicita permiso de cookies, contraseñas, historial completo ni acceso a todas las páginas.
+No hace llamadas a servicios externos: envía los datos al panel y este usa su guardado autenticado de borradores.
+No contiene claves de Supabase ni funciones para publicar, fichar, vender o cambiar alineaciones en Mister.
+Es una herramienta propia de Cuban League, no un producto oficial de Mister.
+Si Mister cambia su diseño, podría necesitar una actualización de la extensión.

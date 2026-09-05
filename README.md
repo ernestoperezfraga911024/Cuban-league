@@ -501,3 +501,33 @@ instalada V116, no vuelvas a ejecutar el archivo V115 antiguo porque ya fue
 reemplazado por esta versión.
 
 La contraseña y las reglas de acceso se administran exclusivamente en Supabase.
+# Importación desde Mister · V164
+
+La extensión de `mister-extension/` conecta la jornada de Mister con el borrador
+del panel. Se distribuye en `downloads/Cuban-League-Mister-1.0.0.zip`; instalación
+en `mister-extension-install.html`. No es una integración oficial de Mister.
+
+- Liga verificada por ID `649733`, calendario leído de Mister y 20 participantes.
+- Lectura de XI (sin suplentes), capitán opcional, puntos visibles, goles, CS del
+  portero y rojas (incluida doble amarilla). El detalle estadístico debe existir;
+  un campo ausente se conserva como `null`, no como cero.
+- Jornada en curso: los relojes son ceros provisionales y activan la opción de
+  partidos pendientes. Al completarse hay que revisar/desmarcar esa opción.
+- Reimportaciones sin acumulación; revisión por participante si hay cambios propios.
+  Identidades vinculadas por ID tras la primera coincidencia de nombres.
+- La captura pasa por mensajería de Chrome y se conserva en `storage.session`
+  durante hasta una hora. No se exportan cookies ni contraseñas. El guardado usa
+  el RPC autenticado existente `save_matchday_draft_v124`, con control de revisión.
+- No cambia SQL ni funciones de Supabase y no invoca RPC de publicación.
+- Si hay error de lectura, no sustituye el borrador; hay que cancelar y repetir.
+  No hay continuación automática por jugador. Los cambios de DOM de Mister o
+  jugadores no relacionados con el catálogo necesitan revisión.
+- Antes de aplicar, se conserva la versión anterior en el almacenamiento local
+  del panel (`cuban-mister-before:<temporada>:<jornada>`). No es un backup cloud.
+
+Validación de desarrollo: `npm ci && npm test`. Pruebas de reglas, límites de
+mensajería, cancelación, reinicio del worker, captura de 20 participantes en DOM
+simulado y el guardado del panel con el RPC sustituido por un doble de prueba.
+Empaquetar: `npm run package:extension` (sin código remoto; ZIP reproducible).
+La instalación en Chrome real y la primera captura autenticada deben verificarse
+con el administrador; las pruebas simuladas no sustituyen ese paso.

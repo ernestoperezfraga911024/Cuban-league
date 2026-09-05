@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-green.png">
-  <link rel="stylesheet" href="admin.css?v=163-20260904-negative-balance">
+  <link rel="stylesheet" href="admin.css?v=164-20260905-mister-extension">
 </head>
 <body>
   <div class="admin-background" aria-hidden="true"></div>
@@ -361,18 +361,23 @@
           </div>
         </header>
         <div class="mister-import-steps">
-          <div><span>1</span><p><b>Instala el ayudante una sola vez</b><small>Arrastra “Enviar a Cuban League” a la barra de marcadores. Si no puedes arrastrarlo, usa “Copiar ayudante” y crea un marcador con ese contenido.</small></p></div>
-          <div><span>2</span><p><b>Abre la jornada en Mister</b><small>El enlace lleva a la jornada seleccionada y caduca en 15 minutos.</small></p></div>
-          <div><span>3</span><p><b>Pulsa el marcador dentro de Mister</b><small>Se recopilarán participantes, XI, capitanes, puntos, goles, clean sheets, tarjetas rojas y el aviso de saldo negativo. “—” se guarda como 0; “Saldo negativo, no puntúa” deja toda la jornada del participante en 0.</small></p></div>
+          <div><span>1</span><p><b>Instala la extensión una vez</b><small>Chrome en computadora. La guía explica cómo cargarla y abrir tu sesión de Mister.</small></p></div>
+          <div><span>2</span><p><b>Selecciona la jornada e importa</b><small>Se abre Mister y se leen los 20 participantes. Mantén ambas pestañas abiertas hasta ver «Borrador guardado».</small></p></div>
+          <div><span>3</span><p><b>Revisa el borrador</b><small>Incluye XI, capitanes, puntos, goles, clean sheets y rojas. Se señalan pendientes y diferencias con tus correcciones.</small></p></div>
         </div>
         <div class="mister-import-actions">
-          <a id="misterHelperBookmark" class="mister-helper-bookmark" href="#" draggable="true">Enviar a Cuban League</a>
-          <button id="copyMisterHelperButton" class="secondary-button" type="button">Copiar ayudante</button>
-          <a id="openMisterImportLink" class="primary-button" href="https://mister.mundodeportivo.com/standings" target="_blank" rel="noopener noreferrer">Abrir Mister</a>
+          <button id="copyMisterHelperButton" class="secondary-button" type="button">Instalar extensión · guía</button>
+          <button id="retryMisterImportButton" class="secondary-button" type="button" hidden>Recuperar captura</button>
           <button id="cancelMisterImportButton" class="mister-import-cancel" type="button">Cancelar</button>
         </div>
-        <p id="misterHelperCopyStatus" class="copy-admin-status" role="status" aria-live="polite"></p>
-        <p class="mister-import-privacy">La contraseña y la sesión de Mister no salen de Mister. Cuban League recibe solamente los datos deportivos de la jornada y nunca publica automáticamente.</p>
+        <p id="misterImportDetails" class="mister-import-details" role="status"></p>
+        <div id="misterImportReview" class="mister-import-review" hidden>
+          <h3>Revisar datos existentes</h3>
+          <p>Marca los participantes cuyos datos quieres sustituir por los de Mister. Los demás conservarán su borrador.</p>
+          <div id="misterImportConflicts"></div>
+          <button id="saveMisterImportDecisions" class="primary-button" type="button">Guardar decisiones en borrador</button>
+        </div>
+        <p class="mister-import-privacy">La extensión lee datos deportivos con tu sesión de Mister. Tu contraseña no se envía al panel. La publicación siempre la decides tú.</p>
       </section>
 
       <section id="championsAutomationNotice" class="champions-automation-notice" aria-labelledby="championsAutomationTitle" hidden>
@@ -422,7 +427,7 @@
           <label class="achievement-switch postponed-switch">
             <input id="postponedToggle" type="checkbox">
             <span class="achievement-switch-control" aria-hidden="true"><i></i></span>
-            <span><b>Esta jornada tiene partidos aplazados</b><small>La Liga se publica, pero la Copa no confirma eliminados hasta completarla</small></span>
+            <span><b>Esta jornada tiene partidos pendientes o aplazados</b><small>La Liga se publica, pero la Copa no confirma eliminados hasta completarla</small></span>
           </label>
         </div>
         <p id="achievementSettingsMessage" class="achievement-settings-message">La fecha se guarda con el borrador de esta jornada.</p>
@@ -755,6 +760,7 @@
   <script src="supabase.js"></script>
   <script src="supabase-config.js?v=161-20260902"></script>
   <script src="player-catalog.js?v=161-20260902"></script>
-  <script src="admin.js?v=163-20260904-negative-balance"></script>
+  <script src="mister-import-core.js?v=164"></script>
+  <script src="admin.js?v=164-20260905-mister-extension"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v163-negative-balance';
+const CACHE_NAME = 'cuban-league-v164-mister-extension';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,9 +9,9 @@ const APP_SHELL = [
   './player-catalog.js?v=161-20260902',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=163-20260904-negative-balance',
-  './admin.js?v=163-20260904-negative-balance',
-  './mister-import-helper.js?v=163',
+  './admin.css?v=164-20260905-mister-extension',
+  './admin.js?v=164-20260905-mister-extension',
+  './mister-import-core.js?v=164',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',
@@ -124,6 +124,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
     url.pathname.endsWith('/mister-import-helper.js') ||
+    url.pathname.endsWith('/mister-import-core.js') ||
     url.pathname.endsWith('/player-catalog.js') ||
     url.pathname.endsWith('/supabase-config.js')
   ) {
