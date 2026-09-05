@@ -21,8 +21,30 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,537);
+    assert.equal(c.recordCount,538);
   } finally { dom.window.close(); }
+});
+
+test('clubes explícitos y resolución de importación impiden inferencias y cruces de homónimos',async()=>{
+  const {dom,catalog:c}=await catalog();
+  try {
+    assert.equal(c.clubsByMisterId.size,20);
+    assert.equal(c.clubsByMisterId.get('14').id,'rayo-vallecano');
+    const cardenas=c.resolveMister({misterPlayerId:'24742',playerName:'D. Cárdenas',clubId:'rayo-vallecano',position:'PT'});
+    assert.equal(cardenas.id,'d-cardenas');
+    assert.equal(cardenas.photo,'catalog/faces/d-cardenas.webp');
+    assert.equal(c.resolveMister({misterPlayerId:'58958',playerName:'P. Fernández',clubId:'rayo-vallecano',position:'DF'}).id,'p-fernandez-rayo-vallecano');
+    assert.equal(c.resolveMister({misterPlayerId:'4947929',playerName:'E. Audero',clubId:'rayo-vallecano',position:'PT'}).id,'emil-audero');
+    assert.equal(c.resolveMister({misterPlayerId:'3848779',playerName:'G. Bouare',clubId:'rayo-vallecano',position:'MC'}).id,'g-bouare');
+    assert.equal(c.resolveMister({misterPlayerId:'999999',playerName:'C. Romero',clubId:'atletico-madrid',position:'DF'}),null);
+    assert.equal(c.resolveMister({misterPlayerId:'999999',playerName:'Koke',clubId:'rayo-vallecano',position:'MC'}),null);
+    assert.equal(c.resolveMister({misterPlayerId:'24742',playerName:'D. Cárdenas',clubId:'unknown'}),null);
+    const harvey=c.players.find(p=>p.displayName==='Harvey Elliott');
+    assert.ok(harvey);
+    assert.equal(c.resolveMister({misterPlayerId:'999999',playerName:'H. Elliott',clubId:harvey.clubId,position:harvey.position}).id,harvey.id);
+    c.players.push({...harvey,id:'different-elliott',displayName:'Harry Elliott'});
+    assert.equal(c.resolveMister({misterPlayerId:'999999',playerName:'H. Elliott',clubId:harvey.clubId,position:harvey.position}),null);
+  } finally {dom.window.close();}
 });
 test('retratos de Mister solo aceptan el origen y formato verificados',async()=>{
   const {dom,catalog:c}=await catalog();

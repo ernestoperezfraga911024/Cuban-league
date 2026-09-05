@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '166-20260905-mister-identities';
+  const VERSION = '167-20260905-mister-clubs';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -320,18 +320,6 @@
     const missing = state.participants.filter(participant => !managerByParticipant.has(participant.name));
     if (missing.length) throw new Error('Faltan participantes: ' + missing.map(item => item.name).join(', ') + '.');
 
-    const misterClubMap = new Map(state.catalog.clubs.filter(club => club.misterId).map(club => [club.misterId, club.id]));
-    payload.managers.flatMap(manager => Array.isArray(manager?.lineup) ? manager.lineup : []).forEach(player => {
-      const resolved = state.catalog.resolve({ misterPlayerId: player?.misterPlayerId, playerName: player?.playerName, fullName: player?.fullName });
-      const misterClubId = String(player?.misterClubId || '');
-      if (!resolved || !misterClubId) return;
-      const previous = misterClubMap.get(misterClubId);
-      if (previous && previous !== resolved.clubId) {
-        throw new Error('Hay que revisar el club de ' + String(player?.fullName || player?.playerName || 'un jugador') + ' (Mister ID ' + String(player?.misterPlayerId || '') + ') en el catálogo. La captura sigue disponible.');
-      }
-      misterClubMap.set(misterClubId, resolved.clubId);
-    });
-
     return state.participants.map(participant => {
       const manager = managerByParticipant.get(participant.name);
       if (typeof manager?.negativeBalanceNoScore !== 'boolean') {
@@ -360,6 +348,7 @@
         throw new Error('La alineación de ' + participant.name + ' no tiene exactamente 11 jugadores.');
       }
       const seenMisterPlayers = new Set();
+      const catalogWarnings = [];
       const lineup = manager.lineup.map((rawPlayer, index) => {
         if (rawPlayer?.isEmpty === true) {
           if (rawPlayer.displayedPoints !== -4 || rawPlayer.isCaptain || !['PT','DF','MC','DL'].includes(rawPlayer.position)) throw new Error('Posición vacía no válida.');
@@ -371,19 +360,27 @@
           throw new Error('La alineación de ' + participant.name + ' contiene un jugador repetido o sin identidad.');
         }
         seenMisterPlayers.add(misterPlayerId);
-        const mappedClubId = misterClubMap.get(String(rawPlayer?.misterClubId || '')) || '';
-        const catalogPlayer = state.catalog.resolve({
+        const misterClubId = String(rawPlayer?.misterClubId || '');
+        const sourceClub = state.catalog.clubsByMisterId.get(misterClubId);
+        if (!sourceClub) {
+          throw new Error('No se reconoce el club de Mister ' + (misterClubId || '(sin identificador)') + ' de ' + String(rawPlayer?.playerName || 'un jugador') + '. La captura sigue disponible.');
+        }
+        const position = String(rawPlayer?.position || '').toUpperCase();
+        const catalogPlayer = state.catalog.resolveMister({
           misterPlayerId,
           playerName: rawPlayer?.playerName,
           fullName: rawPlayer?.fullName,
-          clubId: mappedClubId
+          clubId: sourceClub.id,
+          position
         });
         if (!catalogPlayer) {
-          throw new Error('No se pudo relacionar “' + String(rawPlayer?.playerName || 'jugador sin nombre') + '” de ' + participant.name + ' con el Catálogo Maestro.');
+          throw new Error('No se pudo relacionar “' + String(rawPlayer?.playerName || 'jugador sin nombre') + '” (' + sourceClub.name + ', Mister ID ' + misterPlayerId + ') de ' + participant.name + ' con un jugador único del Catálogo Maestro. La captura sigue disponible.');
         }
-        const position = String(rawPlayer?.position || '').toUpperCase();
-        if (!['PT', 'DF', 'MC', 'DL'].includes(position) || catalogPlayer.position !== position) {
-          throw new Error('La posición de ' + catalogPlayer.displayName + ' no coincide entre Mister y el catálogo.');
+        if (!['PT', 'DF', 'MC', 'DL'].includes(position)) {
+          throw new Error('La posición de ' + catalogPlayer.displayName + ' no es válida.');
+        }
+        if (catalogPlayer.clubId !== sourceClub.id || catalogPlayer.position !== position) {
+          catalogWarnings.push(catalogPlayer.displayName + ': se importa como ' + position + ' de ' + sourceClub.name + ', según Mister.');
         }
         const displayedPoints = importCore.number(rawPlayer?.displayedPoints);
         if (displayedPoints === null || !Number.isFinite(displayedPoints) || Math.abs(displayedPoints * 2 - Math.round(displayedPoints * 2)) > 0.0001) {
@@ -401,9 +398,9 @@
           slot_number: index + 1,
           player_id: catalogPlayer.id,
           player_name: catalogPlayer.displayName,
-          club_id: catalogPlayer.clubId,
-          club_name: catalogPlayer.clubName,
-          position: catalogPlayer.position,
+          club_id: sourceClub.id,
+          club_name: sourceClub.name,
+          position,
           displayed_points: displayedPoints,
           is_captain: isCaptain,
           captain_multiplier: isCaptain ? multiplier : 1
@@ -426,7 +423,8 @@
         cleanSheets: validateIntegerStat(manager.cleanSheets, 'Total de clean sheets', participant.name),
         redCards: validateIntegerStat(manager.redCards, 'Total de tarjetas rojas', participant.name),
         negativeBalanceNoScore: false,
-        lineup
+        lineup,
+        catalogWarnings
       };
     });
   }
@@ -484,7 +482,10 @@
     const baseline = readImportJSON(misterBaselineKey()) || {};
     const conflicts = rows.filter(row => importCore.conflict(current.get(row.participant.name), importedRowData(row),
       baseline[row.participant.name], request.protectExisting || request.startFingerprint !== importFingerprint()));
-    const messages = Array.isArray(payload.warnings) ? payload.warnings.map(String) : [];
+    const messages = [...new Set([
+      ...(Array.isArray(payload.warnings) ? payload.warnings.map(String) : []),
+      ...rows.flatMap(row => row.catalogWarnings || [])
+    ])];
     $('misterImportDetails').textContent = 'Captura: ' + new Date(payload.capturedAt).toLocaleString('es')
       + ' · ' + (payload.provisional ? 'Provisional' : 'Revisar antes de publicar')
       + (messages.length ? '\n' + messages.join('\n') : '\nSin incidencias detectadas en la captura.');
@@ -1415,8 +1416,9 @@
       : catalogPlayer?.photo
       ? `<span class="lineup-selected-face" aria-hidden="true"><span>${initials}</span><img data-player-catalog-image src="${escapeHtml(catalogPlayer.photo)}" alt="" loading="lazy"></span>`
       : `<span class="lineup-selected-face is-initials" aria-hidden="true"><span>${initials}</span></span>`;
-    const crest = catalogPlayer?.crest
-      ? `<img data-player-catalog-image src="${escapeHtml(catalogPlayer.crest)}" alt="" loading="lazy">`
+    const snapshotCrest = state.catalog?.clubsById.get(clubId)?.crest || catalogPlayer?.crest;
+    const crest = snapshotCrest
+      ? `<img data-player-catalog-image src="${escapeHtml(snapshotCrest)}" alt="" loading="lazy">`
       : '';
     return `<span class="lineup-player-fields${selected ? ' has-player' : ''}${emptyPosition ? ' is-empty-position' : ''}">
       <input data-lineup-field="player_id" type="hidden" value="${escapeHtml(playerId)}">

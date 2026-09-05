@@ -1,16 +1,16 @@
-const CACHE_NAME = 'cuban-league-v166-mister-identities';
+const CACHE_NAME = 'cuban-league-v167-mister-clubs';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=161-20260902',
-  './app.js?v=161-20260902',
+  './app.js?v=167-20260905-mister-clubs',
   './data.json?v=161-20260902',
   './catalog/players.json?v=161-20260902',
-  './player-catalog.js?v=166-20260905-mister-identities',
+  './player-catalog.js?v=167-20260905-mister-clubs',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=166-20260905-mister-identities',
-  './admin.js?v=166-20260905-mister-identities',
+  './admin.css?v=167-20260905-mister-clubs',
+  './admin.js?v=167-20260905-mister-clubs',
   './mister-import-core.js?v=164',
   './admin-manifest.json',
   './supabase.js',

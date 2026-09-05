@@ -568,3 +568,36 @@ la misma pestaña de administración (si aún está dentro del plazo de una hora
 Validación: 19 pruebas pasan, incluyendo reproducción del error de ambos Romero,
 la asociación correcta de cada defensor y la conservación del historial. No hay
 cambios SQL, publicaciones de jornada ni modificación de borradores en el despliegue.
+
+# Clubes de Mister sin inferencias entre jugadores · V167
+
+El error sobre D. Cárdenas era reproducible al procesar primero a A. Pedrosa con
+su antiguo club del catálogo: el importador deducía que el ID 14 pertenecía al
+Sevilla y después rechazaba al portero correctamente registrado en el Rayo.
+Se elimina esa deducción. Los 20 IDs de club se verificaron el 5 de septiembre
+de 2026 en las opciones del filtro «Equipo» del buscador autenticado de Mister:
+
+`48 Alavés; 1 Athletic; 2 Atlético; 3 Barcelona; 4 Betis; 5 Celta;
+6 Deportivo; 23 Elche; 8 Espanyol; 9 Getafe; 12 Levante; 13 Málaga;
+50 Osasuna; 1490 Racing; 14 Rayo; 15 Real Madrid; 16 Real Sociedad;
+17 Sevilla; 19 Valencia; 20 Villarreal`.
+
+La consulta de la plantilla del Rayo en https://mister.mundodeportivo.com/search
+permitió verificar los IDs de sus 28 jugadores. Cárdenas (24742) conserva su ID
+interno, club, posición y foto. Pedrosa (14691) y Belaid (70183) pasan al Rayo,
+según esa fuente; Bouare (3848779) se añade con foto verificada de Mister.
+El catálogo tiene 538 jugadores activos. Ningún futbolista anterior se elimina.
+
+La importación usa primero el ID del futbolista. Sin un ID conocido, exige un
+nombre único dentro del club y posición, admitiendo inicial y apellido completos
+para nombres como «H. Elliott». No adivina clubes ni elige el primer homónimo.
+Para una identidad ya verificada, el club y posición capturados se guardan en la
+alineación de esa jornada y cualquier diferencia aparece en el informe. Los
+escudos del panel y de las alineaciones públicas usan el club guardado en esa
+jornada, conservando también la presentación de los clubes históricos.
+
+La regresión reprodujo exactamente el aviso de Cárdenas antes del arreglo.
+Las 21 pruebas pasan e incluyen independencia del orden de participantes,
+rechazo de clubes desconocidos y homónimos, nombres abreviados, recuperación
+de la captura y guardado exclusivamente en borrador. Compatible con la extensión
+1.0.1; no requiere reinstalarla. No se ejecutan cambios SQL ni se publican jornadas.

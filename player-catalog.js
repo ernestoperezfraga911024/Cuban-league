@@ -29,6 +29,12 @@
       crest: assetUrl(club?.crest)
     })).filter(club => club.id && club.name);
     const clubsById = new Map(clubs.map(club => [club.id, club]));
+    const clubsByMisterId = new Map();
+    clubs.forEach(club => {
+      if (!club.misterId) return;
+      if (!/^\d+$/.test(club.misterId) || clubsByMisterId.has(club.misterId)) throw new Error('El catálogo contiene un club de Mister no válido o duplicado.');
+      clubsByMisterId.set(club.misterId, club);
+    });
     const players = (Array.isArray(raw?.players) ? raw.players : []).map(player => {
       const clubId = String(player?.club_id || '').trim();
       const club = clubsById.get(clubId) || null;
@@ -67,8 +73,32 @@
       recordCount: activePlayers.length,
       clubs,
       clubsById,
+      clubsByMisterId,
       players,
       playersById,
+      resolveMister({ misterPlayerId = '', playerName = '', fullName = '', clubId = '', position = '' } = {}) {
+        const providerId = String(misterPlayerId || '').trim();
+        if (!/^\d+$/.test(providerId) || !clubsById.has(clubId)) return null;
+        const byMisterId = playersByMisterId.get(providerId);
+        if (byMisterId) return byMisterId;
+        // Only an unambiguous name within the explicitly identified club may
+        // establish an identity. Never take the first homonym or infer a club.
+        const names = [fold(playerName), fold(fullName)].filter(Boolean);
+        const candidates = players.filter(player => player.active && !player.misterId
+          && player.clubId === clubId && (!position || player.position === position));
+        const exact = candidates.filter(player => names.includes(fold(player.displayName))
+          || (player.fullName && names.includes(fold(player.fullName))));
+        if (exact.length) return exact.length === 1 ? exact[0] : null;
+        const abbreviated = value => {
+          const parts = fold(value).split(' ');
+          return parts.length > 1 ? parts[0][0] + ' ' + parts.slice(1).join(' ') : '';
+        };
+        const shortName = fold(playerName);
+        if (!/^[a-z] /.test(shortName)) return null;
+        const matches = candidates.filter(player => [player.displayName, player.fullName]
+          .some(name => name && abbreviated(name) === shortName));
+        return matches.length === 1 ? matches[0] : null;
+      },
       resolve({ playerId = '', misterPlayerId = '', playerName = '', fullName = '', clubId = '', clubName = '' } = {}) {
         const byId = playersById.get(String(playerId || '').trim());
         if (byId) return byId;

@@ -36,7 +36,8 @@ async function captureFixture({pending=false,missingStats=false,negative=false}=
       const id=manager.getAttribute('href').split('/')[1];
       const container=w.document.createElement('div');container.className='team-lineup';
       container.innerHTML='<div class="lineup-starting">'+Object.keys(counts).map(position=>'<div class="line">'+players.filter(p=>p.position===position).map(p=>{
-        const index=players.indexOf(p);return `<a class="lineup-player btn-player-gw" data-id_player="${p.mister_id||index+1}" data-id_manager="${id}" data-id_gameweek="4044"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
+        const index=players.indexOf(p);const club=rawCatalog.clubs.find(c=>c.id===p.club_id);
+        return `<a class="lineup-player btn-player-gw" data-id_player="${p.mister_id||500000000+index}" data-id_manager="${id}" data-id_gameweek="4044"><img class="team-logo" src="https://cdn-mister.mundodeportivo.com/file/cdn-common/teams/${club.mister_id}.png"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
       }).join('')+'</div>').join('')+'</div>';
       w.document.body.append(container);
     }
@@ -88,7 +89,7 @@ test('J6: Carlos y Cristian Romero mantienen identidades y clubes distintos aunq
   Object.assign(slots[3],{playerName:'Koke',misterPlayerId:'42',misterClubId:'2'});
   Object.assign(slots[7],{playerName:'C. Romero',misterPlayerId:'55743',misterClubId:'20'});
   Object.assign(slots[8],{playerName:'C. Romero',misterPlayerId:'1385821',misterClubId:'2'});
-  Object.assign(slots[9],{playerName:'P. Cubarsí',misterPlayerId:'fixture-cubarsi',misterClubId:''});
+  Object.assign(slots[9],{playerName:'P. Cubarsí',misterPlayerId:'500000020',misterClubId:'3'});
   const copy={...payload,matchday:3,gameweekId:4044};
   const {dom,api}=await adminFor(copy);
   try {
@@ -101,6 +102,26 @@ test('J6: Carlos y Cristian Romero mantienen identidades y clubes distintos aunq
     assert.equal(rows[0].points,11);
     assert.equal(api.lineupMetrics(rows[0].lineup).complete,true);
   } finally { dom.window.close(); }
+});
+
+test('un club desactualizado de otro jugador no rechaza a Cárdenas ni contamina al Rayo',async()=>{
+  const payload=await captureFixture();
+  const {dom,api}=await adminFor(payload);
+  try {
+    const pedrosa=api.state.catalog.playersById.get('a-pedrosa');
+    pedrosa.clubId='sevilla';pedrosa.clubName='Sevilla FC';
+    Object.assign(payload.managers[0].lineup[7],{playerName:'A. Pedrosa',fullName:'',misterPlayerId:'14691',misterClubId:'14'});
+    Object.assign(payload.managers[0].lineup[10],{playerName:'D. Cárdenas',fullName:'',misterPlayerId:'24742',misterClubId:'14'});
+    const rows=api.normalizeMisterPayload(payload,4044);
+    assert.equal(rows[0].lineup[10].player_id,'d-cardenas');
+    assert.equal(rows[0].lineup[10].club_id,'rayo-vallecano');
+    assert.equal(rows[0].lineup[10].position,'PT');
+    assert.equal(rows[0].lineup[7].club_id,'rayo-vallecano');
+    const reversed=api.normalizeMisterPayload({...payload,managers:[...payload.managers].reverse()},4044);
+    assert.deepEqual(JSON.parse(JSON.stringify(reversed)),JSON.parse(JSON.stringify(rows)));
+    Object.assign(payload.managers[0].lineup[10],{misterClubId:'999999'});
+    assert.throws(()=>api.normalizeMisterPayload(payload,4044),/club de Mister.*999999/i);
+  } finally {dom.window.close();}
 });
 
 test('guardado real del panel usa exclusivamente RPC de borrador y conserva decisiones al reimportar',async()=>{

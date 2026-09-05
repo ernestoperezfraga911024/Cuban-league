@@ -1460,7 +1460,7 @@ function normalizePublishedMatchdayLineup(rawLineup){
         ?MATCHDAY_EMPTY_CLUB_NAME
         :String(row?.club_name||catalogPlayer?.clubName||'').trim(),
       photo:catalogPlayer?.photo||'',
-      crest:catalogPlayer?.crest||'',
+      crest:PLAYER_CATALOG?.clubsById.get(clubId||catalogPlayer?.clubId)?.crest||catalogPlayer?.crest||'',
       position,
       displayedPoints:isEmptyPosition?MATCHDAY_EMPTY_POINTS:matchdayLineupNumericValue(row?.displayed_points),
       isCaptain,
