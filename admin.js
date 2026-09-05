@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '165-20260905-mister-bridge';
+  const VERSION = '166-20260905-mister-identities';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -320,14 +320,14 @@
     const missing = state.participants.filter(participant => !managerByParticipant.has(participant.name));
     if (missing.length) throw new Error('Faltan participantes: ' + missing.map(item => item.name).join(', ') + '.');
 
-    const misterClubMap = new Map();
+    const misterClubMap = new Map(state.catalog.clubs.filter(club => club.misterId).map(club => [club.misterId, club.id]));
     payload.managers.flatMap(manager => Array.isArray(manager?.lineup) ? manager.lineup : []).forEach(player => {
-      const resolved = state.catalog.resolve({ playerName: player?.playerName });
+      const resolved = state.catalog.resolve({ misterPlayerId: player?.misterPlayerId, playerName: player?.playerName, fullName: player?.fullName });
       const misterClubId = String(player?.misterClubId || '');
       if (!resolved || !misterClubId) return;
       const previous = misterClubMap.get(misterClubId);
       if (previous && previous !== resolved.clubId) {
-        throw new Error('Mister devolvió un club contradictorio para ' + String(player?.playerName || 'un jugador') + '.');
+        throw new Error('Hay que revisar el club de ' + String(player?.fullName || player?.playerName || 'un jugador') + ' (Mister ID ' + String(player?.misterPlayerId || '') + ') en el catálogo. La captura sigue disponible.');
       }
       misterClubMap.set(misterClubId, resolved.clubId);
     });
@@ -373,7 +373,9 @@
         seenMisterPlayers.add(misterPlayerId);
         const mappedClubId = misterClubMap.get(String(rawPlayer?.misterClubId || '')) || '';
         const catalogPlayer = state.catalog.resolve({
+          misterPlayerId,
           playerName: rawPlayer?.playerName,
+          fullName: rawPlayer?.fullName,
           clubId: mappedClubId
         });
         if (!catalogPlayer) {

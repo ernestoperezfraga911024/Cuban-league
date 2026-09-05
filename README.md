@@ -548,3 +548,23 @@ No se cambia la base de datos ni se publica ninguna jornada con esta actualizaci
 
 El apodo ampliado de ANDOBA se vincula al participante por su ID Mister verificado
 5014980, dentro de la liga 649733; no se añaden coincidencias aproximadas de nombres.
+
+# Identidades de jugadores en Mister · V166
+
+Mister muestra a Carlos Romero (55743, Villarreal/20) y Cristian Romero
+(1385821, Atlético/2) como «C. Romero». La resolución anterior por nombre
+trataba ambas fichas como una sola y detenía la captura por club contradictorio.
+Se conserva Carlos con ID interno `c-romero`, foto e historial, y se añade Cristian
+como `c-romero-atletico`, con su retrato de la CDN de Mister. El catálogo tiene
+537 futbolistas activos. Se incorporan también los IDs de Iván, Isaac y Zaid Romero
+verificados en el buscador de Mister; sus clubes y fotos permanecen iguales.
+
+El catálogo y el importador resuelven primero por ID de Mister y permiten buscar
+por nombre completo. Un ID desconocido no se asigna a otro futbolista que ya
+tenga ID propio. Las jornadas históricas siguen usando sus IDs y clubes guardados.
+La extensión 1.0.1 es compatible; una captura lista se puede recuperar recargando
+la misma pestaña de administración (si aún está dentro del plazo de una hora).
+
+Validación: 19 pruebas pasan, incluyendo reproducción del error de ambos Romero,
+la asociación correcta de cada defensor y la conservación del historial. No hay
+cambios SQL, publicaciones de jornada ni modificación de borradores en el despliegue.

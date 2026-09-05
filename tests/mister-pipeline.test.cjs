@@ -36,7 +36,7 @@ async function captureFixture({pending=false,missingStats=false,negative=false}=
       const id=manager.getAttribute('href').split('/')[1];
       const container=w.document.createElement('div');container.className='team-lineup';
       container.innerHTML='<div class="lineup-starting">'+Object.keys(counts).map(position=>'<div class="line">'+players.filter(p=>p.position===position).map(p=>{
-        const index=players.indexOf(p);return `<a class="lineup-player btn-player-gw" data-id_player="${index+1}" data-id_manager="${id}" data-id_gameweek="4044"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
+        const index=players.indexOf(p);return `<a class="lineup-player btn-player-gw" data-id_player="${p.mister_id||index+1}" data-id_manager="${id}" data-id_gameweek="4044"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
       }).join('')+'</div>').join('')+'</div>';
       w.document.body.append(container);
     }
@@ -79,6 +79,28 @@ test('jornada en curso conserva avisos; estadística ausente sigue siendo null e
   assert.equal(payload.managers[0].lineup[0].status,'pending');assert.equal(payload.managers[0].lineup[0].didPlay,null);
   assert.equal(payload.managers[0].goals,null);assert.ok(payload.warnings.length>=20);
   const {dom,rows}=await adminFor(payload);assert.equal(rows[0].goals,null);assert.equal(rows[0].points,10);dom.window.close();
+});
+
+test('J6: Carlos y Cristian Romero mantienen identidades y clubes distintos aunque ambos se llamen C. Romero',async()=>{
+  const payload=await captureFixture();
+  payload.matchday=6;payload.gameweekId=4047;
+  const slots=payload.managers[0].lineup;
+  Object.assign(slots[3],{playerName:'Koke',misterPlayerId:'42',misterClubId:'2'});
+  Object.assign(slots[7],{playerName:'C. Romero',misterPlayerId:'55743',misterClubId:'20'});
+  Object.assign(slots[8],{playerName:'C. Romero',misterPlayerId:'1385821',misterClubId:'2'});
+  Object.assign(slots[9],{playerName:'P. Cubarsí',misterPlayerId:'fixture-cubarsi',misterClubId:''});
+  const copy={...payload,matchday:3,gameweekId:4044};
+  const {dom,api}=await adminFor(copy);
+  try {
+    api.state.matchday=6;
+    const rows=api.normalizeMisterPayload(payload,4047);
+    const defenders=rows[0].lineup.filter(p=>p.player_name==='C. Romero');
+    assert.equal(defenders.length,2);
+    assert.deepEqual(Array.from(defenders,p=>p.player_id),['c-romero','c-romero-atletico']);
+    assert.deepEqual(Array.from(defenders,p=>p.club_id),['villarreal','atletico-madrid']);
+    assert.equal(rows[0].points,11);
+    assert.equal(api.lineupMetrics(rows[0].lineup).complete,true);
+  } finally { dom.window.close(); }
 });
 
 test('guardado real del panel usa exclusivamente RPC de borrador y conserva decisiones al reimportar',async()=>{

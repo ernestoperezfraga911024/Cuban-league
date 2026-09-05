@@ -15,12 +15,16 @@
 
   function assetUrl(path) {
     const value = String(path || '').replace(/^\.\//, '');
+    if (/^https?:/i.test(value)) {
+      return /^https:\/\/cdn-mister\.mundodeportivo\.com\/file\/cdn-common\/players\/\d+\.png(?:\?version=\d+)?$/.test(value) ? value : '';
+    }
     return value ? `${BASE_PATH}${value}` : '';
   }
 
   function prepare(raw) {
     const clubs = (Array.isArray(raw?.clubs) ? raw.clubs : []).map(club => ({
       id: String(club?.id || '').trim(),
+      misterId: String(club?.mister_id || '').trim(),
       name: String(club?.name || '').trim(),
       crest: assetUrl(club?.crest)
     })).filter(club => club.id && club.name);
@@ -30,6 +34,8 @@
       const club = clubsById.get(clubId) || null;
       const prepared = {
         id: String(player?.id || '').trim(),
+        misterId: String(player?.mister_id || '').trim(),
+        fullName: String(player?.full_name || '').trim(),
         displayName: String(player?.display_name || '').trim(),
         position: String(player?.position || '').trim().toUpperCase(),
         clubId,
@@ -38,11 +44,17 @@
         crest: club?.crest || '',
         active: player?.active !== false
       };
-      prepared.searchText = fold(`${prepared.displayName} ${prepared.clubName} ${prepared.position}`);
+      prepared.searchText = fold(`${prepared.displayName} ${prepared.fullName} ${prepared.clubName} ${prepared.position}`);
       return prepared;
     }).filter(player => player.id && player.displayName && ['PT', 'DF', 'MC', 'DL'].includes(player.position));
     const activePlayers = players.filter(player => player.active);
     const playersById = new Map(players.map(player => [player.id, player]));
+    const playersByMisterId = new Map();
+    players.forEach(player => {
+      if (!player.misterId) return;
+      if (!/^\d+$/.test(player.misterId) || playersByMisterId.has(player.misterId)) throw new Error('El catálogo contiene una identidad de Mister no válida o duplicada.');
+      playersByMisterId.set(player.misterId, player);
+    });
     const playersByLegacyKey = new Map();
     players.forEach(player => {
       const key = `${fold(player.displayName)}|${fold(player.clubName)}`;
@@ -57,15 +69,21 @@
       clubsById,
       players,
       playersById,
-      resolve({ playerId = '', playerName = '', clubId = '', clubName = '' } = {}) {
+      resolve({ playerId = '', misterPlayerId = '', playerName = '', fullName = '', clubId = '', clubName = '' } = {}) {
         const byId = playersById.get(String(playerId || '').trim());
         if (byId) return byId;
+        const providerId = String(misterPlayerId || '').trim();
+        const byMisterId = playersByMisterId.get(providerId);
+        if (byMisterId) return byMisterId;
+        const eligible = player => !providerId || !player.misterId || player.misterId === providerId;
         const exactLegacy = playersByLegacyKey.get(`${fold(playerName)}|${fold(clubName)}`);
-        if (exactLegacy) return exactLegacy;
+        if (exactLegacy && eligible(exactLegacy)) return exactLegacy;
         const normalizedName = fold(playerName);
+        const normalizedFullName = fold(fullName);
         const normalizedClubId = String(clubId || '').trim();
-        if (!normalizedName) return null;
-        const candidates = players.filter(player => fold(player.displayName) === normalizedName);
+        if (!normalizedName && !normalizedFullName) return null;
+        const candidates = players.filter(player => eligible(player) && (fold(player.displayName) === normalizedName
+          || (normalizedFullName && fold(player.fullName) === normalizedFullName)));
         if (normalizedClubId) {
           const matchingClub = candidates.find(player => player.clubId === normalizedClubId);
           if (matchingClub) return matchingClub;
