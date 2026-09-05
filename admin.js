@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '164-20260905-mister-extension';
+  const VERSION = '165-20260905-mister-bridge';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -191,6 +191,8 @@
 
 
   const MISTER_LEAGUE_ID = '649733';
+  // Verified in league 649733: Mister displays an extra suffix on this nickname.
+  const MISTER_KNOWN_BINDINGS = Object.freeze({'5014980': 'ANDOBA THE BEST'});
   const MISTER_SESSION_KEY = 'cuban-mister-active-import';
   const importCore = window.CubanMisterImportCore;
   const extensionCalls = new Map();
@@ -200,8 +202,10 @@
     if (!pending) return;
     clearTimeout(pending.timer);
     extensionCalls.delete(event.data.id);
-    if (event.data.ok) pending.resolve(event.data);
-    else pending.reject(new Error(event.data.error || 'La extensión no pudo completar la operación.'));
+    // v1.0.0 used a flat envelope; accept its HELLO to explain the required update.
+    const result = event.data.result || event.data;
+    if (result.ok) pending.resolve(result);
+    else pending.reject(new Error(result.error || 'La extensión no pudo completar la operación.'));
   });
 
   function extensionCall(type, input = {}) {
@@ -209,14 +213,28 @@
       const id = crypto.randomUUID();
       const timer = setTimeout(() => {
         extensionCalls.delete(id);
-        reject(new Error('No se detecta la extensión. Instálala y recarga esta página.'));
+        reject(new Error(type === 'HELLO'
+          ? 'No se detecta la extensión. Instálala y recarga esta página.'
+          : 'La extensión no respondió a tiempo. Vuelve al panel y reintenta la operación.'));
       }, 8000);
       extensionCalls.set(id, {resolve, reject, timer});
       window.postMessage({channel:'cuban-mister-panel-v1',id,type,input}, location.origin);
     });
   }
 
+  async function requireMisterExtension() {
+    const hello = await extensionCall('HELLO');
+    if (hello.bridgeProtocol !== 2) {
+      throw new Error('La extensión instalada necesita actualizarse a 1.0.1. Abre «Instalar extensión · guía», reemplaza los archivos, recarga la extensión y este panel.');
+    }
+  }
+
   function misterManagerKey(value) { return importCore.key(value); }
+  function resolveMisterParticipant(manager, bindings = {}) {
+    const linkedName = bindings[manager.id] || MISTER_KNOWN_BINDINGS[manager.id];
+    return state.participants.find(p => p.name === linkedName)
+      || state.participants.find(p => misterManagerKey(p.name) === misterManagerKey(manager.name));
+  }
   function misterBaselineKey() { return 'cuban-mister-baseline:' + currentSeasonKey() + ':' + state.matchday; }
   function misterBindingKey() { return 'cuban-mister-participants:' + currentSeasonKey() + ':' + MISTER_LEAGUE_ID; }
   function readImportJSON(key, storage = localStorage) {
@@ -562,8 +580,7 @@
         const next = {};
         const seen = new Set();
         discovery.managers.forEach(manager => {
-          const participant = state.participants.find(p => p.name === bindings[manager.id])
-            || state.participants.find(p => misterManagerKey(p.name) === misterManagerKey(manager.name));
+          const participant = resolveMisterParticipant(manager, bindings);
           if (!participant || seen.has(participant.name)) throw new Error('No se pudo relacionar a ' + manager.name + ' con un participante único.');
           seen.add(participant.name);
           next[manager.id] = participant.name;
@@ -599,7 +616,7 @@
     state.misterImportBusy = true;
     syncMisterImportUI();
     try {
-      await extensionCall('HELLO');
+      await requireMisterExtension();
       if (state.misterImportAttempt !== attempt) return;
       if (!(await flushAutoSave())) throw new Error('Guarda los cambios actuales antes de importar.');
       if (state.misterImportAttempt !== attempt) return;

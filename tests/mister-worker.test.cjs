@@ -42,3 +42,13 @@ test('resultado se conserva hasta confirmación del panel y luego se elimina',as
   assert.equal((await w.call('STATUS',{id})).job.payload.matchday,6);
   await w.call('CONSUME',{id});assert.equal((await w.call('STATUS',{id})).job.payload,undefined);
 });
+
+test('reintento tras perder START recupera solo la captura de la misma pestaña, jornada y temporada',async()=>{
+  const w=worker();const input={matchday:6,season:'2026/27'};
+  const start=await w.call('START',input);
+  assert.equal((await w.call('START',input)).id,start.id);
+  assert.equal(w.visits.length,2);
+  assert.equal((await w.call('START',input,11)).ok,false);
+  assert.equal((await w.call('START',{...input,matchday:3})).ok,false);
+  assert.equal((await w.call('START',{...input,season:'2025/26'})).ok,false);
+});

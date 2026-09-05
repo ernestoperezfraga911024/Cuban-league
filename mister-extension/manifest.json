@@ -1,13 +1,37 @@
 {
   "manifest_version": 3,
   "name": "Cuban League · Importar desde Mister",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lee la jornada de Mister y la envía al borrador del panel de Cuban League. Publicar siempre es una acción del administrador.",
-  "permissions": ["storage"],
-  "background": {"service_worker": "background.js"},
-  "action": {"default_popup": "popup.html", "default_title": "Importar desde Mister"},
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Importar desde Mister"
+  },
   "content_scripts": [
-    {"matches": ["https://ernestoperezfraga911024.github.io/Cuban-league/admin.html*"], "js": ["admin-bridge.js"], "run_at": "document_start"},
-    {"matches": ["https://mister.mundodeportivo.com/*"], "js": ["mister-import-core.js", "collector.js"], "run_at": "document_idle"}
+    {
+      "matches": [
+        "https://ernestoperezfraga911024.github.io/Cuban-league/admin.html*"
+      ],
+      "js": [
+        "admin-bridge.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://mister.mundodeportivo.com/*"
+      ],
+      "js": [
+        "mister-import-core.js",
+        "collector.js"
+      ],
+      "run_at": "document_idle"
+    }
   ]
 }

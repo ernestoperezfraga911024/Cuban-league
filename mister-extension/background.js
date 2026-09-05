@@ -16,7 +16,7 @@ async function handle(message, sender) {
   if (sender.frameId !== 0 || !sender.tab) throw new Error('Origen no autorizado.');
   const input = message.input || {};
   if (isAdmin(sender.url)) {
-    if (message.type === 'HELLO') return { version: '1.0.0' };
+    if (message.type === 'HELLO') return { version: '1.0.1', bridgeProtocol: 2 };
     if (message.type === 'START') {
       if (!Number.isInteger(input.matchday) || input.matchday < 1 || input.matchday > 38
         || typeof input.season !== 'string' || input.season.length > 30) throw new Error('Jornada no válida.');
@@ -24,7 +24,11 @@ async function handle(message, sender) {
       for (const [key, old] of Object.entries(stored)) {
         if (!key.startsWith('job:')) continue;
         if (Date.now() - old.createdAt > TTL || ['cancelled', 'consumed'].includes(old.status)) await chrome.storage.session.remove(key);
-        else if (['discovering', 'discovered', 'capturing'].includes(old.status)) throw new Error('Ya hay una lectura de Mister activa. Cancélala en su panel antes de empezar otra.');
+        else if (['discovering', 'discovered', 'capturing'].includes(old.status)) {
+          // Recover a START response lost by the same panel without opening another tab.
+          if (old.adminTabId === sender.tab.id && old.matchday === input.matchday && old.season === input.season) return { id: old.id };
+          throw new Error('Ya hay una lectura de Mister activa. Cancélala en su panel antes de empezar otra.');
+        }
       }
       const job = { id: crypto.randomUUID(), adminTabId: sender.tab.id, createdAt: Date.now(),
         matchday: input.matchday, season: input.season, status: 'discovering', progress: 'Abriendo Mister…' };

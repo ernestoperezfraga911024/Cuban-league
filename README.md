@@ -504,7 +504,7 @@ La contraseña y las reglas de acceso se administran exclusivamente en Supabase.
 # Importación desde Mister · V164
 
 La extensión de `mister-extension/` conecta la jornada de Mister con el borrador
-del panel. Se distribuye en `downloads/Cuban-League-Mister-1.0.0.zip`; instalación
+del panel. Se distribuye en `downloads/Cuban-League-Mister-1.0.1.zip`; instalación
 en `mister-extension-install.html`. No es una integración oficial de Mister.
 
 - Liga verificada por ID `649733`, calendario leído de Mister y 20 participantes.
@@ -531,3 +531,20 @@ simulado y el guardado del panel con el RPC sustituido por un doble de prueba.
 Empaquetar: `npm run package:extension` (sin código remoto; ZIP reproducible).
 La instalación en Chrome real y la primera captura autenticada deben verificarse
 con el administrador; las pruebas simuladas no sustituyen ese paso.
+
+# Corrección del inicio de importación · V165 / extensión 1.0.1
+
+La respuesta START incluía el ID de la captura sobre el ID de correlación del mensaje.
+Mister abría correctamente, pero el panel descartaba la respuesta y mostraba
+«No se detecta la extensión». El puente ahora separa la respuesta del sobre; el
+panel verifica el protocolo antes de iniciar y explica cómo actualizar 1.0.0.
+Un reintento en la misma pestaña, jornada y temporada recupera la captura activa.
+
+La prueba de regresión usa el código real del panel, puente y worker con transporte
+de navegador simulado: falló con el error reportado antes del arreglo y pasa después.
+También cubre respuestas ajenas, aviso de versión y recuperación sin duplicar pestañas.
+La suite completa tiene 16 pruebas. La primera importación en Chrome real sigue pendiente.
+No se cambia la base de datos ni se publica ninguna jornada con esta actualización.
+
+El apodo ampliado de ANDOBA se vincula al participante por su ID Mister verificado
+5014980, dentro de la liga 649733; no se añaden coincidencias aproximadas de nombres.

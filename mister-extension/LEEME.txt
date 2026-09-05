@@ -1,4 +1,4 @@
-CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.0.0
+CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.0.1
 
 INSTALAR (CHROME EN COMPUTADORA)
 1. Extrae el ZIP en una carpeta permanente, por ejemplo Documentos/Cuban-League-Mister.
@@ -11,6 +11,11 @@ INSTALAR (CHROME EN COMPUTADORA)
 8. Si aparece revisión de datos existentes, marca cuáles sustituir y guarda las decisiones.
 
 Publicar es siempre una acción tuya desde administración.
+
+ACTUALIZAR DESDE 1.0.0
+1. Extrae el nuevo ZIP en la misma carpeta instalada y acepta reemplazar los archivos.
+2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.0.1.
+3. Recarga administración y vuelve a importar. Conserva el borrador existente.
 
 LECTURA Y LÍMITES
 - Liga configurada: 1ra div Cubanleague, código Mister 649733; 20 participantes.

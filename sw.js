@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v164-mister-extension';
+const CACHE_NAME = 'cuban-league-v165-mister-bridge';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,8 +9,8 @@ const APP_SHELL = [
   './player-catalog.js?v=161-20260902',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=164-20260905-mister-extension',
-  './admin.js?v=164-20260905-mister-extension',
+  './admin.css?v=165-20260905-mister-bridge',
+  './admin.js?v=165-20260905-mister-bridge',
   './mister-import-core.js?v=164',
   './admin-manifest.json',
   './supabase.js',
