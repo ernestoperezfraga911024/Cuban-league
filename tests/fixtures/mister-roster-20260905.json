@@ -1,0 +1,4184 @@
+{
+  "source": "https://mister.mundodeportivo.com/search",
+  "leagueId": "649733",
+  "verifiedAt": "2026-09-05",
+  "paginationComplete": true,
+  "players": [
+    {
+      "misterPlayerId": "48657",
+      "playerName": "Raphinha",
+      "slug": "raphinha",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48657.png?version=20260217184508"
+    },
+    {
+      "misterPlayerId": "17290",
+      "playerName": "S. Camello",
+      "slug": "sergio-camello",
+      "misterClubId": "14",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17290.png?version=20251004230141"
+    },
+    {
+      "misterPlayerId": "53114",
+      "playerName": "J. Bellingham",
+      "slug": "jude-bellingham",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53114.png?version=20251228213943"
+    },
+    {
+      "misterPlayerId": "55009",
+      "playerName": "F. López",
+      "slug": "fermin-lopez",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55009.png?version=20260217184107"
+    },
+    {
+      "misterPlayerId": "58954",
+      "playerName": "K. Mbappé",
+      "slug": "kylian-mbappe",
+      "misterClubId": "15",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58954.png?version=20251228213833"
+    },
+    {
+      "misterPlayerId": "54817",
+      "playerName": "A. Güler",
+      "slug": "arda-gueler",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/54817.png?version=20260823083059"
+    },
+    {
+      "misterPlayerId": "53111",
+      "playerName": "Á. Valles",
+      "slug": "alvaro-valles",
+      "misterClubId": "4",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53111.png?version=20251003194305"
+    },
+    {
+      "misterPlayerId": "22502",
+      "playerName": "A. Baena",
+      "slug": "alex-baena",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22502.png?version=20251228214026"
+    },
+    {
+      "misterPlayerId": "36410",
+      "playerName": "P. Aubameyang",
+      "slug": "pierre-emerick-aubameyang",
+      "misterClubId": "6",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/36410.png?version=20260718091305"
+    },
+    {
+      "misterPlayerId": "6032",
+      "playerName": "A. Remiro",
+      "slug": "alex-remiro",
+      "misterClubId": "16",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/6032.png?version=20251004233029"
+    },
+    {
+      "misterPlayerId": "59382",
+      "playerName": "N. Pépé",
+      "slug": "nicolas-pepe",
+      "misterClubId": "20",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59382.png?version=20251006021201"
+    },
+    {
+      "misterPlayerId": "60888",
+      "playerName": "R. Fernández",
+      "slug": "roberto-fernandez",
+      "misterClubId": "8",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60888.png?version=20250114150015"
+    },
+    {
+      "misterPlayerId": "63",
+      "playerName": "M. Bartra",
+      "slug": "marc-bartra",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63.png?version=20250205144032"
+    },
+    {
+      "misterPlayerId": "52375",
+      "playerName": "L. Yamal",
+      "slug": "lamine-yamal",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52375.png?version=20260217182455"
+    },
+    {
+      "misterPlayerId": "24778",
+      "playerName": "R. Navarro",
+      "slug": "robert-navarro",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/24778.png?version=20251003193526"
+    },
+    {
+      "misterPlayerId": "12900",
+      "playerName": "V. Júnior",
+      "slug": "vinicius-junior",
+      "misterClubId": "15",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/12900.png?version=20260804190153"
+    },
+    {
+      "misterPlayerId": "3060",
+      "playerName": "M. Díaz",
+      "slug": "mariano-diaz",
+      "misterClubId": "48",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3060.png?version=20231221112719"
+    },
+    {
+      "misterPlayerId": "19727",
+      "playerName": "R. Riquelme",
+      "slug": "rodrigo-riquelme",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/19727.png?version=20251003194652"
+    },
+    {
+      "misterPlayerId": "52162",
+      "playerName": "P. Gueye",
+      "slug": "pape-gueye",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52162.png?version=20260312150047"
+    },
+    {
+      "misterPlayerId": "33053",
+      "playerName": "A. de la Fuente",
+      "slug": "adrian-de-la-fuente",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/33053.png?version=20250613151439"
+    },
+    {
+      "misterPlayerId": "14811",
+      "playerName": "U. Simón",
+      "slug": "unai-simon",
+      "misterClubId": "1",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14811.png?version=20251216212451"
+    },
+    {
+      "misterPlayerId": "51135",
+      "playerName": "P. Barrios",
+      "slug": "pablo-barrios",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/51135.png?version=20251003194102"
+    },
+    {
+      "misterPlayerId": "15653",
+      "playerName": "K. Lee",
+      "slug": "kang-in-lee",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15653.png?version=20260725160628"
+    },
+    {
+      "misterPlayerId": "61012",
+      "playerName": "P. García",
+      "slug": "pablo-garcia",
+      "misterClubId": "1490",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61012.png?version=20260902000236"
+    },
+    {
+      "misterPlayerId": "36048",
+      "playerName": "N. Tenaglia",
+      "slug": "nahuel-tenaglia",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/36048.png?version=20251006024418"
+    },
+    {
+      "misterPlayerId": "28773",
+      "playerName": "A. Paredes",
+      "slug": "aitor-paredes",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28773.png?version=20251003185210"
+    },
+    {
+      "misterPlayerId": "63788",
+      "playerName": "D. Huijsen",
+      "slug": "dean-huijsen",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63788.png?version=20251003183640"
+    },
+    {
+      "misterPlayerId": "22604",
+      "playerName": "I. Vicente",
+      "slug": "inigo-vicente",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22604.png?version=20260619115857"
+    },
+    {
+      "misterPlayerId": "30444",
+      "playerName": "L. Román",
+      "slug": "leo-roman",
+      "misterClubId": "6",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/30444.png?version=20250515145822"
+    },
+    {
+      "misterPlayerId": "71640",
+      "playerName": "M. Sierra",
+      "slug": "miguel-sierra",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71640.png?version=20260803092954"
+    },
+    {
+      "misterPlayerId": "64459",
+      "playerName": "D. Hancko",
+      "slug": "david-hancko",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64459.png?version=20250724080120"
+    },
+    {
+      "misterPlayerId": "63705",
+      "playerName": "I. Radu",
+      "slug": "ionut-radu",
+      "misterClubId": "5",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63705.png?version=20250610102418"
+    },
+    {
+      "misterPlayerId": "18004",
+      "playerName": "A. Budimir",
+      "slug": "ante-budimir",
+      "misterClubId": "50",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/18004.png?version=20251006024916"
+    },
+    {
+      "misterPlayerId": "71503",
+      "playerName": "M. Rodriguez",
+      "slug": "mikel-rodriguez",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71503.png?version=20260716123408"
+    },
+    {
+      "misterPlayerId": "7024",
+      "playerName": "F. Valverde",
+      "slug": "fede-valverde",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/7024.png?version=20251003183927"
+    },
+    {
+      "misterPlayerId": "42",
+      "playerName": "Koke",
+      "slug": "koke",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/42.png?version=20251003193951"
+    },
+    {
+      "misterPlayerId": "70638",
+      "playerName": "A. Gordon",
+      "slug": "anthony-gordon",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70638.png?version=20260603151304"
+    },
+    {
+      "misterPlayerId": "58467",
+      "playerName": "C. Ejuke",
+      "slug": "chidera-ejuke",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58467.png?version=20251006013338"
+    },
+    {
+      "misterPlayerId": "61013",
+      "playerName": "A. Santos",
+      "slug": "antony-santos",
+      "misterClubId": "4",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61013.png?version=20251228214253"
+    },
+    {
+      "misterPlayerId": "14789",
+      "playerName": "O. Sancet",
+      "slug": "oihan-sancet",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14789.png?version=20250818192509"
+    },
+    {
+      "misterPlayerId": "130",
+      "playerName": "I. Aspas",
+      "slug": "iago-aspas",
+      "misterClubId": "5",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/130.png?version=20251003195047"
+    },
+    {
+      "misterPlayerId": "23664",
+      "playerName": "S. Carreira",
+      "slug": "sergio-carreira",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/23664.png?version=20251003195345"
+    },
+    {
+      "misterPlayerId": "65674",
+      "playerName": "M. Román",
+      "slug": "miguel-roman",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65674.png?version=20250831165937"
+    },
+    {
+      "misterPlayerId": "28780",
+      "playerName": "L. Cruz",
+      "slug": "luismi-cruz",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28780.png?version=20260621103122"
+    },
+    {
+      "misterPlayerId": "27907",
+      "playerName": "R. Brugué",
+      "slug": "roger-brugue",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27907.png?version=20250613152455"
+    },
+    {
+      "misterPlayerId": "609",
+      "playerName": "D. Soria",
+      "slug": "david-soria",
+      "misterClubId": "9",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/609.png?version=20251003195901"
+    },
+    {
+      "misterPlayerId": "28612",
+      "playerName": "M. Ryan",
+      "slug": "mathew-ryan",
+      "misterClubId": "12",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28612.png?version=20250829183411"
+    },
+    {
+      "misterPlayerId": "15756",
+      "playerName": "A. Catena",
+      "slug": "alejandro-catena",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15756.png?version=20231217204253"
+    },
+    {
+      "misterPlayerId": "52117",
+      "playerName": "J. Ander Olasagasti",
+      "slug": "jon-ander-olasagasti",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52117.png?version=20251004223453"
+    },
+    {
+      "misterPlayerId": "71616",
+      "playerName": "Y. Zabiri",
+      "slug": "yassir-zabiri",
+      "misterClubId": "1490",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71616.png?version=20260730085522"
+    },
+    {
+      "misterPlayerId": "1762",
+      "playerName": "Á. Berenguer",
+      "slug": "alex-berenguer",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1762.png?version=20251003185228"
+    },
+    {
+      "misterPlayerId": "71154",
+      "playerName": "L. Amatucci",
+      "slug": "lorenzo-amatucci",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71154.png?version=20260709090853"
+    },
+    {
+      "misterPlayerId": "35434",
+      "playerName": "M. Pubill",
+      "slug": "marc-pubill",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/35434.png?version=20250722235600"
+    },
+    {
+      "misterPlayerId": "3728",
+      "playerName": "M. Roca",
+      "slug": "marc-roca",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3728.png?version=20260809062618"
+    },
+    {
+      "misterPlayerId": "68676",
+      "playerName": "A. Lookman",
+      "slug": "ademola-lookman",
+      "misterClubId": "2",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68676.png?version=20260323141155"
+    },
+    {
+      "misterPlayerId": "24",
+      "playerName": "U. López",
+      "slug": "unai-lopez",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/24.png?version=20251004230007"
+    },
+    {
+      "misterPlayerId": "476",
+      "playerName": "G. Moreno",
+      "slug": "gerard-moreno",
+      "misterClubId": "20",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/476.png?version=20251031185411"
+    },
+    {
+      "misterPlayerId": "7893",
+      "playerName": "A. Sivera",
+      "slug": "antonio-sivera",
+      "misterClubId": "48",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/7893.png?version=20251006023923"
+    },
+    {
+      "misterPlayerId": "71011",
+      "playerName": "A. Herrero",
+      "slug": "alfonso-herrero",
+      "misterClubId": "13",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71011.png?version=20260621195254"
+    },
+    {
+      "misterPlayerId": "59499",
+      "playerName": "N. Souza",
+      "slug": "natan-souza",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59499.png?version=20240815182347"
+    },
+    {
+      "misterPlayerId": "23369",
+      "playerName": "J. Foyth",
+      "slug": "juan-foyth",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/23369.png?version=20231222225448"
+    },
+    {
+      "misterPlayerId": "15107",
+      "playerName": "M. Cucurella",
+      "slug": "marc-cucurella",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15107.png?version=20260615114322"
+    },
+    {
+      "misterPlayerId": "24789",
+      "playerName": "N. Williams",
+      "slug": "nico-williams",
+      "misterClubId": "1",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/24789.png?version=20260414174608"
+    },
+    {
+      "misterPlayerId": "15342",
+      "playerName": "A. Barrenetxea",
+      "slug": "ander-barrenetxea",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15342.png?version=20251004233329"
+    },
+    {
+      "misterPlayerId": "364",
+      "playerName": "S. Canales",
+      "slug": "sergio-canales",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/364.png?version=20260622183248"
+    },
+    {
+      "misterPlayerId": "59789",
+      "playerName": "O. Óskarsson",
+      "slug": "orri-oskarsson",
+      "misterClubId": "16",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59789.png?version=20251004234219"
+    },
+    {
+      "misterPlayerId": "59484",
+      "playerName": "M. Bernal",
+      "slug": "marc-bernal",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59484.png?version=20260217184633"
+    },
+    {
+      "misterPlayerId": "7025",
+      "playerName": "M. Dmitrović",
+      "slug": "marko-dmitrovic",
+      "misterClubId": "8",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/7025.png?version=20251003195646"
+    },
+    {
+      "misterPlayerId": "71061",
+      "playerName": "Á. Calatrava",
+      "slug": "alex-calatrava",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71061.png?version=20260702123349"
+    },
+    {
+      "misterPlayerId": "1719",
+      "playerName": "A. Mandi",
+      "slug": "aissa-mandi",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1719.png?version=20260716122703"
+    },
+    {
+      "misterPlayerId": "118",
+      "playerName": "J. Otto",
+      "slug": "jonny-otto",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/118.png?version=20250702181230"
+    },
+    {
+      "misterPlayerId": "54900",
+      "playerName": "C. Dotor",
+      "slug": "carlos-dotor",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/54900.png?version=20260621195143"
+    },
+    {
+      "misterPlayerId": "70923",
+      "playerName": "E. Bardeli",
+      "slug": "enzo-bardeli",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70923.png?version=20260619102457"
+    },
+    {
+      "misterPlayerId": "561",
+      "playerName": "M. Llorente",
+      "slug": "marcos-llorente",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/561.png?version=20260304114121"
+    },
+    {
+      "misterPlayerId": "71176",
+      "playerName": "M. Hjulmand",
+      "slug": "morten-hjulmand",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71176.png?version=20260711172059"
+    },
+    {
+      "misterPlayerId": "71132",
+      "playerName": "F. Bernal",
+      "slug": "facundo-bernal",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71132.png?version=20260706194104"
+    },
+    {
+      "misterPlayerId": "59371",
+      "playerName": "L. Sučić",
+      "slug": "luka-sucic",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59371.png?version=20240802114718"
+    },
+    {
+      "misterPlayerId": "28776",
+      "playerName": "B. Turrientes",
+      "slug": "benat-turrientes",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28776.png?version=20251004233515"
+    },
+    {
+      "misterPlayerId": "65347",
+      "playerName": "R. Veiga",
+      "slug": "renato-veiga",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65347.png?version=20250822133320"
+    },
+    {
+      "misterPlayerId": "53098",
+      "playerName": "A. Moleiro",
+      "slug": "alberto-moleiro",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53098.png?version=20251006020600"
+    },
+    {
+      "misterPlayerId": "56926",
+      "playerName": "P. Cubarsi",
+      "slug": "pau-cubarsi",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56926.png?version=20251007153408"
+    },
+    {
+      "misterPlayerId": "27333",
+      "playerName": "E. García",
+      "slug": "eric-garcia",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27333.png?version=20260217184328"
+    },
+    {
+      "misterPlayerId": "22547",
+      "playerName": "Pedri",
+      "slug": "pedri",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22547.png?version=20260217184011"
+    },
+    {
+      "misterPlayerId": "71574",
+      "playerName": "K. Adeyemi",
+      "slug": "karim-adeyemi",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71574.png?version=20260723170252"
+    },
+    {
+      "misterPlayerId": "63780",
+      "playerName": "C. Espí",
+      "slug": "carlos-espi",
+      "misterClubId": "15",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63780.png?version=20260323155642"
+    },
+    {
+      "misterPlayerId": "63406",
+      "playerName": "T. Alexander-Arnold",
+      "slug": "trent-alexander-arnold",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63406.png?version=20251003184213"
+    },
+    {
+      "misterPlayerId": "68606",
+      "playerName": "Á. Pérez",
+      "slug": "angel-perez",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68606.png?version=20260323141026"
+    },
+    {
+      "misterPlayerId": "64411",
+      "playerName": "Y. Enríquez",
+      "slug": "youssef-enriquez",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64411.png?version=20250717112423"
+    },
+    {
+      "misterPlayerId": "31",
+      "playerName": "J. Oblak",
+      "slug": "jan-oblak",
+      "misterClubId": "2",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/31.png?version=20251003193809"
+    },
+    {
+      "misterPlayerId": "4888",
+      "playerName": "C. Soler",
+      "slug": "carlos-soler",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4888.png?version=20250901203628"
+    },
+    {
+      "misterPlayerId": "27520",
+      "playerName": "F. García",
+      "slug": "fran-garcia",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27520.png?version=20251003183837"
+    },
+    {
+      "misterPlayerId": "64562",
+      "playerName": "N. Deossa",
+      "slug": "nelson-deossa",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64562.png?version=20250804175940"
+    },
+    {
+      "misterPlayerId": "60919",
+      "playerName": "Y. Lago",
+      "slug": "yoel-lago",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60919.png?version=20250119134951"
+    },
+    {
+      "misterPlayerId": "70941",
+      "playerName": "B. Nsongo",
+      "slug": "bil-nsongo",
+      "misterClubId": "6",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70941.png?version=20260621101823"
+    },
+    {
+      "misterPlayerId": "70932",
+      "playerName": "S. Martinez",
+      "slug": "sergio-martinez",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70932.png?version=20260619115800"
+    },
+    {
+      "misterPlayerId": "29166",
+      "playerName": "J. Garcia",
+      "slug": "joan-garcia",
+      "misterClubId": "3",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29166.png?version=20260217184424"
+    },
+    {
+      "misterPlayerId": "27516",
+      "playerName": "A. Martín",
+      "slug": "andres-martin",
+      "misterClubId": "1490",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27516.png?version=20260619120157"
+    },
+    {
+      "misterPlayerId": "48203",
+      "playerName": "R. Terrats",
+      "slug": "ramon-terrats",
+      "misterClubId": "9",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48203.png?version=20250204152625"
+    },
+    {
+      "misterPlayerId": "56632",
+      "playerName": "I. Romero",
+      "slug": "isaac-romero",
+      "misterClubId": "17",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56632.png?version=20251006013448"
+    },
+    {
+      "misterPlayerId": "63871",
+      "playerName": "M. Aguado",
+      "slug": "marc-aguado",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63871.png?version=20250617095502"
+    },
+    {
+      "misterPlayerId": "40089",
+      "playerName": "U. Sadiq",
+      "slug": "umar-sadiq",
+      "misterClubId": "19",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/40089.png?version=20251004234421"
+    },
+    {
+      "misterPlayerId": "7784",
+      "playerName": "U. Núñez",
+      "slug": "unai-nunez",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/7784.png?version=20260124075202"
+    },
+    {
+      "misterPlayerId": "20449",
+      "playerName": "F. Niño",
+      "slug": "fer-nino",
+      "misterClubId": "23",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/20449.png?version=20260730085621"
+    },
+    {
+      "misterPlayerId": "60858",
+      "playerName": "P. Ramón",
+      "slug": "pablo-ramon",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60858.png?version=20250107092428"
+    },
+    {
+      "misterPlayerId": "71623",
+      "playerName": "R. Hinojo",
+      "slug": "roger-hinojo",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71623.png?version=20260801091126"
+    },
+    {
+      "misterPlayerId": "27874",
+      "playerName": "I. Martín",
+      "slug": "ivan-martin",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27874.png?version=20260820222555"
+    },
+    {
+      "misterPlayerId": "557",
+      "playerName": "P. Fornals",
+      "slug": "pablo-fornals",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/557.png?version=20260323155521"
+    },
+    {
+      "misterPlayerId": "10",
+      "playerName": "A. Laporte",
+      "slug": "aymeric-laporte",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/10.png?version=20250912080149"
+    },
+    {
+      "misterPlayerId": "59623",
+      "playerName": "J. Martin",
+      "slug": "jon-martin",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59623.png?version=20240826105318"
+    },
+    {
+      "misterPlayerId": "22956",
+      "playerName": "S. Gómez",
+      "slug": "sergio-gomez",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22956.png?version=20251004234305"
+    },
+    {
+      "misterPlayerId": "31484",
+      "playerName": "E. Camavinga",
+      "slug": "eduardo-camavinga",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/31484.png?version=20251003184013"
+    },
+    {
+      "misterPlayerId": "48194",
+      "playerName": "W. Swedberg",
+      "slug": "williot-swedberg",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48194.png?version=20251003195414"
+    },
+    {
+      "misterPlayerId": "29223",
+      "playerName": "M. Soriano",
+      "slug": "mario-soriano",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29223.png?version=20260621102316"
+    },
+    {
+      "misterPlayerId": "59533",
+      "playerName": "G. Martín",
+      "slug": "gerard-martin",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59533.png?version=20251003184533"
+    },
+    {
+      "misterPlayerId": "70922",
+      "playerName": "I. Konaté",
+      "slug": "ibrahima-konate",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70922.png?version=20260618121720"
+    },
+    {
+      "misterPlayerId": "17615",
+      "playerName": "S. Herrera",
+      "slug": "sergio-herrera",
+      "misterClubId": "50",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17615.png?version=20231222183854"
+    },
+    {
+      "misterPlayerId": "56628",
+      "playerName": "L. Agoumé",
+      "slug": "lucien-agoume",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56628.png?version=20251006013907"
+    },
+    {
+      "misterPlayerId": "69889",
+      "playerName": "X. Espart",
+      "slug": "xavi-espart",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/69889.png?version=20260312142636"
+    },
+    {
+      "misterPlayerId": "17614",
+      "playerName": "K. Barja",
+      "slug": "kike-barja",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17614.png?version=20231222184953"
+    },
+    {
+      "misterPlayerId": "29222",
+      "playerName": "G. Simeone",
+      "slug": "giuliano-simeone",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29222.png?version=20251003193744"
+    },
+    {
+      "misterPlayerId": "28774",
+      "playerName": "J. Agirrezabala",
+      "slug": "julen-agirrezabala",
+      "misterClubId": "1490",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28774.png?version=20251006020123"
+    },
+    {
+      "misterPlayerId": "11697",
+      "playerName": "L. Boyé",
+      "slug": "lucas-boye",
+      "misterClubId": "48",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/11697.png?version=20250822135912"
+    },
+    {
+      "misterPlayerId": "59415",
+      "playerName": "D. Olmo",
+      "slug": "dani-olmo",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59415.png?version=20260217184404"
+    },
+    {
+      "misterPlayerId": "25621",
+      "playerName": "A. Rațiu",
+      "slug": "andrei-ratiu",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/25621.png?version=20260123195308"
+    },
+    {
+      "misterPlayerId": "22601",
+      "playerName": "Pepelu",
+      "slug": "pepelu",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22601.png?version=20260413101012"
+    },
+    {
+      "misterPlayerId": "64468",
+      "playerName": "T. Dolan",
+      "slug": "tyrhys-dolan",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64468.png?version=20250725131445"
+    },
+    {
+      "misterPlayerId": "55738",
+      "playerName": "C. Tárrega",
+      "slug": "cesar-tarrega",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55738.png?version=20251006014813"
+    },
+    {
+      "misterPlayerId": "68652",
+      "playerName": "V. Koski",
+      "slug": "ville-koski",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68652.png?version=20260323141101"
+    },
+    {
+      "misterPlayerId": "208",
+      "playerName": "M. Gómez",
+      "slug": "moi-gomez",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/208.png?version=20251006025203"
+    },
+    {
+      "misterPlayerId": "14911",
+      "playerName": "Á. García",
+      "slug": "alvaro-garcia",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14911.png?version=20251004224331"
+    },
+    {
+      "misterPlayerId": "5917",
+      "playerName": "I. Zubeldia",
+      "slug": "igor-zubeldia",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/5917.png?version=20251004233803"
+    },
+    {
+      "misterPlayerId": "71639",
+      "playerName": "B. Gerenabarrena",
+      "slug": "benat-gerenabarrena",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71639.png?version=20260803092552"
+    },
+    {
+      "misterPlayerId": "52189",
+      "playerName": "A. Pérez",
+      "slug": "ayoze-perez",
+      "misterClubId": "20",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52189.png?version=20251006020741"
+    },
+    {
+      "misterPlayerId": "70948",
+      "playerName": "L. Noubi",
+      "slug": "lucas-noubi",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70948.png?version=20260621102249"
+    },
+    {
+      "misterPlayerId": "20346",
+      "playerName": "G. Rodríguez",
+      "slug": "guido-rodriguez",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/20346.png?version=20260126185524"
+    },
+    {
+      "misterPlayerId": "65704",
+      "playerName": "G. Mikautadze",
+      "slug": "georges-mikautadze",
+      "misterClubId": "20",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65704.png?version=20250901204540"
+    },
+    {
+      "misterPlayerId": "6034",
+      "playerName": "E. Expósito",
+      "slug": "edu-exposito",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/6034.png?version=20240626191824"
+    },
+    {
+      "misterPlayerId": "70996",
+      "playerName": "D. Larrubia",
+      "slug": "david-larrubia",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70996.png?version=20260621200736"
+    },
+    {
+      "misterPlayerId": "270",
+      "playerName": "R. García",
+      "slug": "ruben-garcia",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/270.png?version=20251006025119"
+    },
+    {
+      "misterPlayerId": "27425",
+      "playerName": "I. Ruiz De Galarreta",
+      "slug": "inigo-ruiz-de-galarreta",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27425.png?version=20251003185435"
+    },
+    {
+      "misterPlayerId": "68498",
+      "playerName": "Z. Romero",
+      "slug": "zaid-romero",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68498.png?version=20260117124556"
+    },
+    {
+      "misterPlayerId": "19527",
+      "playerName": "J. Moncayola",
+      "slug": "jon-moncayola",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/19527.png?version=20231222184833"
+    },
+    {
+      "misterPlayerId": "71502",
+      "playerName": "A. García",
+      "slug": "andres-garcia",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71502.png?version=20260716123021"
+    },
+    {
+      "misterPlayerId": "31226",
+      "playerName": "A. Danjuma",
+      "slug": "arnaut-danjuma",
+      "misterClubId": "19",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/31226.png?version=20240702124019"
+    },
+    {
+      "misterPlayerId": "29169",
+      "playerName": "P. Ibáñez",
+      "slug": "pablo-ibanez",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29169.png?version=20231222190221"
+    },
+    {
+      "misterPlayerId": "58986",
+      "playerName": "A. Bretones",
+      "slug": "abel-bretones",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58986.png?version=20251006024745"
+    },
+    {
+      "misterPlayerId": "65090",
+      "playerName": "F. Ugrinic",
+      "slug": "filip-ugrinic",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65090.png?version=20250809103647"
+    },
+    {
+      "misterPlayerId": "392",
+      "playerName": "D. Suárez",
+      "slug": "denis-suarez",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/392.png?version=20251006024015"
+    },
+    {
+      "misterPlayerId": "62904",
+      "playerName": "Y. Diomande",
+      "slug": "yan-diomande",
+      "misterClubId": "15",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/62904.png?version=20260806211455"
+    },
+    {
+      "misterPlayerId": "564",
+      "playerName": "M. Oyarzabal",
+      "slug": "mikel-oyarzabal",
+      "misterClubId": "16",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/564.png?version=20251004234014"
+    },
+    {
+      "misterPlayerId": "14670",
+      "playerName": "T. Courtois",
+      "slug": "thibaut-courtois",
+      "misterClubId": "15",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14670.png?version=20251003184139"
+    },
+    {
+      "misterPlayerId": "19562",
+      "playerName": "T. Kubo",
+      "slug": "takefusa-kubo",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/19562.png?version=20251004234049"
+    },
+    {
+      "misterPlayerId": "25631",
+      "playerName": "I. Moriba",
+      "slug": "ilaix-moriba",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/25631.png?version=20251003195109"
+    },
+    {
+      "misterPlayerId": "15566",
+      "playerName": "Y. Herrera",
+      "slug": "yangel-herrera",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15566.png?version=20251004234650"
+    },
+    {
+      "misterPlayerId": "70999",
+      "playerName": "D. Lorenzo",
+      "slug": "dani-lorenzo",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70999.png?version=20260621195504"
+    },
+    {
+      "misterPlayerId": "25867",
+      "playerName": "A. Blanco",
+      "slug": "antonio-blanco",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/25867.png?version=20251006023841"
+    },
+    {
+      "misterPlayerId": "70992",
+      "playerName": "Chupete",
+      "slug": "chupete",
+      "misterClubId": "13",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70992.png?version=20260621195421"
+    },
+    {
+      "misterPlayerId": "24792",
+      "playerName": "J. Iglesias",
+      "slug": "juan-iglesias",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/24792.png?version=20251003200157"
+    },
+    {
+      "misterPlayerId": "2720265",
+      "playerName": "T. Parrott",
+      "slug": "troy-parrott",
+      "misterClubId": "4",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/2720265.png?version=20260820222948"
+    },
+    {
+      "misterPlayerId": "29163",
+      "playerName": "O. El Hilali",
+      "slug": "omar-el-hilali",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29163.png?version=20240626191545"
+    },
+    {
+      "misterPlayerId": "6044",
+      "playerName": "E. Ünal",
+      "slug": "enes-uenal",
+      "misterClubId": "9",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/6044.png?version=20260813165621"
+    },
+    {
+      "misterPlayerId": "56502",
+      "playerName": "M. Jauregizar",
+      "slug": "mikel-jauregizar",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56502.png?version=20251003193200"
+    },
+    {
+      "misterPlayerId": "59042",
+      "playerName": "P. Fernández",
+      "slug": "peque-fernandez",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59042.png?version=20251006014424"
+    },
+    {
+      "misterPlayerId": "52371",
+      "playerName": "I. Muñoz",
+      "slug": "iker-munoz",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52371.png?version=20231222184757"
+    },
+    {
+      "misterPlayerId": "19927",
+      "playerName": "R. García de Haro",
+      "slug": "raul-garcia-de-haro",
+      "misterClubId": "50",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/19927.png?version=20231222193004"
+    },
+    {
+      "misterPlayerId": "66706",
+      "playerName": "J. Hernandez",
+      "slug": "javi-hernandez",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/66706.png?version=20250910192037"
+    },
+    {
+      "misterPlayerId": "67942",
+      "playerName": "Í. Arguibide",
+      "slug": "inigo-arguibide",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/67942.png?version=20251123102325"
+    },
+    {
+      "misterPlayerId": "34",
+      "playerName": "J. Giménez",
+      "slug": "jose-gimenez",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/34.png?version=20251003193851"
+    },
+    {
+      "misterPlayerId": "340",
+      "playerName": "Isco",
+      "slug": "isco",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/340.png?version=20251003194510"
+    },
+    {
+      "misterPlayerId": "70918",
+      "playerName": "B. Silva",
+      "slug": "bernardo-silva",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70918.png?version=20260617112939"
+    },
+    {
+      "misterPlayerId": "70935",
+      "playerName": "J. Salinas",
+      "slug": "jorge-salinas",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70935.png?version=20260619115458"
+    },
+    {
+      "misterPlayerId": "29403",
+      "playerName": "P. Ciss",
+      "slug": "pathe-ciss",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29403.png?version=20251004225713"
+    },
+    {
+      "misterPlayerId": "70936",
+      "playerName": "M. Hernando",
+      "slug": "manu-hernando",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70936.png?version=20260619115608"
+    },
+    {
+      "misterPlayerId": "27518",
+      "playerName": "Ó. Valentín",
+      "slug": "oscar-valentin",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27518.png?version=20251004225843"
+    },
+    {
+      "misterPlayerId": "306",
+      "playerName": "D. Llorente",
+      "slug": "diego-llorente",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/306.png?version=20240709193836"
+    },
+    {
+      "misterPlayerId": "63866",
+      "playerName": "Á. Núñez",
+      "slug": "alvaro-nunez",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63866.png?version=20250617095406"
+    },
+    {
+      "misterPlayerId": "55743",
+      "playerName": "C. Romero",
+      "slug": "carlos-romero",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55743.png?version=20231222225348"
+    },
+    {
+      "misterPlayerId": "65111",
+      "playerName": "O. Vlachodimos",
+      "slug": "odysseas-vlachodimos",
+      "misterClubId": "17",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65111.png?version=20250812211744"
+    },
+    {
+      "misterPlayerId": "54832",
+      "playerName": "S. Mouriño",
+      "slug": "santiago-mourino",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/54832.png?version=20251006021354"
+    },
+    {
+      "misterPlayerId": "36046",
+      "playerName": "G. Villar",
+      "slug": "gonzalo-villar",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/36046.png?version=20260201092605"
+    },
+    {
+      "misterPlayerId": "78750",
+      "playerName": "O. Mangala",
+      "slug": "orel-mangala",
+      "misterClubId": "9",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/78750.png?version=20260807223509"
+    },
+    {
+      "misterPlayerId": "71139",
+      "playerName": "B. Ede",
+      "slug": "bright-ede",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71139.png?version=20260707174927"
+    },
+    {
+      "misterPlayerId": "25579",
+      "playerName": "O. Rey",
+      "slug": "oriol-rey",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/25579.png?version=20250613152155"
+    },
+    {
+      "misterPlayerId": "52377",
+      "playerName": "J. Herrando",
+      "slug": "jorge-herrando",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52377.png?version=20240305112855"
+    },
+    {
+      "misterPlayerId": "59395",
+      "playerName": "P. Díaz",
+      "slug": "pedro-diaz",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59395.png?version=20251004225631"
+    },
+    {
+      "misterPlayerId": "12915",
+      "playerName": "C. Hernández",
+      "slug": "cucho-hernandez",
+      "misterClubId": "4",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/12915.png?version=20251003194337"
+    },
+    {
+      "misterPlayerId": "56925",
+      "playerName": "J. Aramburu",
+      "slug": "jon-aramburu",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56925.png?version=20251004233907"
+    },
+    {
+      "misterPlayerId": "31496",
+      "playerName": "H. Bellerín",
+      "slug": "hector-bellerin",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/31496.png?version=20251003194443"
+    },
+    {
+      "misterPlayerId": "64160",
+      "playerName": "J. Rueda",
+      "slug": "javi-rueda",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64160.png?version=20250704150336"
+    },
+    {
+      "misterPlayerId": "56583",
+      "playerName": "A. Batalla",
+      "slug": "augusto-batalla",
+      "misterClubId": "14",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56583.png?version=20251004224404"
+    },
+    {
+      "misterPlayerId": "48556",
+      "playerName": "A. Christensen",
+      "slug": "andreas-christensen",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48556.png?version=20260217183949"
+    },
+    {
+      "misterPlayerId": "431",
+      "playerName": "J. Cancelo",
+      "slug": "joao-cancelo",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/431.png?version=20260113140939"
+    },
+    {
+      "misterPlayerId": "10967",
+      "playerName": "G. Guedes",
+      "slug": "goncalo-guedes",
+      "misterClubId": "16",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/10967.png?version=20250805081800"
+    },
+    {
+      "misterPlayerId": "61092",
+      "playerName": "T. Buchanan",
+      "slug": "tajon-buchanan",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61092.png?version=20250201122704"
+    },
+    {
+      "misterPlayerId": "22527",
+      "playerName": "A. Oroz",
+      "slug": "aimar-oroz",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22527.png?version=20231217203727"
+    },
+    {
+      "misterPlayerId": "55666",
+      "playerName": "Á. Carreras",
+      "slug": "alvaro-carreras",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55666.png?version=20250714194635"
+    },
+    {
+      "misterPlayerId": "71004",
+      "playerName": "C. Puga",
+      "slug": "carlos-puga",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71004.png?version=20260621195400"
+    },
+    {
+      "misterPlayerId": "53143",
+      "playerName": "A. Rebbach",
+      "slug": "abde-rebbach",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53143.png?version=20251006023558"
+    },
+    {
+      "misterPlayerId": "70998",
+      "playerName": "I. Merino",
+      "slug": "izan-merino",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70998.png?version=20260621195729"
+    },
+    {
+      "misterPlayerId": "4753",
+      "playerName": "Y. Álvarez",
+      "slug": "yeray-alvarez",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4753.png?version=20231218001027"
+    },
+    {
+      "misterPlayerId": "70931",
+      "playerName": "M. Gueye",
+      "slug": "maguette-gueye",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70931.png?version=20260619115543"
+    },
+    {
+      "misterPlayerId": "27865",
+      "playerName": "J. Areso",
+      "slug": "jesus-areso",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27865.png?version=20231222184016"
+    },
+    {
+      "misterPlayerId": "22668",
+      "playerName": "L. Torró",
+      "slug": "lucas-torro",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22668.png?version=20251006025249"
+    },
+    {
+      "misterPlayerId": "69281",
+      "playerName": "N. Pérez",
+      "slug": "nacho-perez",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/69281.png?version=20260323141534"
+    },
+    {
+      "misterPlayerId": "63868",
+      "playerName": "R. Mendoza",
+      "slug": "rodrigo-mendoza",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63868.png?version=20250617095638"
+    },
+    {
+      "misterPlayerId": "60271",
+      "playerName": "R. Bauza",
+      "slug": "rafa-bauza",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60271.png?version=20250204160552"
+    },
+    {
+      "misterPlayerId": "3848780",
+      "playerName": "J. Louis-Jean",
+      "slug": "johaneko-louis-jean",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3848780.png?version=20260827201004"
+    },
+    {
+      "misterPlayerId": "3848684",
+      "playerName": "A. Marchal",
+      "slug": "alex-marchal",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3848684.png?version=20260826150505"
+    },
+    {
+      "misterPlayerId": "1713",
+      "playerName": "F. Lejeune",
+      "slug": "florian-lejeune",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1713.png?version=20251004225338"
+    },
+    {
+      "misterPlayerId": "29",
+      "playerName": "I. Williams",
+      "slug": "inaki-williams",
+      "misterClubId": "1",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29.png?version=20251003185351"
+    },
+    {
+      "misterPlayerId": "59506",
+      "playerName": "J. Rodríguez",
+      "slug": "javi-rodriguez",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59506.png?version=20251003195248"
+    },
+    {
+      "misterPlayerId": "7011",
+      "playerName": "X. Navarro",
+      "slug": "ximo-navarro",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/7011.png?version=20260621103033"
+    },
+    {
+      "misterPlayerId": "616",
+      "playerName": "R. Hernández",
+      "slug": "rodri-hernandez",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/616.png?version=20260818215112"
+    },
+    {
+      "misterPlayerId": "8953",
+      "playerName": "P. Maffeo",
+      "slug": "pablo-maffeo",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/8953.png?version=20251006031549"
+    },
+    {
+      "misterPlayerId": "308",
+      "playerName": "J. Mojica",
+      "slug": "johan-mojica",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/308.png?version=20260813234821"
+    },
+    {
+      "misterPlayerId": "68383",
+      "playerName": "T. Fernández",
+      "slug": "thiago-fernandez",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68383.png?version=20260102114636"
+    },
+    {
+      "misterPlayerId": "3046",
+      "playerName": "E. Ponce",
+      "slug": "ezequiel-ponce",
+      "misterClubId": "23",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3046.png?version=20260814230939"
+    },
+    {
+      "misterPlayerId": "71021",
+      "playerName": "A. Grimaldo",
+      "slug": "alejandro-grimaldo",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71021.png?version=20260630163041"
+    },
+    {
+      "misterPlayerId": "18186",
+      "playerName": "J. Koundé",
+      "slug": "jules-kounde",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/18186.png?version=20260217184253"
+    },
+    {
+      "misterPlayerId": "49382",
+      "playerName": "M. Alonso",
+      "slug": "marcos-alonso",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/49382.png?version=20231218004050"
+    },
+    {
+      "misterPlayerId": "52372",
+      "playerName": "J. Guerra",
+      "slug": "javi-guerra",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52372.png?version=20251006015600"
+    },
+    {
+      "misterPlayerId": "56924",
+      "playerName": "E. Eyong",
+      "slug": "etta-eyong",
+      "misterClubId": "12",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56924.png?version=20251031185323"
+    },
+    {
+      "misterPlayerId": "15693",
+      "playerName": "J. Galán",
+      "slug": "javi-galan",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15693.png?version=20251003193832"
+    },
+    {
+      "misterPlayerId": "25630",
+      "playerName": "V. Chust",
+      "slug": "victor-chust",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/25630.png?version=20250808081013"
+    },
+    {
+      "misterPlayerId": "64382",
+      "playerName": "G. Suazo",
+      "slug": "gabriel-suazo",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64382.png?version=20250712172807"
+    },
+    {
+      "misterPlayerId": "60218",
+      "playerName": "P. Canales",
+      "slug": "peio-canales",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60218.png?version=20260619120854"
+    },
+    {
+      "misterPlayerId": "55966",
+      "playerName": "A. Altimira",
+      "slug": "adria-altimira",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55966.png?version=20240617154112"
+    },
+    {
+      "misterPlayerId": "1737",
+      "playerName": "E. Galilea",
+      "slug": "einar-galilea",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1737.png?version=20260621200620"
+    },
+    {
+      "misterPlayerId": "71008",
+      "playerName": "R. Garrido",
+      "slug": "rafita-garrido",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71008.png?version=20260621200119"
+    },
+    {
+      "misterPlayerId": "68593",
+      "playerName": "L. Cepeda",
+      "slug": "lucas-cepeda",
+      "misterClubId": "23",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68593.png?version=20260323140945"
+    },
+    {
+      "misterPlayerId": "65727",
+      "playerName": "Alemão",
+      "slug": "alemao",
+      "misterClubId": "14",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65727.png?version=20250902080200"
+    },
+    {
+      "misterPlayerId": "64200",
+      "playerName": "J. Toljan",
+      "slug": "jeremy-toljan",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64200.png?version=20250709145410"
+    },
+    {
+      "misterPlayerId": "24742",
+      "playerName": "D. Cárdenas",
+      "slug": "dani-cardenas",
+      "misterClubId": "14",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/24742.png?version=20251004225200"
+    },
+    {
+      "misterPlayerId": "23147",
+      "playerName": "T. Morente",
+      "slug": "tete-morente",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/23147.png?version=20260203085617"
+    },
+    {
+      "misterPlayerId": "68640",
+      "playerName": "A. Freeman",
+      "slug": "alex-freeman",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68640.png?version=20260323141045"
+    },
+    {
+      "misterPlayerId": "35059",
+      "playerName": "F. Jutglà",
+      "slug": "ferran-jutgla",
+      "misterClubId": "5",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/35059.png?version=20250624204756"
+    },
+    {
+      "misterPlayerId": "14791",
+      "playerName": "G. Guruzeta",
+      "slug": "gorka-guruzeta",
+      "misterClubId": "1",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14791.png?version=20231205085735"
+    },
+    {
+      "misterPlayerId": "70950",
+      "playerName": "G. Quagliata",
+      "slug": "giacomo-quagliata",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70950.png?version=20260621102132"
+    },
+    {
+      "misterPlayerId": "40147",
+      "playerName": "A. Rüdiger",
+      "slug": "antonio-ruediger",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/40147.png?version=20251003183330"
+    },
+    {
+      "misterPlayerId": "65179",
+      "playerName": "A. Castrín",
+      "slug": "andres-castrin",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65179.png?version=20250817184950"
+    },
+    {
+      "misterPlayerId": "1256139",
+      "playerName": "V. Drkušić",
+      "slug": "vanja-drkusic",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1256139.png?version=20260814195048"
+    },
+    {
+      "misterPlayerId": "56578",
+      "playerName": "J. Cardoso",
+      "slug": "johnny-cardoso",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56578.png?version=20250818184253"
+    },
+    {
+      "misterPlayerId": "70945",
+      "playerName": "D. Villares",
+      "slug": "diego-villares",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70945.png?version=20260621102017"
+    },
+    {
+      "misterPlayerId": "5916",
+      "playerName": "J. Guridi",
+      "slug": "jon-guridi",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/5916.png?version=20251006024331"
+    },
+    {
+      "misterPlayerId": "4886",
+      "playerName": "A. Villalibre",
+      "slug": "asier-villalibre",
+      "misterClubId": "1490",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4886.png?version=20260619115232"
+    },
+    {
+      "misterPlayerId": "8171",
+      "playerName": "D. Djené",
+      "slug": "dakonam-djene",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/8171.png?version=20251003195924"
+    },
+    {
+      "misterPlayerId": "6065",
+      "playerName": "P. Milla",
+      "slug": "pere-milla",
+      "misterClubId": "8",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/6065.png?version=20240626192223"
+    },
+    {
+      "misterPlayerId": "22595",
+      "playerName": "J. Muñoz",
+      "slug": "joaquin-munoz",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22595.png?version=20260621200811"
+    },
+    {
+      "misterPlayerId": "28791",
+      "playerName": "J. Vázquez",
+      "slug": "jesus-vazquez",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28791.png?version=20251006015643"
+    },
+    {
+      "misterPlayerId": "51134",
+      "playerName": "P. Durán",
+      "slug": "pablo-duran",
+      "misterClubId": "5",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/51134.png?version=20240718155216"
+    },
+    {
+      "misterPlayerId": "22486",
+      "playerName": "V. García",
+      "slug": "victor-garcia",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22486.png?version=20250703125849"
+    },
+    {
+      "misterPlayerId": "1396108",
+      "playerName": "A. Ortiz",
+      "slug": "arnau-ortiz",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1396108.png?version=20260815101129"
+    },
+    {
+      "misterPlayerId": "71142",
+      "playerName": "A. Dieng",
+      "slug": "aliou-dieng",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71142.png?version=20260707213738"
+    },
+    {
+      "misterPlayerId": "4836184",
+      "playerName": "J. Belocian",
+      "slug": "jeanuel-belocian",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836184.png?version=20260901214919"
+    },
+    {
+      "misterPlayerId": "49275",
+      "playerName": "A. Almeida",
+      "slug": "andre-almeida",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/49275.png?version=20251006014715"
+    },
+    {
+      "misterPlayerId": "61009",
+      "playerName": "Á. Ortiz",
+      "slug": "angel-ortiz",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61009.png?version=20251003194240"
+    },
+    {
+      "misterPlayerId": "64491",
+      "playerName": "V. Gómez",
+      "slug": "valentin-gomez",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64491.png?version=20250727111021"
+    },
+    {
+      "misterPlayerId": "3845074",
+      "playerName": "N. Saliba",
+      "slug": "nathan-saliba",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3845074.png?version=20260826061635"
+    },
+    {
+      "misterPlayerId": "59476",
+      "playerName": "J. Álvarez",
+      "slug": "julian-alvarez",
+      "misterClubId": "2",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59476.png?version=20251228213807"
+    },
+    {
+      "misterPlayerId": "27517",
+      "playerName": "I. Palazón",
+      "slug": "isi-palazon",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27517.png?version=20251004225449"
+    },
+    {
+      "misterPlayerId": "15344",
+      "playerName": "B. Díaz",
+      "slug": "brahim-diaz",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15344.png?version=20251003183511"
+    },
+    {
+      "misterPlayerId": "64031",
+      "playerName": "H. Rincón",
+      "slug": "hugo-rincon",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64031.png?version=20250623150347"
+    },
+    {
+      "misterPlayerId": "17568",
+      "playerName": "P. Lozano",
+      "slug": "pol-lozano",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17568.png?version=20250218133011"
+    },
+    {
+      "misterPlayerId": "68259",
+      "playerName": "C. Macia",
+      "slug": "carlos-macia",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68259.png?version=20260818091918"
+    },
+    {
+      "misterPlayerId": "70993",
+      "playerName": "H. Abaida",
+      "slug": "haitam-abaida",
+      "misterClubId": "13",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70993.png?version=20260621195708"
+    },
+    {
+      "misterPlayerId": "3848674",
+      "playerName": "M. Prati",
+      "slug": "matteo-prati",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3848674.png?version=20260826110327"
+    },
+    {
+      "misterPlayerId": "3848779",
+      "playerName": "G. Bouare",
+      "slug": "gnangoro-bouare",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3848779.png?version=20260827165009"
+    },
+    {
+      "misterPlayerId": "71124",
+      "playerName": "D. Dumfries",
+      "slug": "denzel-dumfries",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71124.png?version=20260705134716"
+    },
+    {
+      "misterPlayerId": "59641",
+      "playerName": "T. Martínez",
+      "slug": "toni-martinez",
+      "misterClubId": "48",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59641.png?version=20251006024644"
+    },
+    {
+      "misterPlayerId": "70939",
+      "playerName": "Y. Hernández",
+      "slug": "yeremay-hernandez",
+      "misterClubId": "6",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70939.png?version=20260621102855"
+    },
+    {
+      "misterPlayerId": "11866",
+      "playerName": "H. Duro",
+      "slug": "hugo-duro",
+      "misterClubId": "19",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/11866.png?version=20251006015522"
+    },
+    {
+      "misterPlayerId": "23172",
+      "playerName": "U. González",
+      "slug": "urko-gonzalez",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/23172.png?version=20251003195730"
+    },
+    {
+      "misterPlayerId": "20131",
+      "playerName": "M. Sánchez",
+      "slug": "manu-sanchez",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/20131.png?version=20251004223947"
+    },
+    {
+      "misterPlayerId": "68716",
+      "playerName": "B. Sangaré",
+      "slug": "buba-sangare",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68716.png?version=20260323141411"
+    },
+    {
+      "misterPlayerId": "13420",
+      "playerName": "M. Diakhaby",
+      "slug": "mouctar-diakhaby",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/13420.png?version=20251006020255"
+    },
+    {
+      "misterPlayerId": "29402",
+      "playerName": "R. Nteka",
+      "slug": "randy-nteka",
+      "misterClubId": "14",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29402.png?version=20251004230112"
+    },
+    {
+      "misterPlayerId": "33726",
+      "playerName": "H. Álvarez",
+      "slug": "hugo-alvarez",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/33726.png?version=20251003195021"
+    },
+    {
+      "misterPlayerId": "71000",
+      "playerName": "R. Rodriguez",
+      "slug": "rafa-rodriguez",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71000.png?version=20260621195913"
+    },
+    {
+      "misterPlayerId": "71002",
+      "playerName": "R. Enríquez",
+      "slug": "ramon-enriquez",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71002.png?version=20260621200230"
+    },
+    {
+      "misterPlayerId": "70938",
+      "playerName": "Á. Mantilla",
+      "slug": "alvaro-mantilla",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70938.png?version=20260619115216"
+    },
+    {
+      "misterPlayerId": "71037",
+      "playerName": "F. González",
+      "slug": "facundo-gonzalez",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71037.png?version=20260701170617"
+    },
+    {
+      "misterPlayerId": "52404",
+      "playerName": "M. Bueno",
+      "slug": "manu-bueno",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/52404.png?version=20251006014022"
+    },
+    {
+      "misterPlayerId": "11761",
+      "playerName": "J. Firpo",
+      "slug": "junior-firpo",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/11761.png?version=20250717131011"
+    },
+    {
+      "misterPlayerId": "22885",
+      "playerName": "J. Ferrández",
+      "slug": "josan-ferrandez",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22885.png?version=20250617223649"
+    },
+    {
+      "misterPlayerId": "70917",
+      "playerName": "A. Sangante",
+      "slug": "arouna-sangante",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70917.png?version=20260616153146"
+    },
+    {
+      "misterPlayerId": "69744",
+      "playerName": "J. Díaz",
+      "slug": "julio-diaz",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/69744.png?version=20260227153903"
+    },
+    {
+      "misterPlayerId": "2196106",
+      "playerName": "F. Serrano",
+      "slug": "francho-serrano",
+      "misterClubId": "9",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/2196106.png?version=20260818164522"
+    },
+    {
+      "misterPlayerId": "65625",
+      "playerName": "T. Oluwaseyi",
+      "slug": "tani-oluwaseyi",
+      "misterClubId": "20",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65625.png?version=20250829164124"
+    },
+    {
+      "misterPlayerId": "70150",
+      "playerName": "J. Morcillo",
+      "slug": "javi-morcillo",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70150.png?version=20260407094702"
+    },
+    {
+      "misterPlayerId": "68361",
+      "playerName": "A. Mañas",
+      "slug": "aitor-manas",
+      "misterClubId": "48",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68361.png?version=20251223093636"
+    },
+    {
+      "misterPlayerId": "213",
+      "playerName": "S. Dimitrievski",
+      "slug": "stole-dimitrievski",
+      "misterClubId": "19",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/213.png?version=20251006020443"
+    },
+    {
+      "misterPlayerId": "71138",
+      "playerName": "R. Sato",
+      "slug": "ryunosuke-sato",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71138.png?version=20260707174743"
+    },
+    {
+      "misterPlayerId": "51060",
+      "playerName": "J. Cruz",
+      "slug": "juan-cruz",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/51060.png?version=20260719140022"
+    },
+    {
+      "misterPlayerId": "48210",
+      "playerName": "J. Dubasin",
+      "slug": "jonathan-dubasin",
+      "misterClubId": "50",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48210.png?version=20260728085311"
+    },
+    {
+      "misterPlayerId": "71343",
+      "playerName": "J. Asp Jensen",
+      "slug": "jonathan-asp-jensen",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71343.png?version=20260714104654"
+    },
+    {
+      "misterPlayerId": "33896",
+      "playerName": "I. Akhomach",
+      "slug": "ilias-akhomach",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/33896.png?version=20260212075508"
+    },
+    {
+      "misterPlayerId": "17989",
+      "playerName": "J. de Frutos",
+      "slug": "jorge-de-frutos",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17989.png?version=20251004225553"
+    },
+    {
+      "misterPlayerId": "59581",
+      "playerName": "L. Júnior",
+      "slug": "luiz-junior",
+      "misterClubId": "20",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59581.png?version=20251006021122"
+    },
+    {
+      "misterPlayerId": "58438",
+      "playerName": "F. Boyomo",
+      "slug": "flavien-boyomo",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58438.png?version=20240616125139"
+    },
+    {
+      "misterPlayerId": "432",
+      "playerName": "J. Luis Gayà",
+      "slug": "jose-luis-gaya",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/432.png?version=20251006020035"
+    },
+    {
+      "misterPlayerId": "58125",
+      "playerName": "M. Martín",
+      "slug": "mario-martin",
+      "misterClubId": "9",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58125.png?version=20250114145209"
+    },
+    {
+      "misterPlayerId": "22495",
+      "playerName": "G. Kochorashvili",
+      "slug": "giorgi-kochorashvili",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22495.png?version=20260821132838"
+    },
+    {
+      "misterPlayerId": "71149",
+      "playerName": "G. Moscardo",
+      "slug": "gabriel-moscardo",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71149.png?version=20260708161150"
+    },
+    {
+      "misterPlayerId": "28784",
+      "playerName": "J. Ángel Carmona",
+      "slug": "jose-angel-carmona",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28784.png?version=20251228214145"
+    },
+    {
+      "misterPlayerId": "68677",
+      "playerName": "Á. Fidalgo",
+      "slug": "alvaro-fidalgo",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68677.png?version=20260323141215"
+    },
+    {
+      "misterPlayerId": "65475",
+      "playerName": "A. Osambela",
+      "slug": "asier-osambela",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65475.png?version=20250826151727"
+    },
+    {
+      "misterPlayerId": "59593",
+      "playerName": "L. Costa",
+      "slug": "logan-costa",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59593.png?version=20240822222712"
+    },
+    {
+      "misterPlayerId": "18531",
+      "playerName": "A. Febas",
+      "slug": "aleix-febas",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/18531.png?version=20250617223016"
+    },
+    {
+      "misterPlayerId": "55088",
+      "playerName": "C. Starfelt",
+      "slug": "carl-starfelt",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55088.png?version=20251003194833"
+    },
+    {
+      "misterPlayerId": "70943",
+      "playerName": "D. Mella",
+      "slug": "david-mella",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70943.png?version=20260621101933"
+    },
+    {
+      "misterPlayerId": "239",
+      "playerName": "P. Bigas",
+      "slug": "pedro-bigas",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/239.png?version=20250617224701"
+    },
+    {
+      "misterPlayerId": "55045",
+      "playerName": "H. Sotelo",
+      "slug": "hugo-sotelo",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55045.png?version=20250904172630"
+    },
+    {
+      "misterPlayerId": "64033",
+      "playerName": "J. Gorrotxategi",
+      "slug": "jon-gorrotxategi",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64033.png?version=20250623150410"
+    },
+    {
+      "misterPlayerId": "71792",
+      "playerName": "N. Guillén",
+      "slug": "nico-guillen",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71792.png?version=20260805081843"
+    },
+    {
+      "misterPlayerId": "68446",
+      "playerName": "P. Cortés",
+      "slug": "paco-cortes",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68446.png?version=20260109074559"
+    },
+    {
+      "misterPlayerId": "28779",
+      "playerName": "I. Romero",
+      "slug": "ivan-romero",
+      "misterClubId": "12",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28779.png?version=20250613151854"
+    },
+    {
+      "misterPlayerId": "68495",
+      "playerName": "M. Satriano",
+      "slug": "martin-satriano",
+      "misterClubId": "9",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68495.png?version=20260116190325"
+    },
+    {
+      "misterPlayerId": "28619",
+      "playerName": "I. Balliu",
+      "slug": "ivan-balliu",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28619.png?version=20251004225519"
+    },
+    {
+      "misterPlayerId": "33734",
+      "playerName": "A. Ezzalzouli",
+      "slug": "abde-ezzalzouli",
+      "misterClubId": "4",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/33734.png?version=20260807190725"
+    },
+    {
+      "misterPlayerId": "1385821",
+      "playerName": "C. Romero",
+      "slug": "cristian-romero",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1385821.png?version=20260815091308"
+    },
+    {
+      "misterPlayerId": "29235",
+      "playerName": "Gavi",
+      "slug": "gavi",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29235.png?version=20251003184453"
+    },
+    {
+      "misterPlayerId": "71038",
+      "playerName": "J. De Haas",
+      "slug": "justin-de-haas",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71038.png?version=20260701170915"
+    },
+    {
+      "misterPlayerId": "58436",
+      "playerName": "R. Moro",
+      "slug": "raul-moro",
+      "misterClubId": "50",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58436.png?version=20260122191623"
+    },
+    {
+      "misterPlayerId": "71179",
+      "playerName": "H. Abdelkarim",
+      "slug": "hamza-abdelkarim",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71179.png?version=20260713091445"
+    },
+    {
+      "misterPlayerId": "3844425",
+      "playerName": "C. Driouech",
+      "slug": "couhaib-driouech",
+      "misterClubId": "5",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3844425.png?version=20260825210031"
+    },
+    {
+      "misterPlayerId": "64151",
+      "playerName": "Davinchi",
+      "slug": "davinchi",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64151.png?version=20250703132321"
+    },
+    {
+      "misterPlayerId": "55439",
+      "playerName": "H. González",
+      "slug": "hugo-gonzalez",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55439.png?version=20260805081935"
+    },
+    {
+      "misterPlayerId": "19168",
+      "playerName": "N. Gudelj",
+      "slug": "nemanja-gudelj",
+      "misterClubId": "9",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/19168.png?version=20260831085448"
+    },
+    {
+      "misterPlayerId": "70181",
+      "playerName": "D. Martínez",
+      "slug": "dani-martinez",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70181.png?version=20260819215249"
+    },
+    {
+      "misterPlayerId": "15345",
+      "playerName": "A. Muñoz",
+      "slug": "aihen-munoz",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15345.png?version=20251004232955"
+    },
+    {
+      "misterPlayerId": "11186",
+      "playerName": "D. Raba",
+      "slug": "dani-raba",
+      "misterClubId": "19",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/11186.png?version=20251006014924"
+    },
+    {
+      "misterPlayerId": "71791",
+      "playerName": "P. Felipe",
+      "slug": "pedro-felipe",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71791.png?version=20260805081823"
+    },
+    {
+      "misterPlayerId": "53144",
+      "playerName": "C. Benavídez",
+      "slug": "carlos-benavidez",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53144.png?version=20251006024142"
+    },
+    {
+      "misterPlayerId": "78394",
+      "playerName": "N. Valentini",
+      "slug": "nicolas-valentini",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/78394.png?version=20260807143729"
+    },
+    {
+      "misterPlayerId": "55454",
+      "playerName": "A. Zakharyan",
+      "slug": "arsen-zakharyan",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55454.png?version=20251004233646"
+    },
+    {
+      "misterPlayerId": "2586746",
+      "playerName": "Á. Padilla",
+      "slug": "alvaro-padilla",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/2586746.png?version=20260820090120"
+    },
+    {
+      "misterPlayerId": "1255969",
+      "playerName": "J. Domínguez",
+      "slug": "jorge-dominguez",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1255969.png?version=20260814190113"
+    },
+    {
+      "misterPlayerId": "18109",
+      "playerName": "L. Rioja",
+      "slug": "luis-rioja",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/18109.png?version=20251006020204"
+    },
+    {
+      "misterPlayerId": "78751",
+      "playerName": "F. Buonanotte",
+      "slug": "facundo-buonanotte",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/78751.png?version=20260808001433"
+    },
+    {
+      "misterPlayerId": "65476",
+      "playerName": "C. Riedel",
+      "slug": "clemens-riedel",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65476.png?version=20250826090602"
+    },
+    {
+      "misterPlayerId": "70953",
+      "playerName": "M. Loureiro",
+      "slug": "miguel-loureiro",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70953.png?version=20260621102344"
+    },
+    {
+      "misterPlayerId": "5920",
+      "playerName": "C. Aleñá",
+      "slug": "carles-alena",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/5920.png?version=20251006024230"
+    },
+    {
+      "misterPlayerId": "71790",
+      "playerName": "S. Sazonov",
+      "slug": "saba-sazonov",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71790.png?version=20260805081801"
+    },
+    {
+      "misterPlayerId": "60861",
+      "playerName": "J. El-Abdellaoui",
+      "slug": "jones-el-abdellaoui",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60861.png?version=20250108113128"
+    },
+    {
+      "misterPlayerId": "63727",
+      "playerName": "M. Fernández",
+      "slug": "marcos-fernandez",
+      "misterClubId": "8",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63727.png?version=20250610230715"
+    },
+    {
+      "misterPlayerId": "64524",
+      "playerName": "M. Neto",
+      "slug": "martim-neto",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64524.png?version=20250731081235"
+    },
+    {
+      "misterPlayerId": "12946",
+      "playerName": "S. Comesaña",
+      "slug": "santi-comesana",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/12946.png?version=20251006021320"
+    },
+    {
+      "misterPlayerId": "523868",
+      "playerName": "R. Ure",
+      "slug": "robbie-ure",
+      "misterClubId": "17",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/523868.png?version=20260811120619"
+    },
+    {
+      "misterPlayerId": "71010",
+      "playerName": "Á. Recio",
+      "slug": "angel-recio",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71010.png?version=20260621195317"
+    },
+    {
+      "misterPlayerId": "35922",
+      "playerName": "J. Carreras",
+      "slug": "jofre-carreras",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/35922.png?version=20251003195556"
+    },
+    {
+      "misterPlayerId": "60872",
+      "playerName": "R. Vargas",
+      "slug": "ruben-vargas",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60872.png?version=20250110103914"
+    },
+    {
+      "misterPlayerId": "70940",
+      "playerName": "Z. Eddahchouri",
+      "slug": "zakaria-eddahchouri",
+      "misterClubId": "6",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70940.png?version=20260621102923"
+    },
+    {
+      "misterPlayerId": "59633",
+      "playerName": "A. González",
+      "slug": "alfon-gonzalez",
+      "misterClubId": "17",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59633.png?version=20251006013207"
+    },
+    {
+      "misterPlayerId": "27861",
+      "playerName": "P. Martínez",
+      "slug": "pablo-martinez",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27861.png?version=20250613152336"
+    },
+    {
+      "misterPlayerId": "925296",
+      "playerName": "G. Tsitaishvili",
+      "slug": "giorgi-tsitaishvili",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/925296.png?version=20260813101752"
+    },
+    {
+      "misterPlayerId": "70994",
+      "playerName": "E. Jauregi",
+      "slug": "eneko-jauregi",
+      "misterClubId": "13",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70994.png?version=20260621195646"
+    },
+    {
+      "misterPlayerId": "31128",
+      "playerName": "J. Lobete",
+      "slug": "julen-lobete",
+      "misterClubId": "13",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/31128.png?version=20260621201037"
+    },
+    {
+      "misterPlayerId": "58992",
+      "playerName": "Á. Djaló",
+      "slug": "alvaro-djalo",
+      "misterClubId": "1",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58992.png?version=20240707084259"
+    },
+    {
+      "misterPlayerId": "71022",
+      "playerName": "T. Gijselhart",
+      "slug": "teun-gijselhart",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71022.png?version=20260630222009"
+    },
+    {
+      "misterPlayerId": "71509",
+      "playerName": "K. Sánchez",
+      "slug": "kevin-sanchez",
+      "misterClubId": "6",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71509.png?version=20260716182043"
+    },
+    {
+      "misterPlayerId": "1751425",
+      "playerName": "M. Santos",
+      "slug": "marc-santos",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1751425.png?version=20260816205258"
+    },
+    {
+      "misterPlayerId": "49424",
+      "playerName": "K. Salas",
+      "slug": "kike-salas",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/49424.png?version=20251006013823"
+    },
+    {
+      "misterPlayerId": "607",
+      "playerName": "B. Mayoral",
+      "slug": "borja-mayoral",
+      "misterClubId": "9",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/607.png?version=20251003195836"
+    },
+    {
+      "misterPlayerId": "64038",
+      "playerName": "J. Salinas",
+      "slug": "jose-salinas",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64038.png?version=20250625134658"
+    },
+    {
+      "misterPlayerId": "14691",
+      "playerName": "A. Pedrosa",
+      "slug": "adria-pedrosa",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14691.png?version=20251006022606"
+    },
+    {
+      "misterPlayerId": "70929",
+      "playerName": "J. Carlos Arana",
+      "slug": "juan-carlos-arana",
+      "misterClubId": "1490",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70929.png?version=20260619115520"
+    },
+    {
+      "misterPlayerId": "70944",
+      "playerName": "R. Rodríguez",
+      "slug": "riki-rodriguez",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70944.png?version=20260621102552"
+    },
+    {
+      "misterPlayerId": "68497",
+      "playerName": "S. Boselli",
+      "slug": "sebastian-boselli",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68497.png?version=20260117124336"
+    },
+    {
+      "misterPlayerId": "65104",
+      "playerName": "J. Vertrouwd",
+      "slug": "jozhua-vertrouwd",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65104.png?version=20250812101021"
+    },
+    {
+      "misterPlayerId": "20141",
+      "playerName": "G. Valera",
+      "slug": "german-valera",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/20141.png?version=20251006022918"
+    },
+    {
+      "misterPlayerId": "48205",
+      "playerName": "A. Martínez",
+      "slug": "arnau-martinez",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48205.png?version=20231220225819"
+    },
+    {
+      "misterPlayerId": "70927",
+      "playerName": "G. Guliashvili",
+      "slug": "giorgi-guliashvili",
+      "misterClubId": "1490",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70927.png?version=20260619115321"
+    },
+    {
+      "misterPlayerId": "68835",
+      "playerName": "J. Ochieng",
+      "slug": "job-ochieng",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68835.png?version=20260323141445"
+    },
+    {
+      "misterPlayerId": "61093",
+      "playerName": "M. Sannadi",
+      "slug": "maroan-sannadi",
+      "misterClubId": "1",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61093.png?version=20251003185515"
+    },
+    {
+      "misterPlayerId": "53107",
+      "playerName": "S. Cardona",
+      "slug": "sergi-cardona",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53107.png?version=20251006021432"
+    },
+    {
+      "misterPlayerId": "28621",
+      "playerName": "A. Abqar",
+      "slug": "abdel-abqar",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28621.png?version=20251003195813"
+    },
+    {
+      "misterPlayerId": "65136",
+      "playerName": "F. Redondo",
+      "slug": "fede-redondo",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65136.png?version=20250814153342"
+    },
+    {
+      "misterPlayerId": "58958",
+      "playerName": "P. Fernández",
+      "slug": "pelayo-fernandez",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58958.png?version=20240702134805"
+    },
+    {
+      "misterPlayerId": "28395",
+      "playerName": "M. Dituro",
+      "slug": "matias-dituro",
+      "misterClubId": "23",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28395.png?version=20250617224159"
+    },
+    {
+      "misterPlayerId": "40166",
+      "playerName": "A. Tchouaméni",
+      "slug": "aurelien-tchouameni",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/40166.png?version=20251003183451"
+    },
+    {
+      "misterPlayerId": "53095",
+      "playerName": "B. Zaragoza",
+      "slug": "bryan-zaragoza",
+      "misterClubId": "8",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/53095.png?version=20260827201514"
+    },
+    {
+      "misterPlayerId": "128",
+      "playerName": "B. Iglesias",
+      "slug": "borja-iglesias",
+      "misterClubId": "5",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/128.png?version=20251003194754"
+    },
+    {
+      "misterPlayerId": "31355",
+      "playerName": "A. Sørloth",
+      "slug": "alexander-sorloth",
+      "misterClubId": "2",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/31355.png?version=20251003193614"
+    },
+    {
+      "misterPlayerId": "4836153",
+      "playerName": "J. David",
+      "slug": "jonathan-david",
+      "misterClubId": "2",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836153.png?version=20260901213540"
+    },
+    {
+      "misterPlayerId": "11472",
+      "playerName": "L. Cabrera",
+      "slug": "leandro-cabrera",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/11472.png?version=20240626191555"
+    },
+    {
+      "misterPlayerId": "17453",
+      "playerName": "F. De Jong",
+      "slug": "frenkie-de-jong",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17453.png?version=20251003184429"
+    },
+    {
+      "misterPlayerId": "15109",
+      "playerName": "G. Lo Celso",
+      "slug": "giovani-lo-celso",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15109.png?version=20251003194404"
+    },
+    {
+      "misterPlayerId": "3849388",
+      "playerName": "M. Sarr",
+      "slug": "mamadou-sarr",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3849388.png?version=20260828114618"
+    },
+    {
+      "misterPlayerId": "29205",
+      "playerName": "A. Balde",
+      "slug": "alejandro-balde",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29205.png?version=20260217184052"
+    },
+    {
+      "misterPlayerId": "4836189",
+      "playerName": "H. Elliott",
+      "slug": "harvey-elliott",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836189.png?version=20260901214753"
+    },
+    {
+      "misterPlayerId": "4947927",
+      "playerName": "Y. Fofana",
+      "slug": "youssouf-fofana",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947927.png?version=20260902084430"
+    },
+    {
+      "misterPlayerId": "58383",
+      "playerName": "C. Uche",
+      "slug": "christantus-uche",
+      "misterClubId": "9",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58383.png?version=20260619095827"
+    },
+    {
+      "misterPlayerId": "361",
+      "playerName": "Y. Berchiche",
+      "slug": "yuri-berchiche",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/361.png?version=20251003193357"
+    },
+    {
+      "misterPlayerId": "4764213",
+      "playerName": "G. Jesus",
+      "slug": "gabriel-jesus",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4764213.png?version=20260901151907"
+    },
+    {
+      "misterPlayerId": "4836172",
+      "playerName": "L. Stassin",
+      "slug": "lucas-stassin",
+      "misterClubId": "17",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836172.png?version=20260901214106"
+    },
+    {
+      "misterPlayerId": "71140",
+      "playerName": "Q. Hartman",
+      "slug": "quilindschy-hartman",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71140.png?version=20260707175228"
+    },
+    {
+      "misterPlayerId": "27852",
+      "playerName": "D. Vivian",
+      "slug": "daniel-vivian",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27852.png?version=20250204170236"
+    },
+    {
+      "misterPlayerId": "71795",
+      "playerName": "Angeliño",
+      "slug": "angelino",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71795.png?version=20260806080032"
+    },
+    {
+      "misterPlayerId": "4947931",
+      "playerName": "P. Ratkov",
+      "slug": "petar-ratkov",
+      "misterClubId": "12",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947931.png?version=20260902085231"
+    },
+    {
+      "misterPlayerId": "17452",
+      "playerName": "É. Militão",
+      "slug": "eder-militao",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17452.png?version=20251003183705"
+    },
+    {
+      "misterPlayerId": "36334",
+      "playerName": "A. Traoré",
+      "slug": "adama-traore",
+      "misterClubId": "6",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/36334.png?version=20260826224813"
+    },
+    {
+      "misterPlayerId": "4836173",
+      "playerName": "F. Correia",
+      "slug": "felix-correia",
+      "misterClubId": "17",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836173.png?version=20260901214140"
+    },
+    {
+      "misterPlayerId": "4947926",
+      "playerName": "K. Lomónaco",
+      "slug": "kevin-lomonaco",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947926.png?version=20260902084236"
+    },
+    {
+      "misterPlayerId": "4733614",
+      "playerName": "R. Del Castillo",
+      "slug": "romain-del-castillo",
+      "misterClubId": "50",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4733614.png?version=20260901110930"
+    },
+    {
+      "misterPlayerId": "58980",
+      "playerName": "V. Rosier",
+      "slug": "valentin-rosier",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58980.png?version=20251006025403"
+    },
+    {
+      "misterPlayerId": "58951",
+      "playerName": "Endrick",
+      "slug": "endrick",
+      "misterClubId": "15",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58951.png?version=20251003183947"
+    },
+    {
+      "misterPlayerId": "4947930",
+      "playerName": "J. Cajuste",
+      "slug": "jens-lys-cajuste",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947930.png?version=20260902085048"
+    },
+    {
+      "misterPlayerId": "4478035",
+      "playerName": "A. Tape",
+      "slug": "axel-tape",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4478035.png?version=20260831090012"
+    },
+    {
+      "misterPlayerId": "60210",
+      "playerName": "P. Navarro",
+      "slug": "pau-navarro",
+      "misterClubId": "20",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60210.png?version=20240929093251"
+    },
+    {
+      "misterPlayerId": "61167",
+      "playerName": "A. Aznou",
+      "slug": "adam-aznou",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61167.png?version=20260901111647"
+    },
+    {
+      "misterPlayerId": "70925",
+      "playerName": "S. Eriksson",
+      "slug": "simon-eriksson",
+      "misterClubId": "1490",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70925.png?version=20260619112407"
+    },
+    {
+      "misterPlayerId": "56971",
+      "playerName": "H. Fort",
+      "slug": "hector-fort",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/56971.png?version=20251006023111"
+    },
+    {
+      "misterPlayerId": "4836181",
+      "playerName": "I. Azón",
+      "slug": "ivan-azon",
+      "misterClubId": "9",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836181.png?version=20260901214352"
+    },
+    {
+      "misterPlayerId": "4947932",
+      "playerName": "M. Sadick",
+      "slug": "mujaid-sadick",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947932.png?version=20260902085435"
+    },
+    {
+      "misterPlayerId": "71649",
+      "playerName": "P. Gulácsi",
+      "slug": "peter-gulacsi",
+      "misterClubId": "20",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71649.png?version=20260804093816"
+    },
+    {
+      "misterPlayerId": "4775",
+      "playerName": "A. Martín",
+      "slug": "aaron-martin",
+      "misterClubId": "1490",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4775.png?version=20260901111219"
+    },
+    {
+      "misterPlayerId": "4836242",
+      "playerName": "S. Cáceres",
+      "slug": "sebastian-caceres",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836242.png?version=20260901221433"
+    },
+    {
+      "misterPlayerId": "4836165",
+      "playerName": "R. Revivo",
+      "slug": "roy-revivo",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4836165.png?version=20260901213742"
+    },
+    {
+      "misterPlayerId": "58820",
+      "playerName": "M. Casadó",
+      "slug": "marc-casado",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58820.png?version=20260217184708"
+    },
+    {
+      "misterPlayerId": "65721",
+      "playerName": "D. Livakovic",
+      "slug": "dominik-livakovic",
+      "misterClubId": "3",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65721.png?version=20260827164543"
+    },
+    {
+      "misterPlayerId": "4947929",
+      "playerName": "E. Audero",
+      "slug": "emil-audero",
+      "misterClubId": "14",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947929.png?version=20260902084735"
+    },
+    {
+      "misterPlayerId": "71622",
+      "playerName": "J. Bisiwu",
+      "slug": "jesse-bisiwu",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71622.png?version=20260801090833"
+    },
+    {
+      "misterPlayerId": "13005",
+      "playerName": "A. Lunin",
+      "slug": "andriy-lunin",
+      "misterClubId": "15",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/13005.png?version=20251003183429"
+    },
+    {
+      "misterPlayerId": "59642",
+      "playerName": "J. Musso",
+      "slug": "juan-musso",
+      "misterClubId": "2",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59642.png?version=20251003193911"
+    },
+    {
+      "misterPlayerId": "1684",
+      "playerName": "K. García",
+      "slug": "kike-garcia",
+      "misterClubId": "8",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1684.png?version=20251003195620"
+    },
+    {
+      "misterPlayerId": "65269",
+      "playerName": "A. Houary",
+      "slug": "ali-houary",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65269.png?version=20250818204307"
+    },
+    {
+      "misterPlayerId": "64458",
+      "playerName": "P. Campos",
+      "slug": "pablo-campos",
+      "misterClubId": "12",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64458.png?version=20250723185510"
+    },
+    {
+      "misterPlayerId": "3117",
+      "playerName": "D. Rico",
+      "slug": "diego-rico",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3117.png?version=20251003200031"
+    },
+    {
+      "misterPlayerId": "14379",
+      "playerName": "A. Fernández",
+      "slug": "aitor-fernandez",
+      "misterClubId": "50",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14379.png?version=20231217203816"
+    },
+    {
+      "misterPlayerId": "96",
+      "playerName": "D. Ceballos",
+      "slug": "dani-ceballos",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/96.png?version=20251003183552"
+    },
+    {
+      "misterPlayerId": "17459",
+      "playerName": "Rodrygo",
+      "slug": "rodrygo",
+      "misterClubId": "15",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17459.png?version=20251003184121"
+    },
+    {
+      "misterPlayerId": "4947925",
+      "playerName": "B. Fariñas",
+      "slug": "brian-farinas",
+      "misterClubId": "3",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947925.png?version=20260902084053"
+    },
+    {
+      "misterPlayerId": "14432",
+      "playerName": "J. Puado",
+      "slug": "javi-puado",
+      "misterClubId": "8",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/14432.png?version=20240626192042"
+    },
+    {
+      "misterPlayerId": "12949",
+      "playerName": "T. Lemar",
+      "slug": "thomas-lemar",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/12949.png?version=20251006030726"
+    },
+    {
+      "misterPlayerId": "78393",
+      "playerName": "A. Bayındır",
+      "slug": "altay-bayindir",
+      "misterClubId": "5",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/78393.png?version=20260807120106"
+    },
+    {
+      "misterPlayerId": "4774",
+      "playerName": "Á. Fernández",
+      "slug": "alvaro-fernandez",
+      "misterClubId": "6",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4774.png?version=20260621103001"
+    },
+    {
+      "misterPlayerId": "11092",
+      "playerName": "A. Gorosabel",
+      "slug": "andoni-gorosabel",
+      "misterClubId": "8",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/11092.png?version=20251003185251"
+    },
+    {
+      "misterPlayerId": "55664",
+      "playerName": "U. Marrero",
+      "slug": "unai-marrero",
+      "misterClubId": "16",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55664.png?version=20251004234343"
+    },
+    {
+      "misterPlayerId": "27869",
+      "playerName": "J. Berrocal",
+      "slug": "juan-berrocal",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27869.png?version=20240819142622"
+    },
+    {
+      "misterPlayerId": "60227",
+      "playerName": "W. Szczęsny",
+      "slug": "wojciech-szczesny",
+      "misterClubId": "3",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60227.png?version=20241002145503"
+    },
+    {
+      "misterPlayerId": "33717",
+      "playerName": "R. Sánchez",
+      "slug": "ruben-sanchez",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/33717.png?version=20251004223322"
+    },
+    {
+      "misterPlayerId": "70189",
+      "playerName": "A. Antañón",
+      "slug": "andres-antanon",
+      "misterClubId": "5",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70189.png?version=20260412184532"
+    },
+    {
+      "misterPlayerId": "17623",
+      "playerName": "F. Mendy",
+      "slug": "ferland-mendy",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17623.png?version=20251003183856"
+    },
+    {
+      "misterPlayerId": "59126",
+      "playerName": "H. Novoa",
+      "slug": "hugo-novoa",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59126.png?version=20240723082427"
+    },
+    {
+      "misterPlayerId": "71006",
+      "playerName": "Á. Pastor",
+      "slug": "alex-pastor",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71006.png?version=20260621195231"
+    },
+    {
+      "misterPlayerId": "65724",
+      "playerName": "F. Cardoso",
+      "slug": "fabio-cardoso",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65724.png?version=20250902075400"
+    },
+    {
+      "misterPlayerId": "24691",
+      "playerName": "M. Rodríguez",
+      "slug": "miguel-rodriguez",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/24691.png?version=20260727100759"
+    },
+    {
+      "misterPlayerId": "71511",
+      "playerName": "M. Diarra",
+      "slug": "moussa-diarra",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71511.png?version=20260716182159"
+    },
+    {
+      "misterPlayerId": "64410",
+      "playerName": "A. Iturbe",
+      "slug": "alejandro-iturbe",
+      "misterClubId": "23",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64410.png?version=20250717112218"
+    },
+    {
+      "misterPlayerId": "63869",
+      "playerName": "B. Diaby",
+      "slug": "bambo-diaby",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63869.png?version=20250617095415"
+    },
+    {
+      "misterPlayerId": "70255",
+      "playerName": "I. Luque",
+      "slug": "iker-luque",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70255.png?version=20260502195407"
+    },
+    {
+      "misterPlayerId": "1034",
+      "playerName": "J. Jiménez",
+      "slug": "juanmi-jimenez",
+      "misterClubId": "9",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1034.png?version=20240201121646"
+    },
+    {
+      "misterPlayerId": "28787",
+      "playerName": "D. López",
+      "slug": "diego-lopez",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28787.png?version=20251006015004"
+    },
+    {
+      "misterPlayerId": "71019",
+      "playerName": "K. Kita",
+      "slug": "kazunari-kita",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71019.png?version=20260630155354"
+    },
+    {
+      "misterPlayerId": "217",
+      "playerName": "D. Foulquier",
+      "slug": "dimitri-foulquier",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/217.png?version=20251006015048"
+    },
+    {
+      "misterPlayerId": "70934",
+      "playerName": "Í. Sáinz-Maza",
+      "slug": "inigo-sainz-maza",
+      "misterClubId": "1490",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70934.png?version=20260619115412"
+    },
+    {
+      "misterPlayerId": "63784",
+      "playerName": "J. Cabello",
+      "slug": "jorge-cabello",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63784.png?version=20250613112544"
+    },
+    {
+      "misterPlayerId": "29167",
+      "playerName": "Á. Fortuño",
+      "slug": "angel-fortuno",
+      "misterClubId": "8",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29167.png?version=20250805082651"
+    },
+    {
+      "misterPlayerId": "65188",
+      "playerName": "T. Pitarch",
+      "slug": "thiago-pitarch",
+      "misterClubId": "15",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65188.png?version=20250818161450"
+    },
+    {
+      "misterPlayerId": "70183",
+      "playerName": "R. Belaid",
+      "slug": "rayane-belaid",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70183.png?version=20260411211253"
+    },
+    {
+      "misterPlayerId": "17450",
+      "playerName": "A. Ruibal",
+      "slug": "aitor-ruibal",
+      "misterClubId": "4",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/17450.png?version=20251003194220"
+    },
+    {
+      "misterPlayerId": "71530",
+      "playerName": "D. Requena",
+      "slug": "daniel-requena",
+      "misterClubId": "12",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71530.png?version=20260717162215"
+    },
+    {
+      "misterPlayerId": "48620",
+      "playerName": "Marcão",
+      "slug": "marcao",
+      "misterClubId": "17",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48620.png?version=20251006014137"
+    },
+    {
+      "misterPlayerId": "65669",
+      "playerName": "G. Diangana",
+      "slug": "grady-diangana",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65669.png?version=20250831090633"
+    },
+    {
+      "misterPlayerId": "19524",
+      "playerName": "I. Losada",
+      "slug": "iker-losada",
+      "misterClubId": "4",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/19524.png?version=20240706160939"
+    },
+    {
+      "misterPlayerId": "59532",
+      "playerName": "M. Kumbulla",
+      "slug": "marash-kumbulla",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59532.png?version=20240817221457"
+    },
+    {
+      "misterPlayerId": "28677",
+      "playerName": "B. Prados",
+      "slug": "benat-prados",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28677.png?version=20231217221108"
+    },
+    {
+      "misterPlayerId": "71506",
+      "playerName": "R. López",
+      "slug": "ruben-lopez",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71506.png?version=20260716182139"
+    },
+    {
+      "misterPlayerId": "70997",
+      "playerName": "A. Ochoa",
+      "slug": "aaron-ochoa",
+      "misterClubId": "13",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70997.png?version=20260621195207"
+    },
+    {
+      "misterPlayerId": "71003",
+      "playerName": "D. Murillo",
+      "slug": "diego-murillo",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71003.png?version=20260621201411"
+    },
+    {
+      "misterPlayerId": "1153038",
+      "playerName": "R. Gamón",
+      "slug": "rodrigo-gamon",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/1153038.png?version=20260814085444"
+    },
+    {
+      "misterPlayerId": "70949",
+      "playerName": "D. Barcia",
+      "slug": "dani-barcia",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70949.png?version=20260621101909"
+    },
+    {
+      "misterPlayerId": "70947",
+      "playerName": "N. Carrillo",
+      "slug": "noe-carrillo",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70947.png?version=20260621102519"
+    },
+    {
+      "misterPlayerId": "59089",
+      "playerName": "A. Padilla",
+      "slug": "alex-padilla",
+      "misterClubId": "1",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59089.png?version=20240716201319"
+    },
+    {
+      "misterPlayerId": "64496",
+      "playerName": "R. Bardghji",
+      "slug": "roony-bardghji",
+      "misterClubId": "3",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64496.png?version=20250727223602"
+    },
+    {
+      "misterPlayerId": "60859",
+      "playerName": "F. Garcés",
+      "slug": "facundo-garces",
+      "misterClubId": "48",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60859.png?version=20250107092359"
+    },
+    {
+      "misterPlayerId": "71638",
+      "playerName": "L. Gómez",
+      "slug": "laro-gomez",
+      "misterClubId": "1490",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71638.png?version=20260803084450"
+    },
+    {
+      "misterPlayerId": "22471",
+      "playerName": "J. Pacheco",
+      "slug": "jon-pacheco",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/22471.png?version=20250204161316"
+    },
+    {
+      "misterPlayerId": "60290",
+      "playerName": "R. Asencio",
+      "slug": "raul-asencio",
+      "misterClubId": "15",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60290.png?version=20251003184102"
+    },
+    {
+      "misterPlayerId": "12902",
+      "playerName": "R. de Tomás",
+      "slug": "raul-de-tomas",
+      "misterClubId": "14",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/12902.png?version=20230608093556"
+    },
+    {
+      "misterPlayerId": "27855",
+      "playerName": "D. Conde",
+      "slug": "diego-conde",
+      "misterClubId": "4",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27855.png?version=20251006021002"
+    },
+    {
+      "misterPlayerId": "28772",
+      "playerName": "N. Serrano",
+      "slug": "nico-serrano",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/28772.png?version=20240707094206"
+    },
+    {
+      "misterPlayerId": "68711",
+      "playerName": "O. Vargas",
+      "slug": "obed-vargas",
+      "misterClubId": "2",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68711.png?version=20260323141231"
+    },
+    {
+      "misterPlayerId": "822248",
+      "playerName": "R. Yeboah",
+      "slug": "rockson-yeboah",
+      "misterClubId": "50",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/822248.png?version=20260813000707"
+    },
+    {
+      "misterPlayerId": "65187",
+      "playerName": "A. Rego",
+      "slug": "alejandro-rego",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/65187.png?version=20250818102705"
+    },
+    {
+      "misterPlayerId": "67580",
+      "playerName": "S. Becerra",
+      "slug": "samu-becerra",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/67580.png?version=20250919191526"
+    },
+    {
+      "misterPlayerId": "61410",
+      "playerName": "A. Rodríguez",
+      "slug": "adrian-rodriguez",
+      "misterClubId": "48",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61410.png?version=20250310092159"
+    },
+    {
+      "misterPlayerId": "3688394",
+      "playerName": "K. van Oevelen",
+      "slug": "kayne-van-oevelen",
+      "misterClubId": "19",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3688394.png?version=20260824204657"
+    },
+    {
+      "misterPlayerId": "59064",
+      "playerName": "J. Letacek",
+      "slug": "jiri-letacek",
+      "misterClubId": "9",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/59064.png?version=20240714083538"
+    },
+    {
+      "misterPlayerId": "5691",
+      "playerName": "Á. Odriozola",
+      "slug": "alvaro-odriozola",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/5691.png?version=20251004233059"
+    },
+    {
+      "misterPlayerId": "27422",
+      "playerName": "C. Rivero",
+      "slug": "cristian-rivero",
+      "misterClubId": "19",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/27422.png?version=20251006014848"
+    },
+    {
+      "misterPlayerId": "71642",
+      "playerName": "A. Faye",
+      "slug": "abdoulaye-faye",
+      "misterClubId": "5",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71642.png?version=20260803164525"
+    },
+    {
+      "misterPlayerId": "67870",
+      "playerName": "A. Boayar",
+      "slug": "adam-boayar",
+      "misterClubId": "23",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/67870.png?version=20251006104849"
+    },
+    {
+      "misterPlayerId": "29238",
+      "playerName": "A. Comas",
+      "slug": "arnau-comas",
+      "misterClubId": "6",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/29238.png?version=20260621101801"
+    },
+    {
+      "misterPlayerId": "71505",
+      "playerName": "J. Noriega",
+      "slug": "jairo-noriega",
+      "misterClubId": "6",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71505.png?version=20260716182025"
+    },
+    {
+      "misterPlayerId": "48486",
+      "playerName": "J. Copete",
+      "slug": "jose-copete",
+      "misterClubId": "19",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48486.png?version=20251006015726"
+    },
+    {
+      "misterPlayerId": "48554",
+      "playerName": "L. Felipe",
+      "slug": "luiz-felipe",
+      "misterClubId": "14",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48554.png?version=20250707130239"
+    },
+    {
+      "misterPlayerId": "4774441",
+      "playerName": "M. Barzic",
+      "slug": "matia-barzic",
+      "misterClubId": "23",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4774441.png?version=20260901155317"
+    },
+    {
+      "misterPlayerId": "51137",
+      "playerName": "P. Marín",
+      "slug": "pablo-marin",
+      "misterClubId": "16",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/51137.png?version=20251004234154"
+    },
+    {
+      "misterPlayerId": "4947928",
+      "playerName": "S. Esquivel",
+      "slug": "salvi-esquivel",
+      "misterClubId": "2",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/4947928.png?version=20260902084609"
+    },
+    {
+      "misterPlayerId": "67931",
+      "playerName": "S. Sánchez",
+      "slug": "selton-sanchez",
+      "misterClubId": "1",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/67931.png?version=20251109145151"
+    },
+    {
+      "misterPlayerId": "55452",
+      "playerName": "S. Canós",
+      "slug": "sergi-canos",
+      "misterClubId": "19",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/55452.png?version=20231221203629"
+    },
+    {
+      "misterPlayerId": "64199",
+      "playerName": "U. Egiluz",
+      "slug": "unai-egiluz",
+      "misterClubId": "1",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/64199.png?version=20250709145149"
+    },
+    {
+      "misterPlayerId": "63867",
+      "playerName": "Y. Santiago",
+      "slug": "yago-santiago",
+      "misterClubId": "23",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/63867.png?version=20250617095658"
+    },
+    {
+      "misterPlayerId": "6035",
+      "playerName": "I. Villar",
+      "slug": "ivan-villar",
+      "misterClubId": "5",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/6035.png?version=20251003195129"
+    },
+    {
+      "misterPlayerId": "70952",
+      "playerName": "G. Parreño",
+      "slug": "german-parreno",
+      "misterClubId": "6",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70952.png?version=20260621102110"
+    },
+    {
+      "misterPlayerId": "62910",
+      "playerName": "F. González",
+      "slug": "fran-gonzalez",
+      "misterClubId": "17",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/62910.png?version=20260803084157"
+    },
+    {
+      "misterPlayerId": "71012",
+      "playerName": "C. López",
+      "slug": "carlos-lopez",
+      "misterClubId": "13",
+      "position": "PT",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71012.png?version=20260621195339"
+    },
+    {
+      "misterPlayerId": "71633",
+      "playerName": "Y. Musuayi",
+      "slug": "yanis-musuayi",
+      "misterClubId": "12",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71633.png?version=20260802175018"
+    },
+    {
+      "misterPlayerId": "3317698",
+      "playerName": "I. Ndukwe",
+      "slug": "ifeanyi-ndukwe",
+      "misterClubId": "12",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3317698.png?version=20260823083029"
+    },
+    {
+      "misterPlayerId": "3368896",
+      "playerName": "J. Pesquer",
+      "slug": "jordi-pesquer",
+      "misterClubId": "3",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/3368896.png?version=20260823140726"
+    },
+    {
+      "misterPlayerId": "13011",
+      "playerName": "F. Calero",
+      "slug": "fernando-calero",
+      "misterClubId": "13",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/13011.png?version=20240626191613"
+    },
+    {
+      "misterPlayerId": "68465",
+      "playerName": "A. Osorio",
+      "slug": "abiel-osorio",
+      "misterClubId": "23",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/68465.png?version=20260112092536"
+    },
+    {
+      "misterPlayerId": "16868",
+      "playerName": "A. Guevara",
+      "slug": "ander-guevara",
+      "misterClubId": "48",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/16868.png?version=20251006023721"
+    },
+    {
+      "misterPlayerId": "60927",
+      "playerName": "A. Niño",
+      "slug": "adrian-nino",
+      "misterClubId": "13",
+      "position": "DL",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/60927.png?version=20260621200950"
+    },
+    {
+      "misterPlayerId": "70496",
+      "playerName": "A. Diatta",
+      "slug": "alassane-diatta",
+      "misterClubId": "20",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70496.png?version=20260525065559"
+    },
+    {
+      "misterPlayerId": "70499",
+      "playerName": "I. Rupérez",
+      "slug": "inaki-ruperez",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/70499.png?version=20260525073940"
+    },
+    {
+      "misterPlayerId": "49296",
+      "playerName": "F. Pérez",
+      "slug": "fran-perez",
+      "misterClubId": "14",
+      "position": "MC",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/49296.png?version=20251004225250"
+    },
+    {
+      "misterPlayerId": "71141",
+      "playerName": "J. Ives Valou",
+      "slug": "jean-ives-valou",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/71141.png?version=20260707175541"
+    },
+    {
+      "misterPlayerId": "61297",
+      "playerName": "L. Beitia",
+      "slug": "luken-beitia",
+      "misterClubId": "16",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/61297.png?version=20250225085005"
+    },
+    {
+      "misterPlayerId": "15338",
+      "playerName": "R. Le Normand",
+      "slug": "robin-le-normand",
+      "misterClubId": "2",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/15338.png?version=20251228214158"
+    },
+    {
+      "misterPlayerId": "48960",
+      "playerName": "K. Femenía",
+      "slug": "kiko-femenia",
+      "misterClubId": "9",
+      "position": "DF",
+      "photo": "https://cdn-mister.mundodeportivo.com/file/cdn-common/players/48960.png?version=20251003200010"
+    }
+  ]
+}

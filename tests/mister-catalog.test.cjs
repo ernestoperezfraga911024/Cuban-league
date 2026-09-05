@@ -2,6 +2,26 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {JSDOM} = require('jsdom');
+const observedRoster = require('./fixtures/mister-roster-20260905.json');
+
+test('los 522 futbolistas observados en Mister resuelven por ID con su club y posición',async()=>{
+  const {dom,catalog:c}=await catalog();
+  try {
+    assert.equal(observedRoster.paginationComplete,true);
+    assert.equal(observedRoster.players.length,522);
+    const problems=[];
+    const identities=new Set();
+    for (const raw of observedRoster.players) {
+      const club=c.clubsByMisterId.get(raw.misterClubId);
+      const found=c.resolveMister({...raw,clubId:club?.id});
+      if (!found || found.misterId!==raw.misterPlayerId || found.clubId!==club.id || found.position!==raw.position || identities.has(found.id)) {
+        problems.push(raw.playerName+' / '+raw.misterPlayerId);
+      }
+      if (found) identities.add(found.id);
+    }
+    assert.deepEqual(problems,[]);
+  } finally {dom.window.close();}
+});
 
 async function catalog() {
   const dom=new JSDOM('',{url:'https://ernestoperezfraga911024.github.io/Cuban-league/',runScripts:'outside-only'});
@@ -21,7 +41,13 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,538);
+    assert.equal(c.recordCount,569);
+    assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
+    assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
+    assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
+    assert.equal(c.resolve({misterPlayerId:'59089'}).id,'a-padilla');
+    assert.equal(c.resolve({misterPlayerId:'71503'}).id,'m-rodriguez-alaves-2');
+    assert.equal(c.resolve({misterPlayerId:'24691'}).id,'m-rodriguez');
   } finally { dom.window.close(); }
 });
 
@@ -41,6 +67,8 @@ test('clubes explícitos y resolución de importación impiden inferencias y cru
     assert.equal(c.resolveMister({misterPlayerId:'24742',playerName:'D. Cárdenas',clubId:'unknown'}),null);
     const harvey=c.players.find(p=>p.displayName==='Harvey Elliott');
     assert.ok(harvey);
+    // A future entry without provider metadata still supports a unique initial.
+    harvey.misterId='';
     assert.equal(c.resolveMister({misterPlayerId:'999999',playerName:'H. Elliott',clubId:harvey.clubId,position:harvey.position}).id,harvey.id);
     c.players.push({...harvey,id:'different-elliott',displayName:'Harry Elliott'});
     assert.equal(c.resolveMister({misterPlayerId:'999999',playerName:'H. Elliott',clubId:harvey.clubId,position:harvey.position}),null);

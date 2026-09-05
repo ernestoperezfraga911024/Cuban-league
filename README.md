@@ -601,3 +601,35 @@ Las 21 pruebas pasan e incluyen independencia del orden de participantes,
 rechazo de clubes desconocidos y homónimos, nombres abreviados, recuperación
 de la captura y guardado exclusivamente en borrador. Compatible con la extensión
 1.0.1; no requiere reinstalarla. No se ejecutan cambios SQL ni se publican jornadas.
+
+# Auditoría completa del catálogo de Mister · V168
+
+La captura real de J6 se detenía ante N. Gudelj (19168, Getafe/9, MC): no existía
+en el catálogo. V167 comprobaba identidades y clubes, pero sus pruebas no
+cubrían la integridad de las plantillas actuales de Mister.
+
+Se recorrió el buscador de Mister de la liga 649733, sin filtros, usando todas
+las páginas de «Ver más» hasta que el botón quedó oculto. Los 522 registros
+visibles (ID, nombre, club propio, posición, enlace y foto) se conservaron en
+`tests/fixtures/mister-roster-20260905.json`, sin propietarios, precios ni puntos.
+La auditoría incorpora 31 fichas ausentes, incluido Gudelj, y verifica IDs para
+los 522 futbolistas. El catálogo conserva además las fichas anteriores que no
+aparecieron en esa consulta: queda con 569 activos y 7 archivados.
+
+Los siete cambios de club observados son H. Fort → Real Sociedad,
+M. Casadó → Deportivo, T. Lemar → Elche, A. Gorosabel → Espanyol,
+J. Berrocal → Málaga, R. Sánchez → Elche e I. Luque → Racing.
+No se cambia ningún ID interno, nombre visible, foto ni estado previo.
+Enes Ünal se relaciona con «E. Ünal» sin duplicarlo. Arnau/Ángel Ortiz y
+Álvaro/Álex Padilla se mantienen separados; también Mikel/Miguel Rodríguez
+del Alavés, cuyas fichas previas se distinguen por nombre visible exacto.
+
+Antes de importar, el panel revisa todos los futbolistas y reúne las incidencias
+de catálogo en un solo aviso. Un jugador desconocido sigue requiriendo una ficha
+verificada; la captura se conserva y no se aplica parcialmente. La extensión
+1.0.1 permanece compatible y solo el usuario publica la jornada.
+
+Validación: 24 pruebas pasan. Incluyen la captura J6 con Gudelj, la resolución
+de los 522 registros reales por ID/club/posición sin duplicidades, los homónimos
+y la ausencia de escrituras parciales cuando faltan dos identidades. La
+importación completa en el Chrome del usuario debe confirmarse tras recargar.

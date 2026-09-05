@@ -4087,6 +4087,7 @@ body.backup-restore-open{overflow:hidden}
 .mister-import-panel.is-success{border-color:rgba(159,255,124,.36)}
 .mister-import-panel.is-success #misterImportStatus{color:var(--green)}
 .mister-import-panel.is-error #misterImportStatus{color:#ffb4b4}
+#misterImportStatus{white-space:pre-line;overflow-wrap:anywhere}
 
 .mister-import-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
 .mister-import-steps>div{display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.025)}

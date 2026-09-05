@@ -89,7 +89,8 @@ test('J6: Carlos y Cristian Romero mantienen identidades y clubes distintos aunq
   Object.assign(slots[3],{playerName:'Koke',misterPlayerId:'42',misterClubId:'2'});
   Object.assign(slots[7],{playerName:'C. Romero',misterPlayerId:'55743',misterClubId:'20'});
   Object.assign(slots[8],{playerName:'C. Romero',misterPlayerId:'1385821',misterClubId:'2'});
-  Object.assign(slots[9],{playerName:'P. Cubarsí',misterPlayerId:'500000020',misterClubId:'3'});
+  const cubarsi=JSON.parse(read('catalog/players.json')).players.find(p=>p.id==='p-cubarsi');
+  Object.assign(slots[9],{playerName:'P. Cubarsí',misterPlayerId:cubarsi.mister_id,misterClubId:'3'});
   const copy={...payload,matchday:3,gameweekId:4044};
   const {dom,api}=await adminFor(copy);
   try {
@@ -121,6 +122,38 @@ test('un club desactualizado de otro jugador no rechaza a Cárdenas ni contamina
     assert.deepEqual(JSON.parse(JSON.stringify(reversed)),JSON.parse(JSON.stringify(rows)));
     Object.assign(payload.managers[0].lineup[10],{misterClubId:'999999'});
     assert.throws(()=>api.normalizeMisterPayload(payload,4044),/club de Mister.*999999/i);
+  } finally {dom.window.close();}
+});
+
+test('N. Gudelj de ANDOBA en J6 se importa como MC de Getafe con puntos provisionales',async()=>{
+  const payload=await captureFixture({pending:true});
+  const {dom,api}=await adminFor(payload);
+  try {
+    payload.matchday=6;payload.gameweekId=4047;api.state.matchday=6;
+    const manager=payload.managers.find(p=>p.name==='ANDOBA THE BEST');
+    Object.assign(manager.lineup[3],{playerName:'N. Gudelj',fullName:'',misterPlayerId:'19168',misterClubId:'9',position:'MC',displayedPoints:0,didPlay:null,status:'pending'});
+    const row=api.normalizeMisterPayload(payload,4047).find(r=>r.participant.name===manager.name);
+    assert.equal(row.lineup[3].player_id,'mister-19168');
+    assert.equal(row.lineup[3].club_id,'getafe');
+    assert.equal(row.lineup[3].position,'MC');
+    assert.equal(row.lineup[3].displayed_points,0);
+  } finally {dom.window.close();}
+});
+
+test('la revisión previa reúne todos los futbolistas desconocidos sin modificar la captura',async()=>{
+  const payload=await captureFixture();
+  const {dom,api}=await adminFor(payload);
+  try {
+    Object.assign(payload.managers[0].lineup[3],{playerName:'Ausente Uno',fullName:'',misterPlayerId:'999999991'});
+    Object.assign(payload.managers[1].lineup[3],{playerName:'Ausente Dos',fullName:'',misterPlayerId:'999999992'});
+    const before=JSON.stringify(payload);
+    assert.throws(()=>api.normalizeMisterPayload(payload,4044),error=>{
+      assert.match(error.message,/2 incidencias/);
+      assert.match(error.message,/Ausente Uno/);
+      assert.match(error.message,/Ausente Dos/);
+      return true;
+    });
+    assert.equal(JSON.stringify(payload),before);
   } finally {dom.window.close();}
 });
 
@@ -166,5 +199,17 @@ test('guardado real del panel usa exclusivamente RPC de borrador y conserva deci
   assert.equal(calls.length,2);
   assert.equal(calls[1].params.p_rows.find(row=>row.participant_name===first.name).goals,5);
   assert.equal(calls[1].params.p_rows[1].points,11); // Not 22 after a repeated import.
+  const incomplete=JSON.parse(JSON.stringify(payload));
+  Object.assign(incomplete.managers[0].lineup[3],{playerName:'Ausente Uno',fullName:'',misterPlayerId:'999999991'});
+  Object.assign(incomplete.managers[1].lineup[3],{playerName:'Ausente Dos',fullName:'',misterPlayerId:'999999992'});
+  const retry={...request,startFingerprint:api.importFingerprint()};
+  const beforeFailedImport=api.importFingerprint();
+  state.misterImportRequest=retry;state.misterImportBusy=true;
+  await api.finishMisterImport(incomplete,retry);
+  assert.equal(calls.length,2); // No partial draft write.
+  assert.equal(api.importFingerprint(),beforeFailedImport);
+  assert.equal(state.misterImportRequest.requestId,retry.requestId);
+  assert.match(w.document.getElementById('misterImportStatus').textContent,/2 incidencias/);
+  assert.equal(w.document.getElementById('retryMisterImportButton').hidden,false);
   dom.window.close();
 });

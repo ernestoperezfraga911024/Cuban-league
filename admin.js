@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '167-20260905-mister-clubs';
+  const VERSION = '168-20260905-mister-catalog-audit';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -320,6 +320,38 @@
     const missing = state.participants.filter(participant => !managerByParticipant.has(participant.name));
     if (missing.length) throw new Error('Faltan participantes: ' + missing.map(item => item.name).join(', ') + '.');
 
+    // Review the entire capture before applying anything. A missing catalogue
+    // entry must not hide the next missing player behind repeated retries.
+    const playerMatches = new Map();
+    const catalogIssues = new Set();
+    state.participants.forEach(participant => {
+      const manager = managerByParticipant.get(participant.name);
+      if (manager?.negativeBalanceNoScore || !Array.isArray(manager?.lineup)) return;
+      manager.lineup.forEach(rawPlayer => {
+        if (rawPlayer?.isEmpty === true) return;
+        const misterPlayerId = String(rawPlayer?.misterPlayerId || '');
+        const misterClubId = String(rawPlayer?.misterClubId || '');
+        const sourceClub = state.catalog.clubsByMisterId.get(misterClubId);
+        const label = String(rawPlayer?.playerName || 'jugador sin nombre') + ' de ' + participant.name;
+        if (!sourceClub) {
+          catalogIssues.add('No se reconoce el club de Mister ' + (misterClubId || '(sin identificador)') + ' de ' + label + '.');
+          return;
+        }
+        const position = String(rawPlayer?.position || '').toUpperCase();
+        const catalogPlayer = state.catalog.resolveMister({misterPlayerId, playerName:rawPlayer?.playerName,
+          fullName:rawPlayer?.fullName, clubId:sourceClub.id, position});
+        if (!catalogPlayer) {
+          catalogIssues.add(label + ' (' + sourceClub.name + ', Mister ID ' + misterPlayerId + '): falta una identidad única en el catálogo.');
+          return;
+        }
+        playerMatches.set(rawPlayer,{sourceClub,catalogPlayer,position});
+      });
+    });
+    if (catalogIssues.size) {
+      throw new Error('Hay ' + catalogIssues.size + ' incidencias de catálogo en la captura:\n'
+        + [...catalogIssues].join('\n') + '\nLa captura sigue disponible; sus datos todavía no se han aplicado.');
+    }
+
     return state.participants.map(participant => {
       const manager = managerByParticipant.get(participant.name);
       if (typeof manager?.negativeBalanceNoScore !== 'boolean') {
@@ -360,22 +392,7 @@
           throw new Error('La alineación de ' + participant.name + ' contiene un jugador repetido o sin identidad.');
         }
         seenMisterPlayers.add(misterPlayerId);
-        const misterClubId = String(rawPlayer?.misterClubId || '');
-        const sourceClub = state.catalog.clubsByMisterId.get(misterClubId);
-        if (!sourceClub) {
-          throw new Error('No se reconoce el club de Mister ' + (misterClubId || '(sin identificador)') + ' de ' + String(rawPlayer?.playerName || 'un jugador') + '. La captura sigue disponible.');
-        }
-        const position = String(rawPlayer?.position || '').toUpperCase();
-        const catalogPlayer = state.catalog.resolveMister({
-          misterPlayerId,
-          playerName: rawPlayer?.playerName,
-          fullName: rawPlayer?.fullName,
-          clubId: sourceClub.id,
-          position
-        });
-        if (!catalogPlayer) {
-          throw new Error('No se pudo relacionar “' + String(rawPlayer?.playerName || 'jugador sin nombre') + '” (' + sourceClub.name + ', Mister ID ' + misterPlayerId + ') de ' + participant.name + ' con un jugador único del Catálogo Maestro. La captura sigue disponible.');
-        }
+        const {sourceClub,catalogPlayer,position} = playerMatches.get(rawPlayer);
         if (!['PT', 'DF', 'MC', 'DL'].includes(position)) {
           throw new Error('La posición de ' + catalogPlayer.displayName + ' no es válida.');
         }
