@@ -4214,3 +4214,8 @@ body.backup-restore-open{overflow:hidden}
 #misterImportConflicts { display: grid; gap: 12px; margin: 16px 0; }
 #misterImportConflicts label { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border: 1px solid #80808040; border-radius: 10px; font-size: 14px; line-height: 1.5; }
 #misterImportConflicts input { flex: 0 0 auto; width: 20px; height: 20px; accent-color: var(--mister-import-accent); }
+
+/* Matchday position, independent of scoring and negative balance. */
+.mister-rank-option{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.mister-rank-option input{width:64px;padding:6px 8px;border:1px solid #ffffff30;border-radius:8px;background:#10243b;color:#fff;font-size:16px}
+.mister-rank-option input:disabled{opacity:.6}

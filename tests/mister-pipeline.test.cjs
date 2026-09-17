@@ -111,6 +111,7 @@ test('20 participantes: DOM de Mister → captura → alineaciones válidas del 
   const payload=await captureFixture({negative:true});assert.equal(payload.managers.length,20);
   const {dom,api,rows}=await adminFor(payload);
   assert.equal(rows.length,20);assert.equal(rows[0].negativeBalanceNoScore,true);assert.equal(rows[0].lineup.length,0);
+  rows.forEach(row=>assert.equal(row.misterRank,payload.managers.findIndex(m=>m.name===row.participant.name)+1));
   for(const row of rows.slice(1)){assert.equal(row.lineup.length,11);assert.equal(row.points,11);assert.equal(row.cleanSheets,1);assert.equal(api.lineupMetrics(row.lineup).complete,true);}
   assert.throws(()=>api.normalizeMisterPayload({...payload,matchday:6},4044),/no corresponde/);
   assert.throws(()=>api.normalizeMisterPayload({...payload,league:{id:'other'}},4044),/no corresponde/);
@@ -160,7 +161,9 @@ test('un club desactualizado de otro jugador no rechaza a Cárdenas ni contamina
     assert.equal(rows[0].lineup[10].position,'PT');
     assert.equal(rows[0].lineup[7].club_id,'rayo-vallecano');
     const reversed=api.normalizeMisterPayload({...payload,managers:[...payload.managers].reverse()},4044);
-    assert.deepEqual(JSON.parse(JSON.stringify(reversed)),JSON.parse(JSON.stringify(rows)));
+    const withoutRank=list=>JSON.parse(JSON.stringify(list.map(({misterRank,...row})=>row)));
+    assert.deepEqual(withoutRank(reversed),withoutRank(rows));
+    reversed.forEach(row=>assert.equal(row.misterRank,21-rows.find(r=>r.participant.name===row.participant.name).misterRank));
     Object.assign(payload.managers[0].lineup[10],{misterClubId:'999999'});
     assert.throws(()=>api.normalizeMisterPayload(payload,4044),/club de Mister.*999999/i);
   } finally {dom.window.close();}
@@ -225,6 +228,9 @@ test('guardado real del panel usa exclusivamente RPC de borrador y conserva deci
   assert.equal(calls.length,1,w.document.getElementById('misterImportStatus').textContent);
   assert.ok(calls[0].params.p_rows.every(row=>row.published===false));
   assert.equal(calls[0].params.p_rows.length,20);
+  calls[0].params.p_rows.forEach(row=>assert.equal(row.mister_rank,payload.managers.findIndex(m=>m.name===row.participant_name)+1));
+  api.renderPlayerRows(calls[0].params.p_rows);
+  assert.deepEqual(api.gatherRows(false,true).map(row=>row.mister_rank),calls[0].params.p_rows.map(row=>row.mister_rank));
   assert.equal(calls[0].params.p_expected_write_revision,'revision-0');
   assert.equal(state.misterImportRequest,null);
   assert.match(w.document.getElementById('misterImportStatus').textContent,/Borrador guardado/);
@@ -240,6 +246,20 @@ test('guardado real del panel usa exclusivamente RPC de borrador y conserva deci
   assert.equal(calls.length,2);
   assert.equal(calls[1].params.p_rows.find(row=>row.participant_name===first.name).goals,5);
   assert.equal(calls[1].params.p_rows[1].points,11); // Not 22 after a repeated import.
+  // A subsequent source ranking replaces the previous imported ranking, without
+  // losing a deliberately edited position or silently publishing the matchday.
+  const rankInput=w.document.querySelector(`.admin-player[data-player-id="${roster[1].id}"] [data-mister-rank]`);
+  rankInput.value='7';
+  const changedOrder={...payload,managers:[...payload.managers].reverse()};
+  const rankRequest={...request,protectExisting:true,startFingerprint:api.importFingerprint()};
+  state.misterImportRequest=rankRequest;state.misterImportBusy=true;
+  await api.finishMisterImport(changedOrder,rankRequest);
+  assert.equal(calls.length,2);
+  assert.ok([...w.document.querySelectorAll('[data-mister-use-incoming]')].some(el=>el.dataset.misterUseIncoming===roster[1].name));
+  w.document.querySelectorAll('[data-mister-use-incoming]').forEach(el=>{el.checked=true;});
+  await api.finishMisterImport(changedOrder,rankRequest,true);
+  assert.equal(calls.length,3);
+  assert.equal(calls[2].params.p_rows.find(row=>row.participant_name===roster[1].name).mister_rank,19);
   const incomplete=JSON.parse(JSON.stringify(payload));
   Object.assign(incomplete.managers[0].lineup[3],{playerName:'Ausente Uno',fullName:'',misterPlayerId:'999999991'});
   Object.assign(incomplete.managers[1].lineup[3],{playerName:'Ausente Dos',fullName:'',misterPlayerId:'999999992'});
@@ -247,7 +267,7 @@ test('guardado real del panel usa exclusivamente RPC de borrador y conserva deci
   const beforeFailedImport=api.importFingerprint();
   state.misterImportRequest=retry;state.misterImportBusy=true;
   await api.finishMisterImport(incomplete,retry);
-  assert.equal(calls.length,2); // No partial draft write.
+  assert.equal(calls.length,3); // No partial draft write.
   assert.equal(api.importFingerprint(),beforeFailedImport);
   assert.equal(state.misterImportRequest.requestId,retry.requestId);
   assert.match(w.document.getElementById('misterImportStatus').textContent,/2 incidencias/);

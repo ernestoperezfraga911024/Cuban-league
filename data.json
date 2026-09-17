@@ -4512,5 +4512,97 @@
         "points": 1938
       }
     ]
-  }
+  },
+  "misterStandings": [
+    {
+      "season": "2026/27",
+      "matchday": 5,
+      "gameweekId": 4046,
+      "leagueId": "649733",
+      "verifiedOn": "2026-09-17",
+      "source": "https://mister.mundodeportivo.com/standings?gw=4046",
+      "rows": [
+        {
+          "name": "MONEY MON$TER",
+          "points": 84
+        },
+        {
+          "name": "Yovany R9",
+          "points": 74
+        },
+        {
+          "name": "Viva Libre",
+          "points": 71
+        },
+        {
+          "name": "Arian Mirandez Li",
+          "points": 67
+        },
+        {
+          "name": "GNT D ZONA",
+          "points": 61
+        },
+        {
+          "name": "Ernesto",
+          "points": 60
+        },
+        {
+          "name": "Juventus",
+          "points": 51
+        },
+        {
+          "name": "Roberto Piñeiro",
+          "points": 51
+        },
+        {
+          "name": "Brian",
+          "points": 49
+        },
+        {
+          "name": "Mario Fernandez",
+          "points": 48
+        },
+        {
+          "name": "Andy",
+          "points": 48
+        },
+        {
+          "name": "ANDOBA THE BEST",
+          "points": 47
+        },
+        {
+          "name": "@elministro",
+          "points": 45
+        },
+        {
+          "name": "Julio",
+          "points": 43
+        },
+        {
+          "name": "Esteban Dominguez",
+          "points": 43
+        },
+        {
+          "name": "Patria FC",
+          "points": 39
+        },
+        {
+          "name": "Maykel Zuaznabar",
+          "points": 36
+        },
+        {
+          "name": "Bayer Munich",
+          "points": 35
+        },
+        {
+          "name": "Rivaldo",
+          "points": 31
+        },
+        {
+          "name": "Victor Manuel",
+          "points": 31
+        }
+      ]
+    }
+  ]
 }

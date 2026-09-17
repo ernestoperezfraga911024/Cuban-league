@@ -1,5 +1,24 @@
 # Cuban League V161
 
+Actualización V170 · 17 de septiembre de 2026:
+
+- En la Copa, entre los supervivientes empatados a menos puntos, sale el que
+  aparece más abajo en la tabla de esa jornada en Mister. Goles, clean sheets y
+  clasificación general no intervienen en este desempate.
+- La extensión 1.0.2 conserva el orden original de la tabla. El panel lo guarda
+  como `mister_rank` en el borrador; aparece como «Puesto en Mister · Copa» y en
+  la revisión antes de publicar. Reimportar permite actualizarlo y conserva la
+  revisión de cambios manuales. La importación nunca publica la jornada.
+- `supabase-v170-cup-mister-order.sql` añade el puesto opcional a las jornadas y
+  lo conserva en publicación, historial, deshacer y restauración de respaldos.
+  Los clientes anteriores que omiten el campo conservan el puesto existente.
+- La tabla J5 verificada en Mister está en `data.json`: Rivaldo 19.º y Víctor
+  Manuel 20.º, ambos con 31 puntos. Solo sirve como respaldo cuando los 20
+  totales publicados coinciden y todavía no hay ningún puesto guardado.
+- Si faltan puestos o están duplicados en un empate decisivo, la eliminación
+  queda pendiente. Los partidos aplazados siguen generando resultados
+  provisionales. Liga y Champions mantienen sus propias reglas.
+
 - La vitrina superior de cada perfil muestra todas las insignias ganadas en un carrusel horizontal. Cada insignia abre un detalle ampliado, accesible y adaptado a móvil con su categoría, rareza, requisito y el logro concreto del participante.
 
 - En móvil, la barra fija de `Resumen`, `Equipo`, `Logros` e `Historia` queda alineada justo debajo del área segura superior al desplazarse. El botón de cerrar permanece centrado en la misma franja, sin aplicar dos veces el espacio del notch ni dejar la barra flotando sobre el contenido.
@@ -224,10 +243,9 @@ Sitio oficial de la Cuban League con:
   abre y se cierra con una transición suave, cambia su indicación y conserva la
   misma ruta de jornadas en móvil y PC sin modificar los datos de competición.
 - Nuevo apartado «Copa»: competición eliminatoria desde la Jornada 4 hasta la
-  Jornada 22. Cada ronda usa únicamente los puntos, goles y clean sheets de esa
-  jornada; el último queda eliminado y los supervivientes comienzan la ronda
-  siguiente desde cero. Los empates se resuelven por puntos, goles, clean
-  sheets y, si persisten, por la posición de la clasificación general de Liga.
+  Jornada 22. Cada ronda usa los puntos de esa jornada; el último queda eliminado
+  y los supervivientes comienzan la ronda siguiente desde cero. Desde V170, en
+  caso de empate sale quien aparezca más abajo en la tabla de esa jornada en Mister.
 - El apartado independiente «Estadísticas» queda retirado temporalmente de la
   navegación, la portada y las rutas directas. Se conservan intactas las
   estadísticas propias de clasificación, perfiles y Pizarra del Míster.

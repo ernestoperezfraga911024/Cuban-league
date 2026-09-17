@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '169-20260917-mister-not-played';
+  const VERSION = '170-20260917-cup-mister-order';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -308,7 +308,9 @@
 
     const bindings = readImportJSON(misterBindingKey()) || {};
     const managerByParticipant = new Map();
-    payload.managers.forEach(manager => {
+    payload.managers.forEach((sourceManager, index) => {
+      // The collector preserves the complete Mister matchday table order.
+      const manager = {...sourceManager, misterRank:index+1};
       const boundName = bindings[String(manager?.misterManagerId || '')];
       const participant = boundName
         ? state.participants.find(p => p.name === boundName)
@@ -368,6 +370,7 @@
         }
         return {
           participant,
+          misterRank: manager.misterRank,
           points: 0,
           goals: 0,
           cleanSheets: 0,
@@ -435,6 +438,7 @@
 
       return {
         participant,
+        misterRank: manager.misterRank,
         points,
         goals: validateIntegerStat(manager.goals, 'Total de goles', participant.name),
         cleanSheets: validateIntegerStat(manager.cleanSheets, 'Total de clean sheets', participant.name),
@@ -456,6 +460,7 @@
       const negativeBalanceCheckbox = card.querySelector('[data-negative-balance-no-score]');
       if (!negativeBalanceCheckbox) throw new Error('Falta la opción de saldo negativo de ' + imported.participant.name + '.');
       negativeBalanceCheckbox.checked = imported.negativeBalanceNoScore === true;
+      card.querySelector('[data-mister-rank]').value = String(imported.misterRank);
       syncNegativeBalanceCard(card);
       const values = {
         points: imported.points,
@@ -485,10 +490,10 @@
 
   function importedRowData(row) {
     return {participant_name:row.participant.name,points:row.points,goals:row.goals,clean_sheets:row.cleanSheets,
-      red_cards:row.redCards,negative_balance_no_score:row.negativeBalanceNoScore,lineup:row.lineup};
+      red_cards:row.redCards,mister_rank:row.misterRank,negative_balance_no_score:row.negativeBalanceNoScore,lineup:row.lineup};
   }
   function importFingerprint() {
-    return JSON.stringify({rows:gatherRows(false,true).map(importCore.canonical),milestone:gatherMilestone(),pending:hasPostponedMatches()});
+    return JSON.stringify({rows:gatherRows(false,true).map(row=>[importCore.canonical(row),row.mister_rank]),milestone:gatherMilestone(),pending:hasPostponedMatches()});
   }
   function isCurrentImport(request) {
     return state.misterImportRequest?.requestId === request.requestId && state.matchday === request.matchday
@@ -497,8 +502,14 @@
   function displayMisterReview(payload, rows, request) {
     const current = new Map(gatherRows(false,true).map(row => [row.participant_name,row]));
     const baseline = readImportJSON(misterBaselineKey()) || {};
-    const conflicts = rows.filter(row => importCore.conflict(current.get(row.participant.name), importedRowData(row),
-      baseline[row.participant.name], request.protectExisting || request.startFingerprint !== importFingerprint()));
+    const conflicts = rows.filter(row => {
+      const existing=current.get(row.participant.name);
+      const previous=baseline[row.participant.name];
+      const editedRank=existing?.mister_rank!=null&&existing.mister_rank!==row.misterRank
+        &&existing.mister_rank!==previous?.mister_rank;
+      return editedRank||importCore.conflict(existing, importedRowData(row), previous,
+        request.protectExisting || request.startFingerprint !== importFingerprint());
+    });
     const messages = [...new Set([
       ...(Array.isArray(payload.warnings) ? payload.warnings.map(String) : []),
       ...rows.flatMap(row => row.catalogWarnings || [])
@@ -521,6 +532,7 @@
       summary.textContent = name + ': usar datos de Mister (PTS ' + shown(existing?.points) + ' → ' + shown(row.points)
         + ', G ' + shown(existing?.goals) + ' → ' + shown(row.goals) + ', CS ' + shown(existing?.clean_sheets)
         + ' → ' + shown(row.cleanSheets) + ', TR ' + shown(existing?.red_cards) + ' → ' + shown(row.redCards)
+        + ', puesto Mister ' + shown(existing?.mister_rank) + ' → ' + row.misterRank
         + '; incluye XI y capitán). Sin marcar: conservar borrador.';
       label.append(checkbox,summary);
       list.append(label);
@@ -2224,6 +2236,8 @@
         input.disabled = locked || negativeBalance;
       });
       if (checkbox) checkbox.disabled = locked;
+      const misterRank = card.querySelector('[data-mister-rank]');
+      if (misterRank) misterRank.disabled = locked;
     });
     ['matchdayDate', 'monthEndToggle', 'yearEndToggle', 'postponedToggle'].forEach(id => {
       $(id).disabled = locked || isChampionsMode();
@@ -2425,6 +2439,9 @@
               <input data-negative-balance-no-score type="checkbox"${negativeBalance ? ' checked' : ''}${champions ? ' disabled' : ''}>
               <span>Saldo negativo · no puntúa</span>
             </label>
+            ${champions ? '' : `<label class="mister-rank-option">Puesto en Mister · Copa
+              <input data-mister-rank type="number" inputmode="numeric" min="1" max="${state.participants.length}" step="1" value="${fieldValue(row, 'mister_rank')}" placeholder="—" aria-label="Puesto en la tabla de Mister de ${name}">
+            </label>`}
           </span>
         </div>
         <div class="stat-input-wrap has-sign-toggle${Number(fieldValue(row, 'points')) < 0 ? ' is-negative' : ''}" data-signed-points-control>
@@ -2483,6 +2500,11 @@
     return [...document.querySelectorAll('.admin-player')].map(node => {
       const participant = state.participants.find(item => item.id === Number(node.dataset.playerId));
       const negativeBalanceNoScore = node.querySelector('[data-negative-balance-no-score]')?.checked === true;
+      const rankInput = node.querySelector('[data-mister-rank]');
+      const misterRank = rankInput?.value.trim() ? Number(rankInput.value) : null;
+      if (misterRank !== null && (!Number.isInteger(misterRank) || misterRank < 1 || misterRank > state.participants.length)) {
+        throw new Error('El puesto en Mister debe estar entre 1 y ' + state.participants.length + '.');
+      }
       const points = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="points"]'));
       const goals = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="goals"]'));
       const cleanSheets = negativeBalanceNoScore ? 0 : inputNumberOrNull(node.querySelector('[data-stat="clean_sheets"]'));
@@ -2498,6 +2520,7 @@
         season: currentSeasonKey(),
         matchday: state.matchday,
         participant_name: participant.name,
+        mister_rank: misterRank,
         points,
         goals,
         clean_sheets: cleanSheets,
@@ -2863,7 +2886,7 @@
       const a = before.get(name);
       const b = after.get(name);
       const lineupChanged = JSON.stringify(a?.lineup ?? null) !== JSON.stringify(b?.lineup ?? null);
-      if (!a || !b || lineupChanged || ['points', 'goals', 'clean_sheets', 'red_cards', 'published'].some(key => a[key] !== b[key])) count += 1;
+      if (!a || !b || lineupChanged || ['points', 'goals', 'clean_sheets', 'red_cards', 'mister_rank', 'published'].some(key => a[key] !== b[key])) count += 1;
     });
     return count;
   }
@@ -3068,6 +3091,7 @@
           ...(includeRedCards ? ['red_cards'] : []),
           ...(includePostponed ? ['has_postponed_matches'] : []),
           'negative_balance_no_score',
+          ...(!champions ? ['mister_rank'] : []),
           ...(includeLineup ? ['lineup'] : []),
           ...(includePublished ? ['published'] : []),
           'updated_at'
@@ -3483,7 +3507,7 @@
       const participant = state.participantIndex.get(row.participant_name);
       return `<div class="preview-row">
         <span>${index + 1}</span>
-        <span class="preview-player"><img src="${escapeHtml(participant?.shield || '')}" alt=""><span><b>${escapeHtml(row.participant_name)}</b>${isChampionsMode() ? '' : `<small>${lineupMetrics(row.lineup).complete ? 'XI completo' : 'Sin alineación'}</small>`}</span></span>
+        <span class="preview-player"><img src="${escapeHtml(participant?.shield || '')}" alt=""><span><b>${escapeHtml(row.participant_name)}</b>${isChampionsMode() ? '' : `<small>${lineupMetrics(row.lineup).complete ? 'XI completo' : 'Sin alineación'} · Mister ${row.mister_rank==null?'pendiente':row.mister_rank+'º'}</small>`}</span></span>
         <span>${row.points}</span><span>${row.goals}</span><span>${row.clean_sheets}</span><span>${row.red_cards}</span>
       </div>`;
     }).join('');
@@ -4498,6 +4522,14 @@
     });
 
     $('playerRows').addEventListener('input', event => {
+      if (event.target.matches('[data-mister-rank]')) {
+        if (!event.target.checkValidity()) {
+          event.target.reportValidity();
+          return;
+        }
+        scheduleAutoSave();
+        return;
+      }
       if (!event.target.matches('.stat-input')) return;
       if (event.target.dataset.stat !== 'points' && valueFor(event.target) < 0) event.target.value = 0;
       if (event.target.dataset.stat === 'points') syncSignedPointsControl(event.target);
