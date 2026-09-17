@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,569);
+    assert.equal(c.recordCount,570);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');

@@ -655,3 +655,18 @@ capitán M. Sierra ×3 con 6 puntos ya multiplicados. También se verifica el av
 para actualizar extensiones antiguas. Se requiere reemplazar los archivos por
 1.0.2, recargar la extensión y ambas pestañas antes de reimportar. El ZIP contiene
 el mismo núcleo probado y no cambia permisos. Solo el usuario publica jornadas.
+
+# Catálogo de J5: D. Otorbi · 2026-09-17
+
+La captura completa de J5 llegó al panel, pero la revisión del catálogo se
+detuvo ante D. Otorbi de Arian Mirandez Li. No figuraba en el catálogo ni en
+los 522 registros del buscador observados el 5 de septiembre. Se verificó
+directamente en la alineación J5/4046: ID 59534, Valencia/19, DL, 9 puntos,
+foto y enlace de Mister. Se añade `mister-59534` sin modificar identidades
+anteriores; el catálogo contiene ahora 570 futbolistas activos y 7 archivados.
+
+La regresión usa el DOM real de los 11 titulares de Arian y reproduce el aviso
+exacto antes de corregir el catálogo. Después conserva sus 67 puntos y los 0
+de P. Barrios, que también lleva el icono de no jugó. La extensión sigue en
+1.0.2: basta recargar la misma pestaña del panel y recuperar la captura si
+sigue disponible (máximo una hora). No se escriben ni publican jornadas.

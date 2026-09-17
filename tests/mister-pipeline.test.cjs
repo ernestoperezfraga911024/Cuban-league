@@ -9,11 +9,11 @@ const core=read('mister-import-core.js');
 const league=JSON.parse(read('data.json'));
 const roster=league.participants.filter(p=>p.active!==false);
 function escape(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-async function captureFixture({pending=false,missingStats=false,negative=false,yovanyLineup=null,matchday=3,gameweekId=4044}={}) {
+async function captureFixture({pending=false,missingStats=false,negative=false,sourceLineup=null,matchday=3,gameweekId=4044}={}) {
   const ids=roster.map((p,i)=>String(100+i));
   const html=`<a class="active" href="https://mister.mundodeportivo.com/action/change?id_community=649733">1ra div Cubanleague</a>
     <button data-tab="gameweek" class="active">Jornada</button><a data-partial class="selected" href="/standings?gw=${gameweekId}">J${matchday}</a>
-    ${roster.map((p,i)=>`<a class="btn btn-sw-link user" href="users/${ids[i]}/manager"><div class="info"><div class="name">${escape(p.name)}</div><div class="played">${negative&&i===0?'Saldo negativo, no puntúa':'11 / 11'}</div></div><div class="points">${negative&&i===0?0:yovanyLineup&&p.name==='Yovany R9'?74:pending?10:11}<span> Pts</span></div></a>`).join('')}`;
+    ${roster.map((p,i)=>`<a class="btn btn-sw-link user" href="users/${ids[i]}/manager"><div class="info"><div class="name">${escape(p.name)}</div><div class="played">${negative&&i===0?'Saldo negativo, no puntúa':'11 / 11'}</div></div><div class="points">${negative&&i===0?0:sourceLineup&&p.name===sourceLineup.name?sourceLineup.points:pending?10:11}<span> Pts</span></div></a>`).join('')}`;
   const dom=new JSDOM(html,{url:'https://mister.mundodeportivo.com/standings',runScripts:'outside-only'});
   const w=dom.window;
   Object.defineProperty(w.HTMLElement.prototype,'offsetWidth',{get(){return 10;}});
@@ -39,8 +39,8 @@ async function captureFixture({pending=false,missingStats=false,negative=false,y
         const index=players.indexOf(p);const club=rawCatalog.clubs.find(c=>c.id===p.club_id);
         return `<a class="lineup-player btn-player-gw" data-id_player="${p.mister_id||500000000+index}" data-id_manager="${id}" data-id_gameweek="${gameweekId}"><img class="team-logo" src="https://cdn-mister.mundodeportivo.com/file/cdn-common/teams/${club.mister_id}.png"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
       }).join('')+'</div>').join('')+'</div>';
-      if(yovanyLineup&&manager.querySelector('.name').textContent==='Yovany R9') {
-        container.innerHTML=yovanyLineup.replaceAll('data-id_manager="7070670"',`data-id_manager="${id}"`);
+      if(sourceLineup&&manager.querySelector('.name').textContent===sourceLineup.name) {
+        container.innerHTML=sourceLineup.html.replaceAll(`data-id_manager="${sourceLineup.managerId}"`,`data-id_manager="${id}"`);
       }
       w.document.body.append(container);
     }
@@ -71,7 +71,7 @@ async function adminFor(payload) {
   return {dom,api,rows:api.normalizeMisterPayload(payload,payload.gameweekId)};
 }
 test('J5: el icono real de G. Jesus permite terminar los 20 participantes y conserva los 74 de Yovany',async()=>{
-  const payload=await captureFixture({yovanyLineup:read('tests/fixtures/mister-j5-yovany-lineup-20260917.html'),matchday:5,gameweekId:4046});
+  const payload=await captureFixture({sourceLineup:{name:'Yovany R9',managerId:'7070670',points:74,html:read('tests/fixtures/mister-j5-yovany-lineup-20260917.html')},matchday:5,gameweekId:4046});
   assert.equal(payload.managers.length,20);
   assert.equal(payload.provisional,false);
   const manager=payload.managers.find(m=>m.name==='Yovany R9');
@@ -88,6 +88,23 @@ test('J5: el icono real de G. Jesus permite terminar los 20 participantes y cons
     assert.equal(row.lineup.find(p=>p.player_id==='mister-4764213').displayed_points,0);
     const captain=row.lineup.find(p=>p.is_captain);
     assert.equal(captain.captain_multiplier,3);assert.equal(captain.displayed_points,6);
+  } finally {dom.window.close();}
+});
+test('J5: la alineación real de Arian incluye a D. Otorbi sin bloquear el catálogo',async()=>{
+  const payload=await captureFixture({sourceLineup:{name:'Arian Mirandez Li',managerId:'5003988',points:67,html:read('tests/fixtures/mister-j5-arian-lineup-20260917.html')},matchday:5,gameweekId:4046});
+  const manager=payload.managers.find(m=>m.name==='Arian Mirandez Li');
+  const otorbi=manager.lineup.find(p=>p.misterPlayerId==='59534');
+  assert.equal(otorbi.playerName,'D. Otorbi');assert.equal(otorbi.misterClubId,'19');
+  assert.equal(otorbi.position,'DL');assert.equal(otorbi.displayedPoints,9);
+  assert.equal(manager.lineup.reduce((sum,p)=>sum+p.displayedPoints,0),67);
+  const {dom,api,rows}=await adminFor(payload);
+  try {
+    const row=rows.find(r=>r.participant.name===manager.name);
+    assert.equal(row.lineup.length,11);assert.equal(row.points,67);
+    assert.equal(api.lineupMetrics(row.lineup).complete,true);
+    const player=row.lineup.find(p=>p.player_id==='mister-59534');
+    assert.equal(player.club_id,'valencia');assert.equal(player.displayed_points,9);
+    assert.equal(row.lineup.find(p=>p.player_name==='P. Barrios').displayed_points,0);
   } finally {dom.window.close();}
 });
 test('20 participantes: DOM de Mister → captura → alineaciones válidas del panel',async()=>{
