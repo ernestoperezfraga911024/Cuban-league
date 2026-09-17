@@ -504,7 +504,7 @@ La contraseña y las reglas de acceso se administran exclusivamente en Supabase.
 # Importación desde Mister · V164
 
 La extensión de `mister-extension/` conecta la jornada de Mister con el borrador
-del panel. Se distribuye en `downloads/Cuban-League-Mister-1.0.1.zip`; instalación
+del panel. Se distribuye en `downloads/Cuban-League-Mister-1.0.2.zip`; instalación
 en `mister-extension-install.html`. No es una integración oficial de Mister.
 
 - Liga verificada por ID `649733`, calendario leído de Mister y 20 participantes.
@@ -633,3 +633,25 @@ Validación: 24 pruebas pasan. Incluyen la captura J6 con Gudelj, la resolución
 de los 522 registros reales por ID/club/posición sin duplicidades, los homónimos
 y la ausencia de escrituras parciales cuando faltan dos identidades. La
 importación completa en el Chrome del usuario debe confirmarse tras recargar.
+
+# Icono de no jugó · V169 / extensión 1.0.2
+
+En J5/4046, G. Jesus (4764213) de Yovany R9 muestra un círculo rojo tachado:
+Mister lo representa con `.points.not-played` y un SVG `#not-played`, sin texto.
+El lector anterior solo reconocía guiones y rechazaba ese texto vacío. Se
+reprodujo el error con el DOM real antes de aplicar la corrección; la alineación
+observada queda en `tests/fixtures/mister-j5-yovany-lineup-20260917.html`.
+
+El lector pasa ahora ese indicador explícito al núcleo: no jugó, 0 puntos,
+0 goles, 0 clean sheets y 0 rojas, conservando el puesto y sin abrir una ficha
+estadística. Los ceros numéricos siguen consultando estadísticas; los pendientes
+siguen siendo provisionales y un blanco sin indicador sigue siendo un error.
+Un indicador contradictorio con puntos distintos de cero o pendiente se rechaza.
+Los errores de lectura identifican al futbolista y participante afectados.
+
+La regresión recorre 20 participantes simulados con el DOM real de Yovany en
+J5, termina la captura, normaliza sus 11 puestos y conserva su total 74 y al
+capitán M. Sierra ×3 con 6 puntos ya multiplicados. También se verifica el aviso
+para actualizar extensiones antiguas. Se requiere reemplazar los archivos por
+1.0.2, recargar la extensión y ambas pestañas antes de reimportar. El ZIP contiene
+el mismo núcleo probado y no cambia permisos. Solo el usuario publica jornadas.

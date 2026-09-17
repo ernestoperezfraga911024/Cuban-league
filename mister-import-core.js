@@ -7,10 +7,16 @@
     const text = String(value).trim().replace(/−/g, '-').replace(',', '.');
     return /^[+-]?\d+(?:\.\d+)?$/.test(text) && Number.isFinite(Number(text)) ? Number(text) : null;
   }
-  function points(raw, pending = false) {
+  function points(raw, pending = false, didNotPlay = false) {
     const text = String(raw ?? '').trim();
+    if (didNotPlay) {
+      if (pending || (!['', '-', '—', '–', '−'].includes(text) && number(text) !== 0)) {
+        throw new Error('El indicador de no jugó contradice los puntos o el estado pendiente.');
+      }
+      return { value: 0, status: 'did-not-play', didPlay: false };
+    }
     if (pending) return { value: 0, status: 'pending', didPlay: null };
-    if (['-', '—', '–'].includes(text)) return { value: 0, status: 'did-not-play', didPlay: false };
+    if (['-', '—', '–', '−'].includes(text)) return { value: 0, status: 'did-not-play', didPlay: false };
     const value = number(text);
     if (value === null) throw new Error('Puntuación ausente o ilegible. No se sustituye por cero.');
     return { value, status: 'scored', didPlay: true };

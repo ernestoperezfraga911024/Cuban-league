@@ -1,4 +1,4 @@
-CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.0.1
+CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.0.2
 
 INSTALAR (CHROME EN COMPUTADORA)
 1. Extrae el ZIP en una carpeta permanente, por ejemplo Documentos/Cuban-League-Mister.
@@ -12,17 +12,18 @@ INSTALAR (CHROME EN COMPUTADORA)
 
 Publicar es siempre una acción tuya desde administración.
 
-ACTUALIZAR DESDE 1.0.0
+ACTUALIZAR DESDE 1.0.0 O 1.0.1
 1. Extrae el nuevo ZIP en la misma carpeta instalada y acepta reemplazar los archivos.
-2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.0.1.
-3. Recarga administración y vuelve a importar. Conserva el borrador existente.
+2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.0.2.
+3. Recarga las pestañas de Mister y administración, y vuelve a importar. Conserva el borrador existente.
 
 LECTURA Y LÍMITES
 - Liga configurada: 1ra div Cubanleague, código Mister 649733; 20 participantes.
 - Solo se importan jornadas que aparecen en el calendario de Mister.
 - Lee las alineaciones de esa jornada, no la plantilla actual ni los suplentes.
 - Copia puntos ya multiplicados del capitán. No multiplica goles ni tarjetas.
-- Sin capitán es válido. «−» de no jugó = 0 puntos.
+- Sin capitán es válido. «−» y el círculo rojo tachado de no jugó = 0 puntos, goles, clean sheets y rojas.
+- El símbolo de no jugó conserva al futbolista en la alineación y no interrumpe la captura.
 - El reloj/pendiente se registra con 0 provisional y un aviso; no prueba que el jugador no haya jugado.
 - Saldo negativo, no puntúa: todos los datos contabilizables de ese participante quedan en 0.
 - Clean sheet sigue la regla actual del importador: portero con minutos, cero goles recibidos y crédito positivo de portería a cero en Mister.

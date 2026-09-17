@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '168-20260905-mister-catalog-audit';
+  const VERSION = '169-20260917-mister-not-played';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';
@@ -224,8 +224,8 @@
 
   async function requireMisterExtension() {
     const hello = await extensionCall('HELLO');
-    if (hello.bridgeProtocol !== 2) {
-      throw new Error('La extensión instalada necesita actualizarse a 1.0.1. Abre «Instalar extensión · guía», reemplaza los archivos, recarga la extensión y este panel.');
+    if (hello.bridgeProtocol !== 2 || hello.notPlayedIcon !== true) {
+      throw new Error('La extensión instalada necesita actualizarse a 1.0.2 para reconocer el símbolo de «no jugó». Abre «Instalar extensión · guía», reemplaza los archivos y recarga la extensión, Mister y este panel.');
     }
   }
 
@@ -404,7 +404,7 @@
           throw new Error('Los puntos de ' + catalogPlayer.displayName + ' no son válidos.');
         }
         if (rawPlayer?.didPlay === false && displayedPoints !== 0) {
-          throw new Error('Un jugador marcado con “—” debe tener 0 puntos.');
+          throw new Error('Un jugador marcado como «no jugó» debe tener 0 puntos.');
         }
         const isCaptain = rawPlayer?.isCaptain === true;
         const multiplier = Number(rawPlayer?.captainMultiplier);

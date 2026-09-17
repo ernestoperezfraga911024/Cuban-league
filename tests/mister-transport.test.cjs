@@ -68,11 +68,13 @@ test('panel → puente → worker: START conserva la correlación y devuelve la 
   } finally { t.dom.window.close(); }
 });
 
-test('avisa de actualizar 1.0.0 antes de iniciar una captura', async () => {
+test('avisa de actualizar las extensiones sin soporte del icono antes de iniciar una captura', async () => {
   const t = transport();
   try {
-    t.dom.window.chrome.runtime.sendMessage = async () => ({ok: true, version: '1.0.0'});
-    await assert.rejects(t.api.requireMisterExtension(), /actualizarse a 1.0.1/);
+    for(const hello of [{version:'1.0.0'},{version:'1.0.1',bridgeProtocol:2}]) {
+      t.dom.window.chrome.runtime.sendMessage = async () => ({ok: true, ...hello});
+      await assert.rejects(t.api.requireMisterExtension(), /actualizarse a 1.0.2/);
+    }
     assert.equal(t.opened.length, 0);
   } finally { t.dom.window.close(); }
 });

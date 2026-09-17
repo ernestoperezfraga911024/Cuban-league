@@ -9,16 +9,16 @@ const core=read('mister-import-core.js');
 const league=JSON.parse(read('data.json'));
 const roster=league.participants.filter(p=>p.active!==false);
 function escape(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-async function captureFixture({pending=false,missingStats=false,negative=false}={}) {
+async function captureFixture({pending=false,missingStats=false,negative=false,yovanyLineup=null,matchday=3,gameweekId=4044}={}) {
   const ids=roster.map((p,i)=>String(100+i));
   const html=`<a class="active" href="https://mister.mundodeportivo.com/action/change?id_community=649733">1ra div Cubanleague</a>
-    <button data-tab="gameweek" class="active">Jornada</button><a data-partial class="selected" href="/standings?gw=4044">J3</a>
-    ${roster.map((p,i)=>`<a class="btn btn-sw-link user" href="users/${ids[i]}/manager"><div class="info"><div class="name">${escape(p.name)}</div><div class="played">${negative&&i===0?'Saldo negativo, no puntúa':'11 / 11'}</div></div><div class="points">${negative&&i===0?0:pending?10:11}<span> Pts</span></div></a>`).join('')}`;
+    <button data-tab="gameweek" class="active">Jornada</button><a data-partial class="selected" href="/standings?gw=${gameweekId}">J${matchday}</a>
+    ${roster.map((p,i)=>`<a class="btn btn-sw-link user" href="users/${ids[i]}/manager"><div class="info"><div class="name">${escape(p.name)}</div><div class="played">${negative&&i===0?'Saldo negativo, no puntúa':'11 / 11'}</div></div><div class="points">${negative&&i===0?0:yovanyLineup&&p.name==='Yovany R9'?74:pending?10:11}<span> Pts</span></div></a>`).join('')}`;
   const dom=new JSDOM(html,{url:'https://mister.mundodeportivo.com/standings',runScripts:'outside-only'});
   const w=dom.window;
   Object.defineProperty(w.HTMLElement.prototype,'offsetWidth',{get(){return 10;}});
   let listener;let done;const completed=new Promise(resolve=>done=resolve);
-  const job={id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday:3,season:'2026/27'};
+  const job={id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday,season:'2026/27'};
   w.chrome={runtime:{id:'test-extension',onMessage:{addListener(fn){listener=fn;}},sendMessage:async msg=>{
     if(msg.type==='MISTER_READY')return{ok:true,job};
     if(msg.type==='DISCOVERED') {job.discovery=msg.input.discovery;setTimeout(()=>listener({type:'RUN',job},{id:'test-extension'},()=>{}),0);}
@@ -37,16 +37,20 @@ async function captureFixture({pending=false,missingStats=false,negative=false}=
       const container=w.document.createElement('div');container.className='team-lineup';
       container.innerHTML='<div class="lineup-starting">'+Object.keys(counts).map(position=>'<div class="line">'+players.filter(p=>p.position===position).map(p=>{
         const index=players.indexOf(p);const club=rawCatalog.clubs.find(c=>c.id===p.club_id);
-        return `<a class="lineup-player btn-player-gw" data-id_player="${p.mister_id||500000000+index}" data-id_manager="${id}" data-id_gameweek="4044"><img class="team-logo" src="https://cdn-mister.mundodeportivo.com/file/cdn-common/teams/${club.mister_id}.png"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
+        return `<a class="lineup-player btn-player-gw" data-id_player="${p.mister_id||500000000+index}" data-id_manager="${id}" data-id_gameweek="${gameweekId}"><img class="team-logo" src="https://cdn-mister.mundodeportivo.com/file/cdn-common/teams/${club.mister_id}.png"><div class="info"><div class="name">${escape(p.display_name)}</div><div class="points ${pending&&index===0?'pending':''}">${pending&&index===0?'':1}</div></div></a>`;
       }).join('')+'</div>').join('')+'</div>';
+      if(yovanyLineup&&manager.querySelector('.name').textContent==='Yovany R9') {
+        container.innerHTML=yovanyLineup.replaceAll('data-id_manager="7070670"',`data-id_manager="${id}"`);
+      }
       w.document.body.append(container);
     }
     const card=event.target.closest('a.lineup-player');
     if(card){
+      if(card.querySelector('.points.not-played')) { done({error:'No debe abrir estadísticas de quien no jugó'});return; }
       const overlay=w.document.createElement('div');overlay.id='overlay';overlay.className='show';
       const stats={goals:{value:0},redCard:{value:0},doubleYellowCard:{value:0},minutesPlayed:{value:90},goalsAgainst:{value:0,rating:4}};
       if(missingStats)delete stats.goals;
-      overlay.innerHTML=`<button class="popup-close">Cerrar</button><div id="popup-content"><button data-stats="{}" data-id_gameweek="4044" data-marca_stats_rating_detailed_filtered="${escape(JSON.stringify(stats))}" data-name="Player">Ver más estadísticas</button></div>`;
+      overlay.innerHTML=`<button class="popup-close">Cerrar</button><div id="popup-content"><button data-stats="{}" data-id_gameweek="${gameweekId}" data-marca_stats_rating_detailed_filtered="${escape(JSON.stringify(stats))}" data-name="Player">Ver más estadísticas</button></div>`;
       w.document.body.append(overlay);
     }
     if(event.target.closest('.popup-close')) w.document.querySelector('#overlay')?.remove();
@@ -63,9 +67,29 @@ async function adminFor(payload) {
   w.fetch=async()=>({ok:true,json:async()=>JSON.parse(read('catalog/players.json'))});
   w.eval(core);w.eval(read('player-catalog.js'));
   w.eval(read('admin.js').replace('  boot();','  window.testImport = {state, normalizeMisterPayload, lineupMetrics, displayMisterReview, importedRowData};'));
-  const api=w.testImport;api.state.participants=roster;api.state.matchday=3;api.state.catalog=await w.CubanLeaguePlayerCatalog.load();
-  return {dom,api,rows:api.normalizeMisterPayload(payload,4044)};
+  const api=w.testImport;api.state.participants=roster;api.state.matchday=payload.matchday;api.state.catalog=await w.CubanLeaguePlayerCatalog.load();
+  return {dom,api,rows:api.normalizeMisterPayload(payload,payload.gameweekId)};
 }
+test('J5: el icono real de G. Jesus permite terminar los 20 participantes y conserva los 74 de Yovany',async()=>{
+  const payload=await captureFixture({yovanyLineup:read('tests/fixtures/mister-j5-yovany-lineup-20260917.html'),matchday:5,gameweekId:4046});
+  assert.equal(payload.managers.length,20);
+  assert.equal(payload.provisional,false);
+  const manager=payload.managers.find(m=>m.name==='Yovany R9');
+  const jesus=manager.lineup.find(p=>p.misterPlayerId==='4764213');
+  assert.equal(jesus.status,'did-not-play');assert.equal(jesus.didPlay,false);
+  for(const key of ['displayedPoints','goals','cleanSheet','redCard'])assert.equal(jesus[key],0);
+  assert.equal(manager.points,74);
+  assert.equal(manager.lineup.reduce((sum,p)=>sum+p.displayedPoints,0),74);
+  const {dom,api,rows}=await adminFor(payload);
+  try {
+    const row=rows.find(r=>r.participant.name==='Yovany R9');
+    assert.equal(row.lineup.length,11);assert.equal(row.points,74);
+    assert.equal(api.lineupMetrics(row.lineup).complete,true);
+    assert.equal(row.lineup.find(p=>p.player_id==='mister-4764213').displayed_points,0);
+    const captain=row.lineup.find(p=>p.is_captain);
+    assert.equal(captain.captain_multiplier,3);assert.equal(captain.displayed_points,6);
+  } finally {dom.window.close();}
+});
 test('20 participantes: DOM de Mister → captura → alineaciones válidas del panel',async()=>{
   const payload=await captureFixture({negative:true});assert.equal(payload.managers.length,20);
   const {dom,api,rows}=await adminFor(payload);

@@ -8,6 +8,17 @@ test('no jugó, pendiente y dato ilegible tienen estados distintos', () => {
   assert.throws(()=>core.points('')); assert.throws(()=>core.points('cargando')); assert.throws(()=>core.points('3 goles'));
   assert.equal(core.points('−2').value,-2); assert.equal(core.points('7,5').value,7.5);
 });
+test('icono explícito de no jugó vale cero sin aceptar blancos ni estados contradictorios', () => {
+  for(const raw of ['', '0', '-', '—', '–', '−']) {
+    assert.deepEqual(core.points(raw,false,true),{value:0,status:'did-not-play',didPlay:false});
+  }
+  assert.throws(()=>core.points(''));
+  assert.throws(()=>core.points('',true,true),/contradice/);
+  assert.throws(()=>core.points('7',false,true),/contradice/);
+  assert.throws(()=>core.points('cargando',false,true),/contradice/);
+  assert.deepEqual(core.points('0'),{value:0,status:'scored',didPlay:true});
+  assert.deepEqual(core.points('',true),{value:0,status:'pending',didPlay:null});
+});
 test('estadísticas explícitas: roja doble no duplica, portero sin jugar no recibe CS', () => {
   const data = stats({goals:2,redCard:1,doubleYellowCard:1,minutesPlayed:90,goalsAgainst:0});
   assert.deepEqual(core.statistics(data,'PT'),{goals:2,cleanSheet:1,redCard:1});

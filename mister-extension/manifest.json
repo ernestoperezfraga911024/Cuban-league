@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cuban League · Importar desde Mister",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Lee la jornada de Mister y la envía al borrador del panel de Cuban League. Publicar siempre es una acción del administrador.",
   "permissions": [
     "storage"

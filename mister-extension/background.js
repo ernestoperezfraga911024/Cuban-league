@@ -16,7 +16,7 @@ async function handle(message, sender) {
   if (sender.frameId !== 0 || !sender.tab) throw new Error('Origen no autorizado.');
   const input = message.input || {};
   if (isAdmin(sender.url)) {
-    if (message.type === 'HELLO') return { version: '1.0.1', bridgeProtocol: 2 };
+    if (message.type === 'HELLO') return { version: '1.0.2', bridgeProtocol: 2, notPlayedIcon: true };
     if (message.type === 'START') {
       if (!Number.isInteger(input.matchday) || input.matchday < 1 || input.matchday > 38
         || typeof input.season !== 'string' || input.season.length > 30) throw new Error('Jornada no válida.');

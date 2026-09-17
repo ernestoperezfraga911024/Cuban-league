@@ -153,7 +153,15 @@
             }
             if (!/^\d+$/.test(id) || String(card.dataset.id_manager) !== manager.id || Number(card.dataset.id_gameweek) !== gameweekId) throw new Error('Un puesto de ' + manager.name + ' no se pudo identificar.');
             const pointNode = card.querySelector('.info .points, .points');
-            const parsed = core.points(rawPoints, pointNode?.classList.contains('pending') === true);
+            // Mister renders the red no-play icon as an empty .points.not-played
+            // element. Only this explicit marker makes empty points a known zero.
+            let parsed;
+            try {
+              parsed = core.points(rawPoints, pointNode?.classList.contains('pending') === true,
+                pointNode?.classList.contains('not-played') === true);
+            } catch (error) {
+              throw new Error(text(card.querySelector('.name')) + ' de ' + manager.name + ': ' + error.message);
+            }
             const captainNode = card.querySelector('.captain-badge__multiplier');
             const multiplier = captainNode ? core.number(text(captainNode).replace(/^x/i, '')) : 1;
             let stats = {goals:0,cleanSheet:0,redCard:0,fullName:''};
