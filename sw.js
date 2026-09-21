@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v172-remove-wall-badge';
+const CACHE_NAME = 'cuban-league-v173-league-no-bonus';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=161-20260902',
-  './app.js?v=172-20260921-remove-wall-badge',
-  './data.json?v=172-20260921-remove-wall-badge',
-  './catalog/players.json?v=172-20260921-remove-wall-badge',
+  './styles.css?v=173-20260921-league-no-bonus',
+  './app.js?v=173-20260921-league-no-bonus',
+  './data.json?v=173-20260921-league-no-bonus',
+  './catalog/players.json?v=173-20260921-league-no-bonus',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',
   './supabase-config.js?v=161-20260902',
   './admin.html',
@@ -109,12 +109,12 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=172-20260921-remove-wall-badge'));
+    event.respondWith(networkFirst(request, './data.json?v=173-20260921-league-no-bonus'));
     return;
   }
 
   if (url.pathname.endsWith('/catalog/players.json')) {
-    event.respondWith(networkFirst(request, './catalog/players.json?v=172-20260921-remove-wall-badge'));
+    event.respondWith(networkFirst(request, './catalog/players.json?v=173-20260921-league-no-bonus'));
     return;
   }
 

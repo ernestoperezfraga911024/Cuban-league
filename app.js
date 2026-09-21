@@ -1,4 +1,4 @@
-const APP_VERSION='172-20260921-remove-wall-badge';
+const APP_VERSION='173-20260921-league-no-bonus';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -3732,7 +3732,7 @@ async function fetchPublishedLeagueStatsRows(signal){
   const rows=[];
   for(let offset=0;offset<10000;offset+=pageSize){
     const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
-    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,lineup,updated_at');
+    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,negative_balance_no_score,has_postponed_matches,lineup,updated_at');
     endpoint.searchParams.set('season',`eq.${season}`);
     endpoint.searchParams.set('published','eq.true');
     endpoint.searchParams.set('order','matchday.asc,participant_name.asc');
@@ -3762,6 +3762,92 @@ async function fetchPublishedLeagueStatsRows(signal){
     if(page.length<pageSize)return rows;
   }
   throw new Error('La respuesta de estadísticas superó el límite de seguridad');
+}
+
+// Read-only alternative standings. Do not reuse the estimated captain bonus
+// from the other statistics: Mister rounds multiplied points to whole points.
+function leagueNoBonusCaptainAdjustment(player){
+  const readNumber=value=>value===null||value===undefined||value===''||typeof value==='boolean'
+    ?NaN:matchdayLineupNumericValue(value,NaN);
+  const stored=readNumber(player?.displayed_points);
+  const multiplier=readNumber(player?.captain_multiplier);
+  if(!Number.isFinite(stored)||![1,1.5,2,3].includes(multiplier))return null;
+  // Legacy manual entries such as 31.995 represent 32 displayed points.
+  // This tolerance never rounds a real half point or edits the stored score.
+  const finalPoints=Math.abs(stored-Math.round(stored))<=.0051?Math.round(stored):stored;
+  if(multiplier===1)return 0;
+  const basePoints=Math.round(finalPoints/multiplier);
+  if(Number.isInteger(finalPoints)){
+    // The integer base must reproduce the published score after rounding.
+    if(Math.round(basePoints*multiplier)!==finalPoints)return null;
+  }else if(Math.abs(basePoints*multiplier-finalPoints)>.000001){
+    return null;
+  }
+  return finalPoints-basePoints;
+}
+
+function leagueNoBonusMatchday(row){
+  if(row.negative_balance_no_score===true)return {points:0,bonus:0};
+  if(row.points===null||row.points===undefined||row.points==='')return null;
+  const officialPoints=matchdayLineupNumericValue(row.points,NaN);
+  if(!Number.isFinite(officialPoints))return null;
+  let raw=row.lineup;
+  if(typeof raw==='string'){
+    try{raw=JSON.parse(raw)}catch{return null}
+  }
+  const players=Array.isArray(raw)?raw:Array.isArray(raw?.players)?raw.players:[];
+  const lineup=normalizePublishedMatchdayLineup(players);
+  if(players.length!==11||lineup.length!==11||new Set(lineup.map(player=>player.slotNumber)).size!==11)return null;
+  const captains=players.filter(player=>player?.is_captain===true||player?.is_captain==='true');
+  if(captains.length>1||captains.some(isPublishedEmptyLineupPlayer))return null;
+  const bonus=captains.length?leagueNoBonusCaptainAdjustment(captains[0]):0;
+  if(bonus===null)return null;
+  // Preserve every other point, adjustment and empty-slot penalty in the total.
+  return {points:officialPoints-bonus,bonus};
+}
+
+function buildLeagueNoBonusStandings(rows,participants){
+  const published=rows.filter(row=>row.published!==false);
+  const matchdays=[...new Set(published.map(row=>row.matchday))].sort((a,b)=>a-b);
+  const byTeam=new Map(participants.map(participant=>[participant.name,new Map()]));
+  published.forEach(row=>byTeam.get(row.participantName)?.set(row.matchday,row));
+  const teams=participants.map(participant=>{
+    const team={id:participant.id,name:participant.name,shield:participant.shield||'',
+      officialPoints:0,officialGoals:0,officialCleanSheets:0,points:0,bonus:0,
+      goals:0,cleanSheets:0,missingMatchdays:[]};
+    matchdays.forEach(matchday=>{
+      const row=byTeam.get(participant.name).get(matchday);
+      if(!row){team.missingMatchdays.push(matchday);return;}
+      const goals=Math.max(0,Math.trunc(matchdayLineupNumericValue(row.goals)));
+      const cleanSheets=Math.max(0,Math.trunc(matchdayLineupNumericValue(row.clean_sheets)));
+      team.officialPoints+=matchdayLineupNumericValue(row.points);
+      team.officialGoals+=goals;
+      team.officialCleanSheets+=cleanSheets;
+      if(row.negative_balance_no_score!==true){team.goals+=goals;team.cleanSheets+=cleanSheets;}
+      const result=leagueNoBonusMatchday(row);
+      if(!result){team.missingMatchdays.push(matchday);return;}
+      team.points+=result.points;
+      team.bonus+=result.bonus;
+    });
+    if(team.missingMatchdays.length)team.points=null;
+    return team;
+  });
+  const complete=matchdays.length>0&&teams.length>0&&teams.every(team=>!team.missingMatchdays.length);
+  const officialRanks=new Map(teams.map(team=>({...team,points:team.officialPoints,
+    goals:team.officialGoals,cleanSheets:team.officialCleanSheets}))
+    .sort(sortStandings).map((team,index)=>[team.name,index+1]));
+  // If any team lacks a full season, withhold ranks instead of comparing
+  // incomplete totals. Complete teams may still see their own adjusted points.
+  const ordered=[...teams].sort(complete?sortStandings:(a,b)=>a.id-b.id);
+  return {
+    matchdays,
+    complete,
+    postponedMatchdays:[...new Set(published.filter(row=>row.has_postponed_matches===true)
+      .map(row=>row.matchday))].sort((a,b)=>a-b),
+    teams:ordered.map((team,index)=>({...team,rank:complete?index+1:null,
+      officialRank:complete?officialRanks.get(team.name):null,
+      movement:complete?officialRanks.get(team.name)-(index+1):null}))
+  };
 }
 
 function buildLeagueStats(rawRows){
@@ -3910,6 +3996,7 @@ function buildLeagueStats(rawRows){
     teamsWithLineups:teams.filter(team=>team.lineupMatchdays>0).length,
     teams,
     lineRankings,
+    noBonus:buildLeagueNoBonusStandings(rows,participants),
     latestUpdate
   };
 }
@@ -4267,6 +4354,28 @@ function leagueStatsMvpMarkup(data){
     <p class="league-stats-note">Si el mismo futbolista cambia de participante, sus puntos anteriores permanecen en el equipo donde los consiguió.</p>`;
 }
 
+function leagueStatsNoBonusMarkup(data){
+  const table=data.noBonus;
+  if(!table?.matchdays.length)return `<div class="league-stats-empty"><h3>Todavía no hay jornadas publicadas</h3><p>La liga sin bonus aparecerá con los datos que publiques durante la temporada.</p></div>`;
+  const pending=table.postponedMatchdays;
+  return `<div class="league-stats-explainer"><b>Liga sin bonus</b><span>Los puntos normales del capitán se conservan. Solo se descuenta el extra del multiplicador.</span></div>
+    <div class="league-no-bonus-status"><span>${table.matchdays.length} jornadas publicadas · Hasta J${table.matchdays.at(-1)}</span>${pending.length?`<strong>Provisional · ${pending.map(day=>`J${day}`).join(', ')} con aplazados</strong>`:''}</div>
+    ${!table.complete?'<p class="league-no-bonus-pending" role="status">Faltan datos para completar la comparación. Los puestos y cambios aparecerán cuando todos los participantes tengan sus jornadas y capitanes verificados.</p>':''}
+    <div class="league-no-bonus-wrap"><table class="league-no-bonus-table" aria-label="Clasificación alternativa sin bonus del capitán">
+      <thead><tr><th scope="col">Puesto</th><th scope="col">Participante</th><th scope="col">Puntos<br>sin bonus</th><th scope="col">Cambio<small>vs. oficial</small></th></tr></thead>
+      <tbody>${table.teams.map(team=>{
+        const movement=team.movement;
+        const changeLabel=movement===null?'Comparación pendiente':movement>0?`Sube ${movement} ${movement===1?'puesto':'puestos'}`:movement<0?`Baja ${Math.abs(movement)} ${movement===-1?'puesto':'puestos'}`:'Mismo puesto';
+        return `<tr><td class="league-no-bonus-rank">${team.rank??'—'}</td>
+          <th scope="row"><div class="league-no-bonus-team" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}${team.missingMatchdays.length?`<small>Revisar ${team.missingMatchdays.map(day=>`J${day}`).join(', ')}</small>`:''}</span></div></th>
+          <td class="league-no-bonus-points">${team.points===null?'<span aria-label="Puntos pendientes">—</span>':profileSeasonFormat(team.points)}</td>
+          <td><span class="league-no-bonus-change${movement>0?' is-up':movement<0?' is-down':''}" aria-label="${changeLabel}">${movement===null?'—':movement>0?`↑ ${movement}`:movement<0?`↓ ${Math.abs(movement)}`:'='}</span>${team.officialRank?`<small class="league-no-bonus-official">Oficial: ${team.officialRank}º</small>`:''}</td></tr>`;
+      }).join('')}</tbody>
+    </table></div>
+    <p class="league-stats-note">Ejemplo: 8 puntos ×3 = 24. Aquí el jugador conserva sus 8 puntos y se descuentan solo los 16 de bonus.</p>
+    <p class="league-stats-note">Comparación informativa con los mismos desempates de la Liga: puntos, goles y clean sheets. Sin capitán se mantiene el total; con saldo negativo, esa jornada suma 0. Si el capitán resta puntos, quitar su multiplicador recupera únicamente esa penalización extra. La clasificación oficial y las demás estadísticas se mantienen.</p>`;
+}
+
 function leagueStatsLoadingMarkup(){
   return `<div class="league-stats-loading" role="status" aria-live="polite"><span class="lineup-loader" aria-hidden="true"></span><div><b>Calculando la competición</b><small>Sumando capitanes, líneas y MVP de todos los XI publicados…</small></div></div>`;
 }
@@ -4292,11 +4401,11 @@ function renderLeagueStatsContent(){
     host.innerHTML=leagueStatsLoadingMarkup();
     return;
   }
-  const section=['captains','lines','mvp'].includes(LEAGUE_STATS_STATE.section)?LEAGUE_STATS_STATE.section:'captains';
+  const section=['captains','lines','mvp','noBonus'].includes(LEAGUE_STATS_STATE.section)?LEAGUE_STATS_STATE.section:'captains';
   const updated=data.latestUpdate
     ?new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(data.latestUpdate)
     :'Sin actualizaciones registradas';
-  const panelMarkup=data.lineupRows
+  const panelMarkup=section==='noBonus'?leagueStatsNoBonusMarkup(data):data.lineupRows
     ?section==='lines'
       ?leagueStatsLineMarkup(data)
       :section==='mvp'
@@ -4304,11 +4413,11 @@ function renderLeagueStatsContent(){
         :leagueStatsCaptainMarkup(data)
     :`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
   host.innerHTML=`<header class="league-stats-head">
-      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Radiografía de la competición</h3><p>Capitanes destacados, rendimiento por líneas y MVP de cada participante.</p></div>
+      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Radiografía de la competición</h3><p>Capitanes destacados, rendimiento por líneas, MVP y liga sin bonus.</p></div>
       <div class="league-stats-coverage"><b>${data.lineupRows}</b><span>XI publicados</span><small>${data.teamsWithLineups}/${data.teams.length} equipos con datos</small></div>
     </header>
-    <nav class="league-stats-subtabs" role="tablist" aria-label="Estadísticas generales de jugadores">
-      ${[['captains','Capitanes'],['lines','Líneas'],['mvp','MVP']].map(([value,label])=>`<button id="leagueStats${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-league-stats-section="${value}" aria-controls="leagueStatsSectionPanel" aria-selected="${section===value}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
+    <nav class="league-stats-subtabs" role="tablist" aria-label="Estadísticas de la competición">
+      ${[['captains','Capitanes'],['lines','Líneas'],['mvp','MVP'],['noBonus','Liga sin bonus']].map(([value,label])=>`<button id="leagueStats${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-league-stats-section="${value}" aria-controls="leagueStatsSectionPanel" aria-selected="${section===value}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
     </nav>
     <section id="leagueStatsSectionPanel" class="league-stats-section" role="tabpanel" aria-labelledby="leagueStats${section[0].toUpperCase()}${section.slice(1)}Tab">
       ${panelMarkup}
@@ -4371,7 +4480,7 @@ async function ensureLeagueStatsData({force=false}={}){
 }
 
 function setLeagueStatsSection(section,{focus=false}={}){
-  LEAGUE_STATS_STATE.section=['captains','lines','mvp'].includes(section)?section:'captains';
+  LEAGUE_STATS_STATE.section=['captains','lines','mvp','noBonus'].includes(section)?section:'captains';
   renderLeagueStatsContent();
   if(focus)document.querySelector(`[data-league-stats-section="${LEAGUE_STATS_STATE.section}"]`)?.focus();
 }

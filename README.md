@@ -1,5 +1,23 @@
 # Cuban League V161
 
+Actualización V173 · 21 de septiembre de 2026:
+
+- Clasificación → Estadísticas → Liga sin bonus: tabla informativa con puesto,
+  participante, puntos sin el extra del capitán y cambio frente al puesto oficial.
+- Conserva los puntos base: 8 ×3 = 24; se descuentan 16. Parte del total publicado
+  para mantener los demás ajustes y penalizaciones. Usa solo jornadas publicadas.
+- Reconstruye el punto base entero de los capitanes ×1,5 con el redondeo de Mister
+  (https://mister.mundodeportivo.com/blog, «El Capitán», 5 de junio de 2026).
+  Tolera residuos históricos de hasta 0,0051 junto a un entero (31,995 → 32);
+  cualquier puntuación o multiplicador que no permita recuperar el base se
+  señala como pendiente. Las entradas exactas de medio punto se conservan.
+- Sin capitán conserva el total; saldo negativo aporta cero; un bonus negativo
+  se descuenta con su signo. Los aplazados muestran la tabla como provisional.
+- Reutiliza los desempates de Liga (puntos, goles, clean sheets, ID estable). Si
+  faltan jornadas, XI completos o datos de capitán, no inventa totales ni puestos.
+- Cálculo aislado, sin escrituras ni cambios en Liga oficial, Copa, Champions,
+  insignias o estadísticas existentes. Se recalcula con las publicaciones.
+
 Actualización V172 · 21 de septiembre de 2026:
 
 - Retirada la insignia El Muro del catálogo, del cálculo de logros y de los
