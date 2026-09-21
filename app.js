@@ -1,4 +1,4 @@
-const APP_VERSION='171-20260921-cup-negative-balance';
+const APP_VERSION='172-20260921-remove-wall-badge';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -2240,7 +2240,6 @@ const ACHIEVEMENT_CATALOG=[
   {id:'matchday_king',icon:'🗓️',name:'Rey de la jornada',rarity:'epic',type:'Temporada',requirement:'Ganar 3 jornadas en la temporada actual.'},
   {id:'on_fire',icon:'🔥',name:'En llamas',rarity:'epic',type:'Racha',requirement:'Estar en el Top 3 durante 3 jornadas seguidas.'},
   {id:'manita',icon:'⚽',name:'La Manita',rarity:'rare',type:'Jornada',requirement:'Marcar 5 goles o más en una jornada.'},
-  {id:'wall',icon:'🧤',name:'El Muro',rarity:'legendary',type:'Récord',requirement:'Tener la mayor racha de clean sheets seguidos (mínimo 2).'},
   {id:'leader',icon:'⭐',name:'Líder actual',rarity:'rare',type:'Dinámica',requirement:'Ocupar el 1.º puesto de la clasificación actual.'},
   {id:'pichichi',icon:'🥇',iconAsset:'golden-boot-pichichi.png',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar los goles de la temporada.'},
   {id:'golden_glove',icon:'🛡️',name:'Guante de Oro',rarity:'rare',type:'Dinámica',requirement:'Liderar los clean sheets de la temporada.'},
@@ -2455,8 +2454,7 @@ function buildAchievementSnapshot(){
     matchdayWins:0,
     topThreeStreak:0,
     maxGoals:0,
-    maxGoalsMatchday:null,
-    cleanSheetStreak:0
+    maxGoalsMatchday:null
   }]));
   const historical=statMap();
   const seasonRecord=achievementSeasonRecord();
@@ -2492,7 +2490,6 @@ function buildAchievementSnapshot(){
 
   DATA.participants.forEach(player=>{
     let topRun=0;
-    let cleanRun=0;
     PUBLISHED_MATCHDAYS.forEach(matchday=>{
       const row=LIVE_MATCHDAY_ROWS.find(item=>item.matchday===matchday&&item.participantName===player.name);
       const weekly=row?weeklyStandings(matchday).find(item=>item.name===player.name):null;
@@ -2502,16 +2499,9 @@ function buildAchievementSnapshot(){
       }else{
         topRun=0;
       }
-      if(row&&(row.cleanSheets||0)>0){
-        cleanRun+=1;
-        metrics.get(player.name).cleanSheetStreak=Math.max(metrics.get(player.name).cleanSheetStreak,cleanRun);
-      }else{
-        cleanRun=0;
-      }
     });
   });
 
-  const cleanSheetRecord=Math.max(0,...[...metrics.values()].map(item=>item.cleanSheetStreak));
   const monthAwards=monthlyAchievementAwards();
   const winterAwards=winterAchievementAwards();
   const championsSeasons=historicalTitleIndex().championsSeasons;
@@ -2561,12 +2551,6 @@ function buildAchievementSnapshot(){
       earned=playerMetrics.maxGoals>=5;
       meta=earned?`${playerMetrics.maxGoals} goles · J${playerMetrics.maxGoalsMatchday}`:'';
       progress=`Récord personal: ${playerMetrics.maxGoals}/5 goles`;
-    }else if(catalog.id==='wall'){
-      earned=cleanSheetRecord>=2&&playerMetrics.cleanSheetStreak===cleanSheetRecord;
-      meta=earned?`Récord: ${cleanSheetRecord} jornadas seguidas`:'';
-      progress=cleanSheetRecord<2
-        ?`${playerMetrics.cleanSheetStreak}/2 jornadas`
-        :`Récord actual: ${cleanSheetRecord}`;
     }else if(catalog.id==='leader'){
       earned=Boolean(currentRow&&currentRow.position===1&&latest!=null);
       meta=earned?`${currentRow.points.toLocaleString('es')} pts · J${latest}`:'';

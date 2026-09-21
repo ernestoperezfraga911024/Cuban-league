@@ -1,5 +1,10 @@
 # Cuban League V161
 
+Actualización V172 · 21 de septiembre de 2026:
+
+- Retirada la insignia El Muro del catálogo, del cálculo de logros y de los
+  perfiles. Los contadores de insignias se ajustan automáticamente.
+
 Actualización V171 · 21 de septiembre de 2026:
 
 - La Copa consulta la marca publicada `negative_balance_no_score`. Todos los
@@ -425,7 +430,7 @@ Sitio oficial de la Cuban League con:
   Clasificación y Centro de Jornada.
 - Insignias históricas, dinámicas y de jornada: Campeón, Dinastía, Habitual del
   podio, Temporada legendaria, Rey de la jornada, En llamas, La Manita de cinco
-  goles, El Muro por la mayor racha de clean sheets, líderes actuales y
+  goles, líderes actuales y
   campeón de Champions.
 - Insignia Club 2.000 para cada participante que supere los 2.000 puntos en una
   misma temporada.

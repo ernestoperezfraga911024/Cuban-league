@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v171-cup-negative-balance';
+const CACHE_NAME = 'cuban-league-v172-remove-wall-badge';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=161-20260902',
-  './app.js?v=171-20260921-cup-negative-balance',
-  './data.json?v=171-20260921-cup-negative-balance',
-  './catalog/players.json?v=171-20260921-cup-negative-balance',
+  './app.js?v=172-20260921-remove-wall-badge',
+  './data.json?v=172-20260921-remove-wall-badge',
+  './catalog/players.json?v=172-20260921-remove-wall-badge',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',
   './supabase-config.js?v=161-20260902',
   './admin.html',
@@ -109,12 +109,12 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.pathname.endsWith('/data.json')) {
-    event.respondWith(networkFirst(request, './data.json?v=171-20260921-cup-negative-balance'));
+    event.respondWith(networkFirst(request, './data.json?v=172-20260921-remove-wall-badge'));
     return;
   }
 
   if (url.pathname.endsWith('/catalog/players.json')) {
-    event.respondWith(networkFirst(request, './catalog/players.json?v=171-20260921-cup-negative-balance'));
+    event.respondWith(networkFirst(request, './catalog/players.json?v=172-20260921-remove-wall-badge'));
     return;
   }
 
