@@ -12,7 +12,8 @@ function setup({ranks=true,snapshot=true,pending=false}={}){
   const dom=new JSDOM(read('index.html'),{url:'https://example.test',runScripts:'outside-only'});
   dom.window.eval(read('app.js').replace('init();',`window.testCup={
     set(data,rows){DATA=data;LIVE_MATCHDAY_ROWS=normalizeMatchdayRows(rows);},
-    buildCupTournament,renderCup,select(day){SELECTED_CUP_MATCHDAY=day;CUP_SELECTION_MANUAL=true;}
+    buildCupTournament,renderCup,weeklyStandings,deriveChampionsStatsFromLeague,fetchPublishedStatsRows,
+    select(day){SELECTED_CUP_MATCHDAY=day;CUP_SELECTION_MANUAL=true;}
   };`));
   const rows=[
     ...roster.map(p=>({participant_name:p.name,matchday:4,points:p.name==='Arian Mirandez Li'?18:100,goals:0,clean_sheets:0})),
@@ -88,5 +89,139 @@ test('a unique lowest score needs no tiebreak; eliminated teams never re-enter',
     rows.find(r=>r.matchday===5&&r.participant_name==='Arian Mirandez Li').points=-10;
     api.set(league,rows);
     assert.equal(api.buildCupTournament().rounds[1].eliminated.name,'Rivaldo');
+  }finally{dom.window.close();}
+});
+
+function addNegativeRound(rows){
+  rows.push(...roster.map(p=>({participant_name:p.name,matchday:6,
+    points:p.name==='Maykel Zuaznabar'?0:50,goals:0,clean_sheets:0,
+    negative_balance_no_score:p.name==='Maykel Zuaznabar',has_postponed_matches:true})));
+  rows.push(...roster.map(p=>({participant_name:p.name,matchday:7,
+    points:p.name==='ANDOBA THE BEST'?22:50,has_postponed_matches:false})));
+}
+test('J6 negative balance confirms Maykel despite postponement and unlocks J7 ANDOBA',()=>{
+  const {dom,api,rows,league}=setup();
+  try{
+    addNegativeRound(rows);api.set(league,rows);
+    const result=api.buildCupTournament();
+    assert.equal(result.rounds[2].status,'confirmed');
+    assert.equal(result.rounds[2].incomplete,true);
+    assert.equal(result.rounds[2].eliminated.name,'Maykel Zuaznabar');
+    assert.equal(result.rounds[3].status,'confirmed');
+    assert.equal(result.rounds[3].eliminated.name,'ANDOBA THE BEST');
+    assert.equal(result.survivors.length,16);
+    assert.ok(!result.rounds[3].entrants.includes('Maykel Zuaznabar'));
+    assert.equal(api.weeklyStandings(7).find(p=>p.name==='Maykel Zuaznabar').points,50);
+    assert.ok(api.deriveChampionsStatsFromLeague().rows.filter(r=>r.leagueMatchday===6).every(r=>r.hasPostponedMatches));
+    assert.ok(rows.filter(r=>r.matchday===6).every(r=>r.has_postponed_matches));
+    api.select(6);api.renderCup();
+    const doc=dom.window.document;
+    assert.match(doc.getElementById('cupDanger').textContent,/Maykel Zuaznabar.*0 PTS.*Saldo negativo/s);
+    assert.match(doc.getElementById('cupRoundState').textContent,/Eliminación confirmada.*aplazados/);
+    assert.equal(doc.getElementById('cupEliminatedCount').textContent,'4');
+    assert.match(doc.getElementById('cupHistory').textContent,/ANDOBA THE BEST.*22 PTS.*Maykel Zuaznabar.*Saldo negativo/s);
+    api.select(7);api.renderCup();
+    assert.match(doc.getElementById('cupDanger').textContent,/ELIMINADO EN J7.*ANDOBA THE BEST/s);
+  }finally{dom.window.close();}
+});
+test('zero alone is not negative balance; corrections recalculate downstream eliminations',()=>{
+  const {dom,api,rows,league}=setup();
+  try{
+    addNegativeRound(rows);api.set(league,rows);
+    assert.equal(api.buildCupTournament().rounds[2].status,'confirmed');
+    rows.find(r=>r.matchday===6&&r.participant_name==='Maykel Zuaznabar').negative_balance_no_score=false;
+    api.set(league,rows);
+    let result=api.buildCupTournament();
+    assert.equal(result.rounds[2].status,'provisional');
+    assert.equal(result.rounds[3].status,'provisional');
+    assert.ok(result.survivors.includes('Maykel Zuaznabar'));
+    assert.ok(result.survivors.includes('ANDOBA THE BEST'));
+    rows.filter(r=>r.matchday===6).forEach(r=>r.has_postponed_matches=false);
+    api.set(league,rows);
+    result=api.buildCupTournament();
+    assert.equal(result.rounds[2].eliminated.name,'Maykel Zuaznabar');
+    assert.equal(result.rounds[3].eliminated.name,'ANDOBA THE BEST');
+    api.set(league,rows.filter(r=>r.matchday!==6));
+    assert.equal(api.buildCupTournament().rounds[3].status,'blocked');
+  }finally{dom.window.close();}
+});
+test('disqualification takes priority over a lower points score and needs no Mister order',()=>{
+  const {dom,api,rows,league}=setup();
+  try{
+    addNegativeRound(rows);
+    rows.find(r=>r.matchday===6&&r.participant_name==='Ernesto').points=-4;
+    rows.find(r=>r.matchday===6&&r.participant_name==='Brian').points=0;
+    api.set(league,rows);
+    const result=api.buildCupTournament();
+    assert.equal(result.rounds[2].eliminated.name,'Maykel Zuaznabar');
+    assert.equal(result.rounds[2].status,'confirmed');
+    assert.ok(result.survivors.includes('Ernesto'));
+    assert.ok(result.survivors.includes('Brian'));
+  }finally{dom.window.close();}
+});
+test('all negative survivors leave together without eliminating another team by points',()=>{
+  const {dom,api,rows,league}=setup();
+  try{
+    addNegativeRound(rows);
+    Object.assign(rows.find(r=>r.matchday===6&&r.participant_name==='Brian'),{points:0,negative_balance_no_score:true});
+    api.set(league,rows);
+    const result=api.buildCupTournament();
+    assert.deepEqual(Array.from(result.rounds[2].eliminatedTeams,t=>t.name).sort(),['Brian','Maykel Zuaznabar']);
+    assert.equal(result.rounds[3].rows.length,16);
+    assert.equal(result.survivors.length,15);
+    api.select(6);api.renderCup();
+    assert.equal(dom.window.document.querySelectorAll('#cupDanger .is-eliminated').length,2);
+    assert.equal(dom.window.document.querySelectorAll('#cupRows .is-eliminated').length,2);
+    assert.equal(dom.window.document.getElementById('cupEliminatedCount').textContent,'5');
+  }finally{dom.window.close();}
+});
+test('negative flags on teams already eliminated do not resolve an unfinished round',()=>{
+  const {dom,api,rows,league}=setup();
+  try{
+    addNegativeRound(rows);
+    rows.find(r=>r.matchday===6&&r.participant_name==='Maykel Zuaznabar').negative_balance_no_score=false;
+    Object.assign(rows.find(r=>r.matchday===6&&r.participant_name==='Victor Manuel'),{points:0,negative_balance_no_score:true});
+    api.set(league,rows);
+    assert.equal(api.buildCupTournament().rounds[2].status,'provisional');
+  }finally{dom.window.close();}
+});
+for(const blocker of ['earlier-postponed','missing-participant'])test('negative balance does not bypass '+blocker,()=>{
+  const {dom,api,rows,league}=setup({pending:blocker==='earlier-postponed'});
+  try{
+    addNegativeRound(rows);
+    api.set(league,blocker==='missing-participant'?rows.filter(r=>!(r.matchday===6&&r.participant_name==='Ernesto')):rows);
+    const result=api.buildCupTournament();
+    assert.equal(result.rounds[2].eliminated,null);
+    assert.equal(result.rounds[2].status,blocker==='missing-participant'?'invalid':'provisional');
+    assert.ok(result.survivors.includes('Maykel Zuaznabar'));
+  }finally{dom.window.close();}
+});
+for(const surviving of [0,1])test('multiple disqualifications finish safely with '+surviving+' survivors',()=>{
+  const {dom,api,rows,league}=setup();
+  try{
+    addNegativeRound(rows);
+    rows.filter(r=>r.matchday===6).forEach(r=>{
+      r.negative_balance_no_score=!(surviving&&r.participant_name==='Ernesto');
+      r.points=r.negative_balance_no_score?0:50;
+    });
+    api.set(league,rows);
+    const result=api.buildCupTournament();
+    assert.equal(result.survivors.length,surviving);
+    assert.equal(result.finished,true);
+    assert.equal(result.champion?.name||null,surviving?'Ernesto':null);
+    assert.equal(result.finalMatchday,6);
+    api.select(6);api.renderCup();
+    assert.equal(dom.window.document.getElementById('cupEliminatedCount').textContent,String(20-surviving));
+  }finally{dom.window.close();}
+});
+test('published stats request includes the explicit negative-balance flag',async()=>{
+  const {dom,api}=setup();
+  try{
+    dom.window.CUBAN_LEAGUE_SUPABASE={url:'https://example.test',publishableKey:'public-test-key'};
+    dom.window.fetch=async url=>{
+      assert.ok(new URL(url).searchParams.get('select').split(',').includes('negative_balance_no_score'));
+      return {ok:true,json:async()=>[]};
+    };
+    await api.fetchPublishedStatsRows('2026/27');
   }finally{dom.window.close();}
 });

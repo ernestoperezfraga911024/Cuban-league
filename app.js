@@ -1,4 +1,4 @@
-const APP_VERSION='170-20260917-cup-mister-order';
+const APP_VERSION='171-20260921-cup-negative-balance';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -140,6 +140,7 @@ function normalizeMatchdayRows(rows){
     cleanSheets:Math.max(0,Number(row.clean_sheets)||0),
     redCards:Math.max(0,Number(row.red_cards)||0),
     misterRank:Number.isInteger(row.mister_rank)&&row.mister_rank>0?row.mister_rank:null,
+    negativeBalanceNoScore:row.negative_balance_no_score===true,
     hasPostponedMatches:row.has_postponed_matches===true,
     updatedAt:row.updated_at||null
   })).filter(row=>validNames.has(row.participantName)&&Number.isInteger(row.matchday)&&row.matchday>0);
@@ -217,7 +218,7 @@ async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatch
     const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
     endpoint.searchParams.set(
       'select',
-      `participant_name,matchday,points,goals,clean_sheets,mister_rank,${includeRedCards?'red_cards,':''}${includePostponed?'has_postponed_matches,':''}updated_at`
+      `participant_name,matchday,points,goals,clean_sheets,mister_rank,negative_balance_no_score,${includeRedCards?'red_cards,':''}${includePostponed?'has_postponed_matches,':''}updated_at`
     );
     endpoint.searchParams.set('season',`eq.${season}`);
     endpoint.searchParams.set('published','eq.true');
@@ -332,11 +333,13 @@ function cupRoundStandings(matchday,eligibleNames,{includeStats=true}={}){
         points:row?.points||0,
         goals:row?.goals||0,
         cleanSheets:row?.cleanSheets||0,
-        misterRank:row?.misterRank??sourceRanks.get(participant.name)??null
+        misterRank:row?.misterRank??sourceRanks.get(participant.name)??null,
+        negativeBalanceNoScore:row?.negativeBalanceNoScore===true
       };
     })
     .sort((a,b)=>
-      b.points-a.points
+      Number(a.negativeBalanceNoScore)-Number(b.negativeBalanceNoScore)
+      ||b.points-a.points
       ||(a.misterRank??Infinity)-(b.misterRank??Infinity)
     )
     .map((participant,index)=>({...participant,position:index+1}));
@@ -351,6 +354,8 @@ function buildCupTournament(){
   let projectionOpen=true;
   let blockedBy=null;
   const rounds=cupMatchdays().map(matchday=>{
+    // Multiple disqualifications may leave a single survivor before J22.
+    if(projectedSurvivors.size<=1)return null;
     const matchdayRows=LIVE_MATCHDAY_ROWS.filter(row=>row.matchday===matchday&&rosterNames.has(row.participantName));
     const rowNames=new Set(matchdayRows.map(row=>row.participantName));
     const hasAnyStats=matchdayRows.length>0;
@@ -396,8 +401,10 @@ function buildCupTournament(){
     }
 
     const rows=cupRoundStandings(matchday,projectedSurvivors,{includeStats:true,leagueMatchday:matchday});
-    const candidate=projectedSurvivors.size>1?rows.at(-1)||null:null;
-    const tied=candidate?rows.filter(row=>row.points===candidate.points):[];
+    const disqualified=rows.filter(row=>row.negativeBalanceNoScore);
+    const candidate=rows.at(-1)||null;
+    const candidates=disqualified.length?disqualified:candidate?[candidate]:[];
+    const tied=!disqualified.length&&candidate?rows.filter(row=>row.points===candidate.points):[];
     const rankCounts=new Map();
     matchdayRows.forEach(row=>{if(row.misterRank!=null)rankCounts.set(row.misterRank,(rankCounts.get(row.misterRank)||0)+1);});
     const missingMisterOrder=tied.length>1&&tied.some(row=>
@@ -412,12 +419,12 @@ function buildCupTournament(){
         incomplete,blockedBy,rows,eliminated:null,provisionalEliminated:null,entrants,
         officialSurvivorsAfter:[...officialSurvivors],projectedSurvivorsAfter:[...projectedSurvivors]};
     }
-    const confirmed=confirmationOpen&&!incomplete;
+    const confirmed=confirmationOpen&&(!incomplete||disqualified.length>0);
     const status=confirmed?'confirmed':'provisional';
-    const eliminated=confirmed?candidate:null;
-    const provisionalEliminated=confirmed?null:candidate;
-    if(candidate)projectedSurvivors.delete(candidate.name);
-    if(eliminated)officialSurvivors.delete(eliminated.name);
+    const eliminatedTeams=confirmed?candidates:[];
+    const provisionalEliminatedTeams=confirmed?[]:candidates;
+    candidates.forEach(team=>projectedSurvivors.delete(team.name));
+    eliminatedTeams.forEach(team=>officialSurvivors.delete(team.name));
     if(!confirmed){
       blockedBy??=matchday;
       confirmationOpen=false;
@@ -431,13 +438,16 @@ function buildCupTournament(){
       incomplete,
       blockedBy:confirmed?null:blockedBy,
       rows,
-      eliminated,
-      provisionalEliminated,
+      eliminationReason:disqualified.length?'negative-balance':'points',
+      eliminated:eliminatedTeams[0]||null,
+      provisionalEliminated:provisionalEliminatedTeams[0]||null,
+      eliminatedTeams,
+      provisionalEliminatedTeams,
       entrants,
       officialSurvivorsAfter:[...officialSurvivors],
       projectedSurvivorsAfter:[...projectedSurvivors]
     };
-  });
+  }).filter(Boolean);
   const allConfirmed=rounds.length>0&&rounds.every(round=>round.status==='confirmed');
   const champion=allConfirmed&&officialSurvivors.size===1
     ?roster.find(participant=>officialSurvivors.has(participant.name))||null
@@ -447,12 +457,14 @@ function buildCupTournament(){
     survivors:[...officialSurvivors],
     projectedSurvivors:[...projectedSurvivors],
     champion,
+    finished:allConfirmed&&officialSurvivors.size<=1,
+    finalMatchday:rounds.at(-1)?.matchday||CUP_FINAL_MATCHDAY,
     blockedBy
   };
 }
 
 function defaultCupMatchday(tournament){
-  return tournament.rounds.find(round=>round.status!=='confirmed')?.matchday||CUP_FINAL_MATCHDAY;
+  return tournament.rounds.find(round=>round.status!=='confirmed')?.matchday||tournament.finalMatchday;
 }
 
 function previousPublishedMatchday(matchday){
@@ -3476,6 +3488,7 @@ function profileSeasonPublishedRowsSignature(rows){
     row.goals,
     row.cleanSheets,
     row.redCards,
+    row.negativeBalanceNoScore,
     row.hasPostponedMatches,
     row.updatedAt
   ]).sort((a,b)=>a[1]-b[1]||String(a[0]).localeCompare(String(b[0]),'es')));
@@ -5235,20 +5248,20 @@ function renderCup(){
   if(!rowsHost)return;
 
   const tournament=buildCupTournament();
-  const matchdays=cupMatchdays();
+  const matchdays=tournament.rounds.map(round=>round.matchday);
   if(!CUP_SELECTION_MANUAL||!matchdays.includes(SELECTED_CUP_MATCHDAY)){
     SELECTED_CUP_MATCHDAY=defaultCupMatchday(tournament);
   }
 
   const selectedRound=tournament.rounds.find(round=>round.matchday===SELECTED_CUP_MATCHDAY)||tournament.rounds[0];
   const completedRounds=tournament.rounds.filter(round=>round.status==='confirmed');
-  const eliminatedRounds=completedRounds.filter(round=>round.eliminated);
+  const eliminations=completedRounds.flatMap(round=>(round.eliminatedTeams||[]).map(team=>({round,team})));
   const nextRound=tournament.rounds.find(round=>round.status!=='confirmed')||null;
   const postponedBlocker=nextRound?.incomplete?nextRound:null;
   const selectedIsNext=nextRound?.matchday===selectedRound.matchday;
 
-  $('cupHeroStatus').textContent=tournament.champion
-    ?'Copa finalizada'
+  $('cupHeroStatus').textContent=tournament.finished
+    ?tournament.champion?'Copa finalizada':'Copa sin supervivientes'
     :nextRound?.status==='invalid'
       ?`Jornada ${nextRound.matchday}: ${nextRound.missingMisterOrder?'desempate pendiente':'datos incompletos'}`
     :postponedBlocker
@@ -5257,13 +5270,13 @@ function renderCup(){
       ?`${tournament.survivors.length} equipos siguen en pie`
       :'Empieza en la Jornada 4';
   $('cupAliveCount').textContent=tournament.survivors.length.toLocaleString('es');
-  $('cupEliminatedCount').textContent=eliminatedRounds.length.toLocaleString('es');
-  $('cupNextMatchday').textContent=tournament.champion
-    ?'Campeón'
+  $('cupEliminatedCount').textContent=eliminations.length.toLocaleString('es');
+  $('cupNextMatchday').textContent=tournament.finished
+    ?tournament.champion?'Campeón':'Finalizada'
     :nextRound
       ?`J${nextRound.matchday}`
       :'J22';
-  $('cupProgressCopy').textContent=tournament.champion
+  $('cupProgressCopy').textContent=tournament.finished
     ?'Copa completada · consulta el recorrido ronda a ronda.'
     :postponedBlocker
       ?`Las eliminaciones desde J${postponedBlocker.matchday} son provisionales hasta completar el partido aplazado.`
@@ -5276,15 +5289,15 @@ function renderCup(){
   championHost.innerHTML=tournament.champion?`<article class="cup-champion-card team-profile-link" ${profileTriggerAttrs(tournament.champion.name)}>
     <span class="cup-champion-crown">${uiIcon('trophy')}</span>
     <img src="${imageMap()[tournament.champion.name]||''}" alt="Foto de ${profileAttr(tournament.champion.name)}">
-    <div><span>CAMPEÓN DE COPA</span><h3>${profileAttr(tournament.champion.name)}</h3><p>El último equipo en pie después de 19 eliminaciones.</p></div>
-    <strong>J22</strong>
+    <div><span>CAMPEÓN DE COPA</span><h3>${profileAttr(tournament.champion.name)}</h3><p>El último equipo en pie después de ${eliminations.length} eliminaciones.</p></div>
+    <strong>J${tournament.finalMatchday}</strong>
   </article>`:'';
 
   $('cupTimeline').innerHTML=tournament.rounds.map(round=>{
     const isSelected=round.matchday===selectedRound.matchday;
     const isNext=round.matchday===nextRound?.matchday;
     const stateCopy=round.status==='confirmed'
-      ?round.eliminated?`Sale ${profileAttr(round.eliminated.name)}`:'Cerrada'
+      ?round.eliminatedTeams.length>1?`Salen ${round.eliminatedTeams.length} equipos`:round.eliminated?`Sale ${profileAttr(round.eliminated.name)}`:'Cerrada'
       :round.status==='provisional'
         ?round.incomplete?'Con aplazado':'Provisional'
         :round.status==='blocked'
@@ -5305,7 +5318,7 @@ function renderCup(){
   $('cupRoundTitle').textContent=`Jornada ${selectedRound.matchday}`;
   const roundState=$('cupRoundState');
   roundState.textContent=selectedRound.status==='confirmed'
-    ?'Jornada cerrada'
+    ?selectedRound.incomplete?'Eliminación confirmada · hay aplazados':'Jornada cerrada'
     :selectedRound.status==='provisional'
       ?selectedRound.incomplete?'Pendiente por partido aplazado':'Resultado provisional'
       :selectedRound.status==='blocked'
@@ -5317,21 +5330,19 @@ function renderCup(){
 
   const dangerHost=$('cupDanger');
   if(selectedRound.status==='confirmed'&&selectedRound.eliminated){
-    const eliminated=selectedRound.eliminated;
-    dangerHost.innerHTML=`<article class="cup-danger-card is-eliminated team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
+    dangerHost.innerHTML=selectedRound.eliminatedTeams.map(eliminated=>`<article class="cup-danger-card is-eliminated team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
       <span class="cup-danger-icon">${uiIcon('red-card')}</span>
       <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
-      <div><span>ELIMINADO EN J${selectedRound.matchday}</span><h3>${profileAttr(eliminated.name)}</h3><p>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.misterRank==null?'Puesto Mister pendiente':eliminated.misterRank+'º en Mister'}</p></div>
+      <div><span>ELIMINADO EN J${selectedRound.matchday}</span><h3>${profileAttr(eliminated.name)}</h3><p>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.negativeBalanceNoScore?'Saldo negativo':eliminated.misterRank==null?'Puesto Mister pendiente':eliminated.misterRank+'º en Mister'}</p></div>
       <strong>Fuera</strong>
-    </article>`;
+    </article>`).join('');
   }else if(selectedRound.status==='provisional'&&selectedRound.provisionalEliminated){
-    const candidate=selectedRound.provisionalEliminated;
-    dangerHost.innerHTML=`<article class="cup-danger-card is-provisional team-profile-link" ${profileTriggerAttrs(candidate.name)}>
+    dangerHost.innerHTML=selectedRound.provisionalEliminatedTeams.map(candidate=>`<article class="cup-danger-card is-provisional team-profile-link" ${profileTriggerAttrs(candidate.name)}>
       <span class="cup-danger-icon">${uiIcon('calendar')}</span>
       <img src="${imageMap()[candidate.name]||''}" alt="Foto de ${profileAttr(candidate.name)}">
-      <div><span>${selectedRound.incomplete?'ÚLTIMO PROVISIONAL':'PROYECCIÓN PROVISIONAL'}</span><h3>${profileAttr(candidate.name)}</h3><p>${candidate.points.toLocaleString('es')} PTS · todavía no está eliminado · espera el partido aplazado de J${selectedRound.blockedBy}</p></div>
+      <div><span>${candidate.negativeBalanceNoScore?'SALDO NEGATIVO':selectedRound.incomplete?'ÚLTIMO PROVISIONAL':'PROYECCIÓN PROVISIONAL'}</span><h3>${profileAttr(candidate.name)}</h3><p>${candidate.points.toLocaleString('es')} PTS · todavía no está eliminado · espera el partido aplazado de J${selectedRound.blockedBy}</p></div>
       <strong>En riesgo</strong>
-    </article>`;
+    </article>`).join('');
   }else{
     const pendingTitle=selectedRound.status==='blocked'
       ?`Espera a completar la Jornada ${selectedRound.blockedBy}`
@@ -5347,8 +5358,8 @@ function renderCup(){
 
   rowsHost.innerHTML=selectedRound.rows.map(participant=>{
     const safeName=profileAttr(participant.name);
-    const eliminated=selectedRound.eliminated?.name===participant.name;
-    const provisional=selectedRound.provisionalEliminated?.name===participant.name;
+    const eliminated=selectedRound.eliminatedTeams?.some(team=>team.name===participant.name);
+    const provisional=selectedRound.provisionalEliminatedTeams?.some(team=>team.name===participant.name);
     const status=eliminated
       ?'Eliminado'
       :selectedRound.status==='confirmed'
@@ -5371,7 +5382,7 @@ function renderCup(){
       <span class="cup-rank">${participant.position}</span>
       <div class="cup-team-cell team-profile-link" ${profileTriggerAttrs(participant.name)}>
         <img src="${imageMap()[participant.name]||''}" alt="Foto de ${safeName}">
-        <span><b>${safeName}</b><small class="cup-team-meta"><span>Mister ${participant.misterRank==null?'—':participant.misterRank+'º'}</span><span class="cup-mobile-extra"> · ${participant.goals.toLocaleString('es')} GOL · ${participant.cleanSheets.toLocaleString('es')} CS</span></small></span>
+        <span><b>${safeName}</b><small class="cup-team-meta"><span>${participant.negativeBalanceNoScore?'Saldo negativo':'Mister '+(participant.misterRank==null?'—':participant.misterRank+'º')}</span><span class="cup-mobile-extra"> · ${participant.goals.toLocaleString('es')} GOL · ${participant.cleanSheets.toLocaleString('es')} CS</span></small></span>
       </div>
       <span class="cup-stat cup-stat-points"><b>${participant.points.toLocaleString('es')}</b></span>
       <span class="cup-stat cup-stat-goals"><b>${participant.goals.toLocaleString('es')}</b></span>
@@ -5380,13 +5391,12 @@ function renderCup(){
     </div>`;
   }).join('');
 
-  $('cupHistory').innerHTML=eliminatedRounds.length
-    ?eliminatedRounds.slice().reverse().map(round=>{
-      const eliminated=round.eliminated;
+  $('cupHistory').innerHTML=eliminations.length
+    ?eliminations.slice().reverse().map(({round,team:eliminated})=>{
       return `<article class="cup-history-item team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
         <span>J${round.matchday}</span>
         <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
-        <div><b>${profileAttr(eliminated.name)}</b><small>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.misterRank==null?'Puesto Mister pendiente':eliminated.misterRank+'º en Mister'}</small></div>
+        <div><b>${profileAttr(eliminated.name)}</b><small>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.negativeBalanceNoScore?'Saldo negativo':eliminated.misterRank==null?'Puesto Mister pendiente':eliminated.misterRank+'º en Mister'}</small></div>
         <strong>Fuera</strong>
       </article>`;
     }).join('')

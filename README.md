@@ -1,5 +1,21 @@
 # Cuban League V161
 
+Actualización V171 · 21 de septiembre de 2026:
+
+- La Copa consulta la marca publicada `negative_balance_no_score`. Todos los
+  supervivientes marcados quedan eliminados por saldo negativo, sin esperar a
+  los aplazados de esa jornada ni exigir un desempate de Mister entre ellos.
+  No se elimina además a otro equipo por puntos. Un cero sin esa marca no es
+  una descalificación; los resultados por puntos siguen esperando al cierre.
+- La eliminación permite confirmar las rondas posteriores, siempre que las
+  rondas anteriores estén resueltas y estén publicados todos los participantes.
+  Las jornadas conservan sus puntos y su estado de aplazadas en Liga y Champions.
+- Si se corrige la marca o se retira una publicación, toda la Copa se recalcula.
+  Los equipos ya eliminados no vuelven a participar. Varias descalificaciones
+  pueden adelantar el final; no se inventa un campeón si no quedan supervivientes.
+- La tabla y el historial explican «Saldo negativo». No requiere migración,
+  cambios de datos ni publicar jornadas desde el asistente.
+
 Actualización V170 · 17 de septiembre de 2026:
 
 - En la Copa, entre los supervivientes empatados a menos puntos, sale el que

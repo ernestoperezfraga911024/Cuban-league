@@ -195,7 +195,7 @@
     <button type="button" data-go="matchdays"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg></span><span><b>Jornadas</b><small>Podios, líderes y movimientos</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="players"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg></span><span><b>Participantes</b><small>Todos los perfiles</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="history" data-history-view="historical"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-landmark"></use></svg></span><span><b>Historia</b><small>Temporadas, rankings y récords</small></span><span aria-hidden="true">→</span></button>
-    <button type="button" data-go="cup"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-crown"></use></svg></span><span><b>Copa</b><small>Una jornada, una eliminación</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" data-go="cup"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-crown"></use></svg></span><span><b>Copa</b><small>Eliminación por jornada</small></span><span aria-hidden="true">→</span></button>
     <button type="button" data-go="rules"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-shield"></use></svg></span><span><b>Reglamento oficial</b><small>Normas de Liga, Copa y Champions</small></span><span aria-hidden="true">→</span></button>
     <button type="button" class="home-shortcut-share" data-go="cards"><span class="home-shortcut-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg></span><span><b>Tarjetas para WhatsApp</b><small>Podios, clasificación, Jugador del mes y Champions listos para compartir</small></span><span aria-hidden="true">→</span></button>
   </nav>
@@ -612,7 +612,7 @@
     <div>
       <span class="eyebrow">COPA CUBAN LEAGUE · 2026/27</span>
       <h2>La última silla.</h2>
-      <p>Una jornada. Un eliminado. Cero puntos heredados.</p>
+      <p>Sobrevive cada jornada. Cero puntos heredados.</p>
     </div>
     <span id="cupHeroStatus" class="cup-hero-status">Empieza en la Jornada 4</span>
   </div>
@@ -645,7 +645,7 @@
       <div class="thead cup-table-head cup-table-grid"><span>#</span><span>Participante</span><span>PTS</span><span>GOL</span><span>CS</span><span>Estado</span></div>
       <div id="cupRows"></div>
     </div>
-    <p class="cup-note">Sale el equipo con menos puntos. En caso de empate, sale quien aparezca más abajo en la tabla de esa jornada en Mister.</p>
+    <p class="cup-note">El saldo negativo elimina automáticamente, aunque haya partidos aplazados. Si no hay equipos con saldo negativo, sale el de menos puntos; en caso de empate, el que aparezca más abajo en la tabla de esa jornada en Mister.</p>
 
     <div class="section-head lower cup-history-head">
       <div><span class="eyebrow">ARCHIVO DE LA COPA</span><h2>Historial de eliminaciones</h2></div>
@@ -657,8 +657,9 @@
       <ol>
         <li>Comienza en la Jornada 4 con los 20 equipos activos de la Liga.</li>
         <li>Cada ronda usa los puntos de esa jornada; el desempate sigue el orden de la tabla de Mister.</li>
-        <li>El último queda eliminado; los supervivientes pasan a la siguiente ronda con todo a cero.</li>
-        <li>La Jornada 22 deja un único equipo: el campeón de Copa.</li>
+        <li>Los equipos que siguen en Copa y tienen «saldo negativo, no puntúa» quedan eliminados automáticamente, aunque haya partidos aplazados. Si hay varios, salen todos ellos.</li>
+        <li>Si no hay saldo negativo, el último queda eliminado cuando se completa la jornada. Los supervivientes pasan a la siguiente ronda con todo a cero.</li>
+        <li>El último equipo en pie es el campeón. La final está prevista para la Jornada 22; varias eliminaciones por saldo negativo pueden adelantarla.</li>
       </ol>
     </details>
   </div>
@@ -877,4 +878,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=167-20260905-mister-clubs"></script><script src="app.js?v=170-20260917-cup-mister-order"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=167-20260905-mister-clubs"></script><script src="app.js?v=171-20260921-cup-negative-balance"></script></body></html>
