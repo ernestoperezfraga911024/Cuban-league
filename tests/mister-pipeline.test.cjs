@@ -201,8 +201,14 @@ test('la revisión previa reúne todos los futbolistas desconocidos sin modifica
   } finally {dom.window.close();}
 });
 
-test('guardado real del panel usa exclusivamente RPC de borrador y conserva decisiones al reimportar',async()=>{
-  const payload=await captureFixture();
+test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conserva decisiones al reimportar',async()=>{
+  // Synthetic 20-team capture with the two identities reported in the J8 error.
+  const payload=await captureFixture({matchday:8,gameweekId:8008});
+  for(const [name,playerName,misterPlayerId,misterClubId,position] of [
+    ['Juventus','A. Mayol','5340038','19','MC'],
+    ['Esteban Dominguez','X. Olaiz','5235247','48','DF']
+  ])Object.assign(payload.managers.find(m=>m.name===name).lineup.find(p=>p.position===position),
+    {playerName,fullName:'',misterPlayerId,misterClubId});
   const dom=new JSDOM(read('admin.html'),{url:'https://ernestoperezfraga911024.github.io/Cuban-league/admin.html',runScripts:'outside-only',pretendToBeVisual:true});
   const w=dom.window;w.CUBAN_LEAGUE_SUPABASE={season:'2026/27'};w.matchMedia=()=>({matches:false});
   w.HTMLElement.prototype.scrollIntoView=function(){};
@@ -215,19 +221,25 @@ test('guardado real del panel usa exclusivamente RPC de borrador y conserva deci
   `;
   w.eval(read('admin.js').replace('  boot();',inject));
   const api=w.testImport;const state=api.state;
-  Object.assign(state,{participants:roster,leagueParticipants:roster,participantIndex:new Map(roster.map(p=>[p.name,p])),matchday:3,
+  Object.assign(state,{participants:roster,leagueParticipants:roster,participantIndex:new Map(roster.map(p=>[p.name,p])),matchday:8,
     matchdayLoadBlocked:false,matchdayRestoreGeneration:'test-generation',serverRestoreGeneration:'test-generation',
     matchdayWriteRevision:'revision-0',restoreStateAvailable:true,lineupParticipantName:roster[0].name});
   state.catalog=await w.CubanLeaguePlayerCatalog.load();
   const calls=[];
   state.client={rpc:async(name,params)=>{calls.push({name,params});assert.equal(name,'save_matchday_draft_v124');return{data:{rows:params.p_rows,writeRevision:'revision-'+calls.length},error:null};}};
   api.renderPlayerRows([]);
-  const request={requestId:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday:3,season:'2026/27',gameweekId:4044,protectExisting:false,startFingerprint:api.importFingerprint()};
+  const request={requestId:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday:8,season:'2026/27',gameweekId:8008,protectExisting:false,startFingerprint:api.importFingerprint()};
   state.misterImportRequest=request;state.misterImportBusy=true;
   await api.finishMisterImport(payload,request);
   assert.equal(calls.length,1,w.document.getElementById('misterImportStatus').textContent);
   assert.ok(calls[0].params.p_rows.every(row=>row.published===false));
   assert.equal(calls[0].params.p_rows.length,20);
+  for(const [name,playerId,clubId] of [['Juventus','mister-5340038','valencia'],['Esteban Dominguez','mister-5235247','alaves']]){
+    const saved=calls[0].params.p_rows.find(row=>row.participant_name===name);
+    assert.equal(saved.lineup.length,11);
+    assert.equal(saved.lineup.find(player=>player.player_id===playerId).club_id,clubId);
+    assert.equal(saved.points,11);
+  }
   calls[0].params.p_rows.forEach(row=>assert.equal(row.mister_rank,payload.managers.findIndex(m=>m.name===row.participant_name)+1));
   api.renderPlayerRows(calls[0].params.p_rows);
   assert.deepEqual(api.gatherRows(false,true).map(row=>row.mister_rank),calls[0].params.p_rows.map(row=>row.mister_rank));

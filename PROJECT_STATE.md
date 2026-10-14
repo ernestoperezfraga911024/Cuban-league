@@ -7,9 +7,9 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión funcional actual:** V173
-- **Último commit verificado:** `7ee8d6dcceb5f7dbac08e01858f63d994988b506`
-- **Fecha de verificación:** 2026-09-23
+- **Versión funcional actual:** V174
+- **Último commit base verificado:** `40a577a533af717fc7f707b2482dd9ba7afb64de`
+- **Fecha de verificación del código:** 2026-10-14
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -251,7 +251,8 @@ Incluye:
 - resto de assets: stale-while-revalidate.
 - Cada release importante debe rotar `CACHE_NAME`/version strings cuando cambien assets que deban invalidarse.
 
-Cache actual: V173 League No Bonus.
+Cache actual: V174 Mister J8 Catalog. El panel y la web cargan el catálogo con
+la versión `174-20261014-mister-j8-catalog`; la extensión sigue en 1.0.2.
 
 ## Backups
 
@@ -307,6 +308,13 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Cambios recientes relevantes
 
+- **V174:** añadidos A. Mayol (Valencia, ID Mister `5340038`, MC) y X. Olaiz
+  (Alavés, ID `5235247`, DF), los dos ausentes del error de importación de J8
+  aportado por el administrador el 14 de octubre. Catálogo: 572 activos.
+  Sus IDs y clubes se verificaron en la captura; las posiciones del catálogo
+  se contrastaron con fuentes oficiales y el importador mantiene la posición
+  de Mister en cada snapshot. Recargar el panel y recuperar la captura permite
+  reintentar; las validaciones de identidad y el guardado solo en borrador siguen.
 - **V173:** Liga sin bonus read-only con reconstrucción verificada del bonus de capitán.
 - **V172:** retirada de El Muro.
 - **V171:** saldo negativo elimina correctamente en Copa aunque haya postponed.
@@ -338,5 +346,9 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 - Cambios visuales triviales no requieren actualizar este archivo.
 
 ## Última actualización
+
+**2026-10-14** — V174: catálogo de J8, invalidación de caché y comprobación del
+flujo de borrador con los 20 participantes y los dos nuevos jugadores. Cambio
+exclusivamente en el repositorio; no requiere migración ni modifica Supabase.
 
 **2026-09-23** — Bootstrap inicial de `PROJECT_STATE.md`, verificado contra `main`, README V173, código principal, Supabase vivo, Edge Functions, migraciones registradas, Security Advisor y sistema de backups.

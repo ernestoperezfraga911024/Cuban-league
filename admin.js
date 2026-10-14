@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '170-20260917-cup-mister-order';
+  const VERSION = '174-20261014-mister-j8-catalog';
   const OWNER_VISIT_EXCLUSION_KEY = 'cuban-league-owner-browser';
   const LOCAL_DRAFT_PREFIX = 'cuban-admin-draft:';
   const ARCHIVED_DRAFT_PREFIX = 'cuban-admin-archived-draft:';

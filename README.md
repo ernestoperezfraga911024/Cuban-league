@@ -1,5 +1,19 @@
 # Cuban League V161
 
+Actualización V174 · 14 de octubre de 2026:
+
+- Añadidos los dos jugadores ausentes detectados al importar J8: A. Mayol
+  (Valencia CF, Mister ID 5340038) y X. Olaiz (Deportivo Alavés, ID 5235247).
+  El catálogo dispone de 572 jugadores activos. Se conservan las identidades
+  anteriores y las validaciones contra homónimos.
+- Los IDs y clubes proceden del error de importación aportado por el administrador;
+  las posiciones del catálogo se contrastaron con Valencia CF y LaLiga. El snapshot
+  importado sigue conservando la posición y el club que envíe Mister.
+- Caché y versiones del panel/web actualizadas. Recargar la misma pestaña del
+  panel permite recuperar la captura retenida; no hace falta actualizar la extensión.
+- Probado el flujo de 20 participantes con ambas identidades y guardado exclusivo
+  en borrador. Esta actualización no publica jornadas ni modifica sus puntos.
+
 Actualización V173 · 21 de septiembre de 2026:
 
 - Clasificación → Estadísticas → Liga sin bonus: tabla informativa con puesto,

@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,570);
+    assert.equal(c.recordCount,572);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -49,6 +49,25 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'71503'}).id,'m-rodriguez-alaves-2');
     assert.equal(c.resolve({misterPlayerId:'24691'}).id,'m-rodriguez');
   } finally { dom.window.close(); }
+});
+
+test('J8: Mayol y Olaiz resuelven por los IDs del error y no por coincidencias aproximadas',async()=>{
+  const {dom,catalog:c}=await catalog();
+  try {
+    for(const [misterPlayerId,playerName,clubId,position,fullName] of [
+      ['5340038','A. Mayol','valencia','MC','Aaron Mayol'],
+      ['5235247','X. Olaiz','alaves','DF','Xanet Olaiz']
+    ]) {
+      const player=c.resolveMister({misterPlayerId,playerName,clubId,position});
+      assert.equal(player.id,'mister-'+misterPlayerId);
+      assert.equal(player.clubId,clubId);
+      assert.equal(player.position,position);
+      assert.equal(c.players.filter(p=>p.misterId===misterPlayerId).length,1);
+      assert.equal(c.search(fullName)[0].id,player.id);
+      assert.equal(c.resolveMister({misterPlayerId:'999999999',playerName,clubId,position}),null);
+    }
+    assert.equal(c.declaredRecordCount,c.recordCount);
+  } finally {dom.window.close();}
 });
 
 test('clubes explícitos y resolución de importación impiden inferencias y cruces de homónimos',async()=>{
