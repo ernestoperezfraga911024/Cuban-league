@@ -7,9 +7,9 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V177: diseño V174 restaurado; barra inferior oscura con acento verde, a petición de Ernesto. Se conserva el menú Más aprobado.
+- **Versión:** V178: diseño V174 restaurado; barra inferior y menú Más oscuros, letras claras e iconos verdes. Opciones y funcionamiento conservados.
 - **Publicación:** Ernesto pidió restaurar el diseño anterior y conservar la navegación de sus dos capturas el 2026-10-14 (Miami). Publicar mediante GitHub Pages; revisión visual en dispositivos reales pendiente.
-- **Base de esta actualización:** `7d1590e06636279937659d026f9d16cc8abe4005` (V176 publicada mediante PR #46).
+- **Base de esta actualización:** `8053ffd463c789cf64898d50a6430c801124d972` (V177 publicada mediante PR #47). V178 ajusta solo los colores del menú Más y la caché de estilos.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
 - **Fecha de verificación del código:** 2026-10-15 UTC; pruebas de datos, cálculos, fotos y navegación ejecutadas antes de integrar.
 - **Temporada configurada:** 2026/27
