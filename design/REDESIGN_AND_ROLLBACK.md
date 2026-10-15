@@ -1,6 +1,10 @@
-# V177 · Diseño anterior con navegación móvil conservada
+# V178 · Diseño anterior con navegación móvil conservada
 
 ## Estado actual
+
+V178 unifica los colores del menú Más con la página: fondo oscuro, texto claro,
+iconos verdes y foco visible. Conserva sus opciones, medidas y funcionamiento;
+no modifica JavaScript de navegación ni datos. La caché de estilos pasa a V178.
 
 V177 ajusta únicamente los colores de la barra inferior a la paleta oscura y
 verde del sitio. No cambia el menú Más, la navegación, las medidas ni los datos.
