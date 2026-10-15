@@ -52,7 +52,7 @@ const $=id=>document.getElementById(id);const imageMap=()=>Object.fromEntries(DA
 const uiIcon=(name,className='ui-icon')=>`<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 const profileAttr=name=>String(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function profileTriggerAttrs(name){const safe=profileAttr(name);return `data-profile-player="${safe}" role="button" tabindex="0" aria-label="Ver perfil completo de ${safe}"`}
-function teamCell(name){return `<div class="team team-profile-link" ${profileTriggerAttrs(name)}><img loading="lazy" decoding="async" src="${imageMap()[name]||''}" alt="Foto de ${name}"><span class="name">${name}</span></div>`}
+function teamCell(name){return `<div class="team team-profile-link" ${profileTriggerAttrs(name)}><img src="${imageMap()[name]||''}" alt="Foto de ${name}"><span class="name">${name}</span></div>`}
 function matchdayLineupTriggerAttrs(name,matchday,postponed=false){
   const safe=profileAttr(name);
   const day=Number(matchday);
@@ -61,7 +61,7 @@ function matchdayLineupTriggerAttrs(name,matchday,postponed=false){
 function matchdayLineupTeamCell(name,postponed=false){
   const safe=profileAttr(name);
   return `<span class="team matchday-lineup-team">
-    <img loading="lazy" decoding="async" src="${imageMap()[name]||''}" alt="Foto de ${safe}">
+    <img src="${imageMap()[name]||''}" alt="Foto de ${safe}">
     <span class="matchday-lineup-team-copy"><span class="name">${safe}</span><small>${postponed?'Pendiente':'Ver alineación'}</small></span>
     <span class="matchday-lineup-team-arrow" aria-hidden="true">›</span>
   </span>`;
@@ -640,7 +640,7 @@ function playerInline(name,opts={}){
   const people=names.map(n=>DATA.participants.find(p=>p.name===n)).filter(Boolean);
   return `<span class="player-inline-set${people.length>1?' multiple':''}">${people.map(p=>`
     <span class="player-inline${compact} team-profile-link" ${profileTriggerAttrs(p.name)}>
-      <span class="player-inline-photos"><img loading="lazy" decoding="async" src="${p.shield}" alt="Foto de ${p.name}" title="${p.name}"></span>
+      <span class="player-inline-photos"><img src="${p.shield}" alt="Foto de ${p.name}" title="${p.name}"></span>
       <span>${p.name}</span>
     </span>`).join('')}</span>`;
 }
@@ -789,13 +789,6 @@ function go(id,historyView){
   const next=$(target);
   if(!next)return;
   const current=document.querySelector('.page.active');
-  // V175 presentation-only: no delayed transitions or off-screen animation work.
-  if(document.body.classList.contains('editorial')){
-    ++SECTION_TRANSITION_TOKEN;
-    applySectionChange(target,selectedHistoryView);
-    scrollToSectionStart();
-    return;
-  }
   if(current===next){
     if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
     scrollToSectionStart();
@@ -1137,7 +1130,7 @@ function heroKpiPlayerCard({label,player,name=player.name,detail,marker,tone}){
   const markerContent=marker.icon?uiIcon(marker.icon):marker.text;
   return `<article class="hero-kpi-live hero-kpi-${tone} team-profile-link" ${profileTriggerAttrs(player.name)}>
     <span class="kpi-marker" aria-hidden="true">${markerContent}</span>
-    <span class="kpi-icon kpi-player-photo"><img loading="eager" decoding="async" src="${player.shield}" alt="Foto de ${profileAttr(player.name)}"></span>
+    <span class="kpi-icon kpi-player-photo"><img src="${player.shield}" alt="Foto de ${profileAttr(player.name)}"></span>
     <div><span>${label}</span><b>${name}</b>${heroKpiScoreMarkup(detail)}</div>
   </article>`;
 }
@@ -1163,7 +1156,7 @@ function heroLeaderMetricCard({label,icon,tone,names=[],value,detail}){
   const photoRows=Math.max(1,Math.ceil(leaders.length/photoColumns));
   const visual=leaders.length
     ? `<span class="hero-leader-icon hero-leader-photos${leaders.length>1?' is-multiple':''}" style="--leader-photo-columns:${photoColumns};--leader-photo-rows:${photoRows}" data-leader-photo-count="${leaders.length}" role="img" aria-label="Fotos de ${profileAttr(leaders.map(leader=>leader.name).join(', '))}">
-        ${leaders.map(leader=>`<img loading="lazy" decoding="async" src="${profileAttr(leader.shield)}" alt="" title="${profileAttr(leader.name)}">`).join('')}
+        ${leaders.map(leader=>`<img src="${profileAttr(leader.shield)}" alt="" title="${profileAttr(leader.name)}">`).join('')}
       </span>`
     : `<span class="hero-leader-icon">${uiIcon(icon)}</span>`;
   return `<article class="hero-leader-metric hero-leader-${tone}${player?' team-profile-link':' hero-kpi-placeholder'}" ${attrs}>
@@ -1278,7 +1271,7 @@ function pulsePerson(names){
   if(!participant)return '';
   const extra=names.length-1;
   return `<span class="pulse-person team-profile-link" ${profileTriggerAttrs(participant.name)}>
-    <img loading="lazy" decoding="async" src="${participant.shield}" alt="Foto de ${participant.name}">
+    <img src="${participant.shield}" alt="Foto de ${participant.name}">
     <span><b>${participant.name}</b>${extra?`<small>y ${extra} ${extra===1?'más':'más'}</small>`:''}</span>
   </span>`;
 }
@@ -1572,7 +1565,7 @@ function matchdayLineupHeaderMarkup(participant,matchday,official,{formation='',
     ?`Formación ${formation} · ${occupancy}`
     :'Detalle del equipo en esta jornada';
   return `<section class="matchday-lineup-hero">
-    <img loading="lazy" decoding="async" src="${safeShield}" alt="Foto de ${safeName}">
+    <img src="${safeShield}" alt="Foto de ${safeName}">
     <div class="matchday-lineup-identity">
       <span class="eyebrow">JORNADA ${matchday}</span>
       <h2 id="lineupModalTitle">${safeName}</h2>
@@ -1929,7 +1922,7 @@ function renderMatchdayDetails(){
   ].filter(entry=>entry.player);
   $('matchdayPodium').innerHTML=podiumOrder.map(({player,place,tone})=>`<article class="podium-player podium-${tone}">
     <span class="podium-medal">${place}º</span>
-    <div class="podium-avatar team-profile-link" ${profileTriggerAttrs(player.name)}><img loading="lazy" decoding="async" src="${player.shield}" alt="Foto de ${player.name}"></div>
+    <div class="podium-avatar team-profile-link" ${profileTriggerAttrs(player.name)}><img src="${player.shield}" alt="Foto de ${player.name}"></div>
     <h4 class="team-profile-link" ${profileTriggerAttrs(player.name)}>${player.name}</h4>
     <strong>${player.points.toLocaleString('es')} pts</strong>
     <small>${player.goals} GOL · ${player.cleanSheets} CS · ${player.redCards} TR</small>
@@ -2125,7 +2118,7 @@ function renderHistoricalPodium(list,mode,snapshot=buildAchievementSnapshot()){
     });
     return `<article class="historical-podium-card historical-podium-${rank} team-profile-link" ${profileTriggerAttrs(player.name)}>
       <span class="historical-podium-place">${rank}</span>
-      <img loading="lazy" decoding="async" src="${imageMap()[player.name]||''}" alt="Foto de ${player.name}">
+      <img src="${imageMap()[player.name]||''}" alt="Foto de ${player.name}">
       <div><small>${metric.label}</small><strong>${player.name}</strong>${badges}<b>${value}<span>${metric.unit}</span></b>${metric.detail?`<em>${metric.detail}</em>`:''}</div>
     </article>`;
   }).join('');
@@ -2224,7 +2217,7 @@ $('championsLegacy').innerHTML=(DATA.champions?.history||[]).length
         const img=imageMap()[item.champion];
         return `<article class="champions-legacy-card team-profile-link" ${profileTriggerAttrs(item.champion)}>
           <span class="champions-legacy-trophy">${uiIcon('trophy')}</span>
-          ${img?`<img loading="lazy" decoding="async" src="${img}" alt="Foto de ${profileAttr(item.champion)}">`:''}
+          ${img?`<img src="${img}" alt="Foto de ${profileAttr(item.champion)}">`:''}
           <div><small>CAMPEÓN · ${item.season}</small><h3>${item.champion}</h3><p>${item.note||'Campeón de la Cuban League Champions'}</p></div>
           <span class="champions-legacy-edition">EDICIÓN ${String(item.edition||1).padStart(2,'0')}</span>
         </article>`;
@@ -2236,7 +2229,7 @@ $('seasonChampions').innerHTML=list.map((c,index)=>{
 const img=imageMap()[c.name];
 return `<article class="champion-history-card">
   <span class="champion-history-number">${String(index+1).padStart(2,'0')}</span>
-  ${img?`<img loading="lazy" decoding="async" src="${img}" alt="Foto de ${c.name}">`:`<div class="champion-placeholder">${uiIcon('trophy','champion-placeholder-icon')}</div>`}
+  ${img?`<img src="${img}" alt="Foto de ${c.name}">`:`<div class="champion-placeholder">${uiIcon('trophy','champion-placeholder-icon')}</div>`}
   <div><span class="champion-season">${c.season}</span><h3>${playerInline(c.name)}</h3><p>${c.points?c.points.toLocaleString('es')+' puntos':'El campeón de esta edición no aparece identificado en las capturas disponibles.'}</p></div>
   <span class="champion-history-mark">${uiIcon('trophy')}</span>
 </article>`
@@ -2264,7 +2257,7 @@ const ACHIEVEMENT_RARITY_LABEL={legendary:'Legendaria',epic:'Épica',rare:'Rara'
 
 function achievementIconMarkup(item){
   return item.iconAsset
-    ?`<img loading="lazy" decoding="async" class="achievement-icon-image" src="${item.iconAsset}" alt="">`
+    ?`<img class="achievement-icon-image" src="${item.iconAsset}" alt="">`
     :item.icon;
 }
 
@@ -2436,7 +2429,7 @@ function renderPlayerOfMonth(groups=monthlyAchievementGroups()){
         const safeName=profileAttr(winner.name);
         return `<button type="button" class="player-month-winner team-profile-link" ${profileTriggerAttrs(winner.name)}>
           <span class="player-month-winner-medal" aria-hidden="true">${uiIcon('medal')}</span>
-          <img loading="lazy" decoding="async" src="${imageMap()[winner.name]||''}" alt="Foto de ${safeName}">
+          <img src="${imageMap()[winner.name]||''}" alt="Foto de ${safeName}">
           <span class="player-month-winner-copy"><small>${tied?'CO-GANADOR':'GANADOR DEL MES'}</small><strong>${safeName}</strong><span>${winner.played} J · ${winner.goals} GOL · ${winner.cleanSheets} CS · ${winner.redCards} TR</span></span>
           <span class="player-month-winner-points"><b>${winner.points.toLocaleString('es')}</b><small>PTS</small></span>
         </button>`;
@@ -2652,7 +2645,7 @@ function standingsTeamCell(name,snapshot,{playerMonthLabel=''}={}){
       </span>`
     :'';
   return `<div class="team standings-team team-profile-link" ${profileTriggerAttrs(name)}>
-    <img loading="lazy" decoding="async" src="${imageMap()[name]||''}" alt="Foto de ${profileAttr(name)}">
+    <img src="${imageMap()[name]||''}" alt="Foto de ${profileAttr(name)}">
     <div class="standings-team-copy">
       <span class="name">${name}</span>
       ${playerMonthLabel?`<span class="standings-title-meta">${monthTitle}${badges}</span>`:badges}
@@ -2701,7 +2694,7 @@ function renderPlayers(filter=''){
     const badges=sortFeaturedAchievements(playerAchievementState(player.name,snapshot).filter(item=>item.earned));
     const visible=badges.slice(0,3);
     return `<article class="player-card player-card-v76 team-profile-link" ${profileTriggerAttrs(player.name)}>
-      <img loading="lazy" decoding="async" src="${player.shield}" alt="Foto de ${player.name}">
+      <img src="${player.shield}" alt="Foto de ${player.name}">
       <div class="player-card-main" style="display:contents!important">
         <h3 style="grid-column:2!important;grid-row:1!important">${player.name}</h3>
         <small style="grid-column:2!important;grid-row:2!important">${statsRow.label||'Participante'}</small>
@@ -4016,7 +4009,7 @@ function leagueStatsTeamVisual(team){
   const safeName=profileAttr(team.name);
   const shield=profileAttr(team.shield||'');
   return `<div class="league-stats-team" ${profileTriggerAttrs(team.name)}>
-    ${shield?`<img loading="lazy" decoding="async" src="${shield}" alt="">`:''}
+    ${shield?`<img src="${shield}" alt="">`:''}
     <span><strong>${safeName}</strong><small>${team.lineupMatchdays} ${team.lineupMatchdays===1?'XI registrado':'XI registrados'}</small></span>
   </div>`;
 }
@@ -4077,7 +4070,7 @@ function leagueComparatorHeroTeamMarkup(team,side,result){
   const shield=profileAttr(team.shield||'');
   const available=team.publishedRows>0;
   return `<article class="league-comparator-hero-team is-${side}${result===side?' is-winner':''}" ${profileTriggerAttrs(team.name)}>
-      <div class="league-comparator-avatar">${shield?`<img loading="lazy" decoding="async" src="${shield}" alt="Foto de ${safeName}">`:`<span>${profileAttr(matchdayLineupInitials(team.name))}</span>`}</div>
+      <div class="league-comparator-avatar">${shield?`<img src="${shield}" alt="Foto de ${safeName}">`:`<span>${profileAttr(matchdayLineupInitials(team.name))}</span>`}</div>
       <h3>${safeName}</h3>
       <strong>${available?profileSeasonFormat(team.officialPoints):'—'}<small> pts</small></strong>
       ${leagueComparatorLeaderBadge(side,result)}
@@ -4973,7 +4966,7 @@ function openPlayer(name){
   };
   $('modalContent').innerHTML=`<div class="profile-v152">
     <section class="profile-hero profile-hero-v152">
-      <img loading="lazy" decoding="async" src="${p.shield}" class="profile-avatar" alt="Foto de ${name}">
+      <img src="${p.shield}" class="profile-avatar" alt="Foto de ${name}">
       <div class="profile-identity">
         <span class="eyebrow">${s.label||'PARTICIPANTE'}</span>
         <h2 id="profileTitle">${name}</h2>
@@ -5028,7 +5021,7 @@ function initHistoricalEvolution(){
   }
   picker.innerHTML=DATA.participants.map(p=>`
     <button class="evolution-player-chip ${evolutionSelected.includes(p.name)?'selected':''}" data-evo-player="${p.name}">
-      <img loading="lazy" decoding="async" src="${p.shield}" alt=""><span>${p.name}</span>
+      <img src="${p.shield}" alt=""><span>${p.name}</span>
     </button>`).join('');
   picker.querySelectorAll('[data-evo-player]').forEach(btn=>btn.onclick=()=>{
     const name=btn.dataset.evoPlayer;
@@ -5090,7 +5083,7 @@ function renderHistoricalEvolutionChart(){
   const legend=evolutionSelected.map((name,idx)=>{
     const p=DATA.participants.find(x=>x.name===name);
     const color=EVOLUTION_COLORS[idx%EVOLUTION_COLORS.length];
-    return `<div class="hist-legend-item"><span class="hist-color" style="background:${color}"></span><img loading="lazy" decoding="async" src="${p?.shield||''}" alt=""><b>${playerInline(name)}</b></div>`;
+    return `<div class="hist-legend-item"><span class="hist-color" style="background:${color}"></span><img src="${p?.shield||''}" alt=""><b>${playerInline(name)}</b></div>`;
   }).join('');
 
   host.innerHTML=`<div class="hist-legend">${legend}</div>
@@ -5282,7 +5275,7 @@ function renderChampions(){
     const championImage=imageMap()[championsHolder];
     defendingHost.innerHTML=championsHolder?`<article class="champions-defending-card team-profile-link" ${profileTriggerAttrs(championsHolder)}>
       <span class="champions-defending-crown">${uiIcon('trophy')}</span>
-      ${championImage?`<img loading="lazy" decoding="async" src="${championImage}" alt="Foto de ${profileAttr(championsHolder)}">`:''}
+      ${championImage?`<img src="${championImage}" alt="Foto de ${profileAttr(championsHolder)}">`:''}
       <div><span>CAMPEÓN DEFENSOR</span><h3>${championsHolder}</h3><p>Campeón de Champions ${DATA.champions?.championSeason||''} · única edición disputada</p></div>
       <span class="champions-defending-badge">REY DE EUROPA</span>
     </article>`:'';
@@ -5310,7 +5303,7 @@ function renderChampions(){
       return `<div class="champions-score-row champions-score-grid${index<2?' is-qualifying':''}">
         <span class="champions-rank">${index+1}</span>
         <div class="champions-team-cell team-profile-link" ${profileTriggerAttrs(team.name)}>
-          <img loading="lazy" decoding="async" src="${imageMap()[team.name]||''}" alt="Foto de ${safeName}">
+          <img src="${imageMap()[team.name]||''}" alt="Foto de ${safeName}">
           <b>${safeName}</b>
         </div>
         ${points}
@@ -5392,7 +5385,7 @@ function renderCup(){
   championHost.hidden=!tournament.champion;
   championHost.innerHTML=tournament.champion?`<article class="cup-champion-card team-profile-link" ${profileTriggerAttrs(tournament.champion.name)}>
     <span class="cup-champion-crown">${uiIcon('trophy')}</span>
-    <img loading="lazy" decoding="async" src="${imageMap()[tournament.champion.name]||''}" alt="Foto de ${profileAttr(tournament.champion.name)}">
+    <img src="${imageMap()[tournament.champion.name]||''}" alt="Foto de ${profileAttr(tournament.champion.name)}">
     <div><span>CAMPEÓN DE COPA</span><h3>${profileAttr(tournament.champion.name)}</h3><p>El último equipo en pie después de ${eliminations.length} eliminaciones.</p></div>
     <strong>J${tournament.finalMatchday}</strong>
   </article>`:'';
@@ -5436,14 +5429,14 @@ function renderCup(){
   if(selectedRound.status==='confirmed'&&selectedRound.eliminated){
     dangerHost.innerHTML=selectedRound.eliminatedTeams.map(eliminated=>`<article class="cup-danger-card is-eliminated team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
       <span class="cup-danger-icon">${uiIcon('red-card')}</span>
-      <img loading="lazy" decoding="async" src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
+      <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
       <div><span>ELIMINADO EN J${selectedRound.matchday}</span><h3>${profileAttr(eliminated.name)}</h3><p>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.negativeBalanceNoScore?'Saldo negativo':eliminated.misterRank==null?'Puesto Mister pendiente':eliminated.misterRank+'º en Mister'}</p></div>
       <strong>Fuera</strong>
     </article>`).join('');
   }else if(selectedRound.status==='provisional'&&selectedRound.provisionalEliminated){
     dangerHost.innerHTML=selectedRound.provisionalEliminatedTeams.map(candidate=>`<article class="cup-danger-card is-provisional team-profile-link" ${profileTriggerAttrs(candidate.name)}>
       <span class="cup-danger-icon">${uiIcon('calendar')}</span>
-      <img loading="lazy" decoding="async" src="${imageMap()[candidate.name]||''}" alt="Foto de ${profileAttr(candidate.name)}">
+      <img src="${imageMap()[candidate.name]||''}" alt="Foto de ${profileAttr(candidate.name)}">
       <div><span>${candidate.negativeBalanceNoScore?'SALDO NEGATIVO':selectedRound.incomplete?'ÚLTIMO PROVISIONAL':'PROYECCIÓN PROVISIONAL'}</span><h3>${profileAttr(candidate.name)}</h3><p>${candidate.points.toLocaleString('es')} PTS · todavía no está eliminado · espera el partido aplazado de J${selectedRound.blockedBy}</p></div>
       <strong>En riesgo</strong>
     </article>`).join('');
@@ -5485,7 +5478,7 @@ function renderCup(){
     return `<div class="cup-row cup-table-grid${eliminated?' is-eliminated':''}${provisional?' is-provisional-candidate':''}">
       <span class="cup-rank">${participant.position}</span>
       <div class="cup-team-cell team-profile-link" ${profileTriggerAttrs(participant.name)}>
-        <img loading="lazy" decoding="async" src="${imageMap()[participant.name]||''}" alt="Foto de ${safeName}">
+        <img src="${imageMap()[participant.name]||''}" alt="Foto de ${safeName}">
         <span><b>${safeName}</b><small class="cup-team-meta"><span>${participant.negativeBalanceNoScore?'Saldo negativo':'Mister '+(participant.misterRank==null?'—':participant.misterRank+'º')}</span><span class="cup-mobile-extra"> · ${participant.goals.toLocaleString('es')} GOL · ${participant.cleanSheets.toLocaleString('es')} CS</span></small></span>
       </div>
       <span class="cup-stat cup-stat-points"><b>${participant.points.toLocaleString('es')}</b></span>
@@ -5499,7 +5492,7 @@ function renderCup(){
     ?eliminations.slice().reverse().map(({round,team:eliminated})=>{
       return `<article class="cup-history-item team-profile-link" ${profileTriggerAttrs(eliminated.name)}>
         <span>J${round.matchday}</span>
-        <img loading="lazy" decoding="async" src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
+        <img src="${imageMap()[eliminated.name]||''}" alt="Foto de ${profileAttr(eliminated.name)}">
         <div><b>${profileAttr(eliminated.name)}</b><small>${eliminated.points.toLocaleString('es')} PTS · ${eliminated.negativeBalanceNoScore?'Saldo negativo':eliminated.misterRank==null?'Puesto Mister pendiente':eliminated.misterRank+'º en Mister'}</small></div>
         <strong>Fuera</strong>
       </article>`;
