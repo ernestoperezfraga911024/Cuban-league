@@ -259,7 +259,84 @@ Sitio oficial de la Cuban League con:
   enfrentarlos visualmente por puntos oficiales, goles, clean sheets, MVP,
   mejor capitán y acumulados de PT/DF/MC/DL. Las barras y etiquetas señalan qué
   equipo lidera cada métrica, sin mezclar el histórico de un futbolista entre
-…1548 tokens truncated…con 33 jornadas y el
+  participantes cuando cambia de equipo.
+- Clasificación incorpora «Estadísticas» con tres comparativas globales: el
+  capitán con más puntos y el de mejor promedio de cada participante, los
+  acumulados PT/DF/MC/DL para descubrir las mejores líneas de la competición y
+  el MVP histórico de cada equipo. Los registros se separan por pareja
+  futbolista–participante: un traspaso inicia un acumulado nuevo sin borrar lo
+  conseguido con el equipo anterior.
+- Al tocar un participante en Clasificación, su perfil incorpora la pestaña
+  «Temporada 2026-2027». El resumen acumula jornadas, puntos, goles, clean
+  sheets, rojas, formaciones y rendimiento por líneas; Capitanes y Jugadores
+  reúnen todos los futbolistas utilizados y permiten ordenarlos por puntos,
+  jornadas o promedio.
+- El Catálogo Maestro incorpora 536 jugadores activos de 20 clubes, con rostro, escudo,
+  posición e identidad estable. En el panel se busca y selecciona al jugador;
+  club y posición se completan automáticamente, y el administrador escribe
+  únicamente los puntos, el capitán y su multiplicador x1,5, x2 o x3. Los
+  futbolistas que abandonan la competición se archivan fuera del selector para
+  conservar intactas sus alineaciones y estadísticas históricas.
+- Cada participante puede guardar su alineación de 11 jugadores dentro de una
+  jornada. Las identidades `player_id` y `club_id` distinguen homónimos, mientras
+  nombre, club y posición quedan como snapshot histórico. La web pública muestra
+  los rostros y escudos, con iniciales como respaldo para alineaciones antiguas.
+- Al tocar un equipo en la tabla de una jornada se abre su campo: formación,
+  estadísticas oficiales de esa fecha, capitán y aporte del brazalete, MVP del
+  equipo, total por portería/defensa/medio/delantera y línea más productiva.
+- El panel privado permite completar las alineaciones poco a poco. Una jornada
+  puede publicarse aunque todavía falten fotos, pero una alineación empezada
+  debe completarse o vaciarse antes de publicar. Borradores, correcciones y
+  «Deshacer» conservan juntos estadísticas y alineaciones.
+- Para activar esta fase, ejecuta una sola vez
+  `SUPABASE-V116-CATALOGO-ALINEACIONES-COPIAR-Y-PEGAR.txt` en Supabase > SQL
+  Editor, después de V114. Es acumulativa: no hace falta ejecutar V115 antes.
+
+- El panel privado permite marcar una jornada de Liga como «Tiene partidos
+  aplazados». La Liga puede seguir publicándose y las jornadas posteriores se
+  cargan normalmente, mientras la Copa conserva como provisionales todas las
+  eliminaciones desde la primera jornada pendiente.
+- Al completar el partido aplazado, se corrige la jornada original, se desmarca
+  la opción y la Copa se recalcula cronológicamente desde esa ronda. El estado
+  también forma parte del historial, por lo que «Deshacer» restaura juntos los
+  puntos y la condición pendiente anterior.
+- La Copa adopta una presentación más directa: «La última silla» deja de estar
+  encerrada en una tarjeta, el resumen se compacta, se eliminan datos repetidos
+  y la tabla de supervivencia comparte el lenguaje visual de la clasificación.
+- Los accesos principales de Inicio ahora son Clasificación, Reglamento,
+  Champions y Copa; Centro de Jornada deja de ocupar uno de esos botones.
+- El calendario oficial de «Champions» ahora aparece como una pestaña compacta,
+  cerrada al entrar para que la fase de grupos quede visible inmediatamente. Se
+  abre y se cierra con una transición suave, cambia su indicación y conserva la
+  misma ruta de jornadas en móvil y PC sin modificar los datos de competición.
+- Nuevo apartado «Copa»: competición eliminatoria desde la Jornada 4 hasta la
+  Jornada 22. Cada ronda usa los puntos de esa jornada; el último queda eliminado
+  y los supervivientes comienzan la ronda siguiente desde cero. Desde V170, en
+  caso de empate sale quien aparezca más abajo en la tabla de esa jornada en Mister.
+- El apartado independiente «Estadísticas» queda retirado temporalmente de la
+  navegación, la portada y las rutas directas. Se conservan intactas las
+  estadísticas propias de clasificación, perfiles y Pizarra del Míster.
+- La Pizarra del Míster de Andy incorpora su temporada de Primera 2025/26.
+  Pablo Fornals es su MVP con 135 puntos, mientras Dakonam Djené lidera sus
+  Hombres de hierro con 30 jornadas. Ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Brian incorpora sus temporadas de Primera 2022/23
+  y 2025/26. Gavi y Antony Santos fueron sus MVP, y Alejandro Catena marca su
+  mayor permanencia con 35 jornadas. Ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Maykel Zuaznabar incorpora su temporada de Primera
+  2024/25. Diego López es su MVP y Hombre de hierro con 114 puntos y 26
+  jornadas; Luis Rioja, Pep Chavarría y Alex Remiro completan sus referentes
+  por línea. El equipo ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de @elministro incorpora su temporada de Primera
+  2024/25. Iñaki Williams es su MVP y Hombre de hierro con 106 puntos y 20
+  jornadas; Brahim Díaz, Miguel Gutiérrez y Rui Silva completan sus referentes
+  por línea. El equipo ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de Juventus incorpora su temporada de Primera 2025/26.
+  Mathew Ryan es el MVP y uno de sus Hombres de hierro con 101 puntos y 16
+  jornadas. El campeón ya participa en el Duelo de Banquillos.
+- La Pizarra del Míster de MONEY MON$TER incorpora sus tres temporadas
+  oficiales de Primera, desde 2023/24 hasta 2025/26. Las campañas 2020/21,
+  2021/22 y 2022/23 quedan fuera del análisis porque el equipo militaba en
+  Segunda. Mika Mármol lidera sus Hombres de hierro con 33 jornadas y el
   equipo ya participa en el Duelo de Banquillos.
 - La Pizarra del Míster de Roberto Piñeiro incorpora sus tres temporadas
   oficiales de Primera, desde 2023/24 hasta 2025/26. Las campañas 2020/21,
