@@ -7,10 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión funcional actual:** V174
-- **Diseño en preparación:** V175 editorial, rama `codex/editorial-redesign-v175`, no publicado; pendiente QA visual y aprobación.
-- **Último commit base verificado:** `40a577a533af717fc7f707b2482dd9ba7afb64de`
-- **Fecha de verificación del código:** 2026-10-14
+- **Versión:** V175 editorial; conserva las funciones y los datos de V174.
+- **Publicación:** autorizada expresamente por Ernesto el 2026-10-15; integración mediante PR #45 y despliegue en GitHub Pages. La revisión visual en dispositivos reales sigue pendiente.
+- **Último commit de implementación verificado:** `25abcc4059384778fd57d32309565b55e4ac898c`.
+- **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
+- **Fecha de verificación del código:** 2026-10-15; 73 pruebas aprobadas.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -33,8 +34,8 @@ La web pública nunca debe mostrar borradores no publicados.
 ## Stack
 
 - **Frontend:** HTML, CSS y JavaScript vanilla.
-- **Web pública:** `index.html` + `app.js` + `styles.css`.
-- **Admin:** `admin.html` + `admin.js` + `admin.css`.
+- **Web pública:** `index.html` + `app.js` + `editorial-ui.js` + `editorial.css`.
+- **Admin:** `admin.html` + `admin.js` + `editorial-admin.css`. Los CSS anteriores se conservan como base histórica.
 - **Datos estáticos/históricos:** `data.json`.
 - **Catálogo:** `catalog/players.json` + `player-catalog.js`.
 - **Backend:** Supabase Auth + Postgres + RLS + RPCs.

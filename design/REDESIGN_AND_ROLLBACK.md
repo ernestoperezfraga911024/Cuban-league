@@ -1,9 +1,12 @@
-# V175 · Rediseño editorial (rama de prueba)
+# V175 · Rediseño editorial
 
 ## Estado y alcance
 
 Preparado sobre V174, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`.
-No publicado. No se han ejecutado escrituras ni migraciones en Supabase.
+Publicación autorizada expresamente por Ernesto el 2026-10-15 mediante PR #45.
+La revisión visual en dispositivos reales sigue pendiente; esta autorización
+no implica que se haya realizado. No se han ejecutado escrituras ni migraciones
+en Supabase.
 El código de administración, importación Mister, publicación, restauración,
 reglas y cálculos permanece intacto. `app.js` solo cambia navegación visual,
 estado accesible de navegación y atributos de carga de imágenes.
@@ -85,7 +88,7 @@ npm test
 - CSS parseable, recursos locales presentes, caché de recursos nuevos,
   contraste de los seis pares principales y ausencia de nuevas escrituras.
 
-## Pendiente antes de publicar
+## Verificación visual pendiente
 
 No se pudo realizar QA visual en navegador en este entorno porque no estaba
 disponible la herramienta de navegador requerida. **Estos tests no certifican
@@ -105,4 +108,5 @@ Revisar al menos:
 
 Usar datos de prueba para cualquier validación de escritura. No publicar una
 jornada real ni restaurar datos como parte de la revisión de un diseño.
-Solo integrar/publicar cuando esa revisión y la aprobación visual estén listas.
+El usuario autorizó publicar después de conocer esta limitación. Mantener esta
+revisión pendiente y registrar sus resultados cuando se realice.
