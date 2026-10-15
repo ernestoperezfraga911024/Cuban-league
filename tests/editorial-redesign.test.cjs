@@ -3,7 +3,6 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
-const zlib=require('node:zlib');
 const {JSDOM}=require('jsdom');
 const CSSOM=require('rrweb-cssom');
 const root=path.join(__dirname,'..');
@@ -15,7 +14,7 @@ const baseline=JSON.parse(read('tests/fixtures/pre-editorial-contract.json'));
 function setup() {
   const dom=new JSDOM(read('index.html'),{url:'https://example.test/Cuban-league/',runScripts:'outside-only',pretendToBeVisual:true});
   dom.window.scrollTo=()=>{};
-  dom.window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+  dom.window.matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});
   dom.window.fetch=async()=>{throw new Error('Live network forbidden in design tests');};
   dom.window.eval(read('app.js').replace(/init\(\);\s*$/,`window.designTest={
     set(data){DATA=data;},data(){return JSON.stringify(DATA);},go,openPlayer,closePlayer,setProfileView,
@@ -57,8 +56,8 @@ test('all public sections render without changing static league data or photo ma
       assert.equal(doc.body.dataset.section,route);
       assert.equal(doc.querySelectorAll('.page.active').length,1);
       assert.equal(doc.querySelector('.page.active').id,route);
-      assert.equal(doc.querySelector('.navtab[aria-current=page]').dataset.section,route);
-      assert.equal(doc.querySelector('.hero-photo').inert,route!=='home');
+      if(route!=='home')assert.equal(doc.querySelector('.navtab[aria-current=page]').dataset.section,route);
+      assert.equal(Boolean(doc.querySelector('.hero-photo').inert),route!=='home');
       assert.equal(doc.querySelectorAll('.page-entering,.page-leaving').length,0);
     }
     const data=JSON.parse(read('data.json'));
@@ -115,26 +114,69 @@ test('without dialog support the existing full navigation remains available',()=
   try{dom.window.eval(read('editorial-ui.js'));assert.equal(dom.window.document.body.classList.contains('editorial-ui-ready'),false);}
   finally{dom.window.close();}
 });
-test('theme and enhanced navigation do not create data or auth persistence paths',()=>{
+test('real app click handlers route every retained shortcut and keep league data intact',async()=>{
+  const dom=setup();
+  try{
+    const w=dom.window,doc=w.document,menu=doc.getElementById('editorialMenu');
+    w.HTMLCanvasElement.prototype.getContext=()=>null;
+    w.fetch=async(url,options={})=>{
+      assert.match(String(url),/^data\.json\?/);
+      assert.equal(options.method||'GET','GET');
+      return {ok:true,json:async()=>JSON.parse(read('data.json'))};
+    };
+    menu.showModal=()=>menu.setAttribute('open','');
+    menu.close=()=>{menu.removeAttribute('open');menu.dispatchEvent(new w.Event('close'));};
+    await w.init();
+    w.eval(read('editorial-ui.js'));
+    const before=w.designTest.data();
+    const more=doc.querySelector('.editorial-mobile-nav [data-editorial-menu]');
+    for(const route of ['current','matchdays','history','home','players','champions','cup','rules','cards']){
+      const direct=['home','current','matchdays','history'].includes(route);
+      if(!direct){more.focus();more.querySelector('svg').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));assert.equal(menu.open,true);}
+      const button=doc.querySelector(`${direct?'.editorial-mobile-nav':'#editorialMenu'} [data-go=${route}]`);
+      button.querySelector('svg').dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+      await Promise.resolve();
+      assert.equal(doc.body.dataset.section,route);
+      assert.equal(doc.querySelector('.page.active').id,route);
+      assert.equal(menu.open,false);
+      if(!direct)assert.equal(doc.activeElement,more);
+      const active=doc.querySelector('.editorial-mobile-nav [aria-current=page]');
+      assert.equal(active.dataset.go||'more',direct?route:'more');
+    }
+    more.click();menu.querySelector('[data-editorial-close]').click();
+    assert.equal(menu.open,false);
+    assert.equal(menu.querySelector('a').getAttribute('href'),'admin.html');
+    assert.equal(w.designTest.data(),before);
+  }finally{dom.window.close();}
+});
+test('navigation stays read-only and the new cache restores the classic resources',()=>{
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
-  for(const asset of ['editorial.css?v=175-20261015','editorial-admin.css?v=175-20261015','editorial-ui.js?v=175-20261015'])assert.ok(sw.includes(asset));
-  assert.doesNotMatch(sw,/\.\/(bernabeu-bg|stadium-bg|home-stadium-night|mbappe-card|yamal-card)\./);
+  for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=176-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
+  assert.match(sw,/cuban-league-v176-classic-mobile-nav/);
+  assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
-test('generated CSS parses, has light surfaces, and removes external font/decorative image requests',()=>{
-  for(const p of ['editorial.css','editorial-admin.css']){
-    const css=read(p);
-    assert.ok(CSSOM.parse(css).cssRules.length>0);
-    assert.doesNotMatch(css,/[\t ]+$/m);
-    assert.doesNotMatch(css,/url\(['"]?(?:https?:|bernabeu|stadium|home-stadium|mbappe|yamal)/);
-    assert.match(css,/color-scheme:\s*light/);
-    assert.match(css,/font-size:\s*16px\s*!important/);
-    assert.match(css,/safe-area-inset-bottom/);
-    assert.match(css,/prefers-reduced-motion/);
+test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{
+  const css=read('mobile-navigation.css');
+  const parsed=CSSOM.parse(css);
+  assert.ok(parsed.cssRules.length>0);
+  assert.ok(bytes('mobile-navigation.css').length<6000);
+  assert.doesNotMatch(css,/url\(/);
+  assert.match(css,/safe-area-inset-bottom/);
+  assert.match(css,/prefers-reduced-motion/);
+  function checkRules(rules){for(const rule of rules){
+    if(rule.cssRules){checkRules(rule.cssRules);continue;}
+    assert.ok(rule.selectorText.startsWith('.classic-mobile-nav')||rule.selectorText.startsWith('#editorialMenu'),rule.selectorText);
+  }}
+  checkRules(parsed.cssRules);
+  for(const [file,legacy] of [['index.html','styles.css'],['admin.html','admin.css']]){
+    const dom=new JSDOM(read(file));
+    const sheets=[...dom.window.document.querySelectorAll('link[rel=stylesheet]')].map(n=>n.getAttribute('href'));
+    assert.ok(sheets.some(s=>s.startsWith(legacy+'?')));
+    assert.ok(sheets.every(s=>!s.includes('editorial.css')&&!s.includes('editorial-admin.css')));
+    assert.equal(dom.window.document.body.classList.contains('editorial'),false);
+    dom.window.close();
   }
-  assert.doesNotMatch(read('index.html'),/fonts\.googleapis\.com|fonts\.gstatic\.com/);
-  assert.ok(zlib.gzipSync(bytes('editorial.css')).length<zlib.gzipSync(bytes('styles.css')).length*.8);
-  assert.ok(zlib.gzipSync(bytes('editorial-admin.css')).length<zlib.gzipSync(bytes('admin.css')).length*.85);
 });
 test('every referenced local HTML/script/stylesheet/image asset exists',()=>{
   for(const file of ['index.html','admin.html']) {

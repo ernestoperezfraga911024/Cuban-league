@@ -7,11 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V175 editorial; conserva las funciones y los datos de V174.
-- **Publicación:** autorizada expresamente por Ernesto el 2026-10-15; integración mediante PR #45 y despliegue en GitHub Pages. La revisión visual en dispositivos reales sigue pendiente.
-- **Último commit de implementación verificado:** `25abcc4059384778fd57d32309565b55e4ac898c`.
+- **Versión:** V176: diseño anterior V174 restaurado, conservando la barra inferior y el menú Más aprobados de V175.
+- **Publicación:** Ernesto pidió restaurar el diseño anterior y conservar la navegación de sus dos capturas el 2026-10-14 (Miami). Publicar mediante GitHub Pages; revisión visual en dispositivos reales pendiente.
+- **Base de esta actualización:** `0073a709b50d91d0de3f09934415c79dfd53d2b8` (V175 publicada mediante PR #45).
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-15; 73 pruebas aprobadas.
+- **Fecha de verificación del código:** 2026-10-15 UTC; pruebas de datos, cálculos, fotos y navegación ejecutadas antes de integrar.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -34,8 +34,8 @@ La web pública nunca debe mostrar borradores no publicados.
 ## Stack
 
 - **Frontend:** HTML, CSS y JavaScript vanilla.
-- **Web pública:** `index.html` + `app.js` + `editorial-ui.js` + `editorial.css`.
-- **Admin:** `admin.html` + `admin.js` + `editorial-admin.css`. Los CSS anteriores se conservan como base histórica.
+- **Web pública:** `index.html` + `app.js` + `styles.css`; `mobile-navigation.css` y `editorial-ui.js` solo para la barra y el menú Más.
+- **Admin:** `admin.html` + `admin.js` + `admin.css`, con su aspecto anterior. Los archivos del tema editorial se conservan como referencia, sin cargarse.
 - **Datos estáticos/históricos:** `data.json`.
 - **Catálogo:** `catalog/players.json` + `player-catalog.js`.
 - **Backend:** Supabase Auth + Postgres + RLS + RPCs.
@@ -310,7 +310,13 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Cambios recientes relevantes
 
-- **V175 (rama de prueba):** tema marfil/verde bosque para web y admin, navegación
+- **V176:** se recupera el diseño anterior de portada, tablas, perfiles y panel.
+  Se conserva únicamente la barra clara de cinco accesos y el menú Más de las
+  capturas aprobadas. CSS aislado de 4 KB, sin nuevas dependencias. En PC se
+  mantiene la navegación anterior; en móvil la barra sustituye a la superior
+  solo si el navegador soporta el diálogo. Caché V176, sin restaurar datos.
+
+- **V175 (publicada y luego sustituida por petición del usuario):** tema marfil/verde bosque para web y admin, navegación
   móvil de cinco accesos + menú nativo, fuentes de sistema, carga diferida de
   fotos y menor precarga de fondos. No cambia datos, reglas, importación ni
   publicaciones. Respaldo remoto `backup/pre-editorial-redesign-v174-20261015`
@@ -357,8 +363,10 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Última actualización
 
-**2026-10-15 UTC** — Preparación V175, sin desplegar. Conservados 627 assets y
-350 IDs de interfaz; se añade un contrato de regresión y respaldo de código.
+**2026-10-15 UTC / 2026-10-14 Miami** — V176: restauración selectiva de la
+presentación V174 con la barra inferior y el menú Más conservados. Se parte
+del main vigente; no se restauran datos, fotos, catálogo ni Supabase.
+V175 se había publicado en PR #45 y Ernesto pidió volver al diseño anterior.
 
 **2026-10-14** — V174: catálogo de J8, invalidación de caché y comprobación del
 flujo de borrador con los 20 participantes y los dos nuevos jugadores. Cambio

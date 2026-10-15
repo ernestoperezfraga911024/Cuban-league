@@ -1,18 +1,18 @@
-# Cuban League V175
+# Cuban League V176
 
-## Rediseño V175 · publicación autorizada
+## Diseño anterior con la barra inferior y el menú Más
 
-Tema editorial marfil/verde bosque, adaptaciones para móvil y escritorio,
-navegación móvil simplificada y administración visualmente unificada.
-Conserva fotos, datos, catálogo, cálculos y operaciones del panel.
+Se recupera el aspecto V174 de la web y del panel. Se conservan la barra
+inferior clara (Inicio, Liga, Jornadas, Historia, Más) y el menú «Toda la liga»
+aprobados por Ernesto. La navegación anterior permanece en PC y como respaldo
+para navegadores sin soporte de diálogo.
 
-Respaldo: `backup/pre-editorial-redesign-v174-20261015`.
-Ver `design/REDESIGN_AND_ROLLBACK.md` para regeneración, pruebas, límites de
-verificación y regreso al diseño anterior **sin restaurar datos antiguos**.
+Los datos, las fotos, el catálogo, los cálculos y las operaciones administrativas
+se conservan. La nueva caché V176 actualiza la presentación sin restaurar datos.
 
-Publicación autorizada expresamente por Ernesto el 2026-10-15 mediante PR #45.
-73 pruebas automáticas aprobadas; sigue pendiente la revisión visual en
-dispositivos reales y la validación administrativa autenticada en vivo.
+Respaldo del diseño original: `backup/pre-editorial-redesign-v174-20261015`.
+V175 queda en el historial, integrada mediante PR #45. Detalles y límites de
+verificación: `design/REDESIGN_AND_ROLLBACK.md`.
 
 Actualización V174 · 14 de octubre de 2026:
 

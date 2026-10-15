@@ -1,4 +1,34 @@
-# V175 · Rediseño editorial
+# V176 · Diseño anterior con navegación móvil conservada
+
+## Estado actual
+
+Ernesto rechazó el aspecto V175 después de publicarlo y pidió recuperar V174,
+conservando únicamente la barra inferior clara y el menú Más mostrados en sus
+dos capturas (2026-10-14, Miami).
+
+V176 parte del main `0073a709b50d91d0de3f09934415c79dfd53d2b8` y restablece
+`styles.css`, las fuentes, los fondos y `admin.css` del diseño anterior.
+`mobile-navigation.css` contiene solo estilos de los dos elementos conservados;
+`editorial-ui.js` mantiene el diálogo nativo, el foco y la sección activa.
+En escritorio se conserva la navegación anterior. La lógica de `app.js` vuelve
+a V174, salvo los atributos accesibles de la sección activa. Las fotografías,
+`data.json`, el catálogo, Supabase y el código administrativo no se restauran
+ni se modifican. El service worker usa una caché nueva V176.
+
+Los recursos del tema V175 quedan archivados en el repositorio, pero no se
+cargan ni se precargan. No ejecutar `build:design` para cambiar V176: editar
+únicamente `mobile-navigation.css` si se ajusta esta barra o este menú.
+
+Se comprueban conservación de datos y fotos, cálculos, perfiles, rutas reales
+al pulsar los accesos, cierre del menú, foco y recursos de caché. La revisión
+visual en navegador/dispositivos reales sigue pendiente por falta de la
+herramienta compatible. No se afirma haber realizado Lighthouse ni un login
+administrativo real.
+
+## Historial de V175 y recuperación de código
+
+El contenido siguiente documenta la versión sustituida, no el tema activo.
+
 
 ## Estado y alcance
 

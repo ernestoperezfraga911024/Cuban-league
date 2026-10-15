@@ -2,17 +2,7 @@
 (()=>{
   'use strict';
   const menu=document.getElementById('editorialMenu');
-  const actions=document.querySelector('.topbar-actions');
-  if(!menu||!actions||typeof menu.showModal!=='function')return;
-  const trigger=document.createElement('button');
-  trigger.type='button';
-  trigger.className='editorial-menu-trigger';
-  trigger.dataset.editorialMenu='';
-  trigger.setAttribute('aria-label','Abrir todas las secciones');
-  trigger.setAttribute('aria-haspopup','dialog');
-  trigger.setAttribute('aria-controls','editorialMenu');
-  trigger.textContent='☰';
-  actions.append(trigger);
+  if(!menu||typeof menu.showModal!=='function')return;
   const buttons=[...document.querySelectorAll('.editorial-mobile-nav [data-go]')];
   const more=document.querySelector('.editorial-mobile-nav [data-editorial-menu]');
   const sync=()=>{
