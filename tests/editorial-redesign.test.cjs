@@ -152,8 +152,8 @@ test('real app click handlers route every retained shortcut and keep league data
 test('navigation stays read-only and the new cache restores the classic resources',()=>{
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
-  for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=176-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v176-classic-mobile-nav/);
+  for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=177-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
+  assert.match(sw,/cuban-league-v177-dark-mobile-nav/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{
@@ -192,7 +192,7 @@ test('every referenced local HTML/script/stylesheet/image asset exists',()=>{
 });
 test('primary and secondary palette combinations meet 4.5:1 contrast',()=>{
   function lum(h){const rgb=h.slice(1).match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;}
-  for(const [fg,bg] of [['#172b25','#f7f8f3'],['#596b62','#ffffff'],['#145c46','#ffffff'],['#ffffff','#145c46'],['#85602c','#f7f1e5'],['#ac3541','#fbefef']]){
+  for(const [fg,bg] of [['#172b25','#f7f8f3'],['#596b62','#ffffff'],['#145c46','#ffffff'],['#ffffff','#145c46'],['#85602c','#f7f1e5'],['#ac3541','#fbefef'],['#91a4b5','#06151b'],['#6cff73','#12382b']]){
     const a=lum(fg),b=lum(bg);assert.ok((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,`${fg} / ${bg}`);
   }
 });
