@@ -1,5 +1,17 @@
 # Cuban League V161
 
+## Rediseño V175 · en revisión, no publicado
+
+Tema editorial marfil/verde bosque, adaptaciones para móvil y escritorio,
+navegación móvil simplificada y administración visualmente unificada.
+Conserva fotos, datos, catálogo, cálculos y operaciones del panel.
+
+Respaldo: `backup/pre-editorial-redesign-v174-20261015`.
+Ver `design/REDESIGN_AND_ROLLBACK.md` para regeneración, pruebas, límites de
+verificación y regreso al diseño anterior **sin restaurar datos antiguos**.
+
+Antes de publicar: revisar en navegador móvil/PC y aprobar la presentación.
+
 Actualización V174 · 14 de octubre de 2026:
 
 - Añadidos los dos jugadores ausentes detectados al importar J8: A. Mayol

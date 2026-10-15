@@ -8,6 +8,7 @@
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
 - **Versión funcional actual:** V174
+- **Diseño en preparación:** V175 editorial, rama `codex/editorial-redesign-v175`, no publicado; pendiente QA visual y aprobación.
 - **Último commit base verificado:** `40a577a533af717fc7f707b2482dd9ba7afb64de`
 - **Fecha de verificación del código:** 2026-10-14
 - **Temporada configurada:** 2026/27
@@ -308,6 +309,14 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Cambios recientes relevantes
 
+- **V175 (rama de prueba):** tema marfil/verde bosque para web y admin, navegación
+  móvil de cinco accesos + menú nativo, fuentes de sistema, carga diferida de
+  fotos y menor precarga de fondos. No cambia datos, reglas, importación ni
+  publicaciones. Respaldo remoto `backup/pre-editorial-redesign-v174-20261015`
+  en `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Detalles de regeneración,
+  pruebas y reversión sin restaurar datos: `design/REDESIGN_AND_ROLLBACK.md`.
+  73 tests locales aprobados; QA visual real pendiente por herramienta no disponible.
+
 - **V174:** añadidos A. Mayol (Valencia, ID Mister `5340038`, MC) y X. Olaiz
   (Alavés, ID `5235247`, DF), los dos ausentes del error de importación de J8
   aportado por el administrador el 14 de octubre. Catálogo: 572 activos.
@@ -346,6 +355,9 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 - Cambios visuales triviales no requieren actualizar este archivo.
 
 ## Última actualización
+
+**2026-10-15 UTC** — Preparación V175, sin desplegar. Conservados 627 assets y
+350 IDs de interfaz; se añade un contrato de regresión y respaldo de código.
 
 **2026-10-14** — V174: catálogo de J8, invalidación de caché y comprobación del
 flujo de borrador con los 20 participantes y los dos nuevos jugadores. Cambio
