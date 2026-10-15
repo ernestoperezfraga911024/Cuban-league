@@ -1,4 +1,18 @@
-# Cuban League V161
+# Cuban League V175
+
+## Rediseño V175 · publicación autorizada
+
+Tema editorial marfil/verde bosque, adaptaciones para móvil y escritorio,
+navegación móvil simplificada y administración visualmente unificada.
+Conserva fotos, datos, catálogo, cálculos y operaciones del panel.
+
+Respaldo: `backup/pre-editorial-redesign-v174-20261015`.
+Ver `design/REDESIGN_AND_ROLLBACK.md` para regeneración, pruebas, límites de
+verificación y regreso al diseño anterior **sin restaurar datos antiguos**.
+
+Publicación autorizada expresamente por Ernesto el 2026-10-15 mediante PR #45.
+73 pruebas automáticas aprobadas; sigue pendiente la revisión visual en
+dispositivos reales y la validación administrativa autenticada en vivo.
 
 Actualización V174 · 14 de octubre de 2026:
 

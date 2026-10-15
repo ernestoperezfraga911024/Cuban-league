@@ -1,15 +1,16 @@
-const CACHE_NAME = 'cuban-league-v174-mister-j8-catalog';
+const CACHE_NAME = 'cuban-league-v175-editorial';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=173-20260921-league-no-bonus',
-  './app.js?v=174-20261014-mister-j8-catalog',
+  './editorial.css?v=175-20261015',
+  './editorial-ui.js?v=175-20261015',
+  './app.js?v=175-20261015-editorial',
   './data.json?v=174-20261014-mister-j8-catalog',
   './catalog/players.json?v=174-20261014-mister-j8-catalog',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=170-20260917-cup-mister-order',
+  './editorial-admin.css?v=175-20261015',
   './admin.js?v=174-20261014-mister-j8-catalog',
   './mister-import-core.js?v=169',
   './admin-manifest.json',
@@ -22,11 +23,6 @@ const APP_SHELL = [
   './apple-touch-icon-green.png',
   './favicon-green-32.png',
   './golden-boot-pichichi.png',
-  './bernabeu-bg.jpg',
-  './stadium-bg.jpg',
-  './home-stadium-night.jpg',
-  './mbappe-card.jpg',
-  './yamal-card.jpg',
   './team-01.png',
   './team-02.png',
   './team-03.png',
@@ -120,6 +116,9 @@ self.addEventListener('fetch', event => {
 
   if (
     url.pathname.endsWith('/styles.css') ||
+    url.pathname.endsWith('/editorial.css') ||
+    url.pathname.endsWith('/editorial-admin.css') ||
+    url.pathname.endsWith('/editorial-ui.js') ||
     url.pathname.endsWith('/app.js') ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||

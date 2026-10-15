@@ -1,0 +1,74 @@
+:root {
+  color-scheme:light;--bg:#f7f8f3;--surface:#fff;--surface-2:#f0f3ed;--surface-3:#e7eee5;
+  --line:#dce3dc;--line-soft:#e5e9e1;--text:#172b25;--muted:#596b62;
+  --green:#145c46;--green-2:#236b52;--cyan:#145c46;--yellow:#85602c;--danger:#ac3541;--shadow:none;
+}
+body {background:#f7f8f3!important;color:#172b25;-webkit-font-smoothing:antialiased}
+* {box-shadow:none!important;text-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.admin-background {display:none!important}
+button,input,select,textarea {font-family:inherit}
+input,select,textarea {font-size:16px!important;min-height:46px;color:#172b25!important;background:#fff!important;accent-color:#145c46}
+button,a,summary {touch-action:manipulation}
+button,select,summary {min-height:44px}
+:is(button,a,input,select,summary):focus-visible {outline:3px solid #85602c!important;outline-offset:3px}
+button:disabled {cursor:not-allowed}
+h1,h2,h3 {letter-spacing:-.045em}
+.admin-topbar {background:#f7f8f3!important;border-bottom:1px solid #dce3dc;padding-top:max(12px,env(safe-area-inset-top));min-height:76px}
+.admin-brand b {color:#172b25;font-size:1rem;letter-spacing:-.02em}
+.admin-brand img {filter:none!important}
+.admin-brand small {color:#596b62;letter-spacing:.07em}
+.admin-main {max-width:1280px;padding-top:36px}
+.admin-kicker {color:#145c46;letter-spacing:.1em}
+.panel-heading h1 {font-size:clamp(2rem,4vw,3.5rem);line-height:1.05}
+.panel-heading p {color:#596b62;max-width:620px;font-size:.95rem;line-height:1.6}
+.account-box {border:1px solid #dce3dc;background:#fff;border-radius:12px}
+.account-avatar {background:#e7eee5;color:#145c46}
+.admin-workflow {border:1px solid #dce3dc;border-radius:16px;background:#fff;padding:20px}
+.admin-workflow article.active>span {background:#145c46;color:#fff}
+.admin-workflow article.active b {color:#145c46}
+.primary-button,.login-button,.mister-import-button {background:#145c46!important;color:#fff!important;border:1px solid #145c46!important;border-radius:12px}
+.primary-button *,.login-button *,.mister-import-button * {color:inherit!important}
+.secondary-button {background:#fff!important;color:#145c46!important;border:1px solid #b8cbbd!important;border-radius:12px}
+.danger-button {background:#ac3541!important;color:#fff!important}
+.action-dock {background:#f7f8f3!important;border-top:1px solid #dce3dc;gap:12px}
+.action-dock button {min-height:48px}
+.login-card,.state-card,.entry-card,.lineup-management,.revision-card,.completion-card,.mister-import-panel,.achievement-settings,.participant-workflow,.admin-tool-details {
+  background:#fff!important;border:1px solid #dce3dc!important;border-radius:18px!important;
+}
+.login-card::before,.state-card::before,.entry-card::before,.lineup-management::before {content:none!important}
+.login-copy h1 {font-size:clamp(2.4rem,5vw,4.5rem);line-height:1.02;color:#172b25}
+.lock-mark {background:#e7eee5;color:#145c46;border:0}
+.entry-table-head,.preview-table-head {background:#edf1e9!important;color:#596b62!important}
+.entry-row,.preview-row {border-color:#e4e9e1;background:#fff!important}
+.entry-row:focus-within {background:#edf3ee!important}
+.entry-row img,.preview-row img {filter:none!important}
+.form-message.error,.completion-card.warning,.backup-restore-warning {background:#fff3e6!important;color:#78552a!important;border-color:#dcc6a3!important}
+.publication-badge.draft {background:#f7f1e5!important;color:#85602c!important}
+.publication-badge.published {background:#e7eee5!important;color:#145c46!important}
+.admin-preview-modal,.backup-restore-modal,.player-catalog-modal,.admin-install-modal {background:rgba(13,30,24,.48)!important}
+.admin-preview-card,.backup-restore-card,.player-catalog-card,.admin-install-card {background:#f7f8f3!important;color:#172b25;border:1px solid #dce3dc!important;border-radius:22px}
+.preview-close,.admin-install-close {background:#fff;color:#172b25;border:1px solid #dce3dc;min-width:44px;min-height:44px}
+.preview-actions,.preview-footer {background:#f7f8f3!important;border-color:#dce3dc}
+.player-catalog-result {background:#fff!important;border-color:#dce3dc!important}
+.player-catalog-result:hover {background:#edf3ee!important}
+.lineup-player-card,.lineup-slot {border-color:#dce3dc!important}
+.negative-points,.is-negative {color:#ac3541!important}
+.completion-progress i {background:#145c46!important}
+.completion-card.warning .completion-progress i {background:#85602c!important}
+@media(max-width:760px) {
+  .admin-main {padding:22px 14px calc(120px + env(safe-area-inset-bottom))}
+  .admin-topbar {padding-left:14px;padding-right:14px}
+  .admin-workflow {padding:14px 10px;gap:8px}
+  .admin-workflow article small {font-size:.64rem}
+  .panel-heading {gap:16px}
+  .panel-heading h1 {font-size:2.2rem}
+  .panel-heading p {font-size:.88rem}
+  .matchday-toolbar {gap:12px}
+  .action-dock {padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+  .action-dock button {min-height:48px;font-size:.83rem}
+  .admin-preview-card {max-height:calc(100dvh - 24px);overflow:hidden;display:flex;flex-direction:column}
+  .preview-table-shell {min-height:0;overflow:auto;overscroll-behavior:contain}
+  .admin-preview-card>header,.admin-preview-card>footer {flex-shrink:0}
+  .login-card {padding:24px 18px}
+}
+@media(prefers-reduced-motion:reduce) {* {animation:none!important;transition:none!important}}
