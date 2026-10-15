@@ -1,6 +1,10 @@
-# V176 · Diseño anterior con navegación móvil conservada
+# V177 · Diseño anterior con navegación móvil conservada
 
 ## Estado actual
+
+V177 ajusta únicamente los colores de la barra inferior a la paleta oscura y
+verde del sitio. No cambia el menú Más, la navegación, las medidas ni los datos.
+La caché V177 invalida el recurso de estilos para mostrar el ajuste.
 
 Ernesto rechazó el aspecto V175 después de publicarlo y pidió recuperar V174,
 conservando únicamente la barra inferior clara y el menú Más mostrados en sus

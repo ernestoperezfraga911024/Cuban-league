@@ -1,14 +1,14 @@
-# Cuban League V176
+# Cuban League V177
 
 ## Diseño anterior con la barra inferior y el menú Más
 
 Se recupera el aspecto V174 de la web y del panel. Se conservan la barra
-inferior clara (Inicio, Liga, Jornadas, Historia, Más) y el menú «Toda la liga»
+inferior oscura con acento verde (Inicio, Liga, Jornadas, Historia, Más) y el menú «Toda la liga»
 aprobados por Ernesto. La navegación anterior permanece en PC y como respaldo
 para navegadores sin soporte de diálogo.
 
 Los datos, las fotos, el catálogo, los cálculos y las operaciones administrativas
-se conservan. La nueva caché V176 actualiza la presentación sin restaurar datos.
+se conservan. La nueva caché V177 actualiza la presentación sin restaurar datos.
 
 Respaldo del diseño original: `backup/pre-editorial-redesign-v174-20261015`.
 V175 queda en el historial, integrada mediante PR #45. Detalles y límites de

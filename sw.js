@@ -1,9 +1,9 @@
-const CACHE_NAME = 'cuban-league-v176-classic-mobile-nav';
+const CACHE_NAME = 'cuban-league-v177-dark-mobile-nav';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=176-20261015-classic-navigation',
-  './mobile-navigation.css?v=176-20261015',
+  './mobile-navigation.css?v=177-20261015',
   './editorial-ui.js?v=176-20261015',
   './app.js?v=176-20261015-classic-navigation',
   './data.json?v=174-20261014-mister-j8-catalog',
