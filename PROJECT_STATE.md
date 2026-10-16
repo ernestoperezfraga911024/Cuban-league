@@ -7,11 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V178: diseño V174 restaurado; barra inferior y menú Más oscuros, letras claras e iconos verdes. Opciones y funcionamiento conservados.
-- **Publicación:** Ernesto pidió restaurar el diseño anterior y conservar la navegación de sus dos capturas el 2026-10-14 (Miami). Publicar mediante GitHub Pages; revisión visual en dispositivos reales pendiente.
-- **Base de esta actualización:** `8053ffd463c789cf64898d50a6430c801124d972` (V177 publicada mediante PR #47). V178 ajusta solo los colores del menú Más y la caché de estilos.
+- **Versión:** V179: corrección de carga inicial del podio, sincronización pública y caché. Se conserva el diseño V178.
+- **Publicación:** cambios preparados en `codex/loading-audit-v179` para revisión mediante PR. GitHub Pages sigue la rama `main`; V179 no se considera publicada hasta integrar el PR.
+- **Base de esta actualización:** `aa5e06b` (V178, PR #48). Revisión y correcciones solicitadas por Ernesto el 2026-10-16.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-15 UTC; pruebas de datos, cálculos, fotos y navegación ejecutadas antes de integrar.
+- **Fecha de verificación del código:** 2026-10-16; 88 pruebas automatizadas. Incluye carga lenta, fallos/reintentos, conservación de datos y caché; comprobación visual en navegador real pendiente.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -253,8 +253,30 @@ Incluye:
 - resto de assets: stale-while-revalidate.
 - Cada release importante debe rotar `CACHE_NAME`/version strings cuando cambien assets que deban invalidarse.
 
-Cache actual: V174 Mister J8 Catalog. El panel y la web cargan el catálogo con
-la versión `174-20261014-mister-j8-catalog`; la extensión sigue en 1.0.2.
+Cache de V179: `cuban-league-v179-loading-audit`. La web registra el worker y
+carga `app.js` con `179-20261016-loading-audit`. Los datos y el catálogo conservan
+`174-20261014-mister-j8-catalog`; panel y extensión (1.0.2) no cambian.
+El fallback de un script usa su propio archivo precargado, nunca `index.html`.
+Las respuestas 5xx/408 pueden recuperar la copia local del recurso.
+
+## Carga pública y sincronización — V179
+
+- El HTML inicial y la portada muestran carga neutra hasta confirmar las jornadas.
+- El podio anterior solo se muestra si una consulta correcta confirma cero jornadas.
+- Un fallo inicial muestra error/reintento; un fallo posterior conserva el último
+  resultado recibido e indica que no pudo actualizarse.
+- Catálogo en paralelo: solo las consultas de alineaciones/estadísticas detalladas
+  esperan sus fotos/metadatos. Portada y navegación no dependen de esa descarga.
+- Temporizador, reconexión y regreso a pestaña comparten una única sincronización.
+  Datos base, jornadas e insignias tienen un límite de petición de 15 segundos.
+- La portada se actualiza antes de esperar insignias. Sin cambios confirmados no
+  se reconstruyen tablas, tarjetas, perfiles ni el podio.
+- Una consulta fallida de milestones conserva la última respuesta válida; una
+  respuesta correcta vacía sí puede retirar milestones. No se escriben datos.
+- La firma de cambios incluye `misterRank` para detectar correcciones de Copa.
+- El refresco del modal de alineación tiene su propio bloqueo y no retiene el de
+  las jornadas si su consulta tarda.
+- Alcance, evidencia y reversión: `docs/REVIEW_V179.md`.
 
 ## Backups
 
@@ -310,6 +332,11 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Cambios recientes relevantes
 
+- **V179:** revisión de carga/sincronización y PWA; sin cambios en los datos,
+  cálculos deportivos, panel, importación, SQL, credenciales ni conexiones.
+  Pruebas de comportamiento sustituyen únicamente las seis comprobaciones de
+  hash de funciones de I/O modificadas; la referencia V174 se conserva intacta.
+
 - **V176:** se recupera el diseño anterior de portada, tablas, perfiles y panel.
   Se conserva únicamente la barra clara de cinco accesos y el menú Más de las
   capturas aprobadas. CSS aislado de 4 KB, sin nuevas dependencias. En PC se
@@ -362,6 +389,10 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 - Cambios visuales triviales no requieren actualizar este archivo.
 
 ## Última actualización
+
+**2026-10-16** — V179: corrección del podio histórico al arrancar y optimizaciones
+verificadas de las consultas públicas. Rama separada desde V178; sin migraciones
+ni operaciones de escritura sobre Supabase.
 
 **2026-10-15 UTC / 2026-10-14 Miami** — V176: restauración selectiva de la
 presentación V174 con la barra inferior y el menú Más conservados. Se parte

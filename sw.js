@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v178-dark-more-menu';
+const CACHE_NAME = 'cuban-league-v179-loading-audit';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=176-20261015-classic-navigation',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=176-20261015-classic-navigation',
+  './app.js?v=179-20261016-loading-audit',
   './data.json?v=174-20261014-mister-j8-catalog',
   './catalog/players.json?v=174-20261014-mister-j8-catalog',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',
@@ -74,26 +74,42 @@ self.addEventListener('activate', event => {
   );
 });
 
-async function networkFirst(request, fallback = './index.html') {
+async function networkFirst(request, fallback = null) {
   const cache = await caches.open(CACHE_NAME);
+  let failedResponse;
   try {
     const response = await fetch(request, { cache: 'no-store' });
-    if (response.ok) await cache.put(request, response.clone());
-    return response;
-  } catch {
-    return (await cache.match(request)) || (await cache.match(fallback));
-  }
+    if (response.ok) {
+      // A full cache must not turn a successful download into a failed load.
+      try { await cache.put(request, response.clone()); } catch {}
+      return response;
+    }
+    if (response.status < 500 && response.status !== 408) return response;
+    failedResponse = response;
+  } catch {}
+  return (await cache.match(request))
+    || (fallback ? await cache.match(fallback) : null)
+    || failedResponse
+    || new Response('', { status: 504, statusText: 'Offline' });
 }
 
-async function staleWhileRevalidate(request) {
+function shellFallback(request) {
+  const pathname = new URL(request.url).pathname;
+  return APP_SHELL.find(asset => new URL(asset, self.location.href).pathname === pathname) || null;
+}
+
+async function staleWhileRevalidate(request, event) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   const update = fetch(request)
-    .then(response => {
-      if (response.ok) cache.put(request, response.clone());
+    .then(async response => {
+      if (response.ok) {
+        try { await cache.put(request, response.clone()); } catch {}
+      }
       return response;
     })
     .catch(() => null);
+  event.waitUntil(update.then(() => {}));
   return cached || (await update) || new Response('', { status: 504, statusText: 'Offline' });
 }
 
@@ -132,11 +148,11 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/player-catalog.js') ||
     url.pathname.endsWith('/supabase-config.js')
   ) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(request, shellFallback(request)));
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request));
+  event.respondWith(staleWhileRevalidate(request, event));
 });
 
 self.addEventListener('message', event => {

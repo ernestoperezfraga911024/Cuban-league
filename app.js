@@ -1,11 +1,16 @@
-const APP_VERSION='174-20261014-mister-j8-catalog';
+const APP_VERSION='179-20261016-loading-audit';
+const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
 let PLAYER_CATALOG=null;
+let PLAYER_CATALOG_PROMISE=Promise.resolve(null);
 let LIVE_MATCHDAY_ROWS=[];
 let PUBLISHED_MATCHDAYS=[];
 let MATCHDAY_MILESTONES=[];
+let LIVE_STATS_STATUS='loading';
+let LIVE_STATS_HAS_SYNCED=false;
+let PUBLISHED_SYNC_PROMISE=null;
 let SELECTED_MATCHDAY=null;
 let SELECTED_CLASSIFICATION_MATCHDAY=null;
 const CUP_START_MATCHDAY=4;
@@ -212,7 +217,14 @@ function deriveChampionsStatsFromLeague(){
   };
 }
 
-async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatchday=null}={}){
+async function withPublicRequestTimeout(request){
+  const controller=new AbortController();
+  const timeout=window.setTimeout(()=>controller.abort(),15000);
+  try{return await request(controller.signal);}
+  finally{window.clearTimeout(timeout);}
+}
+
+async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatchday=null,signal}={}){
   const config=window.CUBAN_LEAGUE_SUPABASE;
   const request=async({includeRedCards=true,includePostponed=true}={})=>{
     const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
@@ -227,6 +239,7 @@ async function fetchPublishedStatsRows(season,{minimumMatchday=null,maximumMatch
     endpoint.searchParams.set('order','matchday.asc');
     return fetch(endpoint,{
       cache:'no-store',
+      signal,
       headers:{
         apikey:config.publishableKey,
         Authorization:`Bearer ${config.publishableKey}`,
@@ -509,13 +522,18 @@ function recentForm(name,throughMatchday){
 
 async function syncLiveCurrentStats({render=true}={}){
   const config=window.CUBAN_LEAGUE_SUPABASE;
-  if(!DATA||!config?.url||!config?.publishableKey)return {synced:false,changed:false};
+  if(!DATA||!config?.url||!config?.publishableKey){
+    LIVE_STATS_STATUS='error';
+    return {synced:false,changed:false};
+  }
   try{
-    const rows=await fetchPublishedStatsRows(config.season||DATA.currentSeason);
+    const rows=await withPublicRequestTimeout(signal=>fetchPublishedStatsRows(config.season||DATA.currentSeason,{signal}));
     const previousSignature=profileSeasonPublishedRowsSignature(LIVE_MATCHDAY_ROWS);
     const nextRows=normalizeMatchdayRows(rows);
     const publishedStatsChanged=previousSignature!==profileSeasonPublishedRowsSignature(nextRows);
     LIVE_MATCHDAY_ROWS=nextRows;
+    LIVE_STATS_HAS_SYNCED=true;
+    LIVE_STATS_STATUS='ready';
     if(publishedStatsChanged){
       PROFILE_SEASON_CACHE.clear();
       LEAGUE_STATS_CACHE.clear();
@@ -564,6 +582,8 @@ async function syncLiveCurrentStats({render=true}={}){
     }
     return {synced:true,changed:publishedStatsChanged};
   }catch{
+    LIVE_STATS_STATUS=LIVE_STATS_HAS_SYNCED?'stale':'error';
+    if(render)renderHomeLive();
     return {synced:false,changed:false};
   }
 }
@@ -591,26 +611,27 @@ async function syncAchievementMilestones({render=true}={}){
     endpoint.searchParams.set('select','matchday,matchday_date,is_month_end,is_year_end');
     endpoint.searchParams.set('season',`eq.${config.season||DATA.currentSeason}`);
     endpoint.searchParams.set('order','matchday.asc');
-    const response=await fetch(endpoint,{
-      cache:'no-store',
-      headers:{
-        apikey:config.publishableKey,
-        Authorization:`Bearer ${config.publishableKey}`,
-        Accept:'application/json'
-      }
+    const rows=await withPublicRequestTimeout(async signal=>{
+      const response=await fetch(endpoint,{
+        cache:'no-store',
+        signal,
+        headers:{
+          apikey:config.publishableKey,
+          Authorization:`Bearer ${config.publishableKey}`,
+          Accept:'application/json'
+        }
+      });
+      if(!response.ok)throw new Error('No se pudieron actualizar las insignias');
+      return response.json();
     });
-    if(!response.ok)throw new Error('No se pudieron actualizar las insignias');
-    const rows=await response.json();
     if(!Array.isArray(rows))throw new Error('Respuesta de insignias no válida');
     MATCHDAY_MILESTONES=normalizeMatchdayMilestones(rows);
     const milestonesChanged=previousSignature!==JSON.stringify(MATCHDAY_MILESTONES);
     if(render)renderPlayers($('playerSearch')?.value||'');
     return milestonesChanged;
   }catch{
-    MATCHDAY_MILESTONES=[];
-    const milestonesChanged=previousSignature!==JSON.stringify(MATCHDAY_MILESTONES);
-    if(render)renderPlayers($('playerSearch')?.value||'');
-    return milestonesChanged;
+    // A failed read is not an empty season. Keep the last confirmed awards.
+    return false;
   }
 }
 
@@ -1182,6 +1203,26 @@ function heroKpiLayout({eyebrow,title,subtitle,badge,podiumCards,leaderCards}){
 function renderHeroKpis(latest){
   const host=$('heroKpis');
   if(!host)return;
+  host.setAttribute('aria-busy',String(LIVE_STATS_STATUS==='loading'));
+  if(latest==null&&!LIVE_STATS_HAS_SYNCED){
+    const loading=LIVE_STATS_STATUS==='loading';
+    host.innerHTML=heroKpiLayout({
+      eyebrow:`TEMPORADA ${DATA.currentSeason}`,
+      title:loading?'Cargando clasificación':'Clasificación no disponible',
+      subtitle:loading?'Consultando las jornadas publicadas.':'No se pudo conectar. Puedes volver a intentarlo.',
+      badge:'',
+      podiumCards:['first','second','third'].map((tone,index)=>`<article class="hero-kpi-live hero-kpi-${tone} hero-kpi-placeholder">
+        <span class="kpi-marker" aria-hidden="true">${index+1}</span>
+        <span class="kpi-icon">${uiIcon('medal')}</span>
+        <div><span>${['Primer','Segundo','Tercer'][index]} lugar</span><b>—</b><small>${loading?'Cargando…':'Sin conexión'}</small></div>
+      </article>`),
+      leaderCards:[
+        heroLeaderMetricCard({label:'Líder goleador',icon:'ball',tone:'goals',value:'—',detail:loading?'Cargando…':'Sin conexión'}),
+        heroLeaderMetricCard({label:'Líder clean sheets',icon:'shield',tone:'clean-sheets',value:'—',detail:loading?'Cargando…':'Sin conexión'})
+      ]
+    });
+    return;
+  }
   if(latest==null){
     host.innerHTML=heroKpiPreseasonCards();
     return;
@@ -1226,8 +1267,27 @@ function renderHeroKpis(latest){
 
 function renderHomeLive(){
   if(!$('homeLiveTitle'))return;
+  const notice=$('liveDataNotice');
+  if(notice){
+    notice.hidden=!['error','stale'].includes(LIVE_STATS_STATUS);
+    $('liveDataNoticeText').textContent=LIVE_STATS_HAS_SYNCED
+      ?'No se pudo actualizar. Se muestran los últimos datos recibidos.'
+      :'No se pudo cargar la clasificación actual. Revisa tu conexión e inténtalo de nuevo.';
+  }
   const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
   renderHeroKpis(latest);
+  if(latest==null&&!LIVE_STATS_HAS_SYNCED){
+    const loading=LIVE_STATS_STATUS==='loading';
+    $('homeLiveBadge').textContent=loading?'CARGANDO':'SIN CONEXIÓN';
+    $('homeLiveTitle').textContent=loading?'Consultando la temporada actual.':'No se pudieron cargar las jornadas.';
+    $('homeLiveCopy').textContent=loading?'La clasificación aparecerá en cuanto recibamos los datos publicados.':'Volveremos a intentarlo al recuperar la conexión.';
+    $('homeLatestRound').textContent='—';
+    $('homeLatestWinner').textContent=loading?'Cargando…':'Pendiente de conexión';
+    $('homeCurrentLeader').textContent='—';
+    $('homeLeaderPoints').textContent=loading?'Cargando…':'Pendiente de conexión';
+    renderSeasonPulse();
+    return;
+  }
   if(latest==null){
     $('homeLiveBadge').textContent='POR COMENZAR';
     $('homeLiveTitle').textContent='Todo preparado para el comienzo.';
@@ -1298,6 +1358,13 @@ function renderSeasonPulse(){
   const badge=$('seasonPulseBadge');
   if(!host||!badge)return;
   const latest=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
+
+  if(latest==null&&!LIVE_STATS_HAS_SYNCED){
+    badge.textContent=LIVE_STATS_STATUS==='loading'?'CARGANDO':'SIN CONEXIÓN';
+    host.className='season-pulse';
+    host.innerHTML='<p class="league-stats-loading">Esperando los datos de la temporada actual.</p>';
+    return;
+  }
 
   if(latest==null){
     const champion=defendingChampion();
@@ -1522,6 +1589,7 @@ function matchdayLineupOfficialStats(name,matchday){
 }
 
 async function fetchPublishedMatchdayLineup(name,matchday,signal){
+  await PLAYER_CATALOG_PROMISE;
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!config?.url||!config?.publishableKey)throw new Error('Supabase no está configurado');
   const season=config.season||DATA.currentSeason;
@@ -3476,6 +3544,7 @@ function profileSeasonPublishedRowsSignature(rows){
     row.goals,
     row.cleanSheets,
     row.redCards,
+    row.misterRank,
     row.negativeBalanceNoScore,
     row.hasPostponedMatches,
     row.updatedAt
@@ -3502,6 +3571,7 @@ function profileSeasonPlayerKey(player){
 }
 
 async function fetchPublishedProfileSeasonRows(name,signal){
+  await PLAYER_CATALOG_PROMISE;
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!config?.url||!config?.publishableKey)throw new Error('Supabase no está configurado');
   const season=config.season||DATA.currentSeason;
@@ -3729,6 +3799,7 @@ function leagueStatsPlayerKey(player){
 }
 
 async function fetchPublishedLeagueStatsRows(signal){
+  await PLAYER_CATALOG_PROMISE;
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!config?.url||!config?.publishableKey)throw new Error('Supabase no está configurado');
   const season=config.season||DATA.currentSeason;
@@ -6779,17 +6850,70 @@ function setupChampionsCalendarToggle(){
   });
 }
 
+function syncPublishedData(){
+  // Timer, reconnect and tab visibility share one in-flight refresh.
+  if(PUBLISHED_SYNC_PROMISE)return PUBLISHED_SYNC_PROMISE;
+  if(!DATA)return Promise.resolve();
+  PUBLISHED_SYNC_PROMISE=(async()=>{
+    const previousStatus=LIVE_STATS_STATUS;
+    const firstSync=!LIVE_STATS_HAS_SYNCED;
+    if(firstSync){
+      LIVE_STATS_STATUS='loading';
+      renderHomeLive();
+    }
+    const liveStatsResult=await syncLiveCurrentStats({render:false});
+    const liveStatsChanged=liveStatsResult.changed;
+    const renderStats=liveStatsResult.synced&&(firstSync||liveStatsChanged);
+    // Display current standings before waiting for the separate awards query.
+    if(renderStats){
+      syncChampionsStats({render:false});
+      renderCurrent();
+      renderMatchdayCenter();
+      renderChampions();
+      renderCup();
+    }
+    if(renderStats||firstSync||previousStatus!==LIVE_STATS_STATUS)renderHomeLive();
+    if(!liveStatsResult.synced)return;
+    const milestonesChanged=await syncAchievementMilestones({render:false});
+    if((liveStatsChanged||milestonesChanged)&&PROFILE_SEASON_STATE&&!$('playerModal')?.hidden){
+      refreshOpenProfileCurrentSummary();
+      if(liveStatsChanged)ensureProfileSeasonData({force:true});
+    }
+    if(milestonesChanged)renderCurrent();
+    if(renderStats||milestonesChanged){
+      renderPlayers($('playerSearch')?.value||'');
+      if(SHARE_CARD_BOUND)renderShareCardStudio();
+      checkForNewAchievementUnlocks();
+    }
+    // The modal has its own request guard. A slow lineup must not block polling.
+    void refreshOpenMatchdayLineup();
+  })().finally(()=>{PUBLISHED_SYNC_PROMISE=null;});
+  return PUBLISHED_SYNC_PROMISE;
+}
+
 async function init(){
   trackSiteVisit();
   const catalogPromise=window.CubanLeaguePlayerCatalog
-    ?window.CubanLeaguePlayerCatalog.load(APP_VERSION).catch(()=>null)
+    ?window.CubanLeaguePlayerCatalog.load(DATA_VERSION).catch(()=>null)
     :Promise.resolve(null);
-  const [dataResponse,catalog]=await Promise.all([
-    fetch(`data.json?v=${APP_VERSION}`,{cache:'no-store'}),
-    catalogPromise
-  ]);
-  DATA=await dataResponse.json();
-  PLAYER_CATALOG=catalog;
+  // Catalog photos are needed by lineups, not by the home podium or navigation.
+  PLAYER_CATALOG_PROMISE=catalogPromise.then(catalog=>{PLAYER_CATALOG=catalog;return catalog;});
+  try{
+    DATA=await withPublicRequestTimeout(async signal=>{
+      const response=await fetch(`data.json?v=${DATA_VERSION}`,{cache:'no-store',signal});
+      if(!response.ok)throw new Error('No se pudieron cargar los datos de la liga');
+      return response.json();
+    });
+  }catch{
+    $('heroKpis').setAttribute('aria-busy','false');
+    $('heroKpis').innerHTML='<div class="hero-kpis-heading"><div><strong>No se pudo cargar la página</strong><small>Revisa tu conexión y vuelve a intentarlo.</small></div></div>';
+    const retry=document.createElement('button');
+    retry.type='button';
+    retry.textContent='Volver a intentar';
+    retry.onclick=()=>location.reload();
+    $('heroKpis').appendChild(retry);
+    return;
+  }
   renderCurrent();
   renderMatchdayCenter();
   renderHomeLive();
@@ -6805,26 +6929,6 @@ async function init(){
   renderCup();
   setupShareCardStudio();
 
-  const syncPublishedData=async()=>{
-    const liveStatsResult=await syncLiveCurrentStats({render:false});
-    const liveStatsSynced=liveStatsResult.synced;
-    const liveStatsChanged=liveStatsResult.changed;
-    syncChampionsStats({render:false});
-    const milestonesChanged=await syncAchievementMilestones({render:false});
-    if((liveStatsChanged||milestonesChanged)&&PROFILE_SEASON_STATE&&!$('playerModal')?.hidden){
-      refreshOpenProfileCurrentSummary();
-      if(liveStatsChanged)ensureProfileSeasonData({force:true});
-    }
-    renderCurrent();
-    renderMatchdayCenter();
-    renderHomeLive();
-    renderPlayers($('playerSearch')?.value||'');
-    renderChampions();
-    renderCup();
-    if(SHARE_CARD_BOUND)renderShareCardStudio();
-    checkForNewAchievementUnlocks();
-    if(liveStatsSynced)await refreshOpenMatchdayLineup();
-  };
   syncPublishedData();
   window.setInterval(()=>{
     if(document.visibilityState==='visible')syncPublishedData();
@@ -6835,6 +6939,10 @@ async function init(){
   });
 
   document.addEventListener('click',e=>{
+    if(e.target.closest('[data-live-retry]')){
+      syncPublishedData();
+      return;
+    }
     const route=e.target.closest('[data-go]');
     if(route){
       go(route.dataset.go,route.dataset.historyView);
