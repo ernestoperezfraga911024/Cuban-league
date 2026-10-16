@@ -1,4 +1,18 @@
-# Cuban League V178
+# Cuban League V179
+
+## Carga y actualización pública
+
+- La portada espera las jornadas publicadas antes de mostrar el podio. La carga
+  inicial y los fallos de conexión ya no se interpretan como una temporada vacía.
+- El catálogo no bloquea portada/navegación; las insignias no retrasan el podio.
+- Las actualizaciones simultáneas se agrupan; los resultados sin cambios no
+  reconstruyen el DOM. Las consultas principales tienen timeout y reintento.
+- Un fallo de milestones conserva las insignias recibidas previamente.
+- Caché corregida para no devolver HTML como JavaScript sin conexión.
+- 88 pruebas automatizadas; datos, fotos, panel y cálculos existentes preservados.
+
+Revisión, límites y reversión: `docs/REVIEW_V179.md`. Publicación mediante PR;
+no se aplican migraciones ni restauraciones de datos.
 
 ## Diseño anterior con la barra inferior y el menú Más
 

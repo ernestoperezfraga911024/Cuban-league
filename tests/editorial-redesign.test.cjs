@@ -40,9 +40,14 @@ test('all existing element IDs remain available and new markup has no duplicate 
     dom.window.close();
   }
 });
-test('all 28 calculation, normalization, fetch and synchronization functions are unchanged',()=>{
+test('original league calculations and normalization functions remain unchanged',()=>{
   const dom=setup();
-  try {for(const [name,digest] of Object.entries(baseline.protectedFunctions))assert.equal(hash(dom.window.designTest.business(name)),digest,name);}
+  // V179 intentionally fixes loading/sync and defers catalog dependencies.
+  // These six I/O functions now have behavioral coverage in public-loading.test.cjs.
+  const loadingFixes=new Set(['fetchPublishedStatsRows','syncLiveCurrentStats','syncAchievementMilestones','fetchPublishedMatchdayLineup','fetchPublishedProfileSeasonRows','fetchPublishedLeagueStatsRows']);
+  try {for(const [name,digest] of Object.entries(baseline.protectedFunctions)){
+    if(!loadingFixes.has(name))assert.equal(hash(dom.window.designTest.business(name)),digest,name);
+  }}
   finally{dom.window.close();}
 });
 test('all public sections render without changing static league data or photo mappings',()=>{
@@ -153,7 +158,7 @@ test('navigation stays read-only and the new cache restores the classic resource
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
   for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v178-dark-more-menu/);
+  assert.match(sw,/cuban-league-v179-loading-audit/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{
