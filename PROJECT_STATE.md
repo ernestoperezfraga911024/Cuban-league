@@ -7,11 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V180: bonos acumulados y peores capitanes en Estadísticas → Capitanes. Conserva diseño y carga pública V179.
-- **Publicación:** cambios preparados en `codex/captain-bonus-ranking-v180` para revisión mediante PR. GitHub Pages sigue la rama `main`; V180 no se considera publicada hasta integrar el PR.
-- **Base de esta actualización:** `85d65fe` (V179, PR #49 ya integrado). Dos vistas solicitadas por Ernesto el 2026-10-17 (Miami).
+- **Versión:** V181: tarjetas compactas de mejores/peores capitanes y MVP, según la propuesta visual aprobada por Ernesto. Conserva bonos acumulados V180 y carga pública V179.
+- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama de entrega V181: `codex/compact-captain-mvp-v181`. V180 se publicó en PR #50; para el estado vivo de V181 comprobar la ejecución de Pages del commit integrado.
+- **Base de esta actualización:** `ccb5af1` (V180, PR #50 integrado y publicado). Diseño solicitado por Ernesto el 2026-10-17 (Miami).
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-18 UTC; 95 pruebas automatizadas aprobadas de carga, conservación, caché y nuevas vistas de capitanes; comprobación visual en navegador real pendiente.
+- **Fecha de verificación del código:** 2026-10-18 UTC; 95 pruebas automatizadas aprobadas; comparación antes/después de valores, identidades y fotos de capitanes y MVP. La vista previa local no es accesible desde el navegador remoto; comprobar el aspecto en la web publicada.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -35,6 +35,7 @@ La web pública nunca debe mostrar borradores no publicados.
 
 - **Frontend:** HTML, CSS y JavaScript vanilla.
 - **Web pública:** `index.html` + `app.js` + `styles.css`; `mobile-navigation.css` y `editorial-ui.js` solo para la barra y el menú Más.
+- **Tarjetas compactas:** `stats-compact.css` (aprox. 4,5 KB), limitado a `.league-stats-compact-card` en Capitanes y MVP. Sin nuevas dependencias.
 - **Admin:** `admin.html` + `admin.js` + `admin.css`, con su aspecto anterior. Los archivos del tema editorial se conservan como referencia, sin cargarse.
 - **Datos estáticos/históricos:** `data.json`.
 - **Catálogo:** `catalog/players.json` + `player-catalog.js`.
@@ -259,6 +260,16 @@ Incluye:
 - Vistas de lectura con datos ya cargados; sin nuevas consultas, escrituras,
   dependencias ni cambios en Liga oficial, Copa, Champions o perfiles.
 
+**V181 — Presentación compacta:**
+- Participante a la izquierda y futbolista con su foto a la derecha. Debajo,
+  una banda compacta con etiquetas y métricas; el escritorio amplio usa una fila.
+- Aplicado a Más puntos, Mejor promedio, Peores capitanes y MVP. La tabla de
+  bonos acumulados, Líneas, comparador y perfiles mantienen su presentación.
+- Nombres completos y notas de empate pueden envolver a varias líneas;
+  no se recortan ni se fija una altura que oculte información.
+- Se conserva la lógica de ranking y todas las métricas/fotos existentes.
+- CSS aislado, sin consultas nuevas, librerías, mediciones JS ni cambios de datos.
+
 ## PWA / cache
 
 `sw.js` mantiene app shell y recursos estáticos.
@@ -268,8 +279,8 @@ Incluye:
 - resto de assets: stale-while-revalidate.
 - Cada release importante debe rotar `CACHE_NAME`/version strings cuando cambien assets que deban invalidarse.
 
-Cache de V180: `cuban-league-v180-captain-bonus`. La web registra el worker y
-carga `app.js` con `180-20261018-captain-bonus`. Los datos y el catálogo conservan
+Cache de V181: `cuban-league-v181-compact-stats`. La web registra el worker y
+carga `app.js` y `stats-compact.css` con `181-20261018-compact-stats`. Los datos y el catálogo conservan
 `174-20261014-mister-j8-catalog`; panel y extensión (1.0.2) no cambian.
 El fallback de un script usa su propio archivo precargado, nunca `index.html`.
 Las respuestas 5xx/408 pueden recuperar la copia local del recurso.
@@ -347,6 +358,10 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Cambios recientes relevantes
 
+- **V181:** presentación compacta de Capitanes/MVP aprobada mediante imagen.
+  Cambio de distribución y CSS aislado; 95 pruebas aprobadas y comprobación
+  de valores/fotos antes y después. Ninguna función de cálculo modificada.
+
 - **V180:** tabla de bonos acumulados y vista de peores capitanes. Reutiliza los
   datos y estilos existentes; pruebas de navegación, empates, negativos,
   redondeo, correcciones, datos incompletos e inmutabilidad. Se conservan
@@ -409,6 +424,10 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 - Cambios visuales triviales no requieren actualizar este archivo.
 
 ## Última actualización
+
+**2026-10-18 UTC / 2026-10-17 Miami** — V181: tarjetas compactas de mejores y
+peores capitanes y MVP, sobre V180 ya publicado. Conserva datos, cálculos,
+conexiones y el CSS anterior; nueva hoja de estilos específica y caché V181.
 
 **2026-10-18 UTC / 2026-10-17 Miami** — V180: dos opciones nuevas dentro de
 Estadísticas → Capitanes, preparadas en rama separada desde V179 para PR.

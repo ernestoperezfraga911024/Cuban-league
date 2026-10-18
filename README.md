@@ -1,4 +1,17 @@
-# Cuban League V180
+# Cuban League V181
+
+## Tarjetas compactas de Capitanes y MVP
+
+El participante y el futbolista con su foto aparecen lado a lado en móvil,
+con las métricas en una banda inferior compacta. En escritorio amplio se
+mantiene una fila. Los nombres largos y las notas de empate pueden ocupar
+varias líneas, sin cortar información.
+
+Se aplica a Más puntos, Mejor promedio, Peores capitanes y MVP. Reutiliza datos,
+ranking, fotografías y estilos base; `stats-compact.css` añade unos 4,5 KB de
+reglas limitadas a estas tarjetas. Sin nuevas consultas ni dependencias.
+95 pruebas aprobadas y comparación de valores/identidades/fotos antes y después.
+Publicación mediante PR a `main`, con caché V181.
 
 ## Bonos acumulados y peores capitanes
 

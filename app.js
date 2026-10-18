@@ -1,4 +1,4 @@
-const APP_VERSION='180-20261018-captain-bonus';
+const APP_VERSION='181-20261018-compact-stats';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -4383,18 +4383,20 @@ function leagueStatsCaptainMarkup(data){
         const leaders=leadersFor(team);
         const player=leaders[0]||null;
         const both=!worst&&player&&team.topCaptainsByPoints.some(item=>item.key===player.key)&&team.topCaptainsByAverage.some(item=>item.key===player.key);
-        return `<article class="league-stats-captain-card${player?'':' is-empty'}" role="listitem">
+        return `<article class="league-stats-captain-card league-stats-compact-card${player?'':' is-empty'}" role="listitem">
           <span class="league-stats-rank">${player?rank:'—'}</span>
           ${leagueStatsTeamVisual(team)}
           <div class="league-stats-captain-player">
             ${leagueStatsTiedPlayerVisual(leaders)}
-            ${player?`<div class="league-stats-tags"><span>${worst?'Peor promedio':mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
           </div>
+          <div class="league-stats-summary">
+            ${player?`<div class="league-stats-tags"><span>${worst?'Peor promedio':mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
           <div class="league-stats-metrics">
             <div><span>Puntos</span><b>${player?profileSeasonFormat(player.captainPoints):'—'}</b></div>
             <div><span>Jornadas</span><b>${player?player.captainUses:'—'}</b></div>
             <div><span>Promedio</span><b>${player?profileSeasonFormat(player.captainAverage):'—'}</b></div>
             <div><span>Bono</span><b class="${player?.captainBonus<0?'is-negative':'is-positive'}">${player?profileSeasonFormat(player.captainBonus,{signed:true}):'—'}</b></div>
+          </div>
           </div>
         </article>`;
       }).join('')}
@@ -4449,16 +4451,19 @@ function leagueStatsMvpMarkup(data){
   const ranked=leagueStatsCompetitionRanks(teams,team=>team.mvps[0]?.contributionPoints??Number.NEGATIVE_INFINITY);
   return `<div class="league-stats-explainer"><b>MVP histórico de cada equipo</b><span>Es el futbolista que más puntos aportó mientras pertenecía a ese participante. Un traspaso inicia un acumulado separado en el nuevo equipo.</span></div>
     <div class="league-stats-ranking" role="list">
-      ${ranked.map(({row:team,rank})=>`<article class="league-stats-mvp-card${team.mvps.length?'':' is-empty'}" role="listitem">
+      ${ranked.map(({row:team,rank})=>`<article class="league-stats-mvp-card league-stats-compact-card${team.mvps.length?'':' is-empty'}" role="listitem">
         <span class="league-stats-rank">${team.mvps.length?rank:'—'}</span>
         ${leagueStatsTeamVisual(team)}
         <div class="league-stats-mvp-players">
           ${team.mvps.length?team.mvps.slice(0,1).map(player=>`<div class="league-stats-mvp-player">
             ${profileSeasonPlayerVisual(player)}
-            <div class="league-stats-mvp-metrics"><span><small>Puntos</small><b>${profileSeasonFormat(player.contributionPoints)}</b></span><span><small>Jornadas</small><b>${player.appearances}</b></span><span><small>Promedio</small><b>${profileSeasonFormat(player.average)}</b></span></div>
           </div>`).join(''):'<div class="league-stats-no-player"><b>Sin MVP registrado</b><small>Esperando un XI publicado</small></div>'}
           ${team.mvps.length>1?`<span class="league-stats-tie">MVP compartido entre ${team.mvps.length} jugadores · se muestra una referencia</span>`:''}
         </div>
+        ${team.mvps.length?`<div class="league-stats-summary">
+          <div class="league-stats-tags"><span>MVP</span></div>
+          <div class="league-stats-mvp-metrics"><span><small>Puntos</small><b>${profileSeasonFormat(team.mvps[0].contributionPoints)}</b></span><span><small>Jornadas</small><b>${team.mvps[0].appearances}</b></span><span><small>Promedio</small><b>${profileSeasonFormat(team.mvps[0].average)}</b></span></div>
+        </div>`:''}
       </article>`).join('')}
     </div>
     <p class="league-stats-note">Si el mismo futbolista cambia de participante, sus puntos anteriores permanecen en el equipo donde los consiguió.</p>`;
