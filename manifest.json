@@ -12,27 +12,27 @@
     "standalone",
     "minimal-ui"
   ],
-  "background_color": "#030914",
-  "theme_color": "#030914",
+  "background_color": "#071910",
+  "theme_color": "#071910",
   "categories": [
     "sports",
     "entertainment"
   ],
   "icons": [
     {
-      "src": "icon-green-192.png",
+      "src": "icon-f05-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-green-512.png",
+      "src": "icon-f05-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-green-512.png",
+      "src": "icon-f05-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

@@ -1,0 +1,80 @@
+/* V182 — F05 palette only. No layout, visibility, typography or data changes. */
+:root{
+  --bg:#071910;--panel:#0c2117;--panel2:#142e21;--line:rgba(165,197,173,.22);
+  --text:#f4efdc;--muted:#a6b4aa;--green:#9ed8b6;--green-2:#76b994;
+  --emerald:#075638;--cyan:#b9d7c4;--turquoise:#b9d7c4;--gold:#e0c486;
+  --surface:#0c2117;--surface-2:#142e21;--surface-3:#1b3828;
+  --surface-raised:#142e21;--surface-strong:#142e21;--surface-soft:rgba(20,46,33,.85);
+  --line-soft:rgba(244,239,220,.1);--home-navy:#071910;--home-green:#9ed8b6;
+  --home-emerald:#075638;--home-turquoise:#b9d7c4;
+  --rules-green:#9ed8b6;--rules-mint:#b9d7c4;--rules-gold:#e0c486;
+  --mister-import-accent:#9ed8b6;
+}
+html{background:#071910}
+body.f05-theme{background:#071910;color:var(--text)}
+.f05-theme::before{background-image:none}
+.f05-theme .brand .logo{background:transparent;border-color:transparent;box-shadow:none}
+.f05-theme .brand .logo img,.f05-theme .admin-brand img{object-fit:contain;filter:none;box-shadow:none}
+.f05-theme :is(.topbar,.main-nav,.admin-topbar,.action-dock){background:rgba(7,25,16,.96);border-color:var(--line)}
+.f05-theme :is(h1,h2,h3,h4,.brand b,.admin-brand b){color:var(--text)}
+.f05-theme :is(.eyebrow,.admin-kicker,.section-icon,.panel-icon,.page-banner-mark){color:var(--green)}
+.f05-theme :is(button,select,input,textarea){border-color:var(--line);background-color:var(--panel);color:var(--text)}
+.f05-theme :is(button,select,input,textarea):focus-visible{outline-color:var(--green)}
+.f05-theme :is(.primary-button,.install-primary,.home-live-cta,.pulse-primary-action),
+.f05-theme .hero-photo .actions button:first-child{
+  background:#075638;color:#f4efdc;border-color:#3d8d65;box-shadow:none;text-shadow:none;
+}
+.f05-theme :is(.primary-button,.install-primary,.home-live-cta,.pulse-primary-action):hover,
+.f05-theme .hero-photo .actions button:first-child:hover{background:#096441;color:#f4efdc}
+.f05-theme :is(.secondary,.secondary-button,.hero-rules-action){background:var(--panel);color:var(--text);border-color:var(--line);box-shadow:none}
+.f05-theme .hero-photo .actions .secondary{background:rgba(12,33,23,.82);color:var(--text);border-color:var(--line);box-shadow:none}
+.f05-theme :is(.navtab.active,.subtab.active),
+.f05-theme .league-stats-subtabs button[aria-selected="true"],
+.f05-theme .league-stats-toolbar button[aria-pressed="true"],
+.f05-theme .profile-view-tabs button[aria-selected="true"]{
+  background:#075638;color:#f4efdc;border-color:#3d8d65;box-shadow:none;text-shadow:none;
+}
+.f05-theme .navtab.active .ui-icon{color:#f4efdc}
+.classic-mobile-nav.f05-theme .editorial-mobile-nav{background:#0c2117;border-color:var(--line)}
+.classic-mobile-nav.f05-theme .editorial-mobile-nav button{background:transparent;color:var(--muted)}
+.classic-mobile-nav.f05-theme .editorial-mobile-nav button.active{background:#075638;color:#f4efdc}
+.f05-theme #editorialMenu{background:var(--panel);border-color:var(--line)}
+.f05-theme #editorialMenu nav :is(button,a):hover{background:#1b3828}
+.f05-theme :is(.panel,.record,.news-card,.card,.player-card,.group,.round,.second-division,
+ .evolution-historical-card,.champion-history-card,.home-live-card,.home-shortcuts button,
+ .matchday-live-head,.matchday-block,.matchday-feature-card,.matchday-metrics>article,
+ .matchday-archive-card,.season-results,.known-row,.season-empty,.rules-card,.rules-section,
+ .league-stats-captain-card,.league-stats-line-card,.league-stats-mvp-card,.league-no-bonus-wrap,
+ .league-stats-explainer,.league-stats-loading,.league-stats-empty){
+  background:var(--panel);border-color:var(--line);box-shadow:none;
+}
+.f05-theme :is(.panel,.record,.news-card,.player-card,.group,.home-shortcuts button):hover{background:var(--panel2);border-color:#507e61}
+.f05-theme :is(.thead,.profile-season-head,.league-no-bonus-table thead th){background:#142e21;color:var(--muted);border-color:var(--line)}
+.f05-theme :is(.row,.general-row,.points-row,.palmares-row,.season-result-row,.matchday-table-row,.profile-season-row){border-color:rgba(165,197,173,.14)}
+.f05-theme :is(.row,.general-row,.points-row,.palmares-row,.season-result-row,.matchday-table-row,.profile-season-row):hover{background:rgba(158,216,182,.055)}
+.f05-theme .current-goals,.f05-theme .current-clean-sheets{color:#9ed8b6;border-color:rgba(158,216,182,.25);background:rgba(158,216,182,.055)}
+.f05-theme :is(.league-no-bonus-points,.league-no-bonus-change.is-up,.league-stats-metrics b.is-positive,
+ .league-stats-line-total b,.home-live-summary b,.home-shortcut-icon){color:var(--green)}
+.f05-theme :is(.hero-copy p,.minimal-page-banner p,.matchday-banner p,.season-banner p,.history-banner p,
+ .records-banner p,.champions-banner p,.hero-kpi-score em,.league-stats-note,.league-stats-updated){color:var(--muted)}
+.f05-theme :is(.minimal-page-banner,.matchday-banner,.season-banner,.history-banner,.records-banner,.champions-banner){
+  border-color:var(--line);
+  background-image:linear-gradient(90deg,rgba(7,25,16,.97),rgba(7,25,16,.5)),url('home-stadium-night.jpg')!important;
+}
+.f05-theme :is(.hero-photo .shade,.shade){background:linear-gradient(90deg,rgba(7,25,16,.94),rgba(7,25,16,.38)),linear-gradient(0deg,#071910,transparent 65%)}
+.f05-theme :is(.hero-accent-line,.panel::before,.record::before,.news-card::before,.player-card::before,.group::before){background:#9ed8b6;box-shadow:none}
+.f05-theme .hero-kpis article{background:rgba(12,33,23,.88);border-color:var(--line);box-shadow:none}
+.f05-theme .hero-kpis .kpi-icon{border-color:var(--line);background:rgba(244,239,220,.04)}
+.f05-theme .hero-kpis .hero-kpi-first{border-color:rgba(224,196,134,.45)}
+.f05-theme :is(.modal-card,.player-profile-modal,.install-card,.admin-install-card){background:var(--panel);border-color:var(--line)}
+.f05-theme .profile-v152{
+  --profile-text:#f4efdc;--profile-muted:#a6b4aa;--profile-surface:#0c2117;
+  --profile-line:rgba(165,197,173,.22);--profile-line-strong:#507e61;--profile-gold:#e0c486;
+}
+.f05-theme :is(.profile-current-card,.profile-score-hero,.profile-summary-stats,.profile-summary-section,
+ .profile-major-stats article,.profile-detail-grid article,.profile-history-archive,.profile-achievements-section){background:var(--panel2);border-color:var(--line)}
+.f05-theme :is(.state-card,.login-card,.summary-card,.admin-panel,.admin-section,.admin-workflow,
+ .participant-card,.participant-entry,.admin-preview-card,.backup-card,.revision-item){background:var(--panel);border-color:var(--line)}
+.f05-theme .admin-background::before{border-color:var(--line);box-shadow:none}
+.f05-theme .admin-background::after{background:rgba(158,216,182,.035)}
+/* Red cards, relegation, alerts, podium medals and achievement rarities retain meaning. */

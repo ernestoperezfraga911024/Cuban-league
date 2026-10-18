@@ -1,12 +1,12 @@
 <!DOCTYPE html><html lang="es"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#020912"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#071910"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cuban League"><meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Cuban League"><meta name="format-detection" content="telephone=no">
 <meta name="description" content="Archivo oficial de la Cuban League: clasificación, jornadas, historia, récords, perfiles y Champions.">
 <title>Cuban League</title><link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon-green.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-green-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon-f05.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-f05-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=176-20261015-classic-navigation">
@@ -117,7 +117,8 @@
   }
 }
 </style><link rel="stylesheet" href="mobile-navigation.css?v=178-20261015">
-<script src="editorial-ui.js?v=176-20261015" defer></script></head><body class="classic-mobile-nav" data-section="home">
+<link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05">
+<script src="editorial-ui.js?v=176-20261015" defer></script></head><body class="classic-mobile-nav f05-theme" data-section="home">
 <a class="skip-link" href="#mainContent">Saltar al contenido</a>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
@@ -136,7 +137,7 @@
   <symbol id="icon-red-card" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="1.5" transform="rotate(-6 12 12)" fill="currentColor"/></symbol>
   <symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></symbol>
 </svg>
-<header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-green-logo.svg" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><span class="header-season-badge"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Temporada 2026/27</span></span><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
+<header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-f05-logo.svg" width="48" height="48" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><span class="header-season-badge"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Temporada 2026/27</span></span><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
 
 <nav class="main-nav" aria-label="Navegación principal">
 <button type="button" class="navtab active" data-section="home"><svg class="ui-icon" aria-hidden="true"><use href="#icon-home"></use></svg><span>Inicio</span></button><button type="button" class="navtab" data-section="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Clasificación</span></button>
@@ -874,7 +875,7 @@
 <div id="installModal" class="modal install-modal" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
   <div class="install-card">
     <button type="button" id="closeInstall" class="install-close" aria-label="Cerrar instrucciones">✕</button>
-    <img src="apple-touch-icon-green.png" class="install-icon" alt="Escudo verde de Cuban League con balón de fútbol">
+    <img src="apple-touch-icon-f05.png" class="install-icon" width="180" height="180" alt="Escudo de tres franjas de Cuban League con balón de fútbol">
     <span class="eyebrow">IPHONE · PASOS CORRECTOS</span>
     <h2 id="installTitle">Instalar desde Safari</h2>
     <p id="installIntro">Cuban League se añade a la pantalla de inicio desde el menú oficial de Safari. No se instala desde el botón de compartir de la página.</p>
@@ -917,4 +918,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=181-20261018-compact-stats"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=182-20261018-f05"></script></body></html>

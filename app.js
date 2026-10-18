@@ -1,4 +1,4 @@
-const APP_VERSION='181-20261018-compact-stats';
+const APP_VERSION='182-20261018-f05';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -6047,25 +6047,25 @@ async function drawPlayerAvatar(ctx,name,x,y,size,radius=size/2){
 async function drawShareCardBase(ctx,{eyebrow,title,subtitle,badge}){
   ctx.clearRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
   const background=ctx.createLinearGradient(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
-  background.addColorStop(0,'#061b1d');
-  background.addColorStop(.48,'#031117');
-  background.addColorStop(1,'#02090f');
+  background.addColorStop(0,'#102b1e');
+  background.addColorStop(.48,'#0c2117');
+  background.addColorStop(1,'#071910');
   ctx.fillStyle=background;
   ctx.fillRect(0,0,SHARE_CARD_WIDTH,SHARE_CARD_HEIGHT);
 
   const glow=ctx.createRadialGradient(925,115,10,925,115,470);
-  glow.addColorStop(0,'rgba(108,255,115,.22)');
-  glow.addColorStop(.45,'rgba(80,230,208,.07)');
+  glow.addColorStop(0,'rgba(158,216,182,.14)');
+  glow.addColorStop(.45,'rgba(185,215,196,.045)');
   glow.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=glow;
   ctx.fillRect(450,0,630,610);
 
   ctx.save();
   ctx.globalAlpha=.08;
-  ctx.strokeStyle='#50e6d0';
+  ctx.strokeStyle='#b9d7c4';
   ctx.lineWidth=2;
   for(let i=0;i<4;i++){
-    strokeRounded(ctx,735+i*42,-135+i*42,300,420,42,'#50e6d0',2);
+    strokeRounded(ctx,735+i*42,-135+i*42,300,420,42,'#b9d7c4',2);
   }
   ctx.beginPath();
   ctx.arc(540,710,360,0,Math.PI*2);
@@ -6076,25 +6076,25 @@ async function drawShareCardBase(ctx,{eyebrow,title,subtitle,badge}){
   ctx.stroke();
   ctx.restore();
 
-  const logo=await loadShareCardImage('cuban-league-green-logo.svg');
-  fillRounded(ctx,58,52,76,76,21,'rgba(108,255,115,.08)');
+  const logo=await loadShareCardImage('cuban-league-f05-logo.svg');
+  fillRounded(ctx,58,52,76,76,21,'rgba(158,216,182,.08)');
   drawCoveredImage(ctx,logo,58,52,76,76,21);
-  strokeRounded(ctx,58,52,76,76,21,'rgba(108,255,115,.28)',2);
-  drawCardText(ctx,'CUBAN LEAGUE',154,88,460,27,22,850,'left','#f4faf7');
-  drawCardText(ctx,'REGISTRO OFICIAL',154,115,460,14,12,800,'left','#6e9593');
+  strokeRounded(ctx,58,52,76,76,21,'rgba(165,197,173,.22)',2);
+  drawCardText(ctx,'CUBAN LEAGUE',154,88,460,27,22,850,'left','#f4efdc');
+  drawCardText(ctx,'REGISTRO OFICIAL',154,115,460,14,12,800,'left','#a6b4aa');
 
-  fillRounded(ctx,810,62,212,51,25,'rgba(108,255,115,.075)');
-  strokeRounded(ctx,810,62,212,51,25,'rgba(108,255,115,.2)',2);
-  drawCardText(ctx,badge,916,95,182,16,12,850,'center','#91f388');
+  fillRounded(ctx,810,62,212,51,25,'rgba(158,216,182,.075)');
+  strokeRounded(ctx,810,62,212,51,25,'rgba(165,197,173,.22)',2);
+  drawCardText(ctx,badge,916,95,182,16,12,850,'center','#9ed8b6');
 
-  drawCardText(ctx,eyebrow,60,190,620,19,16,850,'left','#50e6d0');
-  drawCardText(ctx,title,60,259,960,56,34,850,'left','#f7faf8');
-  drawCardText(ctx,subtitle,60,305,930,23,17,600,'left','#849ca5');
-  ctx.fillStyle='#6cff73';
+  drawCardText(ctx,eyebrow,60,190,620,19,16,850,'left','#b9d7c4');
+  drawCardText(ctx,title,60,259,960,56,34,850,'left','#f4efdc');
+  drawCardText(ctx,subtitle,60,305,930,23,17,600,'left','#a6b4aa');
+  ctx.fillStyle='#9ed8b6';
   ctx.fillRect(60,329,88,4);
   const line=ctx.createLinearGradient(148,0,1000,0);
-  line.addColorStop(0,'rgba(80,230,208,.55)');
-  line.addColorStop(1,'rgba(80,230,208,0)');
+  line.addColorStop(0,'rgba(185,215,196,.45)');
+  line.addColorStop(1,'rgba(185,215,196,0)');
   ctx.fillStyle=line;
   ctx.fillRect(148,330,852,2);
 }
