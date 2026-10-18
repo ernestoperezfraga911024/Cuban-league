@@ -15,7 +15,7 @@ Respaldo remoto: `backup/pre-f05-logo-v181-20261018`.
 - Cabecera pública, cabecera privada, favicon, ayuda de instalación, PWA y
   generador central de tarjetas usan la marca F05.
 - PNG de 32, 180, 192 y 512 píxeles; maskable separado con margen del 20%.
-- `brand-f05.css`: menos de 7 KB, sin librerías, medidas JS, cambios de geometría,
+- `brand-f05.css`: menos de 8 KB, sin librerías, medidas JS, cambios de geometría,
   visibilidad o fuentes. La paleta usa `#075638`, `#f4efdc` y `#071910` con tonos
   derivados legibles. Conserva rojas, alertas, descenso, medallas y rarezas.
 - Manifests: solo iconos y theme/background colors. Se conservan IDs, scope,
@@ -46,6 +46,13 @@ La vista previa local administrada no arrancó por una limitación del entorno:
 `bwrap: Can't mount proc on /newroot/proc: Operation not permitted`.
 No se desactivaron protecciones ni se sustituyó el supervisor.
 Las pruebas DOM no sustituyen una comprobación visual en dispositivos reales.
+
+V182 se publicó en PR #52, commit `04f8d5296d0984f5b9254cdfd8afd28d050ca234`;
+Pages run `39095711906` terminó con éxito. En el navegador público se comprobaron
+el nuevo SVG y la hoja de paleta, portada con datos J8, tabla con 20 participantes
+y apertura del perfil de Ernesto con foto, métricas e insignias. La revisión
+detectó fondos azules heredados con mayor especificidad: se refuerza solo su
+pintura y la de pestañas activas, con caché `cuban-league-v182-f05-brand-2`.
 
 ## Datos y seguridad
 

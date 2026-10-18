@@ -1,10 +1,10 @@
-const CACHE_NAME = 'cuban-league-v182-f05-brand';
+const CACHE_NAME = 'cuban-league-v182-f05-brand-2';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=176-20261015-classic-navigation',
   './stats-compact.css?v=181-20261018-compact-stats',
-  './brand-f05.css?v=182-20261018-f05',
+  './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
   './app.js?v=182-20261018-f05',
