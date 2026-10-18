@@ -1,0 +1,88 @@
+/* V181: presentation only, scoped to captain and MVP cards. */
+.league-stats-compact-card{
+  grid-template-columns:18px minmax(0,1fr) minmax(0,1fr);
+  gap:10px 8px;
+  padding:12px 10px;
+  border-radius:14px;
+}
+.league-stats-compact-card>.league-stats-rank{grid-column:1;grid-row:1}
+.league-stats-compact-card>.league-stats-team{grid-column:2;grid-row:1;gap:7px;min-height:44px}
+.league-stats-compact-card>.league-stats-captain-player,
+.league-stats-compact-card>.league-stats-mvp-players{
+  grid-column:3;
+  grid-row:1;
+  padding-left:8px;
+  border-left:1px solid rgba(128,174,151,.18);
+}
+.league-stats-compact-card .league-stats-team img{width:30px;height:32px;flex-basis:30px;border-radius:8px}
+.league-stats-compact-card .league-stats-team strong,
+.league-stats-compact-card .profile-season-player-copy strong{
+  overflow:visible;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-size:.78rem;
+  line-height:1.3;
+}
+.league-stats-compact-card .league-stats-team small{margin-top:4px;font-size:.625rem;white-space:normal;line-height:1.3}
+.league-stats-compact-card .league-stats-player-wrap,
+.league-stats-compact-card .league-stats-mvp-player{grid-template-columns:36px minmax(0,1fr);gap:7px}
+.league-stats-compact-card .profile-season-player-photo{width:36px;height:40px;border-radius:9px}
+.league-stats-compact-card .profile-season-player-copy small{
+  margin-top:4px;
+  gap:3px;
+  overflow:visible;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  color:#91aba3;
+  font-size:.625rem;
+  line-height:1.35;
+}
+.league-stats-compact-card .profile-season-player-copy small img{width:12px;height:12px}
+.league-stats-compact-card .league-stats-tie{margin-top:2px;font-size:.625rem;overflow-wrap:anywhere}
+.league-stats-compact-card>.league-stats-summary{
+  display:flex;
+  align-items:center;
+  grid-column:1/-1;
+  gap:8px;
+  min-width:0;
+  padding:8px 6px;
+  border:1px solid rgba(128,174,151,.12);
+  border-radius:10px;
+  background:rgba(255,255,255,.018);
+}
+.league-stats-compact-card .league-stats-tags{flex:0 1 90px;justify-content:center;gap:4px;margin:0}
+.league-stats-compact-card .league-stats-tags span{padding:4px 5px;text-align:center;font-size:.57rem;line-height:1.25}
+.league-stats-compact-card .league-stats-metrics,
+.league-stats-compact-card .league-stats-mvp-metrics{flex:1 1 0;min-width:0;gap:0;grid-column:auto}
+.league-stats-compact-card .league-stats-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+.league-stats-compact-card .league-stats-metrics>div,
+.league-stats-compact-card .league-stats-mvp-metrics>span{padding:0 3px;border-radius:0;background:none}
+.league-stats-compact-card .league-stats-metrics>div+div,
+.league-stats-compact-card .league-stats-mvp-metrics>span+span{border-left:1px solid rgba(128,174,151,.18)}
+.league-stats-compact-card .league-stats-metrics span,
+.league-stats-compact-card .league-stats-mvp-metrics small{font-size:.625rem;color:#91aba3;line-height:1.3}
+.league-stats-compact-card .league-stats-metrics b,
+.league-stats-compact-card .league-stats-mvp-metrics b{margin-top:4px;font-size:.86rem;line-height:1.25;overflow:visible;overflow-wrap:anywhere}
+@media(max-width:620px){
+  .league-stats-compact-card .league-stats-tags{flex-basis:62px}
+  .league-stats-compact-card .league-stats-team strong,
+  .league-stats-compact-card .profile-season-player-copy strong{font-size:.75rem}
+}
+@media(max-width:380px){
+  .league-stats-compact-card{grid-template-columns:14px minmax(0,1fr) minmax(0,1fr);gap:9px 5px;padding:10px 7px}
+  .league-stats-compact-card>.league-stats-team{gap:5px}
+  .league-stats-compact-card>.league-stats-captain-player,
+  .league-stats-compact-card>.league-stats-mvp-players{padding-left:5px}
+  .league-stats-compact-card .league-stats-team img{width:24px;height:28px;flex-basis:24px}
+  .league-stats-compact-card .league-stats-player-wrap,
+  .league-stats-compact-card .league-stats-mvp-player{grid-template-columns:30px minmax(0,1fr);gap:5px}
+  .league-stats-compact-card .profile-season-player-photo{width:30px;height:36px}
+  .league-stats-compact-card>.league-stats-summary{gap:4px;padding:7px 3px}
+  .league-stats-compact-card .league-stats-tags{flex-basis:52px}
+  .league-stats-compact-card .league-stats-tags span{font-size:.53rem;padding:4px 2px}
+  .league-stats-compact-card .league-stats-metrics span{font-size:.57rem}
+}
+@media(min-width:1000px){
+  .league-stats-compact-card{grid-template-columns:22px minmax(0,.9fr) minmax(0,1fr) minmax(310px,1.4fr);gap:12px;padding:12px}
+  .league-stats-compact-card>.league-stats-summary{grid-column:4;grid-row:1}
+}
