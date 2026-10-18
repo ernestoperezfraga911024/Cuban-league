@@ -1,4 +1,20 @@
-# Cuban League V181
+# Cuban League V183
+
+## Ranking general de todos los capitanes
+
+Estadísticas → Capitanes permite alternar entre «Por participante» y «Ranking
+general». El ranking general admite varios futbolistas del mismo participante,
+separa sus registros cuando cambian de equipo y ofrece Más puntos, Mejor
+promedio y Peor promedio. Los primeros 20 puestos incluyen los empates; «Ver
+todos» muestra la lista completa.
+
+Reutiliza los acumulados existentes de jornadas como capitán, sin modificar
+funciones de puntuación, fotos, datos o conexiones. Conserva las cuatro vistas
+anteriores, incluida Bonos acumulados. La nueva tarjeta identifica al futbolista
+y al participante y muestra puntos, jornadas, promedio y bono estimado.
+
+Cálculo bajo demanda con caché por datos publicados; sin nuevas consultas ni
+dependencias. 109 pruebas aprobadas. Caché V183 para actualizar JS y CSS.
 
 ## Tarjetas compactas de Capitanes y MVP
 
