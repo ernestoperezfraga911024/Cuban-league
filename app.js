@@ -1,4 +1,4 @@
-const APP_VERSION='182-20261018-f05';
+const APP_VERSION='183-20261018-global-captains';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -41,10 +41,14 @@ let ACHIEVEMENT_DETAIL_STATE=null;
 let LEAGUE_STATS_REQUEST_TOKEN=0;
 let LEAGUE_STATS_ABORT_CONTROLLER=null;
 const LEAGUE_STATS_CACHE=new Map();
+const LEAGUE_CAPTAIN_RANKINGS=new WeakMap();
 const LEAGUE_STATS_STATE={
   status:'idle',
   section:'captains',
   captainMode:'points',
+  captainView:'team',
+  captainGeneralMode:'points',
+  captainGeneralExpanded:false,
   linePosition:'all',
   data:null,
   error:''
@@ -4352,9 +4356,67 @@ function leagueStatsCaptainBonusMarkup(data){
     <p class="league-stats-note">Ejemplo: 8 puntos ×3 = 24; el bono es +16. Se suman solo los extras del brazalete, incluidos los negativos. Sin capitán o con saldo negativo, el bono de esa jornada es 0. Los empates comparten puesto.</p>`;
 }
 
+function leagueStatsGlobalCaptainRanking(data,mode){
+  // Derive only from the existing participant/player aggregates. Cache per
+  // published snapshot; refreshed data naturally gets a new ranking.
+  if(!LEAGUE_CAPTAIN_RANKINGS.has(data))LEAGUE_CAPTAIN_RANKINGS.set(data,new Map());
+  const cache=LEAGUE_CAPTAIN_RANKINGS.get(data);
+  if(cache.has(mode))return cache.get(mode);
+  const valueFor=entry=>mode==='points'?entry.player.captainPoints:entry.player.captainAverage;
+  const entries=data.teams.flatMap(team=>team.captains.map(player=>({team,player})));
+  entries.sort((a,b)=>(mode==='worst'?valueFor(a)-valueFor(b):valueFor(b)-valueFor(a))
+    ||b.player.captainUses-a.player.captainUses
+    ||a.team.name.localeCompare(b.team.name,'es')
+    ||a.player.playerName.localeCompare(b.player.playerName,'es')
+    ||a.player.key.localeCompare(b.player.key,'es'));
+  const ranking=leagueStatsCompetitionRanks(entries,valueFor);
+  cache.set(mode,ranking);
+  return ranking;
+}
+
+function leagueStatsGlobalCaptainMarkup(data){
+  const mode=LEAGUE_STATS_STATE.captainGeneralMode;
+  const ranked=leagueStatsGlobalCaptainRanking(data,mode);
+  if(!ranked.length)return `<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay capitanes registrados</h3><p>El ranking aparecerá con los capitanes de los XI publicados.</p></div>`;
+  const expanded=LEAGUE_STATS_STATE.captainGeneralExpanded;
+  const first=ranked.filter(entry=>entry.rank<=20);
+  const visible=expanded?ranked:first;
+  const description=mode==='points'?'De más a menos puntos finales acumulados.':mode==='average'?'De mayor a menor promedio por jornada como capitán.':'De menor a mayor promedio por jornada como capitán.';
+  const postponed=data.noBonus.postponedMatchdays;
+  return `<div class="league-stats-explainer"><b>${mode==='worst'?'Peores capitanes de la liga':'Mejores capitanes de la liga'}</b><span>${description} Cada futbolista tiene un registro por participante; un equipo puede aparecer varias veces.</span></div>
+    ${postponed.length?`<div class="league-no-bonus-status"><strong>Provisional · ${postponed.map(day=>`J${day}`).join(', ')} con aplazados</strong></div>`:''}
+    <p class="league-stats-note" role="status">Mostrando ${visible.length} de ${ranked.length} capitanes · ${expanded?'Lista completa':'Primeros 20 puestos, incluidos los empates'}</p>
+    <div id="leagueGlobalCaptainRanking" class="league-stats-ranking" role="list">
+      ${visible.map(({row:{team,player},rank})=>`<article class="league-stats-captain-card league-stats-compact-card league-stats-global-card" role="listitem">
+        <span class="league-stats-rank">${rank}</span>
+        <div class="league-stats-global-identity">
+          ${profileSeasonPlayerVisual(player)}
+          <button type="button" class="league-stats-global-owner" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}</span></button>
+        </div>
+        <div class="league-stats-summary"><div class="league-stats-metrics">
+          <div><span>Puntos</span><b>${profileSeasonFormat(player.captainPoints)}</b></div>
+          <div><span>Jornadas</span><b>${player.captainUses}</b></div>
+          <div><span>Promedio</span><b>${profileSeasonFormat(player.captainAverage)}</b></div>
+          <div><span>Bono</span><b class="${player.captainBonus<0?'is-negative':'is-positive'}">${profileSeasonFormat(player.captainBonus,{signed:true})}</b></div>
+        </div></div>
+      </article>`).join('')}
+    </div>
+    ${first.length<ranked.length?`<div class="league-stats-toolbar league-stats-global-more"><button type="button" data-league-captain-expand aria-expanded="${expanded}" aria-controls="leagueGlobalCaptainRanking">${expanded?'Ver primeros 20 puestos':`Ver todos (${ranked.length})`}</button></div>`:''}
+    <p class="league-stats-note">Solo se suman las jornadas en las que cada futbolista fue capitán de ese participante. Puntos finales, ya multiplicados; bono estimado del brazalete. Los empates comparten puesto. Consulta las jornadas para interpretar los promedios; se incluyen todos los registros disponibles.</p>`;
+}
+
 function leagueStatsCaptainMarkup(data){
+  const general=LEAGUE_STATS_STATE.captainView==='general';
+  const viewToolbar=`<div class="league-stats-toolbar league-stats-captain-views" role="group" aria-label="Vista de capitanes">
+    <button type="button" data-league-captain-view="team" aria-pressed="${!general}">Por participante</button>
+    <button type="button" data-league-captain-view="general" aria-pressed="${general}">Ranking general</button>
+  </div>`;
+  if(general)return viewToolbar+`<div class="league-stats-toolbar" role="group" aria-label="Orden del ranking general">
+    <span>Comparar por</span>
+    ${[['points','Más puntos'],['average','Mejor promedio'],['worst','Peor promedio']].map(([value,label])=>`<button type="button" data-league-captain-mode="${value}" aria-pressed="${LEAGUE_STATS_STATE.captainGeneralMode===value}">${label}</button>`).join('')}
+  </div>`+leagueStatsGlobalCaptainMarkup(data);
   const mode=['points','average','bonus','worst'].includes(LEAGUE_STATS_STATE.captainMode)?LEAGUE_STATS_STATE.captainMode:'points';
-  const toolbar=`<div class="league-stats-toolbar" role="group" aria-label="Orden de capitanes">
+  const toolbar=viewToolbar+`<div class="league-stats-toolbar" role="group" aria-label="Orden de capitanes">
       <span>Comparar por</span>
       <button type="button" data-league-captain-mode="points" aria-pressed="${mode==='points'}">Más puntos</button>
       <button type="button" data-league-captain-mode="average" aria-pressed="${mode==='average'}">Mejor promedio</button>
@@ -4601,9 +4663,25 @@ function setLeagueStatsSection(section,{focus=false}={}){
 }
 
 function setLeagueCaptainMode(mode,{focus=false}={}){
-  LEAGUE_STATS_STATE.captainMode=['points','average','bonus','worst'].includes(mode)?mode:'points';
+  const general=LEAGUE_STATS_STATE.captainView==='general';
+  const key=general?'captainGeneralMode':'captainMode';
+  const allowed=general?['points','average','worst']:['points','average','bonus','worst'];
+  LEAGUE_STATS_STATE[key]=allowed.includes(mode)?mode:'points';
+  LEAGUE_STATS_STATE.captainGeneralExpanded=false;
   renderLeagueStatsContent();
-  if(focus)document.querySelector(`[data-league-captain-mode="${LEAGUE_STATS_STATE.captainMode}"]`)?.focus();
+  if(focus)document.querySelector(`[data-league-captain-mode="${LEAGUE_STATS_STATE[key]}"]`)?.focus();
+}
+
+function setLeagueCaptainView(view,{focus=false}={}){
+  LEAGUE_STATS_STATE.captainView=view==='general'?'general':'team';
+  renderLeagueStatsContent();
+  if(focus)document.querySelector(`[data-league-captain-view="${LEAGUE_STATS_STATE.captainView}"]`)?.focus();
+}
+
+function toggleLeagueCaptainExpanded(){
+  LEAGUE_STATS_STATE.captainGeneralExpanded=!LEAGUE_STATS_STATE.captainGeneralExpanded;
+  renderLeagueStatsContent();
+  document.querySelector('[data-league-captain-expand]')?.focus();
 }
 
 function setLeagueLinePosition(position,{focus=false}={}){
@@ -7003,6 +7081,15 @@ async function init(){
     const leagueComparatorSwap=e.target.closest('[data-league-comparator-swap]');
     if(leagueComparatorSwap){
       swapLeagueComparatorParticipants({focus:true});
+      return;
+    }
+    const leagueCaptainView=e.target.closest('[data-league-captain-view]');
+    if(leagueCaptainView){
+      setLeagueCaptainView(leagueCaptainView.dataset.leagueCaptainView,{focus:true});
+      return;
+    }
+    if(e.target.closest('[data-league-captain-expand]')){
+      toggleLeagueCaptainExpanded();
       return;
     }
     const leagueCaptainMode=e.target.closest('[data-league-captain-mode]');

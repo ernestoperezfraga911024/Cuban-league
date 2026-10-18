@@ -7,11 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V182: escudo F05 «Tres franjas» y paleta verde bosque/crema, aprobados por Ernesto. Conserva tarjetas compactas V181, bonos V180 y carga pública V179.
-- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama de entrega V182: `codex/f05-league-brand-v182`. V181 se publicó en PR #51; comprobar Pages del commit integrado para el estado vivo de V182.
-- **Base de esta actualización:** `f172dce4dbba2e8580a2a281a02de1652a76e19f` (V181 publicado). Respaldo remoto inmediato: `backup/pre-f05-logo-v181-20261018`.
+- **Versión:** V183: ranking general de todos los capitanes por pareja futbolista–participante. Conserva la vista por participante, la marca F05 V182, las tarjetas compactas V181 y los bonos V180.
+- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama de entrega V183: `codex/global-captains-v183`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
+- **Base de esta actualización:** `2aeff93019a3302685b84d0da8e999e3bf5c46cf` (V182, incluida la última armonización de colores). Revertir el PR V183 restaura esa presentación sin restaurar datos.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-18 UTC; 103 pruebas automatizadas aprobadas, incluidas conservación de datos/fotos, navegación, iconos F05, contratos PWA y contraste. V182 publicada en PR #52 y Pages exitoso, commit `04f8d5296d0984f5b9254cdfd8afd28d050ca234`. Revisión visual pública: portada, clasificación con 20 participantes y perfil de Ernesto. Ajuste posterior de pintura para retirar fondos/acentos azules heredados; no cambia geometría. Vista previa local limitada por `bwrap`.
+- **Fecha de verificación del código:** 2026-10-18 UTC; 109 pruebas automatizadas aprobadas. Incluyen conservación de datos, fotos y funciones de puntuación, varios capitanes del mismo participante, separación de traspasos, empates del puesto 20, correcciones publicadas y botones reales sin consultas adicionales. Revisión visual pública posterior al despliegue; el navegador disponible no ofrece emulación móvil.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -31,11 +31,21 @@ Gestionar y publicar Cuban League, una liga fantasy con:
 
 La web pública nunca debe mostrar borradores no publicados.
 
+## Ranking general de capitanes (V183)
+
+- Estadísticas → Capitanes: «Por participante» conserva las cuatro opciones existentes; «Ranking general» reúne todas las parejas futbolista–participante, con Más puntos, Mejor promedio y Peor promedio.
+- Abre en Más puntos; cada vista conserva su criterio. Muestra los primeros 20 puestos con todos los empates del corte y permite Ver todos / Ver primeros 20 puestos.
+- Deriva exclusivamente de `buildLeagueStats().teams[].captains`; no modifica esa función, las alineaciones, el ranking oficial ni los historiales. Solo cuenta actuaciones como capitán en XI publicados completos, conforme al cálculo existente.
+- Reutiliza identidad, foto, métricas y bono estimado de las tarjetas existentes; el bono se identifica como estimado y no reemplaza el extra verificado de la tabla Bonos acumulados.
+- Ranking calculado al abrir y guardado en WeakMap por snapshot y criterio. Nuevos datos publicados invalidan naturalmente el ranking. Sin nuevas consultas, dependencias, escrituras o migraciones.
+- Tarjeta compacta con futbolista principal, foto a la derecha, participante enlazado debajo y cuatro métricas. Aplazados indicados como provisionales.
+- Caché y recursos actualizados a `183-20261018-global-captains`.
+
 ## Stack
 
 - **Frontend:** HTML, CSS y JavaScript vanilla.
 - **Web pública:** `index.html` + `app.js` + `styles.css`; `mobile-navigation.css` y `editorial-ui.js` solo para la barra y el menú Más.
-- **Tarjetas compactas:** `stats-compact.css` (aprox. 4,5 KB), limitado a `.league-stats-compact-card` en Capitanes y MVP. Sin nuevas dependencias.
+- **Tarjetas compactas:** `stats-compact.css` (aprox. 6,5 KB), limitado a Capitanes y MVP; incluye controles y tarjetas del ranking general. Sin nuevas dependencias.
 - **Marca F05:** `cuban-league-f05-logo.svg` (menos de 2 KB, sin fuentes, imágenes embebidas ni filtros) + iconos PNG generados en distintos tamaños. `brand-f05.css` (menos de 8 KB) solo cambia colores/efectos; mantiene geometría, responsive y contenidos. `node scripts/build-brand-icons.cjs` regenera los iconos con Inkscape, solo en desarrollo.
 - **Admin:** `admin.html` + `admin.js` + `admin.css`, con su aspecto anterior. Los archivos del tema editorial se conservan como referencia, sin cargarse.
 - **Datos estáticos/históricos:** `data.json`.
