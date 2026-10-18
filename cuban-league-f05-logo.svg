@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Cuban League — escudo Tres franjas</title>
+  <defs>
+    <clipPath id="shield"><path d="M109 73H403V285C403 360 349 411 256 454C163 411 109 360 109 285Z"/></clipPath>
+    <clipPath id="ball"><circle cx="256" cy="233" r="108"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="84" fill="#071910"/>
+  <path d="M99 63H413V285C413 366 355 420 256 465C157 420 99 366 99 285Z" fill="#f4efdc"/>
+  <g clip-path="url(#shield)">
+    <path fill="#075638" d="M109 73H403V454H109Z"/>
+    <path fill="#f4efdc" d="M201 73H311V454H201Z"/>
+  </g>
+  <circle cx="256" cy="233" r="123" fill="#f4efdc"/>
+  <circle cx="256" cy="233" r="116" fill="#0b1714"/>
+  <circle cx="256" cy="233" r="108" fill="#f4efdc"/>
+  <g clip-path="url(#ball)" fill="#0b1714" stroke="#0b1714" stroke-width="4" stroke-linejoin="round">
+    <path d="M256 192L295 220L280 266H232L217 220Z"/>
+    <path d="M220 131L256 120L292 131L282 160H230Z"/>
+    <path d="M337 158L369 194L365 232L333 220L318 187Z"/>
+    <path d="M175 158L143 194L147 232L179 220L194 187Z"/>
+    <path d="M338 271L359 300L324 334L288 346L281 309L303 286Z"/>
+    <path d="M174 271L153 300L188 334L224 346L231 309L209 286Z"/>
+    <g fill="none" stroke-width="4.5">
+      <path d="M256 192V167M295 220L327 210M280 266L299 291M232 266L213 291M217 220L185 210"/>
+      <path d="M230 160L194 187M282 160L318 187M333 220L338 271M179 220L174 271M231 309H281"/>
+    </g>
+  </g>
+  <circle cx="256" cy="233" r="108" fill="none" stroke="#f4efdc" stroke-width="2"/>
+  <g fill="none" stroke="#0b1714" stroke-width="13" stroke-linejoin="round">
+    <path d="M253 375H242C228 375 222 383 222 397V405C222 419 230 426 243 426H253"/>
+    <path d="M264 369V426H277C288 426 294 418 294 407"/>
+  </g>
+</svg>

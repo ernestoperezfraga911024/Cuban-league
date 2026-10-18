@@ -25,8 +25,20 @@ function setup() {
   return dom;
 }
 
-test('V174 data, catalog, admin logic, import, credentials config and legacy CSS remain byte-for-byte unchanged',()=>{
-  for(const [p,expected] of Object.entries(baseline.files))assert.equal(hash(bytes(p)),expected,p);
+test('V174 protected files remain unchanged; manifests only replace approved F05 image URLs and theme colors',()=>{
+  for(const [p,expected] of Object.entries(baseline.files)){
+    if(p==='manifest.json'||p==='admin-manifest.json'){
+      // Preserve the original hash contract after undoing only the approved branding fields.
+      const originalColors=p==='manifest.json'?['#030914','#030914']:['#030a0c','#06130f'];
+      const normalized=read(p)
+        .replaceAll('icon-f05-192.png','icon-green-192.png')
+        .replaceAll('icon-f05-maskable-512.png','icon-green-512.png')
+        .replaceAll('icon-f05-512.png','icon-green-512.png')
+        .replace('"background_color": "#071910"',`"background_color": "${originalColors[0]}"`)
+        .replace('"theme_color": "#071910"',`"theme_color": "${originalColors[1]}"`);
+      assert.equal(hash(normalized),expected,p+' non-brand fields');
+    }else assert.equal(hash(bytes(p)),expected,p);
+  }
 });
 test('all 627 original photo, crest and icon assets are byte-for-byte preserved',()=>{
   assert.equal(hash(baseline.assets.map(p=>p+'\0'+hash(bytes(p))).join('\n')),baseline.assetDigest);
@@ -158,7 +170,7 @@ test('navigation stays read-only and the new cache restores the classic resource
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
   for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v181-compact-stats/);
+  assert.match(sw,/cuban-league-v182-f05-brand/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{
