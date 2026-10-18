@@ -10,7 +10,7 @@ function setup(participants=roster){
   const dom=new JSDOM(read('index.html'),{url:'https://example.test',runScripts:'outside-only'});
   dom.window.eval(read('app.js').replace('init();',`window.testNoBonus={
     set(data){DATA=data;},buildLeagueStats,leagueNoBonusCaptainAdjustment,
-    fetchPublishedLeagueStatsRows,setLeagueStatsSection,
+    fetchPublishedLeagueStatsRows,setLeagueStatsSection,setLeagueCaptainMode,
     render(data){LEAGUE_STATS_STATE.data=data;LEAGUE_STATS_STATE.status='ready';setLeagueStatsSection('noBonus');}
   };`));
   const api=dom.window.testNoBonus;
@@ -154,5 +154,141 @@ test('statistics fetch reads only published rows for this season, including nega
       return {ok:true,json:async()=>[]};
     };
     await api.fetchPublishedLeagueStatsRows();
+  }finally{dom.window.close();}
+});
+
+test('captain bonus table sums every captain, uses verified rounding, and leaves statistics immutable',()=>{
+  const {dom,api}=setup();
+  try{
+    const rows=[row('Uno',{captain:8,multiplier:1.5}),row('Uno',{day:2}),row('Uno',{day:3,captain:-6}),
+      row('Dos',{captain:30}),row('Dos',{day:2,captain:null}),row('Dos',{day:3,negative:true}),
+      ...[1,2,3].map(day=>row('Tres',{day,captain:null}))];
+    rows[1].lineup[10].player_id='another-captain';
+    rows[1].lineup[10].player_name='Otro capitán';
+    const before=JSON.stringify(rows);
+    const data=freeze(api.buildLeagueStats(freeze(rows)));
+    const statsBefore=JSON.stringify(data);
+    api.render(data);api.setLeagueStatsSection('captains');api.setLeagueCaptainMode('bonus',{focus:true});
+    const doc=dom.window.document;
+    const table=[...doc.querySelectorAll('.league-captain-bonus-table tbody tr')];
+    assert.deepEqual(table.map(tr=>tr.querySelector('[data-profile-player]').dataset.profilePlayer),['Dos','Uno','Tres']);
+    assert.deepEqual(table.map(tr=>tr.cells[2].textContent),['+20','+15','0']);
+    assert.equal(table.length,3);
+    assert.equal(doc.querySelectorAll('.league-captain-bonus-table thead th').length,3);
+    assert.equal(doc.activeElement.dataset.leagueCaptainMode,'bonus');
+    assert.equal(doc.activeElement.getAttribute('aria-pressed'),'true');
+    assert.equal(JSON.stringify(rows),before);
+    assert.equal(JSON.stringify(data),statsBefore);
+  }finally{dom.window.close();}
+});
+
+test('bonus ranking shares tied positions and displays negative extras below zero',()=>{
+  const {dom,api}=setup();
+  try{
+    api.render(api.buildLeagueStats([row('Uno'),row('Dos'),row('Tres',{captain:-6})]));
+    api.setLeagueStatsSection('captains');api.setLeagueCaptainMode('bonus');
+    const table=[...dom.window.document.querySelectorAll('.league-captain-bonus-table tbody tr')];
+    assert.deepEqual(table.map(tr=>tr.cells[0].textContent),['1','1','3']);
+    assert.deepEqual(table.map(tr=>tr.cells[2].textContent),['+16','+16','−4']);
+    assert.ok(table[2].querySelector('.is-down'));
+  }finally{dom.window.close();}
+});
+
+test('bonus table includes all 20 participants before any XI and does not invent zero totals',()=>{
+  const participants=JSON.parse(read('data.json')).participants.filter(p=>p.active!==false);
+  const {dom,api}=setup(participants);
+  try{
+    assert.equal(participants.length,20);
+    api.render(api.buildLeagueStats([]));api.setLeagueStatsSection('captains');
+    assert.ok(dom.window.document.querySelector('[data-league-captain-mode="bonus"]'));
+    api.setLeagueCaptainMode('bonus');
+    const table=[...dom.window.document.querySelectorAll('.league-captain-bonus-table tbody tr')];
+    assert.equal(table.length,20);
+    assert.ok(table.every(tr=>tr.cells[0].textContent==='—'&&tr.cells[2].textContent==='—'));
+    assert.match(dom.window.document.getElementById('leagueStatsContent').textContent,/Sin jornadas publicadas/);
+  }finally{dom.window.close();}
+});
+
+test('bonus table distinguishes missing XI from zero and refreshes corrected postponed rounds',()=>{
+  const {dom,api}=setup();
+  try{
+    const rows=roster.map(p=>({...row(p.name,{pending:true}),updated_at:'2026-09-01T00:00:00Z'}));
+    rows[2].lineup=[];
+    api.render(api.buildLeagueStats(rows));api.setLeagueStatsSection('captains');api.setLeagueCaptainMode('bonus');
+    const doc=dom.window.document;
+    let table=[...doc.querySelectorAll('.league-captain-bonus-table tbody tr')];
+    assert.ok(table.every(tr=>tr.cells[0].textContent==='—'));
+    assert.equal(table[2].cells[2].textContent,'—');
+    assert.match(table[2].textContent,/Revisar J1/);
+    assert.match(doc.getElementById('leagueStatsContent').textContent,/Provisional.*J1 con aplazados/);
+    const corrected=roster.map(p=>({...row(p.name,{captain:30}),updated_at:'2026-09-02T00:00:00Z'}));
+    api.render(api.buildLeagueStats([...rows,...corrected]));api.setLeagueStatsSection('captains');
+    table=[...doc.querySelectorAll('.league-captain-bonus-table tbody tr')];
+    assert.ok(table.every(tr=>tr.cells[0].textContent==='1'&&tr.cells[2].textContent==='+20'));
+    assert.doesNotMatch(doc.getElementById('leagueStatsContent').textContent,/Provisional|Revisar J1/);
+  }finally{dom.window.close();}
+});
+
+test('negative balance with no XI still allows a verified zero in the bonus table',()=>{
+  const {dom,api}=setup();
+  try{
+    const rows=roster.map(p=>({...row(p.name,{negative:true}),lineup:[]}));
+    api.render(api.buildLeagueStats(rows));api.setLeagueStatsSection('captains');api.setLeagueCaptainMode('bonus');
+    const table=[...dom.window.document.querySelectorAll('.league-captain-bonus-table tbody tr')];
+    assert.equal(table.length,3);
+    assert.ok(table.every(tr=>tr.cells[0].textContent==='1'&&tr.cells[2].textContent==='0'));
+  }finally{dom.window.close();}
+});
+
+test('worst captains uses lowest average per participant, keeps ties and puts absent captains last',()=>{
+  const {dom,api}=setup();
+  try{
+    const rows=[row('Uno',{captain:0}),row('Uno',{day:2,captain:24}),row('Uno',{day:3,captain:6}),
+      row('Dos',{captain:-6}),row('Dos',{day:2,captain:-6}),row('Tres',{captain:null})];
+    rows[2].lineup[10].player_id='worst-captain';rows[2].lineup[10].player_name='Peor de Uno';
+    rows[4].lineup[10].player_id='tied-captain';rows[4].lineup[10].player_name='Empatado de Dos';
+    const data=freeze(api.buildLeagueStats(freeze(rows)));
+    const before=JSON.stringify(data);
+    api.render(data);api.setLeagueStatsSection('captains');api.setLeagueCaptainMode('worst');
+    const doc=dom.window.document;
+    const cards=[...doc.querySelectorAll('.league-stats-captain-card')];
+    assert.deepEqual(cards.map(card=>card.querySelector('[data-profile-player]').dataset.profilePlayer),['Dos','Uno','Tres']);
+    assert.match(cards[0].textContent,/Empatado de Dos/);
+    assert.match(cards[0].textContent,/Jugador 10/);
+    assert.match(cards[1].textContent,/Peor de Uno/); // 6 average, versus the other's (0 + 24) / 2 = 12.
+    assert.doesNotMatch(cards[1].textContent,/Jugador 10/);
+    assert.equal(cards[2].querySelector('.league-stats-rank').textContent,'—');
+    assert.equal(cards[0].querySelector('.league-stats-metrics div:nth-child(3) b').textContent,'−6');
+    assert.doesNotMatch(doc.getElementById('leagueStatsContent').textContent,/Líder en ambos/);
+    assert.equal(JSON.stringify(data),before);
+    api.setLeagueCaptainMode('average');
+    assert.equal(doc.querySelector('.league-stats-captain-card [data-profile-player]').dataset.profilePlayer,'Uno');
+    assert.match(doc.querySelector('.league-stats-captain-card').textContent,/Jugador 10/);
+  }finally{dom.window.close();}
+});
+
+test('real captain buttons switch between both new views and retained views without extra requests',async()=>{
+  const {dom,api}=setup();
+  try{
+    const w=dom.window,doc=w.document;
+    w.scrollTo=()=>{};w.matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});
+    w.HTMLCanvasElement.prototype.getContext=()=>null;
+    let requests=0;
+    w.fetch=async(url,options={})=>{
+      assert.match(String(url),/^data\.json\?/);assert.equal(options.method||'GET','GET');requests++;
+      return {ok:true,json:async()=>JSON.parse(read('data.json'))};
+    };
+    await w.init();
+    api.set({currentSeason:'2026/27',participants:roster});
+    api.render(api.buildLeagueStats(roster.map(p=>row(p.name))));api.setLeagueStatsSection('captains');
+    const initialRequests=requests;
+    assert.deepEqual([...doc.querySelectorAll('[data-league-captain-mode]')].map(b=>b.dataset.leagueCaptainMode),['points','average','bonus','worst']);
+    for(const mode of ['bonus','worst','average','points']){
+      doc.querySelector(`[data-league-captain-mode="${mode}"]`).click();
+      assert.equal(doc.querySelector('[data-league-captain-mode][aria-pressed="true"]').dataset.leagueCaptainMode,mode);
+      assert.equal(doc.activeElement.dataset.leagueCaptainMode,mode);
+      assert.equal(doc.querySelectorAll(mode==='bonus'?'.league-captain-bonus-table tbody tr':'.league-stats-captain-card').length,3);
+    }
+    assert.equal(requests,initialRequests);
   }finally{dom.window.close();}
 });
