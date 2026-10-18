@@ -1,4 +1,4 @@
-const APP_VERSION='179-20261016-loading-audit';
+const APP_VERSION='180-20261018-captain-bonus';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -4328,32 +4328,67 @@ function leagueStatsCompetitionRanks(rows,valueFor){
   });
 }
 
+function leagueStatsCaptainBonusMarkup(data){
+  const table=data.noBonus;
+  const hasMatchdays=table.matchdays.length>0;
+  const completeFor=team=>hasMatchdays&&!team.missingMatchdays.length;
+  // Reuse the verified extra (including Mister rounding), never the estimated
+  // bonus on individual captain cards. Sort a copy to preserve other views.
+  const teams=[...table.teams].sort((a,b)=>Number(completeFor(b))-Number(completeFor(a))
+    ||(completeFor(a)&&completeFor(b)?b.bonus-a.bonus:0)
+    ||a.name.localeCompare(b.name,'es'));
+  const ranked=leagueStatsCompetitionRanks(teams,team=>team.bonus);
+  return `<div class="league-stats-explainer"><b>Bonos acumulados por participante</b><span>Suma de los puntos extra de todos los capitanes utilizados durante la temporada, de mayor a menor.</span></div>
+    <div class="league-no-bonus-status"><span>${hasMatchdays?`${table.matchdays.length} jornadas publicadas · Hasta J${table.matchdays.at(-1)}`:'Sin jornadas publicadas'}</span>${table.postponedMatchdays.length?`<strong>Provisional · ${table.postponedMatchdays.map(day=>`J${day}`).join(', ')} con aplazados</strong>`:''}</div>
+    ${hasMatchdays&&!table.complete?'<p class="league-no-bonus-pending" role="status">Faltan datos para completar el ranking. Los totales incompletos y los puestos quedan pendientes hasta verificar todas las jornadas.</p>':''}
+    <div class="league-no-bonus-wrap"><table class="league-no-bonus-table league-captain-bonus-table" aria-label="Participantes por bonos acumulados de capitán">
+      <thead><tr><th scope="col">Puesto</th><th scope="col">Participante</th><th scope="col" aria-sort="descending">Bono total<small>puntos extra</small></th></tr></thead>
+      <tbody>${ranked.map(({row:team,rank})=>`<tr>
+        <td class="league-no-bonus-rank">${table.complete?rank:'—'}</td>
+        <th scope="row"><div class="league-no-bonus-team" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}${team.missingMatchdays.length?`<small>Revisar ${team.missingMatchdays.map(day=>`J${day}`).join(', ')}</small>`:''}</span></div></th>
+        <td class="league-no-bonus-points">${completeFor(team)?`<span${team.bonus<0?' class="league-no-bonus-change is-down"':''}>${profileSeasonFormat(team.bonus,{signed:true})}</span>`:'<span aria-label="Bono pendiente">—</span>'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <p class="league-stats-note">Ejemplo: 8 puntos ×3 = 24; el bono es +16. Se suman solo los extras del brazalete, incluidos los negativos. Sin capitán o con saldo negativo, el bono de esa jornada es 0. Los empates comparten puesto.</p>`;
+}
+
 function leagueStatsCaptainMarkup(data){
-  const mode=LEAGUE_STATS_STATE.captainMode==='average'?'average':'points';
-  const leadersFor=team=>mode==='average'?team.topCaptainsByAverage:team.topCaptainsByPoints;
-  const metricFor=team=>{
-    const leader=leadersFor(team)[0];
-    return leader?(mode==='average'?leader.captainAverage:leader.captainPoints):Number.NEGATIVE_INFINITY;
-  };
-  const teams=[...data.teams].sort((a,b)=>metricFor(b)-metricFor(a)||b.lineupMatchdays-a.lineupMatchdays||a.name.localeCompare(b.name,'es'));
-  const ranked=leagueStatsCompetitionRanks(teams,team=>metricFor(team));
-  return `<div class="league-stats-toolbar" role="group" aria-label="Orden de capitanes">
+  const mode=['points','average','bonus','worst'].includes(LEAGUE_STATS_STATE.captainMode)?LEAGUE_STATS_STATE.captainMode:'points';
+  const toolbar=`<div class="league-stats-toolbar" role="group" aria-label="Orden de capitanes">
       <span>Comparar por</span>
       <button type="button" data-league-captain-mode="points" aria-pressed="${mode==='points'}">Más puntos</button>
       <button type="button" data-league-captain-mode="average" aria-pressed="${mode==='average'}">Mejor promedio</button>
-    </div>
-    <div class="league-stats-explainer"><b>Un líder por equipo</b><span>${mode==='points'?'El capitán que más puntos finales generó para cada participante.':'El capitán con mejor promedio final de cada participante; las jornadas utilizadas siempre quedan visibles.'}</span></div>
+      <button type="button" data-league-captain-mode="bonus" aria-pressed="${mode==='bonus'}">Bonos acumulados</button>
+      <button type="button" data-league-captain-mode="worst" aria-pressed="${mode==='worst'}">Peores capitanes</button>
+    </div>`;
+  if(mode==='bonus')return toolbar+leagueStatsCaptainBonusMarkup(data);
+  if(!data.lineupRows)return toolbar+`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
+  const worst=mode==='worst';
+  const leadersFor=team=>{
+    if(!worst)return mode==='average'?team.topCaptainsByAverage:team.topCaptainsByPoints;
+    const minimum=Math.min(...team.captains.map(player=>player.captainAverage));
+    return team.captains.filter(player=>Math.abs(player.captainAverage-minimum)<.0001)
+      .sort((a,b)=>b.captainUses-a.captainUses||a.captainPoints-b.captainPoints||a.playerName.localeCompare(b.playerName,'es'));
+  };
+  const metricFor=team=>{
+    const leader=leadersFor(team)[0];
+    return leader?(mode==='points'?leader.captainPoints:leader.captainAverage):(worst?Number.POSITIVE_INFINITY:Number.NEGATIVE_INFINITY);
+  };
+  const teams=[...data.teams].sort((a,b)=>(worst?metricFor(a)-metricFor(b):metricFor(b)-metricFor(a))||b.lineupMatchdays-a.lineupMatchdays||a.name.localeCompare(b.name,'es'));
+  const ranked=leagueStatsCompetitionRanks(teams,team=>metricFor(team));
+  return `${toolbar}
+    <div class="league-stats-explainer"><b>${worst?'Menor promedio por equipo':'Un líder por equipo'}</b><span>${worst?'El capitán con menor promedio de puntos finales de cada participante, de peor a mejor; las jornadas utilizadas siempre quedan visibles.':mode==='points'?'El capitán que más puntos finales generó para cada participante.':'El capitán con mejor promedio final de cada participante; las jornadas utilizadas siempre quedan visibles.'}</span></div>
     <div class="league-stats-ranking" role="list">
       ${ranked.map(({row:team,rank})=>{
         const leaders=leadersFor(team);
         const player=leaders[0]||null;
-        const both=player&&team.topCaptainsByPoints.some(item=>item.key===player.key)&&team.topCaptainsByAverage.some(item=>item.key===player.key);
+        const both=!worst&&player&&team.topCaptainsByPoints.some(item=>item.key===player.key)&&team.topCaptainsByAverage.some(item=>item.key===player.key);
         return `<article class="league-stats-captain-card${player?'':' is-empty'}" role="listitem">
           <span class="league-stats-rank">${player?rank:'—'}</span>
           ${leagueStatsTeamVisual(team)}
           <div class="league-stats-captain-player">
             ${leagueStatsTiedPlayerVisual(leaders)}
-            ${player?`<div class="league-stats-tags"><span>${mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
+            ${player?`<div class="league-stats-tags"><span>${worst?'Peor promedio':mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
           </div>
           <div class="league-stats-metrics">
             <div><span>Puntos</span><b>${player?profileSeasonFormat(player.captainPoints):'—'}</b></div>
@@ -4480,13 +4515,13 @@ function renderLeagueStatsContent(){
   const updated=data.latestUpdate
     ?new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(data.latestUpdate)
     :'Sin actualizaciones registradas';
-  const panelMarkup=section==='noBonus'?leagueStatsNoBonusMarkup(data):data.lineupRows
-    ?section==='lines'
-      ?leagueStatsLineMarkup(data)
-      :section==='mvp'
-        ?leagueStatsMvpMarkup(data)
-        :leagueStatsCaptainMarkup(data)
-    :`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
+  const panelMarkup=section==='noBonus'
+    ?leagueStatsNoBonusMarkup(data)
+    :section==='captains'
+      ?leagueStatsCaptainMarkup(data)
+      :data.lineupRows
+        ?section==='lines'?leagueStatsLineMarkup(data):leagueStatsMvpMarkup(data)
+        :`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
   host.innerHTML=`<header class="league-stats-head">
       <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Radiografía de la competición</h3><p>Capitanes destacados, rendimiento por líneas, MVP y liga sin bonus.</p></div>
       <div class="league-stats-coverage"><b>${data.lineupRows}</b><span>XI publicados</span><small>${data.teamsWithLineups}/${data.teams.length} equipos con datos</small></div>
@@ -4561,7 +4596,7 @@ function setLeagueStatsSection(section,{focus=false}={}){
 }
 
 function setLeagueCaptainMode(mode,{focus=false}={}){
-  LEAGUE_STATS_STATE.captainMode=mode==='average'?'average':'points';
+  LEAGUE_STATS_STATE.captainMode=['points','average','bonus','worst'].includes(mode)?mode:'points';
   renderLeagueStatsContent();
   if(focus)document.querySelector(`[data-league-captain-mode="${LEAGUE_STATS_STATE.captainMode}"]`)?.focus();
 }

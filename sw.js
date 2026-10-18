@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cuban-league-v179-loading-audit';
+const CACHE_NAME = 'cuban-league-v180-captain-bonus';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=176-20261015-classic-navigation',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=179-20261016-loading-audit',
+  './app.js?v=180-20261018-captain-bonus',
   './data.json?v=174-20261014-mister-j8-catalog',
   './catalog/players.json?v=174-20261014-mister-j8-catalog',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',

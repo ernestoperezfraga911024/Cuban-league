@@ -1,4 +1,22 @@
-# Cuban League V179
+# Cuban League V180
+
+## Bonos acumulados y peores capitanes
+
+- Estadísticas → Capitanes incorpora «Bonos acumulados», junto a «Mejor
+  promedio»: tabla de los 20 participantes por extra total del brazalete,
+  descendente y con puestos compartidos en empates.
+- Reutiliza el cálculo verificado de Liga sin bonus: redondeo de Mister,
+  negativos, jornadas sin capitán y saldo negativo. Un total incompleto queda
+  pendiente; los aplazados se identifican como provisionales.
+- «Peores capitanes» muestra el capitán con menor promedio de puntos finales
+  por participante, de peor a mejor, con puntos, jornadas, promedio y bono.
+  Conserva todos los futbolistas empatados y deja sin puesto a quien no tiene
+  capitanes registrados.
+- Ambas vistas reutilizan los datos ya cargados y el diseño adaptable existente.
+  No agregan consultas ni modifican cálculos, datos, panel o conexiones.
+- Caché V180; 95 pruebas aprobadas de cálculos, navegación real de botones en jsdom,
+  empates, datos pendientes e inmutabilidad. Revisión visual en navegador pendiente.
+- Publicación mediante PR a `main`, que sirve GitHub Pages.
 
 ## Carga y actualización pública
 

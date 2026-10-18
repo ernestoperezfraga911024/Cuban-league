@@ -7,11 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V179: corrección de carga inicial del podio, sincronización pública y caché. Se conserva el diseño V178.
-- **Publicación:** cambios preparados en `codex/loading-audit-v179` para revisión mediante PR. GitHub Pages sigue la rama `main`; V179 no se considera publicada hasta integrar el PR.
-- **Base de esta actualización:** `aa5e06b` (V178, PR #48). Revisión y correcciones solicitadas por Ernesto el 2026-10-16.
+- **Versión:** V180: bonos acumulados y peores capitanes en Estadísticas → Capitanes. Conserva diseño y carga pública V179.
+- **Publicación:** cambios preparados en `codex/captain-bonus-ranking-v180` para revisión mediante PR. GitHub Pages sigue la rama `main`; V180 no se considera publicada hasta integrar el PR.
+- **Base de esta actualización:** `85d65fe` (V179, PR #49 ya integrado). Dos vistas solicitadas por Ernesto el 2026-10-17 (Miami).
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-16; 88 pruebas automatizadas. Incluye carga lenta, fallos/reintentos, conservación de datos y caché; comprobación visual en navegador real pendiente.
+- **Fecha de verificación del código:** 2026-10-18 UTC; 95 pruebas automatizadas aprobadas de carga, conservación, caché y nuevas vistas de capitanes; comprobación visual en navegador real pendiente.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -244,6 +244,21 @@ Incluye:
 
 **V172:** la insignia `El Muro` fue eliminada del catálogo, cálculo y perfiles. No reintroducirla por datos históricos viejos.
 
+**V180 — Capitanes:**
+- «Bonos acumulados» se sitúa junto a «Mejor promedio» y muestra todos los
+  participantes por bono total descendente; suma el extra de todos sus capitanes.
+- Reutiliza `data.noBonus.teams[].bonus` y su validación, sin alterar los cálculos
+  existentes. Respeta redondeo, bonos negativos, saldo negativo y ausencia de capitán.
+- Empates comparten puesto. Si faltan datos se ocultan el total incompleto y los
+  puestos; las jornadas aplazadas quedan señaladas como provisionales.
+- «Peores capitanes» selecciona el menor `captainAverage` de cada participante
+  y ordena ascendente. Usa puntos finales por jornada, muestra todos los empatados
+  y conserva jornadas, puntos y bono estimado de las tarjetas existentes.
+- Sin capitanes no se inventa un puesto. Las nuevas opciones siguen accesibles
+  aunque no haya XI; la tabla distingue datos pendientes de bonos verificados en 0.
+- Vistas de lectura con datos ya cargados; sin nuevas consultas, escrituras,
+  dependencias ni cambios en Liga oficial, Copa, Champions o perfiles.
+
 ## PWA / cache
 
 `sw.js` mantiene app shell y recursos estáticos.
@@ -253,8 +268,8 @@ Incluye:
 - resto de assets: stale-while-revalidate.
 - Cada release importante debe rotar `CACHE_NAME`/version strings cuando cambien assets que deban invalidarse.
 
-Cache de V179: `cuban-league-v179-loading-audit`. La web registra el worker y
-carga `app.js` con `179-20261016-loading-audit`. Los datos y el catálogo conservan
+Cache de V180: `cuban-league-v180-captain-bonus`. La web registra el worker y
+carga `app.js` con `180-20261018-captain-bonus`. Los datos y el catálogo conservan
 `174-20261014-mister-j8-catalog`; panel y extensión (1.0.2) no cambian.
 El fallback de un script usa su propio archivo precargado, nunca `index.html`.
 Las respuestas 5xx/408 pueden recuperar la copia local del recurso.
@@ -332,6 +347,11 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 
 ## Cambios recientes relevantes
 
+- **V180:** tabla de bonos acumulados y vista de peores capitanes. Reutiliza los
+  datos y estilos existentes; pruebas de navegación, empates, negativos,
+  redondeo, correcciones, datos incompletos e inmutabilidad. Se conservan
+  intactas las funciones protegidas de cálculo y todos los datos V174.
+
 - **V179:** revisión de carga/sincronización y PWA; sin cambios en los datos,
   cálculos deportivos, panel, importación, SQL, credenciales ni conexiones.
   Pruebas de comportamiento sustituyen únicamente las seis comprobaciones de
@@ -389,6 +409,10 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 - Cambios visuales triviales no requieren actualizar este archivo.
 
 ## Última actualización
+
+**2026-10-18 UTC / 2026-10-17 Miami** — V180: dos opciones nuevas dentro de
+Estadísticas → Capitanes, preparadas en rama separada desde V179 para PR.
+No se ha escrito en Supabase; no se han restaurado datos ni modificado estilos.
 
 **2026-10-16** — V179: corrección del podio histórico al arrancar y optimizaciones
 verificadas de las consultas públicas. Rama separada desde V178; sin migraciones
