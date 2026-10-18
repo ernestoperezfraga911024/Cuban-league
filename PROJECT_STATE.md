@@ -11,7 +11,7 @@
 - **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama de entrega V182: `codex/f05-league-brand-v182`. V181 se publicó en PR #51; comprobar Pages del commit integrado para el estado vivo de V182.
 - **Base de esta actualización:** `f172dce4dbba2e8580a2a281a02de1652a76e19f` (V181 publicado). Respaldo remoto inmediato: `backup/pre-f05-logo-v181-20261018`.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-18 UTC; 103 pruebas automatizadas aprobadas, incluidas conservación de datos/fotos, navegación, iconos F05, contratos PWA y contraste. Vista previa local no disponible por restricción `bwrap` del supervisor; comprobar el aspecto en la web publicada.
+- **Fecha de verificación del código:** 2026-10-18 UTC; 103 pruebas automatizadas aprobadas, incluidas conservación de datos/fotos, navegación, iconos F05, contratos PWA y contraste. V182 publicada en PR #52 y Pages exitoso, commit `04f8d5296d0984f5b9254cdfd8afd28d050ca234`. Revisión visual pública: portada, clasificación con 20 participantes y perfil de Ernesto. Ajuste posterior de pintura para retirar fondos/acentos azules heredados; no cambia geometría. Vista previa local limitada por `bwrap`.
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -36,7 +36,7 @@ La web pública nunca debe mostrar borradores no publicados.
 - **Frontend:** HTML, CSS y JavaScript vanilla.
 - **Web pública:** `index.html` + `app.js` + `styles.css`; `mobile-navigation.css` y `editorial-ui.js` solo para la barra y el menú Más.
 - **Tarjetas compactas:** `stats-compact.css` (aprox. 4,5 KB), limitado a `.league-stats-compact-card` en Capitanes y MVP. Sin nuevas dependencias.
-- **Marca F05:** `cuban-league-f05-logo.svg` (menos de 2 KB, sin fuentes, imágenes embebidas ni filtros) + iconos PNG generados en distintos tamaños. `brand-f05.css` (menos de 7 KB) solo cambia colores/efectos; mantiene geometría, responsive y contenidos. `node scripts/build-brand-icons.cjs` regenera los iconos con Inkscape, solo en desarrollo.
+- **Marca F05:** `cuban-league-f05-logo.svg` (menos de 2 KB, sin fuentes, imágenes embebidas ni filtros) + iconos PNG generados en distintos tamaños. `brand-f05.css` (menos de 8 KB) solo cambia colores/efectos; mantiene geometría, responsive y contenidos. `node scripts/build-brand-icons.cjs` regenera los iconos con Inkscape, solo en desarrollo.
 - **Admin:** `admin.html` + `admin.js` + `admin.css`, con su aspecto anterior. Los archivos del tema editorial se conservan como referencia, sin cargarse.
 - **Datos estáticos/históricos:** `data.json`.
 - **Catálogo:** `catalog/players.json` + `player-catalog.js`.
@@ -280,8 +280,8 @@ Incluye:
 - resto de assets: stale-while-revalidate.
 - Cada release importante debe rotar `CACHE_NAME`/version strings cuando cambien assets que deban invalidarse.
 
-Cache de V182: `cuban-league-v182-f05-brand`. La web registra el worker y
-carga `app.js` y `brand-f05.css` con `182-20261018-f05`; `stats-compact.css` conserva `181-20261018-compact-stats`. Los datos y el catálogo conservan
+Cache de V182: `cuban-league-v182-f05-brand-2`. La web registra el worker y
+carga `app.js` con `182-20261018-f05` y `brand-f05.css` con `182-20261018-f05-2`; `stats-compact.css` conserva `181-20261018-compact-stats`. Los datos y el catálogo conservan
 `174-20261014-mister-j8-catalog`; panel y extensión (1.0.2) no cambian.
 Los dos manifests mantienen identidad, URL de inicio, scope y accesos; solo cambian
 los iconos y colores de marca. Icono maskable específico con margen seguro del 20%.

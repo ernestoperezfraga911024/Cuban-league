@@ -46,7 +46,7 @@ body.f05-theme{background:#071910;color:var(--text)}
  .matchday-archive-card,.season-results,.known-row,.season-empty,.rules-card,.rules-section,
  .league-stats-captain-card,.league-stats-line-card,.league-stats-mvp-card,.league-no-bonus-wrap,
  .league-stats-explainer,.league-stats-loading,.league-stats-empty){
-  background:var(--panel);border-color:var(--line);box-shadow:none;
+  background:var(--panel)!important;border-color:var(--line);box-shadow:none;
 }
 .f05-theme :is(.panel,.record,.news-card,.player-card,.group,.home-shortcuts button):hover{background:var(--panel2);border-color:#507e61}
 .f05-theme :is(.thead,.profile-season-head,.league-no-bonus-table thead th){background:#142e21;color:var(--muted);border-color:var(--line)}
@@ -78,3 +78,11 @@ body.f05-theme{background:#071910;color:var(--text)}
 .f05-theme .admin-background::before{border-color:var(--line);box-shadow:none}
 .f05-theme .admin-background::after{background:rgba(158,216,182,.035)}
 /* Red cards, relegation, alerts, podium medals and achievement rarities retain meaning. */
+/* Old high-specificity blue surfaces must not override the selected brand palette. */
+.f05-theme :is(.header-season-badge,#profileCurrentMetrics,#profileCurrentForm,#profileEarnedAchievements){
+  background:var(--panel2)!important;border-color:var(--line);color:var(--text);
+}
+.f05-theme :is(button,a)[role="tab"][aria-selected="true"]{
+  background:#075638!important;color:#f4efdc!important;border-color:#3d8d65!important;box-shadow:none;
+}
+.f05-theme .header-season-badge .ui-icon{color:var(--text)}

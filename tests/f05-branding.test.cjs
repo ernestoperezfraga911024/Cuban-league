@@ -24,7 +24,7 @@ test('public and admin headers, installation dialogs and browser icons use F05',
       assert.equal(doc.querySelector('link[rel=icon]').getAttribute('href'),'favicon-f05-32.png');
       assert.equal(doc.querySelector('link[rel=apple-touch-icon]').getAttribute('href'),'apple-touch-icon-f05.png');
       assert.equal(doc.querySelector('meta[name=theme-color]').content,'#071910');
-      assert.ok(doc.querySelector('link[href="brand-f05.css?v=182-20261018-f05"]'));
+      assert.ok(doc.querySelector('link[href="brand-f05.css?v=182-20261018-f05-2"]'));
       assert.doesNotMatch(read(file),/cuban-league-(?:green|football)-logo|(?:apple-touch-icon|favicon)-green/);
       const modal=doc.querySelector('#installModal img,#adminInstallModal img');
       assert.equal(modal.getAttribute('src'),'apple-touch-icon-f05.png');
@@ -98,7 +98,7 @@ test('cream, muted labels, accents and active controls retain accessible contras
 test('service worker precaches every active logo, icon and palette version',()=>{
   const sw=read('sw.js'),app=read('app.js');
   assert.match(sw,/cuban-league-v182-f05-brand/);
-  assert.match(sw,/brand-f05\.css\?v=182-20261018-f05/);
+  assert.match(sw,/brand-f05\.css\?v=182-20261018-f05-2/);
   assert.match(app,/APP_VERSION='182-20261018-f05'/);
   for(const name of ['cuban-league-f05-logo.svg',...Object.keys(images)])assert.ok(sw.includes(`'./${name}'`),name);
   assert.doesNotMatch(sw,/cuban-league-green-logo|icon-green-|favicon-green|apple-touch-icon-green/);
