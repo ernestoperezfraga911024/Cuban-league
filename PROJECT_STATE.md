@@ -7,9 +7,9 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V184: redondeo visual a enteros en Estadísticas y Comparador. Conserva cálculos, históricos, puntos oficiales y ranking general de capitanes V183.
-- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama V184: `codex/rounded-stats-v184`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
-- **Base de esta actualización:** `d2b640a` (main V183). Revertir únicamente el PR V184 restaura el formato anterior sin restaurar datos.
+- **Versión:** V185: buscador del ranking general y desglose por jornada al tocar puntos de capitanes. Conserva el redondeo V184 y todos los cálculos existentes.
+- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama V185: `codex/captain-search-details-v185`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
+- **Base de esta actualización:** `00391da` (main V184). Revertir únicamente el PR V185 retira estos controles sin restaurar datos.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
 - **Fecha de verificación del código:** 2026-10-19 UTC / 2026-10-18 Miami. Auditoría de lectura sobre 160 filas publicadas, 20 participantes y 8 jornadas: 7.466 puntos oficiales. Se comprobaron 697 acumulados por futbolista/participante contra sus jornadas; estadísticas, perfiles, rankings y HTML de tablas oficiales/históricas idénticos antes y después. Pruebas: `npm test` (112 casos).
 - **Temporada configurada:** 2026/27
@@ -30,6 +30,16 @@ Gestionar y publicar Cuban League, una liga fantasy con:
 - importación controlada desde Mister.
 
 La web pública nunca debe mostrar borradores no publicados.
+
+## Búsqueda y desglose de capitanes (V185)
+
+- Ranking general: búsqueda por futbolista, participante o ambos, sin distinguir acentos/mayúsculas. Busca también fuera del top 20 y mantiene los puestos del criterio elegido. Limpiar devuelve la lista anterior; cambiar criterio conserva la consulta.
+- Filtra rankings ya calculados y reemplaza solo los resultados, conservando el campo, el foco y el teclado. No realiza consultas de red al buscar.
+- Puntos es un botón en ambas vistas de capitanes (mejores y peores). Abre un detalle dentro de la tarjeta; el contenido se genera solo al abrirlo. Cada jornada enlaza al modal de XI existente y conserva el foco al regresar.
+- El detalle reutiliza las filas publicadas obtenidas por `ensureLeagueStatsData`. Índice diferido en WeakMap por snapshot; aplica las mismas reglas de deduplicación, última corrección, XI completo e identidad por participante/futbolista. Libera las filas crudas al crear el índice y no mezcla snapshots.
+- Verifica número de apariciones y suma contra el agregado antes de mostrarlo. Base estimada, multiplicador y final; los totales se suman antes de redondear. Aplazados señalados. No altera `buildLeagueStats`, consultas, normalización, clasificación, perfiles, administración, catálogo, datos ni históricos.
+- Recursos app/CSS/SW: `185-20261019-captain-details`; caché `cuban-league-v185-captain-details`. Sin dependencias nuevas ni escrituras de datos.
+- Pruebas: `npm test` (117 casos). Cinco casos nuevos de búsqueda fuera del top, posiciones/foco, datos congelados, traspasos, correcciones, XI incompletos, negativos/cero/redondeos, apertura/cierre de XI y actualización fallida. Contratos de datos/cálculos y 627 imágenes originales conservados.
 
 ## Redondeo visual de estadísticas (V184)
 
@@ -56,7 +66,7 @@ La web pública nunca debe mostrar borradores no publicados.
 
 - **Frontend:** HTML, CSS y JavaScript vanilla.
 - **Web pública:** `index.html` + `app.js` + `styles.css`; `mobile-navigation.css` y `editorial-ui.js` solo para la barra y el menú Más.
-- **Tarjetas compactas:** `stats-compact.css` (aprox. 6,5 KB), limitado a Capitanes y MVP; incluye controles y tarjetas del ranking general. Sin nuevas dependencias.
+- **Tarjetas compactas:** `stats-compact.css`, limitado a Capitanes y MVP; incluye búsqueda, tarjetas del ranking general y desglose de capitanes. Sin nuevas dependencias.
 - **Marca F05:** `cuban-league-f05-logo.svg` (menos de 2 KB, sin fuentes, imágenes embebidas ni filtros) + iconos PNG generados en distintos tamaños. `brand-f05.css` (menos de 8 KB) solo cambia colores/efectos; mantiene geometría, responsive y contenidos. `node scripts/build-brand-icons.cjs` regenera los iconos con Inkscape, solo en desarrollo.
 - **Admin:** `admin.html` + `admin.js` + `admin.css`, con su aspecto anterior. Los archivos del tema editorial se conservan como referencia, sin cargarse.
 - **Datos estáticos/históricos:** `data.json`.
