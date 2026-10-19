@@ -1,4 +1,4 @@
-const APP_VERSION='184-20261019-rounded-stats';
+const APP_VERSION='185-20261019-captain-details';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -42,6 +42,7 @@ let LEAGUE_STATS_REQUEST_TOKEN=0;
 let LEAGUE_STATS_ABORT_CONTROLLER=null;
 const LEAGUE_STATS_CACHE=new Map();
 const LEAGUE_CAPTAIN_RANKINGS=new WeakMap();
+const LEAGUE_CAPTAIN_DETAILS=new WeakMap();
 const LEAGUE_STATS_STATE={
   status:'idle',
   section:'captains',
@@ -49,6 +50,7 @@ const LEAGUE_STATS_STATE={
   captainView:'team',
   captainGeneralMode:'points',
   captainGeneralExpanded:false,
+  captainQuery:'',
   linePosition:'all',
   data:null,
   error:''
@@ -4371,6 +4373,83 @@ function leagueStatsCaptainBonusMarkup(data){
     <p class="league-stats-note">Ejemplo: 8 puntos ×3 = 24; el bono es +16. Se suman solo los extras del brazalete, incluidos los negativos. Sin capitán o con saldo negativo, el bono de esa jornada es 0. Los empates comparten puesto.</p>`;
 }
 
+function leagueCaptainSearchText(value){
+  return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').trim().replace(/\s+/g,' ');
+}
+
+function leagueStatsCaptainDetails(data,team,player){
+  const snapshot=LEAGUE_CAPTAIN_DETAILS.get(data);
+  if(!snapshot)return null;
+  if(!snapshot.index){
+    // Build once, on demand, from the same published snapshot as the totals.
+    // Mirror the aggregator's latest-row and complete-XI rules without changing it.
+    const names=new Set(data.teams.map(item=>item.name));
+    const unique=new Map();
+    snapshot.rows.forEach(row=>{
+      const name=String(row?.participant_name||'').trim();
+      const day=Math.trunc(matchdayLineupNumericValue(row?.matchday));
+      if(!names.has(name)||!Number.isInteger(day)||day<1)return;
+      const key=JSON.stringify([name,day]);
+      const current=unique.get(key);
+      if(!current||(new Date(row?.updated_at||0).getTime()||0)>=(new Date(current.row?.updated_at||0).getTime()||0))unique.set(key,{name,day,row});
+    });
+    const index=new Map();
+    [...unique.values()].sort((a,b)=>a.day-b.day||a.name.localeCompare(b.name,'es')).forEach(({name,day,row})=>{
+      const lineup=normalizePublishedMatchdayLineup(row.lineup);
+      if(lineup.length!==11)return;
+      lineup.forEach(item=>{
+        if(!item.isCaptain||item.isEmptyPosition)return;
+        const key=JSON.stringify([name,leagueStatsPlayerKey(item)]);
+        const finalPoints=matchdayLineupNumericValue(item.displayedPoints);
+        const multiplier=Math.max(1,matchdayLineupNumericValue(item.captainMultiplier,1));
+        if(!index.has(key))index.set(key,[]);
+        index.get(key).push({matchday:day,finalPoints,multiplier,basePoints:finalPoints/multiplier,postponed:row.has_postponed_matches===true});
+      });
+    });
+    snapshot.index=index;
+    snapshot.rows=null;
+  }
+  const details=snapshot.index.get(JSON.stringify([team.name,player.key]))||[];
+  const total=details.reduce((sum,item)=>sum+item.finalPoints,0);
+  // Withhold a mismatching breakdown rather than explain a total with other data.
+  return details.length===player.captainUses&&Math.abs(total-player.captainPoints)<.0001?details:null;
+}
+
+function leagueStatsCaptainPointsMarkup(data,team,player){
+  if(!player)return '<span>Puntos</span><b>—</b>';
+  const id=`leagueCaptainDetail-${data.teams.indexOf(team)}-${team.captains.indexOf(player)}`;
+  return `<button type="button" class="league-captain-points" data-league-captain-detail data-captain-team="${profileAttr(team.name)}" data-captain-key="${profileAttr(player.key)}" aria-expanded="false" aria-controls="${id}" aria-label="${profileAttr(`Desglose de ${leagueStatsFormat(player.captainPoints)} puntos de ${player.playerName} con ${team.name}`)}"><span>Puntos <i aria-hidden="true">⌄</i></span><b>${leagueStatsFormat(player.captainPoints)}</b></button>`;
+}
+
+function toggleLeagueCaptainDetails(button){
+  const data=LEAGUE_STATS_STATE.data;
+  const team=data?.teams.find(item=>item.name===button.dataset.captainTeam);
+  const player=team?.captains.find(item=>item.key===button.dataset.captainKey);
+  const card=button.closest('.league-stats-captain-card');
+  if(!player||!card)return;
+  const id=button.getAttribute('aria-controls');
+  let panel=$(id);
+  const expanded=button.getAttribute('aria-expanded')!=='true';
+  if(!panel){
+    panel=document.createElement('section');
+    panel.id=id;
+    panel.className='league-captain-detail';
+    panel.setAttribute('aria-label',`Jornadas de ${player.playerName} con ${team.name}`);
+    const details=leagueStatsCaptainDetails(data,team,player);
+    panel.innerHTML=details?`<h4>${profileAttr(player.playerName)} · Jornadas como capitán</h4>
+      <p>Toca una jornada para ver su XI publicado.</p>
+      <table><caption class="sr-only">Puntos de ${profileAttr(player.playerName)} con ${profileAttr(team.name)}</caption>
+        <thead><tr><th scope="col">Jornada</th><th scope="col"><abbr title="Puntos base estimados: final dividido entre multiplicador">Base est.</abbr></th><th scope="col" aria-label="Multiplicador">×</th><th scope="col">Final</th></tr></thead>
+        <tbody>${details.map(item=>`<tr><th scope="row"><button type="button" ${matchdayLineupTriggerAttrs(team.name,item.matchday,item.postponed)}>J${item.matchday}<span aria-hidden="true"> ↗</span></button>${item.postponed?'<small>Provisional</small>':''}</th><td>${leagueStatsFormat(item.basePoints)}</td><td>×${matchdayLineupMultiplier(item.multiplier)}</td><td title="${profileAttr(`Sin redondear: ${profileSeasonFormat(item.finalPoints)}`)}">${leagueStatsFormat(item.finalPoints)}</td></tr>`).join('')}</tbody>
+        <tfoot><tr><th scope="row" colspan="3">Total · ${details.length} ${details.length===1?'jornada':'jornadas'}</th><td>${leagueStatsFormat(player.captainPoints)}</td></tr></tfoot>
+      </table><p>Base estimada = final ÷ multiplicador. Valores redondeados; el total se suma antes de redondear. Solo cuenta cuando fue capitán de este participante.</p>`
+      :'<p>No se puede verificar el desglose con esta carga de datos. Actualiza las estadísticas para volver a intentarlo.</p>';
+    card.append(panel);
+  }
+  panel.hidden=!expanded;
+  button.setAttribute('aria-expanded',String(expanded));
+}
+
 function leagueStatsGlobalCaptainRanking(data,mode){
   // Derive only from the existing participant/player aggregates. Cache per
   // published snapshot; refreshed data naturally gets a new ranking.
@@ -4384,7 +4463,7 @@ function leagueStatsGlobalCaptainRanking(data,mode){
     ||a.team.name.localeCompare(b.team.name,'es')
     ||a.player.playerName.localeCompare(b.player.playerName,'es')
     ||a.player.key.localeCompare(b.player.key,'es'));
-  const ranking=leagueStatsCompetitionRanks(entries,valueFor);
+  const ranking=leagueStatsCompetitionRanks(entries,valueFor).map(entry=>({...entry,searchText:leagueCaptainSearchText(`${entry.row.player.playerName} ${entry.row.team.name}`)}));
   cache.set(mode,ranking);
   return ranking;
 }
@@ -4393,14 +4472,27 @@ function leagueStatsGlobalCaptainMarkup(data){
   const mode=LEAGUE_STATS_STATE.captainGeneralMode;
   const ranked=leagueStatsGlobalCaptainRanking(data,mode);
   if(!ranked.length)return `<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay capitanes registrados</h3><p>El ranking aparecerá con los capitanes de los XI publicados.</p></div>`;
-  const expanded=LEAGUE_STATS_STATE.captainGeneralExpanded;
-  const first=ranked.filter(entry=>entry.rank<=20);
-  const visible=expanded?ranked:first;
   const description=mode==='points'?'De más a menos puntos finales acumulados.':mode==='average'?'De mayor a menor promedio por jornada como capitán.':'De menor a mayor promedio por jornada como capitán.';
   const postponed=data.noBonus.postponedMatchdays;
   return `<div class="league-stats-explainer"><b>${mode==='worst'?'Peores capitanes de la liga':'Mejores capitanes de la liga'}</b><span>${description} Cada futbolista tiene un registro por participante; un equipo puede aparecer varias veces.</span></div>
     ${postponed.length?`<div class="league-no-bonus-status"><strong>Provisional · ${postponed.map(day=>`J${day}`).join(', ')} con aplazados</strong></div>`:''}
-    <p class="league-stats-note" role="status">Mostrando ${visible.length} de ${ranked.length} capitanes · ${expanded?'Lista completa':'Primeros 20 puestos, incluidos los empates'}</p>
+    <div class="league-captain-search" role="search" aria-label="Buscar en el ranking general">
+      <label for="leagueCaptainSearch">Buscar futbolista o participante</label>
+      <div><input id="leagueCaptainSearch" type="search" maxlength="120" autocomplete="off" placeholder="Ej.: Mbappé o Ernesto" value="${profileAttr(LEAGUE_STATS_STATE.captainQuery)}" aria-controls="leagueGlobalCaptainResults"><button type="button" data-league-captain-clear${LEAGUE_STATS_STATE.captainQuery?'':' hidden'}>Limpiar</button></div>
+    </div>
+    <div id="leagueGlobalCaptainResults">${leagueStatsGlobalCaptainResults(data)}</div>
+    <p class="league-stats-note">Solo se suman las jornadas en las que cada futbolista fue capitán de ese participante. Puntos finales, ya multiplicados; bono estimado del brazalete. Los empates comparten puesto. Toca los puntos para consultar las jornadas.</p>`;
+}
+
+function leagueStatsGlobalCaptainResults(data){
+  const ranked=leagueStatsGlobalCaptainRanking(data,LEAGUE_STATS_STATE.captainGeneralMode);
+  const query=leagueCaptainSearchText(LEAGUE_STATS_STATE.captainQuery);
+  const words=query.split(' ').filter(Boolean);
+  const expanded=LEAGUE_STATS_STATE.captainGeneralExpanded;
+  const first=ranked.filter(entry=>entry.rank<=20);
+  const visible=query?ranked.filter(entry=>words.every(word=>entry.searchText.includes(word))):expanded?ranked:first;
+  return `<p class="league-stats-note" role="status" aria-live="polite" aria-atomic="true">Mostrando ${visible.length} de ${ranked.length} capitanes · ${query?'Búsqueda en toda la lista · Puestos originales':expanded?'Lista completa':'Primeros 20 puestos, incluidos los empates'}</p>
+    ${!visible.length?'<p class="league-stats-empty">No hay coincidencias. Prueba otro nombre o limpia la búsqueda.</p>':''}
     <div id="leagueGlobalCaptainRanking" class="league-stats-ranking" role="list">
       ${visible.map(({row:{team,player},rank})=>`<article class="league-stats-captain-card league-stats-compact-card league-stats-global-card" role="listitem">
         <span class="league-stats-rank">${rank}</span>
@@ -4409,15 +4501,22 @@ function leagueStatsGlobalCaptainMarkup(data){
           <button type="button" class="league-stats-global-owner" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}</span></button>
         </div>
         <div class="league-stats-summary"><div class="league-stats-metrics">
-          <div><span>Puntos</span><b>${leagueStatsFormat(player.captainPoints)}</b></div>
+          <div>${leagueStatsCaptainPointsMarkup(data,team,player)}</div>
           <div><span>Jornadas</span><b>${player.captainUses}</b></div>
           <div><span>Promedio</span><b>${leagueStatsFormat(player.captainAverage)}</b></div>
           <div><span>Bono</span><b class="${player.captainBonus<0?'is-negative':'is-positive'}">${leagueStatsFormat(player.captainBonus,{signed:true})}</b></div>
         </div></div>
       </article>`).join('')}
     </div>
-    ${first.length<ranked.length?`<div class="league-stats-toolbar league-stats-global-more"><button type="button" data-league-captain-expand aria-expanded="${expanded}" aria-controls="leagueGlobalCaptainRanking">${expanded?'Ver primeros 20 puestos':`Ver todos (${ranked.length})`}</button></div>`:''}
-    <p class="league-stats-note">Solo se suman las jornadas en las que cada futbolista fue capitán de ese participante. Puntos finales, ya multiplicados; bono estimado del brazalete. Los empates comparten puesto. Consulta las jornadas para interpretar los promedios; se incluyen todos los registros disponibles.</p>`;
+    ${!query&&first.length<ranked.length?`<div class="league-stats-toolbar league-stats-global-more"><button type="button" data-league-captain-expand aria-expanded="${expanded}" aria-controls="leagueGlobalCaptainRanking">${expanded?'Ver primeros 20 puestos':`Ver todos (${ranked.length})`}</button></div>`:''}`;
+}
+
+function filterLeagueCaptains(value){
+  LEAGUE_STATS_STATE.captainQuery=String(value).slice(0,120);
+  const host=$('leagueGlobalCaptainResults');
+  if(host&&LEAGUE_STATS_STATE.data)host.innerHTML=leagueStatsGlobalCaptainResults(LEAGUE_STATS_STATE.data);
+  const clear=document.querySelector('[data-league-captain-clear]');
+  if(clear)clear.hidden=!LEAGUE_STATS_STATE.captainQuery;
 }
 
 function leagueStatsCaptainMarkup(data){
@@ -4469,7 +4568,7 @@ function leagueStatsCaptainMarkup(data){
           <div class="league-stats-summary">
             ${player?`<div class="league-stats-tags"><span>${worst?'Peor promedio':mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
           <div class="league-stats-metrics">
-            <div><span>Puntos</span><b>${player?leagueStatsFormat(player.captainPoints):'—'}</b></div>
+            <div>${leagueStatsCaptainPointsMarkup(data,team,player)}</div>
             <div><span>Jornadas</span><b>${player?player.captainUses:'—'}</b></div>
             <div><span>Promedio</span><b>${player?leagueStatsFormat(player.captainAverage):'—'}</b></div>
             <div><span>Bono</span><b class="${player?.captainBonus<0?'is-negative':'is-positive'}">${player?leagueStatsFormat(player.captainBonus,{signed:true}):'—'}</b></div>
@@ -4478,7 +4577,7 @@ function leagueStatsCaptainMarkup(data){
         </article>`;
       }).join('')}
     </div>
-    <p class="league-stats-note">Los puntos del capitán son los finales, ya multiplicados. El bono indica el efecto estimado del brazalete.</p>`;
+    <p class="league-stats-note">Los puntos del capitán son los finales, ya multiplicados. El bono indica el efecto estimado del brazalete. Toca los puntos para consultar las jornadas.</p>`;
 }
 
 function leagueStatsLineMarkup(data){
@@ -4646,6 +4745,7 @@ async function ensureLeagueStatsData({force=false}={}){
     const rows=await fetchPublishedLeagueStatsRows(controller.signal);
     if(token!==LEAGUE_STATS_REQUEST_TOKEN)return;
     const data=buildLeagueStats(rows);
+    LEAGUE_CAPTAIN_DETAILS.set(data,{rows,index:null});
     LEAGUE_STATS_CACHE.set(season,data);
     LEAGUE_STATS_STATE.data=data;
     LEAGUE_STATS_STATE.status='ready';
@@ -7072,6 +7172,9 @@ async function init(){
     if(document.visibilityState==='visible')syncPublishedData();
   });
 
+  document.addEventListener('input',e=>{
+    if(e.target.id==='leagueCaptainSearch')filterLeagueCaptains(e.target.value);
+  });
   document.addEventListener('click',e=>{
     if(e.target.closest('[data-live-retry]')){
       syncPublishedData();
@@ -7106,6 +7209,18 @@ async function init(){
     }
     if(e.target.closest('[data-league-captain-expand]')){
       toggleLeagueCaptainExpanded();
+      return;
+    }
+    if(e.target.closest('[data-league-captain-clear]')){
+      const input=$('leagueCaptainSearch');
+      if(input)input.value='';
+      filterLeagueCaptains('');
+      input?.focus();
+      return;
+    }
+    const captainDetail=e.target.closest('[data-league-captain-detail]');
+    if(captainDetail){
+      toggleLeagueCaptainDetails(captainDetail);
       return;
     }
     const leagueCaptainMode=e.target.closest('[data-league-captain-mode]');

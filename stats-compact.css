@@ -107,3 +107,30 @@
   .league-stats-global-card{grid-template-columns:24px minmax(0,1fr) minmax(310px,1.2fr)}
   .league-stats-global-card>.league-stats-summary{grid-column:3}
 }
+
+/* Search retains its input node; matchday details are rendered only on demand. */
+.league-captain-search{margin:14px 0}
+.league-captain-search label{display:block;margin-bottom:7px;font-size:.8rem;font-weight:700}
+.league-captain-search>div{display:flex;gap:8px;align-items:center}
+.league-captain-search input{flex:1;min-width:0;width:100%;min-height:44px;padding:10px 12px;border:1px solid rgba(128,174,151,.35);border-radius:10px;background:rgba(0,0,0,.2);color:inherit;font:inherit;font-size:16px}
+.league-captain-search input::placeholder{color:var(--muted,#a6b4aa);opacity:1}
+.league-captain-search button,.league-captain-detail button{min-height:44px;padding:8px 10px;border:1px solid rgba(128,174,151,.3);border-radius:8px;background:rgba(255,255,255,.04);color:inherit;font:inherit;font-size:.8rem;cursor:pointer}
+.league-stats-compact-card .league-captain-points{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:44px;width:100%;padding:0;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.league-stats-compact-card .league-captain-points b{text-decoration:underline;text-decoration-color:rgba(158,216,182,.65);text-underline-offset:3px}
+.league-captain-points i{display:inline-block;font-style:normal;transition:transform .15s}
+.league-captain-points[aria-expanded="true"] i{transform:rotate(180deg)}
+.league-captain-search :focus-visible,.league-captain-points:focus-visible,.league-captain-detail button:focus-visible{outline:2px solid var(--green,#9ed8b6);outline-offset:2px}
+.league-captain-detail{grid-column:1/-1;min-width:0;padding-top:10px;border-top:1px solid rgba(128,174,151,.22)}
+.league-captain-detail[hidden],.league-captain-search [hidden]{display:none}
+.league-captain-detail h4{margin:0;font-size:.86rem;line-height:1.4;overflow-wrap:anywhere}
+.league-captain-detail p{margin:6px 0 10px;color:var(--muted,#a6b4aa);font-size:.73rem;line-height:1.5}
+.league-captain-detail table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:.8rem;font-variant-numeric:tabular-nums}
+.league-captain-detail th,.league-captain-detail td{padding:5px 3px;text-align:right;overflow-wrap:anywhere}
+.league-captain-detail th:first-child{text-align:left}
+.league-captain-detail thead th{color:var(--muted,#a6b4aa);font-size:.7rem}
+.league-captain-detail tbody tr+tr{border-top:1px solid rgba(128,174,151,.1)}
+.league-captain-detail tbody td:last-child,.league-captain-detail tfoot{font-weight:800}
+.league-captain-detail tfoot{border-top:1px solid rgba(128,174,151,.3)}
+.league-captain-detail tfoot th,.league-captain-detail tfoot td{padding-top:10px;padding-bottom:10px}
+.league-captain-detail small{display:block;font-size:.65rem;color:var(--muted,#a6b4aa);font-weight:400}
+@media(prefers-reduced-motion:reduce){.league-captain-points i{transition:none}}
