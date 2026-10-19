@@ -170,7 +170,7 @@ test('navigation stays read-only and the new cache restores the classic resource
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
   for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v183-global-captains/);
+  assert.match(sw,/cuban-league-v184-rounded-stats/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{

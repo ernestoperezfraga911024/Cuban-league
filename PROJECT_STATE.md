@@ -7,11 +7,11 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V183: ranking general de todos los capitanes por pareja futbolista–participante. Conserva la vista por participante, la marca F05 V182, las tarjetas compactas V181 y los bonos V180.
-- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama de entrega V183: `codex/global-captains-v183`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
-- **Base de esta actualización:** `2aeff93019a3302685b84d0da8e999e3bf5c46cf` (V182, incluida la última armonización de colores). Revertir el PR V183 restaura esa presentación sin restaurar datos.
+- **Versión:** V184: redondeo visual a enteros en Estadísticas y Comparador. Conserva cálculos, históricos, puntos oficiales y ranking general de capitanes V183.
+- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama V184: `codex/rounded-stats-v184`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
+- **Base de esta actualización:** `d2b640a` (main V183). Revertir únicamente el PR V184 restaura el formato anterior sin restaurar datos.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
-- **Fecha de verificación del código:** 2026-10-18 UTC; 109 pruebas automatizadas aprobadas. Incluyen conservación de datos, fotos y funciones de puntuación, varios capitanes del mismo participante, separación de traspasos, empates del puesto 20, correcciones publicadas y botones reales sin consultas adicionales. Revisión visual pública posterior al despliegue; el navegador disponible no ofrece emulación móvil.
+- **Fecha de verificación del código:** 2026-10-19 UTC / 2026-10-18 Miami. Auditoría de lectura sobre 160 filas publicadas, 20 participantes y 8 jornadas: 7.466 puntos oficiales. Se comprobaron 697 acumulados por futbolista/participante contra sus jornadas; estadísticas, perfiles, rankings y HTML de tablas oficiales/históricas idénticos antes y después. Pruebas: `npm test` (112 casos).
 - **Temporada configurada:** 2026/27
 - **Supabase:** proyecto activo y saludable verificado en vivo.
 - **Estado:** web pública + panel privado de administración + PWA + integración asistida con Mister mediante extensión Chrome y Supabase.
@@ -30,6 +30,17 @@ Gestionar y publicar Cuban League, una liga fantasy con:
 - importación controlada desde Mister.
 
 La web pública nunca debe mostrar borradores no publicados.
+
+## Redondeo visual de estadísticas (V184)
+
+- Capitanes (ambas vistas y todos los criterios), Bonos acumulados, Líneas, MVP, Liga sin bonus y Comparador muestran enteros con `leagueStatsFormat`.
+- Redondeo al entero más cercano, mitades alejándose de cero; evita `−0`/`+0` y conserva `—` para valores desconocidos. Una única instancia de `Intl.NumberFormat`.
+- Primero se suman y dividen los puntos completos de las jornadas; solo se formatea el resultado final. Nunca se suman valores ya redondeados.
+- Orden, empates y corte del top 20 conservan toda la precisión. La nota visible explica por qué dos valores mostrados iguales pueden ocupar puestos distintos.
+- `profileSeasonFormat`, normalización, todas las funciones de cálculo, perfiles, jornadas, clasificación oficial e históricos permanecen intactos. El bono estimado de las tarjetas sigue identificado como estimado; no sustituye el bono verificado.
+- Sin consultas adicionales, dependencias, cambios de datos, SQL de escritura o migraciones. Se actualizan únicamente presentación, caché y pruebas/documentación.
+- Recursos `app.js`/registro SW: `184-20261019-rounded-stats`; caché `cuban-league-v184-rounded-stats`. CSS, catálogo y datos mantienen sus versiones.
+- Pruebas nuevas: una sola operación de redondeo, negativos/mitades/cero/ausencias, suma de dos bonos de 2,5 = 5, todas las vistas con datos congelados y rankings sin empates artificiales.
 
 ## Ranking general de capitanes (V183)
 
@@ -449,6 +460,10 @@ Los SQL históricos V57/V58/V59/V65/V114/V116/V124 siguen en el repo. No reejecu
 - Cambios visuales triviales no requieren actualizar este archivo.
 
 ## Última actualización
+
+**2026-10-19 UTC / 2026-10-18 Miami** — V184: presentación de estadísticas
+sin decimales; auditoría de jornadas publicadas y conservación exacta de cálculos,
+rankings, perfiles y tablas. Sin operaciones de escritura en Supabase.
 
 **2026-10-18 UTC / 2026-10-17 Miami** — V182: logo F05 elegido por Ernesto,
 adaptación de paleta y recursos PWA. Basado en V181, con respaldo remoto previo.
