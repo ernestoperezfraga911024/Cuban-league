@@ -1,4 +1,4 @@
-const APP_VERSION='183-20261018-global-captains';
+const APP_VERSION='184-20261019-rounded-stats';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -4080,6 +4080,20 @@ function buildLeagueStats(rawRows){
   };
 }
 
+// Presentation only: never feed rounded text into sums, averages or rankings.
+// Keep the profile/history formatter and the published scores unchanged.
+const LEAGUE_STATS_INTEGER_FORMAT=new Intl.NumberFormat('es',{maximumFractionDigits:0});
+function leagueStatsFormat(value,{signed=false}={}){
+  if(value===null||value===undefined||value===''||typeof value==='boolean')return '—';
+  const number=matchdayLineupNumericValue(value,NaN);
+  if(!Number.isFinite(number))return '—';
+  const absolute=LEAGUE_STATS_INTEGER_FORMAT.format(Math.abs(number));
+  // Round once at display time, with half points away from zero; hide signed zero.
+  if(absolute==='0')return absolute;
+  if(number<0)return `−${absolute}`;
+  return signed?`+${absolute}`:absolute;
+}
+
 function leagueStatsTeamVisual(team){
   const safeName=profileAttr(team.name);
   const shield=profileAttr(team.shield||'');
@@ -4147,7 +4161,7 @@ function leagueComparatorHeroTeamMarkup(team,side,result){
   return `<article class="league-comparator-hero-team is-${side}${result===side?' is-winner':''}" ${profileTriggerAttrs(team.name)}>
       <div class="league-comparator-avatar">${shield?`<img src="${shield}" alt="Foto de ${safeName}">`:`<span>${profileAttr(matchdayLineupInitials(team.name))}</span>`}</div>
       <h3>${safeName}</h3>
-      <strong>${available?profileSeasonFormat(team.officialPoints):'—'}<small> pts</small></strong>
+      <strong>${available?leagueStatsFormat(team.officialPoints):'—'}<small> pts</small></strong>
       ${leagueComparatorLeaderBadge(side,result)}
       <span class="league-comparator-games">${team.publishedRows} ${team.publishedRows===1?'jornada oficial':'jornadas oficiales'}</span>
     </article>`;
@@ -4164,7 +4178,7 @@ function leagueComparatorPlayerCard(team,side,type,result){
   return `<article class="league-comparator-player-card is-${side} is-${type}${result===side?' is-winner':''}">
       <header><span>${isCaptain?uiIcon('crown'):uiIcon('star')}</span><b>${title}</b>${leagueComparatorLeaderBadge(side,result)}</header>
       ${player?`<div class="league-comparator-player">${profileSeasonPlayerVisual(player)}</div>
-        <div class="league-comparator-player-numbers"><strong>${profileSeasonFormat(points)} pts</strong><span>${uses} ${uses===1?'jornada':'jornadas'} · ${profileSeasonFormat(average)} prom.</span></div>
+        <div class="league-comparator-player-numbers"><strong>${leagueStatsFormat(points)} pts</strong><span>${uses} ${uses===1?'jornada':'jornadas'} · ${leagueStatsFormat(average)} prom.</span></div>
         ${records.length>1?`<small class="league-comparator-shared">Liderato compartido entre ${records.length} jugadores</small>`:''}`
         :`<div class="league-comparator-player-empty"><b>Sin ${isCaptain?'capitán':'MVP'} registrado</b><span>Esperando un XI completo</span></div>`}
     </article>`;
@@ -4190,13 +4204,13 @@ function leagueComparatorLineMarkup(left,right){
     const leftWidth=visualWidth(leftValue,leftAvailable);
     const rightWidth=visualWidth(rightValue,rightAvailable);
     const resultText=result==='left'?`${left.name} lidera`:result==='right'?`${right.name} lidera`:result==='tie'?'empate':'comparación no disponible';
-    const aria=`${labels[position]}: ${left.name}, ${leftAvailable?`${profileSeasonFormat(leftValue)} puntos`:'sin XI'}; ${right.name}, ${rightAvailable?`${profileSeasonFormat(rightValue)} puntos`:'sin XI'}. Resultado: ${resultText}`;
+    const aria=`${labels[position]}: ${left.name}, ${leftAvailable?`${leagueStatsFormat(leftValue)} puntos`:'sin XI'}; ${right.name}, ${rightAvailable?`${leagueStatsFormat(rightValue)} puntos`:'sin XI'}. Resultado: ${resultText}`;
     return `<div class="league-comparator-line" role="img" aria-label="${profileAttr(aria)}">
-      <strong class="is-left${result==='left'?' is-winner':''}">${leftAvailable?profileSeasonFormat(leftValue):'—'}${result==='left'?'<span aria-hidden="true">★</span>':''}</strong>
+      <strong class="is-left${result==='left'?' is-winner':''}">${leftAvailable?leagueStatsFormat(leftValue):'—'}${result==='left'?'<span aria-hidden="true">★</span>':''}</strong>
       <span class="league-comparator-track is-left${leftValue<0?' is-negative':''}"><i style="--compare-width:${leftWidth.toFixed(2)}%"></i></span>
       <b title="${labels[position]}">${position}</b>
       <span class="league-comparator-track is-right${rightValue<0?' is-negative':''}"><i style="--compare-width:${rightWidth.toFixed(2)}%"></i></span>
-      <strong class="is-right${result==='right'?' is-winner':''}">${result==='right'?'<span aria-hidden="true">★</span>':''}${rightAvailable?profileSeasonFormat(rightValue):'—'}</strong>
+      <strong class="is-right${result==='right'?' is-winner':''}">${result==='right'?'<span aria-hidden="true">★</span>':''}${rightAvailable?leagueStatsFormat(rightValue):'—'}</strong>
       ${result==='tie'?'<small>EMPATE</small>':''}
     </div>`;
   }).join('');
@@ -4209,11 +4223,11 @@ function leagueComparatorOfficialMetricMarkup(label,icon,left,right,key){
   const rightValue=right[key];
   const result=leagueComparatorResult(leftValue,rightValue,leftAvailable,rightAvailable);
   const resultText=result==='left'?`${left.name} lidera`:result==='right'?`${right.name} lidera`:result==='tie'?'empate':'comparación no disponible';
-  return `<article class="league-comparator-official-metric" aria-label="${profileAttr(`${label}: ${left.name}, ${leftAvailable?profileSeasonFormat(leftValue):'sin datos'}; ${right.name}, ${rightAvailable?profileSeasonFormat(rightValue):'sin datos'}. Resultado: ${resultText}`)}">
+  return `<article class="league-comparator-official-metric" aria-label="${profileAttr(`${label}: ${left.name}, ${leftAvailable?leagueStatsFormat(leftValue):'sin datos'}; ${right.name}, ${rightAvailable?leagueStatsFormat(rightValue):'sin datos'}. Resultado: ${resultText}`)}">
     <span class="league-comparator-official-icon">${uiIcon(icon)}</span>
-    <div class="is-left${result==='left'?' is-winner':''}"><strong>${leftAvailable?profileSeasonFormat(leftValue):'—'}</strong>${result==='left'?'<small>★ LÍDER</small>':''}</div>
+    <div class="is-left${result==='left'?' is-winner':''}"><strong>${leftAvailable?leagueStatsFormat(leftValue):'—'}</strong>${result==='left'?'<small>★ LÍDER</small>':''}</div>
     <b>${label}</b>
-    <div class="is-right${result==='right'?' is-winner':''}"><strong>${rightAvailable?profileSeasonFormat(rightValue):'—'}</strong>${result==='right'?'<small>★ LÍDER</small>':''}</div>
+    <div class="is-right${result==='right'?' is-winner':''}"><strong>${rightAvailable?leagueStatsFormat(rightValue):'—'}</strong>${result==='right'?'<small>★ LÍDER</small>':''}</div>
     ${result==='tie'?'<span class="league-comparator-metric-tie">EMPATE</span>':''}
   </article>`;
 }
@@ -4284,6 +4298,7 @@ function renderLeagueComparatorContent(){
       <span><b>${right.publishedRows}</b> jornadas oficiales · <b>${right.lineupMatchdays}</b> XI completos</span>
       ${unequalCoverage?`<small>La cobertura ${officialCoverageDiffers&&lineupCoverageDiffers?'de jornadas oficiales y XI':officialCoverageDiffers?'de jornadas oficiales':'de XI'} es diferente; compara los acumulados con cautela.</small>`:''}
     </div>
+    <p class="league-stats-note">Valores redondeados al entero más cercano. Las comparaciones usan los valores exactos.</p>
     <p class="league-comparator-updated">${LEAGUE_STATS_STATE.status==='loading'
       ?'Actualizando…'
       :LEAGUE_STATS_STATE.error
@@ -4350,7 +4365,7 @@ function leagueStatsCaptainBonusMarkup(data){
       <tbody>${ranked.map(({row:team,rank})=>`<tr>
         <td class="league-no-bonus-rank">${table.complete?rank:'—'}</td>
         <th scope="row"><div class="league-no-bonus-team" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}${team.missingMatchdays.length?`<small>Revisar ${team.missingMatchdays.map(day=>`J${day}`).join(', ')}</small>`:''}</span></div></th>
-        <td class="league-no-bonus-points">${completeFor(team)?`<span${team.bonus<0?' class="league-no-bonus-change is-down"':''}>${profileSeasonFormat(team.bonus,{signed:true})}</span>`:'<span aria-label="Bono pendiente">—</span>'}</td>
+        <td class="league-no-bonus-points">${completeFor(team)?`<span${team.bonus<0?' class="league-no-bonus-change is-down"':''}>${leagueStatsFormat(team.bonus,{signed:true})}</span>`:'<span aria-label="Bono pendiente">—</span>'}</td>
       </tr>`).join('')}</tbody>
     </table></div>
     <p class="league-stats-note">Ejemplo: 8 puntos ×3 = 24; el bono es +16. Se suman solo los extras del brazalete, incluidos los negativos. Sin capitán o con saldo negativo, el bono de esa jornada es 0. Los empates comparten puesto.</p>`;
@@ -4394,10 +4409,10 @@ function leagueStatsGlobalCaptainMarkup(data){
           <button type="button" class="league-stats-global-owner" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}</span></button>
         </div>
         <div class="league-stats-summary"><div class="league-stats-metrics">
-          <div><span>Puntos</span><b>${profileSeasonFormat(player.captainPoints)}</b></div>
+          <div><span>Puntos</span><b>${leagueStatsFormat(player.captainPoints)}</b></div>
           <div><span>Jornadas</span><b>${player.captainUses}</b></div>
-          <div><span>Promedio</span><b>${profileSeasonFormat(player.captainAverage)}</b></div>
-          <div><span>Bono</span><b class="${player.captainBonus<0?'is-negative':'is-positive'}">${profileSeasonFormat(player.captainBonus,{signed:true})}</b></div>
+          <div><span>Promedio</span><b>${leagueStatsFormat(player.captainAverage)}</b></div>
+          <div><span>Bono</span><b class="${player.captainBonus<0?'is-negative':'is-positive'}">${leagueStatsFormat(player.captainBonus,{signed:true})}</b></div>
         </div></div>
       </article>`).join('')}
     </div>
@@ -4454,10 +4469,10 @@ function leagueStatsCaptainMarkup(data){
           <div class="league-stats-summary">
             ${player?`<div class="league-stats-tags"><span>${worst?'Peor promedio':mode==='points'?'Más puntos':'Mejor promedio'}</span>${both?'<span class="is-double">Líder en ambos</span>':''}</div>`:''}
           <div class="league-stats-metrics">
-            <div><span>Puntos</span><b>${player?profileSeasonFormat(player.captainPoints):'—'}</b></div>
+            <div><span>Puntos</span><b>${player?leagueStatsFormat(player.captainPoints):'—'}</b></div>
             <div><span>Jornadas</span><b>${player?player.captainUses:'—'}</b></div>
-            <div><span>Promedio</span><b>${player?profileSeasonFormat(player.captainAverage):'—'}</b></div>
-            <div><span>Bono</span><b class="${player?.captainBonus<0?'is-negative':'is-positive'}">${player?profileSeasonFormat(player.captainBonus,{signed:true}):'—'}</b></div>
+            <div><span>Promedio</span><b>${player?leagueStatsFormat(player.captainAverage):'—'}</b></div>
+            <div><span>Bono</span><b class="${player?.captainBonus<0?'is-negative':'is-positive'}">${player?leagueStatsFormat(player.captainBonus,{signed:true}):'—'}</b></div>
           </div>
           </div>
         </article>`;
@@ -4483,7 +4498,7 @@ function leagueStatsLineMarkup(data){
         const ranking=data.lineRankings[line]||[];
         const best=ranking[0]?.positionTotals[line];
         const leaders=ranking.filter(team=>Math.abs(team.positionTotals[line]-best)<.0001);
-        return `<article><span>${line}</span><b>${leaders.length?profileSeasonFormat(best):'—'}</b><small>${leaders.length?profileAttr(leaders.map(team=>team.name).join(' / ')):'Sin XI registrados'}</small></article>`;
+        return `<article><span>${line}</span><b>${leaders.length?leagueStatsFormat(best):'—'}</b><small>${leaders.length?profileAttr(leaders.map(team=>team.name).join(' / ')):'Sin XI registrados'}</small></article>`;
       }).join('')}
     </div>
     <div class="league-stats-toolbar" role="group" aria-label="Ordenar líneas">
@@ -4496,9 +4511,9 @@ function leagueStatsLineMarkup(data){
         <span class="league-stats-rank">${team.lineupMatchdays?rank:'—'}</span>
         ${leagueStatsTeamVisual(team)}
         <div class="league-stats-line-metrics">
-          ${positions.map(line=>`<div class="${position===line?'is-selected':''}"><span>${line}</span><b>${team.lineupMatchdays?profileSeasonFormat(team.positionTotals[line]):'—'}</b></div>`).join('')}
+          ${positions.map(line=>`<div class="${position===line?'is-selected':''}"><span>${line}</span><b>${team.lineupMatchdays?leagueStatsFormat(team.positionTotals[line]):'—'}</b></div>`).join('')}
         </div>
-        <div class="league-stats-line-total"><span>${position==='all'?'Total del XI':positionLabels[position]}</span><b>${team.lineupMatchdays?profileSeasonFormat(valueFor(team)):'—'}</b><small>${team.lineupMatchdays?`${profileSeasonFormat(valueFor(team)/team.lineupMatchdays)} pts por XI`:'Sin alineaciones'}</small></div>
+        <div class="league-stats-line-total"><span>${position==='all'?'Total del XI':positionLabels[position]}</span><b>${team.lineupMatchdays?leagueStatsFormat(valueFor(team)):'—'}</b><small>${team.lineupMatchdays?`${leagueStatsFormat(valueFor(team)/team.lineupMatchdays)} pts por XI`:'Sin alineaciones'}</small></div>
       </article>`).join('')}
     </div>
     <p class="league-stats-note">PT + DF + MC + DL equivale a todos los puntos registrados en las alineaciones de ese participante.</p>`;
@@ -4524,7 +4539,7 @@ function leagueStatsMvpMarkup(data){
         </div>
         ${team.mvps.length?`<div class="league-stats-summary">
           <div class="league-stats-tags"><span>MVP</span></div>
-          <div class="league-stats-mvp-metrics"><span><small>Puntos</small><b>${profileSeasonFormat(team.mvps[0].contributionPoints)}</b></span><span><small>Jornadas</small><b>${team.mvps[0].appearances}</b></span><span><small>Promedio</small><b>${profileSeasonFormat(team.mvps[0].average)}</b></span></div>
+          <div class="league-stats-mvp-metrics"><span><small>Puntos</small><b>${leagueStatsFormat(team.mvps[0].contributionPoints)}</b></span><span><small>Jornadas</small><b>${team.mvps[0].appearances}</b></span><span><small>Promedio</small><b>${leagueStatsFormat(team.mvps[0].average)}</b></span></div>
         </div>`:''}
       </article>`).join('')}
     </div>
@@ -4545,7 +4560,7 @@ function leagueStatsNoBonusMarkup(data){
         const changeLabel=movement===null?'Comparación pendiente':movement>0?`Sube ${movement} ${movement===1?'puesto':'puestos'}`:movement<0?`Baja ${Math.abs(movement)} ${movement===-1?'puesto':'puestos'}`:'Mismo puesto';
         return `<tr><td class="league-no-bonus-rank">${team.rank??'—'}</td>
           <th scope="row"><div class="league-no-bonus-team" ${profileTriggerAttrs(team.name)}>${team.shield?`<img src="${profileAttr(team.shield)}" alt="" loading="lazy">`:''}<span>${profileAttr(team.name)}${team.missingMatchdays.length?`<small>Revisar ${team.missingMatchdays.map(day=>`J${day}`).join(', ')}</small>`:''}</span></div></th>
-          <td class="league-no-bonus-points">${team.points===null?'<span aria-label="Puntos pendientes">—</span>':profileSeasonFormat(team.points)}</td>
+          <td class="league-no-bonus-points">${team.points===null?'<span aria-label="Puntos pendientes">—</span>':leagueStatsFormat(team.points)}</td>
           <td><span class="league-no-bonus-change${movement>0?' is-up':movement<0?' is-down':''}" aria-label="${changeLabel}">${movement===null?'—':movement>0?`↑ ${movement}`:movement<0?`↓ ${Math.abs(movement)}`:'='}</span>${team.officialRank?`<small class="league-no-bonus-official">Oficial: ${team.officialRank}º</small>`:''}</td></tr>`;
       }).join('')}</tbody>
     </table></div>
@@ -4599,6 +4614,7 @@ function renderLeagueStatsContent(){
     <section id="leagueStatsSectionPanel" class="league-stats-section" role="tabpanel" aria-labelledby="leagueStats${section[0].toUpperCase()}${section.slice(1)}Tab">
       ${panelMarkup}
     </section>
+    <p class="league-stats-note">Valores redondeados al entero más cercano. El orden y los empates usan los valores exactos.</p>
     <p class="league-stats-updated">${LEAGUE_STATS_STATE.status==='loading'
       ?'Actualizando…'
       :LEAGUE_STATS_STATE.error
