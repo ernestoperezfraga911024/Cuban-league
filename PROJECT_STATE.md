@@ -7,9 +7,9 @@
 - **Proyecto:** Cuban League
 - **Repositorio:** `ernestoperezfraga911024/Cuban-league`
 - **Rama principal:** `main`
-- **Versión:** V185: buscador del ranking general y desglose por jornada al tocar puntos de capitanes. Conserva el redondeo V184 y todos los cálculos existentes.
-- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama V185: `codex/captain-search-details-v185`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
-- **Base de esta actualización:** `00391da` (main V184). Revertir únicamente el PR V185 retira estos controles sin restaurar datos.
+- **Versión:** V186: calendario conjunto de Liga, Copa y Champions en Jornadas → Calendario. Conserva estadísticas y navegación existentes.
+- **Publicación:** GitHub Pages desde `main`, mediante PR y comprobación del despliegue. Rama V186: `codex/competition-calendar-v186`; comprobar Pages del commit integrado antes de dar la publicación por terminada.
+- **Base de esta actualización:** `739f257` (main V185). Revertir únicamente el PR V186 retira el calendario sin restaurar datos.
 - **Respaldo anterior:** `backup/pre-editorial-redesign-v174-20261015`, commit `24bc164f6d860b4bb4d1e441807da9530b0a0583`. Revertir solo el código para conservar jornadas nuevas.
 - **Fecha de verificación del código:** 2026-10-19 UTC / 2026-10-18 Miami. Auditoría de lectura sobre 160 filas publicadas, 20 participantes y 8 jornadas: 7.466 puntos oficiales. Se comprobaron 697 acumulados por futbolista/participante contra sus jornadas; estadísticas, perfiles, rankings y HTML de tablas oficiales/históricas idénticos antes y después. Pruebas: `npm test` (112 casos).
 - **Temporada configurada:** 2026/27
@@ -30,6 +30,16 @@ Gestionar y publicar Cuban League, una liga fantasy con:
 - importación controlada desde Mister.
 
 La web pública nunca debe mostrar borradores no publicados.
+
+## Calendario conjunto (V186)
+
+- Jornadas mantiene Resumen y añade Calendario con pestañas accesibles por teclado. Abre en el tramo de la última jornada publicada; muestra seis jornadas, permite cambiar tramo, Anteriores/Siguientes y volver a la última publicada. La temporada abarca J1–J38.
+- Usa `LIVE_MATCHDAY_ROWS` para disponibilidad/estados de Liga y grupos de Champions; Copa reutiliza `buildCupTournament()` intacto. Una eliminación por saldo negativo puede estar confirmada mientras Liga sigue provisional. Si Copa termina antes, desaparecen los enlaces a rondas inexistentes.
+- Grupos de Champions proceden de `championsConfiguration()` y `data.json` (J3, J7, J9, J12, J15, J18, J21, J24). Las cinco fechas de eliminatorias se leen del calendario oficial ya existente en `index.html`, sin mantener otra copia: Cuartos J27/J28, Semifinales J32/J33 y Final J37. No inventa cruces ni resultados de eliminatorias.
+- Liga abre el resumen de esa jornada publicada; Copa selecciona su ronda real; Champions abre su calendario oficial, resalta la fecha y, si corresponde, su columna en los grupos. Cada destino incluye Volver al calendario, restaurando tramo y foco.
+- Cálculo diferido al abrir la vista, caché por snapshot/configuración y DOM conservado si no cambia. Sin consultas de red nuevas al abrir, paginar o navegar; sin dependencias, datos, migraciones, administración ni cambios de reglas.
+- CSS aislado en `competition-calendar.css`; tres filas por jornada en móvil y columnas en escritorio. Recursos app/CSS/registro SW `186-20261019-calendar`, caché `cuban-league-v186-calendar`. Datos y catálogo conservan sus versiones.
+- Verificación: `npm test` 122/122, sintaxis JS y `git diff --check`. Cinco casos nuevos cubren mapping J7 y futuras fases, datos congelados, estados parciales/aplazados, eliminación por saldo negativo, final anticipada, carga/error, actualización de calendarios, teclado, paginación y retorno desde las tres competiciones sin nuevas peticiones. Contratos de cálculos/datos e imágenes originales preservados.
 
 ## Búsqueda y desglose de capitanes (V185)
 

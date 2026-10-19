@@ -1,4 +1,4 @@
-const APP_VERSION='185-20261019-captain-details';
+const APP_VERSION='186-20261019-calendar';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -13,6 +13,9 @@ let LIVE_STATS_HAS_SYNCED=false;
 let PUBLISHED_SYNC_PROMISE=null;
 let SELECTED_MATCHDAY=null;
 let SELECTED_CLASSIFICATION_MATCHDAY=null;
+const COMPETITION_CALENDAR_PAGE_SIZE=6;
+const COMPETITION_CALENDAR_LAST_MATCHDAY=38;
+const COMPETITION_CALENDAR_STATE={view:'summary',start:null,cache:null,markup:null,returnDay:null,championsDay:null,focus:null};
 const CUP_START_MATCHDAY=4;
 const CUP_FINAL_MATCHDAY=22;
 let SELECTED_CUP_MATCHDAY=null;
@@ -797,6 +800,7 @@ function applySectionChange(target,selectedHistoryView){
     hero.inert=!isHome;
   }
   if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
+  focusCompetitionCalendarDestination(target);
 }
 
 function scrollToSectionStart(){
@@ -819,6 +823,7 @@ function go(id,historyView){
   if(current===next){
     if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
     scrollToSectionStart();
+    focusCompetitionCalendarDestination(target);
     return;
   }
 
@@ -2079,7 +2084,189 @@ function renderMatchdayDetails(){
   </button>`).join('');
 }
 
+function competitionChampionsSchedule(){
+  const configuration=championsConfiguration();
+  const entries=configuration?configuration.leagueMatchdays.map((day,index)=>({day,title:`Grupos · Champions J${index+1}`,groupDay:index+1})):[];
+  // Knockout dates already live in the official Champions calendar. Read that
+  // source instead of maintaining a second, independently editable schedule.
+  document.querySelectorAll('#championsCalendarPanel .champions-calendar-phase:not(.is-groups)').forEach(phase=>{
+    const title=phase.querySelector('h3')?.textContent.trim()||'';
+    phase.querySelectorAll('.champions-calendar-dates li').forEach(item=>{
+      const match=item.querySelector('strong')?.textContent.trim().match(/^Liga J(\d+)$/);
+      const day=Number(match?.[1]);
+      const leg=item.querySelector('span')?.textContent.trim()||'';
+      if(title&&Number.isInteger(day)&&day>=1&&day<=COMPETITION_CALENDAR_LAST_MATCHDAY)entries.push({day,title:`${title} · ${leg}`,groupDay:null});
+    });
+  });
+  return {configured:Boolean(configuration),entries};
+}
+
+function buildCompetitionCalendar(){
+  const schedule=competitionChampionsSchedule();
+  const roster=activeParticipants();
+  const names=new Set(roster.map(team=>team.name));
+  const known=LIVE_STATS_HAS_SYNCED||LIVE_MATCHDAY_ROWS.length>0;
+  const key=JSON.stringify([schedule,[...names],known]);
+  const cached=COMPETITION_CALENDAR_STATE.cache;
+  if(cached?.rows===LIVE_MATCHDAY_ROWS&&cached.data===DATA&&cached.key===key)return cached.model;
+  const byDay=new Map();
+  LIVE_MATCHDAY_ROWS.forEach(row=>{
+    if(!names.has(row.participantName)||row.matchday<1||row.matchday>COMPETITION_CALENDAR_LAST_MATCHDAY)return;
+    if(!byDay.has(row.matchday))byDay.set(row.matchday,new Map());
+    byDay.get(row.matchday).set(row.participantName,row);
+  });
+  const latest=Math.max(0,...byDay.keys());
+  const tournament=buildCupTournament();
+  const rounds=new Map(tournament.rounds.map(round=>[round.matchday,round]));
+  const championsDays=new Map();
+  schedule.entries.forEach(entry=>{
+    // A conflicting configuration cannot silently turn into a made-up fixture.
+    championsDays.set(entry.day,championsDays.has(entry.day)?null:entry);
+  });
+  const days=Array.from({length:COMPETITION_CALENDAR_LAST_MATCHDAY},(_,index)=>{
+    const day=index+1;
+    const rows=[...(byDay.get(day)?.values()||[])];
+    const partial=rows.length>0&&rows.length<names.size;
+    const postponed=rows.some(row=>row.hasPostponedMatches);
+    const published=rows.length>0;
+    const status=!known?'Estado por consultar':!published?'Sin resultados publicados':partial?`Datos parciales · ${rows.length}/${names.size}`:postponed?'Provisional · Aplazados':'Resultados publicados';
+    const league={kind:'league',title:`Liga · J${day}`,detail:status,tone:partial||postponed?'warning':published?'ready':'idle',enabled:published};
+    const round=rounds.get(day);
+    let cup={kind:'cup',title:day<CUP_START_MATCHDAY?`Empieza en J${CUP_START_MATCHDAY}`:tournament.finished?'Copa finalizada':day>CUP_FINAL_MATCHDAY?'Sin ronda programada':'Ronda pendiente de confirmar',detail:'',tone:'idle',enabled:false};
+    if(round){
+      const detail=!known?'Estado por consultar':round.status==='confirmed'?'Eliminación confirmada':round.status==='provisional'?(round.incomplete?'Provisional · Aplazados':'Resultado provisional'):round.status==='blocked'?`En espera de J${round.blockedBy}`:round.status==='invalid'?(round.missingMisterOrder?'Desempate pendiente':'Datos incompletos'):'Pendiente de resultados';
+      cup={kind:'cup',title:tournament.finished&&day===tournament.finalMatchday?'Ronda final':day===CUP_FINAL_MATCHDAY?'Final prevista':'Ronda de eliminación',detail,tone:['provisional','blocked','invalid'].includes(round.status)?'warning':round.status==='confirmed'?'ready':'idle',enabled:true};
+    }
+    const entry=championsDays.get(day);
+    let champions={kind:'champions',title:'Sin jornada programada',detail:'',tone:'idle',enabled:false};
+    if(entry)champions={kind:'champions',title:entry.title,detail:entry.groupDay?status:'Ver calendario oficial',tone:entry.groupDay&&(partial||postponed)?'warning':'idle',enabled:true};
+    else if(!schedule.configured||championsDays.has(day))champions={kind:'champions',title:'Calendario por confirmar',detail:'',tone:'warning',enabled:false};
+    return {day,events:[league,cup,champions]};
+  });
+  const model={latest,known,days};
+  COMPETITION_CALENDAR_STATE.cache={rows:LIVE_MATCHDAY_ROWS,data:DATA,key,model};
+  return model;
+}
+
+function competitionCalendarPage(day){
+  const safe=Math.min(COMPETITION_CALENDAR_LAST_MATCHDAY,Math.max(1,Math.trunc(Number(day)||1)));
+  return Math.floor((safe-1)/COMPETITION_CALENDAR_PAGE_SIZE)*COMPETITION_CALENDAR_PAGE_SIZE+1;
+}
+
+function renderCompetitionCalendar(){
+  const host=$('competitionCalendarContent');
+  if(!host||COMPETITION_CALENDAR_STATE.view!=='calendar'||!DATA)return;
+  const model=buildCompetitionCalendar();
+  const start=COMPETITION_CALENDAR_STATE.start??competitionCalendarPage(model.latest||1);
+  const end=Math.min(start+COMPETITION_CALENDAR_PAGE_SIZE-1,COMPETITION_CALENDAR_LAST_MATCHDAY);
+  const pages=Array.from({length:Math.ceil(COMPETITION_CALENDAR_LAST_MATCHDAY/COMPETITION_CALENDAR_PAGE_SIZE)},(_,index)=>index*COMPETITION_CALENDAR_PAGE_SIZE+1);
+  const labels={league:'Liga',cup:'Copa',champions:'Champions'};
+  const markup=`<div class="competition-calendar-toolbar">
+      <label>Jornadas de Liga<select id="competitionCalendarRange" aria-label="Tramo del calendario">${pages.map(day=>`<option value="${day}"${day===start?' selected':''}>J${day}–J${Math.min(day+COMPETITION_CALENDAR_PAGE_SIZE-1,COMPETITION_CALENDAR_LAST_MATCHDAY)}</option>`).join('')}</select></label>
+      <button type="button" data-calendar-current>${model.latest?`Última publicada · J${model.latest}`:'Ir al inicio'}</button>
+    </div>
+    ${LIVE_STATS_STATUS==='loading'?'<p class="competition-calendar-warning" role="status">Consultando resultados publicados…</p>':LIVE_STATS_STATUS==='stale'?'<p class="competition-calendar-warning" role="status">Sin actualizar: se conservan los últimos resultados recibidos.</p>':LIVE_STATS_STATUS==='error'?'<p class="competition-calendar-warning" role="status">Resultados no disponibles. Puedes consultar la programación.</p>':''}
+    <p class="competition-calendar-note" role="status" aria-live="polite">Jornadas ${start}–${end} de ${COMPETITION_CALENDAR_LAST_MATCHDAY} · Temporada ${profileAttr(DATA.currentSeason)}</p>
+    <div class="competition-calendar-list">${model.days.slice(start-1,end).map(({day,events})=>`<article id="competitionCalendarDay${day}" class="competition-calendar-day${day===model.latest?' is-latest':''}" aria-labelledby="competitionCalendarTitle${day}" tabindex="-1">
+      <header><h3 id="competitionCalendarTitle${day}">Jornada ${day}</h3>${day===model.latest?'<span>Última publicada</span>':model.known&&day===model.latest+1?'<span>Próxima por publicar</span>':''}</header>
+      <div class="competition-calendar-events">${events.map(event=>{
+        const tag=event.enabled?'button':'div';
+        return `<${tag} class="competition-calendar-event is-${event.tone}"${event.enabled?` type="button" data-calendar-competition="${event.kind}" data-calendar-day="${day}" aria-label="${profileAttr(`Abrir ${labels[event.kind]} · Liga J${day} · ${event.title}`)}"`:''}>
+          <span class="competition-calendar-label">${labels[event.kind]}</span><span><b>${profileAttr(event.title)}</b>${event.detail?`<small>${profileAttr(event.detail)}</small>`:''}</span>${event.enabled?'<span aria-hidden="true">→</span>':''}</${tag}>`;
+      }).join('')}</div></article>`).join('')}</div>
+    <div class="competition-calendar-pager" role="group" aria-label="Recorrer calendario"><button type="button" data-calendar-page="${start-COMPETITION_CALENDAR_PAGE_SIZE}"${start===1?' disabled':''}>← Anteriores</button><button type="button" data-calendar-page="${start+COMPETITION_CALENDAR_PAGE_SIZE}"${end===COMPETITION_CALENDAR_LAST_MATCHDAY?' disabled':''}>Siguientes →</button></div>
+    <p class="competition-calendar-note">Las jornadas corresponden a Liga. Los resultados con aplazados o datos incompletos siguen pendientes; Copa puede confirmar una eliminación por saldo negativo. Las fechas de Champions siguen su calendario oficial.</p>`;
+  if(COMPETITION_CALENDAR_STATE.markup!==markup){
+    host.innerHTML=markup;
+    COMPETITION_CALENDAR_STATE.markup=markup;
+  }
+}
+
+function setMatchdayView(view,{focus=false}={}){
+  const selected=view==='calendar'?'calendar':'summary';
+  COMPETITION_CALENDAR_STATE.view=selected;
+  document.querySelectorAll('[data-matchday-view]').forEach(button=>{
+    const active=button.dataset.matchdayView===selected;
+    button.setAttribute('aria-selected',String(active));
+    button.tabIndex=active?0:-1;
+    $(button.getAttribute('aria-controls')).hidden=!active;
+    if(active&&focus)button.focus();
+  });
+  if(selected==='calendar')renderCompetitionCalendar();
+}
+
+function setCompetitionCalendarPage(day){
+  COMPETITION_CALENDAR_STATE.start=competitionCalendarPage(day);
+  renderCompetitionCalendar();
+  $('competitionCalendarRange')?.focus({preventScroll:true});
+  $('matchdayCalendarPanel')?.scrollIntoView({block:'start',behavior:'auto'});
+}
+
+function focusCompetitionCalendarDestination(target){
+  const pending=COMPETITION_CALENDAR_STATE.focus;
+  if(!pending||pending.target!==target)return;
+  COMPETITION_CALENDAR_STATE.focus=null;
+  requestAnimationFrame(()=>{
+    if(document.body.dataset.section!==target)return;
+    const node=$(pending.id);
+    node?.focus({preventScroll:true});
+    node?.scrollIntoView({block:'start',behavior:'auto'});
+  });
+}
+
+function highlightCompetitionCalendarChampions(){
+  const day=COMPETITION_CALENDAR_STATE.championsDay;
+  const groupDay=championsConfiguration()?.leagueToChampions.get(day);
+  document.querySelectorAll('#championsCalendarPanel .champions-calendar-dates li').forEach(item=>{
+    item.classList.toggle('is-calendar-day',item.querySelector('strong')?.textContent.trim()===`Liga J${day}`);
+  });
+  document.querySelectorAll('#groupGrid .champions-group').forEach(group=>{
+    group.querySelectorAll('.champions-day-head').forEach((cell,index)=>cell.classList.toggle('is-calendar-day',index+1===groupDay));
+    group.querySelectorAll('.champions-score-row').forEach(row=>row.querySelectorAll('.champions-points-cell').forEach((cell,index)=>cell.classList.toggle('is-calendar-day',index+1===groupDay)));
+  });
+}
+
+function openCompetitionCalendarEntry(competition,day){
+  if(!['league','cup','champions'].includes(competition)||!Number.isInteger(day))return;
+  const item=buildCompetitionCalendar().days.find(item=>item.day===day);
+  const event=item?.events.find(event=>event.kind===competition);
+  if(!event?.enabled)return;
+  const target=competition==='league'?'matchdays':competition;
+  const id=competition==='league'?'matchdayCalendarReturn':`${competition}CalendarReturn`;
+  COMPETITION_CALENDAR_STATE.returnDay=day;
+  const context=$(id);
+  context.hidden=false;
+  const detail=competition==='champions'?` · ${event.title}`:'';
+  context.innerHTML=`<p>Desde el calendario · Liga J${day}${profileAttr(detail)}</p><button type="button" data-calendar-return>← Volver al calendario</button>`;
+  if(competition==='league'){
+    SELECTED_MATCHDAY=day;
+    setMatchdayView('summary');
+    renderMatchdayCenter();
+  }else if(competition==='cup'){
+    SELECTED_CUP_MATCHDAY=day;
+    CUP_SELECTION_MANUAL=true;
+    renderCup();
+  }else{
+    COMPETITION_CALENDAR_STATE.championsDay=day;
+    renderChampions();
+    $('championsCalendar').classList.add('is-open');
+    $('championsCalendarToggle').setAttribute('aria-expanded','true');
+    $('championsCalendarPanel').setAttribute('aria-hidden','false');
+  }
+  COMPETITION_CALENDAR_STATE.focus={target,id};
+  go(target);
+}
+
+function returnToCompetitionCalendar(){
+  const day=COMPETITION_CALENDAR_STATE.returnDay||buildCompetitionCalendar().latest||1;
+  COMPETITION_CALENDAR_STATE.start=competitionCalendarPage(day);
+  setMatchdayView('calendar');
+  COMPETITION_CALENDAR_STATE.focus={target:'matchdays',id:`competitionCalendarDay${day}`};
+  go('matchdays');
+}
+
 function renderMatchdayCenter(){
+  renderCompetitionCalendar();
   const select=$('publicMatchdaySelect');
   if(!select)return;
   const hasMatchdays=PUBLISHED_MATCHDAYS.length>0;
@@ -5643,6 +5830,7 @@ function renderChampions(){
     </article>`;
   }).join('');
   $('bracket').innerHTML=DATA.champions.knockout.map(r=>`<article class="round"><h3 class="group-title">${uiIcon('trophy')}<span>${r.round}</span></h3><div class="empty-match">Pendiente de clasificación</div><div class="empty-match">Pendiente de clasificación</div></article>`).join('');
+  highlightCompetitionCalendarChampions();
 }
 
 function renderCup(){
@@ -7107,6 +7295,7 @@ function syncPublishedData(){
       renderCup();
     }
     if(renderStats||firstSync||previousStatus!==LIVE_STATS_STATUS)renderHomeLive();
+    if(previousStatus!==LIVE_STATS_STATUS)renderCompetitionCalendar();
     if(!liveStatsResult.synced)return;
     const milestonesChanged=await syncAchievementMilestones({render:false});
     if((liveStatsChanged||milestonesChanged)&&PROFILE_SEASON_STATE&&!$('playerModal')?.hidden){
@@ -7175,7 +7364,18 @@ async function init(){
   document.addEventListener('input',e=>{
     if(e.target.id==='leagueCaptainSearch')filterLeagueCaptains(e.target.value);
   });
+  document.addEventListener('change',e=>{
+    if(e.target.id==='competitionCalendarRange')setCompetitionCalendarPage(Number(e.target.value));
+  });
   document.addEventListener('click',e=>{
+    const matchdayView=e.target.closest('[data-matchday-view]');
+    if(matchdayView){setMatchdayView(matchdayView.dataset.matchdayView,{focus:true});return;}
+    const calendarEntry=e.target.closest('[data-calendar-competition]');
+    if(calendarEntry){openCompetitionCalendarEntry(calendarEntry.dataset.calendarCompetition,Number(calendarEntry.dataset.calendarDay));return;}
+    const calendarPage=e.target.closest('[data-calendar-page]');
+    if(calendarPage){setCompetitionCalendarPage(Number(calendarPage.dataset.calendarPage));return;}
+    if(e.target.closest('[data-calendar-current]')){setCompetitionCalendarPage(buildCompetitionCalendar().latest||1);return;}
+    if(e.target.closest('[data-calendar-return]')){returnToCompetitionCalendar();return;}
     if(e.target.closest('[data-live-retry]')){
       syncPublishedData();
       return;
@@ -7303,6 +7503,12 @@ async function init(){
     }
   });
   document.addEventListener('keydown',e=>{
+    const matchdayTab=e.target.closest('[data-matchday-view]');
+    if(matchdayTab&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
+      e.preventDefault();
+      setMatchdayView(e.key==='Home'?'summary':e.key==='End'?'calendar':matchdayTab.dataset.matchdayView==='summary'?'calendar':'summary',{focus:true});
+      return;
+    }
     trapAchievementDetailFocus(e);
     trapMatchdayLineupFocus(e);
     if(e.key==='Escape'&&!$('achievementDetailModal').hidden){
