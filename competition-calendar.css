@@ -1,0 +1,44 @@
+/* Scoped calendar/navigation presentation; existing competition tables stay intact. */
+.matchday-view-tabs{display:flex;gap:6px;margin:0 0 22px;padding:5px;border:1px solid rgba(128,174,151,.2);border-radius:13px;background:#0b2117}
+.matchday-view-tabs button{flex:1;min-height:44px;padding:10px 14px;border:0;border-radius:9px;background:transparent;color:var(--muted,#a6b4aa);font:inherit;font-size:.9rem;font-weight:750;cursor:pointer}
+.matchday-view-tabs button[aria-selected="true"]{background:#0a5437;color:#f4f0df}
+#matchdaySummaryPanel[hidden],#matchdayCalendarPanel[hidden],.competition-calendar-context[hidden]{display:none!important}
+.competition-calendar-heading{margin-bottom:18px}
+.competition-calendar-heading h2{margin:7px 0;font-size:clamp(1.25rem,3vw,1.8rem);line-height:1.25}
+.competition-calendar-heading p,.competition-calendar-note{color:var(--muted,#a6b4aa);font-size:.8rem;line-height:1.55}
+.competition-calendar-toolbar{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.competition-calendar-toolbar label{flex:1;min-width:150px;display:grid;gap:5px;font-size:.75rem;color:var(--muted,#a6b4aa)}
+.competition-calendar-toolbar select{width:100%;min-height:44px;padding:8px 10px;border:1px solid rgba(128,174,151,.35);border-radius:9px;background:#0b2117;color:#f4f0df;font:inherit;font-size:16px}
+.competition-calendar-toolbar button,.competition-calendar-pager button,.competition-calendar-context button{min-height:44px;padding:9px 13px;border:1px solid rgba(128,174,151,.3);border-radius:9px;background:#0b2117;color:#f4f0df;font:inherit;font-size:.8rem;font-weight:650;cursor:pointer}
+.competition-calendar-pager{display:flex;justify-content:space-between;gap:12px;margin:14px 0}
+.competition-calendar-pager button:disabled{opacity:.4;cursor:default}
+.competition-calendar-list{display:grid;gap:12px}
+.competition-calendar-day{padding:12px;border:1px solid rgba(128,174,151,.18);border-radius:14px;background:#0b2117;scroll-margin-top:100px}
+.competition-calendar-day.is-latest{border-color:#508b62;box-shadow:inset 3px 0 #75b881}
+.competition-calendar-day>header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.competition-calendar-day h3{margin:0;font-size:1rem;font-variant-numeric:tabular-nums}
+.competition-calendar-day>header span{font-size:.67rem;line-height:1.4;color:#bdd8c2}
+.competition-calendar-events{display:grid;gap:4px;min-width:0}
+.competition-calendar-event{display:grid;grid-template-columns:82px minmax(0,1fr) 12px;align-items:center;gap:8px;width:100%;min-height:54px;padding:9px 4px;border:0;border-radius:7px;background:transparent;color:#f4f0df;font:inherit;text-align:left}
+button.competition-calendar-event{cursor:pointer}
+button.competition-calendar-event:hover{background:rgba(255,255,255,.045)}
+.competition-calendar-event+.competition-calendar-event{border-top:1px solid rgba(128,174,151,.12)}
+.competition-calendar-label{font-size:.72rem;font-weight:750;color:#c8dbc7}
+.competition-calendar-event b{display:block;font-size:.8rem;line-height:1.4;overflow-wrap:anywhere}
+.competition-calendar-event small{display:block;margin-top:3px;color:var(--muted,#a6b4aa);font-size:.7rem;line-height:1.4}
+.competition-calendar-event.is-warning small,.competition-calendar-warning{color:#e6c38a}
+.competition-calendar-event.is-idle b{font-weight:500;color:var(--muted,#a6b4aa)}
+.competition-calendar-warning{margin:10px 0;font-size:.8rem;line-height:1.5}
+.competition-calendar-context{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:12px 0 18px;padding:10px 12px;border:1px solid rgba(128,174,151,.35);border-radius:10px;background:#0b2117;scroll-margin-top:100px}
+.competition-calendar-context p{flex:1;min-width:180px;margin:0;font-size:.8rem;line-height:1.5;color:#f4f0df}
+.matchday-view-tabs button:focus-visible,.competition-calendar-toolbar :focus-visible,.competition-calendar-pager button:focus-visible,.competition-calendar-event:focus-visible,.competition-calendar-context:focus-visible,.competition-calendar-context button:focus-visible{outline:2px solid #a0d6ac;outline-offset:3px}
+.champions-calendar-dates li.is-calendar-day{outline:2px solid #a0d6ac;outline-offset:2px;border-radius:7px}
+.champions-day-head.is-calendar-day,.champions-points-cell.is-calendar-day{background:rgba(117,184,129,.18);box-shadow:inset 0 -2px #a0d6ac}
+@media(min-width:900px){
+  .competition-calendar-day{display:grid;grid-template-columns:105px minmax(0,1fr);gap:16px;align-items:center}
+  .competition-calendar-day>header{display:grid;gap:5px;margin:0}
+  .competition-calendar-events{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .competition-calendar-event{grid-template-columns:minmax(0,1fr) 12px;min-height:92px;padding:8px}
+  .competition-calendar-label{grid-column:1/-1}
+  .competition-calendar-event+.competition-calendar-event{border-top:0;border-left:1px solid rgba(128,174,151,.12);border-radius:0}
+}
