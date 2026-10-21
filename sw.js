@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v186-calendar';
+const CACHE_NAME = 'cuban-league-v187-mobile-podium';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,7 +8,7 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=186-20261019-calendar',
+  './app.js?v=187-20261021-mobile-podium',
   './data.json?v=174-20261014-mister-j8-catalog',
   './catalog/players.json?v=174-20261014-mister-j8-catalog',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',

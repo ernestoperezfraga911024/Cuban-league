@@ -12,6 +12,22 @@
 <link rel="stylesheet" href="styles.css?v=176-20261015-classic-navigation">
 <link rel="stylesheet" href="stats-compact.css?v=185-20261019-captain-details">
 <link rel="stylesheet" href="competition-calendar.css?v=186-20261019-calendar">
+<style id="home-mobile-podium-v187">
+/* V187 — En celular: presentación, podio y accesos, sin duplicar contenido. */
+@media(max-width:700px){
+  .hero-photo .hero-shell{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"intro" "podium" "actions";
+    align-content:start;
+    row-gap:24px;
+  }
+  .hero-photo .hero-copy{display:contents}
+  .hero-photo .hero-intro{grid-area:intro;min-width:0}
+  .hero-photo #heroKpis{grid-area:podium;margin-top:0!important}
+  .hero-photo .hero-copy>.actions{grid-area:actions;margin-top:0!important}
+}
+</style>
 <style id="participant-card-layout-v76">
 @media(max-width:700px){
   #players .player-card{
@@ -152,10 +168,12 @@
 <div class="shade"></div>
 <div class="hero-shell">
   <div class="hero-copy">
-    <span class="hero-season-line">TEMPORADA 2026/27</span>
-    <h1>Una liga.<br>Toda una historia.</h1>
-    <span class="hero-accent-line" aria-hidden="true"></span>
-    <p>Clasificación, jornadas y récords de una competición que se escribe cada temporada.</p>
+    <div class="hero-intro">
+      <span class="hero-season-line">TEMPORADA 2026/27</span>
+      <h1>Una liga.<br>Toda una historia.</h1>
+      <span class="hero-accent-line" aria-hidden="true"></span>
+      <p>Clasificación, jornadas y récords de una competición que se escribe cada temporada.</p>
+    </div>
     <div class="actions">
       <button type="button" data-go="current"><span>Clasificación</span><span class="action-arrow" aria-hidden="true">→</span></button>
       <button type="button" class="secondary" data-go="rules"><span>Reglamento</span><span class="action-arrow" aria-hidden="true">→</span></button>
@@ -932,4 +950,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=186-20261019-calendar"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=187-20261021-mobile-podium"></script></body></html>
