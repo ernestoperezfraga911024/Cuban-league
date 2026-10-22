@@ -2,6 +2,15 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Actualización V189 · 2026-10-22
+- Segunda: extensión 1.1.1 espera 11 puestos visibles estables del participante y jornada elegidos; ignora tarjetas ocultas y conserva la validación de identidad.
+- Fotos de participantes desde Mister en General, jornadas y revisión. HTTPS validado, carga diferida e iniciales de respaldo. Reimportar General incorpora las fotos.
+- El panel muestra jornadas Guardadas/Pendientes. Para completar J1–J9, hay que importar y publicar cada una; se guardan de forma independiente.
+- Migración aplicada: `supabase-second-division-history-photos.sql`, después de `supabase-second-division.sql`. Solo funciones de Segunda, sin reescribir resultados. General real con 19 participantes y administrador excluido; todavía sin jornadas.
+- Verificación: 134 pruebas pasan con `node --test --test-concurrency=1 tests/*.test.cjs`; SQL con rollback verifica independencia J1/J5/J9, fotos, permisos y conservación de Primera. Revisión visual en 390 px y escritorio.
+- La sesión de Mister del usuario no está disponible para una prueba real; se verificó con HTML archivado y escenarios de carga parcial/otra jornada. Debe actualizar la extensión y probar J1.
+- Detalles: `docs/SECOND_DIVISION_V189.md`.
+
 ## Snapshot
 
 - **Proyecto:** Cuban League

@@ -4,6 +4,16 @@
   const LEAGUE_ID = '978196';
   const key = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const idOK = value => typeof value === 'string' && /^\d{1,20}$/.test(value);
+  function avatarUrl(value) {
+    if (typeof value !== 'string' || value.length > 2048 || /[\s<>"'\\]/.test(value)) return null;
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password || url.port
+        || !/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/i.test(url.hostname)) return null;
+      url.hash = '';
+      return url.href;
+    } catch { return null; }
+  }
   function lineup(rows) {
     if (!Array.isArray(rows) || rows.length !== 11) throw new Error('La alineación debe contener los 11 puestos.');
     const ids = new Set();
@@ -51,6 +61,8 @@
       ids.add(row.id);
       if (i && payload.managers[i - 1].points < row.points) throw new Error('La tabla no está ordenada por puntos.');
       const clean = { id:row.id, name:row.name.trim(), points:row.points, rank:row.rank };
+      const avatar = avatarUrl(row.avatarUrl);
+      if (avatar) clean.avatarUrl = avatar;
       if (!general && row.id !== payload.excludedManagerId) {
         if (typeof row.negativeBalance !== 'boolean') throw new Error('Falta el estado del participante.');
         clean.negativeBalance = row.negativeBalance;
@@ -80,7 +92,7 @@
     if (/^[+-]?\d{1,3}(?:[.,\s]\d{3})+$/.test(text)) return Number(text.replace(/[.,\s]/g, ''));
     throw new Error('Hay un total ilegible. No se sustituye por cero.');
   }
-  const api = { LEAGUE_ID, validate, lineup, standings, suggestedExclusion, points };
+  const api = { LEAGUE_ID, validate, lineup, standings, suggestedExclusion, points, avatarUrl };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.CubanSecondDivisionCore = api;
 })(typeof globalThis === 'object' ? globalThis : this);

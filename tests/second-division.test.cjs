@@ -147,6 +147,7 @@ test('Mister DOM to historical XI reads the chosen day, keeps no-play/captain an
     if(event.target.closest('.lineup-player'))stats++;
     const link=event.target.closest('a.user');
     if(link){
+      event.preventDefault();
       assert.match(link.getAttribute('href'),/101/);
       w.document.querySelector('.team-lineup')?.remove();
       const container=w.document.createElement('div');container.className='team-lineup';
@@ -173,12 +174,12 @@ test('admin publishes only reviewed Second Division data and passes the exact da
   const id='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
   const client={rpc:async(name,args)=>{
     calls.push({name,args});
-    if(name==='get_second_division_admin_state')return {data:{revision:2,excludedId:'999',snapshot:{standings:[{id:'101'}]},baselineStandings:[{id:'101'}]}};
+    if(name==='get_second_division_admin_state')return {data:{revision:2,publishedMatchdays:[0,1,5],excludedId:'999',snapshot:{standings:[{id:'101'}]},baselineStandings:[{id:'101'}]}};
     return {data:{},error:null};
   }};
   const extensionCall=async(type,input)=>{
     jobs.push({type,input});
-    if(type==='HELLO')return {secondDivision:true};
+    if(type==='HELLO')return {secondDivision:true,secondHistory:true};
     if(type==='SECOND_START')return {id};
     if(type==='SECOND_STATUS')return {job:{status:'ready',payload:payload(5)}};
     return {};
@@ -188,6 +189,8 @@ test('admin publishes only reviewed Second Division data and passes the exact da
     w.CubanSecondAdmin.init({client,season,extensionCall,isBlocked:()=>false});
     $('secondImportScope').value='5';$('secondImportScope').dispatchEvent(new w.Event('change'));
     $('secondImport').click();await tick();await tick();
+    assert.match($('secondSavedDays').textContent,/J1, J5/);
+    assert.match($('secondImportScope').selectedOptions[0].textContent,/Guardada/);
     assert.equal($('secondReview').hidden,false);assert.equal($('secondExcluded').value,'999');assert.equal($('secondExcluded').disabled,true);
     assert.equal(calls.some(c=>c.name==='publish_second_division'),false);
     assert.equal(jobs.find(c=>c.type==='SECOND_START').input.matchday,5);
@@ -199,4 +202,76 @@ test('admin publishes only reviewed Second Division data and passes the exact da
     assert.ok(calls.every(c=>c.name.includes('second_division')));
     assert.ok(jobs.some(c=>c.type==='SECOND_CONSUME'));
   }finally{dom.window.close();}
+});
+
+
+test('participant photos accept HTTPS URLs, reject unsafe sources, and fall back without changing names or points',async()=>{
+  const photo='https://cdn-mister.mundodeportivo.com/avatar/101.jpg?v=2';
+  const p=payload();p.managers[0].avatarUrl=photo;
+  assert.equal(core.standings(core.validate(p,season),'999')[0].avatarUrl,photo);
+  for(const value of ['javascript:alert(1)','data:image/svg+xml,xx','http://example.com/a','https://user:pass@example.com/a','https://127.0.0.1/a','https://localhost/a','https://example.com:444/a','https://example.com/a"bad']) {
+    assert.equal(core.avatarUrl(value),null);
+  }
+  const page=publicPage(()=>[{...snapshot(0),standings:[{id:'101',name:'Fixture Participant',rank:1,points:100,avatarUrl:photo}]}]);
+  try{
+    page.w.document.body.dataset.section='second-division';await tick();
+    const img=page.$('secondDivisionRows').querySelector('img');
+    assert.equal(img.src,photo);assert.equal(img.loading,'lazy');assert.equal(img.referrerPolicy,'no-referrer');
+    assert.equal(img.width,40);assert.equal(img.alt,'');
+    img.dispatchEvent(new page.w.Event('error'));
+    assert.equal(page.$('secondDivisionRows').querySelectorAll('img').length,0);
+    assert.match(page.$('secondDivisionRows').textContent,/Fixture Participant/);
+    assert.equal(page.$('secondDivisionRows').querySelector('.second-avatar-fallback').textContent,'FP');
+  }finally{page.dom.window.close();}
+});
+
+async function collectHistorical({wrong=false}={}) {
+  const source=read('tests/fixtures/mister-j5-yovany-lineup-20260917.html')
+    .replaceAll('data-id_manager="7070670"','data-id_manager="101"').replaceAll('data-id_gameweek="4046"','data-id_gameweek="4001"');
+  const html='<a class="active" href="/action/change?id_community=978196">2da Cubanleague</a><button data-tab="gameweek" class="active">Jornada</button>'
+    +'<a data-partial class="selected" href="/standings?gw=4009">J9</a><a data-partial href="/standings?gw=4001">J1</a>'
+    +'<a class="btn btn-sw-link user" href="users/101/manager"><img src="https://cdn-mister.mundodeportivo.com/avatar/101.png"><div class="info"><div class="name">Fixture</div></div><div class="points">74</div></a>'
+    +'<a class="btn btn-sw-link user" href="users/999/manager"><div class="info"><div class="name">Ernesto</div></div><div class="points">0</div></a>';
+  const dom=new JSDOM(html,{url:'https://mister.mundodeportivo.com/standings',runScripts:'outside-only'});
+  const w=dom.window, realTimeout=w.setTimeout.bind(w), start=Date.now();
+  w.setTimeout=(fn,ms)=>realTimeout(fn,ms/40);
+  w.Date.now=()=>start+(Date.now()-start)*40;
+  Object.defineProperty(w.HTMLElement.prototype,'offsetWidth',{get(){return this.closest('[hidden]')?0:10;}});
+  let resolve,opened=0,selected=0;const finished=new Promise(r=>resolve=r);
+  w.chrome={runtime:{sendMessage:async({type,input})=>{
+    if(type==='SECOND_READY')return {ok:true,job:{id:'history',season,matchday:1,excludedManagerId:'999'}};
+    if(type==='SECOND_RESULT')resolve({payload:input.payload});
+    if(type==='SECOND_FAIL')resolve({error:input.error});
+    return {ok:true};
+  }}};
+  w.document.addEventListener('click',event=>{
+    const day=event.target.closest('a[data-partial]');
+    if(day){event.preventDefault();selected++;w.document.querySelectorAll('a[data-partial]').forEach(a=>a.classList.toggle('selected',a===day));}
+    const link=event.target.closest('a.user');
+    if(link){
+      event.preventDefault();opened++;assert.match(link.getAttribute('href'),/101/);
+      const box=w.document.createElement('div');box.className='team-lineup';box.innerHTML=source.replaceAll('data-id_gameweek="4001"','data-id_gameweek="4009"');w.document.body.append(box);
+      if(!wrong)realTimeout(()=>{
+        box.innerHTML=source;
+        const hidden=box.querySelector('.lineup-player').cloneNode(true);hidden.hidden=true;hidden.dataset.id_gameweek='4009';
+        box.querySelector('.line').append(hidden);
+      },50);
+    }
+  });
+  try{
+    w.eval(read('mister-import-core.js'));w.eval(read('second-division-core.js'));w.eval(read('mister-extension/second-division-collector.js'));
+    const timer=setTimeout(()=>resolve({error:'Test timeout'}),3000);
+    const result=await finished;clearTimeout(timer);await tick();return {...result,opened,selected};
+  }finally{dom.window.close();}
+}
+test('J1 imports while the league is on J9: waits for historical cards and ignores hidden stale cards',async()=>{
+  const result=await collectHistorical();
+  assert.equal(result.error,undefined);assert.equal(result.opened,1);assert.equal(result.selected,1);
+  assert.equal(result.payload.matchday,1);assert.equal(result.payload.gameweekId,4001);
+  assert.equal(result.payload.managers[0].lineup.length,11);
+  assert.equal(result.payload.managers[0].avatarUrl,'https://cdn-mister.mundodeportivo.com/avatar/101.png');
+});
+test('an XI that stays on J9 cannot be saved as J1',async()=>{
+  const result=await collectHistorical({wrong:true});
+  assert.equal(result.payload,undefined);assert.match(result.error,/Jornada 1.*0\/11.*No se guardó/);
 });
