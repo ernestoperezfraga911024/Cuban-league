@@ -6,7 +6,8 @@ import zipfile
 
 root = Path(__file__).resolve().parents[1]
 extension = root / 'mister-extension'
-(extension / 'mister-import-core.js').write_bytes((root / 'mister-import-core.js').read_bytes())
+for core in ('mister-import-core.js', 'second-division-core.js'):
+    (extension / core).write_bytes((root / core).read_bytes())
 version = json.loads((extension / 'manifest.json').read_text())['version']
 destination = root / 'downloads' / f'Cuban-League-Mister-{version}.zip'
 destination.parent.mkdir(exist_ok=True)

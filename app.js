@@ -1,4 +1,4 @@
-const APP_VERSION='187-20261021-mobile-podium';
+const APP_VERSION='188-20261022-second-division';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -7562,7 +7562,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards','second-division'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }

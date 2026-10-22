@@ -135,6 +135,9 @@
 }
 </style><link rel="stylesheet" href="mobile-navigation.css?v=178-20261015">
 <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
+<link rel="stylesheet" href="second-division.css?v=188-20261022">
+<script src="second-division-core.js?v=188-20261022" defer></script>
+<script src="second-division.js?v=188-20261022" defer></script>
 <script src="editorial-ui.js?v=176-20261015" defer></script></head><body class="classic-mobile-nav f05-theme" data-section="home">
 <a class="skip-link" href="#mainContent">Saltar al contenido</a>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -157,6 +160,7 @@
 <header class="topbar"><div class="brand"><div class="logo"><img src="cuban-league-f05-logo.svg" width="48" height="48" alt=""></div><div><b>CUBAN LEAGUE</b><small>Archivo oficial</small></div></div><div class="topbar-actions"><span class="header-season-badge"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg><span>Temporada 2026/27</span></span><button type="button" id="installApp" aria-label="Ver cómo instalar Cuban League" hidden><span aria-hidden="true">＋</span><span class="button-label">Instalar</span></button><button type="button" id="share" aria-label="Compartir Cuban League"><span aria-hidden="true">↗</span><span class="button-label">Compartir</span></button></div></header>
 
 <nav class="main-nav" aria-label="Navegación principal">
+<a class="second-desktop-fallback" href="?section=second-division">Segunda División</a><button class="second-desktop-menu" type="button" data-editorial-menu aria-haspopup="dialog" aria-controls="editorialMenu"><span aria-hidden="true">•••</span> Más</button>
 <button type="button" class="navtab active" data-section="home"><svg class="ui-icon" aria-hidden="true"><use href="#icon-home"></use></svg><span>Inicio</span></button><button type="button" class="navtab" data-section="current"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg><span>Clasificación</span></button>
 <button type="button" class="navtab" data-section="matchdays"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg><span>Jornadas</span></button>
 <button type="button" class="navtab" data-section="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><span>Participantes</span></button>
@@ -422,6 +426,25 @@
     <div class="competition-calendar-heading"><span class="eyebrow">LIGA · COPA · CHAMPIONS</span><h2>Tu calendario de competiciones</h2><p>Qué se juega en cada jornada de Liga. Toca una competición para consultarla.</p></div>
     <div id="competitionCalendarContent"></div>
   </div>
+</section>
+
+<section id="second-division" class="page" aria-labelledby="secondDivisionTitle" aria-busy="false">
+  <header class="second-heading"><span class="eyebrow">CUBAN LEAGUE</span><h1 id="secondDivisionTitle">Segunda División</h1><p>Así va la competición</p></header>
+  <div class="second-view-switch" role="group" aria-label="Clasificación de Segunda">
+    <button id="secondGeneral" type="button" aria-pressed="true">General</button>
+    <button id="secondByDay" type="button" aria-pressed="false">Por jornada</button>
+  </div>
+  <div id="secondDayControl" class="second-day-control" hidden><label for="secondMatchday">Jornada</label><select id="secondMatchday" disabled><option value="">Cargando jornadas…</option></select></div>
+  <p id="secondDayHint" class="second-note" hidden>Toca un participante para ver su alineación.</p>
+  <div class="second-table-shell"><table class="second-table"><caption id="secondTableCaption" class="sr-only">Segunda División · Clasificación general</caption><thead><tr><th scope="col">Pos.</th><th scope="col">Participante</th><th scope="col">Puntos</th></tr></thead><tbody id="secondDivisionRows"></tbody></table></div>
+  <p id="secondDivisionStatus" class="second-status" role="status" aria-live="polite">La clasificación se cargará al abrir esta sección.</p>
+  <button id="secondDivisionRetry" class="second-retry" type="button" hidden>Volver a intentar</button>
+  <dialog id="secondLineupDialog" class="second-lineup-dialog" aria-labelledby="secondLineupTitle" aria-describedby="secondLineupSubtitle">
+    <div class="second-lineup-head"><div><p id="secondLineupSubtitle" class="eyebrow"></p><h2 id="secondLineupTitle"></h2></div><button id="secondLineupClose" type="button" aria-label="Cerrar alineación" autofocus>×</button></div>
+    <p id="secondLineupStatus" class="second-status" role="status" aria-live="polite"></p>
+    <div id="secondLineupBody"></div>
+    <button id="secondLineupRetry" class="second-retry" type="button" hidden>Actualizar y reintentar</button>
+  </dialog>
 </section>
 
 <section id="players" class="page">
@@ -895,6 +918,7 @@
 <dialog id="editorialMenu" class="editorial-menu" aria-labelledby="editorialMenuTitle">
   <header><h2 id="editorialMenuTitle">Toda la liga.</h2><button type="button" data-editorial-close aria-label="Cerrar menú">✕</button></header>
   <nav aria-label="Más secciones">
+    <button type="button" data-go="second-division"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>Segunda División</button>
     <button type="button" data-go="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg>Participantes</button>
     <button type="button" data-go="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg>Champions</button>
     <button type="button" data-go="cup"><svg class="ui-icon" aria-hidden="true"><use href="#icon-crown"></use></svg>Copa</button>
@@ -950,4 +974,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=187-20261021-mobile-podium"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=188-20261022-second-division"></script></body></html>

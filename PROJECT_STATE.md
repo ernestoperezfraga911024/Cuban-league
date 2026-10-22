@@ -511,3 +511,12 @@ flujo de borrador con los 20 participantes y los dos nuevos jugadores. Cambio
 exclusivamente en el repositorio; no requiere migración ni modifica Supabase.
 
 **2026-09-23** — Bootstrap inicial de `PROJECT_STATE.md`, verificado contra `main`, README V173, código principal, Supabase vivo, Edge Functions, migraciones registradas, Security Advisor y sistema de backups.
+
+
+## v188 · 2026-10-22 · Segunda División
+
+Más incluye Segunda División con General, Por jornada y once histórico por participante. Comunidad Mister 978196; la cuenta de Ernesto se excluye por ID solo en Segunda. Extensión 1.1.0: publicar General primero y después importar/publicar cada jornada. General usa el total oficial, sin sumar jornadas.
+
+Migración aditiva aplicada en Supabase Cuban League: second_division_standings, second_division_lineups y configuración/historial privados. Primera conserva todos sus datos y cálculos. Sin datos reales de Segunda publicados todavía; requiere la primera captura desde la sesión Mister del propietario.
+
+Ver docs/SECOND_DIVISION_V188.md para arquitectura, pruebas, límites y recuperación; mister-extension-install.html#segunda para instrucciones.

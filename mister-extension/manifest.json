@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Cuban League · Importar desde Mister",
-  "version": "1.0.2",
-  "description": "Lee la jornada de Mister y la envía al borrador del panel de Cuban League. Publicar siempre es una acción del administrador.",
+  "version": "1.1.0",
+  "description": "Importa jornadas de Primera y la clasificación general de Segunda. Revisión y publicación desde el panel.",
   "permissions": [
     "storage"
   ],
@@ -29,7 +29,9 @@
       ],
       "js": [
         "mister-import-core.js",
-        "collector.js"
+        "collector.js",
+        "second-division-core.js",
+        "second-division-collector.js"
       ],
       "run_at": "document_idle"
     }

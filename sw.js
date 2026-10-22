@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v187-mobile-podium';
+const CACHE_NAME = 'cuban-league-v188-second-division';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,14 +8,18 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=187-20261021-mobile-podium',
+  './app.js?v=188-20261022-second-division',
+  './second-division.js?v=188-20261022',
+  './second-division.css?v=188-20261022',
+  './second-division-core.js?v=188-20261022',
+  './second-division-admin.js?v=188-20261022',
   './data.json?v=174-20261014-mister-j8-catalog',
   './catalog/players.json?v=174-20261014-mister-j8-catalog',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',
   './supabase-config.js?v=161-20260902',
   './admin.html',
   './admin.css?v=176-20261015-classic-navigation',
-  './admin.js?v=174-20261014-mister-j8-catalog',
+  './admin.js?v=188-20261022',
   './mister-import-core.js?v=169',
   './admin-manifest.json',
   './supabase.js',
@@ -141,6 +145,7 @@ self.addEventListener('fetch', event => {
   }
 
   if (
+    /\/second-division(?:-core|-admin)?\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/styles.css') ||
     url.pathname.endsWith('/mobile-navigation.css') ||
     url.pathname.endsWith('/editorial-ui.js') ||
