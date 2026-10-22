@@ -2,6 +2,13 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Corrección de publicación de Segunda · 2026-10-22
+- Resuelto el error SQL 21000 («more than one row returned by a subquery used as an expression») al publicar una jornada o reimportar General: las consultas de fotos guardadas comparaban una columna local consigo misma. Ahora relacionan explícitamente el ID del participante recibido con el guardado.
+- Migración aplicada: `supabase-second-division-publish-photos-fix.sql`, después de la migración V189. Solo reemplaza `publish_second_division`; conserva permisos, revisiones, controles de administrador, historial y datos.
+- Se mantiene la web V190 y la extensión 1.1.2. Si la lectura sigue abierta y no ha caducado (una hora), basta con pulsar Publicar jornada de nuevo, sin recargar ni actualizar la extensión.
+- La prueba de regresión con 19 participantes reproduce el mismo error antes del arreglo y pasa después. Verifica fotos distintas/ausentes, cambio de orden, prioridad foto nueva → jornada guardada → General, reintento sin duplicados, 18 alineaciones con tres huecos y un saldo negativo. Toda la suite SQL pasa y revierte sus datos de prueba.
+- Verificación de conservación: General real sigue en revisión 1 con 19 participantes; los hashes de datos de Primera y Segunda permanecen iguales. Ninguna jornada real se publicó durante estas pruebas.
+
 ## Actualización V190 · 2026-10-22
 - Corregidos los huecos de Segunda con tarjeta sin nombre/identidad y −4 explícito. Conserva su puesto, formación y penalización; no rellena con suplentes ni convierte una tarjeta incompleta en hueco.
 - Extensión 1.1.2 y caché V190. El panel exige soporte `secondEmptySlots`. Actualizar extensión, recargar Mister/administración y repetir J1.

@@ -75,6 +75,81 @@ begin
   if (select md5(coalesce(jsonb_agg(to_jsonb(s) order by to_jsonb(s)::text)::text,'')) from public.matchday_stats s) <> baseline then raise exception 'First Division changed'; end if;
 end;
 $$;
+
+-- Regression: the photo lookups must match manager IDs across a real-sized roster.
+do $photo_regression$
+declare
+  general_payload jsonb; day_payload jsonb; players jsonb; result jsonb; again jsonb;
+  admin_id uuid; day_req uuid := gen_random_uuid();
+begin
+  select user_id into admin_id from private.league_admins limit 1;
+  perform set_config('request.jwt.claim.sub',admin_id::text,true);
+  select jsonb_build_object('version',1,'league',jsonb_build_object('id','978196'),
+    'kind','general','matchday',0,'season','9998/98','capturedAt',now(),
+    'managers',jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
+      'id',(1000+n)::text,'name','Photo fixture '||n,'points',100-n,'rank',n,
+      'avatarUrl',case when n in (1,2) then 'https://example.com/avatar/'||n||'.jpg'
+        when n=4 then 'javascript:alert(1)' else null end)) order by n)
+      ||jsonb_build_array(jsonb_build_object('id','999','name','Excluded admin','points',0,'rank',20)))
+    into general_payload from generate_series(1,19) n;
+  result := public.publish_second_division(general_payload,'999',0,gen_random_uuid());
+  if jsonb_array_length(result->'standings') <> 19 then raise exception 'Wrong fixture roster size'; end if;
+
+  -- Eight players and three empty positions, including the goalkeeper.
+  select jsonb_agg(jsonb_build_object('slot',n,
+    'id',case when n in (2,7,11) then '' else (2000+n)::text end,
+    'name',case when n in (2,7,11) then 'Posición vacía' else 'Player '||n end,
+    'position',case when n=11 then 'PT' when n<=2 then 'DL' when n<=6 then 'MC' else 'DF' end,
+    'points',case when n in (2,7,11) then -4 else 1 end,
+    'status',case when n in (2,7,11) then 'empty' else 'scored' end,
+    'captain',false,'multiplier',1) order by n) into players from generate_series(1,11) n;
+  select general_payload || jsonb_build_object('kind','matchday','matchday',1,
+    'gameweekId',4001,'excludedManagerId','999',
+    'managers',jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
+      'id',case when n=1 then '1002' when n=2 then '1001' else (1000+n)::text end,
+      'name','Photo fixture '||n,'points',case when n=19 then 0 else 100-n end,'rank',n,
+      'avatarUrl',case when n=3 then 'https://example.com/day/3.jpg' else null end,
+      'negativeBalance',n=19,'lineup',case when n=19 then '[]'::jsonb else players end)) order by n)
+      ||jsonb_build_array(jsonb_build_object('id','999','name','Excluded admin','points',0,'rank',20)))
+    into day_payload from generate_series(1,19) n;
+  result := public.publish_second_division(day_payload,'999',0,day_req);
+  if result#>>'{standings,0,avatarUrl}' is distinct from 'https://example.com/avatar/2.jpg'
+    or result#>>'{standings,1,avatarUrl}' is distinct from 'https://example.com/avatar/1.jpg'
+    or result#>>'{standings,2,avatarUrl}' is distinct from 'https://example.com/day/3.jpg'
+    or result#>'{standings,3}' ? 'avatarUrl'
+    then raise exception 'General fallback attached a missing or incorrect participant photo'; end if;
+  again := public.publish_second_division(day_payload,'999',0,day_req);
+  if result is distinct from again then raise exception 'Day publication retry was not idempotent'; end if;
+  if (select count(*) from public.second_division_lineups where season='9998/98' and matchday=1) <> 19
+    or (select count(*) from public.second_division_lineups where season='9998/98' and matchday=1 and lineup=players) <> 18
+    or (select count(*) from public.second_division_lineups where season='9998/98' and matchday=1 and negative_balance and lineup='[]'::jsonb) <> 1
+    then raise exception 'Publication failed to preserve empty slots or negative balance'; end if;
+
+  -- A reimport uses each photo saved for this day, before considering General.
+  day_payload := day_payload #- '{managers,2,avatarUrl}';
+  day_payload := jsonb_set(day_payload,'{managers,1,avatarUrl}','"https://example.com/new/1.jpg"');
+  result := public.publish_second_division(day_payload,'999',1,gen_random_uuid());
+  if result#>>'{standings,0,avatarUrl}' is distinct from 'https://example.com/avatar/2.jpg'
+    or result#>>'{standings,1,avatarUrl}' is distinct from 'https://example.com/new/1.jpg'
+    or result#>>'{standings,2,avatarUrl}' is distinct from 'https://example.com/day/3.jpg'
+    or result#>'{standings,3}' ? 'avatarUrl'
+    or (result->>'revision')::int <> 2
+    then raise exception 'Reimport did not preserve per-manager photo precedence'; end if;
+  if (select count(*) from public.second_division_lineups where season='9998/98' and matchday=1 and revision=2) <> 19
+    then raise exception 'Reimport did not replace all day lineups atomically'; end if;
+
+  general_payload := general_payload #- '{managers,0,avatarUrl}' #- '{managers,1,avatarUrl}';
+  result := public.publish_second_division(general_payload,'999',1,gen_random_uuid());
+  if result#>>'{standings,0,avatarUrl}' is distinct from 'https://example.com/avatar/1.jpg'
+    or result#>>'{standings,1,avatarUrl}' is distinct from 'https://example.com/avatar/2.jpg'
+    or result#>'{standings,2}' ? 'avatarUrl'
+    or result#>'{standings,3}' ? 'avatarUrl'
+    then raise exception 'General reimport changed photo owners or copied a day-only photo'; end if;
+  if (select revision from public.second_division_standings where season='9998/98' and matchday=1) <> 2
+    then raise exception 'General reimport altered an existing day'; end if;
+end;
+$photo_regression$;
+
 set local role anon;
 do $$
 begin
