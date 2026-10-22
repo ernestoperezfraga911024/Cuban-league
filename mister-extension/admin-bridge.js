@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const allowed = new Set(['HELLO', 'START', 'STATUS', 'CAPTURE', 'CANCEL', 'CONSUME']);
+  const allowed = new Set(['HELLO', 'START', 'STATUS', 'CAPTURE', 'CANCEL', 'CONSUME', 'SECOND_START', 'SECOND_STATUS', 'SECOND_CANCEL', 'SECOND_CONSUME']);
   window.addEventListener('message', async event => {
     const data = event.data;
     if (event.source !== window || event.origin !== location.origin || data?.channel !== 'cuban-mister-panel-v1'

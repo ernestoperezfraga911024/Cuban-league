@@ -17,6 +17,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon-f05.png">
   <link rel="stylesheet" href="admin.css?v=176-20261015-classic-navigation">
   <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
+  <link rel="stylesheet" href="second-division.css?v=188-20261022">
 </head>
 <body class="f05-theme">
   <div class="admin-background" aria-hidden="true"></div>
@@ -304,6 +305,31 @@
       </details>
         </div>
       </section>
+
+      <details id="secondAdmin" class="second-admin">
+        <summary><span>Segunda División<small>General, jornadas y alineaciones desde Mister</small></span></summary>
+        <div class="second-admin-body">
+          <p class="second-note">Abre «2da Cubanleague» en Mister. Publica primero General para identificar tu cuenta de administrador. Después podrás importar cada jornada con sus alineaciones.</p>
+          <label for="secondImportScope">Tabla que deseas importar</label>
+          <select id="secondImportScope"><option value="0">General · puntos totales</option></select>
+          <div class="second-admin-actions">
+            <button id="secondImport" type="button">Importar Segunda desde Mister</button>
+            <button id="secondCancel" type="button" hidden>Descartar lectura</button>
+            <a href="mister-extension-install.html" target="_blank" rel="noopener">Actualizar extensión</a>
+            <a href="index.html?section=second-division" target="_blank" rel="noopener">Ver Segunda</a>
+          </div>
+          <p id="secondAdminStatus" class="second-status" role="status" aria-live="polite"></p>
+          <div id="secondReview" hidden>
+            <label for="secondExcluded">Tu cuenta de administrador · no compite</label>
+            <select id="secondExcluded"><option value="">Seleccionar cuenta de administrador</option></select>
+            <p id="secondReviewCount" class="second-note"></p>
+            <p id="secondReviewWarnings" class="second-note"></p>
+            <div class="second-table-shell"><table class="second-table"><thead><tr><th scope="col">Pos.</th><th scope="col">Participante</th><th scope="col">Puntos</th></tr></thead><tbody id="secondPreviewRows"></tbody></table></div>
+            <div id="secondRosterWarning" hidden><p class="second-note">La lista de participantes es distinta de la última publicada. Comprueba que la captura esté completa.</p><label><input id="secondAllowRoster" type="checkbox"> He revisado y confirmo el cambio de participantes.</label></div>
+            <div class="second-admin-actions"><button id="secondPublish" type="button" disabled>Publicar clasificación de Segunda</button></div>
+          </div>
+        </div>
+      </details>
 
       <nav class="competition-switcher" aria-label="Competición que deseas administrar">
         <button id="leagueModeButton" class="competition-option active" type="button" aria-pressed="true">
@@ -762,6 +788,8 @@
   <script src="supabase-config.js?v=161-20260902"></script>
   <script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script>
   <script src="mister-import-core.js?v=169"></script>
-  <script src="admin.js?v=174-20261014-mister-j8-catalog"></script>
+  <script src="second-division-core.js?v=188-20261022"></script>
+  <script src="second-division-admin.js?v=188-20261022"></script>
+  <script src="admin.js?v=188-20261022"></script>
 </body>
 </html>

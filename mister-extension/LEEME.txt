@@ -1,4 +1,4 @@
-CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.0.2
+CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.1.0
 
 INSTALAR (CHROME EN COMPUTADORA)
 1. Extrae el ZIP en una carpeta permanente, por ejemplo Documentos/Cuban-League-Mister.
@@ -12,12 +12,25 @@ INSTALAR (CHROME EN COMPUTADORA)
 
 Publicar es siempre una acción tuya desde administración.
 
-ACTUALIZAR DESDE 1.0.0 O 1.0.1
+ACTUALIZAR DESDE CUALQUIER VERSIÓN ANTERIOR
 1. Extrae el nuevo ZIP en la misma carpeta instalada y acepta reemplazar los archivos.
-2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.0.2.
+2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.1.0.
 3. Recarga las pestañas de Mister y administración, y vuelve a importar. Conserva el borrador existente.
 
-LECTURA Y LÍMITES
+SEGUNDA DIVISIÓN
+1. Selecciona 2da Cubanleague en Mister: código 978196.
+2. Abre Segunda División en administración. Importa y publica primero General.
+3. En la revisión identifica a Ernesto como cuenta de administrador que no compite.
+4. La exclusión se guarda por ID y se mantiene aunque cambie el nombre.
+5. Selecciona cada jornada e importa sus puntos y los once titulares de esa fecha.
+6. Revisa y publica. Los visitantes pueden abrir el once desde Más → Segunda División → Por jornada.
+7. Las jornadas deben estar disponibles en Mister. General no se calcula sumando las jornadas importadas.
+8. Si cambian los puntos durante la lectura, repite para obtener una captura coherente.
+9. Reimportar sustituye, no suma. No se publican datos automáticamente.
+10. Saldo negativo se muestra como cero; no se inventa una alineación ausente.
+11. Una sola lectura de Mister a la vez: termina o cancela antes de cambiar de división.
+
+LECTURA Y LÍMITES DE PRIMERA
 - Liga configurada: 1ra div Cubanleague, código Mister 649733; 20 participantes.
 - Solo se importan jornadas que aparecen en el calendario de Mister.
 - Lee las alineaciones de esa jornada, no la plantilla actual ni los suplentes.
@@ -45,7 +58,7 @@ RECUPERACIÓN
 PRIVACIDAD
 La extensión solo se ejecuta en Mister y en el panel de Cuban League.
 No solicita permiso de cookies, contraseñas, historial completo ni acceso a todas las páginas.
-No hace llamadas a servicios externos: envía los datos al panel y este usa su guardado autenticado de borradores.
+No hace llamadas a servicios externos: envía los datos al panel y este usa su guardado autenticado: borradores de Primera o publicación revisada de Segunda.
 No contiene claves de Supabase ni funciones para publicar, fichar, vender o cambiar alineaciones en Mister.
 Es una herramienta propia de Cuban League, no un producto oficial de Mister.
 Si Mister cambia su diseño, podría necesitar una actualización de la extensión.

@@ -12,12 +12,76 @@ async function jobFor(id) {
   return job;
 }
 async function save(job) { await chrome.storage.session.set({ [jobKey(job.id)]: job }); }
+
+  // Separate namespace and messages: Second Division never enters the matchday pipeline.
+  async function secondDivisionMessage(type, input, sender) {
+    const secondKey = id => 'second-job:' + id;
+    const entries = await chrome.storage.session.get(null);
+    if (type === 'SECOND_START' && isAdmin(sender.url)) {
+      if (!/^\d{4}\/\d{2}$/.test(input.season || '')) throw new Error('Temporada no válida.');
+      if (!Number.isInteger(input.matchday) || input.matchday < 0 || input.matchday > 38
+        || (input.matchday > 0 && !/^\d{1,20}$/.test(input.excludedManagerId || ''))) throw new Error('Jornada o cuenta excluida no válida.');
+      for (const [key, old] of Object.entries(entries)) {
+        if (Date.now() - old.createdAt >= TTL) {
+          if (key.startsWith('second-job:')) await chrome.storage.session.remove(key);
+          continue;
+        }
+        if (key.startsWith('job:') && ['discovering','discovered','capturing'].includes(old.status))
+          throw new Error('Termina o cancela la importación de Primera antes de leer Segunda.');
+        if (key.startsWith('second-job:') && old.status === 'reading') {
+          if (old.adminTabId === sender.tab.id && old.season === input.season && old.matchday === input.matchday && old.excludedManagerId === input.excludedManagerId) return { id: old.id };
+          throw new Error('Ya hay una lectura de Segunda activa.');
+        }
+      }
+      const job = { id: crypto.randomUUID(), season: input.season, matchday: input.matchday, excludedManagerId: input.excludedManagerId || '', adminTabId: sender.tab.id, createdAt: Date.now(), status: 'reading' };
+      const tab = await chrome.tabs.create({ url: 'about:blank', active: true });
+      job.tabId = tab.id;
+      await chrome.storage.session.set({ [secondKey(job.id)]: job });
+      await chrome.tabs.update(tab.id, { url: MISTER + '/standings' });
+      return { id: job.id };
+    }
+    if (type === 'SECOND_READY' && isMister(sender.url)) {
+      const job = Object.entries(entries).find(([key, j]) => key.startsWith('second-job:') && j.tabId === sender.tab.id
+        && j.status === 'reading' && Date.now() - j.createdAt < TTL)?.[1];
+      return { job: job || null };
+    }
+    if (!/^[\da-f-]{36}$/i.test(String(input.id || ''))) throw new Error('Solicitud de Segunda no válida.');
+    const job = entries[secondKey(input.id)];
+    if (!job || Date.now() - job.createdAt >= TTL) throw new Error('La captura de Segunda caducó.');
+    if (isAdmin(sender.url)) {
+      if (job.adminTabId !== sender.tab.id) throw new Error('La captura pertenece a otra pestaña.');
+      if (type === 'SECOND_STATUS') return { job };
+      if (type !== 'SECOND_CANCEL' && type !== 'SECOND_CONSUME') throw new Error('Acción no autorizada.');
+      job.status = type === 'SECOND_CANCEL' ? 'cancelled' : 'consumed';
+      delete job.payload;
+    } else if (isMister(sender.url)) {
+      if (job.tabId !== sender.tab.id || job.status !== 'reading') throw new Error('Lectura cancelada o finalizada.');
+      if (type === 'SECOND_RESULT') {
+        if (input.payload?.league?.id !== '978196' || input.payload?.kind !== (job.matchday ? 'matchday' : 'general')
+          || input.payload.matchday !== job.matchday || (job.matchday && input.payload.excludedManagerId !== job.excludedManagerId)
+          || input.payload.season !== job.season || JSON.stringify(input.payload).length > 500000)
+          throw new Error('La captura no corresponde a Segunda División.');
+        job.payload = input.payload;
+        job.status = 'ready';
+      } else if (type === 'SECOND_FAIL') {
+        job.error = String(input.error || 'No se pudo leer Segunda.').slice(0, 500);
+        job.status = 'failed';
+      } else throw new Error('Acción no autorizada.');
+    } else throw new Error('Origen no autorizado.');
+    await chrome.storage.session.set({ [secondKey(job.id)]: job });
+    return {};
+  }
+
 async function handle(message, sender) {
   if (sender.frameId !== 0 || !sender.tab) throw new Error('Origen no autorizado.');
   const input = message.input || {};
+  if (String(message.type).startsWith('SECOND_')) return secondDivisionMessage(message.type, input, sender);
   if (isAdmin(sender.url)) {
-    if (message.type === 'HELLO') return { version: '1.0.2', bridgeProtocol: 2, notPlayedIcon: true };
+    if (message.type === 'HELLO') return { version: '1.1.0', bridgeProtocol: 2, notPlayedIcon: true, secondDivision: true };
     if (message.type === 'START') {
+      const secondEntries = await chrome.storage.session.get(null);
+      if (Object.entries(secondEntries).some(([key, job]) => key.startsWith('second-job:') && job.status === 'reading' && Date.now() - job.createdAt < TTL))
+        throw new Error('Termina o cancela la lectura de Segunda antes de importar Primera.');
       if (!Number.isInteger(input.matchday) || input.matchday < 1 || input.matchday > 38
         || typeof input.season !== 'string' || input.season.length > 30) throw new Error('Jornada no válida.');
       const stored = await chrome.storage.session.get(null);

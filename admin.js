@@ -163,6 +163,8 @@
   }
 
   function showOnly(viewId) {
+    if (viewId !== 'panelView') window.CubanSecondAdmin?.reset();
+
     ['loadingView', 'loginView', 'panelView'].forEach(id => {
       $(id).hidden = id !== viewId;
     });
@@ -4650,6 +4652,8 @@
           detectSessionInUrl: true
         }
       });
+      window.CubanSecondAdmin?.init({ client: state.client, season: currentSeasonKey(), extensionCall,
+        isBlocked: () => state.misterImportBusy || state.saving || state.backupRestoring });
       bindEvents();
       setupInstallableAdmin();
       setupMisterImportControls();
