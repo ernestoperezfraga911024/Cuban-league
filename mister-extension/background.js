@@ -77,7 +77,7 @@ async function handle(message, sender) {
   const input = message.input || {};
   if (String(message.type).startsWith('SECOND_')) return secondDivisionMessage(message.type, input, sender);
   if (isAdmin(sender.url)) {
-    if (message.type === 'HELLO') return { version: '1.1.0', bridgeProtocol: 2, notPlayedIcon: true, secondDivision: true };
+    if (message.type === 'HELLO') return { version: '1.1.1', bridgeProtocol: 2, notPlayedIcon: true, secondDivision: true, secondHistory: true };
     if (message.type === 'START') {
       const secondEntries = await chrome.storage.session.get(null);
       if (Object.entries(secondEntries).some(([key, job]) => key.startsWith('second-job:') && job.status === 'reading' && Date.now() - job.createdAt < TTL))

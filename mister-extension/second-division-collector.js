@@ -57,6 +57,69 @@
     await wait(() => dayLinks().some(link => link.classList.contains('selected')
       && Number(new URL(link.href).searchParams.get('gw')) === gameweekId), 'No se seleccionó la jornada.');
   }
+  function photo(link) {
+    const image = [...link.querySelectorAll('img')].find(node => !node.closest('.points') && !node.matches('.team-logo'));
+    const sources = image ? [image.getAttribute('data-src'), image.currentSrc, image.getAttribute('src')] : [];
+    for (const node of [link, ...link.querySelectorAll('[style]')]) {
+      const background = node.style.backgroundImage;
+      const match = background.match(/^url\(["']?(.*?)["']?\)$/);
+      if (match) sources.push(match[1]);
+    }
+    for (const source of sources) {
+      if (!source) continue;
+      try { const url = core.avatarUrl(new URL(source, location.href).href); if (url) return url; } catch {}
+    }
+    return null;
+  }
+  function visibleSlots(starting) {
+    const lines = [...starting.children].filter(node => node.classList.contains('line') && visible(node));
+    return lines.map((line, i) => [...line.querySelectorAll('.lineup-player')]
+      .filter(card => visible(card) && !card.parentElement.closest('.lineup-player'))
+      .map(card => ({card, position:['DL','MC','DF','PT'][i]})));
+  }
+  async function historicalSlots(manager) {
+    let last = '', stable = 0, confirmed = 0, triedDay = false;
+    const deadline = Date.now() + 18000;
+    while (Date.now() < deadline) {
+      context();
+      const candidates = [...document.querySelectorAll('.team-lineup .lineup-starting')].filter(visible);
+      let complete = false;
+      for (const starting of candidates) {
+        const groups = visibleSlots(starting), slots = groups.flat();
+        const matches = slots.filter(({card}) => String(card.dataset.id_manager) === manager.id
+          && Number(card.dataset.id_gameweek) === gameweekId);
+        confirmed = Math.max(confirmed, matches.length);
+        const empty = ({card}) => !card.dataset.id_player && /posici[oó]n vac[ií]a|sin jugador|hueco vac[ií]o/i.test(text(card))
+          && original.number(text(card.querySelector('.info .points, .points'))) === -4
+          && (!card.dataset.id_manager || String(card.dataset.id_manager) === manager.id)
+          && (!card.dataset.id_gameweek || Number(card.dataset.id_gameweek) === gameweekId);
+        if (groups.length !== 4 || slots.length !== 11 || !matches.length
+          || !slots.every(slot => matches.includes(slot) || empty(slot))) continue;
+        complete = true;
+        const fingerprint = JSON.stringify(slots.map(({card,position}) => [position,card.dataset.id_player,card.outerHTML]));
+        stable = fingerprint === last ? stable + 1 : 0; last = fingerprint;
+        if (stable >= 2) return slots;
+      }
+      if (!complete) { last = ''; stable = 0; }
+      // Some historical participant views initially show their current XI.
+      // Use only a real same-origin link already rendered by Mister for this manager/day.
+      if (!triedDay) {
+        const target = [...document.querySelectorAll('a[href]')].filter(visible).find(link => {
+          try {
+            const url = new URL(link.href);
+            return url.origin === location.origin && url.pathname.split('/').includes(manager.id)
+              && Number(url.searchParams.get('gw')) === gameweekId
+              && /^J\s*\d+$/i.test(text(link)) && Number(text(link).replace(/\D/g,'')) === job.matchday;
+          } catch { return false; }
+        });
+        if (target && !target.classList.contains('selected')) { target.click(); triedDay = true; last = ''; stable = 0; }
+      }
+      if ((await send('SECOND_READY', {})).job?.id !== job.id) throw new Error('Lectura cancelada.');
+      await sleep(250);
+    }
+    throw new Error('No se pudo confirmar el once completo de ' + manager.name + ' en la Jornada ' + job.matchday
+      + ' (' + confirmed + '/11 puestos identificados). Abre esa jornada y su alineación en Mister y vuelve a importar. No se guardó ningún dato.');
+  }
   function readRows() {
     const links = managerLinks();
     if (links.length < 2) return null;
@@ -68,11 +131,13 @@
       const displayedRank = text(link.querySelector('.position, .rank')).replace(/[.ºª]/g, '').trim();
       if (displayedRank && /^\d+$/.test(displayedRank) && Number(displayedRank) !== i + 1)
         throw new Error('La clasificación está incompleta o no empieza en el primer puesto.');
-      return { id:managerId(link), name:text(link.querySelector('.info .name')),
+      return { id:managerId(link), name:text(link.querySelector('.info .name')), avatarUrl:photo(link),
         points:core.points(pointNode?.childNodes[0]?.textContent), rank:i + 1,
         ...(job.matchday ? {negativeBalance:/saldo negativo,\s*no punt[uú]a/i.test(text(link.querySelector('.info .played')))} : {}) };
     });
   }
+  // Lazy photo loading must not be mistaken for a change in sporting results.
+  const standingsSignature = managers => JSON.stringify(managers?.map(({avatarUrl, ...row}) => row));
   function show(message, error = false) {
     let panel = document.getElementById('cuban-second-progress');
     if (!panel) {
@@ -92,13 +157,9 @@
     const link = managerLinks().find(node => managerId(node) === manager.id);
     if (!link) throw new Error('Falta ' + manager.name + ' en la tabla.');
     link.click();
-    const selector = '.team-lineup .lineup-starting a.lineup-player[data-id_manager="' + manager.id + '"][data-id_gameweek="' + gameweekId + '"]';
-    const first = await wait(() => [...document.querySelectorAll(selector)].find(visible), 'No cargó el once de ' + manager.name + '.');
-    const lines = [...first.closest('.lineup-starting').children].filter(node => node.classList.contains('line') && visible(node));
-    if (lines.length !== 4) throw new Error('Formación ilegible de ' + manager.name + '.');
+    const slots = await historicalSlots(manager);
     const lineup = [];
-    for (let i = 0; i < lines.length; i++) {
-      for (const card of lines[i].querySelectorAll('.lineup-player')) {
+    for (const {card,position} of slots) {
         context();
         const id = String(card.dataset.id_player || '');
         const node = card.querySelector('.info .points, .points');
@@ -106,7 +167,7 @@
         const empty = !id && /posici[oó]n vac[ií]a|sin jugador|hueco vac[ií]o/i.test(text(card));
         if (empty) {
           if (original.number(raw) !== -4) throw new Error('Penalización de posición vacía ilegible.');
-          lineup.push({slot:lineup.length + 1, id:'', name:'Posición vacía', position:['DL','MC','DF','PT'][i],
+          lineup.push({slot:lineup.length + 1, id:'', name:'Posición vacía', position,
             points:-4, status:'empty', captain:false, multiplier:1});
           continue;
         }
@@ -114,10 +175,9 @@
           throw new Error('La alineación no corresponde a la jornada solicitada.');
         const parsed = original.points(raw, node?.classList.contains('pending') === true, node?.classList.contains('not-played') === true);
         const captain = card.querySelector('.captain-badge__multiplier');
-        lineup.push({slot:lineup.length + 1, id, name:text(card.querySelector('.name')), position:['DL','MC','DF','PT'][i],
+        lineup.push({slot:lineup.length + 1, id, name:text(card.querySelector('.name')), position,
           points:parsed.value, status:parsed.status, captain:Boolean(captain),
           multiplier:captain ? original.number(text(captain).replace(/^x/i, '')) : 1});
-      }
     }
     return {...manager, lineup:core.lineup(lineup)};
   }
@@ -131,13 +191,13 @@
       const deadline = Date.now() + 20000;
       while (Date.now() < deadline) {
         context(); managers = readRows();
-        const fingerprint = managers ? JSON.stringify(managers) : '';
+        const fingerprint = managers ? standingsSignature(managers) : '';
         stable = fingerprint && fingerprint === previous ? stable + 1 : 0; previous = fingerprint;
         if (stable >= 2) break;
         await sleep(400);
       }
       if (!managers || stable < 2) throw new Error('Mister no terminó de mostrar la clasificación.');
-      const initial = JSON.stringify(managers);
+      const initial = standingsSignature(managers);
       if (job.matchday) {
         const output = [];
         for (let i = 0; i < managers.length; i++) {
@@ -145,7 +205,7 @@
           output.push(await readLineup(managers[i]));
         }
         // Do not mix points from different updates of a live matchday.
-        if (JSON.stringify(readRows()) !== initial) throw new Error('Los puntos cambiaron durante la lectura. Vuelve a importar para guardar una captura coherente.');
+        if (standingsSignature(readRows()) !== initial) throw new Error('Los puntos cambiaron durante la lectura. Vuelve a importar para guardar una captura coherente.');
         managers = output;
       }
       context();

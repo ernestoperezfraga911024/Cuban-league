@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cuban League · Importar desde Mister",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Importa jornadas de Primera y la clasificación general de Segunda. Revisión y publicación desde el panel.",
   "permissions": [
     "storage"

@@ -1,4 +1,4 @@
-const APP_VERSION='188-20261022-second-division';
+const APP_VERSION='189-20261022-second-history';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';

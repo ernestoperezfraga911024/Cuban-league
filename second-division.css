@@ -63,3 +63,10 @@
 .second-table th:last-child,.second-table td:last-child{padding-inline:10px}
 .second-day-control select{min-width:0;max-width:270px;flex:1}
 @media(max-width:600px){.second-table th:first-child,.second-table td:first-child{width:48px}.second-table th:last-child,.second-table td:last-child{width:82px}}
+
+.second-participant{display:flex;align-items:center;gap:12px;min-width:0}
+.second-avatar{display:block;width:40px;height:40px;flex:0 0 40px;object-fit:cover;border-radius:50%;background:#254331;border:1px solid #ffffff20;box-sizing:border-box}
+.second-avatar-fallback{display:flex;align-items:center;justify-content:center;color:#d1dfc5;font:600 12px system-ui}
+.second-participant-name{min-width:0;overflow-wrap:anywhere}
+.second-manager{width:100%}
+@media(max-width:600px){.second-participant{gap:9px}.second-avatar{width:34px;height:34px;flex-basis:34px}.second-avatar-fallback{font-size:11px}}

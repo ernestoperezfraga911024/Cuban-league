@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  const core = window.CubanSecondDivisionCore;
   const section = $('second-division');
   if (!section) return;
   const rows = $('secondDivisionRows'), status = $('secondDivisionStatus'), retry = $('secondDivisionRetry');
@@ -24,6 +25,20 @@
       return data;
     } finally { clearTimeout(timer); }
   }
+  function participant(row) {
+    const wrap = document.createElement('span'); wrap.className = 'second-participant';
+    const fallback = document.createElement('span'); fallback.className = 'second-avatar second-avatar-fallback';
+    fallback.setAttribute('aria-hidden', 'true');
+    fallback.textContent = row.name.trim().split(/\s+/).slice(0,2).map(word => [...word][0]).join('').toUpperCase();
+    const url = core.avatarUrl(row.avatarUrl);
+    if (url) {
+      const img = document.createElement('img'); img.className = 'second-avatar'; img.src = url; img.alt = '';
+      img.width = 40; img.height = 40; img.loading = 'lazy'; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
+      img.addEventListener('error', () => img.replaceWith(fallback), {once:true}); wrap.append(img);
+    } else wrap.append(fallback);
+    const name = document.createElement('span'); name.className = 'second-participant-name'; name.textContent = row.name;
+    wrap.append(name); return wrap;
+  }
   function table(data, day) {
     const list = data?.standings;
     if (data && (!Array.isArray(list) || !list.length || list.length > 99 || data.matchday !== day
@@ -36,9 +51,9 @@
       rank.textContent = row.rank; points.textContent = number.format(row.points);
       if (day) {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'second-manager';
-        button.textContent = row.name; button.setAttribute('aria-label', 'Ver alineación de ' + row.name + ', jornada ' + day);
+        button.append(participant(row)); button.setAttribute('aria-label', 'Ver alineación de ' + row.name + ', jornada ' + day);
         button.addEventListener('click', () => openLineup(row)); name.append(button);
-      } else name.textContent = row.name;
+      } else name.append(participant(row));
       tr.append(rank, name, points); fragment.append(tr);
     }
     rows.replaceChildren(fragment); snapshot = data; shownDay = day;

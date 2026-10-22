@@ -24,7 +24,29 @@
     if (error) throw error;
     if (!data || !Number.isSafeInteger(data.revision) || data.revision < 0) throw new Error('No se pudo leer el estado de Segunda.');
     current = data.snapshot; excludedId = data.excludedId || ''; revision = data.revision; baseline = data.baselineStandings || [];
+    const days = Array.isArray(data.publishedMatchdays) ? data.publishedMatchdays.filter(day => Number.isInteger(day) && day >= 0 && day <= 38) : [];
+    for (const option of $('secondImportScope').options) {
+      const day = Number(option.value);
+      option.textContent = (day ? 'Jornada ' + day : 'General') + ' · ' + (days.includes(day) ? 'Guardada' : 'Pendiente');
+    }
+    const saved = days.filter(day => day > 0).sort((a,b) => a-b);
+    $('secondSavedDays').textContent = saved.length ? 'Jornadas guardadas: ' + saved.map(day => 'J' + day).join(', ') + '. Cada importación actualiza solo la jornada elegida.'
+      : 'Todavía no hay jornadas guardadas. Importa y publica cada jornada para conservar su tabla y sus alineaciones.';
     return data;
+  }
+  function participant(row) {
+    const wrap = document.createElement('span'); wrap.className = 'second-participant';
+    const fallback = document.createElement('span'); fallback.className = 'second-avatar second-avatar-fallback';
+    fallback.setAttribute('aria-hidden', 'true');
+    fallback.textContent = row.name.trim().split(/\s+/).slice(0,2).map(word => [...word][0]).join('').toUpperCase();
+    const url = core.avatarUrl(row.avatarUrl);
+    if (url) {
+      const img = document.createElement('img'); img.className = 'second-avatar'; img.src = url; img.alt = '';
+      img.width = 40; img.height = 40; img.loading = 'lazy'; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
+      img.addEventListener('error', () => img.replaceWith(fallback), {once:true}); wrap.append(img);
+    } else wrap.append(fallback);
+    const name = document.createElement('span'); name.className = 'second-participant-name'; name.textContent = row.name;
+    wrap.append(name); return wrap;
   }
   function renderReview() {
     const selected = $('secondExcluded').value;
@@ -32,9 +54,9 @@
     const fragment = document.createDocumentFragment();
     for (const row of rows) {
       const tr = document.createElement('tr');
-      for (const value of [row.rank, row.name, row.points]) {
-        const td = document.createElement('td'); td.textContent = String(value); tr.appendChild(td);
-      }
+      const rank = document.createElement('td'), name = document.createElement('td'), points = document.createElement('td');
+      rank.textContent = row.rank; name.append(participant(row)); points.textContent = row.points;
+      tr.append(rank, name, points);
       fragment.appendChild(tr);
     }
     $('secondPreviewRows').replaceChildren(fragment);
@@ -102,7 +124,7 @@
       if (scope() && !excludedId) throw new Error('Publica primero General e identifica tu cuenta de administrador. Después podrás importar jornadas.');
       const hello = await call('HELLO');
       if (token !== generation) return;
-      if (hello.secondDivision !== true) throw new Error('Actualiza la extensión a 1.1.0 y recarga Mister y este panel. Usa «Actualizar extensión».');
+      if (hello.secondDivision !== true || hello.secondHistory !== true) throw new Error('Actualiza la extensión a 1.1.1 y recarga Mister y este panel. Usa «Actualizar extensión».');
       const result = await call('SECOND_START', { season, matchday:scope(), excludedManagerId:excludedId });
       if (token !== generation) { await call('SECOND_CANCEL', { id:result.id }).catch(() => {}); return; }
       jobId = result.id;
@@ -130,7 +152,7 @@
       const savedJob = jobId; payload = null; jobId = null;
       $('secondReview').hidden = true;
       await call('SECOND_CONSUME', { id:savedJob }).catch(() => {});
-      message('Segunda División publicada. Ya se puede consultar desde Más.');
+      message(label() + ' guardada. Ya se puede consultar desde Más. Las otras jornadas se conservan.');
       // A refresh failure must not misreport an already completed publication.
       await state().catch(() => {});
     } catch (error) {
@@ -154,7 +176,7 @@
       try {
         await state();
         if (token !== generation) return;
-        message(current ? 'Última publicación: ' + new Date(current.updated_at).toLocaleString('es') : 'Todavía no se ha publicado Segunda División.');
+        message(current ? 'Última publicación: ' + new Date(current.updated_at).toLocaleString('es') : 'Todavía no se ha publicado ' + label() + '.');
       } catch (error) { if (token === generation) message(error.message || String(error)); }
     });
     buttons();
