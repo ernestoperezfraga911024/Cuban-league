@@ -124,7 +124,7 @@
       if (scope() && !excludedId) throw new Error('Publica primero General e identifica tu cuenta de administrador. Después podrás importar jornadas.');
       const hello = await call('HELLO');
       if (token !== generation) return;
-      if (hello.secondDivision !== true || hello.secondHistory !== true) throw new Error('Actualiza la extensión a 1.1.1 y recarga Mister y este panel. Usa «Actualizar extensión».');
+      if (hello.secondDivision !== true || hello.secondHistory !== true || hello.secondEmptySlots !== true) throw new Error('Actualiza la extensión a 1.1.2 y recarga Mister y este panel. Usa «Actualizar extensión».');
       const result = await call('SECOND_START', { season, matchday:scope(), excludedManagerId:excludedId });
       if (token !== generation) { await call('SECOND_CANCEL', { id:result.id }).catch(() => {}); return; }
       jobId = result.id;

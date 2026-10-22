@@ -97,9 +97,9 @@ test('cream, muted labels, accents and active controls retain accessible contras
 
 test('service worker precaches every active logo, icon and palette version',()=>{
   const sw=read('sw.js'),app=read('app.js');
-  assert.match(sw,/cuban-league-v189-second-history/);
+  assert.match(sw,/cuban-league-v190-empty-slots/);
   assert.match(sw,/brand-f05\.css\?v=182-20261018-f05-2/);
-  assert.match(app,/APP_VERSION='189-20261022-second-history'/);
+  assert.match(app,/APP_VERSION='190-20261022-empty-slots'/);
   for(const name of ['cuban-league-f05-logo.svg',...Object.keys(images)])assert.ok(sw.includes(`'./${name}'`),name);
   assert.doesNotMatch(sw,/cuban-league-green-logo|icon-green-|favicon-green|apple-touch-icon-green/);
 });

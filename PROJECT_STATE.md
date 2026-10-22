@@ -2,6 +2,12 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Actualización V190 · 2026-10-22
+- Corregidos los huecos de Segunda con tarjeta sin nombre/identidad y −4 explícito. Conserva su puesto, formación y penalización; no rellena con suplentes ni convierte una tarjeta incompleta en hueco.
+- Extensión 1.1.2 y caché V190. El panel exige soporte `secondEmptySlots`. Actualizar extensión, recargar Mister/administración y repetir J1.
+- Evidencia: captura de Juanpy J1 con ocho futbolistas, huecos en DL/MC/PT y total oficial 4. Fixture sintética documentada basada en esa imagen; no se dispone del DOM autenticado de esa captura.
+- 137 pruebas pasan en ejecución secuencial, incluyendo importación y vista de los tres huecos, exclusión de suplentes y rechazo de puestos ambiguos/otra jornada. No hay migración ni modificación de datos publicados.
+
 ## Actualización V189 · 2026-10-22
 - Segunda: extensión 1.1.1 espera 11 puestos visibles estables del participante y jornada elegidos; ignora tarjetas ocultas y conserva la validación de identidad.
 - Fotos de participantes desde Mister en General, jornadas y revisión. HTTPS validado, carga diferida e iniciales de respaldo. Reimportar General incorpora las fotos.

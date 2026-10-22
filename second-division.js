@@ -125,7 +125,8 @@
       for (const player of players.filter(p => p.position === position)) {
         const card = document.createElement('div'); card.className = 'second-player';
         const name = document.createElement('strong'), points = document.createElement('span');
-        name.textContent = player.name;
+        name.textContent = player.status === 'empty' ? 'Posición vacía' : player.name;
+        if (player.status === 'empty') { card.classList.add('second-player-empty'); card.setAttribute('aria-label', 'Posición vacía, menos 4 puntos'); }
         points.textContent = player.status === 'pending' ? 'Pendiente' : player.status === 'did-not-play' ? 'No jugó · 0' : number.format(player.points) + ' pts';
         card.append(name, points);
         if (player.captain) { const badge = document.createElement('small'); badge.textContent = 'Capitán ×' + number.format(player.multiplier); card.append(badge); }

@@ -70,3 +70,5 @@
 .second-participant-name{min-width:0;overflow-wrap:anywhere}
 .second-manager{width:100%}
 @media(max-width:600px){.second-participant{gap:9px}.second-avatar{width:34px;height:34px;flex-basis:34px}.second-avatar-fallback{font-size:11px}}
+
+.second-player-empty{box-sizing:border-box;border:1px dashed #b8cbb866;border-radius:10px;padding:9px 4px;background:#ffffff04}.second-player-empty strong{color:#becbbd;font-weight:400}.second-player-empty>span{background:#5d3341;color:#fff0f1}

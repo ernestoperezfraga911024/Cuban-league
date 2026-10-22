@@ -179,7 +179,7 @@ test('admin publishes only reviewed Second Division data and passes the exact da
   }};
   const extensionCall=async(type,input)=>{
     jobs.push({type,input});
-    if(type==='HELLO')return {secondDivision:true,secondHistory:true};
+    if(type==='HELLO')return {secondDivision:true,secondHistory:true,secondEmptySlots:true};
     if(type==='SECOND_START')return {id};
     if(type==='SECOND_STATUS')return {job:{status:'ready',payload:payload(5)}};
     return {};
@@ -225,12 +225,12 @@ test('participant photos accept HTTPS URLs, reject unsafe sources, and fall back
   }finally{page.dom.window.close();}
 });
 
-async function collectHistorical({wrong=false}={}) {
-  const source=read('tests/fixtures/mister-j5-yovany-lineup-20260917.html')
+async function collectHistorical({wrong=false,sourceOverride=null,officialPoints=74}={}) {
+  const source=sourceOverride || read('tests/fixtures/mister-j5-yovany-lineup-20260917.html')
     .replaceAll('data-id_manager="7070670"','data-id_manager="101"').replaceAll('data-id_gameweek="4046"','data-id_gameweek="4001"');
   const html='<a class="active" href="/action/change?id_community=978196">2da Cubanleague</a><button data-tab="gameweek" class="active">Jornada</button>'
     +'<a data-partial class="selected" href="/standings?gw=4009">J9</a><a data-partial href="/standings?gw=4001">J1</a>'
-    +'<a class="btn btn-sw-link user" href="users/101/manager"><img src="https://cdn-mister.mundodeportivo.com/avatar/101.png"><div class="info"><div class="name">Fixture</div></div><div class="points">74</div></a>'
+    +'<a class="btn btn-sw-link user" href="users/101/manager"><img src="https://cdn-mister.mundodeportivo.com/avatar/101.png"><div class="info"><div class="name">Fixture</div></div><div class="points">'+officialPoints+'</div></a>'
     +'<a class="btn btn-sw-link user" href="users/999/manager"><div class="info"><div class="name">Ernesto</div></div><div class="points">0</div></a>';
   const dom=new JSDOM(html,{url:'https://mister.mundodeportivo.com/standings',runScripts:'outside-only'});
   const w=dom.window, realTimeout=w.setTimeout.bind(w), start=Date.now();
@@ -274,4 +274,51 @@ test('J1 imports while the league is on J9: waits for historical cards and ignor
 test('an XI that stays on J9 cannot be saved as J1',async()=>{
   const result=await collectHistorical({wrong:true});
   assert.equal(result.payload,undefined);assert.match(result.error,/Jornada 1.*0\/11.*No se guardó/);
+});
+
+
+test('Juanpy J1: eight footballers plus three unnamed −4 slots keep the formation, order and official total',async()=>{
+  const result=await collectHistorical({sourceOverride:read('tests/fixtures/second-juanpy-j1-empty-slots.html'),officialPoints:4});
+  assert.equal(result.error,undefined);
+  const manager=JSON.parse(JSON.stringify(result.payload.managers[0]));
+  assert.equal(manager.points,4);
+  assert.equal(manager.lineup.length,11);
+  const gaps=manager.lineup.filter(p=>p.status==='empty');
+  assert.deepEqual(gaps.map(p=>({slot:p.slot,position:p.position,id:p.id,points:p.points})),[
+    {slot:2,position:'DL',id:'',points:-4},{slot:6,position:'MC',id:'',points:-4},{slot:11,position:'PT',id:'',points:-4}
+  ]);
+  assert.equal(manager.lineup.filter(p=>p.id).length,8);
+  assert.equal(manager.lineup.reduce((sum,p)=>sum+p.points,0),2,'Keep the official total even when visible cards differ');
+  assert.equal(manager.lineup.some(p=>p.name==='A. Sangante'||p.name==='I. Villar'),false,'Bench must stay out');
+  assert.equal(core.validate(JSON.parse(JSON.stringify(result.payload)),season).managers[0].points,4);
+});
+test('an empty slot needs an explicit −4 and no identified footballer; wrong-day slots are rejected',async()=>{
+  const source=read('tests/fixtures/second-juanpy-j1-empty-slots.html');
+  for(const broken of [
+    source.replace('<div class="points">−4</div>','<div class="points"></div>'),
+    source.replace('<div class="points">−4</div>','<div class="name">Still loading player</div><div class="points">−4</div>'),
+    source.replace('<div class="lineup-player"><div class="info">','<div class="lineup-player" data-id_player="123"><div class="info">'),
+    source.replace('<div class="lineup-player"><div class="info">','<div class="lineup-player" data-id_gameweek="4009"><div class="info">')
+  ]) {
+    const result=await collectHistorical({sourceOverride:broken,officialPoints:4});
+    assert.equal(result.payload,undefined);assert.match(result.error,/No se guardó/);
+  }
+});
+test('public historical XI preserves the three visible gaps including the goalkeeper',async()=>{
+  const captured=await collectHistorical({sourceOverride:read('tests/fixtures/second-juanpy-j1-empty-slots.html'),officialPoints:4});
+  assert.equal(captured.error,undefined);
+  const page=publicPage(u=>{
+    if(u.pathname.endsWith('lineups'))return [{lineup:captured.payload.managers[0].lineup,negative_balance:false,points:4}];
+    if(u.searchParams.get('matchday')==='gt.0')return [{matchday:1}];
+    return [snapshot(Number(u.searchParams.get('matchday').slice(3)),1,'Juanpy')];
+  });
+  try{
+    page.w.document.body.dataset.section='second-division';await tick();page.$('secondByDay').click();await tick();
+    page.$('secondDivisionRows').querySelector('button').click();await tick();
+    assert.equal(page.$('secondLineupBody').querySelectorAll('.second-player').length,11);
+    assert.equal(page.$('secondLineupBody').querySelectorAll('.second-player-empty').length,3);
+    assert.deepEqual([...page.$('secondLineupBody').querySelectorAll('.second-pitch-line')].map(line=>line.children.length),[2,4,4,1]);
+    assert.equal(page.$('secondLineupBody').querySelector('.second-pitch-line:last-child .second-player-empty').textContent,'Posición vacía-4 pts');
+    assert.match(page.$('secondLineupStatus').textContent,/4 puntos oficiales/);
+  }finally{page.dom.window.close();}
 });

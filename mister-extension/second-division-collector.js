@@ -71,11 +71,33 @@
     }
     return null;
   }
-  function visibleSlots(starting) {
+  function emptySlot(card, manager) {
+    const id = String(card.dataset.id_player || '').trim();
+    const name = text(card.querySelector('.name'));
+    const emptyLabel = /posici[oó]n vac[ií]a|sin jugador|hueco vac[ií]o/i;
+    // Mister also renders an unnamed, unassigned tile with an explicit −4.
+    // A missing card or an ordinary player's negative score is not an empty slot.
+    if (id && id !== '0') return false;
+    if (name && !emptyLabel.test(name)) return false;
+    if (!emptyLabel.test(text(card)) && text(card).replace(/\s/g,'') !== '-4'
+      && text(card).replace(/\s/g,'') !== '−4') return false;
+    if (original.number(text(card.querySelector('.info .points, .points'))) !== -4) return false;
+    return (!card.dataset.id_manager || card.dataset.id_manager === '0' || String(card.dataset.id_manager) === manager.id)
+      && (!card.dataset.id_gameweek || card.dataset.id_gameweek === '0' || Number(card.dataset.id_gameweek) === gameweekId);
+  }
+  function visibleSlots(starting, manager) {
     const lines = [...starting.children].filter(node => node.classList.contains('line') && visible(node));
-    return lines.map((line, i) => [...line.querySelectorAll('.lineup-player')]
-      .filter(card => visible(card) && !card.parentElement.closest('.lineup-player'))
-      .map(card => ({card, position:['DL','MC','DF','PT'][i]})));
+    return lines.map((line, i) => {
+      const cards = [...line.querySelectorAll('.lineup-player')]
+        .filter(card => visible(card) && !card.parentElement.closest('.lineup-player'));
+      // Empty tiles can be plain elements rather than links to a footballer.
+      for (const child of line.children) {
+        if (visible(child) && !child.matches('.lineup-player') && !child.querySelector('.lineup-player')
+          && emptySlot(child, manager)) cards.push(child);
+      }
+      cards.sort((a,b) => a === b ? 0 : a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+      return cards.map(card => ({card, position:['DL','MC','DF','PT'][i]}));
+    });
   }
   async function historicalSlots(manager) {
     let last = '', stable = 0, confirmed = 0, triedDay = false;
@@ -85,14 +107,11 @@
       const candidates = [...document.querySelectorAll('.team-lineup .lineup-starting')].filter(visible);
       let complete = false;
       for (const starting of candidates) {
-        const groups = visibleSlots(starting), slots = groups.flat();
-        const matches = slots.filter(({card}) => String(card.dataset.id_manager) === manager.id
-          && Number(card.dataset.id_gameweek) === gameweekId);
-        confirmed = Math.max(confirmed, matches.length);
-        const empty = ({card}) => !card.dataset.id_player && /posici[oó]n vac[ií]a|sin jugador|hueco vac[ií]o/i.test(text(card))
-          && original.number(text(card.querySelector('.info .points, .points'))) === -4
-          && (!card.dataset.id_manager || String(card.dataset.id_manager) === manager.id)
-          && (!card.dataset.id_gameweek || Number(card.dataset.id_gameweek) === gameweekId);
+        const groups = visibleSlots(starting, manager), slots = groups.flat();
+        const matches = slots.filter(({card}) => /^[1-9]\d*$/.test(card.dataset.id_player || '')
+          && String(card.dataset.id_manager) === manager.id && Number(card.dataset.id_gameweek) === gameweekId);
+        const empty = ({card}) => emptySlot(card, manager);
+        confirmed = Math.max(confirmed, slots.filter(slot => matches.includes(slot) || empty(slot)).length);
         if (groups.length !== 4 || slots.length !== 11 || !matches.length
           || !slots.every(slot => matches.includes(slot) || empty(slot))) continue;
         complete = true;
@@ -164,7 +183,7 @@
         const id = String(card.dataset.id_player || '');
         const node = card.querySelector('.info .points, .points');
         const raw = text(node);
-        const empty = !id && /posici[oó]n vac[ií]a|sin jugador|hueco vac[ií]o/i.test(text(card));
+        const empty = emptySlot(card, manager);
         if (empty) {
           if (original.number(raw) !== -4) throw new Error('Penalización de posición vacía ilegible.');
           lineup.push({slot:lineup.length + 1, id:'', name:'Posición vacía', position,

@@ -1,4 +1,4 @@
-CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.1.1
+CUBAN LEAGUE · IMPORTAR DESDE MISTER · 1.1.2
 
 INSTALAR (CHROME EN COMPUTADORA)
 1. Extrae el ZIP en una carpeta permanente, por ejemplo Documentos/Cuban-League-Mister.
@@ -14,7 +14,7 @@ Publicar es siempre una acción tuya desde administración.
 
 ACTUALIZAR DESDE CUALQUIER VERSIÓN ANTERIOR
 1. Extrae el nuevo ZIP en la misma carpeta instalada y acepta reemplazar los archivos.
-2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.1.1.
+2. En chrome://extensions, pulsa la flecha circular de Cuban League. Debe indicar 1.1.2.
 3. Recarga las pestañas de Mister y administración, y vuelve a importar. Conserva el borrador existente.
 
 SEGUNDA DIVISIÓN
@@ -69,3 +69,8 @@ NOVEDADES 1.1.1 · SEGUNDA
 - Importa y publica J1, J2… J9 una por una para completar el historial. Después, actualiza solo las jornadas que lo necesiten.
 - General y cada jornada se guardan por separado. El selector muestra Guardada o Pendiente.
 - Reimporta General para incorporar las fotos de los participantes. Las fotos ausentes muestran iniciales.
+
+CORRECCIÓN 1.1.2 · POSICIONES VACÍAS DE SEGUNDA
+- Una tarjeta sin futbolista ni nombre y con −4 explícito se conserva como posición vacía.
+- Se mantienen el lugar del hueco, la formación y el total oficial de Mister. Los suplentes no rellenan huecos.
+- Una tarjeta sin cargar o con identidad de otra jornada detiene la captura; no se inventan puestos.
