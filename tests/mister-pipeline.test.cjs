@@ -286,3 +286,27 @@ test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conser
   assert.equal(w.document.getElementById('retryMisterImportButton').hidden,false);
   dom.window.close();
 });
+
+test('J10: D. Carvajal de ANDOBA resuelve por Mister 328 y conserva la captura',async()=>{
+  // Synthetic capture: identity and club come from the admin error screenshot.
+  const payload=await captureFixture({matchday:10,gameweekId:9000010});
+  const manager=payload.managers.find(p=>p.name==='ANDOBA THE BEST');
+  Object.assign(manager.lineup[7],{playerName:'D. Carvajal',fullName:'',misterPlayerId:'328',misterClubId:'9',position:'DF'});
+  const original=JSON.stringify(payload);
+  const {dom,api,rows}=await adminFor(payload);
+  try {
+    assert.equal(rows.length,20);
+    const row=rows.find(r=>r.participant.name===manager.name);
+    const player=row.lineup[7];
+    assert.equal(player.player_id,'mister-328');
+    assert.equal(player.player_name,'D. Carvajal');
+    assert.equal(player.club_id,'getafe');
+    assert.equal(player.position,'DF');
+    assert.equal(player.displayed_points,manager.lineup[7].displayedPoints);
+    assert.equal(row.points,manager.points);
+    assert.equal(api.lineupMetrics(row.lineup).complete,true);
+    assert.equal(JSON.stringify(payload),original);
+    assert.equal(api.state.catalog.players.filter(p=>p.misterId==='328').length,1);
+    assert.equal(api.state.catalog.resolveMister({misterPlayerId:'999999999',playerName:'D. Carvajal',clubId:'getafe',position:'DF'}),null);
+  } finally {dom.window.close();}
+});
