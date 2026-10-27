@@ -2,6 +2,12 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Catálogo J10 · 2026-10-27
+- Añadido D. Carvajal como `mister-328`, defensa de Getafe CF, con el ID 328 y club 9 indicados por el aviso de importación de ANDOBA THE BEST. Evidencia: `Screenshot 2026-10-27 100557.png`; posición contrastada con LaLiga. Retrato desde la ruta de Mister correspondiente a su ID.
+- El catálogo pasa de 572 a 573 activos; las 579 fichas anteriores (incluidas siete archivadas) permanecen idénticas. Solo se añade la ficha y se actualizan el contador y la fecha.
+- La prueba de J10 recorre la normalización de los 20 participantes, verifica la identidad única, el club, el XI completo y que no cambia los puntos ni la captura. No se modifican datos de jornadas ni lógica de importación.
+- El catálogo ya se carga con red primero y sin caché HTTP. Tras el despliegue, recargar el panel y usar Recuperar captura; si ha caducado, repetir la importación. No requiere actualizar la extensión.
+
 ## Corrección de publicación de Segunda · 2026-10-22
 - Resuelto el error SQL 21000 («more than one row returned by a subquery used as an expression») al publicar una jornada o reimportar General: las consultas de fotos guardadas comparaban una columna local consigo misma. Ahora relacionan explícitamente el ID del participante recibido con el guardado.
 - Migración aplicada: `supabase-second-division-publish-photos-fix.sql`, después de la migración V189. Solo reemplaza `publish_second_division`; conserva permisos, revisiones, controles de administrador, historial y datos.
