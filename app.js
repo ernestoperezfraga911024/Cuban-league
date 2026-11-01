@@ -1,4 +1,4 @@
-const APP_VERSION='191-20261101-compact-stats';
+const APP_VERSION='192-20261101-glass-standings';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
