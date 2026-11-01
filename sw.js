@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v192-glass-standings';
+const CACHE_NAME = 'cuban-league-v193-restore-classic';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,10 +8,9 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=192-20261101-glass-standings',
+  './app.js?v=193-20261101-restore-classic',
   './second-division.js?v=190-20261022',
   './second-division.css?v=190-20261022',
-  './glass-standings.css?v=192-20261101',
   './second-division-core.js?v=190-20261022',
   './second-division-admin.js?v=190-20261022',
   './data.json?v=174-20261014-mister-j8-catalog',
