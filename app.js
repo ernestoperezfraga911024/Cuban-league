@@ -1,4 +1,4 @@
-const APP_VERSION='190-20261022-empty-slots';
+const APP_VERSION='191-20261101-compact-stats';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -4890,18 +4890,14 @@ function renderLeagueStatsContent(){
       :data.lineupRows
         ?section==='lines'?leagueStatsLineMarkup(data):leagueStatsMvpMarkup(data)
         :`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
-  host.innerHTML=`<header class="league-stats-head">
-      <div><span class="eyebrow">TEMPORADA ${profileSeasonLongLabel(data.season)}</span><h3>Radiografía de la competición</h3><p>Capitanes destacados, rendimiento por líneas, MVP y liga sin bonus.</p></div>
-      <div class="league-stats-coverage"><b>${data.lineupRows}</b><span>XI publicados</span><small>${data.teamsWithLineups}/${data.teams.length} equipos con datos</small></div>
-    </header>
-    <nav class="league-stats-subtabs" role="tablist" aria-label="Estadísticas de la competición">
+  host.innerHTML=`<nav class="league-stats-subtabs" role="tablist" aria-label="Estadísticas de la competición">
       ${[['captains','Capitanes'],['lines','Líneas'],['mvp','MVP'],['noBonus','Liga sin bonus']].map(([value,label])=>`<button id="leagueStats${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-league-stats-section="${value}" aria-controls="leagueStatsSectionPanel" aria-selected="${section===value}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
     </nav>
     <section id="leagueStatsSectionPanel" class="league-stats-section" role="tabpanel" aria-labelledby="leagueStats${section[0].toUpperCase()}${section.slice(1)}Tab">
       ${panelMarkup}
     </section>
     <p class="league-stats-note">Valores redondeados al entero más cercano. El orden y los empates usan los valores exactos.</p>
-    <p class="league-stats-updated">${LEAGUE_STATS_STATE.status==='loading'
+    <p class="league-stats-updated">${data.lineupRows} XI publicados · ${data.teamsWithLineups}/${data.teams.length} equipos con datos · ${LEAGUE_STATS_STATE.status==='loading'
       ?'Actualizando…'
       :LEAGUE_STATS_STATE.error
         ?`Mostrando datos anteriores · ${profileAttr(LEAGUE_STATS_STATE.error)}`
