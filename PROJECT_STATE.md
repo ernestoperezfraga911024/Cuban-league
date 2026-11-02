@@ -2,6 +2,13 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Reglas de insignias V194 · 2026-11-01 · pendiente de integrar
+- «Rey de la jornada» pasa de alcanzar tres victorias a liderar el número de jornadas ganadas en la temporada. Dinámica: cambia de dueño al actualizar/corregir/deshacer resultados; comparte empates y no se concede con cero victorias. Conserva el cómputo existente de co-ganadores por puntos.
+- «En llamas» exige una racha de diez Top 3 en las clasificaciones de cada jornada. Conserva la mejor racha alcanzada de la temporada; fechas sin publicar, ausencias y quedar fuera del Top 3 cortan la continuidad. Requisitos, progreso, detalle y miniaturas comparten el mismo cálculo.
+- No modifica puntuaciones, desempates, datos, históricos, catálogo, administración ni estilos/estructura de la tabla restaurada en V193. Sin nuevas consultas, dependencias o escrituras de datos; solo recorrido adicional sobre los contadores ya calculados.
+- Caché/app/HTML V194 coherentes. Pruebas específicas de líderes, empates, correcciones, umbral 3/9/10/11, continuidad, reinicio de temporada, render y conservación de las otras doce insignias. Base para revertir solo código: `14c28d419cc353b1188037e1e012135060dd309c`.
+- Verificación: 144/145 pruebas; único fallo preexistente V174 por el hash antiguo del catálogo anterior al alta de D. Carvajal. Sintaxis y diff correctos. HTML idéntico a V193 salvo la URL de app.js; CSS y datos intactos. Respaldo de código: `backup/pre-achievement-rules-v194-20261101`. Sin comprobación visual en dispositivo ni cambios publicados todavía.
+
 ## Catálogo J10 · 2026-10-27
 - Añadido D. Carvajal como `mister-328`, defensa de Getafe CF, con el ID 328 y club 9 indicados por el aviso de importación de ANDOBA THE BEST. Evidencia: `Screenshot 2026-10-27 100557.png`; posición contrastada con LaLiga. Retrato desde la ruta de Mister correspondiente a su ID.
 - El catálogo pasa de 572 a 573 activos; las 579 fichas anteriores (incluidas siete archivadas) permanecen idénticas. Solo se añade la ficha y se actualizan el contador y la fecha.
