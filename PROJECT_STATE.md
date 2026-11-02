@@ -2,6 +2,14 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Navegación más inmediata V195 · 2026-11-02
+- Cambio limitado a transiciones entre secciones. Fallback: elimina la espera inicial de 130 ms, activa el destino en la misma llamada y reduce la entrada de 450 a 180 ms (limpieza de clase a los 200 ms). View Transitions nativas: salida de 90 ms y entrada de 180 ms. No cambia animaciones de subpestañas, modales, podio ni insignias.
+- Toques sucesivos cancelan el temporizador/animación anterior; los callbacks tardíos no pueden cambiar el último destino. Tocar la sección visible cancela también una navegación todavía pendiente. «Reducir movimiento» sigue cambiando inmediatamente sin animaciones.
+- Solo tres valores de duración cambian en CSS: el resto del archivo queda idéntico, incluidos geometría, responsive y keyframes. HTML intacto salvo URLs versionadas de app/CSS. Datos, históricos, cálculos, insignias V194, consultas, configuración, administración y Segunda División sin cambios.
+- App, CSS y caché V195. Base: `8def29407ca4c7fef8dd251011ed1a3d56bc2940`; respaldo: `backup/pre-faster-navigation-v195-20261102`. El usuario autorizó preparar el cambio y hacer merge tras verificarlo.
+- Pruebas dedicadas de cambio inmediato, rutas/alias, toques rápidos, callbacks nativos tardíos, fallos de transición, reducción de movimiento, conservación de datos/CSS y versiones coherentes. No se afirma una mejora de red ni una medición real de INP; se reduce la demora programada.
+- Verificación: 153/154 pruebas, incluidas las nueve nuevas; único fallo preexistente del hash V174 del catálogo anterior al alta de D. Carvajal. Sintaxis y diff correctos. Comparación con la base confirma HTML idéntico salvo versiones y JavaScript idéntico fuera de `go`, su estado de transición y APP_VERSION. Sin prueba visual en un dispositivo real.
+
 ## Reglas de insignias V194 · 2026-11-01 · pendiente de integrar
 - «Rey de la jornada» pasa de alcanzar tres victorias a liderar el número de jornadas ganadas en la temporada. Dinámica: cambia de dueño al actualizar/corregir/deshacer resultados; comparte empates y no se concede con cero victorias. Conserva el cómputo existente de co-ganadores por puntos.
 - «En llamas» exige una racha de diez Top 3 en las clasificaciones de cada jornada. Conserva la mejor racha alcanzada de la temporada; fechas sin publicar, ausencias y quedar fuera del Top 3 cortan la continuidad. Requisitos, progreso, detalle y miniaturas comparten el mismo cálculo.
