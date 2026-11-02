@@ -24,7 +24,7 @@ function setup({reduced=false,native=false}={}){
       resolve(){resolve();},reject(){reject(new Error('Animation skipped'));}};
     transitions.push(transition);return transition;
   };
-  w.eval(read('app.js').replace(/init\(\);\s*$/,`DATA=${JSON.stringify(JSON.parse(read('data.json')))};window.motionTest={go,snapshot:()=>JSON.stringify(DATA),duration:SECTION_ENTER_DURATION};`));
+  w.eval(read('app.js').replace(/init\(\);\s*$/,`DATA=${JSON.stringify(JSON.parse(read('data.json')))};window.motionTest={go,snapshot:()=>JSON.stringify(DATA),duration:SECTION_ENTER_DURATION,leagueDuration:LEAGUE_ENTER_DURATION};`));
   const assertRoute=route=>{
     assert.equal(doc.body.dataset.section,route);
     assert.equal(doc.querySelectorAll('.page.active').length,1);
@@ -35,13 +35,13 @@ function setup({reduced=false,native=false}={}){
   return {dom,w,doc,timers,transitions,api:w.motionTest,assertRoute,finishTimers,requests:()=>requests,scrolls:()=>scrolls};
 }
 
-test('fallback routes immediately, with only a 200ms animation-cleanup timer and no data/network changes',()=>{
+test('fallback routes immediately, with only an animation-cleanup timer and no data/network changes',()=>{
   const t=setup();try{
     const before=t.api.snapshot();
     for(const route of ['current','matchdays','players','history','cup','champions','rules','cards','second-division','home']){
       t.api.go(route);t.assertRoute(route); // No timers or frames need to run first.
       assert.equal(t.timers.size,1);
-      assert.equal([...t.timers.values()][0].delay,200);
+      assert.equal([...t.timers.values()][0].delay,route==='current'?240:200);
       assert.ok(t.doc.getElementById(route).classList.contains('page-entering'));
       assert.equal(t.doc.querySelectorAll('.page-leaving').length,0);
       assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),false);
@@ -84,8 +84,8 @@ test('reduced-motion navigates synchronously with no timers or native transition
 
 test('native transitions preserve routing and clean up after successful completion',async()=>{
   const t=setup({native:true});try{
-    t.api.go('current');assert.equal(t.transitions.length,1);assert.equal(t.timers.size,0);
-    t.transitions[0].update();t.assertRoute('current');
+    t.api.go('matchdays');assert.equal(t.transitions.length,1);assert.equal(t.timers.size,0);
+    t.transitions[0].update();t.assertRoute('matchdays');
     assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),true);
     t.transitions[0].resolve();await flush();
     assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),false);
@@ -94,7 +94,7 @@ test('native transitions preserve routing and clean up after successful completi
 
 test('rapid native taps skip the old animation and discard its late route/cleanup callbacks',async()=>{
   const t=setup({native:true});try{
-    t.api.go('current');t.api.go('cup');
+    t.api.go('matchdays');t.api.go('cup');
     const [old,latest]=t.transitions;assert.equal(old.skipped,true);
     latest.update();t.assertRoute('cup');old.update();t.assertRoute('cup');
     old.resolve();await flush();
@@ -107,7 +107,7 @@ test('rapid native taps skip the old animation and discard its late route/cleanu
 
 test('returning to the visible section cancels a pending native destination',async()=>{
   const t=setup({native:true});try{
-    t.api.go('current');const pending=t.transitions[0];t.api.go('home');
+    t.api.go('matchdays');const pending=t.transitions[0];t.api.go('home');
     assert.equal(pending.skipped,true);pending.update();t.assertRoute('home');
     pending.resolve();await flush();t.assertRoute('home');
     assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),false);
@@ -117,8 +117,8 @@ test('returning to the visible section cancels a pending native destination',asy
 
 test('unsupported or rejected native animation cannot leave transition classes stuck',async()=>{
   const t=setup({native:true});try{
-    t.api.go('current');t.transitions[0].update();t.transitions[0].reject();await flush();
-    t.assertRoute('current');assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),false);
+    t.api.go('matchdays');t.transitions[0].update();t.transitions[0].reject();await flush();
+    t.assertRoute('matchdays');assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),false);
     t.doc.startViewTransition=()=>{throw new Error('Unavailable');};
     t.api.go('cup');t.assertRoute('cup');assert.equal(t.timers.size,1);
     assert.equal(t.doc.documentElement.classList.contains('section-transition-active'),false);
@@ -139,8 +139,73 @@ test('CSS changes only three page-navigation durations, preserving layout, keyfr
   const baseline=JSON.parse(read('tests/fixtures/pre-editorial-contract.json'));
   assert.equal(createHash('sha256').update(normalized).digest('hex'),baseline.files['styles.css']);
   const html=read('index.html'),sw=read('sw.js');
-  for(const file of ['app.js','styles.css']){
-    assert.ok(html.includes(`${file}?v=195-20261102-fast-navigation`));
-    assert.ok(sw.includes(`${file}?v=195-20261102-fast-navigation`));
+  for(const asset of ['app.js?v=196-20261102-smooth-league','styles.css?v=195-20261102-fast-navigation','league-motion.css?v=196-20261102-smooth-league']){
+    assert.ok(html.includes(asset));
+    assert.ok(sw.includes(asset));
   }
+});
+
+test('Liga has one immediate live-content entrance even when native transitions are available',()=>{
+  for(const native of [false,true]){
+    const t=setup({native});try{
+      const before=t.api.snapshot();t.api.go('current');t.assertRoute('current');
+      assert.equal(t.transitions.length,0);assert.equal(t.api.leagueDuration,220);
+      assert.equal([...t.timers.values()][0].delay,240);
+      assert.ok(t.doc.getElementById('current').classList.contains('page-entering'));
+      t.finishTimers();t.assertRoute('current');
+      assert.equal(t.doc.querySelectorAll('.page-entering,.page-leaving').length,0);
+      assert.equal(t.api.snapshot(),before);assert.equal(t.requests(),0);
+    }finally{t.dom.window.close();}
+  }
+});
+
+test('entering Liga cancels a pending native transition without late navigation or cleanup',async()=>{
+  const t=setup({native:true});try{
+    t.api.go('champions');const old=t.transitions[0];
+    t.api.go('current');t.assertRoute('current');assert.equal(old.skipped,true);
+    old.update();old.resolve();await flush();t.assertRoute('current');
+    assert.ok(t.doc.getElementById('current').classList.contains('page-entering'));
+    assert.equal(t.timers.size,1);t.finishTimers();
+    assert.equal(t.doc.querySelectorAll('.page-entering,.page-leaving').length,0);
+    t.api.go('cup');t.transitions[1].update();t.assertRoute('cup');
+    t.transitions[1].resolve();await flush();
+  }finally{t.dom.window.close();}
+});
+
+test('Liga stylesheet is scoped, uses only opacity/transform, and permanently suppresses the duplicate table reveal',()=>{
+  const css=read('league-motion.css'),rules=CSSOM.parse(css).cssRules;
+  assert.ok(Buffer.byteLength(css)<1000);
+  const keyframes=rules.find(rule=>rule.name==='leaguePageEnter');
+  assert.equal(keyframes.cssRules.length,2);
+  for(const frame of keyframes.cssRules){
+    for(let i=0;i<frame.style.length;i++)assert.ok(['opacity','transform'].includes(frame.style[i]));
+  }
+  assert.equal(keyframes.cssRules[0].style.opacity,'.72');
+  assert.equal(keyframes.cssRules[0].style.transform,'translateY(6px)');
+  assert.equal(keyframes.cssRules[1].style.opacity,'1');
+  assert.equal(keyframes.cssRules[1].style.transform,'none');
+  const normal=rules.filter(rule=>rule.selectorText);
+  assert.deepEqual(normal.map(rule=>rule.selectorText),['#current.page','#current.page.page-entering','#current .standings-panel:not([hidden])']);
+  assert.equal(normal[0].style.animation,'none');
+  assert.match(normal[1].style.animation,/^leaguePageEnter \.22s cubic-bezier/);
+  assert.equal(normal[2].style.animation,'none');
+  for(const rule of normal)assert.deepEqual(Array.from({length:rule.style.length},(_,i)=>rule.style[i]),['animation']);
+  const reduced=rules.find(rule=>rule.media?.mediaText==='(prefers-reduced-motion:reduce)');
+  assert.equal(reduced.cssRules[0].selectorText,'#current.page.page-entering');
+  assert.equal(reduced.cssRules[0].style.animation,'none');
+});
+
+test('actual CSS cascade cannot restart old page/table animations after Liga cleanup or tab changes',()=>{
+  const dom=new JSDOM(`<style>${read('styles.css')}\n${read('league-motion.css')}</style><section id="current" class="page active page-entering"><div class="standings-panel"></div></section><section id="matchdays" class="page active"></section>`);
+  try{
+    const w=dom.window,page=w.document.getElementById('current'),panel=page.firstElementChild;
+    assert.match(w.getComputedStyle(page).animation,/^leaguePageEnter \.22s /);
+    assert.equal(w.getComputedStyle(panel).animation,'none');
+    page.classList.remove('page-entering');
+    assert.equal(w.getComputedStyle(page).animation,'none');
+    assert.equal(w.getComputedStyle(panel).animation,'none');
+    panel.hidden=true;panel.hidden=false;
+    assert.equal(w.getComputedStyle(panel).animation,'none');
+    assert.match(w.getComputedStyle(w.document.getElementById('matchdays')).animation,/pageReveal/);
+  }finally{dom.window.close();}
 });

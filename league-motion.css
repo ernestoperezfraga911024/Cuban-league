@@ -1,0 +1,23 @@
+/* Liga: one restrained entrance, without blur, zoom or a second table reveal. */
+@keyframes leaguePageEnter{
+  from{opacity:.72;transform:translateY(6px)}
+  to{opacity:1;transform:none}
+}
+
+/* The legacy pageReveal must not restart when page-entering is removed. */
+#current.page{
+  animation:none;
+}
+
+#current.page.page-entering{
+  animation:leaguePageEnter .22s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Keep this independent of page-entering so cleanup cannot restart a reveal. */
+#current .standings-panel:not([hidden]){
+  animation:none;
+}
+
+@media(prefers-reduced-motion:reduce){
+  #current.page.page-entering{animation:none}
+}

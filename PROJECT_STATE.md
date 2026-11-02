@@ -2,6 +2,13 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Entrada suave a Liga V196 · 2026-11-02 · pendiente de integrar
+- El usuario no quedó satisfecho con la entrada a Liga tras V195. En el navegador de escritorio se confirmó la cascada antigua: `pageReveal` de 320 ms en `#current` y `sectionPanelReveal` de 400 ms en el panel visible. Quitar la clase de entrada podía reactivar la primera animación.
+- Liga cambia de sección de inmediato y usa una sola entrada de 220 ms: opacidad 0,72 → 1 y desplazamiento vertical 6 px → 0. Sin desenfoque, zoom, snapshots nativos, escalonado de filas, demora inicial ni reconstrucción de tabla. Se suprimen las animaciones antiguas de la página/paneles de Liga de forma estable, también tras la limpieza de clase; sus pestañas internas cambian directamente.
+- CSS aislado en `league-motion.css`, menor de 1 KB y limitado a `#current`; conserva íntegro `styles.css` V195. No cambia tamaños, márgenes, columnas, colores, sticky, datos, consultas, cálculos, insignias ni otras secciones. Respeta «Reducir movimiento» y la protección de V195 frente a toques rápidos/callbacks tardíos.
+- App/SW/nuevo CSS V196; los estilos generales mantienen su versión V195. Base: `1e0ef88feb225a6b47496808a7877f0a1a11ea67`. Respaldo: `backup/pre-smooth-league-entry-v196-20261102`. Preparar PR sin fusionar salvo autorización nueva.
+- Verificación: 157/158 pruebas; solo persiste el hash antiguo del catálogo V174. Las 13 pruebas de movimiento pasan, incluidas cuatro nuevas para Liga/cascada/toques rápidos. Sintaxis y diff correctos; CSS general e HTML de contenido idénticos y JavaScript intacto fuera de navegación/versión. No se ha medido FPS/INP ni probado en un iPhone real.
+
 ## Navegación más inmediata V195 · 2026-11-02
 - Cambio limitado a transiciones entre secciones. Fallback: elimina la espera inicial de 130 ms, activa el destino en la misma llamada y reduce la entrada de 450 a 180 ms (limpieza de clase a los 200 ms). View Transitions nativas: salida de 90 ms y entrada de 180 ms. No cambia animaciones de subpestañas, modales, podio ni insignias.
 - Toques sucesivos cancelan el temporizador/animación anterior; los callbacks tardíos no pueden cambiar el último destino. Tocar la sección visible cancela también una navegación todavía pendiente. «Reducir movimiento» sigue cambiando inmediatamente sin animaciones.
