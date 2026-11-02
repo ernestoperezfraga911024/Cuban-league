@@ -1,4 +1,4 @@
-const APP_VERSION='194-20261101-achievement-rules';
+const APP_VERSION='195-20261102-fast-navigation';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -29,6 +29,9 @@ let SHARE_CARD_MONTH_KEY='';
 let SHARE_CARD_RENDER_TOKEN=0;
 let SHARE_CARD_READY=false;
 let SECTION_TRANSITION_TOKEN=0;
+let SECTION_TRANSITION_TIMER=null;
+let SECTION_VIEW_TRANSITION=null;
+const SECTION_ENTER_DURATION=180;
 let KNOWN_ACHIEVEMENT_KEYS=null;
 let ACHIEVEMENT_UNLOCK_TIMER=null;
 let ACHIEVEMENT_UNLOCK_HIDE_TIMER=null;
@@ -820,6 +823,14 @@ function go(id,historyView){
   const next=$(target);
   if(!next)return;
   const current=document.querySelector('.page.active');
+  // A new tap wins, including a return to the currently visible section.
+  const token=++SECTION_TRANSITION_TOKEN;
+  clearTimeout(SECTION_TRANSITION_TIMER);
+  SECTION_TRANSITION_TIMER=null;
+  SECTION_VIEW_TRANSITION?.skipTransition();
+  SECTION_VIEW_TRANSITION=null;
+  document.documentElement.classList.remove('section-transition-active');
+  document.querySelectorAll('.page-entering,.page-leaving').forEach(page=>page.classList.remove('page-entering','page-leaving'));
   if(current===next){
     if(target==='history'&&selectedHistoryView)setHistoryHubView(selectedHistoryView);
     scrollToSectionStart();
@@ -827,9 +838,8 @@ function go(id,historyView){
     return;
   }
 
-  const token=++SECTION_TRANSITION_TOKEN;
-  document.querySelectorAll('.page-entering,.page-leaving').forEach(page=>page.classList.remove('page-entering','page-leaving'));
   const change=()=>{
+    if(token!==SECTION_TRANSITION_TOKEN)return;
     applySectionChange(target,selectedHistoryView);
     scrollToSectionStart();
   };
@@ -837,12 +847,17 @@ function go(id,historyView){
     if(token!==SECTION_TRANSITION_TOKEN)return;
     document.documentElement.classList.remove('section-transition-active');
     next.classList.remove('page-entering');
+    SECTION_TRANSITION_TIMER=null;
+    SECTION_VIEW_TRANSITION=null;
   };
 
   if(document.startViewTransition&&!prefersReducedMotion()){
     document.documentElement.classList.add('section-transition-active');
     try{
       const transition=document.startViewTransition(change);
+      SECTION_VIEW_TRANSITION=transition;
+      // Skipping a superseded animation can reject ready without failing routing.
+      transition.ready?.catch(()=>{});
       transition.finished.then(finish).catch(finish);
       return;
     }catch{}
@@ -853,14 +868,11 @@ function go(id,historyView){
     finish();
     return;
   }
-  current?.classList.add('page-leaving');
-  setTimeout(()=>{
-    if(token!==SECTION_TRANSITION_TOKEN)return;
-    current?.classList.remove('page-leaving');
-    change();
-    next.classList.add('page-entering');
-    setTimeout(finish,470);
-  },130);
+  // Route immediately; only the visual entrance is animated (also see CSS).
+  document.documentElement.classList.remove('section-transition-active');
+  change();
+  next.classList.add('page-entering');
+  SECTION_TRANSITION_TIMER=setTimeout(finish,SECTION_ENTER_DURATION+20);
 }
 function setRegulationView(view='league'){
   const selected=view==='champions'?'champions':'league';

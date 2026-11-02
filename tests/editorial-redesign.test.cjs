@@ -37,6 +37,16 @@ test('V174 protected files remain unchanged; manifests only replace approved F05
         .replace('"background_color": "#071910"',`"background_color": "${originalColors[0]}"`)
         .replace('"theme_color": "#071910"',`"theme_color": "${originalColors[1]}"`);
       assert.equal(hash(normalized),expected,p+' non-brand fields');
+    }else if(p==='styles.css'){
+      // V195 changes only three navigation durations; preserve every other byte.
+      const normalized=read(p)
+        .replace('.page.page-entering{\n  display:block;\n  animation:sectionPageEnter .18s',
+          '.page.page-entering{\n  display:block;\n  animation:sectionPageEnter .45s')
+        .replace('::view-transition-old(league-section){\n  animation:sectionPageLeave .09s',
+          '::view-transition-old(league-section){\n  animation:sectionPageLeave .18s')
+        .replace('::view-transition-new(league-section){\n  animation:sectionPageEnter .18s',
+          '::view-transition-new(league-section){\n  animation:sectionPageEnter .46s');
+      assert.equal(hash(normalized),expected,p+' original layout preserved');
     }else if(p==='admin.js'){
       // V188 adds only an authenticated-client handoff and teardown for Segunda.
       // Removing those exact integration lines must restore the full original file.
@@ -179,8 +189,8 @@ test('real app click handlers route every retained shortcut and keep league data
 test('navigation stays read-only and the new cache restores the classic resources',()=>{
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
-  for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v194-achievement-rules/);
+  for(const asset of ['styles.css?v=195-20261102-fast-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
+  assert.match(sw,/cuban-league-v195-fast-navigation/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{

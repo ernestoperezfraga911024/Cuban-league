@@ -1,14 +1,14 @@
-const CACHE_NAME = 'cuban-league-v194-achievement-rules';
+const CACHE_NAME = 'cuban-league-v195-fast-navigation';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=176-20261015-classic-navigation',
+  './styles.css?v=195-20261102-fast-navigation',
   './stats-compact.css?v=185-20261019-captain-details',
   './competition-calendar.css?v=186-20261019-calendar',
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=194-20261101-achievement-rules',
+  './app.js?v=195-20261102-fast-navigation',
   './second-division.js?v=190-20261022',
   './second-division.css?v=190-20261022',
   './second-division-core.js?v=190-20261022',

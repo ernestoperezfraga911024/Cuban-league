@@ -15869,7 +15869,7 @@ footer{
 
 .page.page-entering{
   display:block;
-  animation:sectionPageEnter .45s cubic-bezier(.16,.82,.24,1) both;
+  animation:sectionPageEnter .18s cubic-bezier(.16,.82,.24,1) both;
 }
 
 .page.page-leaving{
@@ -15886,11 +15886,11 @@ footer{
 }
 
 ::view-transition-old(league-section){
-  animation:sectionPageLeave .18s ease both;
+  animation:sectionPageLeave .09s ease both;
 }
 
 ::view-transition-new(league-section){
-  animation:sectionPageEnter .46s cubic-bezier(.16,.82,.24,1) both;
+  animation:sectionPageEnter .18s cubic-bezier(.16,.82,.24,1) both;
 }
 
 .motion-tilt-glare{
