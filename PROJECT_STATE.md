@@ -2,6 +2,11 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Entrada uniforme V197 · pendiente de integrar
+- Extiende a todas las secciones la entrada aprobada de Liga: 220 ms, 6 px y opacidad, sin snapshots, blur ni animaciones duplicadas. Paneles de Historia y Reglamento cambian directamente como Liga.
+- Conserva diseño, datos, consultas, cálculos, accesibilidad y cancelación de toques rápidos. Sin cambios en styles.css ni dependencias.
+- PR separada sobre c7d21d9; no fusionar sin autorización. Verificación visual en dispositivo pendiente.
+
 ## Entrada suave a Liga V196 · 2026-11-02 · pendiente de integrar
 - El usuario no quedó satisfecho con la entrada a Liga tras V195. En el navegador de escritorio se confirmó la cascada antigua: `pageReveal` de 320 ms en `#current` y `sectionPanelReveal` de 400 ms en el panel visible. Quitar la clase de entrada podía reactivar la primera animación.
 - Liga cambia de sección de inmediato y usa una sola entrada de 220 ms: opacidad 0,72 → 1 y desplazamiento vertical 6 px → 0. Sin desenfoque, zoom, snapshots nativos, escalonado de filas, demora inicial ni reconstrucción de tabla. Se suprimen las animaciones antiguas de la página/paneles de Liga de forma estable, también tras la limpieza de clase; sus pestañas internas cambian directamente.
