@@ -1,4 +1,4 @@
-const APP_VERSION='193-20261101-restore-classic';
+const APP_VERSION='194-20261101-achievement-rules';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -2496,14 +2496,15 @@ return `<article class="champion-history-card">
 </article>`
 }).join('')
 }
+const ON_FIRE_REQUIRED_MATCHDAYS=10;
 const ACHIEVEMENT_CATALOG=[
   {id:'champion',icon:'🏆',name:'Campeón',rarity:'legendary',type:'Histórica',requirement:'Ganar una temporada de la Cuban League.'},
   {id:'dynasty',icon:'👑',name:'Dinastía',rarity:'legendary',type:'Histórica',requirement:'Conquistar al menos 2 títulos de Liga.'},
   {id:'podium_regular',icon:'🥉',name:'Habitual del podio',rarity:'epic',type:'Histórica',requirement:'Terminar en el Top 3 durante 3 temporadas.'},
   {id:'season_record',icon:'⚡',name:'Temporada legendaria',rarity:'legendary',type:'Récord',requirement:'Tener el récord de puntos en una temporada.'},
   {id:'two_thousand',icon:'💎',name:'Club 2.000',rarity:'epic',type:'Histórica',requirement:'Superar 2.000 puntos en una temporada.'},
-  {id:'matchday_king',icon:'🗓️',name:'Rey de la jornada',rarity:'epic',type:'Temporada',requirement:'Ganar 3 jornadas en la temporada actual.'},
-  {id:'on_fire',icon:'🔥',name:'En llamas',rarity:'epic',type:'Racha',requirement:'Estar en el Top 3 durante 3 jornadas seguidas.'},
+  {id:'matchday_king',icon:'🗓️',name:'Rey de la jornada',rarity:'epic',type:'Dinámica',requirement:'Ser quien más jornadas ha ganado en la temporada actual. En caso de empate, se comparte la insignia.'},
+  {id:'on_fire',icon:'🔥',name:'En llamas',rarity:'epic',type:'Racha',requirement:`Estar en el Top 3 de cada jornada durante ${ON_FIRE_REQUIRED_MATCHDAYS} jornadas seguidas.`},
   {id:'manita',icon:'⚽',name:'La Manita',rarity:'rare',type:'Jornada',requirement:'Marcar 5 goles o más en una jornada.'},
   {id:'leader',icon:'⭐',name:'Líder actual',rarity:'rare',type:'Dinámica',requirement:'Ocupar el 1.º puesto de la clasificación actual.'},
   {id:'pichichi',icon:'🥇',iconAsset:'golden-boot-pichichi.png',name:'Pichichi',rarity:'rare',type:'Dinámica',requirement:'Liderar los goles de la temporada.'},
@@ -2753,9 +2754,15 @@ function buildAchievementSnapshot(){
     });
   });
 
+  const mostMatchdayWins=Math.max(0,...[...metrics.values()].map(item=>item.matchdayWins));
+
   DATA.participants.forEach(player=>{
     let topRun=0;
+    let previousMatchday=null;
     PUBLISHED_MATCHDAYS.forEach(matchday=>{
+      // An unpublished matchday must not join two separate Top 3 runs.
+      if(previousMatchday!=null&&matchday!==previousMatchday+1)topRun=0;
+      previousMatchday=matchday;
       const row=LIVE_MATCHDAY_ROWS.find(item=>item.matchday===matchday&&item.participantName===player.name);
       const weekly=row?weeklyStandings(matchday).find(item=>item.name===player.name):null;
       if(weekly&&weekly.position<=3){
@@ -2805,13 +2812,15 @@ function buildAchievementSnapshot(){
           :`${seasons.length} temporadas · máximo ${seasons[0].points.toLocaleString('es')} pts`
         :'';
     }else if(catalog.id==='matchday_king'){
-      earned=playerMetrics.matchdayWins>=3;
-      meta=earned?`${playerMetrics.matchdayWins} jornadas ganadas`:'';
-      progress=`${Math.min(playerMetrics.matchdayWins,3)}/3 victorias`;
+      earned=mostMatchdayWins>0&&playerMetrics.matchdayWins===mostMatchdayWins;
+      meta=earned?`${playerMetrics.matchdayWins} ${playerMetrics.matchdayWins===1?'jornada ganada':'jornadas ganadas'}`:'';
+      progress=mostMatchdayWins>0
+        ?`${playerMetrics.matchdayWins} victorias · Máximo actual: ${mostMatchdayWins}`
+        :'Todavía no hay jornadas ganadas';
     }else if(catalog.id==='on_fire'){
-      earned=playerMetrics.topThreeStreak>=3;
-      meta=earned?`Racha de ${playerMetrics.topThreeStreak} jornadas`:'';
-      progress=`${Math.min(playerMetrics.topThreeStreak,3)}/3 en el Top 3`;
+      earned=playerMetrics.topThreeStreak>=ON_FIRE_REQUIRED_MATCHDAYS;
+      meta=earned?`Racha de ${playerMetrics.topThreeStreak} jornadas en el Top 3`:'';
+      progress=`${Math.min(playerMetrics.topThreeStreak,ON_FIRE_REQUIRED_MATCHDAYS)}/${ON_FIRE_REQUIRED_MATCHDAYS} en el Top 3`;
     }else if(catalog.id==='manita'){
       earned=playerMetrics.maxGoals>=5;
       meta=earned?`${playerMetrics.maxGoals} goles · J${playerMetrics.maxGoalsMatchday}`:'';

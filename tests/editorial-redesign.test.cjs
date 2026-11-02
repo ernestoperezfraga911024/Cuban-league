@@ -64,8 +64,11 @@ test('original league calculations and normalization functions remain unchanged'
   // V179 intentionally fixes loading/sync and defers catalog dependencies.
   // These six I/O functions now have behavioral coverage in public-loading.test.cjs.
   const loadingFixes=new Set(['fetchPublishedStatsRows','syncLiveCurrentStats','syncAchievementMilestones','fetchPublishedMatchdayLineup','fetchPublishedProfileSeasonRows','fetchPublishedLeagueStatsRows']);
+  // V194 changes only the requested king/fire rules. Keep a strict function hash;
+  // achievement-rules.test.cjs also locks the other twelve badges to V193 output.
+  const approvedHashes={buildAchievementSnapshot:'44b39c6ef5db9bf208b600c7ae4227d4e6c23d0ffcbfe3679dd55969f0593ad3'};
   try {for(const [name,digest] of Object.entries(baseline.protectedFunctions)){
-    if(!loadingFixes.has(name))assert.equal(hash(dom.window.designTest.business(name)),digest,name);
+    if(!loadingFixes.has(name))assert.equal(hash(dom.window.designTest.business(name)),approvedHashes[name]||digest,name);
   }}
   finally{dom.window.close();}
 });
@@ -177,7 +180,7 @@ test('navigation stays read-only and the new cache restores the classic resource
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
   for(const asset of ['styles.css?v=176-20261015-classic-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v193-restore-classic/);
+  assert.match(sw,/cuban-league-v194-achievement-rules/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{
