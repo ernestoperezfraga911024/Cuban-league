@@ -1,4 +1,4 @@
-const APP_VERSION='195-20261102-fast-navigation';
+const APP_VERSION='196-20261102-smooth-league';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -32,6 +32,7 @@ let SECTION_TRANSITION_TOKEN=0;
 let SECTION_TRANSITION_TIMER=null;
 let SECTION_VIEW_TRANSITION=null;
 const SECTION_ENTER_DURATION=180;
+const LEAGUE_ENTER_DURATION=220;
 let KNOWN_ACHIEVEMENT_KEYS=null;
 let ACHIEVEMENT_UNLOCK_TIMER=null;
 let ACHIEVEMENT_UNLOCK_HIDE_TIMER=null;
@@ -851,7 +852,8 @@ function go(id,historyView){
     SECTION_VIEW_TRANSITION=null;
   };
 
-  if(document.startViewTransition&&!prefersReducedMotion()){
+  // Liga animates its live content once, avoiding a full-page snapshot/zoom.
+  if(target!=='current'&&document.startViewTransition&&!prefersReducedMotion()){
     document.documentElement.classList.add('section-transition-active');
     try{
       const transition=document.startViewTransition(change);
@@ -872,7 +874,8 @@ function go(id,historyView){
   document.documentElement.classList.remove('section-transition-active');
   change();
   next.classList.add('page-entering');
-  SECTION_TRANSITION_TIMER=setTimeout(finish,SECTION_ENTER_DURATION+20);
+  const duration=target==='current'?LEAGUE_ENTER_DURATION:SECTION_ENTER_DURATION;
+  SECTION_TRANSITION_TIMER=setTimeout(finish,duration+20);
 }
 function setRegulationView(view='league'){
   const selected=view==='champions'?'champions':'league';
