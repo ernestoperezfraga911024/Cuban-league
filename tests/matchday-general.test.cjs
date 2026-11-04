@@ -115,6 +115,24 @@ test('snapshot refresh updates values even at the same day, handles stale/empty 
     t.api.set([],'error');t.api.renderMatchdayGeneral();assert.match(host.textContent,/No se pudieron/);
   }finally{t.dom.window.close();}
 });
+test('narrow chart geometry keeps readable height and tie expansion retains every tied participant',async()=>{
+  const t=await setup();try{
+    t.api.set(dayRows(1).map(row=>({...row,points:50})));t.api.go('matchdays');
+    const host=t.doc.getElementById('matchdayGeneralPanel'),chart=host.querySelector('[data-mg-chart]');
+    for(const width of [260,326,374]){
+      Object.defineProperty(chart,'clientWidth',{value:width,configurable:true});
+      host.querySelector('[data-mg-expand]').click();
+      assert.equal(Number(host.querySelector('svg').getAttribute('viewBox').split(' ')[2]),width);
+      assert.ok(Number(host.querySelector('svg').getAttribute('height'))>=360);
+      assert.equal(host.querySelectorAll('[data-mg-line]').length,20);
+    }
+    const card=host.querySelector('.mg-best');
+    assert.equal(card.querySelector(':scope > ol').children.length,3);
+    assert.equal(card.querySelector('details').querySelectorAll('li').length,17);
+    card.querySelector('summary').click();assert.equal(card.querySelector('details').open,true);
+    assert.equal(card.querySelectorAll('.mg-rank').length,20);
+  }finally{t.dom.window.close();}
+});
 test('reduced motion keeps the static chart and keyboard-accessible three-tab navigation',async()=>{
   const t=await setup({reduced:true,init:true});try{
     t.api.set([1,2].flatMap(dayRows));t.api.go('matchdays');const requests=t.requests();

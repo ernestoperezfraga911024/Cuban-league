@@ -53,6 +53,7 @@
 #matchdayGeneralPanel input[type="range"]{width:100%;height:44px;padding:0;accent-color:#8fdba7;cursor:pointer}
 #matchdayGeneralPanel .mg-detail{min-height:48px;border-left:3px solid #8fdba7;padding:10px 12px;border-radius:0 8px 8px 0;background:#172f23;font-size:.85rem;line-height:1.5;color:#e1ecde;margin:8px 0}
 #matchdayGeneralPanel .mg-chart-data summary{min-height:44px;padding:12px 0;font-size:.8rem;color:#c1d7c8;cursor:pointer}
+#matchdayGeneralPanel .mg-ties summary{min-height:44px;padding:12px 0;font-size:.8rem;line-height:1.5;color:#c1d7c8;cursor:pointer}
 #matchdayGeneralPanel table{width:100%;border-collapse:collapse;font-size:.8rem;color:var(--mg-ink)}
 #matchdayGeneralPanel caption{text-align:left;font-size:.75rem;color:var(--mg-muted);padding:8px 0}
 #matchdayGeneralPanel td,#matchdayGeneralPanel th{padding:10px 4px;border-bottom:1px solid #b4d4bd20;text-align:left;overflow-wrap:anywhere}

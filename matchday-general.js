@@ -74,13 +74,14 @@
   const dates=days=>days.map(day=>`J${day}`).join(' · ');
   function board(title,entries,kind,description,tone=''){
     const top=entries.filter(p=>p.rank<=3);
-    return `<article class="mg-card ${tone}"><header><h3>${title}</h3><p>${description}</p></header>${top.length?`<ol class="mg-ranking">${top.map(p=>{
+    const item=p=>{
       const record=kind==='best'||kind==='worst'?p[kind]:null;
       const value=record?record.points:kind==='streaks'?p.bestRun:p[kind];
-      const detail=record?dates(record.days):kind==='streaks'?`J${p.bestStart}–J${p.bestEnd}`:kind==='wins'?'jornadas ganadas':'jornadas en primer lugar';
+      const detail=record?dates(record.days):kind==='streaks'?(p.bestStart===p.bestEnd?`J${p.bestStart}`:`J${p.bestStart}–J${p.bestEnd}`):kind==='wins'?'victorias semanales':'lideratos acumulados';
       const trigger=record?`data-matchday-lineup-player="${escape(p.name)}" data-matchday="${record.days[0]}" aria-label="Ver alineación de ${escape(p.name)} en J${record.days[0]}"`:`data-profile-player="${escape(p.name)}" aria-label="Ver perfil de ${escape(p.name)}"`;
-      return `<li><span class="mg-rank">${p.rank}</span><button type="button" class="mg-person" ${trigger}>${photo(p)}<span><b>${escape(p.name)}</b><small>${detail}</small></span></button><span class="mg-value"><b>${number.format(value)}</b><small>${record?'puntos':kind==='streaks'?'seguidas':'jornadas'}</small></span></li>`;
-    }).join('')}</ol>`:'<p class="mg-empty">Sin registros todavía.</p>'}${top.length>3?'<p class="mg-note">Se incluyen los empates en el corte del top 3.</p>':''}</article>`;
+      return `<li><span class="mg-rank">${p.rank}</span><button type="button" class="mg-person" ${trigger}>${photo(p)}<span><b>${escape(p.name)}</b><small>${detail}</small></span></button><span class="mg-value"><b>${number.format(value)}</b><small>${record?(value===1?'punto':'puntos'):kind==='streaks'?(value===1?'seguida':'seguidas'):(value===1?'jornada':'jornadas')}</small></span></li>`;
+    };
+    return `<article class="mg-card ${tone}"><header><h3>${title}</h3><p>${description}</p></header>${top.length?`<ol class="mg-ranking">${top.slice(0,3).map(item).join('')}</ol>`:'<p class="mg-empty">Sin registros todavía.</p>'}${top.length>3?`<details class="mg-ties"><summary>Ver ${top.length-3} más empatados en el top 3</summary><ol class="mg-ranking">${top.slice(3).map(item).join('')}</ol></details>`:''}</article>`;
   }
   function render(nextHost,nextModel,status){
     host=nextHost;if(!host)return;
