@@ -6,6 +6,7 @@
 - Petición: retirar La carrera por la liga y sustituir tarjetas grandes por un diseño más pequeño. Hoja de rankings continua con separadores, fotos de 30 px, filas de 48 px, cifras alineadas y racha actual en franja horizontal. Sin gráfico, SVG, controles de reproducción, ResizeObserver ni bucle de animación.
 - Cálculo build/ranked conservado idéntico a V198; mismos récords, empates, victorias, lideratos y rachas. Se mantienen enlaces a perfiles/XI, estados provisionales, caché diferida, Resumen y Calendario. No cambia datos ni reglas.
 - App/recursos/caché V199. Base: 70fe848dfba3dd8cb7dc7a05c3dbc8a32c1e8f18. PR separada sin merge salvo nueva autorización.
+- Verificación: 164/165 pruebas pasan; único fallo previo del hash V174 del catálogo. Once pruebas de General cubren cálculos idénticos, navegación, estados, empates y retirada del gráfico. Vista previa revisada en navegador de escritorio con datos hasta J11; sin emulación móvil ni prueba en iPhone físico. No se atribuyen mejoras de FPS/INP medidas.
 
 ## Jornadas · General V198 · 2026-11-03 Miami
 - Solicitud: General con mejores/peores actuaciones (participantes distintos), carrera animada de posiciones acumuladas, más jornadas ganadas, mayor racha consecutiva de liderazgo, racha activa y total de jornadas como líder. Ernesto autorizó PR Seguro y merge tras verificar. No incluye podios adicionales ni remontadas.

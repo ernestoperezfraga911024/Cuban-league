@@ -75,7 +75,7 @@
       const trigger=record?`data-matchday-lineup-player="${escape(p.name)}" data-matchday="${record.days[0]}" aria-label="Ver alineación de ${escape(p.name)} en J${record.days[0]}"`:`data-profile-player="${escape(p.name)}" aria-label="Ver perfil de ${escape(p.name)}"`;
       return `<li><span class="mg-rank">${p.rank}</span><button type="button" class="mg-person" ${trigger}>${photo(p)}<span><b>${escape(p.name)}</b>${detail?`<small>${detail}</small>`:''}</span></button><b class="mg-value">${number.format(value)}</b></li>`;
     };
-    return `<section class="mg-section ${tone}" aria-label="${title}"><header><h3>${title}</h3><span>${kind==='best'||kind==='worst'?'Puntos':kind==='streaks'?'Seguidas':'Jornadas'}</span></header>${top.length?`<ol class="mg-ranking">${top.slice(0,3).map(item).join('')}</ol>`:'<p class="mg-empty">Sin registros.</p>'}${top.length>3?`<details class="mg-ties"><summary>+${top.length-3} empatados en el top 3</summary><ol class="mg-ranking">${top.slice(3).map(item).join('')}</ol></details>`:''}</section>`;
+    return `<section class="mg-section ${tone}" aria-label="${title}"><header><h3>${title}</h3><span>${kind==='best'||kind==='worst'?'Puntos':kind==='streaks'?'Seguidas':'Jornadas'}</span></header>${top.length?`<ol class="mg-ranking">${top.slice(0,3).map(item).join('')}</ol>`:'<p class="mg-empty">Sin registros.</p>'}${top.length>3?`<details class="mg-ties"><summary>${top.length-3} más empatados en el top 3</summary><ol class="mg-ranking">${top.slice(3).map(item).join('')}</ol></details>`:''}</section>`;
   }
   function render(nextHost,nextModel,status){
     if(!nextHost)return;
