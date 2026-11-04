@@ -5,12 +5,17 @@ const path=require('node:path');
 const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
 const CSSOM=require('rrweb-cssom');
+const {createHash}=require('node:crypto');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const source=JSON.parse(read('data.json'));
 const roster=source.participants.filter(p=>p.active!==false);
 const plain=x=>JSON.parse(JSON.stringify(x));
 const freeze=x=>{Object.freeze(x);Object.values(x).forEach(v=>{if(v&&typeof v==='object'&&!Object.isFrozen(v))freeze(v);});return x;};
 function builder(){const sandbox={Intl};vm.runInNewContext(read('matchday-general.js'),sandbox);return sandbox.CubanMatchdayGeneral.build;}
+test('V199 preserves the complete V198 aggregation and ranking implementation byte-for-byte',()=>{
+  const script=read('matchday-general.js');
+  assert.equal(createHash('sha256').update(script.slice(0,script.indexOf('  let host=null'))).digest('hex'),'9e05199e9e5305ec4c14609bd550e230b9a804ffb3c971d11374d18615a64a95');
+});
 const people=['A','B','C','D'].map((name,order)=>({name,order}));
 function fixture(scores){
   const rows=scores.flatMap((points,i)=>points.map((value,j)=>({participantName:people[j].name,matchday:i+1,points:value,hasPostponedMatches:false})));
@@ -84,59 +89,53 @@ test('lazy integration preserves official ranks/weekly award rules and caches th
     for(const p of m.wins)assert.equal(Number(awards.players.get(p.name).get('matchday_king').progress.split(' ')[0]),p.wins);
     t.api.renderMatchdayGeneral();t.api.setMatchdayView('summary');t.api.setMatchdayView('general');assert.equal(t.builds(),1);
     assert.equal(t.api.snapshot(),before);assert.equal(t.requests(),0);
-    assert.equal(t.doc.querySelectorAll('[data-mg-line]').length,20);assert.equal(m.frames.length,38);
+    assert.equal(t.doc.querySelectorAll('#matchdayGeneralPanel .mg-section').length,5);assert.equal(m.frames.length,38);
   }finally{t.dom.window.close();}
 });
-test('play/pause, scrub, highlight, expand and leave retain DOM and cancel animation work',async()=>{
+test('compact overview has no chart, animation work or large cards and retains cached DOM',async()=>{
   const t=await setup();try{
-    t.api.set([1,2,3].flatMap(dayRows));t.api.go('matchdays');const host=t.doc.getElementById('matchdayGeneralPanel');
-    const paths=[...host.querySelectorAll('path')],button=host.querySelector('[data-mg-play]');
-    button.click();assert.equal(button.textContent,'Ⅱ Pausar');assert.equal(t.frames.size,1);
-    t.advance(0);t.advance(100);assert.equal(host.querySelector('[data-mg-day]').textContent,'Jornada 1');
-    button.click();assert.equal(t.frames.size,0);
-    const slider=host.querySelector('[data-mg-range]');slider.value='1';slider.dispatchEvent(new t.w.Event('input',{bubbles:true}));
-    assert.equal(host.querySelector('[data-mg-day]').textContent,'Jornada 2');
-    const picker=host.querySelector('[data-mg-person]');picker.value=roster[0].name;picker.dispatchEvent(new t.w.Event('change',{bubbles:true}));
-    assert.match(host.querySelector('[data-mg-detail]').textContent,/puntos acumulados/);
-    assert.equal(paths[0],host.querySelector('path'),'no path rebuild during playback/filter');
-    host.querySelector('[data-mg-expand]').click();assert.equal(host.querySelector('svg').getAttribute('height'),'560');
-    button.click();t.api.setMatchdayView('calendar');assert.equal(t.frames.size,0);assert.equal(host.hidden,true);
-    t.api.setMatchdayView('general');button.click();t.api.go('home');assert.equal(t.frames.size,0);
+    t.api.set([1,2,3].flatMap(dayRows));t.api.go('matchdays');
+    const host=t.doc.getElementById('matchdayGeneralPanel'),sheet=host.querySelector('.mg-sheet');
+    assert.equal(host.querySelector('svg,canvas,[data-mg-play],.mg-card'),null);
+    assert.doesNotMatch(host.textContent,/La carrera por la liga|Reproducir/);
+    assert.equal(host.querySelectorAll('.mg-section').length,5);
+    assert.equal(host.querySelectorAll('.mg-live').length,1);assert.equal(t.frames.size,0);
+    t.api.renderMatchdayGeneral();assert.equal(host.querySelector('.mg-sheet'),sheet);
+    t.api.setMatchdayView('calendar');assert.equal(host.hidden,true);
+    t.api.setMatchdayView('general');t.api.go('home');assert.equal(t.frames.size,0);
+    assert.doesNotMatch(read('matchday-general.js'),/requestAnimationFrame|ResizeObserver|setInterval|setTimeout/);
   }finally{t.dom.window.close();}
 });
-test('snapshot refresh updates values even at the same day, handles stale/empty data, and retains user selection',async()=>{
+test('snapshot refresh updates compact values and handles stale, loading and empty data',async()=>{
   const t=await setup();try{
     const rows=dayRows(1);t.api.set(rows);t.api.go('matchdays');const host=t.doc.getElementById('matchdayGeneralPanel');
-    const picker=host.querySelector('[data-mg-person]');picker.value=roster[0].name;picker.dispatchEvent(new t.w.Event('change',{bubbles:true}));
-    rows[0].points=777;t.api.set(rows);t.api.renderMatchdayGeneral();assert.match(host.querySelector('[data-mg-detail]').textContent,/777/);
-    assert.equal(host.querySelector('[data-mg-person]').value,roster[0].name);
+    rows[0].points=777;t.api.set(rows);t.api.renderMatchdayGeneral();
+    assert.equal(host.querySelector('.mg-best .mg-value').textContent,'777');
     t.api.set(rows,'stale');t.api.renderMatchdayGeneral();assert.match(host.querySelector('[data-mg-status]').textContent,/Sin conexión/);
-    t.api.set([],'loading');t.api.renderMatchdayGeneral();assert.match(host.textContent,/Consultando/);assert.equal(host.querySelector('svg'),null);
+    t.api.set([],'loading');t.api.renderMatchdayGeneral();assert.match(host.textContent,/Consultando/);assert.equal(host.querySelector('.mg-sheet'),null);
     t.api.set([],'error');t.api.renderMatchdayGeneral();assert.match(host.textContent,/No se pudieron/);
   }finally{t.dom.window.close();}
 });
-test('narrow chart geometry keeps readable height and tie expansion retains every tied participant',async()=>{
+test('compact ranking keeps every cutoff tie accessible and record/profile destinations intact',async()=>{
   const t=await setup();try{
     t.api.set(dayRows(1).map(row=>({...row,points:50})));t.api.go('matchdays');
-    const host=t.doc.getElementById('matchdayGeneralPanel'),chart=host.querySelector('[data-mg-chart]');
-    for(const width of [260,326,374]){
-      Object.defineProperty(chart,'clientWidth',{value:width,configurable:true});
-      host.querySelector('[data-mg-expand]').click();
-      assert.equal(Number(host.querySelector('svg').getAttribute('viewBox').split(' ')[2]),width);
-      assert.ok(Number(host.querySelector('svg').getAttribute('height'))>=360);
-      assert.equal(host.querySelectorAll('[data-mg-line]').length,20);
-    }
-    const card=host.querySelector('.mg-best');
-    assert.equal(card.querySelector(':scope > ol').children.length,3);
-    assert.equal(card.querySelector('details').querySelectorAll('li').length,17);
-    card.querySelector('summary').click();assert.equal(card.querySelector('details').open,true);
-    assert.equal(card.querySelectorAll('.mg-rank').length,20);
+    const host=t.doc.getElementById('matchdayGeneralPanel'),section=host.querySelector('.mg-best');
+    assert.equal(section.querySelector(':scope > ol').children.length,3);
+    assert.equal(section.querySelector('details').querySelectorAll('li').length,17);
+    section.querySelector('summary').click();assert.equal(section.querySelector('details').open,true);
+    assert.equal(section.querySelectorAll('.mg-rank').length,20);
+    assert.equal(section.querySelector('[data-matchday-lineup-player]').dataset.matchday,'1');
+    assert.ok(host.querySelector('[data-profile-player]'));
+    const css=read('matchday-general.css');
+    assert.match(css,/min-height:44px/);assert.match(css,/min-height:48px/);
+    assert.match(css,/width:30px;height:30px/);assert.match(css,/overflow-wrap:anywhere/);
+    assert.doesNotMatch(css,/box-shadow:0|linear-gradient|mg-card|mg-chart/);
   }finally{t.dom.window.close();}
 });
-test('reduced motion keeps the static chart and keyboard-accessible three-tab navigation',async()=>{
+test('compact overview retains keyboard-accessible three-tab navigation with reduced motion',async()=>{
   const t=await setup({reduced:true,init:true});try{
     t.api.set([1,2].flatMap(dayRows));t.api.go('matchdays');const requests=t.requests();
-    assert.equal(t.doc.querySelector('[data-mg-play]').disabled,true);t.doc.querySelector('[data-mg-play]').click();assert.equal(t.frames.size,0);
+    assert.equal(t.doc.querySelector('[data-mg-play]'),null);assert.equal(t.frames.size,0);
     const general=t.doc.getElementById('matchdayGeneralTab');general.focus();general.dispatchEvent(new t.w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
     assert.equal(t.doc.activeElement.id,'matchdaySummaryTab');assert.equal(t.doc.getElementById('matchdaySummaryPanel').hidden,false);
     t.doc.activeElement.dispatchEvent(new t.w.KeyboardEvent('keydown',{key:'End',bubbles:true}));assert.equal(t.doc.activeElement.id,'matchdayCalendarTab');
@@ -153,6 +152,6 @@ test('new UI escapes names, rejects unsafe photos, scopes styles and versions al
     assert.equal(w.document.querySelector('[onerror]'),null);assert.equal(w.document.querySelector('img'),null);assert.match(w.document.body.textContent,/<img/);
     const walk=rules=>{for(const r of rules){if(r.selectorText)assert.ok(r.selectorText.split(',').every(s=>s.trim().startsWith('#matchdayGeneralPanel')||s.trim().startsWith('#matchdays[data-matchday-mode=')||s.trim()==='#matchdays>.matchday-view-tabs button'),r.selectorText);if(r.cssRules)walk(r.cssRules);}};
     walk(CSSOM.parse(read('matchday-general.css')).cssRules);
-    for(const file of ['matchday-general.js','matchday-general.css']){assert.ok(read('index.html').includes(file+'?v=198-20261104-matchday-general'));assert.ok(read('sw.js').includes(file+'?v=198-20261104-matchday-general'));}
+    for(const file of ['matchday-general.js','matchday-general.css']){assert.ok(read('index.html').includes(file+'?v=199-20261104-compact-general'));assert.ok(read('sw.js').includes(file+'?v=199-20261104-compact-general'));}
   }finally{dom.window.close();}
 });

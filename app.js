@@ -1,4 +1,4 @@
-const APP_VERSION='198-20261104-matchday-general';
+const APP_VERSION='199-20261104-compact-general';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -789,7 +789,6 @@ function setHistoricalTableView(view='premium',{focus=false}={}){
 }
 
 function applySectionChange(target,selectedHistoryView){
-  if(target!=='matchdays')window.CubanMatchdayGeneral?.stop();
   const isHome=target==='home';
   document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
   document.querySelectorAll('.navtab').forEach(tab=>tab.classList.remove('active'));
@@ -2190,7 +2189,6 @@ function renderCompetitionCalendar(){
 
 function setMatchdayView(view,{focus=false}={}){
   const selected=['general','calendar'].includes(view)?view:'summary';
-  if(selected!=='general')window.CubanMatchdayGeneral?.stop();
   COMPETITION_CALENDAR_STATE.view=selected;
   $('matchdays').dataset.matchdayMode=selected;
   document.querySelectorAll('[data-matchday-view]').forEach(button=>{
