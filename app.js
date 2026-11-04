@@ -1,4 +1,4 @@
-const APP_VERSION='197-20261102-smooth-tabs';
+const APP_VERSION='198-20261104-matchday-general';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -15,7 +15,8 @@ let SELECTED_MATCHDAY=null;
 let SELECTED_CLASSIFICATION_MATCHDAY=null;
 const COMPETITION_CALENDAR_PAGE_SIZE=6;
 const COMPETITION_CALENDAR_LAST_MATCHDAY=38;
-const COMPETITION_CALENDAR_STATE={view:'summary',start:null,cache:null,markup:null,returnDay:null,championsDay:null,focus:null};
+const COMPETITION_CALENDAR_STATE={view:'general',start:null,cache:null,markup:null,returnDay:null,championsDay:null,focus:null};
+let MATCHDAY_GENERAL_CACHE=null;
 const CUP_START_MATCHDAY=4;
 const CUP_FINAL_MATCHDAY=22;
 let SELECTED_CUP_MATCHDAY=null;
@@ -788,6 +789,7 @@ function setHistoricalTableView(view='premium',{focus=false}={}){
 }
 
 function applySectionChange(target,selectedHistoryView){
+  if(target!=='matchdays')window.CubanMatchdayGeneral?.stop();
   const isHome=target==='home';
   document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
   document.querySelectorAll('.navtab').forEach(tab=>tab.classList.remove('active'));
@@ -798,6 +800,7 @@ function applySectionChange(target,selectedHistoryView){
     else tab.removeAttribute('aria-current');
   });
   document.body.dataset.section=target;
+  if(target==='matchdays')renderMatchdayGeneral();
   const hero=document.querySelector('.hero-photo');
   if(hero){
     hero.setAttribute('aria-hidden',String(!isHome));
@@ -2186,8 +2189,10 @@ function renderCompetitionCalendar(){
 }
 
 function setMatchdayView(view,{focus=false}={}){
-  const selected=view==='calendar'?'calendar':'summary';
+  const selected=['general','calendar'].includes(view)?view:'summary';
+  if(selected!=='general')window.CubanMatchdayGeneral?.stop();
   COMPETITION_CALENDAR_STATE.view=selected;
+  $('matchdays').dataset.matchdayMode=selected;
   document.querySelectorAll('[data-matchday-view]').forEach(button=>{
     const active=button.dataset.matchdayView===selected;
     button.setAttribute('aria-selected',String(active));
@@ -2196,6 +2201,19 @@ function setMatchdayView(view,{focus=false}={}){
     if(active&&focus)button.focus();
   });
   if(selected==='calendar')renderCompetitionCalendar();
+  if(selected==='general')renderMatchdayGeneral();
+}
+
+function renderMatchdayGeneral(){
+  const overview=window.CubanMatchdayGeneral;
+  if(!overview||!DATA||COMPETITION_CALENDAR_STATE.view!=='general'||document.body.dataset.section!=='matchdays')return;
+  const photos=imageMap();
+  const participants=activeParticipants().map(p=>({name:p.name,photo:photos[p.name]||''}));
+  const key=JSON.stringify([DATA.currentSeason,participants]);
+  if(!MATCHDAY_GENERAL_CACHE||MATCHDAY_GENERAL_CACHE.rows!==LIVE_MATCHDAY_ROWS||MATCHDAY_GENERAL_CACHE.key!==key){
+    MATCHDAY_GENERAL_CACHE={rows:LIVE_MATCHDAY_ROWS,key,model:overview.build({participants,rows:LIVE_MATCHDAY_ROWS,standings:cumulativeStandings,season:DATA.currentSeason})};
+  }
+  overview.render($('matchdayGeneralPanel'),MATCHDAY_GENERAL_CACHE.model,LIVE_STATS_STATUS);
 }
 
 function setCompetitionCalendarPage(day){
@@ -2269,6 +2287,7 @@ function returnToCompetitionCalendar(){
 }
 
 function renderMatchdayCenter(){
+  renderMatchdayGeneral();
   renderCompetitionCalendar();
   const select=$('publicMatchdaySelect');
   if(!select)return;
@@ -7303,7 +7322,7 @@ function syncPublishedData(){
       renderCup();
     }
     if(renderStats||firstSync||previousStatus!==LIVE_STATS_STATUS)renderHomeLive();
-    if(previousStatus!==LIVE_STATS_STATUS)renderCompetitionCalendar();
+    if(previousStatus!==LIVE_STATS_STATUS){renderCompetitionCalendar();renderMatchdayGeneral();}
     if(!liveStatsResult.synced)return;
     const milestonesChanged=await syncAchievementMilestones({render:false});
     if((liveStatsChanged||milestonesChanged)&&PROFILE_SEASON_STATE&&!$('playerModal')?.hidden){
@@ -7514,7 +7533,10 @@ async function init(){
     const matchdayTab=e.target.closest('[data-matchday-view]');
     if(matchdayTab&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
       e.preventDefault();
-      setMatchdayView(e.key==='Home'?'summary':e.key==='End'?'calendar':matchdayTab.dataset.matchdayView==='summary'?'calendar':'summary',{focus:true});
+      const views=['general','summary','calendar'];
+      const index=views.indexOf(matchdayTab.dataset.matchdayView);
+      const next=e.key==='Home'?0:e.key==='End'?views.length-1:(index+(e.key==='ArrowRight'?1:-1)+views.length)%views.length;
+      setMatchdayView(views[next],{focus:true});
       return;
     }
     trapAchievementDetailFocus(e);
