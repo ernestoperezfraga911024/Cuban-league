@@ -1,0 +1,59 @@
+/* Clubes only: compact lists, native disclosure and no animation/blur. */
+#leagueStatsContent>.league-stats-subtabs{display:flex;overflow-x:auto;scrollbar-width:thin}
+#leagueStatsContent>.league-stats-subtabs button{flex:1 0 auto;min-width:68px;min-height:44px}
+#leagueClubsRoot{--cs-muted:#afc4b8;color:#f4f0df;min-width:0}
+#leagueClubsRoot *{box-sizing:border-box}
+#leagueClubsRoot .cs-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 16px}
+#leagueClubsRoot .cs-heading span{font-size:.64rem;letter-spacing:.08em;color:var(--cs-muted)}
+#leagueClubsRoot .cs-heading h3{font-size:1.1rem;margin:4px 0 0}
+#leagueClubsRoot .cs-heading>small{font-size:.7rem;text-align:right;color:var(--cs-muted)}
+#leagueClubsRoot .cs-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+#leagueClubsRoot .cs-controls label{display:flex;flex-direction:column;gap:6px;font-size:.73rem;color:var(--cs-muted);min-width:0}
+#leagueClubsRoot select{width:100%;min-width:0;min-height:44px;background:#102b1f;border:1px solid #45604f;border-radius:9px;color:#f4f0df;font:inherit;font-size:.83rem;padding:8px}
+#leagueClubsRoot .cs-controls .cs-switch{grid-column:1/-1;flex-direction:row;align-items:center;gap:9px;min-height:44px;color:#d2e6d7;font-size:.8rem;width:fit-content;cursor:pointer}
+#leagueClubsRoot input{width:20px;height:20px;accent-color:#59c58b;margin:0}
+#leagueClubsRoot .cs-context{font-size:.75rem;line-height:1.5;color:var(--cs-muted);margin:4px 0 12px}
+#leagueClubsRoot .cs-warning{display:block;color:#efd39e;margin-top:4px}
+#leagueClubsRoot .cs-insights{display:flex;flex-wrap:wrap;gap:12px 20px;border-block:1px solid #34513e;padding:12px 0;margin-bottom:14px}
+#leagueClubsRoot .cs-insights>div{flex:1 1 110px;min-width:0}
+#leagueClubsRoot .cs-insights span{display:block;font-size:.64rem;color:var(--cs-muted);margin-bottom:4px}
+#leagueClubsRoot .cs-insights b{font-size:.78rem;line-height:1.4;overflow-wrap:anywhere}
+#leagueClubsRoot .cs-table{border:1px solid #34513e;border-radius:12px;overflow:hidden;background:#0b2017}
+#leagueClubsRoot .cs-columns,#leagueClubsRoot .cs-club>summary{display:grid;grid-template-columns:minmax(0,1fr) 52px 54px;gap:8px;align-items:center;padding:10px 12px}
+#leagueClubsRoot .cs-columns{font-size:.62rem;color:var(--cs-muted);background:#143625;text-transform:uppercase;letter-spacing:.03em}
+#leagueClubsRoot .cs-columns>span:not(:first-child){text-align:right}
+#leagueClubsRoot .cs-club+.cs-club{border-top:1px solid #34513e}
+#leagueClubsRoot .cs-club>summary{min-height:64px;cursor:pointer;list-style:none}
+#leagueClubsRoot summary::-webkit-details-marker{display:none}
+#leagueClubsRoot .cs-club[open]>summary{background:#173b29}
+#leagueClubsRoot .cs-club>summary>strong{font-size:1.02rem;text-align:right;color:#c0e5c8;font-variant-numeric:tabular-nums}
+#leagueClubsRoot .cs-club-name{display:flex;align-items:center;gap:8px;min-width:0}
+#leagueClubsRoot .cs-club-name>i{font-size:.65rem;color:var(--cs-muted);font-style:normal;min-width:12px}
+#leagueClubsRoot .cs-crest{width:26px;height:30px;flex-shrink:0;display:grid;place-items:center}
+#leagueClubsRoot .cs-crest img{width:100%;height:100%;object-fit:contain}
+#leagueClubsRoot .cs-club-name b{font-size:.83rem;line-height:1.3;overflow-wrap:anywhere}
+#leagueClubsRoot .cs-club-name small{display:block;color:var(--cs-muted);font-size:.62rem;line-height:1.5;margin-top:3px}
+#leagueClubsRoot .cs-average{text-align:right;font-size:.88rem;font-variant-numeric:tabular-nums}
+#leagueClubsRoot .cs-average i{margin-left:6px;color:var(--cs-muted);font-style:normal}
+#leagueClubsRoot .cs-club[open] .cs-average i{display:inline-block;transform:rotate(180deg)}
+#leagueClubsRoot .cs-detail{padding:0 12px;background:#091b13}
+#leagueClubsRoot .cs-detail-head{display:flex;justify-content:space-between;gap:10px;padding:14px 0 6px;font-size:.73rem}
+#leagueClubsRoot .cs-detail-head span{color:var(--cs-muted);font-size:.65rem}
+#leagueClubsRoot .cs-detail-list{margin:0;padding:0;list-style:none}
+#leagueClubsRoot .cs-detail-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #34513e55}
+#leagueClubsRoot .cs-detail-list li>div{min-width:0}
+#leagueClubsRoot .cs-detail-list b{font-size:.83rem;overflow-wrap:anywhere}
+#leagueClubsRoot .cs-detail-list small{display:block;color:var(--cs-muted);font-size:.67rem;line-height:1.45;margin-top:3px}
+#leagueClubsRoot .cs-detail-list strong{text-align:right;font-size:.93rem;flex-shrink:0;font-variant-numeric:tabular-nums}
+#leagueClubsRoot .cs-best,#leagueClubsRoot .cs-manager{display:block;padding:6px 0;min-height:44px;background:none;border:0;border-radius:0;box-shadow:none;text-align:left;color:#c0e5c8;font:inherit;font-size:.71rem;line-height:1.5;overflow-wrap:anywhere;cursor:pointer}
+#leagueClubsRoot .cs-manager{font-size:.83rem}
+#leagueClubsRoot .cs-more summary,#leagueClubsRoot .cs-method summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:.75rem;color:#bfd8c6;list-style:revert}
+#leagueClubsRoot .cs-method{margin-top:8px;font-size:.75rem;line-height:1.6;color:var(--cs-muted)}
+#leagueClubsRoot .cs-method p{margin:0 0 12px}
+#leagueClubsRoot dl{margin:0 0 12px}
+#leagueClubsRoot dl>div{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #34513e55}
+#leagueClubsRoot dd{margin:0;font-variant-numeric:tabular-nums}
+#leagueClubsRoot .cs-empty{padding:18px 0;font-size:.85rem;color:var(--cs-muted)}
+#leagueClubsRoot :focus-visible{outline:2px solid #cae9ac;outline-offset:2px}
+@media(min-width:760px){#leagueClubsRoot .cs-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:end}#leagueClubsRoot .cs-controls .cs-switch{grid-column:auto}#leagueClubsRoot .cs-columns,#leagueClubsRoot .cs-club>summary{grid-template-columns:minmax(0,1fr) 100px 100px;padding-inline:18px}#leagueClubsRoot .cs-detail{padding-inline:24px}}
+@media(max-width:380px){#leagueClubsRoot .cs-columns,#leagueClubsRoot .cs-club>summary{padding-inline:8px;gap:5px;grid-template-columns:minmax(0,1fr) 43px 43px}#leagueClubsRoot .cs-club-name{gap:5px}#leagueClubsRoot .cs-crest{width:22px}}

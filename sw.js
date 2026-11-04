@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v199-compact-general';
+const CACHE_NAME = 'cuban-league-v200-club-contributions';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,9 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=199-20261104-compact-general',
+  './app.js?v=200-20261104-club-contributions',
+  './club-stats.js?v=200-20261104-club-contributions',
+  './club-stats.css?v=200-20261104-club-contributions',
   './matchday-general.js?v=199-20261104-compact-general',
   './matchday-general.css?v=199-20261104-compact-general',
   './second-division.js?v=190-20261022',

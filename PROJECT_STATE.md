@@ -2,10 +2,18 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
-## General compacto V199 · pendiente de integrar
+## Clubes V200 · PR Seguro pendiente de revisión
+- Añade Liga → Estadísticas → Clubes: clasificación compacta, selector liga/participante, puntos/promedio por aparición, filtro sin bonus, tres destacados y desglose de futbolistas/participantes al abrir un escudo. Enlaces existentes a XI y perfiles. Sin tarjetas grandes ni animación añadida.
+- Reutiliza la misma respuesta paginada de Estadísticas, sin nuevas consultas ni escrituras. Guarda la referencia del snapshot en WeakMap; agrega solo al abrir Clubes y reutiliza el modelo al filtrar. Detalles creados al desplegarlos. Sin dependencias ni cambios de datos, catálogo, administración, conexiones, clasificación, insignias ni estilos generales.
+- Cada aparición usa el club guardado en su XI (nunca el club actual del futbolista). Ceros y negativos reales se conservan. Solo XI completos, con slots/identidades únicos y valores válidos; faltantes/ambiguos no se convierten en ceros. Correcciones usan el timestamp más reciente. Aplazados y cobertura parcial explícitos.
+- Bonus mediante leagueNoBonusCaptainAdjustment intacto (redondeo Mister x1.5/x2/x3). Si no puede verificarse, el modo normal conserva los puntos y el modo sin bonus excluye ese XI y lo avisa. Saldo negativo sin puntuación no aporta XI/apariciones. Huecos, clubes desconocidos y diferencias con el total oficial se muestran fuera del desglose, no se asignan a clubes.
+- Promedio = puntos / apariciones de futbolistas. El destacado de rendimiento exige 5 apariciones en 3 jornadas. Empates por valor exacto, presentación redondeada. Mismas reglas para toda la liga o participante; al cambiar de temporada se reinician filtros.
+- Base: eabb84414c20dc1cd644a95c42e4d3ba62eaca98. App/SW y recursos nuevos V200; resto de recursos mantienen versión. Usuario pidió PR Seguro, no autorizó merge de V200.
+
+## General compacto V199 · integrado mediante PR #72
 - Petición: retirar La carrera por la liga y sustituir tarjetas grandes por un diseño más pequeño. Hoja de rankings continua con separadores, fotos de 30 px, filas de 48 px, cifras alineadas y racha actual en franja horizontal. Sin gráfico, SVG, controles de reproducción, ResizeObserver ni bucle de animación.
 - Cálculo build/ranked conservado idéntico a V198; mismos récords, empates, victorias, lideratos y rachas. Se mantienen enlaces a perfiles/XI, estados provisionales, caché diferida, Resumen y Calendario. No cambia datos ni reglas.
-- App/recursos/caché V199. Base: 70fe848dfba3dd8cb7dc7a05c3dbc8a32c1e8f18. PR separada sin merge salvo nueva autorización.
+- App/recursos/caché V199. Base: 70fe848dfba3dd8cb7dc7a05c3dbc8a32c1e8f18. Merge autorizado por Ernesto: eabb844, Pages publicado y comprobado. Respaldo backup/pre-compact-general-v199-20261104.
 - Verificación: 164/165 pruebas pasan; único fallo previo del hash V174 del catálogo. Once pruebas de General cubren cálculos idénticos, navegación, estados, empates y retirada del gráfico. Vista previa revisada en navegador de escritorio con datos hasta J11; sin emulación móvil ni prueba en iPhone físico. No se atribuyen mejoras de FPS/INP medidas.
 
 ## Jornadas · General V198 · 2026-11-03 Miami
