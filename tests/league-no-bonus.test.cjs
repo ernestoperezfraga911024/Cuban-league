@@ -130,7 +130,7 @@ test('new tab renders four columns, keeps captain points and supports returning 
     const data=api.buildLeagueStats(roster.map(p=>row(p.name)));
     api.render(data);
     const doc=dom.window.document;
-    assert.equal(doc.querySelectorAll('.league-stats-subtabs [role="tab"]').length,4);
+    assert.equal(doc.querySelectorAll('.league-stats-subtabs [role="tab"]').length,5);
     assert.equal(doc.getElementById('leagueStatsNoBonusTab').getAttribute('aria-selected'),'true');
     assert.equal(doc.querySelectorAll('.league-no-bonus-table thead th').length,4);
     assert.equal(doc.querySelectorAll('.league-no-bonus-table tbody tr').length,3);

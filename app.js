@@ -1,4 +1,4 @@
-const APP_VERSION='199-20261104-compact-general';
+const APP_VERSION='200-20261104-club-contributions';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
@@ -51,6 +51,7 @@ let LEAGUE_STATS_ABORT_CONTROLLER=null;
 const LEAGUE_STATS_CACHE=new Map();
 const LEAGUE_CAPTAIN_RANKINGS=new WeakMap();
 const LEAGUE_CAPTAIN_DETAILS=new WeakMap();
+const LEAGUE_CLUB_SOURCES=new WeakMap();
 const LEAGUE_STATS_STATE={
   status:'idle',
   section:'captains',
@@ -4891,6 +4892,20 @@ function leagueStatsErrorMarkup(message){
   return `<div class="league-stats-empty is-error" role="alert"><span>!</span><h3>No pudimos cargar las estadísticas</h3><p>${profileAttr(message||'Inténtalo nuevamente.')}</p><button type="button" data-league-stats-retry>Volver a intentar</button></div>`;
 }
 
+function renderLeagueClubs(data){
+  const host=$('leagueClubsRoot');
+  if(!host||$('currentStatisticsPanel')?.hidden)return;
+  const source=LEAGUE_CLUB_SOURCES.get(data);
+  if(!window.CubanClubStats||!source){
+    host.innerHTML='<p class="league-stats-empty">No se pudo preparar el desglose por clubes. <button type="button" data-league-stats-retry>Reintentar</button></p>';
+    return;
+  }
+  if(!source.model)source.model=window.CubanClubStats.build({rows:source.rows,season:data.season,
+    participants:data.teams,clubs:PLAYER_CATALOG?.clubs||[],publishedMatchdays:source.days,
+    captainAdjustment:leagueNoBonusCaptainAdjustment,isEmpty:isPublishedEmptyLineupPlayer});
+  window.CubanClubStats.render(host,source.model);
+}
+
 function renderLeagueStatsContent(){
   renderLeagueComparatorContent();
   const host=$('leagueStatsContent');
@@ -4908,11 +4923,11 @@ function renderLeagueStatsContent(){
     host.innerHTML=leagueStatsLoadingMarkup();
     return;
   }
-  const section=['captains','lines','mvp','noBonus'].includes(LEAGUE_STATS_STATE.section)?LEAGUE_STATS_STATE.section:'captains';
+  const section=['captains','lines','mvp','noBonus','clubs'].includes(LEAGUE_STATS_STATE.section)?LEAGUE_STATS_STATE.section:'captains';
   const updated=data.latestUpdate
     ?new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(data.latestUpdate)
     :'Sin actualizaciones registradas';
-  const panelMarkup=section==='noBonus'
+  const panelMarkup=section==='clubs'?'<div id="leagueClubsRoot"></div>':section==='noBonus'
     ?leagueStatsNoBonusMarkup(data)
     :section==='captains'
       ?leagueStatsCaptainMarkup(data)
@@ -4920,7 +4935,7 @@ function renderLeagueStatsContent(){
         ?section==='lines'?leagueStatsLineMarkup(data):leagueStatsMvpMarkup(data)
         :`<div class="league-stats-empty"><span>${uiIcon('sparkles')}</span><h3>Todavía no hay XI publicados</h3><p>Estas estadísticas aparecerán cuando se publique al menos una alineación completa de 11 futbolistas.</p></div>`;
   host.innerHTML=`<nav class="league-stats-subtabs" role="tablist" aria-label="Estadísticas de la competición">
-      ${[['captains','Capitanes'],['lines','Líneas'],['mvp','MVP'],['noBonus','Liga sin bonus']].map(([value,label])=>`<button id="leagueStats${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-league-stats-section="${value}" aria-controls="leagueStatsSectionPanel" aria-selected="${section===value}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
+      ${[['captains','Capitanes'],['lines','Líneas'],['mvp','MVP'],['noBonus','Liga sin bonus'],['clubs','Clubes']].map(([value,label])=>`<button id="leagueStats${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-league-stats-section="${value}" aria-controls="leagueStatsSectionPanel" aria-selected="${section===value}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
     </nav>
     <section id="leagueStatsSectionPanel" class="league-stats-section" role="tabpanel" aria-labelledby="leagueStats${section[0].toUpperCase()}${section.slice(1)}Tab">
       ${panelMarkup}
@@ -4930,7 +4945,8 @@ function renderLeagueStatsContent(){
       ?'Actualizando…'
       :LEAGUE_STATS_STATE.error
         ?`Mostrando datos anteriores · ${profileAttr(LEAGUE_STATS_STATE.error)}`
-        :`Datos publicados · ${updated}`}</p>`;
+      :`Datos publicados · ${updated}`}</p>`;
+  if(section==='clubs')renderLeagueClubs(data);
 }
 
 async function ensureLeagueStatsData({force=false}={}){
@@ -4958,6 +4974,7 @@ async function ensureLeagueStatsData({force=false}={}){
     if(token!==LEAGUE_STATS_REQUEST_TOKEN)return;
     const data=buildLeagueStats(rows);
     LEAGUE_CAPTAIN_DETAILS.set(data,{rows,index:null});
+    LEAGUE_CLUB_SOURCES.set(data,{rows,days:[...PUBLISHED_MATCHDAYS],model:null});
     LEAGUE_STATS_CACHE.set(season,data);
     LEAGUE_STATS_STATE.data=data;
     LEAGUE_STATS_STATE.status='ready';
@@ -4985,7 +5002,7 @@ async function ensureLeagueStatsData({force=false}={}){
 }
 
 function setLeagueStatsSection(section,{focus=false}={}){
-  LEAGUE_STATS_STATE.section=['captains','lines','mvp','noBonus'].includes(section)?section:'captains';
+  LEAGUE_STATS_STATE.section=['captains','lines','mvp','noBonus','clubs'].includes(section)?section:'captains';
   renderLeagueStatsContent();
   if(focus)document.querySelector(`[data-league-stats-section="${LEAGUE_STATS_STATE.section}"]`)?.focus();
 }
