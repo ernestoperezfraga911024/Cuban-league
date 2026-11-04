@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="styles.css?v=195-20261102-fast-navigation">
 <link rel="stylesheet" href="stats-compact.css?v=185-20261019-captain-details">
 <link rel="stylesheet" href="competition-calendar.css?v=186-20261019-calendar">
+<link rel="stylesheet" href="matchday-general.css?v=198-20261104-matchday-general">
 <style id="home-mobile-podium-v187">
 /* V187 — En celular: presentación, podio y accesos, sin duplicar contenido. */
 @media(max-width:700px){
@@ -364,7 +365,7 @@
 </div>
 </section>
 
-<section id="matchdays" class="page">
+<section id="matchdays" class="page" data-matchday-mode="general">
   <div class="matchday-banner">
     <div>
       <span class="eyebrow">CENTRO DE JORNADA</span>
@@ -374,10 +375,12 @@
   </div>
 
   <div class="matchday-view-tabs" role="tablist" aria-label="Vista de Jornadas">
-    <button type="button" id="matchdaySummaryTab" role="tab" data-matchday-view="summary" aria-selected="true" aria-controls="matchdaySummaryPanel">Resumen</button>
+    <button type="button" id="matchdayGeneralTab" role="tab" data-matchday-view="general" aria-selected="true" aria-controls="matchdayGeneralPanel">General</button>
+    <button type="button" id="matchdaySummaryTab" role="tab" data-matchday-view="summary" aria-selected="false" aria-controls="matchdaySummaryPanel" tabindex="-1">Resumen</button>
     <button type="button" id="matchdayCalendarTab" role="tab" data-matchday-view="calendar" aria-selected="false" aria-controls="matchdayCalendarPanel" tabindex="-1">Calendario</button>
   </div>
-  <div id="matchdaySummaryPanel" role="tabpanel" aria-labelledby="matchdaySummaryTab">
+  <div id="matchdayGeneralPanel" role="tabpanel" aria-labelledby="matchdayGeneralTab"></div>
+  <div id="matchdaySummaryPanel" role="tabpanel" aria-labelledby="matchdaySummaryTab" hidden>
   <div id="matchdayCalendarReturn" class="competition-calendar-context" hidden tabindex="-1"></div>
   <div class="section-head matchday-section-head">
     <div>
@@ -975,4 +978,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="app.js?v=197-20261102-smooth-tabs"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=198-20261104-matchday-general"></script><script src="app.js?v=198-20261104-matchday-general"></script></body></html>

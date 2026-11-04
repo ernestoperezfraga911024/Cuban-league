@@ -2,6 +2,13 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Jornadas · General V198 · 2026-11-03 Miami
+- Solicitud: General con mejores/peores actuaciones (participantes distintos), carrera animada de posiciones acumuladas, más jornadas ganadas, mayor racha consecutiva de liderazgo, racha activa y total de jornadas como líder. Ernesto autorizó PR Seguro y merge tras verificar. No incluye podios adicionales ni remontadas.
+- General es la primera subpestaña; Resumen y Calendario conservan contenido y enlaces. En General se sustituye solo el gran encabezado por uno compacto. Estilos nuevos aislados, tarjetas apiladas en móvil, controles de 44 px, nombres sin truncar, gráfica 360/560 px con selector, reproducción/pausa, barra de jornadas y tabla accesible.
+- Módulo sin dependencias ni peticiones propias, construido solo al abrir General. Caché por snapshot/temporada/participantes; SVG estático con revelado y marcadores, sin recalcular rankings por fotograma. Detiene reproducción al salir, ocultar documento o activar Reducir movimiento. No inicia automáticamente.
+- Mejores/peores toman solo registros existentes (cero real y negativos incluidos); empates conservan puestos compartidos, incluidas coincidencias en el corte. Victorias por máximo semanal compartido, coherentes con Rey de la jornada. Liderazgo usa cumulativeStandings intacto y sus desempates; datos incompletos/duplicados no se convierten en ceros ni líderes, y se corta la serie acumulada hasta recuperar el cierre completo desde J1. Aplazados y datos parciales se avisan como provisionales/parciales. Corrección/despublicación/temporada nueva recalculan sin acumular premios.
+- App, recursos nuevos y caché V198; estilos/animaciones anteriores y datos/administración/configuración/catálogos sin cambios. Base de reversión solo código: 9b60f631d3e6d60fbe30e6c2ad9a7b74815cdece. Sin migraciones ni escrituras en Supabase. Pruebas específicas en tests/matchday-general.test.cjs; único fallo previo conocido: hash de catálogo V174 obsoleto tras alta de D. Carvajal.
+
 ## Entrada uniforme V197 · pendiente de integrar
 - Extiende a todas las secciones la entrada aprobada de Liga: 220 ms, 6 px y opacidad, sin snapshots, blur ni animaciones duplicadas. Paneles de Historia y Reglamento cambian directamente como Liga.
 - Conserva diseño, datos, consultas, cálculos, accesibilidad y cancelación de toques rápidos. Sin cambios en styles.css ni dependencias.
