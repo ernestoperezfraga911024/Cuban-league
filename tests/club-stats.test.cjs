@@ -31,7 +31,7 @@ function setup(){
     configureFetch(rows){window.CUBAN_LEAGUE_SUPABASE={url:'https://db.example.test',publishableKey:'test',season:'2026/27'};PUBLISHED_MATCHDAYS=[...new Set(rows.map(r=>r.matchday))];},
     resetSeason(){LEAGUE_STATS_STATE.data=null;LEAGUE_STATS_STATE.status='idle';DATA.currentSeason='2027/28';}
   };`));
-  const api=w.clubTest;api.setup();
+  const api=w.clubTest;api.setup();doc.getElementById('currentStatisticsPanel').hidden=false;
   const build=(rows,extra={})=>w.CubanClubStats.build({rows,season:'2026/27',participants:roster,clubs:catalog,captainAdjustment:api.leagueNoBonusCaptainAdjustment,isEmpty:api.isPublishedEmptyLineupPlayer,...extra});
   const view=(model,extra={})=>w.CubanClubStats.select(model,extra);
   return {dom,w,doc,api,build,view};
@@ -142,7 +142,9 @@ test('integration builds once on opening Clubes, caches filters, refreshes corre
     let builds=0;const original=t.w.CubanClubStats.build;t.w.CubanClubStats.build=(...args)=>{builds++;return original(...args);};
     const rows=freeze([row(),row('Dos')]),data=t.api.register(rows),before=JSON.stringify(data);
     for(const section of ['captains','lines','mvp','noBonus'])t.api.setLeagueStatsSection(section);
-    assert.equal(builds,0);t.api.setLeagueStatsSection('clubs');assert.equal(builds,1);
+    assert.equal(builds,0);t.doc.getElementById('currentStatisticsPanel').hidden=true;
+    t.api.setLeagueStatsSection('clubs');assert.equal(builds,0,'a hidden statistics panel must not build Clubes for the comparator');
+    t.doc.getElementById('currentStatisticsPanel').hidden=false;t.api.renderLeagueStatsContent();assert.equal(builds,1);
     assert.equal(t.doc.querySelectorAll('[data-league-stats-section]').length,5);
     const participant=t.doc.getElementById('clubParticipant');participant.value='Uno';participant.dispatchEvent(new t.w.Event('change',{bubbles:true}));
     assert.equal(t.doc.activeElement.id,'clubParticipant');assert.equal(builds,1);
@@ -164,6 +166,24 @@ test('existing fetch is reused with no extra query and its source is available f
     t.api.setLeagueStatsSection('clubs');assert.equal(requests,1);assert.ok(t.api.getModel());
     await t.api.ensureLeagueStatsData();assert.equal(requests,1);
   }finally{t.dom.window.close();}
+});
+test('38-round snapshots reconcile every club across 20 participants and filtering never rebuilds the index',()=>{
+  const t=setup();close(t,()=>{
+    const participants=Array.from({length:20},(_,i)=>({name:'Equipo '+i}));
+    const rows=participants.flatMap(p=>Array.from({length:38},(_,i)=>row(p.name,i+1)));
+    const model=t.build(rows,{participants});
+    for(const withoutBonus of [false,true]){
+      const all=t.view(model,{withoutBonus});assert.equal(all.scope.analyzed,760);assert.equal(all.partial,false);
+      for(const c of all.clubs){
+        const personal=participants.reduce((n,p)=>n+t.view(model,{participant:p.name,withoutBonus}).clubs.find(x=>x.key===c.key).points,0);
+        assert.equal(c.points,personal);
+      }
+    }
+    let builds=0;const original=t.w.CubanClubStats.build;t.w.CubanClubStats.build=(...args)=>{builds++;return original(...args);};
+    const host=t.doc.createElement('div');host.id='leagueClubsRoot';t.doc.body.append(host);t.w.CubanClubStats.render(host,model);
+    for(const participant of participants){const select=host.querySelector('#clubParticipant');select.value=participant.name;select.dispatchEvent(new t.w.Event('change',{bubbles:true}));}
+    assert.equal(builds,0);assert.equal(host.querySelectorAll('.cs-detail-list').length,0);
+  });
 });
 test('disclosures render lazily and retain links to the best lineup and participant profiles',()=>{
   const t=setup();close(t,()=>{

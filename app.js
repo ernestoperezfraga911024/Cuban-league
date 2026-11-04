@@ -4894,7 +4894,7 @@ function leagueStatsErrorMarkup(message){
 
 function renderLeagueClubs(data){
   const host=$('leagueClubsRoot');
-  if(!host)return;
+  if(!host||$('currentStatisticsPanel')?.hidden)return;
   const source=LEAGUE_CLUB_SOURCES.get(data);
   if(!window.CubanClubStats||!source){
     host.innerHTML='<p class="league-stats-empty">No se pudo preparar el desglose por clubes. <button type="button" data-league-stats-retry>Reintentar</button></p>';
