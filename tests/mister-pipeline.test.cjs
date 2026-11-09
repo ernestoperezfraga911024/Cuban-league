@@ -310,3 +310,34 @@ test('J10: D. Carvajal de ANDOBA resuelve por Mister 328 y conserva la captura',
     assert.equal(api.state.catalog.resolveMister({misterPlayerId:'999999999',playerName:'D. Carvajal',clubId:'getafe',position:'DF'}),null);
   } finally {dom.window.close();}
 });
+
+test('A. Santiago de Yovany resuelve por Mister 5521760 sin confundir a Y. Santiago',async()=>{
+  // Synthetic sporting values; identity and club are from the reported import error.
+  const payload=await captureFixture({matchday:12,gameweekId:9000012});
+  const manager=payload.managers.find(p=>p.name==='Yovany R9');
+  Object.assign(manager.lineup[3],{playerName:'A. Santiago',fullName:'',misterPlayerId:'5521760',misterClubId:'8',position:'MC'});
+  const original=JSON.stringify(payload);
+  const {dom,api,rows}=await adminFor(payload);
+  try {
+    assert.equal(rows.length,20);
+    const row=rows.find(r=>r.participant.name===manager.name);
+    const player=row.lineup[3];
+    assert.equal(player.player_id,'mister-5521760');
+    assert.equal(player.player_name,'A. Santiago');
+    assert.equal(player.club_id,'espanyol');
+    assert.equal(player.position,'MC');
+    assert.equal(player.displayed_points,manager.lineup[3].displayedPoints);
+    assert.equal(row.points,manager.points);
+    assert.equal(api.lineupMetrics(row.lineup).complete,true);
+    assert.equal(JSON.stringify(payload),original);
+    assert.equal(api.state.catalog.players.filter(p=>p.misterId==='5521760').length,1);
+    assert.equal(api.state.catalog.resolveMister({misterPlayerId:'63867',playerName:'Y. Santiago',clubId:'elche',position:'MC'}).id,'y-santiago');
+    assert.equal(api.state.catalog.resolveMister({misterPlayerId:'999999999',playerName:'A. Santiago',clubId:'espanyol',position:'MC'}),null);
+    // The stored matchday position always comes from the capture.
+    manager.lineup[3].position='DL';
+    const changed=api.normalizeMisterPayload(payload,payload.gameweekId).find(r=>r.participant.name===manager.name);
+    assert.equal(changed.lineup[3].player_id,'mister-5521760');
+    assert.equal(changed.lineup[3].position,'DL');
+    assert.equal(changed.points,manager.points);
+  } finally {dom.window.close();}
+});

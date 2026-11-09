@@ -2,6 +2,12 @@
 
 > Memoria técnica operativa del proyecto. Mantener compacta y centrada en el estado actual. No guardar passwords, tokens, claves de cifrado, cookies, API secrets ni credenciales de Supabase/GitHub.
 
+## Catálogo · A. Santiago · 2026-11-09
+- Añadida la identidad `mister-5521760`: A. Santiago (Alejandro Santiago Vargas), RCD Espanyol, MC. ID 5521760 y club de la captura de Yovany R9; nombre completo y posición contrastados en la ficha oficial del Espanyol. Evidencia: `Screenshot 2026-11-09 091625.png`.
+- Catálogo: 574 activos y siete archivados; las 580 fichas anteriores permanecen idénticas, incluido Y. Santiago (Elche, Mister 63867). Solo se añade una ficha y se actualizan contador/fecha.
+- Regresión con 20 participantes: resuelve por ID, conserva XI, puntos y captura, rechaza IDs desconocidos y respeta la posición recibida de Mister. Sin cambios en importador, extensión, interfaz, resultados ni base de datos.
+- El catálogo se sirve con red primero. Para continuar: recargar administración y Recuperar captura; repetir importación solo si caducó.
+
 ## Clubes V200 · PR Seguro pendiente de revisión
 - Añade Liga → Estadísticas → Clubes: clasificación compacta, selector liga/participante, puntos/promedio por aparición, filtro sin bonus, tres destacados y desglose de futbolistas/participantes al abrir un escudo. Enlaces existentes a XI y perfiles. Sin tarjetas grandes ni animación añadida.
 - Reutiliza la misma respuesta paginada de Estadísticas, sin nuevas consultas ni escrituras. Guarda la referencia del snapshot en WeakMap; agrega solo al abrir Clubes y reutiliza el modelo al filtrar. Detalles creados al desplegarlos. Sin dependencias ni cambios de datos, catálogo, administración, conexiones, clasificación, insignias ni estilos generales.
