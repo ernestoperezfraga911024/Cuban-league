@@ -4,6 +4,7 @@
   const $=id=>document.getElementById(id),core=()=>window.CubanForecastPublishCore;
   let client,authorized=false,generation=0,operation=0,catalog=null,state=null,sourceKey=null,readyId=null,readyPublished=false,busy=false,pending=null,initialized=false;
   const fields=[];
+  let getSelectedDraft=()=>null;
   function el(tag,text){const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;}
   function message(text){$('forecastEditorStatus').textContent=text;}
   function roster(){return new Map(catalog.players.filter(p=>p.clubId==='real-madrid').map(p=>[p.id,p]));}
@@ -15,6 +16,10 @@
     $('forecastWithdraw').disabled=busy||!!pending||!state?.current_revision;
     $('forecastSaveRevision').disabled=busy||!!pending||!sourceKey;
     for(const f of fields)f.alt.disabled=busy||!!pending||Number(f.prob.value)>=70;
+    if($('forecastSaveHint'))$('forecastSaveHint').textContent=pending?'El resultado está pendiente de confirmar. Usa «Reintentar la misma operación».':
+      !sourceKey?'Selecciona un borrador arriba y pulsa «Editar borrador seleccionado» para poder guardar.':'Guardar crea una revisión privada; no publica el once.';
+    if($('forecastPublishHint'))$('forecastPublishHint').textContent=!readyId?'Para publicar, primero guarda y abre la vista previa de una revisión.':
+      !$('forecastPublishConfirm').checked?'Revisa la vista previa y marca la casilla de confirmación para habilitar Publicar.':'Revisión #'+readyId+' lista para confirmar su publicación.';
   }
   function reset(){
     generation++;operation++;authorized=false;busy=false;pending=null;state=null;sourceKey=null;readyId=null;catalog=null;fields.length=0;
@@ -28,6 +33,7 @@
     if(['PGRST202','42883','42P01'].includes(error?.code))return 'La publicación aún no está habilitada en la base de datos. El visor privado sigue disponible.';
     if(error?.code==='40001')return 'Otra sesión ha cambiado el estado. Conservamos tus campos: recarga el historial y revisa antes de guardar de nuevo.';
     if(error?.code==='22023'||error?.code==='54000')return error.message;
+    if(error?.code==='EDITOR_VALIDATION')return error.message;
     return 'No se pudo completar la operación. Comprueba la conexión y reintenta.';
   }
   function fillState(next){
@@ -54,27 +60,39 @@
     }
     $('forecastEditPlayers').replaceChildren(fragment);$('forecastPublicNote').value=note;controls();
   }
+  function preview(next){
+    if(next.version!==state.version)throw {code:'40001'};
+    const r=next.revision;if(!r)throw Error('Revisión inexistente');core().validate(r.payload);
+    form(r.payload.players.map(p=>({...p,alternative_id:p.alternative?.id??null})),r.payload.note);
+    window.CubanForecastPitch.render($('forecastPreview'),r.payload,catalog,{preview:true});
+    sourceKey=r.source_key;readyId=r.id;readyPublished=!!state.revisions.find(x=>x.id===r.id)?.ever_published;
+    $('forecastPublishConfirm').checked=false;
+  }
   async function refresh(){
     if(!authorized||busy||pending)return;const g=generation,op=++operation;busy=true;controls();
     try{const next=await rpc('get_forecast_publication',{p_revision_id:null});if(g!==generation||op!==operation||!authorized)return;fillState(next);message('Historial actualizado. Guardar no cambia la publicación vigente.');}
     catch(e){if(g===generation)message(explain(e));}
     finally{if(g===generation){busy=false;controls();}}
   }
-  async function open(row=null){
+  async function open(row=getSelectedDraft()){
     if(!authorized||busy||pending)return;
     if(sourceKey&&(!readyId)&&!$('forecastEditor').hidden&&!window.confirm('Abrir otra versión descartará los campos sin guardar. ¿Continuar?'))return;
     const g=generation,op=++operation;busy=true;$('forecastEditor').hidden=false;message('Cargando catálogo e historial…');controls();
+    $('forecastEditor').scrollIntoView?.({block:'start',behavior:'instant'});
     try{
       const [next,data]=await Promise.all([rpc('get_forecast_publication',{p_revision_id:null}),window.CubanLeaguePlayerCatalog.load()]);
       if(g!==generation||op!==operation||!authorized)return;catalog=data;fillState(next);
       sourceKey=null;readyId=null;readyPublished=false;fields.length=0;$('forecastEditPlayers').replaceChildren();$('forecastPreview').replaceChildren();$('forecastPublicNote').value='';$('forecastPublishConfirm').checked=false;
       if(row){
-        const players=core().fromDraft(row.payload);core().candidates(players,new Set(roster().keys()));
-        // Recheck the original assessment in the editor; SQL checks it again on save.
-        for(const p of row.payload.proposal.players)if(window.CubanForecastCore.evaluate(p.assessment).probability!==p.probability)throw Error('Evaluación inconsistente.');
+        let players;
+        try{
+          players=core().fromDraft(row.payload);core().candidates(players,new Set(roster().keys()));
+          // Recheck the original assessment in the editor; SQL checks it again on save.
+          for(const p of row.payload.proposal.players)if(window.CubanForecastCore.evaluate(p.assessment).probability!==p.probability)throw Error('La evaluación de este borrador requiere revisión. Selecciona otro borrador válido.');
+        }catch(e){throw {code:'EDITOR_VALIDATION',message:e.message};}
         sourceKey=row.run_key;form(players,row.payload.limitations.join(' ').slice(0,1200));
         message('Revisa cada jugador, bajas, porcentajes y la nota pública. Los cambios manuales quedarán identificados.');
-      }else message('Elige una revisión guardada, o abre «Editar y preparar» en un borrador con método editorial v1.');
+      }else message('Selecciona un borrador arriba y pulsa «Editar borrador seleccionado», o abre una revisión del historial.');
     }catch(e){if(g===generation)message(explain(e));}
     finally{if(g===generation){busy=false;controls();}}
   }
@@ -84,11 +102,7 @@
     const g=generation,op=++operation;busy=true;controls();
     try{
       const next=await rpc('get_forecast_publication',{p_revision_id:id});if(g!==generation||op!==operation||!authorized)return;
-      if(next.version!==state.version)throw {code:'40001'};
-      const r=next.revision;if(!r)throw Error('Revisión inexistente');core().validate(r.payload);
-      sourceKey=r.source_key;readyId=r.id;readyPublished=!!state.revisions.find(x=>x.id===r.id)?.ever_published;
-      form(r.payload.players.map(p=>({...p,alternative_id:p.alternative?.id??null})),r.payload.note);
-      $('forecastPublishConfirm').checked=false;window.CubanForecastPitch.render($('forecastPreview'),r.payload,catalog,{preview:true});message('Vista previa de la revisión #'+r.id+'. Publicar requiere tu confirmación.');
+      preview(next);message('Vista previa de la revisión #'+readyId+'. Publicar requiere tu confirmación.');
     }catch(e){if(g===generation)message(explain(e));}
     finally{if(g===generation){busy=false;controls();}}
   }
@@ -100,9 +114,25 @@
       pending=null;readyId=null;$('forecastPublishConfirm').checked=false;
       // Command already succeeded even if a following read fails. Never retry it as a new save.
       state={...state,version:result.version,current_revision:result.current_revision};
-      message(result.action==='save'?'Revisión #'+result.revision_id+' guardada en privado. Cárgala para revisar y publicar.':result.action==='withdraw'?'Publicación retirada. El historial privado se conserva.':'Revisión #'+result.revision_id+' publicada.');
-      try{const next=await rpc('get_forecast_publication',{p_revision_id:null});if(g!==generation||!authorized)return;fillState(next);$('forecastSavedRevisions').value=String(result.revision_id||'');}
-      catch{message('La operación se completó. Recarga el historial para verificar su estado actual.');}
+      const saved=result.action==='save',success=saved?'Revisión #'+result.revision_id+' guardada en privado.':result.action==='withdraw'?'Publicación retirada. El historial privado se conserva.':'Revisión #'+result.revision_id+' publicada.';
+      message(success);
+      try{
+        const next=await rpc('get_forecast_publication',{p_revision_id:null});if(g!==generation||!authorized)return;fillState(next);$('forecastSavedRevisions').value=String(result.revision_id||'');
+        if(saved){
+          const detail=await rpc('get_forecast_publication',{p_revision_id:result.revision_id});if(g!==generation||!authorized)return;
+          preview(detail);message(success+' Revisa la vista previa y marca la confirmación para publicar.');
+          $('forecastPreview').scrollIntoView?.({block:'start',behavior:'instant'});
+        }
+      }catch(e){
+        if(g!==generation||!authorized)return;
+        if(e?.code==='42501'||[401,403].includes(e?.status)){message(explain(e));return;}
+        if(saved){
+          const select=$('forecastSavedRevisions');
+          if(![...select.options].some(x=>x.value===String(result.revision_id)))select.add(new Option('#'+result.revision_id+' · Guardada en privado',result.revision_id));
+          select.value=String(result.revision_id);
+        }
+        message(success+' '+(e?.code==='40001'?explain(e):saved?'No se pudo abrir la vista previa. Pulsa «Abrir revisión» para reintentar; no necesitas guardar de nuevo.':'Recarga el historial para verificar el estado actual.'));
+      }
     }catch(e){
       if(g!==generation)return;
       // Unknown transport outcome: retain EXACT command UUID and parameters for safe retry.
@@ -131,7 +161,7 @@
     }catch(e){message(e.message);}
   }
   function init(options){
-    client=options.client;if(initialized||!$('forecastEditor'))return;initialized=true;
+    client=options.client;getSelectedDraft=options.getSelectedDraft||(()=>null);if(initialized||!$('forecastEditor'))return;initialized=true;
     $('forecastManage').addEventListener('click',()=>open());$('forecastHistoryReload').addEventListener('click',refresh);$('forecastLoadRevision').addEventListener('click',loadRevision);
     $('forecastEditPlayers').addEventListener('input',invalidate);$('forecastPublicNote').addEventListener('input',invalidate);
     $('forecastPublishConfirm').addEventListener('change',controls);

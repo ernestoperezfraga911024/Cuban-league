@@ -3,6 +3,8 @@
   const $ = id => document.getElementById(id);
   let client, authorized = false, initialized = false, generation = 0, selection = 0, rows = [], loaded = false;
   const cache = new Map();
+  let currentRow = null;
+  function lockEditorEntry(locked) { if ($('forecastManage')) $('forecastManage').disabled = locked; }
   const core = () => window.CubanForecastCore;
   function el(tag, text, cls) {
     const node = document.createElement(tag);
@@ -23,6 +25,7 @@
   }
   function reset() {
     window.CubanForecastEditor?.reset();
+    currentRow = null; lockEditorEntry(true);
     generation++; selection++; authorized = false; loaded = false; rows = []; cache.clear();
     if (!$('forecastTool')) return;
     $('forecastTool').open = false;
@@ -59,6 +62,7 @@
   }
   async function selectVersion() {
     if (!authorized) return;
+    currentRow = null; lockEditorEntry(true);
     const g = generation, request = ++selection;
     $('forecastStatus').textContent = 'Cargando versión…';
     try {
@@ -68,10 +72,12 @@
       render(row, previous);
       $('forecastStatus').textContent = 'Consulta completada. Los datos corresponden a las fechas indicadas; no se ha ejecutado un análisis nuevo.';
     } catch (error) { if (g === generation && request === selection) $('forecastStatus').textContent = errorMessage(error); }
+    finally { if (g === generation && request === selection) lockEditorEntry(!authorized); }
   }
   async function reload() {
     if (!authorized || !client || $('forecastReload').disabled) return;
     const g = generation; selection++;
+    currentRow = null; lockEditorEntry(true);
     $('forecastReload').disabled = true; $('forecastStatus').textContent = 'Consultando borradores…';
     try {
       const result = await rpc();
@@ -84,7 +90,7 @@
       if (!rows.length) { $('forecastContent').replaceChildren(); $('forecastStatus').textContent = 'Todavía no hay borradores privados.'; return; }
       fillComparisons(); await selectVersion();
     } catch (error) { if (g === generation) $('forecastStatus').textContent = errorMessage(error); }
-    finally { if (g === generation) $('forecastReload').disabled = false; }
+    finally { if (g === generation) { $('forecastReload').disabled = false; lockEditorEntry(!authorized); } }
   }
   function render(row, previous) {
     const p = row.payload, fragment = document.createDocumentFragment();
@@ -138,15 +144,12 @@
     fragment.append(el('p', !previous && $('forecastCompare').options.length > 1 ? 'Selecciona una versión anterior para comparar.' : diff.message));
     for (const change of diff.changes) fragment.append(el('p', change.name + ': ' + change.change + '. Motivo registrado: ' + change.reason));
     fragment.append(el('p', 'Los borradores antiguos conservan sus porcentajes originales. Una diferencia sin evidencia nueva no demuestra un cambio deportivo.', 'forecast-notice'));
-    if (p.status === 'draft' && p.method_version === 'editorial-v1') {
-      const edit = el('button', 'Editar y preparar publicación'); edit.type = 'button';
-      edit.addEventListener('click', () => window.CubanForecastEditor?.open(row)); fragment.append(edit);
-    }
     $('forecastContent').replaceChildren(fragment);
+    currentRow = row;
   }
   function init(options) {
     client = options.client;
-    window.CubanForecastEditor?.init(options);
+    window.CubanForecastEditor?.init({...options, getSelectedDraft: () => currentRow});
     if (initialized || !$('forecastTool')) return;
     initialized = true;
     $('forecastTool').addEventListener('toggle', event => { if (authorized && event.currentTarget.open && !loaded) reload(); });

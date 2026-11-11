@@ -45,12 +45,15 @@ async function main(){
      if(args.p_action==='publish')current=1;
      return {data:{version,current_revision:current,revision_id:1,action:args.p_action}};
     }
-    return {data:args.p_run_key?source:[]};
-   }}});CubanForecastReview.authorize();CubanForecastEditor.open(source);
+    return {data:args.p_run_key?source:[source]};
+   }}});CubanForecastReview.authorize();
   },{source:draft(),payload:publication()});
+  await page.waitForFunction(()=>!document.getElementById('forecastManage').disabled);
+  await page.locator('#forecastManage').click();
   await page.waitForSelector('#forecastEditPlayers fieldset');
+  assert.equal(await page.locator('#forecastSaveRevision').isDisabled(),false);
   await page.locator('#forecastSaveRevision').click();await page.waitForFunction(()=>document.getElementById('forecastEditorStatus').textContent.includes('guardada en privado'));
-  await page.locator('#forecastLoadRevision').click();await page.waitForSelector('#forecastPreview .fp-player');
+  await page.waitForSelector('#forecastPreview .fp-player');
   for(const width of [390,1280]){
    await page.setViewportSize({width,height:1000});const box=await page.locator('#forecastEditor').evaluate(e=>({scroll:e.scrollWidth,client:e.clientWidth}));assert.ok(box.scroll<=box.client+1,JSON.stringify({width,...box}));
    await page.locator('#forecastPreview').screenshot({path:path.join(root,'test-results','forecast-preview-'+width+'.png')});

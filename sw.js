@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v202-forecast-publish';
+const CACHE_NAME = 'cuban-league-v203-forecast-controls';
 const APP_SHELL = [
   './',
   './index.html',
