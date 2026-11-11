@@ -112,6 +112,7 @@
     try{
       const result=await rpc('command_forecast_publication',request);
       if(g!==generation||!authorized)return;
+      window.dispatchEvent(new Event('forecast-publication-changed'));
       pending=null;readyId=null;$('forecastPublishConfirm').checked=false;
       // Command already succeeded even if a following read fails. Never retry it as a new save.
       state={...state,version:result.version,current_revision:result.current_revision};

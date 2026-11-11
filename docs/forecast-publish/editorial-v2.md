@@ -1,5 +1,8 @@
 # Lectura editorial v2 y vista compacta
 
+El flujo de publicación descrito al final refleja la versión original. La entrega
+automática y el botón manual único se documentan en [delivery.md](delivery.md).
+
 El método v1 acumulaba descuentos por rol, disponibilidad, rotación, acuerdo,
 calidad y antelación. Podía convertir una preferencia compartida en un porcentaje
 demasiado bajo. Se conserva para interpretar el historial, pero las nuevas

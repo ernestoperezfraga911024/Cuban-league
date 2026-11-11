@@ -35,3 +35,18 @@
 .fp-editor{margin-top:24px;border-top:1px solid #bda35e55;padding-top:20px}.fp-editor label{display:block;font-size:13px;font-weight:650;line-height:1.6}.fp-editor select,.fp-editor input,.fp-editor textarea{box-sizing:border-box;max-width:100%;width:100%;font:inherit;min-height:44px;padding:10px;border:1px solid #63705d;border-radius:8px;background:#13251c;color:#f0f1e7}.fp-editor textarea{min-height:86px;resize:vertical}
 .fp-edit-player{margin:12px 0;padding:14px;border:1px solid #6c795f66;border-radius:12px;min-width:0}.fp-edit-player legend{color:#e6ca86;padding:0 6px}.fp-edit-grid{display:grid;grid-template-columns:2fr 1fr 2fr;gap:12px}.fp-editor .fp-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.fp-editor .fp-actions button{min-height:44px}.fp-editor .fp-confirm{display:flex;align-items:center;gap:10px;margin-top:18px}.fp-confirm input{width:22px;min-height:22px}.fp-editor [hidden]{display:none!important}.fp-editor-status{line-height:1.6;color:#d8d5bc;overflow-wrap:anywhere}.fp-editor select:disabled,.fp-editor button:disabled{opacity:.5}
 @media(max-width:760px){.fp-edit-grid{grid-template-columns:1fr 90px}.fp-edit-grid>label:last-child{grid-column:1/-1}}
+/* Compact delivery controls; detailed editing remains optional. */
+.fp-delivery{padding:18px;border:1px solid #28413c;border-radius:16px;background:linear-gradient(125deg,#112923,#111b20);margin-bottom:18px;color:#eef6f3}
+.fp-delivery h3{font-size:1.15rem;margin:5px 0 14px}
+.fp-delivery-modes{display:flex;gap:6px;width:fit-content;padding:4px;background:#091712;border-radius:12px}
+.fp-delivery-modes button{border:0;border-radius:8px;padding:9px 14px;color:#c5d5cf;background:transparent;min-height:42px}
+.fp-delivery-modes button[aria-pressed=true]{background:#c4ecb5;color:#112519;opacity:1}
+.fp-delivery #forecastQuickPublish{background:#c4ecb5;color:#112519;font-weight:750;border-color:#c4ecb5}
+.fp-delivery .fp-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.fp-delivery .fp-actions button{border:1px solid #345349;border-radius:10px;padding:10px 14px;min-height:44px;background:#12261e;color:#eef6f3}
+.fp-delivery button:disabled{cursor:default;opacity:.5}
+.fp-delivery button[aria-pressed=true]:disabled{opacity:1}
+.fp-delivery button:focus-visible,.fp-delivery summary:focus-visible{outline:2px solid #c4ecb5;outline-offset:3px}
+.fp-delivery #forecastDeliveryStatus{font-size:.9rem;line-height:1.5;overflow-wrap:anywhere}
+.fp-delivery-preview{margin-top:14px}.fp-delivery-preview summary,#forecastAdvanced>summary{cursor:pointer;padding:12px 0;font-weight:650}
+.fp-delivery-footnote{color:#abc0b7;font-size:.78rem;line-height:1.55}
+@media(max-width:500px){.fp-delivery{padding:12px}.fp-delivery .fp-actions{display:flex;flex-wrap:wrap}.fp-delivery .fp-actions button{flex:1 1 120px;min-height:44px}}

@@ -38,6 +38,7 @@ async function main(){
    for(const id of ['loadingView','loginView'])document.getElementById(id).hidden=true;document.getElementById('panelView').hidden=false;document.getElementById('forecastTool').open=true;
    let version=0,current=null,revision=null;window.__commands=[];
    CubanForecastReview.init({client:{rpc:async(name,args)=>{
+    if(name==='get_forecast_delivery')return {data:{version,current_revision:current,mode:'manual',readiness:'ready',source_key:source.run_key,preview:payload}};
     if(name==='get_forecast_publication')return {data:args.p_revision_id?{version,current_revision:current,revision}:{version,current_revision:current,revisions:revision?[{id:1,created_at:'2026-11-11T17:00Z',ever_published:!!current}]:[]}};
     if(name==='command_forecast_publication'){
      window.__commands.push(args.p_action);version++;
@@ -49,6 +50,7 @@ async function main(){
    }}});CubanForecastReview.authorize();
   },{source:draft(),payload:publication()});
   await page.waitForFunction(()=>!document.getElementById('forecastManage').disabled);
+  await page.locator('#forecastAdvanced > summary').click();
   await page.locator('#forecastManage').click();
   await page.waitForSelector('#forecastEditPlayers fieldset');
   assert.equal(await page.locator('#forecastSaveRevision').isDisabled(),false);

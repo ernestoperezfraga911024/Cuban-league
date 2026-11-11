@@ -25,6 +25,7 @@
   }
   function reset() {
     window.CubanForecastEditor?.reset();
+    window.CubanForecastDelivery?.reset();
     currentRow = null; lockEditorEntry(true);
     generation++; selection++; authorized = false; loaded = false; rows = []; cache.clear();
     if (!$('forecastTool')) return;
@@ -150,6 +151,7 @@
   function init(options) {
     client = options.client;
     window.CubanForecastEditor?.init({...options, getSelectedDraft: () => currentRow});
+    window.CubanForecastDelivery?.init(options);
     if (initialized || !$('forecastTool')) return;
     initialized = true;
     $('forecastTool').addEventListener('toggle', event => { if (authorized && event.currentTarget.open && !loaded) reload(); });
@@ -157,5 +159,5 @@
     $('forecastVersions').addEventListener('change', () => { fillComparisons(); selectVersion(); });
     $('forecastCompare').addEventListener('change', selectVersion);
   }
-  window.CubanForecastReview = { init, reset, authorize() { authorized = true; window.CubanForecastEditor?.authorize(); } };
+  window.CubanForecastReview = { init, reset, authorize() { authorized = true; window.CubanForecastEditor?.authorize(); window.CubanForecastDelivery?.authorize(); } };
 })();
