@@ -79,3 +79,10 @@ en la interfaz o restaurar primero una publicación compatible y vigente mediant
 el control existente. No borrar historial. Para revertir solo los auxiliares,
 usar las definiciones originales `assess` y `build` como CREATE OR REPLACE;
 esto impediría preparar nuevas revisiones v2, pero no cambia las guardadas.
+
+La actualización SQL se aplicó el 11/11/2026 como `forecast_source_weighted_v2`.
+La comprobación posterior a las 19:03:54Z confirmó los once cálculos, los hashes
+de los tres borradores anteriores y de la publicación vigente sin cambios.
+Los dos auxiliares siguen siendo privados e INVOKER; no aparecen avisos nuevos
+en seguridad y el asesor de salud sigue vacío. El incremento de activos públicos
+es de 894 bytes gzip en medición local, con cero dependencias nuevas.

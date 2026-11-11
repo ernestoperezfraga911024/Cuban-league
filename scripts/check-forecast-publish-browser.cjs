@@ -55,12 +55,12 @@ async function main(){
   await page.locator('#forecastSaveRevision').click();await page.waitForFunction(()=>document.getElementById('forecastEditorStatus').textContent.includes('guardada en privado'));
   await page.waitForSelector('#forecastPreview .fp-player');
   for(const width of [390,1280]){
-   await page.setViewportSize({width,height:1000});const box=await page.locator('#forecastEditor').evaluate(e=>({scroll:e.scrollWidth,client:e.clientWidth}));assert.ok(box.scroll<=box.client+1,JSON.stringify({width,...box}));
+   await page.setViewportSize({width,height:1000});const box=await page.locator('#forecastEditor').evaluate(e=>({scroll:e.scrollWidth,client:e.clientWidth,columns:getComputedStyle(e.querySelector('.fp-edit-grid')).gridTemplateColumns.split(' ').length}));assert.equal(box.columns,width<760?2:3);assert.ok(box.scroll<=box.client+1,JSON.stringify({width,...box}));
    await page.locator('#forecastPreview').screenshot({path:path.join(root,'test-results','forecast-preview-'+width+'.png')});
   }
   assert.equal(await page.locator('#forecastPublish').isDisabled(),true);await page.locator('#forecastPublishConfirm').check();await page.locator('#forecastPublish').click();await page.waitForFunction(()=>window.__commands.length===2);
   assert.deepEqual(await page.evaluate(()=>window.__commands),['save','publish']);await page.evaluate(()=>CubanForecastReview.reset());assert.equal(await page.locator('#forecastEditPlayers fieldset').count(),0);
-  assert.deepEqual(errors,[]);console.log('PASS: real public navigation, lazy read, 11 catalog photos, 320/390/1280 layouts, details, withdrawn state, private save, saved preview, explicit publish, logout reset. All responses synthetic.');
+  assert.deepEqual(errors,[]);console.log('PASS: real public navigation, lazy read, 11 catalog photos, 320/390/768/1280 layouts, details, withdrawn state, private save, saved preview, explicit publish, logout reset. All responses synthetic.');
  }finally{await browser.close();}
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
