@@ -37,7 +37,7 @@
     const roster=new Set();
     for(const x of p.players||[]){
       if(!/^[a-z0-9-]+$/.test(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>120
-        ||!['editorial-v1','editorial-manual-v1'].includes(x.method)
+        ||!['editorial-v1','editorial-v2','editorial-manual-v1'].includes(x.method)
         ||x.position!==(x.slot===1?'GK':x.slot<=5?'DF':x.slot<=10?'MF':'FW')) throw Error('Jugador ilegible.');
       roster.add(x.id);
       if(x.alternative){
@@ -49,7 +49,7 @@
     return p;
   }
   function fromDraft(p){
-    if(p?.status!=='draft'||p.method_version!=='editorial-v1') throw Error('Esta versión necesita una nueva lectura con método editorial v1.');
+    if(p?.status!=='draft'||!['editorial-v1','editorial-v2'].includes(p.method_version)) throw Error('Esta versión necesita una nueva lectura con método editorial compatible.');
     return p.proposal.players.map(x=>({id:x.id,slot:x.slot,probability:x.probability,alternative_id:x.alternative?.id??null,reason:x.reason}));
   }
   function freshness(p,now=Date.now()){

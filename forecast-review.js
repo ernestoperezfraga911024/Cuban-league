@@ -119,7 +119,7 @@
             const box = $('forecastPlayerDetail'); box.replaceChildren(el('h4', player.name), el('p', player.reason));
             const assessment = core().assessment(player); box.append(el('p', assessment.label));
             for (const factor of assessment.trace) {
-              box.append(el('p', factor.factor + ': ' + factor.reason + ' (' + factor.points + ')'));
+              box.append(el('p', factor.factor + ': ' + factor.reason + ' (' + Number(factor.points.toFixed(1)) + ')'));
               for (const ref of factor.refs) box.append(link(ref, 'Evidencia del criterio'));
             }
             box.append(el('p', 'Consulta los onces y las noticias utilizados en las fuentes de esta versión.'));
