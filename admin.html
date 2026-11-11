@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="admin.css?v=176-20261015-classic-navigation">
   <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
   <link rel="stylesheet" href="second-division.css?v=190-20261022">
+  <link rel="stylesheet" href="forecast-review.css?v=201-20261111">
 </head>
 <body class="f05-theme">
   <div class="admin-background" aria-hidden="true"></div>
@@ -137,12 +138,31 @@
           <div>
             <span class="admin-kicker"><i></i> ACCESOS RÁPIDOS</span>
             <h2 id="adminToolsTitle">Herramientas del panel</h2>
-            <p>Audiencia y protección de datos agrupadas para dejar libre el área de trabajo.</p>
+            <p>Audiencia, respaldos y revisión privada de alineaciones.</p>
           </div>
-          <span class="admin-tools-count">2 herramientas</span>
+          <span class="admin-tools-count">3 herramientas</span>
         </header>
 
         <div class="admin-tools-grid">
+      <details id="forecastTool" class="admin-tool-details">
+        <summary class="backup-center-head admin-tool-summary">
+          <span class="backup-summary-copy">
+            <span class="admin-kicker">PILOTO PRIVADO</span>
+            <span class="backup-summary-title" role="heading" aria-level="3">Alineaciones probables</span>
+            <span class="backup-summary-description">Revisa el once, las fuentes y los cambios entre borradores del Real Madrid.</span>
+          </span>
+          <span class="backup-summary-toggle">Revisar</span>
+        </summary>
+        <div class="forecast-body">
+          <button id="forecastReload" class="refresh-analytics-button" type="button">Recargar borradores</button>
+          <p id="forecastStatus" role="status">Abre este apartado para consultar los borradores privados.</p>
+          <div id="forecastControls" class="forecast-controls" hidden>
+            <label>Versión guardada<select id="forecastVersions"></select></label>
+            <label>Comparar con anterior<select id="forecastCompare"></select></label>
+          </div>
+          <div id="forecastContent"></div>
+        </div>
+      </details>
       <details id="analyticsTool" class="visitor-analytics admin-tool-details" aria-labelledby="visitorAnalyticsTitle">
         <summary class="backup-center-head admin-tool-summary">
           <span class="backup-summary-copy">
@@ -791,6 +811,8 @@
   <script src="mister-import-core.js?v=169"></script>
   <script src="second-division-core.js?v=190-20261022"></script>
   <script src="second-division-admin.js?v=190-20261022"></script>
-  <script src="admin.js?v=190-20261022"></script>
+  <script src="forecast-review-core.js?v=201-20261111"></script>
+  <script src="forecast-review.js?v=201-20261111"></script>
+  <script src="admin.js?v=201-20261111-forecast-review"></script>
 </body>
 </html>
