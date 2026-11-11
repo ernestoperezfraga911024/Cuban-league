@@ -199,7 +199,7 @@ $body$;
 
 create function forecast_season.save_draft(p_run text,p jsonb) returns jsonb
 language plpgsql security invoker set search_path='' as $body$
-declare k text; projection jsonb; a forecast_season.attempts%rowtype;
+declare k text; v_projection jsonb; a forecast_season.attempts%rowtype;
 begin
  perform 1 from forecast_season.control for update;
  k:=p_run||'-'||(p->>'team');select * into a from forecast_season.attempts where key=k;
@@ -211,9 +211,9 @@ begin
  if p->>'status' is distinct from 'draft' then raise exception 'Usa block_team para registrar una lectura incompleta' using errcode='22023'; end if;
  if not exists(select 1 from forecast_season.fixtures f where f.key=p->>'fixture_key' and f.verified_at>=now()-interval '2 hours' and f.kickoff_at>now()) then raise exception 'Partido sin verificación reciente o iniciado' using errcode='22023'; end if;
  if exists(select 1 from forecast_season.fixtures f where p->>'team' in(f.home,f.away) and f.kickoff_at>now() and f.kickoff_at<(p->>'kickoff_at')::timestamptz) then raise exception 'Hay un partido anterior pendiente para el equipo' using errcode='22023'; end if;
- projection:=forecast_season.build_team(p);
- if projection is null then raise exception 'Lectura no publicable' using errcode='22023'; end if;
- update forecast_season.drafts set run_key=k,fixture_key=p->>'fixture_key',payload=p,projection=projection,checked_at=now(),outcome='saved',reason=null where team=p->>'team';
+ v_projection:=forecast_season.build_team(p);
+ if v_projection is null then raise exception 'Lectura no publicable' using errcode='22023'; end if;
+ update forecast_season.drafts set run_key=k,fixture_key=p->>'fixture_key',payload=p,projection=v_projection,checked_at=now(),outcome='saved',reason=null where team=p->>'team';
  insert into forecast_season.attempts(key,run_key,team,fixture_key,input_hash,outcome) values(k,p_run,p->>'team',p->>'fixture_key',md5(p::text),'saved');
  update public.forecast_season_public set checked_at=now(),status=case when status='withdrawn' then 'withdrawn' else 'pending' end,attempted_fixture_key=p->>'fixture_key' where team=p->>'team';
  update forecast_season.control set version=version+1;
@@ -251,21 +251,21 @@ $body$;
 
 create function forecast_season.publish_team(p_team text,p_age interval,p_manual boolean default false) returns jsonb
 language plpgsql security invoker set search_path='' as $body$
-declare d forecast_season.drafts%rowtype; projection jsonb; horizon text; source_xi jsonb;
+declare d forecast_season.drafts%rowtype; v_projection jsonb; v_horizon text; source_xi jsonb;
 begin
  select * into d from forecast_season.drafts where team=p_team;
  if d.team is null or d.projection is null or d.outcome not in ('saved','ready','published') or (d.paused and not p_manual) then raise exception 'No hay lectura lista para publicar' using errcode='22023'; end if;
- projection:=forecast_season.build_team(d.payload,p_age);
- if projection is null or not exists(select 1 from forecast_season.fixtures f where f.key=d.fixture_key and f.kickoff_at>now()) then raise exception 'Partido iniciado o lectura inválida' using errcode='22023'; end if;
- if (projection->>'evidence_at')::timestamptz<now()-p_age then raise exception 'Lectura caducada' using errcode='22023'; end if;
- if exists(select 1 from forecast_season.fixtures f where p_team in(f.home,f.away) and f.kickoff_at>now() and f.kickoff_at<(projection->>'kickoff_at')::timestamptz) then raise exception 'Existe un partido anterior del equipo' using errcode='22023'; end if;
- if exists(select 1 from public.forecast_season_public where team=p_team and payload=projection and status='published') then return jsonb_build_object('team',p_team,'outcome','unchanged'); end if;
- update public.forecast_season_public set payload=projection,published_at=now(),checked_at=d.checked_at,status='published',attempted_fixture_key=d.fixture_key where team=p_team;
+ v_projection:=forecast_season.build_team(d.payload,p_age);
+ if v_projection is null or not exists(select 1 from forecast_season.fixtures f where f.key=d.fixture_key and f.kickoff_at>now()) then raise exception 'Partido iniciado o lectura inválida' using errcode='22023'; end if;
+ if (v_projection->>'evidence_at')::timestamptz<now()-p_age then raise exception 'Lectura caducada' using errcode='22023'; end if;
+ if exists(select 1 from forecast_season.fixtures f where p_team in(f.home,f.away) and f.kickoff_at>now() and f.kickoff_at<(v_projection->>'kickoff_at')::timestamptz) then raise exception 'Existe un partido anterior del equipo' using errcode='22023'; end if;
+ if exists(select 1 from public.forecast_season_public where team=p_team and payload=v_projection and status='published') then return jsonb_build_object('team',p_team,'outcome','unchanged'); end if;
+ update public.forecast_season_public set payload=v_projection,published_at=now(),checked_at=d.checked_at,status='published',attempted_fixture_key=d.fixture_key where team=p_team;
  update forecast_season.drafts set outcome='published',paused=false where team=p_team;
  update forecast_season.attempts set outcome='published',published_at=now() where key=d.run_key;
- horizon:=case when (projection->>'kickoff_at')::timestamptz-now()<=interval '6 hours' then 'matchday' when (projection->>'kickoff_at')::timestamptz-now()<=interval '48 hours' then 'near' when (projection->>'kickoff_at')::timestamptz-now()<=interval '120 hours' then 'medium' else 'distant' end;
+ v_horizon:=case when (v_projection->>'kickoff_at')::timestamptz-now()<=interval '6 hours' then 'matchday' when (v_projection->>'kickoff_at')::timestamptz-now()<=interval '48 hours' then 'near' when (v_projection->>'kickoff_at')::timestamptz-now()<=interval '120 hours' then 'medium' else 'distant' end;
  select jsonb_agg(jsonb_build_object('id',s->>'id','url',s->>'url','fetched_at',s->'fetched_at','starter_ids',s->'starter_ids','player_observations',s->'player_observations')) into source_xi from jsonb_array_elements(d.payload->'sources') s;
- insert into forecast_season.archive(fixture_key,team,horizon,published_at,projection,source_starters) values(d.fixture_key,p_team,horizon,now(),projection,source_xi)
+ insert into forecast_season.archive(fixture_key,team,horizon,published_at,projection,source_starters) values(d.fixture_key,p_team,v_horizon,now(),v_projection,source_xi)
  on conflict(fixture_key,team,horizon) do update set published_at=excluded.published_at,projection=excluded.projection,source_starters=excluded.source_starters;
  return jsonb_build_object('team',p_team,'outcome','published','published_at',now(),'fixture_key',d.fixture_key);
 end;
