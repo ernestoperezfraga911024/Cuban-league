@@ -1,5 +1,13 @@
 .fp-card{--fp-gold:#e6ca86;--fp-ink:#f4f4e9;--fp-muted:#afc2b5;box-sizing:border-box;color:var(--fp-ink);background:#0c2119;border:1px solid #82917455;border-radius:18px;overflow:hidden;box-shadow:0 12px 30px #0002;font-family:inherit;max-width:880px;margin:0 auto}
 .fp-card *{box-sizing:border-box}.fp-card [hidden]{display:none!important}
+.forecast-clubs:has(.forecast-club-list){display:block;max-width:880px;margin:0 auto 12px;min-width:0}
+.forecast-club-list{display:flex;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:5px 2px 9px;max-width:100%}
+.forecast-clubs .forecast-club-list button{display:flex;flex:0 0 68px;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:72px;padding:7px 3px;border:1px solid #64796540;border-radius:10px;background:#11251e;color:#b9cbbf;box-shadow:none}
+.forecast-clubs .forecast-club-list button[aria-pressed=true]{border-color:#e6ca86;background:#30422b;color:#fff0c6}
+.forecast-clubs .forecast-club-list button span{display:block;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;line-height:1.4;font-weight:650}
+.forecast-clubs .forecast-club-list button img{width:28px;height:32px;object-fit:contain}
+.forecast-clubs .forecast-clubs-caption{display:block;font-size:10px;margin:4px 2px;color:#adbfaf}
+.forecast-club-list button:focus-visible{outline:2px solid #e6ca86;outline-offset:-2px}
 .fp-match{padding:18px 22px 14px;background:radial-gradient(ellipse at 100% 0,#425b3540,transparent 70%)}
 .fp-eyebrow{display:block;color:var(--fp-gold);font-size:9px;font-weight:800;letter-spacing:.15em;line-height:1.6}
 .fp-match h2{font-size:21px;letter-spacing:-.025em;margin:9px 0 5px;font-weight:750;line-height:1.2;color:var(--fp-ink)}

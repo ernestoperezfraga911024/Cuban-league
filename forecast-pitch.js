@@ -16,40 +16,43 @@
     return frame;
   }
   function render(host,payload,catalog,{preview=false,publishedAt=null}={}){
-    const p=core.validate(payload);host.replaceChildren();
+    const round=window.CubanForecastRoundCore,extended=payload?.schema_version===2;
+    const p=extended?round.validate(payload):core.validate(payload);host.replaceChildren();
+    const teamInfo=id=>round.config.teams.find(t=>t.id===id);
+    const slotLabel=slot=>extended?round.label(p.formation,slot):core.SLOTS[slot-1];
     const shell=el('article',null,'fp-card');
     const header=el('header',null,'fp-match');
     header.append(el('span',preview?'VISTA PREVIA · SIN PUBLICAR':'CUBAN LEAGUE · PREVISIÓN EDITORIAL','fp-eyebrow'));
     const match=el('span',null,'fp-match-title');
-    for(const [name,crest] of [['Real Madrid','real-madrid'],['Celta','celta-vigo']]){
+    for(const [name,crest] of (extended?[p.home,p.away].map(id=>[teamInfo(id).name,id]):[['Real Madrid','real-madrid'],['Celta','celta-vigo']])){
       const team=el('span',null,'fp-match-team'),image=el('img');image.src='catalog/crests/'+crest+'.webp';image.alt='';image.width=24;image.height=28;image.decoding='async';image.addEventListener('error',()=>image.remove(),{once:true});team.append(image,el('span',name));
       if(match.children.length)match.append(el('span','vs','fp-versus'));match.append(team);
     }
     const title=el('h2');title.append(match);header.append(title);
-    header.append(el('p','LaLiga · Jornada 13 · Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
+    header.append(el('p',extended?'LaLiga · Jornada 13 · '+teamInfo(p.team).name:'LaLiga · Jornada 13 · Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
     const status=el('p',core.freshness(p),'fp-notice');header.append(status);
     shell.append(header);
     const layout=el('div',null,'fp-layout'), field=el('div',null,'fp-field');
-    field.setAttribute('aria-label','Once propuesto del Real Madrid, 4-2-3-1');
-    field.append(el('span','4–2–3–1','fp-formation'));
+    field.setAttribute('aria-label','Once propuesto de '+(extended?teamInfo(p.team).name:'Real Madrid')+', '+p.formation);
+    field.append(el('span',p.formation,'fp-formation'));
     const markings=el('span',null,'fp-markings');markings.setAttribute('aria-hidden','true');field.append(markings);
     const detail=el('section',null,'fp-detail');detail.tabIndex=-1;detail.setAttribute('aria-live','polite');
     let selectedButton=null;
     function show(player,button,moveFocus=true){
       if(selectedButton)selectedButton.setAttribute('aria-pressed','false');selectedButton=button;button.setAttribute('aria-pressed','true');
-      detail.replaceChildren(el('span','LA DECISIÓN','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',core.SLOTS[player.slot-1],'fp-meta'),el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
+      detail.replaceChildren(el('span','LA DECISIÓN','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',slotLabel(player.slot),'fp-meta'),el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
       if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span','Alternativa: '+player.alternative.name));detail.append(a);}
       detail.append(el('p',player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
       detail.append(el('p','Estimación provisional no calibrada. No mide minutos ni garantiza que juegue.','fp-meta'));
       if(moveFocus){const back=el('button','Volver al campo','fp-link');back.type='button';back.addEventListener('click',()=>button.focus());detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}}
     }
     let first=null;
-    for(const slots of [[11],[8,9,10],[6,7],[2,3,4,5],[1]]){
+    for(const slots of (extended?round.lines(p.formation).reverse():[[11],[8,9,10],[6,7],[2,3,4,5],[1]])){
       const row=el('div',null,'fp-line');
       for(const slot of slots){
         const player=p.players.find(x=>x.slot===slot),button=el('button',null,'fp-player'+(player.probability<70?' fp-uncertain':''));
         button.type='button';button.setAttribute('aria-pressed','false');
-        button.setAttribute('aria-label',player.name+', '+core.SLOTS[slot-1]+', '+player.probability+' por ciento. Ver explicación.');
+        button.setAttribute('aria-label',player.name+', '+slotLabel(slot)+', '+player.probability+' por ciento. Ver explicación.');
         button.append(portrait(player,catalog),el('span',player.name,'fp-name'),el('b',player.probability+'%','fp-prob'));
         if(player.alternative)button.append(el('small','↳ '+player.alternative.name,'fp-alt-name'));
         button.addEventListener('click',()=>show(player,button));row.append(button);if(!first)first={player,button};
