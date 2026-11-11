@@ -75,11 +75,13 @@ El catálogo conserva exactamente su hash de main. Se añade aproximadamente
 ## Despliegue revisable y reversión
 
 `migration.sql` es el SQL revisable para `apply_migration` en el proyecto existente
-`pyahosamoisqcbpvzwka` de Cuban League. **No se ha aplicado permanentemente**.
+`pyahosamoisqcbpvzwka` de Cuban League. **Aplicada con autorización del usuario el
+11/11/2026**, como `forecast_pilot_publication`, versión `20261111181315`.
 No necesita proyectos, ramas Supabase, Edge Functions, planes ni infraestructura.
 
-Orden al integrar: aplicar esta migración una vez, comprobar permisos y ausencia
-de publicación inicial, fusionar el PR y verificar los assets de GitHub Pages.
+La migración ya se aplicó una vez y se comprobaron permisos y ausencia de
+publicación inicial. El frontend se integra mediante el PR #77 y debe verificarse
+en GitHub Pages. No se debe volver a aplicar el mismo SQL de creación.
 La migración no publica ningún borrador. Un administrador debe abrir, guardar,
 previsualizar y confirmar una publicación. Hasta disponer de la migración el
 editor muestra un aviso y el visor privado anterior sigue funcionando.
@@ -128,3 +130,30 @@ La lectura conserva discrepancias en el lateral izquierdo y mediocentro, dudas
 físicas, antelación superior a diez días y fecha de actualización desconocida.
 Los porcentajes bajos del método v1 requieren revisión editorial; no demuestran
 que un futbolista vaya a ser suplente. No se activan actualizaciones diarias.
+
+## Aplicación autorizada y comprobaciones posteriores
+
+El 11/11/2026 a las 18:13Z se instaló el SQL revisado sin cambios respecto del
+ensayo. La comprobación posterior confirmó RLS en las cinco tablas nuevas,
+27 identidades de catálogo y cero revisiones, eventos o publicaciones iniciales.
+Los tres borradores privados conservaron sus hashes. Las referencias anteriores
+a objetos ausentes describen la prueba con ROLLBACK, previa a esta instalación.
+
+El ensayo de permisos sobre las funciones instaladas permitió la lectura de un
+administrador y rechazó identidad ausente, no administrador y acceso anónimo a
+funciones privadas. La API real devolvió HTTP 200 con `[]` para la publicación,
+y HTTP 401 / código 42501 para lectura y comando privados sin autenticación.
+No se ejecutó ningún comando de publicación permanente.
+
+El asesor de seguridad mantuvo los mismos avisos WARN previos (2 para funciones
+anónimas, 23 para funciones autenticadas y 1 de protección de contraseñas). Añadió
+cuatro INFO por RLS sin políticas en las tablas privadas de `forecast_publish`:
+es intencional, ya que no se concede acceso directo y las RPC verifican al
+administrador. Véase la
+[explicación del asesor de RLS sin políticas](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
+No se añadieron políticas que permitan leer el historial privado.
+
+`tests/forecast-publish-db.sql` es el ensayo previo a instalar el esquema. No se
+debe volver a concatenar la migración de creación en una base donde ya existe.
+Las comprobaciones posteriores de instalación fueron de lectura y autorización,
+sin crear revisiones ni publicar datos.
