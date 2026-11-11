@@ -6,8 +6,17 @@
   function position(formation,slot){const rows=lines(formation);return slot===1?'GK':rows[1].includes(slot)?'DF':rows.at(-1).includes(slot)?'FW':'MF';}
   function label(formation,slot){return {GK:'Portería',DF:'Defensa',MF:'Centro del campo',FW:'Ataque'}[position(formation,slot)];}
   function validate(p){
+    if(p?.schema_version===3){
+      const ids=new Set(config.teams.map(t=>t.id));
+      if(p.season!=='2026-27'||!Number.isInteger(p.matchday)||p.matchday<13||p.matchday>38||!ids.has(p.home)||!ids.has(p.away)||p.home===p.away||![p.home,p.away].includes(p.team)||p.opponent!==(p.team===p.home?p.away:p.home)||!new RegExp('^laliga-2026-27-j'+p.matchday+'-[a-z0-9-]{3,100}$').test(p.fixture_key)||!Number.isFinite(Date.parse(p.kickoff_at))||Date.parse(p.kickoff_at)<Date.parse('2026-07-01T00:00:00Z')||Date.parse(p.kickoff_at)>=Date.parse('2027-07-01T04:00:00Z'))throw Error('Partido de temporada incompleto.');
+      return validatePlayers(p);
+    }
     const f=fixture(p?.team);
     if(!f||p.schema_version!==2||p.fixture_key!==f.key||p.home!==f.home||p.away!==f.away||p.opponent!==(p.team===f.home?f.away:f.home)||p.matchday!==13||p.kickoff_at!==f.kickoff_at||p.probability_kind!=='editorial_uncalibrated'||typeof p.note!=='string'||p.note.length<10||p.note.length>1200)throw Error('Partido incompleto.');
+    return validatePlayers(p);
+  }
+  function validatePlayers(p){
+    if(p.probability_kind!=='editorial_uncalibrated'||typeof p.note!=='string'||p.note.length<10||p.note.length>1200)throw Error('Contexto incompleto.');
     lines(p.formation);
     if(!Array.isArray(p.sources)||p.sources.length!==3||new Set(p.sources.map(s=>s.id)).size!==3||p.sources.some(s=>!legacy.sourceUrl(s)||!Number.isFinite(Date.parse(s.fetched_at))||(s.source_updated_at!==null&&!Number.isFinite(Date.parse(s.source_updated_at)))))throw Error('Fuentes incompletas.');
     if(Date.parse(p.evidence_at)!==Math.min(...p.sources.map(s=>Date.parse(s.fetched_at))))throw Error('Fechas inconsistentes.');

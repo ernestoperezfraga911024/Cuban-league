@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
   <link rel="stylesheet" href="second-division.css?v=190-20261022">
   <link rel="stylesheet" href="forecast-review.css?v=201-20261111">
-  <link rel="stylesheet" href="forecast-publish.css?v=205-20261111">
+  <link rel="stylesheet" href="forecast-publish.css?v=207-20261111">
 </head>
 <body class="f05-theme">
   <div class="admin-background" aria-hidden="true"></div>
@@ -148,14 +148,25 @@
       <details id="forecastTool" class="admin-tool-details">
         <summary class="backup-center-head admin-tool-summary">
           <span class="backup-summary-copy">
-            <span class="admin-kicker">PILOTO REAL MADRID</span>
+            <span class="admin-kicker">LALIGA · 20 EQUIPOS · TEMPORADA 2026/27</span>
             <span class="backup-summary-title" role="heading" aria-level="3">Alineaciones probables</span>
             <span class="backup-summary-description">Publicación automática o manual en un clic. Historial y fuentes disponibles.</span>
           </span>
           <span class="backup-summary-toggle">Revisar</span>
         </summary>
         <div class="forecast-body">
-          <section id="forecastDelivery" class="fp-delivery" aria-labelledby="forecastDeliveryTitle">
+          <section id="forecastSeason" class="fp-delivery" aria-labelledby="forecastSeasonTitle">
+            <span class="admin-kicker">ACTUALIZACIONES Y PUBLICACIONES</span><h3 id="forecastSeasonTitle">Los 20 equipos, en un vistazo</h3>
+            <div class="fp-delivery-modes" role="group" aria-label="Modo de publicación de los 20 equipos"><button id="forecastSeasonAuto" type="button" disabled>Automático</button><button id="forecastSeasonManual" type="button" disabled>Manual</button></div>
+            <p class="fp-delivery-footnote">Hora de Miami: 09:00 todos; 06:00 partidos de la mañana; 13:00 partidos pendientes de hoy; 18:00 partidos dentro de 48 horas. Se verifica el próximo encuentro de cada club. Las jornadas avanzan por equipo.</p>
+            <p id="forecastSeasonSummary" class="fs-summary"></p>
+            <div class="fp-actions"><button id="forecastSeasonPublish" type="button" disabled>Publicar listos</button><button id="forecastSeasonReload" type="button" disabled>Actualizar estado</button><button id="forecastSeasonRetry" type="button" hidden>Reintentar</button></div>
+            <p id="forecastSeasonStatus" role="status" aria-live="polite">Abre el apartado para consultar el estado de los 20 equipos.</p>
+            <div id="forecastSeasonRows" class="fs-teams"></div>
+            <details id="forecastSeasonPreviewBox"><summary>Vista previa opcional</summary><div id="forecastSeasonPreview"></div></details>
+            <p class="fp-delivery-footnote">Manual prepara las lecturas y espera Publicar. Una lectura bloqueada conserva la publicación anterior y su fecha. Retirar pausa la publicación automática de ese equipo hasta que publiques otra lectura. Actualizar estado no relee las fuentes.</p>
+          </section>
+          <section id="forecastDelivery" class="fp-delivery" aria-labelledby="forecastDeliveryTitle" hidden>
             <div class="fp-delivery-head"><div><span class="admin-kicker">REAL MADRID · CELTA · J13</span><h3 id="forecastDeliveryTitle">Tu once, listo para publicar</h3></div></div>
             <div class="fp-delivery-modes" role="group" aria-label="Modo de publicación">
               <button id="forecastModeAuto" type="button" aria-pressed="false" disabled>Automático</button>
@@ -167,14 +178,14 @@
             <details class="fp-delivery-preview"><summary>Ver el once preparado</summary><div id="forecastDeliveryPreview"></div></details>
             <p class="fp-delivery-footnote">Piloto hasta el 21 de noviembre. El modo manual prepara el once y espera tu clic. Una lectura bloqueada conserva la publicación anterior con su fecha. Actualizar estado no vuelve a leer las páginas.</p>
           </section>
-          <details id="forecastAdvanced"><summary>Historial, fuentes y edición avanzada</summary>
+          <details id="forecastAdvanced"><summary>Historial del piloto anterior · Solo lectura</summary>
           <button id="forecastReload" class="refresh-analytics-button" type="button">Recargar borradores</button>
           <p id="forecastStatus" role="status">Abre este apartado para consultar los borradores privados.</p>
           <div id="forecastControls" class="forecast-controls" hidden>
             <label>Versión guardada<select id="forecastVersions"></select></label>
             <label>Comparar con anterior<select id="forecastCompare"></select></label>
           </div>
-          <button id="forecastManage" type="button" disabled>Editar borrador seleccionado</button>
+          <button id="forecastManage" type="button" disabled hidden>Editar borrador seleccionado</button>
           <div id="forecastContent"></div>
           <section id="forecastEditor" class="fp-editor" hidden aria-labelledby="forecastEditorTitle">
             <h3 id="forecastEditorTitle">Preparar el once público</h3>
@@ -848,10 +859,13 @@
   <script src="forecast-source-method.js?v=204-20261111"></script>
   <script src="forecast-review-core.js?v=204-20261111"></script>
   <script src="forecast-publish-core.js?v=204-20261111"></script>
-  <script src="forecast-pitch.js?v=206-20261111"></script>
+      <script src="forecast-round-config.js?v=206-20261111"></script>
+    <script src="forecast-round-core.js?v=207-20261111"></script>
+<script src="forecast-pitch.js?v=207-20261111"></script>
   <script src="forecast-editor.js?v=205-20261111"></script>
   <script src="forecast-delivery.js?v=205-20261111"></script>
-  <script src="forecast-review.js?v=205-20261111"></script>
+  <script src="forecast-season-admin.js?v=207-20261111"></script>
+  <script src="forecast-review.js?v=207-20261111"></script>
   <script src="admin.js?v=201-20261111-forecast-review"></script>
 </body>
 </html>

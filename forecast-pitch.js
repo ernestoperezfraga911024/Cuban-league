@@ -16,7 +16,7 @@
     return frame;
   }
   function render(host,payload,catalog,{preview=false,publishedAt=null}={}){
-    const round=window.CubanForecastRoundCore,extended=payload?.schema_version===2;
+    const round=window.CubanForecastRoundCore,extended=[2,3].includes(payload?.schema_version);
     const p=extended?round.validate(payload):core.validate(payload);host.replaceChildren();
     const teamInfo=id=>round.config.teams.find(t=>t.id===id);
     const slotLabel=slot=>extended?round.label(p.formation,slot):core.SLOTS[slot-1];
@@ -29,7 +29,7 @@
       if(match.children.length)match.append(el('span','vs','fp-versus'));match.append(team);
     }
     const title=el('h2');title.append(match);header.append(title);
-    header.append(el('p',extended?'LaLiga · Jornada 13 · '+teamInfo(p.team).name:'LaLiga · Jornada 13 · Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
+    header.append(el('p',extended?'LaLiga · Jornada '+p.matchday+' · '+teamInfo(p.team).name:'LaLiga · Jornada 13 · Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
     const status=el('p',core.freshness(p),'fp-notice');header.append(status);
     shell.append(header);
     const layout=el('div',null,'fp-layout'), field=el('div',null,'fp-field');
