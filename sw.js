@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v200-club-contributions';
+const CACHE_NAME = 'cuban-league-v201-forecast-review';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,7 +24,7 @@ const APP_SHELL = [
   './supabase-config.js?v=161-20260902',
   './admin.html',
   './admin.css?v=176-20261015-classic-navigation',
-  './admin.js?v=190-20261022',
+  './admin.js?v=201-20261111-forecast-review',
   './mister-import-core.js?v=169',
   './admin-manifest.json',
   './supabase.js',
@@ -157,6 +157,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/app.js') ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
+    /\/forecast-review(?:-core)?\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/mister-import-helper.js') ||
     url.pathname.endsWith('/mister-import-core.js') ||
     url.pathname.endsWith('/player-catalog.js') ||

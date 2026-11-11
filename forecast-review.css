@@ -1,0 +1,28 @@
+#forecastTool { grid-column: 1 / -1; }
+#forecastTool .forecast-body { padding: clamp(12px, 3vw, 24px); color: #e6efdf; overflow-wrap: anywhere; }
+#forecastTool .forecast-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 16px 0; }
+#forecastTool label { flex: 1 1 220px; }
+#forecastTool select { display: block; width: 100%; max-width: 100%; margin-top: 6px; padding: 10px; background: #10271c; color: #f2f5eb; border: 1px solid #617954; border-radius: 8px; }
+#forecastTool button { cursor: pointer; }
+#forecastTool button:focus-visible, #forecastTool a:focus-visible, #forecastTool summary:focus-visible { outline: 3px solid #edcc72; outline-offset: 3px; }
+#forecastTool .forecast-notice { color: #ecd293; font-size: .85rem; }
+#forecastTool .forecast-pitch { border: 1px solid #6b825c; border-radius: 16px; background: repeating-linear-gradient(0deg, #173b28 0, #173b28 65px, #1a422d 65px, #1a422d 130px); padding: 18px 8px; display: grid; gap: 24px; max-width: 780px; margin: 20px auto; }
+#forecastTool .forecast-line { display: flex; justify-content: space-evenly; align-items: start; gap: 6px; }
+#forecastTool .forecast-player { flex: 0 1 150px; min-width: 0; border: 1px solid #65885e; border-radius: 10px; background: #0b241bea; color: #f2f5eb; padding: 10px 5px; box-shadow: 0 4px 10px #0003; font: inherit; font-size: .85rem; }
+#forecastTool .forecast-player span, #forecastTool .forecast-player b, #forecastTool .forecast-player small { display: block; }
+#forecastTool .forecast-player b { color: #a9e3a2; margin-top: 5px; }
+#forecastTool .forecast-player.uncertain b { color: #ffdc85; }
+#forecastTool .forecast-player small { color: #efe2b9; font-size: .75rem; margin-top: 5px; }
+#forecastTool .forecast-player-detail { padding: 16px; background: #10291e; border-left: 3px solid #d2b16a; border-radius: 8px; }
+#forecastTool details { margin: 12px 0; }
+#forecastTool summary { cursor: pointer; }
+#forecastTool a { color: #ebd597; display: inline-block; margin: 6px 12px 6px 0; }
+#forecastTool h3, #forecastTool h4 { margin: 18px 0 8px; }
+#forecastTool p, #forecastTool li { line-height: 1.5; }
+#forecastTool [hidden] { display: none !important; }
+@media(max-width: 480px) {
+  #forecastTool .forecast-player { font-size: .72rem; padding: 8px 3px; }
+  #forecastTool .forecast-player small { font-size: .65rem; }
+  #forecastTool .forecast-line { gap: 4px; }
+  #forecastTool .forecast-pitch { padding: 16px 4px; gap: 18px; }
+}

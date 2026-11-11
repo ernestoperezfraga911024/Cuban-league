@@ -51,6 +51,11 @@ test('V174 protected files remain unchanged; manifests only replace approved F05
       // V188 adds only an authenticated-client handoff and teardown for Segunda.
       // Removing those exact integration lines must restore the full original file.
       const normalized=read(p)
+        // Remove only the four forecast handoff/teardown hooks before checking the original hash.
+        .replace("    if (viewId !== 'panelView') {\n      window.CubanSecondAdmin?.reset();\n      window.CubanForecastReview?.reset();\n    }", "    if (viewId !== 'panelView') window.CubanSecondAdmin?.reset();")
+        .replace("      window.CubanForecastReview?.authorize();\n", '')
+        .replace("      window.CubanForecastReview?.init({ client: state.client });\n", '')
+        .replace("    window.CubanForecastReview?.reset();\n", '')
         .replace("      window.CubanSecondAdmin?.init({ client: state.client, season: currentSeasonKey(), extensionCall,\n        isBlocked: () => state.misterImportBusy || state.saving || state.backupRestoring });\n",'')
         .replace("  function showOnly(viewId) {\n    if (viewId !== 'panelView') window.CubanSecondAdmin?.reset();\n",'  function showOnly(viewId) {');
       assert.equal(hash(normalized),expected,p+' original admin preserved');
@@ -190,7 +195,7 @@ test('navigation stays read-only and the new cache restores the classic resource
   assert.doesNotMatch(read('editorial-ui.js'),/\b(fetch|localStorage|sessionStorage|indexedDB|supabase)\s*[.(]/);
   const sw=read('sw.js');
   for(const asset of ['styles.css?v=195-20261102-fast-navigation','admin.css?v=176-20261015-classic-navigation','mobile-navigation.css?v=178-20261015','editorial-ui.js?v=176-20261015','home-stadium-night.jpg'])assert.ok(sw.includes(asset));
-  assert.match(sw,/cuban-league-v200-club-contributions/);
+  assert.match(sw,/cuban-league-v201-forecast-review/);
   assert.doesNotMatch(sw,/editorial(?:-admin)?\.css/);
 });
 test('classic styles are active; the lightweight add-on is scoped to navigation',()=>{

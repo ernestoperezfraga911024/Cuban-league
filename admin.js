@@ -163,7 +163,10 @@
   }
 
   function showOnly(viewId) {
-    if (viewId !== 'panelView') window.CubanSecondAdmin?.reset();
+    if (viewId !== 'panelView') {
+      window.CubanSecondAdmin?.reset();
+      window.CubanForecastReview?.reset();
+    }
 
     ['loadingView', 'loginView', 'panelView'].forEach(id => {
       $(id).hidden = id !== viewId;
@@ -4237,6 +4240,7 @@
       $('sessionEmail').textContent = session.user.email || '';
       $('seasonLabel').textContent = config.season;
       showOnly('panelView');
+      window.CubanForecastReview?.authorize();
       updateCompetitionUI();
       const pendingImport = readImportJSON(MISTER_SESSION_KEY,sessionStorage);
       if (pendingImport?.season === currentSeasonKey() && Number.isInteger(pendingImport.matchday)) {
@@ -4341,6 +4345,7 @@
     if (state.copyingPreviousLineup) return;
     await prepareNavigation();
     closeBackupRestore(false);
+    window.CubanForecastReview?.reset();
     await state.client.auth.signOut();
     state.dirty = false;
     $('adminPassword').value = '';
@@ -4654,6 +4659,7 @@
       });
       window.CubanSecondAdmin?.init({ client: state.client, season: currentSeasonKey(), extensionCall,
         isBlocked: () => state.misterImportBusy || state.saving || state.backupRestoring });
+      window.CubanForecastReview?.init({ client: state.client });
       bindEvents();
       setupInstallableAdmin();
       setupMisterImportControls();
