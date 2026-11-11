@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v201-forecast-review';
+const CACHE_NAME = 'cuban-league-v202-forecast-publish';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,11 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=200-20261104-club-contributions',
+  './app.js?v=202-20261111-forecast-publish',
+  './forecast-publish.css?v=202-20261111',
+  './forecast-publish-core.js?v=202-20261111',
+  './forecast-pitch.js?v=202-20261111',
+  './forecast-public.js?v=202-20261111',
   './club-stats.js?v=200-20261104-club-contributions',
   './club-stats.css?v=200-20261104-club-contributions',
   './matchday-general.js?v=199-20261104-compact-general',
@@ -157,7 +161,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/app.js') ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
-    /\/forecast-review(?:-core)?\.(?:js|css)$/.test(url.pathname) ||
+    /\/forecast-(?:review(?:-core)?|publish(?:-core)?|pitch|public|editor)\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/mister-import-helper.js') ||
     url.pathname.endsWith('/mister-import-core.js') ||
     url.pathname.endsWith('/player-catalog.js') ||

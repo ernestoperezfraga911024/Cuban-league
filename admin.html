@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
   <link rel="stylesheet" href="second-division.css?v=190-20261022">
   <link rel="stylesheet" href="forecast-review.css?v=201-20261111">
+  <link rel="stylesheet" href="forecast-publish.css?v=202-20261111">
 </head>
 <body class="f05-theme">
   <div class="admin-background" aria-hidden="true"></div>
@@ -161,6 +162,23 @@
             <label>Comparar con anterior<select id="forecastCompare"></select></label>
           </div>
           <div id="forecastContent"></div>
+          <button id="forecastManage" type="button">Edición y publicaciones</button>
+          <section id="forecastEditor" class="fp-editor" hidden aria-labelledby="forecastEditorTitle">
+            <h3 id="forecastEditorTitle">Preparar el once público</h3>
+            <p>Solo Real Madrid · J13. Guardar crea una revisión privada. Publicar sustituye el once que ven los visitantes.</p>
+            <p id="forecastPublicationState"></p>
+            <label>Historial de revisiones<select id="forecastSavedRevisions"></select></label>
+            <div class="fp-actions"><button id="forecastLoadRevision" type="button">Abrir revisión</button><button id="forecastHistoryReload" type="button">Recargar historial</button></div>
+            <div id="forecastEditPlayers"></div>
+            <label>Nota pública y limitaciones<textarea id="forecastPublicNote" maxlength="1200" placeholder="Explica dudas, desacuerdos y antelación al partido."></textarea></label>
+            <p>Los porcentajes son estimaciones editoriales no calibradas. Comprueba la disponibilidad: una molestia no confirma una baja. Las posiciones son tácticas.</p>
+            <div class="fp-actions"><button id="forecastSaveRevision" type="button">Guardar revisión privada</button><button id="forecastCommandRetry" type="button" hidden>Reintentar la misma operación</button></div>
+            <p id="forecastEditorStatus" class="fp-editor-status" role="status" aria-live="polite"></p>
+            <div id="forecastPreview"></div>
+            <label class="fp-confirm"><input id="forecastPublishConfirm" type="checkbox">He revisado el once, las fuentes y los textos que se mostrarán públicamente.</label>
+            <div class="fp-actions"><button id="forecastPublish" type="button" disabled>Publicar revisión</button><button id="forecastRestore" type="button" disabled>Restaurar esta publicación</button><button id="forecastWithdraw" type="button" disabled>Retirar publicación vigente</button></div>
+            <p>Publicar y restaurar exigen fuentes consultadas en las últimas 24 horas y un partido aún no iniciado. Ningún botón ejecuta lecturas automáticas.</p>
+          </section>
         </div>
       </details>
       <details id="analyticsTool" class="visitor-analytics admin-tool-details" aria-labelledby="visitorAnalyticsTitle">
@@ -812,7 +830,10 @@
   <script src="second-division-core.js?v=190-20261022"></script>
   <script src="second-division-admin.js?v=190-20261022"></script>
   <script src="forecast-review-core.js?v=201-20261111"></script>
-  <script src="forecast-review.js?v=201-20261111"></script>
+  <script src="forecast-publish-core.js?v=202-20261111"></script>
+  <script src="forecast-pitch.js?v=202-20261111"></script>
+  <script src="forecast-editor.js?v=202-20261111"></script>
+  <script src="forecast-review.js?v=202-20261111"></script>
   <script src="admin.js?v=201-20261111-forecast-review"></script>
 </body>
 </html>

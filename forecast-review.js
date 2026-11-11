@@ -22,6 +22,7 @@
     } catch { return el('span', label + ' · enlace no válido'); }
   }
   function reset() {
+    window.CubanForecastEditor?.reset();
     generation++; selection++; authorized = false; loaded = false; rows = []; cache.clear();
     if (!$('forecastTool')) return;
     $('forecastTool').open = false;
@@ -137,10 +138,15 @@
     fragment.append(el('p', !previous && $('forecastCompare').options.length > 1 ? 'Selecciona una versión anterior para comparar.' : diff.message));
     for (const change of diff.changes) fragment.append(el('p', change.name + ': ' + change.change + '. Motivo registrado: ' + change.reason));
     fragment.append(el('p', 'Los borradores antiguos conservan sus porcentajes originales. Una diferencia sin evidencia nueva no demuestra un cambio deportivo.', 'forecast-notice'));
+    if (p.status === 'draft' && p.method_version === 'editorial-v1') {
+      const edit = el('button', 'Editar y preparar publicación'); edit.type = 'button';
+      edit.addEventListener('click', () => window.CubanForecastEditor?.open(row)); fragment.append(edit);
+    }
     $('forecastContent').replaceChildren(fragment);
   }
   function init(options) {
     client = options.client;
+    window.CubanForecastEditor?.init(options);
     if (initialized || !$('forecastTool')) return;
     initialized = true;
     $('forecastTool').addEventListener('toggle', event => { if (authorized && event.currentTarget.open && !loaded) reload(); });
@@ -148,5 +154,5 @@
     $('forecastVersions').addEventListener('change', () => { fillComparisons(); selectVersion(); });
     $('forecastCompare').addEventListener('change', selectVersion);
   }
-  window.CubanForecastReview = { init, reset, authorize() { authorized = true; } };
+  window.CubanForecastReview = { init, reset, authorize() { authorized = true; window.CubanForecastEditor?.authorize(); } };
 })();
