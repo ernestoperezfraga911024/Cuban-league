@@ -138,6 +138,10 @@
 </style><link rel="stylesheet" href="mobile-navigation.css?v=178-20261015">
 <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
 <link rel="stylesheet" href="second-division.css?v=190-20261022">
+<link rel="stylesheet" href="forecast-publish.css?v=202-20261111">
+<script src="forecast-publish-core.js?v=202-20261111" defer></script>
+<script src="forecast-pitch.js?v=202-20261111" defer></script>
+<script src="forecast-public.js?v=202-20261111" defer></script>
 <link rel="stylesheet" href="league-motion.css?v=197-20261102-smooth-tabs">
 <script src="second-division-core.js?v=190-20261022" defer></script>
 <script src="second-division.js?v=190-20261022" defer></script>
@@ -433,6 +437,11 @@
   </div>
 </section>
 
+<section id="forecasts" class="page" aria-labelledby="forecastPublicTitle" aria-busy="false">
+  <header class="forecast-public-heading"><div><span class="eyebrow">EL PARTIDO, ANTES DEL PARTIDO</span><h1 id="forecastPublicTitle">Alineaciones probables</h1><p>Una propuesta propia. Cada decisión, explicada.</p></div><button id="forecastPublicReload" type="button">Actualizar</button></header>
+  <p id="forecastPublicStatus" role="status" aria-live="polite">Entra para consultar la previsión publicada.</p>
+  <div id="forecastPublicBody"></div>
+</section>
 <section id="second-division" class="page" aria-labelledby="secondDivisionTitle" aria-busy="false">
   <header class="second-heading"><span class="eyebrow">CUBAN LEAGUE</span><h1 id="secondDivisionTitle">Segunda División</h1><p>Así va la competición</p></header>
   <div class="second-view-switch" role="group" aria-label="Clasificación de Segunda">
@@ -923,6 +932,7 @@
 <dialog id="editorialMenu" class="editorial-menu" aria-labelledby="editorialMenuTitle">
   <header><h2 id="editorialMenuTitle">Toda la liga.</h2><button type="button" data-editorial-close aria-label="Cerrar menú">✕</button></header>
   <nav aria-label="Más secciones">
+    <button type="button" data-go="forecasts"><svg class="ui-icon" aria-hidden="true"><use href="#icon-ball"></use></svg>Alineaciones probables</button>
     <button type="button" data-go="second-division"><svg class="ui-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>Segunda División</button>
     <button type="button" data-go="players"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg>Participantes</button>
     <button type="button" data-go="champions"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trophy"></use></svg>Champions</button>
@@ -979,4 +989,4 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="app.js?v=200-20261104-club-contributions"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="app.js?v=202-20261111-forecast-publish"></script></body></html>
