@@ -8,13 +8,15 @@ Solo admite Real Madrid–Celta, LaLiga 2026/27 J13, 21/11/2026 20:00Z.
 ## Flujo
 
 1. En Administración → Herramientas → Alineaciones probables, abrir una lectura
-   con `method_version=editorial-v1` y pulsar **Editar y preparar publicación**.
+   con `method_version=editorial-v1` y pulsar **Editar borrador seleccionado**.
 2. Revisar jugadores, puestos, porcentajes enteros, alternativas y motivos.
    La nota y los motivos son públicos. Las fuentes y sus fechas permanecen
    vinculadas a la lectura guardada; el navegador no puede renovarlas.
 3. **Guardar revisión privada** crea una fila nueva. No modifica los borradores
-   originales ni cambia la versión publicada. Cargar esa revisión abre la misma
-   presentación que utilizará la página pública.
+   originales ni cambia la versión publicada. Después se lee la revisión guardada
+   desde el servidor y se abre automáticamente su vista previa, con la misma
+   presentación que utilizará la página pública. El historial permite abrirla
+   de nuevo si falla esa lectura, sin guardar otra copia.
 4. Revisar, marcar la casilla de confirmación y pulsar **Publicar revisión**.
    Una segunda confirmación identifica el número exacto de revisión.
 5. **Retirar** elimina únicamente la proyección pública. **Restaurar** publica una
@@ -157,3 +159,29 @@ No se añadieron políticas que permitan leer el historial privado.
 debe volver a concatenar la migración de creación en una base donde ya existe.
 Las comprobaciones posteriores de instalación fueron de lectura y autorización,
 sin crear revisiones ni publicar datos.
+
+## Corrección de los controles del editor
+
+Se reprodujo un problema de entrada al editor: «Edición y publicaciones» abría
+un formulario sin la lectura seleccionada, dejando Guardar desactivado cuando
+todavía no existían revisiones. La prueba de navegador anterior abría el editor
+directamente con un borrador y no cubría ese botón real.
+
+El botón visible ahora recibe la lectura seleccionada del visor y se bloquea
+durante un cambio de selección para impedir reutilizar una lectura anterior.
+El guardado abre la vista previa de la revisión devuelta por el servidor; todavía
+exige casilla y confirmación explícita para publicar. Los botones explican el
+paso que falta. Si el guardado tiene éxito pero falla una lectura posterior,
+se conserva su identificador para volver a abrirlo sin duplicarlo. Una pérdida
+de permisos durante ese paso limpia los datos privados.
+
+No se modifica SQL, permisos, reglas de vigencia ni contenido de los borradores.
+La regresión del botón falló antes del cambio (cero campos en lugar de once) y
+pasó después. El ensayo de navegador usa ahora el botón visible y comprueba
+el guardado, la vista previa automática y la confirmación de publicación con
+respuestas sintéticas. No se publica nada en producción durante estas pruebas.
+
+Validación de esta corrección: 23/23 pruebas específicas y 203/204 generales.
+El único fallo general sigue siendo el contrato histórico del catálogo descrito
+arriba, sin cambios en su archivo ni en esa comprobación. El flujo del navegador
+se completó desde el botón visible con once campos y guardado habilitado.

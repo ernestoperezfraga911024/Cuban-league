@@ -14,6 +14,22 @@ function editor(handler){
  return {...b,calls};
 }
 const emptyState={version:0,current_revision:null,revisions:[]};
+test('visible publication entry opens the selected draft and enables save without an empty history detour',async()=>{
+ const source={...draft(),created_at:'2026-11-11T17:00:00Z',status:'draft'},b=browser();
+ const calls=[];try{
+ b.w.eval(read('forecast-editor.js'));b.w.eval(read('forecast-review.js'));
+ b.w.CubanForecastReview.init({client:{rpc:async(name,args)=>{
+  calls.push({name,args});return {data:name==='get_forecast_publication'?emptyState:args.p_run_key?source:[source]};
+ }}});b.w.CubanForecastReview.authorize();b.$('forecastTool').open=true;
+ b.$('forecastTool').dispatchEvent(new b.w.Event('toggle'));await tick();await tick();
+ assert.equal(b.$('forecastVersions').value,source.run_key);
+ b.$('forecastEditor').scrollIntoView=()=>{throw Error('Scrolling unavailable');};
+ b.$('forecastManage').click();await tick();await tick();
+ assert.equal(b.$('forecastEditPlayers').querySelectorAll('fieldset').length,11);
+ assert.equal(b.$('forecastSaveRevision').disabled,false);assert.equal(b.$('forecastPublish').disabled,true);
+ assert.equal(calls.filter(x=>x.name==='command_forecast_publication').length,0);
+ }finally{b.dom.window.close();}
+});
 test('publication validation enforces fixture, XI, roles, probabilities, alternatives and exact source hosts',()=>{
  assert.equal(core.validate(publication()).players.length,11);
  const mutations=[p=>p.team='celta',p=>p.players.pop(),p=>p.players[0].id=p.players[1].id,p=>p.players[0].slot=2,
@@ -66,6 +82,58 @@ test('uncertain network result retains exact command UUID and locks editing unti
  b.w.CubanForecastEditor.authorize();await b.w.CubanForecastEditor.open(draft());b.$('forecastSaveRevision').click();await tick();
  assert.equal(b.$('forecastCommandRetry').hidden,false);assert.equal(b.$('forecastPublicNote').disabled,true);
  fail=false;b.$('forecastCommandRetry').click();await tick();await tick();const cmds=b.calls.filter(x=>x.name==='command_forecast_publication');assert.equal(cmds.length,2);assert.deepEqual(cmds[0].args,cmds[1].args);assert.equal(b.$('forecastCommandRetry').hidden,true);
+ }finally{b.dom.window.close();}
+});
+test('save opens the persisted preview automatically and still needs checkbox plus explicit publish',async()=>{
+ const source=draft(),payload=publication();payload.note='Nota devuelta por el servidor, no una vista previa de campos sin guardar.';
+ let version=0,current=null;const b=editor((name,args)=>{
+  if(name==='command_forecast_publication'){version++;if(args.p_action==='publish')current=7;return {data:{version,current_revision:current,revision_id:7,action:args.p_action}};}
+  return {data:args.p_revision_id?{version,revision:{id:7,source_key:source.run_key,payload}}:{version,current_revision:current,revisions:version?[{id:7,created_at:'2026-11-11T17:00Z',ever_published:!!current}]:[]}};
+ });try{
+ b.w.CubanForecastEditor.authorize();await b.w.CubanForecastEditor.open(source);b.$('forecastSaveRevision').click();await tick();await tick();
+ assert.equal(b.$('forecastPreview').querySelectorAll('.fp-player').length,11);assert.equal(b.$('forecastPublicNote').value,payload.note);
+ assert.deepEqual(b.calls.filter(x=>x.name==='command_forecast_publication').map(x=>x.args.p_action),['save']);
+ assert.equal(b.$('forecastPublish').disabled,true);assert.match(b.$('forecastPublishHint').textContent,/casilla/);
+ b.$('forecastPublishConfirm').checked=true;b.$('forecastPublishConfirm').dispatchEvent(new b.w.Event('change'));assert.equal(b.$('forecastPublish').disabled,false);
+ b.$('forecastPublish').click();await tick();await tick();assert.deepEqual(b.calls.filter(x=>x.name==='command_forecast_publication').map(x=>x.args.p_action),['save','publish']);
+ }finally{b.dom.window.close();}
+});
+test('failed post-save reads keep a known saved revision recoverable without issuing a duplicate save',async()=>{
+ for(const failAt of ['list','detail']){
+  let saved=false,fail=true;const source=draft(),payload=publication();const b=editor((name,args)=>{
+   if(name==='command_forecast_publication'){saved=true;return {data:{version:1,current_revision:null,revision_id:7,action:'save'}};}
+   if(saved&&fail&&((failAt==='list'&&!args.p_revision_id)||(failAt==='detail'&&args.p_revision_id)))return {error:{code:'FETCH_ERROR'}};
+   return {data:args.p_revision_id?{version:1,revision:{id:7,source_key:source.run_key,payload}}:{version:saved?1:0,current_revision:null,revisions:saved?[{id:7,created_at:'2026-11-11T17:00Z',ever_published:false}]:[]}};
+  });try{
+   b.w.CubanForecastEditor.authorize();await b.w.CubanForecastEditor.open(source);b.$('forecastSaveRevision').click();await tick();await tick();
+   assert.match(b.$('forecastEditorStatus').textContent,/guardada en privado.*no necesitas guardar de nuevo/s);assert.equal(b.$('forecastSavedRevisions').value,'7');assert.equal(b.$('forecastPublish').disabled,true);assert.equal(b.$('forecastCommandRetry').hidden,true);
+   fail=false;b.$('forecastLoadRevision').click();await tick();assert.equal(b.$('forecastPreview').querySelectorAll('.fp-player').length,11);
+   assert.equal(b.calls.filter(x=>x.name==='command_forecast_publication').length,1);
+  }finally{b.dom.window.close();}
+ }
+});
+test('losing permission during the automatic preview clears private fields after a successful save',async()=>{
+ let saved=false;const b=editor((name,args)=>{
+  if(name==='command_forecast_publication'){saved=true;return {data:{version:1,current_revision:null,revision_id:1,action:'save'}};}
+  return saved?{error:{code:'42501'}}:{data:emptyState};
+ });try{
+ b.w.CubanForecastEditor.authorize();await b.w.CubanForecastEditor.open(draft());b.$('forecastSaveRevision').click();await tick();await tick();
+ assert.equal(b.$('forecastEditor').hidden,true);assert.equal(b.$('forecastEditPlayers').textContent,'');assert.equal(b.$('forecastPreview').textContent,'');assert.equal(b.$('forecastPublicNote').value,'');
+ }finally{b.dom.window.close();}
+});
+test('changing source locks the entry until the new read completes and cannot reuse the previous draft',async()=>{
+ const source={...draft(),created_at:'2026-11-11T17:00:00Z',status:'draft'},blocked={...draft(),run_key:'pilot-blocked-ui',created_at:'2026-11-11T17:00:00Z',status:'blocked'};
+ blocked.payload={...blocked.payload,status:'blocked',proposal:null};let resolve;const b=browser();try{
+ b.w.eval(read('forecast-editor.js'));b.w.eval(read('forecast-review.js'));
+ b.w.CubanForecastReview.init({client:{rpc:async(name,args)=>{
+  if(name==='get_forecast_publication')return {data:emptyState};
+  if(args.p_run_key===blocked.run_key)return new Promise(r=>resolve=r);
+  return {data:args.p_run_key?source:[source,blocked]};
+ }}});b.w.CubanForecastReview.authorize();b.$('forecastTool').open=true;b.$('forecastTool').dispatchEvent(new b.w.Event('toggle'));
+ await tick();await tick();assert.equal(b.$('forecastContent').querySelectorAll('.forecast-player').length,11);
+ b.$('forecastVersions').value=blocked.run_key;b.$('forecastVersions').dispatchEvent(new b.w.Event('change'));await tick();
+ assert.equal(b.$('forecastManage').disabled,true);resolve({data:blocked});await tick();await tick();assert.equal(b.$('forecastManage').disabled,false);
+ b.$('forecastManage').click();await tick();assert.equal(b.$('forecastEditPlayers').querySelectorAll('fieldset').length,0);assert.equal(b.$('forecastSaveRevision').disabled,true);assert.match(b.$('forecastEditorStatus').textContent,/necesita una nueva lectura/);
  }finally{b.dom.window.close();}
 });
 test('saved revision requires preview and explicit confirmation; changing text disables publication',async()=>{
