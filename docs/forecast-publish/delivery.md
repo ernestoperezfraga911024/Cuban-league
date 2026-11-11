@@ -83,3 +83,14 @@ conservar historial y tablas. No borrar publicaciones ni restaurar respaldos.
 Las pruebas de navegador usan respuestas sintéticas y no escriben en Supabase.
 Se comprueban 320, 390, 768 y 1280 px, reintento tras respuesta perdida,
 conflictos y cierre de sesión con una respuesta todavía pendiente.
+
+Aplicada como `forecast_delivery_modes` el 11/11/2026. Las pruebas SQL pasaron
+y la comprobación de las 19:41:14Z confirmó idénticos los cuatro borradores,
+las dos revisiones, cuatro eventos y la publicación vigente. Ninguna fila
+sintética persistió. Salud sin avisos; los avisos de seguridad previos siguen
+iguales y aparecen dos notas informativas esperadas por las nuevas tablas
+privadas con RLS y sin políticas de acceso.
+
+La suite general conserva el fallo previo del hash histórico del catálogo;
+no se modifica el catálogo ni se relaja la comprobación. Las 28 pruebas de
+alineaciones y los dos recorridos de navegador pasan.

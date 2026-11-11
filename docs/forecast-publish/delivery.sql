@@ -47,7 +47,7 @@ create function forecast_publish.command_delivery(p_action text,p_expected_versi
  p_source_key text default null,p_actor uuid default null) returns jsonb
 language plpgsql security invoker set search_path='' as $body$
 declare st forecast_publish.state%rowtype; cfg forecast_publish.delivery_config%rowtype;
- old forecast_publish.delivery_commands%rowtype; req jsonb; result jsonb; payload jsonb;
+ old forecast_publish.delivery_commands%rowtype; req jsonb; result jsonb; prepared jsonb;
  revision bigint; actor uuid; outcome text; why text; should_publish boolean;
 begin
  if p_action is null or p_action not in ('manual','automatic','publish','deliver') or p_request_id is null
@@ -74,19 +74,19 @@ begin
  else
    should_publish:=p_action='publish' or cfg.mode='automatic';
    begin
-     payload:=forecast_publish.prepare_delivery(p_source_key,case when p_action='deliver' then interval '2 hours' else interval '24 hours' end);
+     prepared:=forecast_publish.prepare_delivery(p_source_key,case when p_action='deliver' then interval '2 hours' else interval '24 hours' end);
    exception when sqlstate '22023' then
      if p_action='publish' then raise; end if;
      outcome:='blocked'; why:=sqlerrm;
    end;
-   if payload is not null then
+   if prepared is not null then
      if not should_publish then outcome:='ready';
      elsif exists(select 1 from public.forecast_public p join forecast_publish.revisions r on r.id=p.revision_id
-       where r.source_key=p_source_key and p.payload=payload) then outcome:='unchanged';revision:=st.current_revision;
+       where r.source_key=p_source_key and p.payload=prepared) then outcome:='unchanged';revision:=st.current_revision;
      else
        if (select count(*) from forecast_publish.revisions)>=100 then raise exception 'Límite de revisiones alcanzado' using errcode='54000'; end if;
-       insert into forecast_publish.revisions(source_key,author,payload) values(p_source_key,actor,payload) returning id into revision;
-       insert into public.forecast_public(fixture_key,revision_id,published_at,payload) values(payload->>'fixture_key',revision,now(),payload)
+       insert into forecast_publish.revisions(source_key,author,payload) values(p_source_key,actor,prepared) returning id into revision;
+       insert into public.forecast_public(fixture_key,revision_id,published_at,payload) values(prepared->>'fixture_key',revision,now(),prepared)
          on conflict(fixture_key) do update set revision_id=excluded.revision_id,published_at=excluded.published_at,payload=excluded.payload;
        update forecast_publish.state set current_revision=revision where singleton;
        outcome:='published';
@@ -106,19 +106,19 @@ $body$;
 
 create function private.get_forecast_delivery() returns jsonb
 language plpgsql stable security definer set search_path='' as $body$
-declare result jsonb; src forecast_pilot.drafts%rowtype; payload jsonb; readiness text:='blocked'; why text;
+declare result jsonb; src forecast_pilot.drafts%rowtype; prepared jsonb; readiness text:='blocked'; why text;
 begin
  if (select auth.uid()) is null or not coalesce(private.is_league_admin(),false) then raise exception 'Administrator access required' using errcode='42501'; end if;
  select jsonb_build_object('version',s.version,'current_revision',s.current_revision,'mode',c.mode) into result
    from forecast_publish.state s cross join forecast_publish.delivery_config c;
  select * into src from forecast_pilot.drafts order by created_at desc,run_key desc limit 1;
  begin
-   payload:=forecast_publish.prepare_delivery(src.run_key);
+   prepared:=forecast_publish.prepare_delivery(src.run_key);
    readiness:=case when exists(select 1 from public.forecast_public p join forecast_publish.revisions r on r.id=p.revision_id
-     where r.source_key=src.run_key and p.payload=payload) then 'published' else 'ready' end;
+     where r.source_key=src.run_key and p.payload=prepared) then 'published' else 'ready' end;
  exception when sqlstate '22023' then why:=sqlerrm; end;
  return result||jsonb_build_object('source_key',src.run_key,'created_at',src.created_at,'readiness',readiness,
-   'reason',why,'limitations',src.payload->'limitations','preview',payload,
+   'reason',why,'limitations',src.payload->'limitations','preview',prepared,
    'last_delivery',(select jsonb_build_object('created_at',d.created_at,'outcome',d.result->>'outcome','reason',d.result->>'reason')
      from forecast_publish.delivery_commands d where d.request->>'action'='deliver' order by d.created_at desc,d.request_id desc limit 1));
 end;
