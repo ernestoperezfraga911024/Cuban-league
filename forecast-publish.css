@@ -58,3 +58,11 @@
 .fp-delivery-preview{margin-top:14px}.fp-delivery-preview summary,#forecastAdvanced>summary{cursor:pointer;padding:12px 0;font-weight:650}
 .fp-delivery-footnote{color:#abc0b7;font-size:.78rem;line-height:1.55}
 @media(max-width:500px){.fp-delivery{padding:12px}.fp-delivery .fp-actions{display:flex;flex-wrap:wrap}.fp-delivery .fp-actions button{flex:1 1 120px;min-height:44px}}
+
+/* Season monitoring stays compact and wraps without horizontal scrolling. */
+.fp-delivery[hidden],#forecastManage[hidden]{display:none!important}
+.fs-summary{font-size:.85rem;line-height:1.6;font-weight:600}
+.fs-teams{display:grid;gap:0;margin:12px 0}
+.fs-team{display:grid;grid-template-columns:minmax(145px,1fr) minmax(180px,2fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(127,145,168,.2);font-size:.83rem}
+.fs-identity{display:flex;align-items:center;gap:8px;min-width:0}.fs-identity img{object-fit:contain;flex:none}.fs-team-detail{display:grid;gap:4px;min-width:0}.fs-team-detail small{font-size:.72rem;line-height:1.5;overflow-wrap:anywhere}.fs-state{font-weight:700}.fs-reason{color:#c99142}.fs-actions{display:flex;flex-wrap:wrap;gap:5px}.fs-actions button{font-size:.72rem!important;padding:7px 10px!important;min-height:32px}.fs-team button:disabled{opacity:.45}
+@media(max-width:680px){.fs-team{grid-template-columns:minmax(0,1fr);gap:7px;padding:13px 0}.fs-actions{justify-content:flex-start}.fs-identity b{font-size:.84rem}}

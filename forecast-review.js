@@ -25,7 +25,7 @@
   }
   function reset() {
     window.CubanForecastEditor?.reset();
-    window.CubanForecastDelivery?.reset();
+    (window.CubanForecastSeason||window.CubanForecastDelivery)?.reset();
     currentRow = null; lockEditorEntry(true);
     generation++; selection++; authorized = false; loaded = false; rows = []; cache.clear();
     if (!$('forecastTool')) return;
@@ -150,14 +150,14 @@
   }
   function init(options) {
     client = options.client;
-    window.CubanForecastEditor?.init({...options, getSelectedDraft: () => currentRow});
-    window.CubanForecastDelivery?.init(options);
+    if(!window.CubanForecastSeason)window.CubanForecastEditor?.init({...options, getSelectedDraft: () => currentRow});
+    (window.CubanForecastSeason||window.CubanForecastDelivery)?.init(options);
     if (initialized || !$('forecastTool')) return;
     initialized = true;
-    $('forecastTool').addEventListener('toggle', event => { if (authorized && event.currentTarget.open && !loaded) reload(); });
+    $(window.CubanForecastSeason?'forecastAdvanced':'forecastTool').addEventListener('toggle', event => { if (authorized && event.currentTarget.open && !loaded) reload(); });
     $('forecastReload').addEventListener('click', reload);
     $('forecastVersions').addEventListener('change', () => { fillComparisons(); selectVersion(); });
     $('forecastCompare').addEventListener('change', selectVersion);
   }
-  window.CubanForecastReview = { init, reset, authorize() { authorized = true; window.CubanForecastEditor?.authorize(); window.CubanForecastDelivery?.authorize(); } };
+  window.CubanForecastReview = { init, reset, authorize() { authorized = true; if(!window.CubanForecastSeason)window.CubanForecastEditor?.authorize(); (window.CubanForecastSeason||window.CubanForecastDelivery)?.authorize(); } };
 })();
