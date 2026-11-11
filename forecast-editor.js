@@ -7,6 +7,7 @@
   let getSelectedDraft=()=>null;
   function el(tag,text){const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;}
   function message(text){$('forecastEditorStatus').textContent=text;}
+  function reveal(id){try{$(id).scrollIntoView?.({block:'start',behavior:'auto'});}catch{/* Scrolling must never block editing. */}}
   function roster(){return new Map(catalog.players.filter(p=>p.clubId==='real-madrid').map(p=>[p.id,p]));}
   function controls(){
     for(const n of $('forecastEditor').querySelectorAll('button,input,select,textarea'))n.disabled=busy||!!pending;
@@ -78,7 +79,7 @@
     if(!authorized||busy||pending)return;
     if(sourceKey&&(!readyId)&&!$('forecastEditor').hidden&&!window.confirm('Abrir otra versión descartará los campos sin guardar. ¿Continuar?'))return;
     const g=generation,op=++operation;busy=true;$('forecastEditor').hidden=false;message('Cargando catálogo e historial…');controls();
-    $('forecastEditor').scrollIntoView?.({block:'start',behavior:'instant'});
+    reveal('forecastEditor');
     try{
       const [next,data]=await Promise.all([rpc('get_forecast_publication',{p_revision_id:null}),window.CubanLeaguePlayerCatalog.load()]);
       if(g!==generation||op!==operation||!authorized)return;catalog=data;fillState(next);
@@ -121,7 +122,7 @@
         if(saved){
           const detail=await rpc('get_forecast_publication',{p_revision_id:result.revision_id});if(g!==generation||!authorized)return;
           preview(detail);message(success+' Revisa la vista previa y marca la confirmación para publicar.');
-          $('forecastPreview').scrollIntoView?.({block:'start',behavior:'instant'});
+          reveal('forecastPreview');
         }
       }catch(e){
         if(g!==generation||!authorized)return;

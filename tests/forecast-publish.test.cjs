@@ -23,6 +23,7 @@ test('visible publication entry opens the selected draft and enables save withou
  }}});b.w.CubanForecastReview.authorize();b.$('forecastTool').open=true;
  b.$('forecastTool').dispatchEvent(new b.w.Event('toggle'));await tick();await tick();
  assert.equal(b.$('forecastVersions').value,source.run_key);
+ b.$('forecastEditor').scrollIntoView=()=>{throw Error('Scrolling unavailable');};
  b.$('forecastManage').click();await tick();await tick();
  assert.equal(b.$('forecastEditPlayers').querySelectorAll('fieldset').length,11);
  assert.equal(b.$('forecastSaveRevision').disabled,false);assert.equal(b.$('forecastPublish').disabled,true);
