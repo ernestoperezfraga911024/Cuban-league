@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
   <link rel="stylesheet" href="second-division.css?v=190-20261022">
   <link rel="stylesheet" href="forecast-review.css?v=201-20261111">
-  <link rel="stylesheet" href="forecast-publish.css?v=204-20261111">
+  <link rel="stylesheet" href="forecast-publish.css?v=205-20261111">
 </head>
 <body class="f05-theme">
   <div class="admin-background" aria-hidden="true"></div>
@@ -148,13 +148,26 @@
       <details id="forecastTool" class="admin-tool-details">
         <summary class="backup-center-head admin-tool-summary">
           <span class="backup-summary-copy">
-            <span class="admin-kicker">PILOTO PRIVADO</span>
+            <span class="admin-kicker">PILOTO REAL MADRID</span>
             <span class="backup-summary-title" role="heading" aria-level="3">Alineaciones probables</span>
-            <span class="backup-summary-description">Revisa el once, las fuentes y los cambios entre borradores del Real Madrid.</span>
+            <span class="backup-summary-description">Publicación automática o manual en un clic. Historial y fuentes disponibles.</span>
           </span>
           <span class="backup-summary-toggle">Revisar</span>
         </summary>
         <div class="forecast-body">
+          <section id="forecastDelivery" class="fp-delivery" aria-labelledby="forecastDeliveryTitle">
+            <div class="fp-delivery-head"><div><span class="admin-kicker">REAL MADRID · CELTA · J13</span><h3 id="forecastDeliveryTitle">Tu once, listo para publicar</h3></div></div>
+            <div class="fp-delivery-modes" role="group" aria-label="Modo de publicación">
+              <button id="forecastModeAuto" type="button" aria-pressed="false" disabled>Automático</button>
+              <button id="forecastModeManual" type="button" aria-pressed="false" disabled>Manual</button>
+            </div>
+            <p id="forecastDeliverySummary"></p>
+            <div class="fp-actions"><button id="forecastQuickPublish" type="button" disabled>Publicar</button><button id="forecastDeliveryReload" type="button" disabled>Actualizar estado</button><button id="forecastDeliveryRetry" type="button" hidden>Reintentar</button></div>
+            <p id="forecastDeliveryStatus" role="status" aria-live="polite">Abre el apartado para consultar la última lectura.</p>
+            <details class="fp-delivery-preview"><summary>Ver el once preparado</summary><div id="forecastDeliveryPreview"></div></details>
+            <p class="fp-delivery-footnote">Piloto hasta el 21 de noviembre. El modo manual prepara el once y espera tu clic. Una lectura bloqueada conserva la publicación anterior con su fecha. Actualizar estado no vuelve a leer las páginas.</p>
+          </section>
+          <details id="forecastAdvanced"><summary>Historial, fuentes y edición avanzada</summary>
           <button id="forecastReload" class="refresh-analytics-button" type="button">Recargar borradores</button>
           <p id="forecastStatus" role="status">Abre este apartado para consultar los borradores privados.</p>
           <div id="forecastControls" class="forecast-controls" hidden>
@@ -181,6 +194,7 @@
             <div class="fp-actions"><button id="forecastPublish" type="button" disabled aria-describedby="forecastPublishHint">Publicar revisión</button><button id="forecastRestore" type="button" disabled>Restaurar esta publicación</button><button id="forecastWithdraw" type="button" disabled>Retirar publicación vigente</button></div>
             <p>Publicar y restaurar exigen fuentes consultadas en las últimas 24 horas y un partido aún no iniciado. Ningún botón ejecuta lecturas automáticas.</p>
           </section>
+          </details>
         </div>
       </details>
       <details id="analyticsTool" class="visitor-analytics admin-tool-details" aria-labelledby="visitorAnalyticsTitle">
@@ -835,8 +849,9 @@
   <script src="forecast-review-core.js?v=204-20261111"></script>
   <script src="forecast-publish-core.js?v=204-20261111"></script>
   <script src="forecast-pitch.js?v=204-20261111"></script>
-  <script src="forecast-editor.js?v=203-20261111-controls"></script>
-  <script src="forecast-review.js?v=204-20261111"></script>
+  <script src="forecast-editor.js?v=205-20261111"></script>
+  <script src="forecast-delivery.js?v=205-20261111"></script>
+  <script src="forecast-review.js?v=205-20261111"></script>
   <script src="admin.js?v=201-20261111-forecast-review"></script>
 </body>
 </html>
