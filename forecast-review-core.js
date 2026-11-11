@@ -12,6 +12,7 @@
     quality: { primary: 0, secondary: -5, limited: -10 },
     horizon: { near: 0, medium: -5, distant: -10 } };
   function evaluate(evidence) {
+    if (evidence?.method === 'editorial-v2') return (typeof module === 'object' && module.exports ? require('./forecast-source-method.js') : globalThis.CubanForecastSourceMethod).evaluate(evidence);
     if (!evidence || evidence.method !== METHOD) throw Error('Método desconocido');
     const trace = [];
     for (const [key, values] of Object.entries(required)) {
@@ -56,7 +57,7 @@
     try {
       const result = evaluate(player.assessment);
       if (result.probability !== player.probability) throw Error('Discrepancia');
-      return { label: 'Método editorial v1 · estimación no calibrada', trace: result.trace };
+      return { label: (result.method === 'editorial-v2' ? 'Método editorial v2 · fuentes 80%, rol 20%' : 'Método editorial v1') + ' · estimación no calibrada', trace: result.trace };
     } catch { return { label: 'Evaluación inconsistente: requiere revisión', trace: [] }; }
   }
   function applyMethod(payload) {
@@ -65,13 +66,15 @@
     if (!Array.isArray(players) || players.length !== 11 || new Set(players.map(p => p.id)).size !== 11) throw Error('Once inválido');
     for (const [position, count] of Object.entries({GK:1, DF:4, MF:5, FW:1}))
       if (players.filter(p => p.position === position).length !== count) throw Error('Distribución inválida');
+    const method = players[0]?.assessment?.method;
+    if (!['editorial-v1','editorial-v2'].includes(method) || players.some(p => p.assessment?.method !== method)) throw Error('Métodos mezclados o incompletos');
     const prepared = players.map(p => {
       const result = evaluate(p.assessment);
       const alternative = result.probability < 70 ? p.alternative : null;
       if (result.probability < 70 && (!alternative?.id || !alternative?.name || players.some(x => x.id === alternative.id))) throw Error('Falta alternativa fuera del once: ' + p.name);
       return {...p, probability: result.probability, alternative};
     });
-    return {...payload, method_version: METHOD, probability_kind: 'editorial_uncalibrated', proposal: {...payload.proposal, players: prepared}};
+    return {...payload, method_version: method, probability_kind: 'editorial_uncalibrated', proposal: {...payload.proposal, players: prepared}};
   }
   return { METHOD, evaluate, applyMethod, comparison, assessment };
 });

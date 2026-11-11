@@ -22,12 +22,12 @@ async function main(){
   await page.goto('https://preview.test/index.html');await page.waitForFunction(()=>document.getElementById('currentRows')?.children.length>0||document.querySelector('.player-card'));
   assert.equal(publicReads,0);
   await page.locator('[data-editorial-menu]:visible').last().click();await page.locator('#editorialMenu [data-go="forecasts"]').click();
-  await page.waitForSelector('#forecasts .fp-player');assert.equal(await page.locator('#forecasts .fp-player').count(),11);assert.equal(publicReads,1);
+  await page.waitForSelector('#forecasts .fp-player');assert.equal(await page.locator('#forecasts .fp-player').count(),11);assert.equal(publicReads,1);await page.locator('#forecastTeamMadrid').click();assert.equal(publicReads,1);assert.equal(await page.locator('#forecastTeamMadrid img').evaluate(x=>x.complete&&x.naturalWidth>0),true);
   fs.mkdirSync(path.join(root,'test-results'),{recursive:true});
-  for(const width of [320,390,1280]){
+  for(const width of [320,390,768,1280]){
    await page.setViewportSize({width,height:1000});
-   const measure=await page.locator('#forecasts').evaluate(e=>({scroll:e.scrollWidth,client:e.clientWidth,photos:[...e.querySelectorAll('.fp-player img')].filter(x=>x.complete&&x.naturalWidth>0).length}));
-   assert.ok(measure.scroll<=measure.client+1,JSON.stringify({width,...measure}));
+   const measure=await page.locator('#forecasts').evaluate(e=>({scroll:e.scrollWidth,client:e.clientWidth,photos:[...e.querySelectorAll('.fp-player img')].filter(x=>x.complete&&x.naturalWidth>0).length,fieldHeight:e.querySelector('.fp-field').getBoundingClientRect().height,cardWidth:e.querySelector('.fp-card').getBoundingClientRect().width,buttonHeight:e.querySelector('.fp-player').getBoundingClientRect().height,gap:getComputedStyle(e.querySelector('.fp-player')).gap,minHeight:getComputedStyle(e.querySelector('.fp-field')).minHeight}));
+   assert.ok(measure.scroll<=measure.client+1,JSON.stringify({width,...measure}));assert.ok(measure.fieldHeight<600,JSON.stringify({width,...measure}));assert.ok(measure.cardWidth<=880);console.log(JSON.stringify({width,...measure}));
    await page.locator('#forecasts').screenshot({path:path.join(root,'test-results','forecast-public-'+width+'.png')});
   }
   await page.locator('#forecasts .fp-player[aria-label^="Y. Diomande"]').click();await page.waitForFunction(()=>document.querySelector('#forecasts .fp-detail h3')?.textContent==='Y. Diomande');

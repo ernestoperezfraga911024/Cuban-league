@@ -31,6 +31,7 @@
     if(next&&!active){active=true;load();}
     else if(!next&&active){active=false;sequence++;controller?.abort();host.replaceChildren();retry.disabled=false;section.setAttribute('aria-busy','false');}
   }
+  document.getElementById('forecastTeamMadrid')?.addEventListener('click',()=>{if(!host.firstChild)load();else{try{host.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}}});
   retry.addEventListener('click',load);
   document.addEventListener('visibilitychange',()=>{if(active&&!document.hidden)load();});
   new MutationObserver(observe).observe(document.body,{attributes:true,attributeFilter:['data-section']});observe();

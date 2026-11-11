@@ -20,8 +20,13 @@
     const shell=el('article',null,'fp-card');
     const header=el('header',null,'fp-match');
     header.append(el('span',preview?'VISTA PREVIA · SIN PUBLICAR':'CUBAN LEAGUE · PREVISIÓN EDITORIAL','fp-eyebrow'));
-    header.append(el('h2','Real Madrid '+String.fromCharCode(183)+' Celta'));
-    header.append(el('p','LaLiga 2026/27 · Jornada 13 · Santiago Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
+    const match=el('span',null,'fp-match-title');
+    for(const [name,crest] of [['Real Madrid','real-madrid'],['Celta','celta-vigo']]){
+      const team=el('span',null,'fp-match-team'),image=el('img');image.src='catalog/crests/'+crest+'.webp';image.alt='';image.width=24;image.height=28;image.decoding='async';image.addEventListener('error',()=>image.remove(),{once:true});team.append(image,el('span',name));
+      if(match.children.length)match.append(el('span','vs','fp-versus'));match.append(team);
+    }
+    const title=el('h2');title.append(match);header.append(title);
+    header.append(el('p','LaLiga · Jornada 13 · Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
     const status=el('p',core.freshness(p),'fp-notice');header.append(status);
     shell.append(header);
     const layout=el('div',null,'fp-layout'), field=el('div',null,'fp-field');
@@ -34,9 +39,9 @@
       if(selectedButton)selectedButton.setAttribute('aria-pressed','false');selectedButton=button;button.setAttribute('aria-pressed','true');
       detail.replaceChildren(el('span','LA DECISIÓN','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',core.SLOTS[player.slot-1],'fp-meta'),el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
       if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span','Alternativa: '+player.alternative.name));detail.append(a);}
-      detail.append(el('p',player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
+      detail.append(el('p',player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
       detail.append(el('p','Estimación provisional no calibrada. No mide minutos ni garantiza que juegue.','fp-meta'));
-      if(moveFocus){const back=el('button','Volver al campo','fp-link');back.type='button';back.addEventListener('click',()=>button.focus());detail.append(back);detail.focus({preventScroll:true});detail.scrollIntoView?.({block:'nearest',behavior:'instant'});}
+      if(moveFocus){const back=el('button','Volver al campo','fp-link');back.type='button';back.addEventListener('click',()=>button.focus());detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}}
     }
     let first=null;
     for(const slots of [[11],[8,9,10],[6,7],[2,3,4,5],[1]]){
@@ -52,9 +57,9 @@
       field.append(row);
     }
     show(first.player,first.button,false);layout.append(field,detail);shell.append(layout);
-    const footer=el('div',null,'fp-evidence');footer.append(el('h3','El contexto de este once'),el('p',p.note));
-    footer.append(el('p','Probabilidades editoriales no calibradas, sin precisión demostrada. No son una votación de fuentes ni tienen que sumar 100 por posición.','fp-meta'));
-    footer.append(el('p','Lectura más antigua: '+date(p.evidence_at)+(publishedAt?' · Publicado: '+date(publishedAt):''),'fp-meta'));
+    const footer=el('div',null,'fp-evidence');const context=el('details',null,'fp-context');context.append(el('summary','Criterio y contexto del once'),el('p',p.note));footer.append(context);
+    context.append(el('p','Estimaciones editoriales no calibradas. Las tres fuentes orientan el cálculo; no garantizan el once ni son una votación. Los porcentajes no tienen que sumar 100 por posición.','fp-meta'));
+    context.append(el('p','Lectura más antigua: '+date(p.evidence_at)+(publishedAt?' · Publicado: '+date(publishedAt):''),'fp-meta'));
     const sources=el('details');sources.append(el('summary','Fuentes y fechas de consulta'));
     for(const s of p.sources){const block=el('p'),a=el('a',s.id);a.href=core.sourceUrl(s);a.target='_blank';a.rel='noopener noreferrer';block.append(a,el('span',' · Consultada: '+date(s.fetched_at)+' · Actualización de la fuente: '+date(s.source_updated_at)));sources.append(block);}
     sources.append(el('p','Consultar una fuente no confirma cuándo fue actualizada. Las posiciones representan esta propuesta táctica.','fp-meta'));footer.append(sources);shell.append(footer);host.append(shell);

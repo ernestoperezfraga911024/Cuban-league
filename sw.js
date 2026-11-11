@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v203-forecast-controls';
+const CACHE_NAME = 'cuban-league-v204-forecast-premium';
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,10 +10,10 @@ const APP_SHELL = [
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
   './app.js?v=202-20261111-forecast-publish',
-  './forecast-publish.css?v=202-20261111',
-  './forecast-publish-core.js?v=202-20261111',
-  './forecast-pitch.js?v=202-20261111',
-  './forecast-public.js?v=202-20261111',
+  './forecast-publish.css?v=204-20261111',
+  './forecast-publish-core.js?v=204-20261111',
+  './forecast-pitch.js?v=204-20261111',
+  './forecast-public.js?v=204-20261111',
   './club-stats.js?v=200-20261104-club-contributions',
   './club-stats.css?v=200-20261104-club-contributions',
   './matchday-general.js?v=199-20261104-compact-general',
