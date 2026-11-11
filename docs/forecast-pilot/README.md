@@ -12,9 +12,11 @@ existentes. No añade una sección pública ni modifica las jornadas de la liga.
   revisión: **no debe ejecutarse de nuevo sobre el proyecto existente**.
 - Borrador interactivo guardado y leído de vuelta: tres fuentes, once jugadores,
   publicación deshabilitada. El contenido deportivo permanece en la base privada.
-- Una tarea de ChatGPT de ejecución única está programada para verificar una
-  lectura nueva y el guardado sin intervención. Su resultado se documentará
-  después de comprobar la fila creada por esa ejecución.
+- La tarea de ChatGPT de ejecución única terminó sin intervención. El registro
+  de la tarea indica inicio a las 16:46:51 UTC y finalización a las 16:48:27 UTC
+  del 11/11/2026, sin acción requerida. La base confirma un segundo borrador
+  `scheduled`, guardado a las 16:48:14 UTC: tres fuentes consultadas de nuevo,
+  once jugadores y publicación deshabilitada.
 - Sin cambios en HTML, CSS, JavaScript, catálogo, políticas existentes o
   configuración de despliegue. No hay tarea diaria ni publicación automática.
 
@@ -114,7 +116,7 @@ order by created_at;
 
 Las huellas del contenido de `matchday_stats`, `matchday_drafts`,
 `matchday_change_log`, `matchday_milestones`, `second_division_lineups` y
-`second_division_standings` coincidieron antes y después del primer guardado.
+`second_division_standings` coincidieron antes y después de ambos guardados.
 No se ejecuta la suite de interfaz: el piloto no modifica código de la web.
 
 El asesor de seguridad añade un aviso informativo de RLS sin políticas para
@@ -123,10 +125,14 @@ los avisos previos del proyecto se evalúan por separado.
 
 ## Antes de ampliar
 
-Se necesita verificar la ejecución autónoma real, la consistencia de varias
-lecturas y la calidad del pronóstico frente a onces oficiales con cortes
+La primera ejecución autónoma está verificada. Quedan por evaluar la consistencia
+de varias lecturas y la calidad del pronóstico frente a onces oficiales con cortes
 temporales comparables. También habrá que revisar las condiciones de uso de
 las fuentes antes de automatizar a escala o publicar contenido derivado.
+
+Los dos borradores conservan el mismo once principal y muestran diferencias en
+los porcentajes editoriales. No se interpreta esa variación como nueva evidencia
+deportiva: antes de publicar se necesita un criterio reproducible y calibración.
 
 Una prueba con un equipo no garantiza cobertura de veinte equipos ni todos los
 días. Cualquier integración del panel, publicación y programación diaria queda
