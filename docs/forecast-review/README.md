@@ -81,8 +81,10 @@ evidencia ni se muestra una recalificación retrospectiva como noticia nueva.
 
 ## Acceso y despliegue
 
-`migration.sql` está **pendiente de aplicar después de revisar el PR**.
-Se ha probado dentro de una transacción con ROLLBACK sobre el esquema existente.
+`migration.sql` fue **aplicada el 11/11/2026 a las 17:21:20 UTC** al proyecto
+Cuban League como `forecast_pilot_admin_read`, versión `20261111172120`.
+No volver a ejecutarla sobre ese proyecto. Antes de aplicarla se probó con ROLLBACK;
+las comprobaciones de autorización se repitieron después de instalarla.
 No reaplicar la creación del piloto de PR #75.
 
 Una RPC pública SECURITY INVOKER llama a una función privada SECURITY DEFINER
@@ -92,9 +94,11 @@ solo no autoriza. Anon y service_role no tienen ejecución. Nadie obtiene permis
 directos nuevos sobre la tabla ni la función save_draft. El definer es necesario
 para leer el esquema cerrado sin otorgar acceso general al navegador.
 
-1. Revisar y aplicar `migration.sql` una vez, en una transacción administrativa.
-2. Verificar acceso del administrador y rechazo de otros roles.
-3. Integrar el frontend mediante el PR revisado y verificar inicio de sesión real.
+1. Migración instalada en el proyecto existente; no reaplicar.
+2. Acceso del administrador y rechazo de otros roles verificados en SQL bajo los
+   roles de aplicación y contexto de identidad, sin escribir datos deportivos.
+3. Integrar el frontend mediante el PR autorizado. La sesión interactiva del
+   usuario se conserva; no se han solicitado ni usado sus credenciales.
 
 Sin migración, el apartado informa que no está habilitado; las otras herramientas
 siguen funcionando. Reversión: revertir frontend y ejecutar `rollback.sql`.
@@ -118,8 +122,8 @@ Conserva todos los borradores. No modifica esquema, claves ni configuración de 
   los cuatro puntos de integración aprobados. No cambios a cálculos públicos.
 
 No incluye edición, publicación, nuevos equipos, tareas diarias, servicios de pago
-ni afirmaciones de precisión deportiva. El siguiente paso será revisar esta
-etapa y verificar la lectura autenticada real antes de ampliar el alcance.
+ni afirmaciones de precisión deportiva. La lectura en una sesión interactiva real sigue siendo una comprobación distinta
+de la prueba SQL de autorización y de la prueba visual con datos sintéticos.
 
 ## Resultado de esta revisión (11/11/2026)
 
@@ -135,3 +139,12 @@ etapa y verificar la lectura autenticada real antes de ampliar el alcance.
   hashes de borradores coinciden antes/después.
 - Archivos nuevos de interfaz: 17.6 kB sin comprimir; 6.2 kB gzip medidos localmente
   (la transferencia real depende del servidor). Solo los solicita admin.html.
+
+## Aplicación autorizada
+
+El 11/11/2026 se aplicó la migración con autorización del usuario. La comprobación
+posterior confirmó ambas funciones instaladas, lectura permitida para administrador,
+rechazo de JWT ausente/no administrador, y hashes de los dos borradores intactos.
+El asesor de seguridad mantiene los mismos avisos y recuentos anteriores.
+Las referencias a funciones ausentes en la revisión anterior describen aquella
+prueba con ROLLBACK, no el estado posterior a la aplicación.
