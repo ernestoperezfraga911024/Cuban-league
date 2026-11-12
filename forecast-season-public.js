@@ -25,7 +25,7 @@
  for(const team of [...teams].sort((a,b)=>a.name.localeCompare(b.name,'es'))){
   const b=document.createElement('button'),img=document.createElement('img'),name=document.createElement('span');b.type='button';b.dataset.forecastTeam=team.id;b.setAttribute('aria-controls','forecastPublicBody');b.title=team.name;b.setAttribute('aria-label',team.name);
   if(team.id==='real-madrid')b.id='forecastTeamMadrid';img.src=team.crest;img.alt='';img.width=28;img.height=32;img.decoding='async';img.addEventListener('error',()=>img.remove(),{once:true});name.textContent=team.name;
-  b.append(img,name);b.addEventListener('click',()=>{selected=team.id;show();});list.append(b);
+  b.append(img,name);b.addEventListener('click',()=>{selected=team.id;show();document.dispatchEvent(new CustomEvent('forecast:team-selected',{detail:{team:selected}}));});list.append(b);
  }
  const caption=document.createElement('span');caption.className='forecast-clubs-caption';caption.textContent='LaLiga · Próximo partido de cada equipo · 20 clubes';nav.replaceChildren(list,caption);buttonState();
  async function load(){
@@ -44,6 +44,7 @@
   }catch{if(current===sequence&&active){rows=[];host.replaceChildren();status.textContent='No se pudo verificar la publicación actual. Reintenta.';}}
   finally{clearTimeout(timeout);if(current===sequence){retry.disabled=false;section.setAttribute('aria-busy','false');}}
  }
- function observe(){const next=document.body.dataset.section==='forecasts';if(next&&!active){active=true;load();}else if(!next&&active){active=false;sequence++;controller?.abort();host.replaceChildren();rows=[];retry.disabled=false;section.setAttribute('aria-busy','false');}}
- retry.addEventListener('click',load);document.addEventListener('visibilitychange',()=>{if(active&&!document.hidden)load();});new MutationObserver(observe).observe(document.body,{attributes:true,attributeFilter:['data-section']});observe();
+ function observe(){const next=document.body.dataset.section==='forecasts'&&document.body.dataset.forecastView!=='history';if(next&&!active){active=true;load();}else if(!next&&active){active=false;sequence++;controller?.abort();host.replaceChildren();rows=[];retry.disabled=false;section.setAttribute('aria-busy','false');}}
+ document.addEventListener('forecast:team-selected',e=>{if(teams.some(t=>t.id===e.detail?.team)&&selected!==e.detail.team){selected=e.detail.team;buttonState();if(active)show();}});
+ retry.addEventListener('click',()=>{if(active)load();});document.addEventListener('visibilitychange',()=>{if(active&&!document.hidden)load();});new MutationObserver(observe).observe(document.body,{attributes:true,attributeFilter:['data-section','data-forecast-view']});observe();
 })();

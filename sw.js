@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v208-predicted11';
+const CACHE_NAME = 'cuban-league-v209-forecast-history';
 const APP_SHELL = [
   './',
   './index.html',
@@ -15,8 +15,12 @@ const APP_SHELL = [
   './forecast-round-config.js?v=206-20261111',
   './forecast-round-core.js?v=208-20261112',
   './forecast-pitch.js?v=208-20261112',
-  './forecast-season-public.js?v=207-20261111',
-  './forecast-season-admin.js?v=207-20261111',
+  './forecast-season-public.js?v=209-20261112',
+  './forecast-season-admin.js?v=209-20261112',
+  './forecast-history-core.js?v=209-20261112',
+  './forecast-history.js?v=209-20261112',
+  './forecast-history-admin.js?v=209-20261112',
+  './forecast-history.css?v=209-20261112',
   './club-stats.js?v=200-20261104-club-contributions',
   './club-stats.css?v=200-20261104-club-contributions',
   './matchday-general.js?v=199-20261104-compact-general',
@@ -164,7 +168,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/app.js') ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
-    /\/forecast-(?:review(?:-core)?|publish(?:-core)?|round-(?:core|config)|season-(?:public|admin)|delivery|pitch|public|editor)\.(?:js|css)$/.test(url.pathname) ||
+    /\/forecast-(?:review(?:-core)?|publish(?:-core)?|round-(?:core|config)|season-(?:public|admin)|history(?:-core|-admin)?|delivery|pitch|public|editor)\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/mister-import-helper.js') ||
     url.pathname.endsWith('/mister-import-core.js') ||
     url.pathname.endsWith('/player-catalog.js') ||
@@ -180,3 +184,4 @@ self.addEventListener('fetch', event => {
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
+
