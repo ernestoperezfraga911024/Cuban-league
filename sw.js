@@ -1,7 +1,10 @@
-const CACHE_NAME = 'cuban-league-v209-forecast-history';
+const CACHE_NAME = 'cuban-league-v210-news';
 const APP_SHELL = [
   './',
   './index.html',
+  './news.js?v=210-20261112',
+  './news.css?v=210-20261112',
+  './news-admin.js?v=210-20261112',
   './styles.css?v=195-20261102-fast-navigation',
   './league-motion.css?v=197-20261102-smooth-tabs',
   './stats-compact.css?v=185-20261019-captain-details',
@@ -9,14 +12,14 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=202-20261111-forecast-publish',
+  './app.js?v=210-20261112',
   './forecast-publish.css?v=207-20261111',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
   './forecast-round-core.js?v=208-20261112',
   './forecast-pitch.js?v=208-20261112',
   './forecast-season-public.js?v=209-20261112',
-  './forecast-season-admin.js?v=209-20261112',
+  './forecast-season-admin.js?v=210-20261112',
   './forecast-history-core.js?v=209-20261112',
   './forecast-history.js?v=209-20261112',
   './forecast-history-admin.js?v=209-20261112',
@@ -166,6 +169,7 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('/mobile-navigation.css') ||
     url.pathname.endsWith('/editorial-ui.js') ||
     url.pathname.endsWith('/app.js') ||
+    /\/news(?:-admin)?\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
     /\/forecast-(?:review(?:-core)?|publish(?:-core)?|round-(?:core|config)|season-(?:public|admin)|history(?:-core|-admin)?|delivery|pitch|public|editor)\.(?:js|css)$/.test(url.pathname) ||
