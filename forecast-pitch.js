@@ -36,19 +36,25 @@
     field.setAttribute('aria-label','Once propuesto de '+(extended?teamInfo(p.team).name:'Real Madrid')+', '+p.formation);
     field.append(el('span',p.formation,'fp-formation'));
     const markings=el('span',null,'fp-markings');markings.setAttribute('aria-hidden','true');field.append(markings);
-    const detail=el('section',null,'fp-detail');detail.tabIndex=-1;detail.setAttribute('aria-live','polite');
+    const detail=el('section',null,'fp-detail');detail.hidden=true;detail.tabIndex=-1;detail.setAttribute('aria-live','polite');
     let selectedButton=null;
-    function show(player,button,moveFocus=true){
+    function close(){
+      const button=selectedButton;if(button)button.setAttribute('aria-pressed','false');
+      selectedButton=null;detail.hidden=true;detail.replaceChildren();layout.classList.remove('has-selection');button?.focus();
+    }
+    detail.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();}});
+    function show(player,button){
+      if(selectedButton===button){close();return;}
       if(selectedButton)selectedButton.setAttribute('aria-pressed','false');selectedButton=button;button.setAttribute('aria-pressed','true');
+      detail.hidden=false;layout.classList.add('has-selection');
       detail.replaceChildren(el('span','EL JUGADOR','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',player.slot?slotLabel(player.slot):({PT:'Portero',DF:'Defensa',MC:'Centrocampista',DL:'Delantero'}[player.position]||''),'fp-meta'));
       if(player.slot)detail.append(el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
       if(playerContext)detail.append(playerContext.detail(player));
       if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span','Alternativa: '+player.alternative.name));detail.append(a);}
       if(player.slot)detail.append(el('p',player.method==='editorial-v3'?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
       if(player.slot)detail.append(el('small','Estimación editorial provisional.','fp-meta'));
-      if(moveFocus){const back=el('button',player.slot?'Volver al campo':'Volver a la plantilla','fp-link');back.type='button';back.addEventListener('click',()=>button.focus());detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}}
+      const back=el('button',player.slot?'Volver al campo':'Volver a la plantilla','fp-link');back.type='button';back.addEventListener('click',close);detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}
     }
-    let first=null;
     for(const slots of (extended?round.lines(p.formation).reverse():[[11],[8,9,10],[6,7],[2,3,4,5],[1]])){
       const row=el('div',null,'fp-line');
       for(const slot of slots){
@@ -58,11 +64,11 @@
         button.append(portrait(player,catalog),el('span',player.name,'fp-name'),el('b',player.probability+'%','fp-prob'));
         const badge=playerContext?.badge(player);if(badge){button.append(badge);button.setAttribute('aria-label',button.getAttribute('aria-label')+' '+badge.getAttribute('aria-label')+'.');}
         if(player.alternative)button.append(el('small','Alt. '+player.alternative.name,'fp-alt-name'));
-        button.addEventListener('click',()=>show(player,button));row.append(button);if(!first)first={player,button};
+        button.addEventListener('click',()=>show(player,button));row.append(button);
       }
       field.append(row);
     }
-    show(first.player,first.button,false);layout.append(field,detail);shell.append(layout);
+    layout.append(field,detail);shell.append(layout);
     if(playerContext){
       const squad=el('section',null,'fp-squad');squad.append(el('h3','Resto de la plantilla'),el('p','Jugadores fuera del once previsto. Toca su foto para ver su situación.'));
       const others=playerContext.roster.filter(x=>!p.players.some(y=>y.id===x.id));

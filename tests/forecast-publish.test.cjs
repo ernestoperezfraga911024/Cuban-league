@@ -49,8 +49,12 @@ test('catalog portraits, fallback, safe text and accessible detail are shared by
  assert.equal(host.querySelectorAll('img[src^="https://evil"]').length,0);assert.equal(host.querySelectorAll('img[src="x"]').length,0);
  const img=host.querySelector('.fp-player img');assert.match(img.getAttribute('src'),/^catalog\/faces\//);assert.equal(img.loading,'lazy');
  const frame=img.parentElement;img.dispatchEvent(new b.w.Event('error'));assert.equal(frame.querySelector('img'),null);assert.equal(frame.querySelector('.fp-initials').hidden,false);
- const button=host.querySelector('.fp-player');button.click();assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(b.w.document.activeElement,host.querySelector('.fp-detail'));
- host.querySelector('.fp-link').click();assert.equal(b.w.document.activeElement,button);assert.match(host.textContent,/No consta/);
+ const detail=host.querySelector('.fp-detail'),button=host.querySelector('.fp-player');
+ const closed=()=>{assert.equal(detail.hidden,true);assert.equal(detail.textContent,'');assert.equal(host.querySelectorAll('[aria-pressed="true"],.fp-layout.has-selection').length,0);};closed();
+ button.click();assert.equal(detail.hidden,false);button.click();closed();
+ button.click();detail.dispatchEvent(new b.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));closed();assert.equal(b.w.document.activeElement,button);
+ button.click();assert.equal(button.getAttribute('aria-pressed'),'true');assert.equal(b.w.document.activeElement,host.querySelector('.fp-detail'));
+ host.querySelector('.fp-link').click();assert.equal(b.w.document.activeElement,button);closed();assert.match(host.textContent,/No consta/);
  }finally{b.dom.window.close();}
 });
 test('public module makes no requests on home, reads only published table, clears withdrawn and failed snapshots',async()=>{

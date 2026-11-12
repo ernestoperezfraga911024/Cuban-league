@@ -84,7 +84,9 @@ test('club/player news uses safe text, source links and actual information/consu
   const row=news('player');row.payload.title='<img src=x onerror=alert(1)>';row.payload.summary='<script>alert(1)</script>';
   const c=context.create('real-madrid',[row,news('foreign','doubt','2026-11-12','fc-barcelona')],null),host=dom.window.document.createElement('div');c.renderClub(host);
   assert.equal(host.querySelectorAll('.fc-story').length,1);assert.equal(host.querySelector('img,script'),null);assert.equal(host.querySelector('summary').textContent,row.payload.title);assert.equal(host.querySelector('a').rel,'noopener noreferrer');
-  const detail=c.detail({id:'player'});assert.match(detail.textContent,/12\/11\/2026/);assert.match(detail.textContent,/Revisada:.*Miami/);assert.doesNotMatch(detail.textContent,/Invalid Date/);
+  const detail=c.detail({id:'player'});assert.match(detail.textContent,/12\/11\/2026/);assert.match(detail.textContent,/Revisada:.*Miami/);assert.doesNotMatch(detail.textContent,/Invalid Date/);assert.equal(detail.querySelectorAll('details[open]').length,0);
+  const legacy=news('player');delete legacy.payload.players[0].health;
+  const legacyDetail=context.create('real-madrid',[legacy],null).detail({id:'player'});assert.equal(legacyDetail.querySelectorAll('details[open]').length,0);legacyDetail.querySelector('summary').click();assert.equal(legacyDetail.querySelector('details').open,true);
  }finally{dom.window.close();}
 });
 test('rest of squad uses active catalog identities, excludes all XI and supports keyboard detail/return',async()=>{
@@ -93,12 +95,13 @@ test('rest of squad uses active catalog identities, excludes all XI and supports
   const reserve=catalog.players.find(x=>x.active&&x.clubId===p.team&&!p.players.some(y=>y.id===x.id));assert.ok(reserve);
   const rows=[news(p.players[0].id),news(reserve.id,'injured')],host=w.document.getElementById('forecastPublicBody');
   w.CubanForecastPitch.render(host,p,catalog,{playerContext:context.create(p.team,rows,catalog)});
+  assert.equal(host.querySelector('.fp-detail').hidden,true);
   const buttons=[...host.querySelectorAll('.fp-reserve')],ids=buttons.map(b=>b.dataset.playerId),expected=catalog.players.filter(x=>x.active&&x.clubId===p.team&&!p.players.some(y=>y.id===x.id));
   assert.deepEqual(new Set(ids),new Set(expected.map(x=>x.id)));assert.equal(new Set(ids).size,ids.length);
   assert.equal(host.querySelector('.fp-player .fc-health').textContent,'?');
   const button=buttons.find(b=>b.dataset.playerId===reserve.id);assert.equal(button.querySelector('.fc-health').textContent,'+');assert.match(button.getAttribute('aria-label'),/Lesionado/);button.click();
   const detail=host.querySelector('.fp-detail');assert.equal(w.document.activeElement,detail);assert.match(detail.textContent,/Lesionado/);assert.doesNotMatch(detail.textContent,/titularidad estimada|Revisión editorial manual/);
-  detail.querySelector('.fp-link').click();assert.equal(w.document.activeElement,button);
+  detail.querySelector('.fp-link').click();assert.equal(w.document.activeElement,button);assert.equal(detail.hidden,true);
   w.CubanForecastPitch.render(host,p,catalog);assert.equal(host.querySelector('.fp-squad'),null);assert.equal(host.querySelector('.fc-health'),null);
  }finally{dom.window.close();}
 });
@@ -116,7 +119,7 @@ test('independent news read is lazy, local by club, survives withdrawn/failed XI
   w.CUBAN_LEAGUE_SUPABASE={url:'https://db.test',publishableKey:'public'};w.CubanLeaguePlayerCatalog={load:async()=>({players:[],playersById:new Map()})};
   w.fetch=async(u,o)=>{calls.push(String(u));const isNews=String(u).includes('news_public');if(String(u).includes('forecast_health_public'))return {ok:true,json:async()=>[]};return {ok:!(isNews?failNews:failForecast),json:async()=>isNews?articles:data};};
   w.eval(read('forecast-season-public.js'));assert.equal(calls.length,0);w.document.body.dataset.section='forecasts';await tick();await tick();assert.equal(calls.length,3);
-  for(const b of w.document.querySelectorAll('[data-forecast-team]'))b.click();assert.equal(calls.length,3);
+  for(const b of w.document.querySelectorAll('[data-forecast-team]')){b.click();assert.equal(w.document.querySelector('.fp-detail').hidden,true);assert.equal(w.document.querySelectorAll('.fc-story[open]').length,0);w.document.querySelector('.fp-player').click();assert.equal(w.document.querySelector('.fp-detail').hidden,false);}assert.equal(calls.length,3);
   const select=()=>w.document.querySelector('[data-forecast-team="'+data[0].team+'"]').click();select();assert.equal(w.document.querySelectorAll('.fc-club-news .fc-story').length,1);
   data[0].status='withdrawn';data[0].payload=null;w.document.getElementById('forecastPublicReload').click();await tick();await tick();assert.equal(w.document.querySelectorAll('.fp-player').length,0);assert.equal(w.document.querySelectorAll('.fc-club-news .fc-story').length,1);
   failForecast=true;w.document.getElementById('forecastPublicReload').click();await tick();await tick();assert.equal(w.document.querySelectorAll('.fc-club-news .fc-story').length,1);
@@ -143,6 +146,6 @@ test('a news timeout cannot abort an already received XI body',async()=>{
 });
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const asset of ['forecast-context.js','forecast-context.css','forecast-pitch.js','forecast-season-public.js']){const version=['forecast-context.js','forecast-season-public.js'].includes(asset)?212:211;assert.ok(index.includes(asset+'?v='+version+'-20261112'));assert.ok(sw.includes(asset+'?v='+version+'-20261112'));}
+ for(const asset of ['forecast-context.js','forecast-context.css','forecast-pitch.js','forecast-season-public.js']){const version={'forecast-context.js':213,'forecast-pitch.js':213,'forecast-context.css':211,'forecast-season-public.js':212}[asset];assert.ok(index.includes(asset+'?v='+version+'-20261112'));assert.ok(sw.includes(asset+'?v='+version+'-20261112'));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
 });

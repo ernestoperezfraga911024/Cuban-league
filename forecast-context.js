@@ -83,7 +83,7 @@
     else if(!related.length)box.append(el('p','Sin novedades publicadas.'));
     else box.append(el('p','Últimas noticias del jugador.'));
     const shown=related.slice(0,5);if(h?.row&&!shown.includes(h.row))shown.push(h.row);
-    for(const [i,row] of shown.entries()){const item=story(row);if(i===0&&!h)item.open=true;box.append(item);}return box;
+    for(const row of shown)box.append(story(row));return box;
    },
    renderClub(host){const box=el('section',null,'fc-club-news');box.append(el('h3','Noticias del equipo'));
     if(unavailable)box.append(el('p','No se pudieron cargar las noticias. Pulsa Actualizar.'));
