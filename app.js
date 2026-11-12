@@ -7607,7 +7607,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards','second-division','forecasts'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards','second-division','forecasts','news'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
 }

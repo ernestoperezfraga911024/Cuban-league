@@ -1,0 +1,23 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{JSDOM}=require('jsdom');
+const root=path.join(__dirname,'..'),read=f=>fs.readFileSync(path.join(root,f),'utf8'),tick=()=>new Promise(r=>setTimeout(r,15));
+test('Noticias loads lazily, filters locally, escapes content and clears a failed refresh',async()=>{
+ const dom=new JSDOM(read('index.html').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''),{url:'https://example.test/',runScripts:'outside-only'}),w=dom.window;try{
+ let calls=0,fail=false;const club={id:'real-madrid',name:'Real Madrid',crest:'https://example.test/crest.png'};
+ w.CUBAN_LEAGUE_SUPABASE={url:'https://example.test',publishableKey:'public-test-key'};
+ w.CubanLeaguePlayerCatalog={load:async()=>({clubs:[club],clubsById:new Map([[club.id,club]]),playersById:new Map()})};
+ const row={key:'test-transfer',payload:{team:club.id,category:'transfer',certainty:'rumor',title:'<img src=x onerror=alert(1)>',summary:'Una información sin confirmar.',impact:'No cambia de club ni confirma titularidad.',players:[],timeline:[],sources:[{name:'Comuniate',url:'https://www.comuniate.com/noticias/test',published_at:null,published_label:'12/11/2026 (fecha de la fuente)',fetched_at:new Date().toISOString()}]}};
+ w.fetch=async url=>{calls++;if(fail)throw Error('offline');return {ok:true,json:async()=>url.includes('news_status')?[{checked_at:new Date().toISOString(),result:'partial'}]:[row]};};
+ w.eval(read('news.js'));assert.equal(calls,0);w.document.body.dataset.section='news';await tick();assert.equal(calls,2);assert.equal(w.document.querySelectorAll('.cn-row').length,1);assert.equal(w.document.querySelector('.cn-copy strong').textContent,row.payload.title);assert.equal(w.document.querySelector('.cn-copy img'),null);assert.match(w.document.getElementById('newsStatus').textContent,/parcial/);assert.match(w.document.getElementById('newsDetail').textContent,/Rumor/);
+ [...w.document.querySelectorAll('#newsFilters button')].find(x=>x.textContent==='Bajas').click();assert.equal(w.document.querySelectorAll('.cn-row').length,0);assert.equal(calls,2);
+ [...w.document.querySelectorAll('#newsFilters button')].find(x=>x.textContent==='Todas').click();assert.equal(w.document.querySelectorAll('.cn-row').length,1);assert.equal(w.document.querySelector('.cn-detail a').rel,'noopener noreferrer');
+ fail=true;w.document.getElementById('newsReload').click();await tick();assert.equal(w.document.querySelectorAll('.cn-row').length,0);assert.equal(w.document.getElementById('newsDetail').textContent,'');assert.match(w.document.getElementById('newsStatus').textContent,/reintentar/);
+ }finally{w.close();}
+});
+test('Noticias admin preserves the request after a lost response and resets on logout',async()=>{
+ const dom=new JSDOM(read('admin.html').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''),{url:'https://example.test/',runScripts:'outside-only'}),w=dom.window;try{
+ const requests=[];let lost=true;w.eval(read('news-admin.js'));w.CubanNewsAdmin.init({client:{rpc:async(name,p)=>{requests.push({...p});if(p.p_action==='automatic'&&lost){lost=false;return {error:{message:'response lost'}};}return {data:{mode:'automatic',version:5,items:[]}};}}});w.CubanNewsAdmin.authorize();
+ w.document.getElementById('newsAdminReload').click();await tick();w.document.getElementById('newsAdmin-automatic').click();await tick();assert.equal(w.document.getElementById('newsAdminRetry').hidden,false);w.document.getElementById('newsAdminRetry').click();await tick();assert.deepEqual(requests.at(-1),requests.at(-2));assert.equal(w.document.getElementById('newsAdminRetry').hidden,true);
+ w.CubanNewsAdmin.reset();assert.equal(w.document.getElementById('newsAdmin-publish').disabled,true);assert.equal(w.document.getElementById('newsAdminRows').textContent,'');
+ }finally{w.close();}
+});

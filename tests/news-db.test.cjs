@@ -1,0 +1,45 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {PGlite}=require('@electric-sql/pglite');
+test('Noticias: permissions, publication, retries, withdrawal and evidence validation',async()=>{
+ const db=new PGlite();try{
+ await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create schema private;create schema forecast_league;
+ grant usage on schema private,auth to authenticated;
+ create function auth.uid() returns uuid language sql as $$select case when current_setting('news_test.admin',true)='true' then '00000000-0000-4000-8000-000000000001'::uuid end$$;
+ create function private.is_league_admin() returns boolean language sql as $$select coalesce(current_setting('news_test.admin',true)='true',false)$$;
+ create table forecast_league.teams(team text primary key);insert into forecast_league.teams values('real-madrid');
+ create table forecast_league.roster(id text primary key,team text,name text);insert into forecast_league.roster values('test-player','real-madrid','Local player');`);
+ await db.exec(fs.readFileSync(path.join(__dirname,'../docs/news/migration.sql'),'utf8'));
+ await db.exec("insert into league_news.runs(key) values('local-test')");
+ const query=async(sql,args=[])=>(await db.query(sql,args)).rows[0];
+ const payload={key:'test-news-event',season:'2026-27',team:'real-madrid',category:'transfer',certainty:'rumor',title:'A local transfer rumor for testing',summary:'A brief original summary exclusively for this local test.',impact:'An unconfirmed report does not change a player club.',players:[{id:'test-player',name:'Local player'}],sources:[{name:'FutbolFantasy',kind:'media',url:'https://www.futbolfantasy.com/laliga/noticias/local-test',fetched_at:new Date().toISOString(),published_at:null}]};
+ const save=p=>query("select league_news.save_draft('local-test',$1::jsonb) r",[JSON.stringify(p)]);
+ const deliver=()=>query("select league_news.deliver('test-news-event') r");
+ const row=()=>query("select * from public.news_public where key='test-news-event'");
+ assert.equal((await save(payload)).r.outcome,'saved');
+ assert.equal((await deliver()).r.outcome,'published');
+ const original=await row();assert.equal(original.payload.certainty,'rumor');
+ assert.equal((await save(payload)).r.outcome,'unchanged');assert.equal((await deliver()).r.outcome,'unchanged');
+ assert.deepEqual(await row(),original);
+ for(const change of [{players:[{id:'invented',name:'Unverified'}]},{certainty:'confirmed'},{sources:[{...payload.sources[0],url:'https://evil.example/article'}]},{sources:[{...payload.sources[0],fetched_at:'2000-01-01T00:00:00Z'}]}]) await assert.rejects(save({...payload,...change}));
+ await db.exec('set role anon');assert.equal((await query('select count(*)::int n from public.news_public')).n,1);
+ await assert.rejects(query("select public.news_admin('read')"));await assert.rejects(query("select league_news.deliver('test-news-event')"));await assert.rejects(query('delete from public.news_public'));await db.exec('reset role');
+ await db.exec('set role authenticated');await assert.rejects(query("select public.news_admin('read')"));await db.exec('reset role');
+ await db.exec("set news_test.admin='true';set role authenticated");
+ const state=() => query("select public.news_admin('read') r");
+ const command=async(action,key,request)=>{const s=await state();return query('select public.news_admin($1,$2,$3,$4) r',[action,key,s.r.version,request]);};
+ const before=await state();const args=['withdraw','test-news-event',before.r.version,'00000000-0000-4000-8000-000000000002'];
+ const withdrawn=await query('select public.news_admin($1,$2,$3,$4) r',args);assert.deepEqual(await query('select public.news_admin($1,$2,$3,$4) r',args),withdrawn);
+ await assert.rejects(query('select public.news_admin($1,$2,$3,$4) r',['restore',args[1],args[2],args[3]]));
+ assert.equal((await query('select count(*)::int n from public.news_public')).n,0);
+ await db.exec('reset role');await save({...payload,summary:'Updated original facts for this local test event only.'});assert.equal((await deliver()).r.outcome,'ready');assert.equal((await row()).visible,false);
+ await db.exec('set role authenticated');await command('manual',null,'00000000-0000-4000-8000-000000000003');await command('restore','test-news-event','00000000-0000-4000-8000-000000000004');await db.exec('reset role');
+ assert.equal((await deliver()).r.outcome,'ready');assert.equal((await row()).payload.summary,payload.summary);
+ await db.exec('set role authenticated');await command('publish',null,'00000000-0000-4000-8000-000000000005');await db.exec('reset role');assert.match((await row()).payload.summary,/Updated/);
+ assert.deepEqual((await db.query('select * from forecast_league.roster')).rows,[{id:'test-player',team:'real-madrid',name:'Local player'}]);
+ await assert.rejects(query("select league_news.finish_run('local-test','[]')"));
+ const checks=['futbolfantasy','jornadaperfecta','comuniate'].map(id=>({id,url:'https://www.'+id+'.com/',status:id==='futbolfantasy'?'unavailable':'read',fetched_at:new Date().toISOString()}));
+ assert.equal((await query("select league_news.finish_run('local-test',$1::jsonb) r",[JSON.stringify(checks)])).r.outcome,'finished');assert.equal((await query('select result from public.news_status')).result,'partial');
+ await assert.rejects(save({...payload,title:'Attempt after the run is finished'}));
+ }finally{await db.close();}
+});
