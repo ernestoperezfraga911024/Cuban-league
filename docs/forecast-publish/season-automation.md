@@ -7,7 +7,7 @@ Destino exclusivo: Supabase link_id=link_6aad67ea13208191b8315f9bb7f2cce7, proje
 1. TURNO REAL Y REINTENTOS
 
 Consulta select now() as observed_at, forecast_season.plan() as plan;
-El servidor decide el turno vigente y los equipos que corresponden: 09:00 Miami todos; 06:00 partidos de esa mañana; 13:00 partidos pendientes de hoy; 18:00 encuentros dentro de 48 horas. No recuperes turnos de más de dos horas. Si slot=null, termina sin guardar ni publicar. El alcance termina como máximo el 30/06/2027. No presentes una previsión de un partido comenzado como actual.
+El servidor decide el turno vigente y los equipos que corresponden: 06:00 Miami todos (incluye los partidos de esa mañana); 13:00 partidos pendientes de hoy; 18:00 encuentros dentro de 48 horas. No hay turno a las 09:00. No recuperes turnos de más de dos horas. Si slot=null, termina sin guardar ni publicar. El alcance termina como máximo el 30/06/2027. No presentes una previsión de un partido comenzado como actual.
 
 Ejecuta select forecast_season.begin_run(); En las tareas periódicas usa exclusivamente la versión sin argumentos; la prueba extraordinaria del 12/11 ya es independiente y no se repite. conserva run_key y la lista de equipos esperados de esa ejecución. Si teams está vacío, llama finish_run(run_key), indica que no había equipos pendientes y no leas páginas. La clave individual es RUN_KEY||'-'||TEAM, sin UUID alternativos. Consulta los intentos ya existentes para el turno. Si un intento está saved, entrega el MISMO borrador con deliver(clave), sin releer ni cambiar su contenido. Si está published, ready o blocked, verifica y no repitas. Si hay conflicto o respuesta perdida, consulta attempts y drafts antes de reintentar; no cambies clave ni fechas para eludir validaciones.
 
