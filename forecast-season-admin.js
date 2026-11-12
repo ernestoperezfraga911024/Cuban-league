@@ -7,12 +7,12 @@
  function el(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;}
  function message(text){$('forecastSeasonStatus').textContent=text;}
  function controls(){
-  for(const b of $('forecastSeason').querySelectorAll('button'))b.disabled=!authorized||busy||!!pending||b.dataset.unavailable==='true';
+  for(const b of $('forecastSeason').querySelectorAll('button'))if(!b.closest('#forecastHistoryAdmin'))b.disabled=!authorized||busy||!!pending||b.dataset.unavailable==='true';
   $('forecastSeasonRetry').hidden=!pending;$('forecastSeasonRetry').disabled=!authorized||busy;
   $('forecastSeasonPublish').disabled=!authorized||busy||!!pending||!state?.teams.some(t=>t.ready&&!t.paused);
   for(const mode of ['manual','automatic'])$(mode==='manual'?'forecastSeasonManual':'forecastSeasonAuto').setAttribute('aria-pressed',String(state?.mode===mode));
  }
- function reset(){generation++;authorized=false;busy=false;pending=null;state=null;if(!$('forecastSeason'))return;$('forecastSeasonRows').replaceChildren();$('forecastSeasonPreview').replaceChildren();$('forecastSeasonSummary').textContent='';message('Abre el apartado para consultar el estado de los 20 equipos.');controls();}
+ function reset(){window.CubanForecastHistoryAdmin?.reset();generation++;authorized=false;busy=false;pending=null;state=null;if(!$('forecastSeason'))return;$('forecastSeasonRows').replaceChildren();$('forecastSeasonPreview').replaceChildren();$('forecastSeasonSummary').textContent='';message('Abre el apartado para consultar el estado de los 20 equipos.');controls();}
  async function rpc(name,args={}){const r=await client.rpc(name,args);if(r.error)throw r.error;return r.data;}
  function error(e){
   if(e?.code==='42501'||[401,403].includes(e?.status)){reset();return 'Sesión vencida o acceso denegado. Inicia sesión de nuevo.';}
@@ -55,6 +55,6 @@
   finally{if(g===generation){busy=false;controls();}}
  }
  function command(action,team=null){if(!authorized||busy||pending||!state)return;send({p_action:action,p_expected_version:state.version,p_request_id:crypto.randomUUID(),p_team:team});}
- function init(options){client=options.client;if(initialized||!$('forecastSeason'))return;initialized=true;$('forecastTool').addEventListener('toggle',()=>{if(authorized&&$('forecastTool').open&&!state)reload();});$('forecastSeasonReload').addEventListener('click',reload);$('forecastSeasonAuto').addEventListener('click',()=>command('automatic'));$('forecastSeasonManual').addEventListener('click',()=>command('manual'));$('forecastSeasonPublish').addEventListener('click',()=>command('publish'));$('forecastSeasonRetry').addEventListener('click',()=>{if(pending)send(pending);});controls();}
- window.CubanForecastSeason={init,reset,authorize(){authorized=true;controls();if($('forecastTool').open)reload();}};
+ function init(options){client=options.client;window.CubanForecastHistoryAdmin?.init(options);if(initialized||!$('forecastSeason'))return;initialized=true;$('forecastTool').addEventListener('toggle',()=>{if(authorized&&$('forecastTool').open&&!state)reload();});$('forecastSeasonReload').addEventListener('click',reload);$('forecastSeasonAuto').addEventListener('click',()=>command('automatic'));$('forecastSeasonManual').addEventListener('click',()=>command('manual'));$('forecastSeasonPublish').addEventListener('click',()=>command('publish'));$('forecastSeasonRetry').addEventListener('click',()=>{if(pending)send(pending);});controls();}
+ window.CubanForecastSeason={init,reset,authorize(){authorized=true;window.CubanForecastHistoryAdmin?.authorize();controls();if($('forecastTool').open)reload();}};
 })();

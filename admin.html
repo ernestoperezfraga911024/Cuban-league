@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="second-division.css?v=190-20261022">
   <link rel="stylesheet" href="forecast-review.css?v=201-20261111">
   <link rel="stylesheet" href="forecast-publish.css?v=207-20261111">
+  <link rel="stylesheet" href="forecast-history.css?v=209-20261112">
 </head>
 <body class="f05-theme">
   <div class="admin-background" aria-hidden="true"></div>
@@ -158,13 +159,14 @@
           <section id="forecastSeason" class="fp-delivery" aria-labelledby="forecastSeasonTitle">
             <span class="admin-kicker">ACTUALIZACIONES Y PUBLICACIONES</span><h3 id="forecastSeasonTitle">Los 20 equipos, en un vistazo</h3>
             <div class="fp-delivery-modes" role="group" aria-label="Modo de publicación de los 20 equipos"><button id="forecastSeasonAuto" type="button" disabled>Automático</button><button id="forecastSeasonManual" type="button" disabled>Manual</button></div>
-            <p class="fp-delivery-footnote">Hora de Miami: 09:00 todos; 06:00 partidos de la mañana; 13:00 partidos pendientes de hoy; 18:00 partidos dentro de 48 horas. Se verifica el próximo encuentro de cada club. Las jornadas avanzan por equipo.</p>
+            <p class="fp-delivery-footnote">Hora de Miami: 06:00 todos; 13:00 partidos pendientes de hoy; 18:00 partidos dentro de 48 horas. El once confirmado se comprueba por horas de 06:00 a 23:00 cuando haya partidos iniciados pendientes de verificar. Las jornadas avanzan por equipo.</p>
             <p id="forecastSeasonSummary" class="fs-summary"></p>
             <div class="fp-actions"><button id="forecastSeasonPublish" type="button" disabled>Publicar listos</button><button id="forecastSeasonReload" type="button" disabled>Actualizar estado</button><button id="forecastSeasonRetry" type="button" hidden>Reintentar</button></div>
             <p id="forecastSeasonStatus" role="status" aria-live="polite">Abre el apartado para consultar el estado de los 20 equipos.</p>
             <div id="forecastSeasonRows" class="fs-teams"></div>
             <details id="forecastSeasonPreviewBox"><summary>Vista previa opcional</summary><div id="forecastSeasonPreview"></div></details>
             <p class="fp-delivery-footnote">Manual prepara las lecturas y espera Publicar. Una lectura bloqueada conserva la publicación anterior y su fecha. Retirar pausa la publicación automática de ese equipo hasta que publiques otra lectura. Actualizar estado no relee las fuentes.</p>
+            <section id="forecastHistoryAdmin" class="fh-admin" aria-labelledby="forecastHistoryAdminTitle"><h4 id="forecastHistoryAdminTitle">Historial y once confirmado</h4><p id="forecastHistoryAdminSummary">Las comparaciones se consultan al abrir este apartado.</p><div id="forecastHistoryAdminRows" class="fh-admin-list"></div><div class="fp-actions"><button id="forecastHistoryPublish" type="button" disabled>Publicar resultados pendientes</button><button id="forecastHistoryAdminReload" type="button" disabled>Actualizar historial</button><button id="forecastHistoryAdminRetry" type="button" hidden>Reintentar publicación</button></div><p id="forecastHistoryAdminStatus" role="status" aria-live="polite"></p></section>
           </section>
           <section id="forecastDelivery" class="fp-delivery" aria-labelledby="forecastDeliveryTitle" hidden>
             <div class="fp-delivery-head"><div><span class="admin-kicker">REAL MADRID · CELTA · J13</span><h3 id="forecastDeliveryTitle">Tu once, listo para publicar</h3></div></div>
@@ -864,8 +866,10 @@
 <script src="forecast-pitch.js?v=208-20261112"></script>
   <script src="forecast-editor.js?v=205-20261111"></script>
   <script src="forecast-delivery.js?v=205-20261111"></script>
-  <script src="forecast-season-admin.js?v=207-20261111"></script>
+  <script src="forecast-history-admin.js?v=209-20261112"></script>
+  <script src="forecast-season-admin.js?v=209-20261112"></script>
   <script src="forecast-review.js?v=207-20261111"></script>
   <script src="admin.js?v=201-20261111-forecast-review"></script>
 </body>
 </html>
+
