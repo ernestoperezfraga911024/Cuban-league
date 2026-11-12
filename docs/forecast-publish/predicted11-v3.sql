@@ -217,7 +217,7 @@ begin
      or ((obs->>'prediction'='starter') is distinct from (s->'starter_ids' ? (obs->>'player_id')))
      or (obs->'probability' is distinct from 'null'::jsonb and (jsonb_typeof(obs->'probability') is distinct from 'number' or coalesce(obs->>'probability','') !~ '^(100|[1-9]?[0-9])$')) then raise exception 'Observación inválida' using errcode='22023'; end if;
    end loop;
-   if (select count(*) from jsonb_array_elements(s->'player_observations') observed where observed->>'prediction'='starter')<>11 then raise exception 'Once observado incompleto' using errcode='22023'; end if;
+   if (select count(*) from jsonb_array_elements(s->'player_observations') source_obs where source_obs->>'prediction'='starter')<>11 then raise exception 'Once observado incompleto' using errcode='22023'; end if;
   else invalid_source:=true; end if;
   oldest:=least(oldest,(s->>'fetched_at')::timestamptz);
   source_result:=source_result||jsonb_build_array(jsonb_build_object('id',s->>'id','url',s->>'url','fetched_at',s->'fetched_at','source_updated_at',s->'source_updated_at'));
@@ -333,7 +333,7 @@ begin
  begin perform forecast_publish.assess(e||'{"role":{"value":100}}');raise exception 'Role was accepted' using errcode='ZX002';exception when sqlstate '22023' then null;end;
  begin perform forecast_publish.assess(jsonb_set(e,'{sources,3,votes}','5'));raise exception 'Invalid ballot accepted' using errcode='ZX002';exception when sqlstate '22023' then null;end;
  begin perform forecast_season.begin_run('not-authorized');raise exception 'Extra run accepted arbitrary key' using errcode='ZX002';exception when sqlstate '22023' then null;end;
- for old_row in select payload,projection from forecast_season.drafts where payload->>'method_version'='editorial-v2' loop
+ for old_row in select d.payload,d.projection from forecast_season.drafts d where d.payload->>'method_version'='editorial-v2' loop
    for item in select value from jsonb_array_elements(old_row.payload->'proposal'->'players') loop
      if forecast_publish.assess(item->'assessment')<>(item->>'probability')::integer then raise exception 'Legacy probability changed'; end if;
    end loop;
