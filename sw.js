@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v213-closed-details';
+const CACHE_NAME = 'cuban-league-v214-editorial-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -16,8 +16,8 @@ const APP_SHELL = [
   './forecast-publish.css?v=213-20261112',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
-  './forecast-round-core.js?v=208-20261112',
-  './forecast-pitch.js?v=213-20261112',
+  './forecast-round-core.js?v=214-20261112',
+  './forecast-pitch.js?v=214-20261112',
   './forecast-season-public.js?v=212-20261112',
   './forecast-context.js?v=213-20261112',
   './forecast-context.css?v=211-20261112',

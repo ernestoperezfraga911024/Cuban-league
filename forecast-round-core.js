@@ -7,7 +7,7 @@
   function label(formation,slot){return {GK:'Portería',DF:'Defensa',MF:'Centro del campo',FW:'Ataque'}[position(formation,slot)];}
   function validate(p){
     if([3,4].includes(p?.schema_version)){
-      if(p.schema_version===4&&p.method_version!=='editorial-v3')throw Error('Método v3 incompleto.');
+      if(p.schema_version===4&&!['editorial-v3','editorial-v4'].includes(p.method_version))throw Error('Método v3 incompleto.');
       const ids=new Set(config.teams.map(t=>t.id));
       if(p.season!=='2026-27'||!Number.isInteger(p.matchday)||p.matchday<13||p.matchday>38||!ids.has(p.home)||!ids.has(p.away)||p.home===p.away||![p.home,p.away].includes(p.team)||p.opponent!==(p.team===p.home?p.away:p.home)||!new RegExp('^laliga-2026-27-j'+p.matchday+'-[a-z0-9-]{3,100}$').test(p.fixture_key)||!Number.isFinite(Date.parse(p.kickoff_at))||Date.parse(p.kickoff_at)<Date.parse('2026-07-01T00:00:00Z')||Date.parse(p.kickoff_at)>=Date.parse('2027-07-01T04:00:00Z'))throw Error('Partido de temporada incompleto.');
       return validatePlayers(p);
@@ -29,7 +29,7 @@
     if(Date.parse(p.evidence_at)!==Math.min(...p.sources.map(s=>Date.parse(s.fetched_at))))throw Error('Fechas inconsistentes.');
     const roster=new Set();
     for(const x of p.players||[]){
-      if(!/^[a-z0-9-]+$/.test(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>120||x.method!==(v3?'editorial-v3':'editorial-v2')||x.position!==position(p.formation,x.slot))throw Error('Jugador inválido.');
+      if(!/^[a-z0-9-]+$/.test(x.id)||typeof x.name!=='string'||!x.name.trim()||x.name.length>120||x.method!==(v3?p.method_version:'editorial-v2')||x.position!==position(p.formation,x.slot))throw Error('Jugador inválido.');
       roster.add(x.id);
       if(x.alternative){if(!/^[a-z0-9-]+$/.test(x.alternative.id)||typeof x.alternative.name!=='string'||!x.alternative.name.trim()||x.alternative.name.length>120)throw Error('Alternativa inválida.');roster.add(x.alternative.id);}else if(x.alternative!==null)throw Error('Alternativa ausente.');
     }
