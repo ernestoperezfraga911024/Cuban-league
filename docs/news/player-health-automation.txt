@@ -1,0 +1,15 @@
+ANEXO NOTICIAS — SITUACIÓN FÍSICA POR JUGADOR
+Este anexo amplía solo el contenido opcional de players en Noticias para mostrar la situación del futbolista junto al once y al resto de su plantilla. Conserva íntegramente fuentes, ventanas de ejecución, funciones autorizadas, modo Automático/Manual, retiradas, deduplicación y reglas editoriales. No cambia porcentajes ni métodos de alineaciones, historial, horarios o catálogo. No crea tareas, PR ni migraciones, ni autoriza reabrir un turno completado o la carga inicial.
+
+Al leer el cuerpo de una novedad relevante sobre el estado físico, añade a la entrada del jugador afectado en payload.players:
+"health":{"status":"doubt|injured|available","event_date":"YYYY-MM-DD","detail":"Hecho breve propio y atribuido, 10..500 caracteres","refs":["URL_REAL_INCLUIDA_EN_SOURCES"]}.
+No lo añadas a los compañeros citados como sustitutos. No deduzcas el estado de una categoría, titular, porcentaje, rumor o mera ausencia de noticias. Todas las referencias han de pertenecer a fuentes realmente leídas de ese payload.
+
+doubt: duda física actual descrita por la fuente (molestias, prueba pendiente o disponibilidad incierta).
+injured: lesión vigente o baja física acreditada por la lectura. No rebajar un diagnóstico publicado a molestias.
+available: información posterior que confirma el alta o que puede jugar, atribuida a quien lo confirma. El trabajo parcial o individual, la mejoría y una convocatoria por sí solos no son un alta. La confirmación de disponibilidad no exige cambiar certainty a confirmed: esa etiqueta sigue exigiendo lectura de fuente oficial directa.
+
+event_date es la fecha original del hecho en la fuente, NO fetched_at ni la fecha del guardado. Si no se puede establecer, omite health y conserva la noticia. detail conserva diagnóstico, estado y plazo estimado con su atribución cuando consten; incluye la diferencia entre plazo editorial y parte oficial. En dos cambios del mismo día verifica su orden real antes de actualizar; no publiques una versión anterior como posterior. Ante discrepancia física no resuelta usa doubt y explica las versiones, sin inventar un alta. Un traslado o rumor de fichaje nunca genera health.
+
+Cuando haya nueva evidencia del mismo proceso, conserva la key del acontecimiento, actualiza health para el jugador y explica el cambio real en change_note. Un alta posterior reemplaza la marca de lesión/duda al refrescar la página. No renueves fechas ni publiques duplicados para conseguir un icono. Las noticias anteriores sin health siguen visibles sin marca; añade el campo al publicar una novedad factual verificada, no mediante inferencias retrospectivas o escrituras directas. Mantén el límite de 16 KiB y las funciones instaladas save_draft/deliver. No trates estados o supuestos de los tests como noticias reales.
+FIN DEL ANEXO DE SITUACIÓN FÍSICA
