@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v211-player-context';
+const CACHE_NAME = 'cuban-league-v212-physical-status';
 const APP_SHELL = [
   './',
   './index.html',
@@ -18,10 +18,10 @@ const APP_SHELL = [
   './forecast-round-config.js?v=206-20261111',
   './forecast-round-core.js?v=208-20261112',
   './forecast-pitch.js?v=211-20261112',
-  './forecast-season-public.js?v=211-20261112',
-  './forecast-context.js?v=211-20261112',
+  './forecast-season-public.js?v=212-20261112',
+  './forecast-context.js?v=212-20261112',
   './forecast-context.css?v=211-20261112',
-  './forecast-season-admin.js?v=210-20261112',
+  './forecast-season-admin.js?v=212-20261112',
   './forecast-history-core.js?v=209-20261112',
   './forecast-history.js?v=209-20261112',
   './forecast-history-admin.js?v=209-20261112',

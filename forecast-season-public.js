@@ -4,13 +4,13 @@
  const section=document.getElementById('forecasts');if(!section)return;
  const host=document.getElementById('forecastPublicBody'),status=document.getElementById('forecastPublicStatus'),retry=document.getElementById('forecastPublicReload');
  const round=window.CubanForecastRoundCore,legacy=window.CubanForecastPublishCore,teams=round.config.teams;
- let selected='real-madrid',sequence=0,active=false,controller,rows=[],catalog=null,news=[],newsUnavailable=false;
+ let selected='real-madrid',sequence=0,active=false,controller,rows=[],catalog=null,news=[],newsUnavailable=false,physical=[],healthUnavailable=false;
  const requested=new URL(location.href).searchParams.get('forecast_team');if(teams.some(t=>t.id===requested))selected=requested;
  const date=value=>value?new Intl.DateTimeFormat('es',{dateStyle:'short',timeStyle:'short',timeZone:'America/New_York'}).format(new Date(value))+' Miami':'pendiente';
  function buttonState(){for(const b of section.querySelectorAll('[data-forecast-team]'))b.setAttribute('aria-pressed',String(b.dataset.forecastTeam===selected));}
  function show(){
   host.replaceChildren();buttonState();
-  const context=window.CubanForecastContext?.create(selected,news,catalog,newsUnavailable);
+  const context=window.CubanForecastContext?.create(selected,news,catalog,newsUnavailable,physical,healthUnavailable);
   try{
    const row=rows.find(r=>r.team===selected);
    if(!row){status.textContent='No se pudo verificar la publicación actual. Pulsa Actualizar.';return;}
@@ -32,18 +32,20 @@
  const caption=document.createElement('span');caption.className='forecast-clubs-caption';caption.textContent='LaLiga · Próximo partido de cada equipo · 20 clubes';nav.replaceChildren(list,caption);buttonState();
  async function load(){
   controller?.abort();controller=new AbortController();const current=++sequence,currentController=controller,signal=controller.signal;
-  host.replaceChildren();rows=[];news=[];newsUnavailable=true;status.textContent='Consultando las publicaciones vigentes.';retry.disabled=true;section.setAttribute('aria-busy','true');
+  host.replaceChildren();rows=[];news=[];physical=[];newsUnavailable=true;healthUnavailable=true;status.textContent='Consultando las publicaciones vigentes.';retry.disabled=true;section.setAttribute('aria-busy','true');
   const timeout=setTimeout(()=>currentController.abort(),15000);
   try{
    const config=window.CUBAN_LEAGUE_SUPABASE;if(!config?.url||!config.publishableKey)throw Error();
    const url=new URL(config.url+'/rest/v1/forecast_season_public');url.search=new URLSearchParams({select:'team,payload,published_at,checked_at,status,attempted_fixture_key',limit:'20'});
-   const [forecastResult,newsResult,catalogResult]=await Promise.allSettled([
+   const [forecastResult,newsResult,catalogResult,healthResult]=await Promise.allSettled([
     fetch(url,{headers:{apikey:config.publishableKey},cache:'no-store',signal}).then(async response=>{if(!response.ok)throw Error();return response.json();}),
     window.CubanForecastContext?.load(signal)||Promise.resolve([]),
-    catalog?Promise.resolve(catalog):window.CubanLeaguePlayerCatalog.load()
+    catalog?Promise.resolve(catalog):window.CubanLeaguePlayerCatalog.load(),
+    window.CubanForecastContext?.loadHealth(signal)||Promise.resolve([])
    ]);
    if(current!==sequence||!active)return;
    newsUnavailable=newsResult.status==='rejected';news=newsUnavailable?[]:newsResult.value;
+   healthUnavailable=healthResult.status==='rejected';physical=healthUnavailable?[]:healthResult.value;
    if(catalogResult.status==='fulfilled')catalog=catalogResult.value;
    if(forecastResult.status==='rejected')throw Error();const data=forecastResult.value;
    if(!Array.isArray(data)||data.length!==20||new Set(data.map(r=>r.team)).size!==20||data.some(r=>!teams.some(t=>t.id===r.team)||!['published','ready','blocked','withdrawn','pending'].includes(r.status)||[r.checked_at,r.published_at].some(d=>d!==null&&!Number.isFinite(Date.parse(d)))))throw Error();

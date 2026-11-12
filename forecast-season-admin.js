@@ -9,7 +9,7 @@
  function controls(){
   for(const b of $('forecastSeason').querySelectorAll('button'))if(!b.closest('#forecastHistoryAdmin'))b.disabled=!authorized||busy||!!pending||b.dataset.unavailable==='true';
   $('forecastSeasonRetry').hidden=!pending;$('forecastSeasonRetry').disabled=!authorized||busy;
-  $('forecastSeasonPublish').disabled=!authorized||busy||!!pending||!state?.teams.some(t=>t.ready&&!t.paused);
+  $('forecastSeasonPublish').disabled=!authorized||busy||!!pending||!state?.teams.some(t=>(t.ready||state.health_ready?.includes(t.team))&&!t.paused);
   for(const mode of ['manual','automatic'])$(mode==='manual'?'forecastSeasonManual':'forecastSeasonAuto').setAttribute('aria-pressed',String(state?.mode===mode));
  }
  function reset(){window.CubanNewsAdmin?.reset();window.CubanForecastHistoryAdmin?.reset();generation++;authorized=false;busy=false;pending=null;state=null;if(!$('forecastSeason'))return;$('forecastSeasonRows').replaceChildren();$('forecastSeasonPreview').replaceChildren();$('forecastSeasonSummary').textContent='';message('Abre el apartado para consultar el estado de los 20 equipos.');controls();}
@@ -33,10 +33,11 @@
   for(const t of [...next.teams].sort((a,b)=>teams.find(x=>x.id===a.team).name.localeCompare(teams.find(x=>x.id===b.team).name,'es'))){
    const club=teams.find(x=>x.id===t.team),row=el('div',null,'fs-team'),identity=el('div',null,'fs-identity'),img=el('img');img.src=club.crest;img.alt='';img.width=24;img.height=28;img.addEventListener('error',()=>img.remove(),{once:true});identity.append(img,el('b',club.name));
    const detail=el('div',null,'fs-team-detail');detail.append(el('span',t.paused?'Retirado · publicación automática pausada':t.outcome==='ready'&&!t.ready?'Lectura caducada':labels[t.outcome]||'Pendiente','fs-state'),el('small','Consulta: '+date(t.checked_at)+' · Publicado: '+date(t.published_at)+' · Miami'));
+   if(next.health_ready?.includes(t.team))detail.append(el('small','Estado físico listo para publicar'));
    if(t.reason)detail.append(el('small',t.reason,'fs-reason'));
    const actions=el('div',null,'fs-actions');
    if(t.preview){const preview=el('button','Ver once');preview.type='button';preview.addEventListener('click',async()=>{const gen=generation;try{const catalog=await window.CubanLeaguePlayerCatalog.load();if(gen!==generation||!authorized)return;window.CubanForecastPitch.render($('forecastSeasonPreview'),t.preview,catalog,{preview:true});$('forecastSeasonPreviewBox').open=true;}catch{if(gen===generation)message('No se pudo abrir la vista previa.');}});actions.append(preview);}
-   const publish=el('button','Publicar');publish.type='button';publish.dataset.unavailable=String(!t.ready);publish.addEventListener('click',()=>command('publish',t.team));actions.append(publish);
+   const publish=el('button','Publicar');publish.type='button';publish.dataset.unavailable=String(!t.ready&&!(next.health_ready?.includes(t.team)&&!t.paused));publish.addEventListener('click',()=>command('publish',t.team));actions.append(publish);
    if(t.published_at){const withdraw=el('button','Retirar');withdraw.type='button';withdraw.addEventListener('click',()=>command('withdraw',t.team));actions.append(withdraw);}
    row.append(identity,detail,actions);rows.append(row);
   }
@@ -50,7 +51,7 @@
    if(!result||!['mode_changed','processed','withdrawn'].includes(result.outcome))throw Error('Resultado incompleto');
    pending=null;state=null;
    const text=result.outcome==='mode_changed'?(result.mode==='automatic'?'Automático activado para los 20 equipos.':'Manual activado: las próximas lecturas esperan Publicar.'):result.outcome==='withdrawn'?'Publicación retirada. Ese equipo queda pausado hasta que publiques otra lectura.':(result.teams||[]).filter(t=>t.outcome==='published').length+' publicados · '+(result.teams||[]).filter(t=>t.outcome==='unchanged').length+' sin cambios · '+(result.teams||[]).filter(t=>t.outcome==='blocked').length+' bloqueados.';
-   try{await read(g);if(g===generation)message(text);}catch(e){if(g===generation)message(text+' No se pudo refrescar el estado; no repitas la publicación.');}
+   try{await read(g);if(g===generation)message(text+(result.health?.players?' · '+result.health.players+' estados físicos publicados.':''));}catch(e){if(g===generation)message(text+' No se pudo refrescar el estado; no repitas la publicación.');}
   }catch(e){if(g===generation){if(['40001','22023','23505','54000'].includes(e?.code)){pending=null;if(e.code==='40001')state=null;}message(error(e));}}
   finally{if(g===generation){busy=false;controls();}}
  }
