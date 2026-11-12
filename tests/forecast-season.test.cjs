@@ -3,6 +3,17 @@ const core=require('../forecast-round-core.js'),{publication}=require('./fixture
 const next=(team='real-madrid')=>({...publication(team),schema_version:3,season:'2026-27',matchday:14,fixture_key:'laliga-2026-27-j14-'+team+'-fixture',kickoff_at:'2026-11-28T20:00:00Z'});
 const rows=()=>core.config.teams.map(t=>({team:t.id,payload:next(t.id),published_at:'2026-11-12T14:30:00Z',checked_at:'2026-11-12T14:20:00Z',status:'published',attempted_fixture_key:next(t.id).fixture_key}));
 const runtime=['forecast-publish-core.js','forecast-round-config.js','forecast-round-core.js','forecast-pitch.js'];
+test('manual health-only update uses the existing one-click publication and reports its result',async()=>{
+ const dom=new JSDOM(read('admin.html'),{url:'https://preview.test/admin.html',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,calls=[];
+ let current=adminState();current.teams=current.teams.map(t=>({...t,ready:false,outcome:'blocked'}));current.health_ready=['real-madrid'];
+ try{
+  for(const f of [...runtime,'forecast-season-admin.js'])w.eval(read(f));
+  const client={rpc:async(name,args)=>{calls.push({name,args});if(name==='get_forecast_season')return{data:current};current={...current,version:9,health_ready:[]};return{data:{outcome:'processed',teams:[],health:{players:2,outcome:'published'}}};}};
+  w.CubanForecastSeason.init({client});w.CubanForecastSeason.authorize();w.document.getElementById('forecastTool').open=true;await tick();await tick();
+  const publish=w.document.getElementById('forecastSeasonPublish');assert.equal(publish.disabled,false);publish.click();await tick();await tick();
+  assert.equal(calls.filter(c=>c.name==='command_forecast_season').length,1);assert.match(w.document.getElementById('forecastSeasonStatus').textContent,/2 estados físicos publicados/);assert.equal(publish.disabled,true);
+ }finally{dom.window.close();}
+});
 test('season accepts verified-shape later matchdays without the fixed J13 identity',()=>{
  for(const t of core.config.teams)assert.equal(core.validate(next(t.id)).matchday,14);
  for(const mutate of [p=>p.season='2027-28',p=>p.matchday=39,p=>p.matchday=14.1,p=>p.fixture_key='laliga-2026-27-j13-x',p=>p.home='foreign',p=>p.away=p.home,p=>p.team='other',p=>p.players[0].id=p.players[1].id,p=>p.players[2].alternative=null,p=>p.kickoff_at='2028-11-21T20:00:00Z']){const p=next();mutate(p);assert.throws(()=>core.validate(p));}
@@ -33,6 +44,6 @@ test('manual publishes in one click; uncertain responses retry exactly the same 
  }finally{dom.window.close();}
 });
 test('season wiring keeps the old pilot read-only and precaches the new forecast assets',()=>{
- const index=read('index.html'),admin=read('admin.html'),sw=read('sw.js');assert.match(index,/forecast-season-public\.js\?v=211/);assert.doesNotMatch(index,/src="forecast-public\.js/);assert.match(admin,/forecast-season-admin\.js\?v=210/);assert.match(admin,/id="forecastManage"[^>]*hidden/);assert.match(admin,/Historial del piloto anterior/);assert.match(sw,/cuban-league-v211-player-context/);assert.match(sw,/forecast-season-public\.js\?v=211/);
+ const index=read('index.html'),admin=read('admin.html'),sw=read('sw.js');assert.match(index,/forecast-season-public\.js\?v=212/);assert.doesNotMatch(index,/src="forecast-public\.js/);assert.match(admin,/forecast-season-admin\.js\?v=212/);assert.match(admin,/id="forecastManage"[^>]*hidden/);assert.match(admin,/Historial del piloto anterior/);assert.match(sw,/cuban-league-v212-physical-status/);assert.match(sw,/forecast-season-public\.js\?v=212/);
 });
 
