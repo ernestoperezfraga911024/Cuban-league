@@ -32,6 +32,6 @@ test('manual publishes in one click; uncertain responses retry exactly the same 
   w.CubanForecastSeason.reset();assert.equal(w.document.querySelectorAll('.fs-team').length,0);assert.equal(w.document.getElementById('forecastSeasonPublish').disabled,true);
  }finally{dom.window.close();}
 });
-test('season wiring keeps the old pilot read-only and precaches version 207 assets',()=>{
- const index=read('index.html'),admin=read('admin.html'),sw=read('sw.js');assert.match(index,/forecast-season-public\.js\?v=207/);assert.doesNotMatch(index,/src="forecast-public\.js/);assert.match(admin,/forecast-season-admin\.js\?v=207/);assert.match(admin,/id="forecastManage"[^>]*hidden/);assert.match(admin,/Historial del piloto anterior/);assert.match(sw,/cuban-league-v207-forecast-season/);assert.match(sw,/forecast-season-public\.js\?v=207/);
+test('season wiring keeps the old pilot read-only and precaches the new forecast assets',()=>{
+ const index=read('index.html'),admin=read('admin.html'),sw=read('sw.js');assert.match(index,/forecast-season-public\.js\?v=207/);assert.doesNotMatch(index,/src="forecast-public\.js/);assert.match(admin,/forecast-season-admin\.js\?v=207/);assert.match(admin,/id="forecastManage"[^>]*hidden/);assert.match(admin,/Historial del piloto anterior/);assert.match(sw,/cuban-league-v208-predicted11/);assert.match(sw,/forecast-season-public\.js\?v=207/);
 });

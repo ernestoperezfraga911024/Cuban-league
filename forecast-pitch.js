@@ -16,7 +16,7 @@
     return frame;
   }
   function render(host,payload,catalog,{preview=false,publishedAt=null}={}){
-    const round=window.CubanForecastRoundCore,extended=[2,3].includes(payload?.schema_version);
+    const round=window.CubanForecastRoundCore,extended=[2,3,4].includes(payload?.schema_version);
     const p=extended?round.validate(payload):core.validate(payload);host.replaceChildren();
     const teamInfo=id=>round.config.teams.find(t=>t.id===id);
     const slotLabel=slot=>extended?round.label(p.formation,slot):core.SLOTS[slot-1];
@@ -42,7 +42,7 @@
       if(selectedButton)selectedButton.setAttribute('aria-pressed','false');selectedButton=button;button.setAttribute('aria-pressed','true');
       detail.replaceChildren(el('span','LA DECISIÓN','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',slotLabel(player.slot),'fp-meta'),el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
       if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span','Alternativa: '+player.alternative.name));detail.append(a);}
-      detail.append(el('p',player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
+      detail.append(el('p',player.method==='editorial-v3'?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%. Sin rol.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%. Sin rol.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
       detail.append(el('p','Estimación provisional no calibrada. No mide minutos ni garantiza que juegue.','fp-meta'));
       if(moveFocus){const back=el('button','Volver al campo','fp-link');back.type='button';back.addEventListener('click',()=>button.focus());detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}}
     }
@@ -64,7 +64,7 @@
     context.append(el('p','Estimaciones editoriales no calibradas. Las tres fuentes orientan el cálculo; no garantizan el once ni son una votación. Los porcentajes no tienen que sumar 100 por posición.','fp-meta'));
     context.append(el('p','Lectura más antigua: '+date(p.evidence_at)+(publishedAt?' · Publicado: '+date(publishedAt):''),'fp-meta'));
     const sources=el('details');sources.append(el('summary','Fuentes y fechas de consulta'));
-    for(const s of p.sources){const block=el('p'),a=el('a',s.id);a.href=core.sourceUrl(s);a.target='_blank';a.rel='noopener noreferrer';block.append(a,el('span',' · Consultada: '+date(s.fetched_at)+' · Actualización de la fuente: '+date(s.source_updated_at)));sources.append(block);}
+    for(const s of p.sources){const block=el('p'),a=el('a',s.id);a.href=extended?round.sourceUrl(s):core.sourceUrl(s);a.target='_blank';a.rel='noopener noreferrer';block.append(a,el('span',' · Consultada: '+date(s.fetched_at)+' · Actualización de la fuente: '+date(s.source_updated_at)));if(s.id==='predicted11')block.append(el('span',s.ballots>0?' · '+s.ballots+' onces completos de autores únicos':' · Sin pronósticos utilizables; no aporta al cálculo'));sources.append(block);}
     sources.append(el('p','Consultar una fuente no confirma cuándo fue actualizada. Las posiciones representan esta propuesta táctica.','fp-meta'));footer.append(sources);shell.append(footer);host.append(shell);
   }
   window.CubanForecastPitch={render,date};

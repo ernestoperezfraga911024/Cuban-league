@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v207-forecast-season';
+const CACHE_NAME = 'cuban-league-v208-predicted11';
 const APP_SHELL = [
   './',
   './index.html',
@@ -13,8 +13,8 @@ const APP_SHELL = [
   './forecast-publish.css?v=207-20261111',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
-  './forecast-round-core.js?v=207-20261111',
-  './forecast-pitch.js?v=207-20261111',
+  './forecast-round-core.js?v=208-20261112',
+  './forecast-pitch.js?v=208-20261112',
   './forecast-season-public.js?v=207-20261111',
   './forecast-season-admin.js?v=207-20261111',
   './club-stats.js?v=200-20261104-club-contributions',
