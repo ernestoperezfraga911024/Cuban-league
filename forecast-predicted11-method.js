@@ -3,7 +3,7 @@
   if(typeof module==='object'&&module.exports)module.exports=api;else root.CubanForecastPredicted11=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const METHOD='editorial-v3';
+  const METHOD='editorial-v4';
   const WEIGHTS={futbolfantasy:30,jornadaperfecta:20,comuniate:20,predicted11:30};
   const SIGNALS={starter:90,alternative:40,not_listed:25};
   const ADJUSTMENTS={availability:{clear:0,concern:-8,unknown:-4},rotation:{low:0,possible:-3,high:-8},horizon:{near:0,medium:-1,distant:-2}};
@@ -35,7 +35,7 @@
     return {ballots,counts};
   }
   function evaluate(e){
-    if(e?.method!==METHOD||e.confirmed_out!==false||Object.hasOwn(e,'role'))throw Error('Método v3 sin rol o baja confirmada.');
+    if(![METHOD,'editorial-v3'].includes(e?.method)||e.confirmed_out!==false||Object.hasOwn(e,'role'))throw Error('Método v3 sin rol o baja confirmada.');
     if(!Array.isArray(e.sources)||e.sources.length!==4||new Set(e.sources.map(s=>s.id)).size!==4)throw Error('Se requieren cuatro comprobaciones de fuentes.');
     let numerator=0,denominator=0;const trace=[];
     for(const s of e.sources){
@@ -59,12 +59,12 @@
     let score=numerator/denominator;
     for(const [key,values] of Object.entries(ADJUSTMENTS)){
       if(!referenced(e[key])||!Object.hasOwn(values,e[key].value))throw Error('Evidencia incompleta: '+key);
-      score+=values[e[key].value];
+      if(e.method==='editorial-v3'||key==='rotation')score+=values[e[key].value];
     }
     if(!referenced(e.context)||!Number.isInteger(e.context.points)||Math.abs(e.context.points)>10)throw Error('Contexto inválido.');
     score+=e.context.points;
     for(const t of trace)t.effective_weight=t.signal===null?0:100*t.nominal_weight/denominator;
-    return {method:METHOD,probability:Math.max(5,Math.min(e.horizon.value==='distant'?90:95,Math.round(score))),probability_kind:'editorial_uncalibrated',trace};
+    return {method:e.method,probability:Math.max(5,Math.min(e.method==='editorial-v3'&&e.horizon.value==='distant'?90:95,Math.round(score))),probability_kind:'editorial_uncalibrated',trace};
   }
   return {METHOD,WEIGHTS,selectAuthors,aggregate,evaluate};
 });
