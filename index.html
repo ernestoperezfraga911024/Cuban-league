@@ -171,6 +171,7 @@
 <script src="forecast-history-core.js?v=209-20261112" defer></script>
 <script src="forecast-history.js?v=209-20261112" defer></script>
 <link rel="stylesheet" href="league-motion.css?v=197-20261102-smooth-tabs">
+<link rel="stylesheet" href="viewer-profile.css?v=218-20261113">
 <script src="second-division-core.js?v=190-20261022" defer></script>
 <script src="second-division.js?v=190-20261022" defer></script>
 <script src="editorial-ui.js?v=176-20261015" defer></script><link rel="stylesheet" href="news.css?v=213-20261112"><script src="news.js?v=213-20261112" defer></script></head><body class="classic-mobile-nav f05-theme" data-section="home">
@@ -324,6 +325,7 @@
 </div>
 
 <div id="currentGeneralPanel" class="standings-panel" role="tabpanel" aria-labelledby="standingsTabGeneral" data-standings-panel="general">
+<div id="viewerStandingsNote" class="viewer-standings-note" hidden><div><b id="viewerStandingsName"></b><small id="viewerStandingsLegend"></small></div><button id="viewerChange" type="button" aria-haspopup="dialog" aria-controls="viewerDialog">Cambiar</button></div>
 <div class="card current-table-card"><div class="thead current-grid"><span>#</span><span>Participante</span><span>J</span><span>PTS</span><span title="Goles"><span class="current-label-full">Goles</span><span class="current-label-short">GOL</span></span><span title="Clean sheets"><span class="current-label-full">Clean sheets</span><span class="current-label-short">CS</span></span><span title="Tarjetas rojas"><span class="current-label-full">Tarjetas rojas</span><span class="current-label-short">TR</span></span><span title="Movimiento respecto a la jornada anterior">MOV</span><span>Últimas 5</span></div><div id="currentRows"></div></div>
 <p class="current-table-note"><b>GOL</b> = goles · <b>CS</b> = porterías a cero · <b>TR</b> = tarjetas rojas · <b>MOV</b> = posiciones ganadas o perdidas · <b>Últimas 5</b> = puesto conseguido en cada jornada reciente</p>
 </div>
@@ -985,7 +987,33 @@
     <button type="button" data-go="cards"><svg class="ui-icon" aria-hidden="true"><use href="#icon-image"></use></svg>Tarjetas para compartir</button>
     <a class="editorial-menu-admin" href="admin.html">Administración <span aria-hidden="true">↗</span></a>
   </nav>
+  <div class="viewer-menu-actions">
+    <button id="viewerChoose" type="button" aria-haspopup="dialog" aria-controls="viewerDialog"><span id="viewerMenuLabel">Elegir mi perfil</span></button>
+    <button id="viewerForget" type="button" hidden>Olvidar mi elección</button>
+  </div>
 </dialog>
+
+<dialog id="viewerDialog" aria-labelledby="viewerTitle" aria-describedby="viewerPreferenceNote">
+  <div class="viewer-header">
+    <span class="viewer-handle" aria-hidden="true"></span>
+    <button id="viewerClose" type="button" aria-label="Cerrar y continuar sin cambiar la elección">✕</button>
+    <h2 id="viewerTitle" tabindex="-1" autofocus>¿Quién eres?</h2>
+    <p id="viewerPreferenceNote">Te recordaremos en este navegador.</p>
+  </div>
+  <label class="viewer-search" for="viewerSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only">Busca tu nombre</span><input id="viewerSearch" type="search" placeholder="Busca tu nombre" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="viewerList"></label>
+  <div class="viewer-list-wrap">
+    <p id="viewerListLabel" class="viewer-list-label">PARTICIPANTES</p>
+    <div id="viewerList" role="group" aria-labelledby="viewerListLabel"></div>
+    <p id="viewerEmpty" hidden>No encontramos ese nombre.</p>
+    <span id="viewerResults" class="sr-only" role="status" aria-live="polite"></span>
+  </div>
+  <div class="viewer-footer">
+    <button id="viewerContinue" type="button" disabled><span id="viewerContinueLabel">Elige tu perfil</span><span aria-hidden="true">→</span></button>
+    <button id="viewerGuest" type="button">Entrar como invitado</button>
+    <p>Puedes cambiar u olvidar tu elección desde Más.</p>
+  </div>
+</dialog>
+<p id="viewerStatus" class="sr-only" role="status" aria-live="polite"></p>
 
 <div id="installModal" class="modal install-modal" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
   <div class="install-card">
@@ -1033,5 +1061,5 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="app.js?v=210-20261112"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="viewer-profile.js?v=218-20261113"></script><script src="app.js?v=218-20261113"></script></body></html>
 

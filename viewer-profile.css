@@ -1,0 +1,93 @@
+/* V218 — local profile picker and signed distances in the published standings. */
+body.viewer-dialog-open{overflow:hidden}
+#viewerDialog{
+  box-sizing:border-box;color-scheme:dark;color:#f4efdc;background:#0c2117;
+  font-family:Manrope,Inter,system-ui,sans-serif;text-shadow:none;
+  width:min(480px,calc(100vw - 32px));max-width:none;max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px);margin:auto;padding:0;
+  border:1px solid #365344;border-radius:28px;overflow:hidden;
+  box-shadow:0 28px 90px #0006;
+}
+#viewerDialog:not([open]){display:none}
+#viewerDialog[open]{display:flex;flex-direction:column;animation:viewerEnter .36s cubic-bezier(.16,1,.3,1) both}
+#viewerDialog::backdrop{background:rgb(2 12 7 / 72%);animation:viewerBackdrop .28s ease both}
+#viewerDialog.is-closing{animation:viewerExit .18s ease-in both;pointer-events:none}
+#viewerDialog.is-closing::backdrop{animation:viewerBackdrop .18s ease reverse both}
+#viewerDialog .viewer-header{flex:none;position:relative;padding:28px 24px 16px;background:none;border:0;margin:0}
+#viewerDialog .viewer-handle{display:none}
+#viewerTitle{margin:0 40px 7px 0;color:#f4efdc;font:800 clamp(1.65rem,6vw,2rem)/1.15 Manrope,system-ui,sans-serif;letter-spacing:-.04em;outline:none}
+#viewerPreferenceNote{margin:0;color:#b8c8bd;font-size:.87rem;line-height:1.5}
+#viewerDialog button,#viewerDialog input{font:inherit;box-sizing:border-box;box-shadow:none;filter:none;text-transform:none;letter-spacing:normal;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#viewerClose{position:absolute;right:16px;top:16px;display:grid;place-items:center;width:44px;height:44px;padding:0;background:transparent;border:0;border-radius:50%;color:#b8c8bd;cursor:pointer}
+#viewerDialog .viewer-search{display:flex;align-items:center;gap:10px;flex:none;margin:0 24px 14px;padding:0 14px;min-height:48px;border:1px solid #527262;border-radius:14px;background:#10291c;color:#bdcfc2}
+#viewerDialog .viewer-search svg{flex:none;width:20px;height:20px}
+#viewerSearch{width:100%;min-width:0;padding:12px 0;background:none;color:#f4efdc;border:0;outline:0;font-size:16px}
+#viewerSearch::placeholder{color:#b4c4b9;opacity:1}
+#viewerDialog .viewer-search:focus-within{outline:2px solid #9ed8b6;outline-offset:2px}
+#viewerDialog .viewer-list-wrap{margin:0;padding:0 24px 8px;border:0;min-height:62px;max-height:320px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#527262 transparent}
+#viewerDialog .viewer-list-label{margin:0 0 10px;padding:0;color:#adbdaf;font-size:.65rem;font-weight:800;letter-spacing:.16em}
+#viewerList{display:grid;gap:8px}
+#viewerDialog .viewer-option{position:relative;display:flex;align-items:center;gap:13px;min-height:66px;margin:0;padding:10px 13px;border:1px solid #2c503c;border-radius:17px;background:#0e2519;cursor:pointer;transition:background-color .14s ease,border-color .14s ease}
+#viewerDialog .viewer-option:hover{background:#143622}
+#viewerDialog .viewer-option.is-selected{background:#11442e;border-color:#9ed8b6}
+#viewerDialog .viewer-option:focus-within{outline:2px solid #9ed8b6;outline-offset:2px}
+#viewerDialog .viewer-option input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+#viewerDialog .viewer-option img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;background:#10291c}
+#viewerDialog .viewer-option-name{flex:1;min-width:0;overflow-wrap:anywhere;color:#f4efdc;font-size:1rem;font-weight:750;line-height:1.3}
+#viewerDialog .viewer-option-check{display:grid;place-items:center;flex:none;width:24px;height:24px;border:2px solid #9fb4a5;border-radius:50%;color:transparent;font-weight:900;font-size:17px;line-height:1}
+#viewerDialog .is-selected .viewer-option-check{background:#9ed8b6;border-color:#9ed8b6;color:#0b2a19}
+#viewerEmpty{margin:16px 0;color:#b8c8bd;font-size:.9rem}
+#viewerDialog .viewer-footer{flex:none;display:grid;gap:10px;margin:0;padding:16px 24px 20px;background:#0c2117;border:0;box-shadow:0 -10px 24px #0c2117aa}
+#viewerDialog .viewer-footer button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:48px;padding:12px 16px;border-radius:14px;font-size:.9rem;font-weight:800;line-height:1.3;cursor:pointer;transition:background-color .14s ease,transform .14s ease}
+#viewerContinue{background:#08603e;border:1px solid #257651;color:#f4efdc}
+#viewerContinue:not(:disabled):hover{background:#0d7049}
+#viewerContinue:disabled{opacity:.5;cursor:default}
+#viewerGuest{background:transparent;border:1px solid #779681;color:#f4efdc}
+#viewerGuest:hover{background:#183b29}
+#viewerDialog .viewer-footer button:not(:disabled):active{transform:scale(.985)}
+#viewerDialog .viewer-footer p{margin:4px 0 0;text-align:center;font-size:.73rem;line-height:1.5;color:#adbdaf}
+#viewerDialog button:focus-visible{outline:2px solid #aee5c4;outline-offset:3px}
+#editorialMenu .viewer-menu-actions{display:grid;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid #365344}
+#editorialMenu .viewer-menu-actions button{min-height:44px;padding:10px 12px;border:1px solid #365344;border-radius:12px;background:#143422;color:#f4efdc;font-size:.85rem;text-align:left}
+#editorialMenu #viewerForget{background:transparent;color:#bdcfc2}
+#editorialMenu #viewerForget[hidden]{display:none}
+.viewer-standings-note{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:12px 0;color:#bbcebf}
+.viewer-standings-note[hidden]{display:none}
+.viewer-standings-note>div{min-width:0;display:grid;gap:3px}
+.viewer-standings-note b{font-size:.83rem;color:#e4f2e7;overflow-wrap:anywhere}
+.viewer-standings-note small{font-size:.7rem}
+#viewerChange{flex:none;min-height:44px;padding:8px 12px;border:1px solid #456952;border-radius:12px;background:transparent;color:#c4e6cf;font-size:.75rem;cursor:pointer}
+#currentRows .current-row.is-viewer{box-shadow:inset 3px 0 #9ed8b6;background-color:#113b29}
+#currentRows .viewer-you{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:6px;background:#9ed8b6;color:#0c2117;font:800 .6rem/1.35 Manrope,system-ui,sans-serif;vertical-align:middle}
+#currentRows .current-row>.num.viewer-points{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+#currentRows .viewer-difference{display:block;max-width:100%;font:800 .68rem/1.1 Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0;color:#b6c4bb}
+#currentRows .viewer-difference.is-ahead{color:#f0ce88}
+#currentRows .viewer-difference.is-behind{color:#9ed8b6}
+@keyframes viewerEnter{from{opacity:0;transform:translateY(24px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes viewerExit{from{opacity:1;transform:none}to{opacity:0;transform:translateY(12px) scale(.99)}}
+@keyframes viewerBackdrop{from{opacity:0}to{opacity:1}}
+@media(max-width:600px){
+  #viewerDialog{width:100%;max-height:calc(100vh - 24px);max-height:calc(100dvh - max(24px,env(safe-area-inset-top)));margin:auto 0 0;border-radius:28px 28px 0 0;border-bottom:0}
+  #viewerDialog .viewer-handle{display:block;width:36px;height:4px;margin:0 auto 20px;background:#839f8c;border-radius:3px}
+  #viewerDialog .viewer-header{padding:12px 20px 16px}
+  #viewerClose{top:28px;right:10px}
+  #viewerDialog .viewer-search{margin-right:20px;margin-left:20px}
+  #viewerDialog .viewer-list-wrap{padding-right:20px;padding-left:20px;max-height:284px}
+  #viewerDialog .viewer-footer{padding:14px 20px max(20px,env(safe-area-inset-bottom))}
+  #viewerDialog .viewer-option{min-height:64px}
+}
+@media(max-height:600px){
+  #viewerDialog .viewer-header{padding-top:12px;padding-bottom:10px}
+  #viewerDialog .viewer-handle{margin-bottom:12px}
+  #viewerDialog .viewer-search{margin-bottom:10px;min-height:44px}
+  #viewerDialog .viewer-footer{padding-top:10px;gap:8px}
+  #viewerDialog .viewer-footer p{font-size:.68rem;margin:0}
+}
+@media(max-height:440px){
+  #viewerDialog{overflow:auto}
+  #viewerDialog .viewer-list-wrap{flex-shrink:0;max-height:140px}
+}
+@media(prefers-reduced-motion:reduce){
+  #viewerDialog[open],#viewerDialog.is-closing,#viewerDialog::backdrop,#viewerDialog.is-closing::backdrop{animation:none}
+  #viewerDialog .viewer-option,#viewerDialog .viewer-footer button{transition:none}
+}
