@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v217-mobile-home-shortcuts';
+const CACHE_NAME = 'cuban-league-v218-browser-profile';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,7 +12,9 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=210-20261112',
+  './app.js?v=218-20261113',
+  './viewer-profile.js?v=218-20261113',
+  './viewer-profile.css?v=218-20261113',
   './forecast-publish.css?v=216-20261113',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',

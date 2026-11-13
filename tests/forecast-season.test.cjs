@@ -44,6 +44,6 @@ test('manual publishes in one click; uncertain responses retry exactly the same 
  }finally{dom.window.close();}
 });
 test('season wiring keeps the old pilot read-only and precaches the new forecast assets',()=>{
- const index=read('index.html'),admin=read('admin.html'),sw=read('sw.js');assert.match(index,/forecast-season-public\.js\?v=215/);assert.doesNotMatch(index,/src="forecast-public\.js/);assert.match(admin,/forecast-season-admin\.js\?v=212/);assert.match(admin,/id="forecastManage"[^>]*hidden/);assert.match(admin,/Historial del piloto anterior/);assert.match(sw,/cuban-league-v217-mobile-home-shortcuts/);assert.match(sw,/forecast-season-public\.js\?v=215/);
+ const index=read('index.html'),admin=read('admin.html'),sw=read('sw.js');assert.match(index,/forecast-season-public\.js\?v=215/);assert.doesNotMatch(index,/src="forecast-public\.js/);assert.match(admin,/forecast-season-admin\.js\?v=212/);assert.match(admin,/id="forecastManage"[^>]*hidden/);assert.match(admin,/Historial del piloto anterior/);assert.match(sw,/cuban-league-v218-browser-profile/);assert.match(sw,/forecast-season-public\.js\?v=215/);
 });
 

@@ -894,7 +894,7 @@ function renderCurrent(){
   $('currentRows').innerHTML=rows.map(p=>{
     const isRelegation=p.position>=16&&p.position<=20;
     const isPlayerMonth=monthWinners.has(p.name);
-    return `<div class="row current-row${isRelegation?' is-relegation':''}${isPlayerMonth?' is-player-month':''}">
+    return `<div data-participant-id="${p.id}" class="row current-row${isRelegation?' is-relegation':''}${isPlayerMonth?' is-player-month':''}">
     <span class="pos"${isRelegation?` aria-label="Puesto ${p.position}, zona de descenso"`:''}>${p.position}</span>
     ${standingsTeamCell(p.name,achievementSnapshot,{playerMonthLabel:isPlayerMonth?currentMonthTitle.label:''})}
     <span class="center">${p.played}</span>
@@ -906,6 +906,7 @@ function renderCurrent(){
     <span class="current-form" aria-label="Forma de las últimas jornadas">${recentForm(p.name,latest)}</span>
   </div>`;
   }).join('');
+  window.CubanLeagueViewer?.renderStandings(rows,{published:latest!==null});
   renderSeasonStatRanking(rows,latest,{
     metric:'goals',
     label:'Líder goleador',
@@ -7610,5 +7611,6 @@ async function init(){
   if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards','second-division','forecasts','news'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
+  window.CubanLeagueViewer?.init(activeParticipants());
 }
 init();

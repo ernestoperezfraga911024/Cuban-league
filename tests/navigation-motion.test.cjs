@@ -109,7 +109,7 @@ test('CSS changes only three page-navigation durations, preserving layout, keyfr
   const baseline=JSON.parse(read('tests/fixtures/pre-editorial-contract.json'));
   assert.equal(createHash('sha256').update(normalized).digest('hex'),baseline.files['styles.css']);
   const html=read('index.html'),sw=read('sw.js');
-  for(const asset of ['app.js?v=210-20261112','styles.css?v=195-20261102-fast-navigation','league-motion.css?v=197-20261102-smooth-tabs']){
+  for(const asset of ['app.js?v=218-20261113','styles.css?v=195-20261102-fast-navigation','league-motion.css?v=197-20261102-smooth-tabs']){
     assert.ok(html.includes(asset));
     assert.ok(sw.includes(asset));
   }
