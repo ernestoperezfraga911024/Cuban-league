@@ -120,8 +120,9 @@ alternativas/candidatos, `assess/build_team` y los controles de publicación. Un
 respuesta JSON vacía real de P11 se registra como `not_created`; errores de red,
 perfil o contrato como `unavailable`; jornada/equipo discrepante como `mismatch`.
 
-Esta entrega conecta el transporte al recolector de lectura. No modifica ni
-activa la automatización principal, ni completa el productor editorial/publicador.
+La integración posterior del productor y entrega está documentada en
+[season-runner.md](season-runner.md). No modifica ni activa la automatización
+principal; requiere revisión semántica de los cuerpos por el agente existente.
 El ahorro del 41% estimado en la auditoría previa no es una promesa de tiempo o
 créditos. Comparar una lectura sin publicación con los 39 minutos de un recorrido
 editorial completo no demuestra ese ahorro total.

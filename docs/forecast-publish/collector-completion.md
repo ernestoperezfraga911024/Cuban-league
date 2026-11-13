@@ -1,5 +1,8 @@
 # Complete each club before starting the next
 
+The integrated reader/editorial/SQL runner and its activation boundaries are in
+[season-runner.md](season-runner.md). It preserves this completion contract.
+
 For the run-scoped public reading transport and compact agent bridge, see
 [read-session.md](read-session.md). Reuse only current-execution readings while
 preserving their original retrieval times; the team completion order below remains mandatory.

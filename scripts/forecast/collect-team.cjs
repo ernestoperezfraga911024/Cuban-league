@@ -69,6 +69,20 @@ function classifyBallot(data, {teamId, seasonId, matchday}) {
 class TeamCollector {
   constructor(reader, capture) { this.reader = reader; this.capture = capture; }
 
+  async follow(packet, from, url) {
+    const parent = packet.docs[from];
+    if (!parent) throw Error('Follow requires a page already read in this execution');
+    const page = await this.reader.read(parent.url);
+    const linked = document(page.body, d => [...d.querySelectorAll('a[href]')].some(a => {
+      try { return new URL(a.getAttribute('href'),page.url).href === url; } catch { return false; }
+    }));
+    if (!linked) throw Error('URL is not linked on the cited public page');
+    const next = await this.reader.read(url);
+    const key = 'extra_' + Object.keys(packet.docs).length;
+    packet.docs[key] = await this.capture(next);
+    return key;
+  }
+
   async collect(team) {
     const started = performance.now();
     const result = {team: team.team, publication_ready: false, fixture_verified: false,
@@ -98,6 +112,7 @@ class TeamCollector {
   }
 
   async predicted11(team, side, ff, result) {
+    result.p11_attempted_at = new Date().toISOString();
     const read = async (key, url) => {
       const page = await this.reader.read(url);
       result.docs[key] = await this.capture(page);

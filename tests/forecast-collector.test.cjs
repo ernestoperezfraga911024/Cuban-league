@@ -103,3 +103,14 @@ test('integrated two-club collection reuses pages/profiles but fetches each team
   assert.ok(calls.filter(u => u.includes('/participacion-criterios/')).every(u => u.includes('/16/13/get/')));
   assert.equal(results[0].docs.futbolfantasy.fetched_at, results[1].docs.futbolfantasy.fetched_at);
 });
+test('editorial review can follow only links present in a current public body',async()=>{
+ const pages={
+  'https://www.futbolfantasy.com/partidos/test':'<a href="/jugadores/test">player</a>',
+  'https://www.futbolfantasy.com/jugadores/test':'<main>Public identity</main>'
+ },calls=[];
+ const collector=new TeamCollector({read:async url=>{calls.push(url);if(!pages[url])throw Error('Unknown page');return{url,body:pages[url],fetched_at:new Date().toISOString()};}},async p=>({url:p.url,fetched_at:p.fetched_at}));
+ const packet={docs:{futbolfantasy:{url:Object.keys(pages)[0]}}};
+ await collector.follow(packet,'futbolfantasy',Object.keys(pages)[1]);assert.equal(Object.keys(packet.docs).length,2);
+ await assert.rejects(collector.follow(packet,'futbolfantasy','https://www.futbolfantasy.com/guessed'),/not linked/);
+ assert.equal(calls.filter(u=>u.includes('guessed')).length,0);
+});
