@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v215-floating-pitch';
+const CACHE_NAME = 'cuban-league-v216-candidates';
 const APP_SHELL = [
   './',
   './index.html',
@@ -13,11 +13,11 @@ const APP_SHELL = [
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
   './app.js?v=210-20261112',
-  './forecast-publish.css?v=215-20261113',
+  './forecast-publish.css?v=216-20261113',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
-  './forecast-round-core.js?v=214-20261112',
-  './forecast-pitch.js?v=215-20261113',
+  './forecast-round-core.js?v=216-20261113',
+  './forecast-pitch.js?v=216-20261113',
   './forecast-season-public.js?v=215-20261113',
   './forecast-context.js?v=213-20261112',
   './forecast-context.css?v=211-20261112',

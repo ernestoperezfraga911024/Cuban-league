@@ -18,6 +18,8 @@
   function render(host,payload,catalog,{preview=false,publishedAt=null,playerContext=null}={}){
     const round=window.CubanForecastRoundCore,extended=[2,3,4].includes(payload?.schema_version);
     const p=extended?round.validate(payload):core.validate(payload);host.replaceChildren();
+    const estimates=new Map((p.candidates||[]).map(c=>[c.id,c]));
+    const alternativeText=a=>'Alternativa: '+a.name+(estimates.has(a.id)?' · '+estimates.get(a.id).probability+'%':'');
     const teamInfo=id=>round.config.teams.find(t=>t.id===id);
     const slotLabel=slot=>extended?round.label(p.formation,slot):core.SLOTS[slot-1];
     const shell=el('article',null,'fp-card');
@@ -50,11 +52,11 @@
       if(selectedButton)selectedButton.setAttribute('aria-pressed','false');selectedButton=button;button.setAttribute('aria-pressed','true');
       detail.hidden=false;layout.classList.add('has-selection');
       detail.replaceChildren(el('span','EL JUGADOR','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',player.slot?slotLabel(player.slot):({PT:'Portero',DF:'Defensa',MC:'Centrocampista',DL:'Delantero'}[player.position]||''),'fp-meta'));
-      if(player.slot)detail.append(el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
+      if(Number.isInteger(player.probability))detail.append(el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
       if(playerContext)detail.append(playerContext.detail(player));
-      if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span','Alternativa: '+player.alternative.name));detail.append(a);}
-      if(player.slot)detail.append(el('p',['editorial-v3','editorial-v4'].includes(player.method)?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
-      if(player.slot)detail.append(el('small','Estimación editorial provisional.','fp-meta'));
+      if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span',alternativeText(player.alternative)));detail.append(a);}
+      if(Number.isInteger(player.probability))detail.append(el('p',['editorial-v3','editorial-v4'].includes(player.method)?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
+      if(Number.isInteger(player.probability))detail.append(el('small','Estimación editorial provisional.','fp-meta'));
       const back=el('button',player.slot?'Volver al campo':'Volver a la plantilla','fp-link');back.type='button';back.addEventListener('click',close);detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}
     }
     for(const slots of (extended?round.lines(p.formation).reverse():[[11],[8,9,10],[6,7],[2,3,4,5],[1]])){
@@ -65,21 +67,22 @@
         button.setAttribute('aria-label',player.name+', '+slotLabel(slot)+', '+player.probability+' por ciento. Ver explicación.');
         button.append(portrait(player,catalog),el('span',player.name,'fp-name'),el('b',player.probability+'%','fp-prob'));
         const badge=playerContext?.badge(player);if(badge){button.append(badge);button.setAttribute('aria-label',button.getAttribute('aria-label')+' '+badge.getAttribute('aria-label')+'.');}
-        if(player.alternative)button.append(el('small','Alt. '+player.alternative.name,'fp-alt-name'));
+        if(player.alternative)button.append(el('small','Alt. '+player.alternative.name+(estimates.has(player.alternative.id)?' · '+estimates.get(player.alternative.id).probability+'%':''),'fp-alt-name'));
         button.addEventListener('click',()=>show(player,button));row.append(button);
       }
       field.append(row);
     }
     pitch.append(field);layout.append(pitch,detail);shell.append(layout);
-    if(playerContext){
+    if(playerContext||estimates.size){
       const squad=el('section',null,'fp-squad');squad.append(el('h3','Resto de la plantilla'),el('p','Jugadores fuera del once previsto. Toca su foto para ver su situación.'));
-      const others=playerContext.roster.filter(x=>!p.players.some(y=>y.id===x.id));
-      if(!playerContext.rosterAvailable)squad.append(el('p','No se pudo cargar la plantilla. Pulsa Actualizar.'));
+      const roster=playerContext?.roster||catalog?.players?.filter(x=>x.active&&x.clubId===p.team).map(x=>({id:x.id,name:x.displayName,position:x.position}))||[];
+      const others=roster.filter(x=>!p.players.some(y=>y.id===x.id)).map(x=>({...x,...estimates.get(x.id)}));
+      if(!(playerContext?playerContext.rosterAvailable:Array.isArray(catalog?.players)))squad.append(el('p','No se pudo cargar la plantilla. Pulsa Actualizar.'));
       else if(!others.length)squad.append(el('p','No hay más jugadores en la plantilla.'));
       for(const [position,label] of [['PT','Porteros'],['DF','Defensas'],['MC','Centrocampistas'],['DL','Delanteros']]){
         const group=others.filter(x=>x.position===position);if(!group.length)continue;
         squad.append(el('h4',label));const line=el('div',null,'fp-reserves');
-        for(const player of group){const b=el('button',null,'fp-reserve');b.type='button';b.setAttribute('data-player-id',player.id);b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',player.name+'. Ver situación');b.append(portrait(player,catalog),el('span',player.name,'fp-name'));const badge=playerContext.badge(player);if(badge){b.append(badge);b.setAttribute('aria-label',player.name+'. '+badge.getAttribute('aria-label')+'. Ver situación');}b.addEventListener('click',()=>show(player,b));line.append(b);}squad.append(line);
+        for(const player of group){const b=el('button',null,'fp-reserve');b.type='button';b.setAttribute('data-player-id',player.id);b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',player.name+'. Ver situación');b.append(portrait(player,catalog),el('span',player.name,'fp-name'));if(Number.isInteger(player.probability)){b.classList.toggle('fp-uncertain',player.probability<70);b.append(el('b',player.probability+'%','fp-prob'));b.setAttribute('aria-label',player.name+', '+player.probability+' por ciento de titularidad. Ver explicación');}const badge=playerContext?.badge(player);if(badge){b.append(badge);b.setAttribute('aria-label',b.getAttribute('aria-label')+'. '+badge.getAttribute('aria-label')+'.');}b.addEventListener('click',()=>show(player,b));line.append(b);}squad.append(line);
       }
       const legend=el('div',null,'fp-squad-legend');legend.append(el('span','? En duda','doubt'),el('span','+ Lesionado','injured'));squad.append(legend);shell.append(squad);
     }
