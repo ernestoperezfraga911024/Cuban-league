@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),read=f=>fs.readFileSync(path.join(root,f),'
 const timestamp='2026-11-13T13:03:25.691609+00:00';
 const clubs=[{id:'real-madrid',name:'Real Madrid',crest:'https://example.test/madrid.png'},{id:'malaga',name:'Málaga',crest:'https://example.test/malaga.png'}];
 function row(i,team='real-madrid',category='injury'){
- return {key:'article-'+String(i).padStart(4,'0'),updated_at:timestamp,published_at:timestamp,payload:{season:'2026-27',team,category,certainty:'reported',title:'Novedad verificada número '+i,summary:'Resumen propio completo de lo sucedido con los jugadores del equipo.',impact:'La disponibilidad se revisará con la siguiente sesión de entrenamiento.',players:[],timeline:[],sources:[{name:'FutbolFantasy',url:'https://www.futbolfantasy.com/laliga/noticias/'+i,fetched_at:timestamp,published_at:null,published_label:'13/11/2026'}]}};
+ return {key:'article-'+String(i).padStart(4,'0'),news_day:'2026-11-13',updated_at:timestamp,published_at:timestamp,payload:{season:'2026-27',team,category,certainty:'reported',title:'Novedad verificada número '+i,summary:'Resumen propio completo de lo sucedido con los jugadores del equipo.',impact:'La disponibilidad se revisará con la siguiente sesión de entrenamiento.',players:[],timeline:[],sources:[{name:'FutbolFantasy',url:'https://www.futbolfantasy.com/laliga/noticias/'+i,fetched_at:timestamp,published_at:null,published_label:'13/11/2026'}]}};
 }
 function setup(handler){
  const dom=new JSDOM(read('index.html').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''),{url:'https://example.test/',runScripts:'outside-only'}),w=dom.window,calls=[];let catalogs=0;
@@ -17,7 +17,7 @@ function setup(handler){
 function page(data,u){
  const team=u.searchParams.get('payload->>team')?.slice(3),category=u.searchParams.get('payload->>category')?.slice(3);
  let filtered=data.filter(r=>(!team||r.payload.team===team)&&(!category||r.payload.category===category));
- const after=u.searchParams.get('or');if(after){const match=after.match(/^\(updated_at\.lt\.(.+),and\(updated_at\.eq\.(.+),key\.gt\.([a-z0-9-]+)\)\)$/);assert.ok(match,'valid keyset');assert.equal(match[1],match[2]);filtered=filtered.filter(r=>r.updated_at<match[1]||(r.updated_at===match[1]&&r.key>match[3]));}
+ const after=u.searchParams.get('or');if(after){const match=after.match(/^\(news_day\.lt\.(\d{4}-\d{2}-\d{2}),news_day\.is\.null,and\(news_day\.eq\.(\d{4}-\d{2}-\d{2}),or\(updated_at\.lt\.(.+),and\(updated_at\.eq\.(.+),key\.gt\.([a-z0-9-]+)\)\)\)\)$/);assert.ok(match,'valid dated keyset');assert.equal(match[1],match[2]);assert.equal(match[3],match[4]);filtered=filtered.filter(r=>r.news_day===null||r.news_day<match[1]||(r.news_day===match[1]&&(r.updated_at<match[3]||(r.updated_at===match[3]&&r.key>match[5]))));}
  return filtered.slice(0,Number(u.searchParams.get('limit')));
 }
 
@@ -27,7 +27,7 @@ test('news pages on demand past 80 and fetches old club stories directly without
  try{
   assert.equal(s.calls.length,0);await s.open();assert.equal(s.count,40);assert.equal(s.calls.length,2);assert.equal(s.catalogs,1);assert.equal(s.more.hidden,false);
   assert.match(s.w.document.getElementById('newsCount').textContent,/40 noticias cargadas/);assert.doesNotMatch(s.w.document.getElementById('newsHighlights').textContent,/novedades disponibles/);
-  const first=s.calls.find(c=>c.url.pathname.endsWith('news_public')).url;assert.equal(first.searchParams.get('visible'),'eq.true');assert.equal(first.searchParams.get('limit'),'41');assert.equal(first.searchParams.get('order'),'updated_at.desc,key.asc');assert.equal(first.searchParams.has('offset'),false);
+  const first=s.calls.find(c=>c.url.pathname.endsWith('news_public')).url;assert.equal(first.searchParams.get('visible'),'eq.true');assert.equal(first.searchParams.get('limit'),'41');assert.equal(first.searchParams.get('order'),'news_day.desc.nullslast,updated_at.desc,key.asc');assert.equal(first.searchParams.has('offset'),false);
   s.more.click();await tick();assert.equal(s.count,80);assert.equal(s.calls.length,3);assert.match(s.calls[2].url.searchParams.get('or'),/691609\+00:00/);assert.match(s.calls[2].url.searchParams.get('or'),/article-0039/);
   s.more.click();await tick();assert.equal(s.count,120);assert.equal(s.more.hidden,false);
   s.more.click();await tick();assert.equal(s.count,121);assert.equal(s.more.hidden,true);assert.equal(s.calls.length,5);assert.equal(s.catalogs,1);
