@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v216-candidates';
+const CACHE_NAME = 'cuban-league-v217-mobile-home-shortcuts';
 const APP_SHELL = [
   './',
   './index.html',

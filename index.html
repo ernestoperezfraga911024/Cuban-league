@@ -14,20 +14,41 @@
 <link rel="stylesheet" href="competition-calendar.css?v=186-20261019-calendar">
 <link rel="stylesheet" href="matchday-general.css?v=199-20261104-compact-general">
 <link rel="stylesheet" href="club-stats.css?v=200-20261104-club-contributions">
-<style id="home-mobile-podium-v187">
-/* V187 — En celular: presentación, podio y accesos, sin duplicar contenido. */
+<style id="home-mobile-shortcuts-v217">
+/* V217 — Los seis accesos de Inicio aparecen antes del podio en celular. */
 @media(max-width:700px){
   .hero-photo .hero-shell{
     display:grid;
     grid-template-columns:minmax(0,1fr);
-    grid-template-areas:"intro" "podium" "actions";
+    grid-template-areas:"intro" "actions" "podium";
+    grid-auto-rows:max-content;
     align-content:start;
-    row-gap:24px;
+    row-gap:16px;
+    padding:24px 16px 28px;
   }
   .hero-photo .hero-copy{display:contents}
   .hero-photo .hero-intro{grid-area:intro;min-width:0}
+  .hero-photo .hero-season-line{margin:0}
+  .hero-photo .hero-accent-line{margin:10px 0 0}
   .hero-photo #heroKpis{grid-area:podium;margin-top:0!important}
-  .hero-photo .hero-copy>.actions{grid-area:actions;margin-top:0!important}
+  .hero-photo .hero-copy>.actions{
+    grid-area:actions;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    width:100%;
+    margin-top:0!important;
+  }
+  .hero-photo .hero-copy>.actions button{
+    min-width:0;
+    min-height:52px;
+    padding:10px 12px;
+    font-size:.8125rem;
+    line-height:1.3;
+    white-space:normal;
+  }
+  .hero-photo .hero-copy>.actions button>span:first-child{min-width:0}
+  .hero-photo .hero-copy>.actions .action-arrow{flex-shrink:0}
 }
 </style>
 <style id="participant-card-layout-v76">
