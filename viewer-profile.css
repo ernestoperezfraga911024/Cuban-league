@@ -91,3 +91,5 @@ body.viewer-dialog-open{overflow:hidden}
   #viewerDialog[open],#viewerDialog.is-closing,#viewerDialog::backdrop,#viewerDialog.is-closing::backdrop{animation:none}
   #viewerDialog .viewer-option,#viewerDialog .viewer-footer button{transition:none}
 }
+
+.viewer-analytics-note{grid-column:1/-1;font-size:.7rem;line-height:1.5;color:#adc3b6;margin:4px 0 0;}

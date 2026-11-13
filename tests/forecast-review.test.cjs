@@ -89,8 +89,11 @@ test('public page does not load the private module; shared auth integration rese
  assert.match(read('admin.js'),/window.CubanForecastReview\?\.authorize\(\)/);
  assert.doesNotMatch(read('forecast-review.js'),/localStorage|sessionStorage|\.from\(|\.insert\(|\.update\(/);
 });
-test('removing only four forecast auth hooks restores the complete main admin byte contract',()=>{
+test('removing forecast hooks and the explicit audience integration restores the main admin byte contract',()=>{
  const normalized=read('admin.js')
+  .replace("      window.CubanAudienceAdmin?.reset();\n", '')
+  .replace("      await window.CubanAudienceAdmin?.load({client:state.client,participants:state.leagueParticipants});\n", '')
+  .replaceAll("=== 1 ? 'navegador' : 'navegadores'", "=== 1 ? 'persona' : 'personas'")
   .replace("    if (viewId !== 'panelView') {\n      window.CubanSecondAdmin?.reset();\n      window.CubanForecastReview?.reset();\n    }", "    if (viewId !== 'panelView') window.CubanSecondAdmin?.reset();")
   .replace("      window.CubanForecastReview?.authorize();\n", '')
   .replace("      window.CubanForecastReview?.init({ client: state.client });\n", '')

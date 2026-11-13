@@ -171,7 +171,7 @@
 <script src="forecast-history-core.js?v=209-20261112" defer></script>
 <script src="forecast-history.js?v=209-20261112" defer></script>
 <link rel="stylesheet" href="league-motion.css?v=197-20261102-smooth-tabs">
-<link rel="stylesheet" href="viewer-profile.css?v=218-20261113">
+<link rel="stylesheet" href="viewer-profile.css?v=219-20261113">
 <script src="second-division-core.js?v=190-20261022" defer></script>
 <script src="second-division.js?v=190-20261022" defer></script>
 <script src="editorial-ui.js?v=176-20261015" defer></script><link rel="stylesheet" href="news.css?v=213-20261112"><script src="news.js?v=213-20261112" defer></script></head><body class="classic-mobile-nav f05-theme" data-section="home">
@@ -990,10 +990,10 @@
   <div class="viewer-menu-actions">
     <button id="viewerChoose" type="button" aria-haspopup="dialog" aria-controls="viewerDialog"><span id="viewerMenuLabel">Elegir mi perfil</span></button>
     <button id="viewerForget" type="button" hidden>Olvidar mi elección</button>
-  </div>
+  <p class="viewer-analytics-note">Las visitas de tu perfil se muestran solo al administrador. Elige Invitado para entrar sin nombre; olvidar la elección deja de asociar nuevas visitas.</p></div>
 </dialog>
 
-<dialog id="viewerDialog" aria-labelledby="viewerTitle" aria-describedby="viewerPreferenceNote">
+<dialog id="viewerDialog" aria-labelledby="viewerTitle" aria-describedby="viewerPreferenceNote viewerAnalyticsNote">
   <div class="viewer-header">
     <span class="viewer-handle" aria-hidden="true"></span>
     <button id="viewerClose" type="button" aria-label="Cerrar y continuar sin cambiar la elección">✕</button>
@@ -1010,7 +1010,7 @@
   <div class="viewer-footer">
     <button id="viewerContinue" type="button" disabled><span id="viewerContinueLabel">Elige tu perfil</span><span aria-hidden="true">→</span></button>
     <button id="viewerGuest" type="button">Entrar como invitado</button>
-    <p>Puedes cambiar u olvidar tu elección desde Más.</p>
+    <p id="viewerAnalyticsNote">El administrador podrá ver las visitas de tu perfil y las secciones consultadas. Como invitado, sin nombre. Puedes cambiar u olvidar tu elección desde Más.</p>
   </div>
 </dialog>
 <p id="viewerStatus" class="sr-only" role="status" aria-live="polite"></p>
@@ -1061,5 +1061,5 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="viewer-profile.js?v=218-20261113"></script><script src="app.js?v=218-20261113"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="site-analytics.js?v=219-20261113"></script><script src="viewer-profile.js?v=219-20261113"></script><script src="app.js?v=219-20261113"></script></body></html>
 

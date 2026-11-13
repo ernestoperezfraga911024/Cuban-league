@@ -165,6 +165,7 @@
   function showOnly(viewId) {
     if (viewId !== 'panelView') {
       window.CubanSecondAdmin?.reset();
+      window.CubanAudienceAdmin?.reset();
       window.CubanForecastReview?.reset();
     }
 
@@ -3751,9 +3752,9 @@
     $('analyticsUniqueVisitors').textContent = analyticsNumber(payload?.uniqueVisitors).toLocaleString('es');
     $('analyticsTotalVisits').textContent = analyticsNumber(payload?.totalVisits).toLocaleString('es');
     $('analyticsTodayVisits').textContent = analyticsNumber(payload?.todayVisits).toLocaleString('es');
-    $('analyticsTodayVisitors').textContent = `${analyticsNumber(payload?.todayVisitors).toLocaleString('es')} ${analyticsNumber(payload?.todayVisitors) === 1 ? 'persona' : 'personas'}`;
+    $('analyticsTodayVisitors').textContent = `${analyticsNumber(payload?.todayVisitors).toLocaleString('es')} ${analyticsNumber(payload?.todayVisitors) === 1 ? 'navegador' : 'navegadores'}`;
     $('analyticsWeekVisits').textContent = analyticsNumber(payload?.last7Visits).toLocaleString('es');
-    $('analyticsWeekVisitors').textContent = `${analyticsNumber(payload?.last7Visitors).toLocaleString('es')} ${analyticsNumber(payload?.last7Visitors) === 1 ? 'persona' : 'personas'}`;
+    $('analyticsWeekVisitors').textContent = `${analyticsNumber(payload?.last7Visitors).toLocaleString('es')} ${analyticsNumber(payload?.last7Visitors) === 1 ? 'navegador' : 'navegadores'}`;
     $('analyticsPeakDay').textContent = peak && peak.visits
       ? `${analyticsLongDayLabel(peak.date)} · ${peak.visits.toLocaleString('es')}`
       : 'Sin visitas';
@@ -3761,7 +3762,7 @@
     $('analyticsDailyChart').innerHTML = daily.map((day, index) => {
       const height = day.visits ? Math.max(8, Math.round((day.visits / maxVisits) * 100)) : 5;
       const isToday = index === daily.length - 1;
-      const label = `${analyticsLongDayLabel(day.date)}: ${day.visits} ${day.visits === 1 ? 'visita' : 'visitas'} de ${day.visitors} ${day.visitors === 1 ? 'persona' : 'personas'}`;
+      const label = `${analyticsLongDayLabel(day.date)}: ${day.visits} ${day.visits === 1 ? 'visita' : 'visitas'} de ${day.visitors} ${day.visitors === 1 ? 'navegador' : 'navegadores'}`;
       return `<div class="analytics-day${isToday ? ' is-today' : ''}" title="${escapeHtml(label)}">
         <strong>${day.visits.toLocaleString('es')}</strong>
         <span style="--bar-height:${height}%"></span>
@@ -3792,6 +3793,7 @@
       const { data, error } = await state.client.rpc('get_site_analytics', { p_days: 7 });
       if (error) throw error;
       renderVisitorAnalytics(data || {});
+      await window.CubanAudienceAdmin?.load({client:state.client,participants:state.leagueParticipants});
       if (manual) flashMessage('Estadísticas de visitas actualizadas.');
       return true;
     } catch (error) {
