@@ -14,7 +14,7 @@ los seleccionados por al menos un once completo válido de Predicted11. Excluye
 los once elegidos, las bajas confirmadas y las identidades sin resolver. Incluye
 las alternativas elegidas para los titulares con porcentaje inferior a 70.
 
-Añade `proposal.candidates` al payload privado editorial-v4. Cada entrada contiene
+Añade `proposal.candidates` al nuevo payload privado editorial-v5. Cada entrada contiene
 exclusivamente `id`, `name`, `probability`, `reason` y `assessment`; no lleva `slot`,
 posición táctica ni otra alternativa. Son como máximo 39 candidatos, manteniendo
 el límite total de 64 KiB. Si no hay candidatos, envía un array vacío.
@@ -25,8 +25,11 @@ horizonte, contexto y referencias realmente consultadas. Recalcula cada uno con
 `forecast_publish.assess`. Todos los votos y denominadores deben coincidir con
 los onces completos de los autores y con `player_observations`.
 
-- Conserva editorial-v4: FF 30%, JP 20%, Comuniate 20%, P11 30%. Sin onces completos
+- Usa editorial-v5 en lecturas nuevas: FF 30%, JP 20%, Comuniate 20%, P11 30%. Sin onces completos
   de P11 se renormalizan las tres fuentes base, sin sustituir la ausencia por cero.
+- En Comuniate, solo titular sin porcentaje publicado usa la señal interna 50.
+  Un porcentaje explícito, incluido 0, siempre manda. Las señales de las demás
+  fuentes y estados se conservan. Mantén `probability:null` en la observación.
 - Disponibilidad y horizonte tienen ajuste cero. No reintroduzcas sus descuentos
   por contexto o rotación. Conserva las marcas y explicaciones físicas.
 - El porcentaje es de titularidad, no de tener minutos. Nunca uses
@@ -87,3 +90,7 @@ previa privada. Revisión visual a 320 y 390 píxeles.
 
 La suite usa la dependencia de pruebas existente PGlite cuando está disponible:
 `node --test tests/forecast-candidates*.test.cjs`. No añade dependencias de producción.
+
+El cambio de cálculo de Comuniate y su despliegue están definidos en
+[editorial-v5.md](editorial-v5.md). Los payloads v4 existentes conservan su fórmula
+y su representación; el método de cada candidato debe coincidir con su payload.

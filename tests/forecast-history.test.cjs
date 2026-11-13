@@ -65,5 +65,5 @@ test('manual history publication retries the same request and clears private res
 });
 test('responsive rules, keyboard controls and service worker include all history assets',()=>{
  const css=read('forecast-history.css'),index=read('index.html'),sw=read('sw.js');assert.match(css,/@media\(max-width:360px\)/);assert.match(css,/grid-template-columns:minmax\(0,1fr\)/);assert.match(css,/focus-visible/);assert.match(index,/id="forecastHistoryRound" aria-label=/);assert.match(index,/id="forecastViewHistory"[^>]*aria-pressed="false"/);
- for(const asset of ['forecast-history.js','forecast-history-core.js','forecast-history-admin.js','forecast-history.css'])assert.ok(sw.includes(asset+'?v=209-20261112'));assert.match(sw,/cuban-league-v219-audience/);assert.match(index,/forecast-history-core\.js\?v=209/);
+ for(const asset of ['forecast-history.js','forecast-history-core.js','forecast-history-admin.js','forecast-history.css'])assert.ok(sw.includes(asset+'?v=209-20261112'));assert.match(sw,/cuban-league-v220-comuniate-default/);assert.match(index,/forecast-history-core\.js\?v=209/);
 });

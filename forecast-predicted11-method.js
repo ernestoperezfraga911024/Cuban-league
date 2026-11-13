@@ -3,7 +3,7 @@
   if(typeof module==='object'&&module.exports)module.exports=api;else root.CubanForecastPredicted11=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const METHOD='editorial-v4';
+  const METHOD='editorial-v5';
   const WEIGHTS={futbolfantasy:30,jornadaperfecta:20,comuniate:20,predicted11:30};
   const SIGNALS={starter:90,alternative:40,not_listed:25};
   const ADJUSTMENTS={availability:{clear:0,concern:-8,unknown:-4},rotation:{low:0,possible:-3,high:-8},horizon:{near:0,medium:-1,distant:-2}};
@@ -35,7 +35,7 @@
     return {ballots,counts};
   }
   function evaluate(e){
-    if(![METHOD,'editorial-v3'].includes(e?.method)||e.confirmed_out!==false||Object.hasOwn(e,'role'))throw Error('Método v3 sin rol o baja confirmada.');
+    if(![METHOD,'editorial-v4','editorial-v3'].includes(e?.method)||e.confirmed_out!==false||Object.hasOwn(e,'role'))throw Error('Método editorial sin rol o baja confirmada.');
     if(!Array.isArray(e.sources)||e.sources.length!==4||new Set(e.sources.map(s=>s.id)).size!==4)throw Error('Se requieren cuatro comprobaciones de fuentes.');
     let numerator=0,denominator=0;const trace=[];
     for(const s of e.sources){
@@ -51,7 +51,8 @@
         }
       }else{
         if(!Object.hasOwn(SIGNALS,s.prediction)||(s.probability!==null&&!integer(s.probability,100)))throw Error('Observación inválida.');
-        signal=s.probability??SIGNALS[s.prediction];
+        // v3/v4 retain their original calculations; a published percentage, including zero, always wins.
+        signal=s.probability??(e.method==='editorial-v5'&&s.id==='comuniate'&&s.prediction==='starter'?50:SIGNALS[s.prediction]);
       }
       if(signal!==null){numerator+=WEIGHTS[s.id]*signal;denominator+=WEIGHTS[s.id];}
       trace.push({id:s.id,signal,nominal_weight:WEIGHTS[s.id]});
