@@ -9,13 +9,14 @@
  const date=value=>value?new Intl.DateTimeFormat('es',{dateStyle:'short',timeStyle:'short',timeZone:'America/New_York'}).format(new Date(value))+' Miami':'pendiente';
  function buttonState(){for(const b of section.querySelectorAll('[data-forecast-team]'))b.setAttribute('aria-pressed',String(b.dataset.forecastTeam===selected));}
  function show(){
-  host.replaceChildren();buttonState();
+  host.replaceChildren();status.removeAttribute('title');buttonState();
   const context=window.CubanForecastContext?.create(selected,news,catalog,newsUnavailable,physical,healthUnavailable);
   try{
    const row=rows.find(r=>r.team===selected);
    if(!row){status.textContent='No se pudo verificar la publicación actual. Pulsa Actualizar.';return;}
    const labels={published:'Publicado',ready:'Actualización pendiente de publicación',blocked:'Última revisión bloqueada',withdrawn:'Publicación retirada',pending:'Actualización pendiente'};
-   status.textContent=labels[row.status]+' · Última comprobación: '+date(row.checked_at)+(row.published_at?' · Publicación visible: '+date(row.published_at):'');
+   status.textContent=row.status==='published'&&row.published_at?'Publicado: '+date(row.published_at):labels[row.status]+' · Última comprobación: '+date(row.checked_at);
+   status.title='Última comprobación: '+date(row.checked_at)+(row.published_at?' · Publicación visible: '+date(row.published_at):'');
    if(!row.payload||row.status==='withdrawn')return;
    if(row.payload.schema_version===1){if(row.team!=='real-madrid')throw Error();legacy.validate(row.payload);}else{round.validate(row.payload);if(row.payload.team!==row.team)throw Error();}
    window.CubanForecastPitch.render(host,row.payload,catalog,{publishedAt:row.published_at,playerContext:context});
