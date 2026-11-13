@@ -22,20 +22,22 @@
     const slotLabel=slot=>extended?round.label(p.formation,slot):core.SLOTS[slot-1];
     const shell=el('article',null,'fp-card');
     const header=el('header',null,'fp-match');
-    header.append(el('span',preview?'VISTA PREVIA · SIN PUBLICAR':'CUBAN LEAGUE · PREVISIÓN EDITORIAL','fp-eyebrow'));
+    if(preview)header.append(el('span','VISTA PREVIA · SIN PUBLICAR','fp-eyebrow'));
+    header.append(el('p','LaLiga · Jornada '+(extended?p.matchday:13),'fp-meta'));
     const match=el('span',null,'fp-match-title');
     for(const [name,crest] of (extended?[p.home,p.away].map(id=>[teamInfo(id).name,id]):[['Real Madrid','real-madrid'],['Celta','celta-vigo']])){
-      const team=el('span',null,'fp-match-team'),image=el('img');image.src='catalog/crests/'+crest+'.webp';image.alt='';image.width=24;image.height=28;image.decoding='async';image.addEventListener('error',()=>image.remove(),{once:true});team.append(image,el('span',name));
+      const team=el('span',null,'fp-match-team'),image=el('img');image.src='catalog/crests/'+crest+'.webp';image.alt='';image.width=72;image.height=84;image.decoding='async';image.addEventListener('error',()=>image.style.visibility='hidden',{once:true});team.append(image,el('span',name));
       if(match.children.length)match.append(el('span','vs','fp-versus'));match.append(team);
     }
     const title=el('h2');title.append(match);header.append(title);
-    header.append(el('p',extended?'LaLiga · Jornada '+p.matchday+' · '+teamInfo(p.team).name:'LaLiga · Jornada 13 · Bernabéu','fp-meta'),el('p',date(p.kickoff_at),'fp-kickoff'));
-    const status=el('p',core.freshness(p),'fp-notice');header.append(status);
+    header.append(el('p',new Intl.DateTimeFormat('es',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Madrid'}).format(new Date(p.kickoff_at))+' · Madrid','fp-kickoff'));
     shell.append(header);
-    const layout=el('div',null,'fp-layout'), field=el('div',null,'fp-field');
+    const layout=el('div',null,'fp-layout'),pitch=el('div',null,'fp-pitch'),field=el('div',null,'fp-field');
+    const pitchHeading=el('div',null,'fp-pitch-heading');
+    pitchHeading.append(el('h3',extended?teamInfo(p.team).name:'Real Madrid'),el('span',p.formation,'fp-formation'));pitch.append(pitchHeading);
     field.setAttribute('aria-label','Once propuesto de '+(extended?teamInfo(p.team).name:'Real Madrid')+', '+p.formation);
-    field.append(el('span',p.formation,'fp-formation'));
     const markings=el('span',null,'fp-markings');markings.setAttribute('aria-hidden','true');field.append(markings);
+    for(const end of ['top','bottom']){const area=el('span',null,'fp-penalty fp-penalty-'+end);area.append(el('span',null,'fp-goal-area'),el('span',null,'fp-penalty-arc'));markings.append(area);}
     const detail=el('section',null,'fp-detail');detail.hidden=true;detail.tabIndex=-1;detail.setAttribute('aria-live','polite');
     let selectedButton=null;
     function close(){
@@ -68,7 +70,7 @@
       }
       field.append(row);
     }
-    layout.append(field,detail);shell.append(layout);
+    pitch.append(field);layout.append(pitch,detail);shell.append(layout);
     if(playerContext){
       const squad=el('section',null,'fp-squad');squad.append(el('h3','Resto de la plantilla'),el('p','Jugadores fuera del once previsto. Toca su foto para ver su situación.'));
       const others=playerContext.roster.filter(x=>!p.players.some(y=>y.id===x.id));
@@ -82,6 +84,7 @@
       const legend=el('div',null,'fp-squad-legend');legend.append(el('span','? En duda','doubt'),el('span','+ Lesionado','injured'));squad.append(legend);shell.append(squad);
     }
     const footer=el('div',null,'fp-evidence');const context=el('details',null,'fp-context');context.append(el('summary','Criterio y contexto del once'),el('p',p.note));footer.append(context);
+    context.append(el('p',core.freshness(p),'fp-meta'));
     context.append(el('p','Porcentajes editoriales provisionales, aún no calibrados. Se refieren a salir de titular.','fp-meta'));
     context.append(el('p','Lectura más antigua: '+date(p.evidence_at)+(publishedAt?' · Publicado: '+date(publishedAt):''),'fp-meta'));
     const sources=el('details');sources.append(el('summary','Fuentes y fechas de consulta'));
