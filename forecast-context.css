@@ -5,3 +5,5 @@
 
 .fp-detail:has(.fc-player-context){max-height:560px;overflow-y:auto;overscroll-behavior:contain}.fc-club-news{max-width:880px;box-sizing:border-box;margin-inline:auto}.fc-story-tag{display:inline-block;font-size:10px;padding:3px 7px;border:1px solid #87988e55;border-radius:6px}
 @media(max-width:620px){.fp-detail:has(.fc-player-context){max-height:none;overflow:visible;overscroll-behavior:auto}}
+
+.fc-load-more{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 12px;margin-top:8px;border:1px solid #87988e55;border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:12px;cursor:pointer}.fc-load-more:disabled{cursor:wait;opacity:.65}.fc-load-more:focus-visible{outline:2px solid #d8c184;outline-offset:3px}.fc-context-status{font-size:12px;line-height:1.5;opacity:.85}
