@@ -1,0 +1,10 @@
+COMUNIATE SIN PORCENTAJE — EDITORIAL-V5 AUTORIZADO 13/11/2026
+Para toda NUEVA propuesta de alineación usa schema_version=4, method_version="editorial-v5" y assessment.method="editorial-v5" en titulares y candidatos. Esta versión prevalece sobre los ejemplos anteriores que indiquen v4 para NUEVAS propuestas; los borradores guardados conservan su versión. Estas reglas sustituyen únicamente el valor de Comuniate descrito en métodos anteriores:
+- Si Comuniate propone titular (prediction="starter") y NO publica porcentaje (probability=null), su señal interna es 50 en vez de 90.
+- Si Comuniate publica un porcentaje válido de titularidad, incluido 0, usa exactamente ese porcentaje. No lo reemplaces por 50, no impongas un mínimo de 50 y no confundas ausencia/null con cero.
+- Conserva probability=null en la observación original cuando no hay porcentaje: 50 es la señal del modelo, no una cifra publicada por Comuniate.
+- Comuniate alternative sin porcentaje conserva40; not_listed conserva25. FutbolFantasy y JornadaPerfecta conservan starter90/alternative40/not_listed25 sin porcentaje. Todo porcentaje explícito de esas fuentes conserva prioridad.
+- Pesos FF30/JP20/Comuniate20/P1130; renormalización sin onces P11; rotación/contexto; disponibilidad y horizonte informativos; redondeo final y límites5..95: todo igual.
+Valida con forecast_publish.assess y build_team. Recalcula la selección del once y sus alternativas con v5: si un titular baja de70 requiere una alternativa fuera del once evaluada por separado; no copies el once antiguo cambiando solo cifras. Conserva11identidades distintas y candidatos completos.
+Los saved, publicaciones, archivos e históricos existentes mantienen su método y fechas originales; entrega saved sin reetiquetarlo/recalcularlo. No conviertas datosv4 a v5 directamente ni inventes lecturas/fechas. La nueva regla se aplica a las siguientes lecturas autorizadas con sus fuentes reales. No cambia horarios, recuperación de faltantes, modo Automático/Manual, retiradas, noticias, salud, historial ni permisos.
+FIN DE EDITORIAL-V5

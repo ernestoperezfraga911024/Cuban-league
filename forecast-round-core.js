@@ -7,7 +7,7 @@
   function label(formation,slot){return {GK:'Portería',DF:'Defensa',MF:'Centro del campo',FW:'Ataque'}[position(formation,slot)];}
   function validate(p){
     if([3,4].includes(p?.schema_version)){
-      if(p.schema_version===4&&!['editorial-v3','editorial-v4'].includes(p.method_version))throw Error('Método v3 incompleto.');
+      if(p.schema_version===4&&!['editorial-v3','editorial-v4','editorial-v5'].includes(p.method_version))throw Error('Método editorial incompleto.');
       const ids=new Set(config.teams.map(t=>t.id));
       if(p.season!=='2026-27'||!Number.isInteger(p.matchday)||p.matchday<13||p.matchday>38||!ids.has(p.home)||!ids.has(p.away)||p.home===p.away||![p.home,p.away].includes(p.team)||p.opponent!==(p.team===p.home?p.away:p.home)||!new RegExp('^laliga-2026-27-j'+p.matchday+'-[a-z0-9-]{3,100}$').test(p.fixture_key)||!Number.isFinite(Date.parse(p.kickoff_at))||Date.parse(p.kickoff_at)<Date.parse('2026-07-01T00:00:00Z')||Date.parse(p.kickoff_at)>=Date.parse('2027-07-01T04:00:00Z'))throw Error('Partido de temporada incompleto.');
       return validatePlayers(p);
@@ -34,7 +34,7 @@
       if(x.alternative){if(!/^[a-z0-9-]+$/.test(x.alternative.id)||typeof x.alternative.name!=='string'||!x.alternative.name.trim()||x.alternative.name.length>120)throw Error('Alternativa inválida.');roster.add(x.alternative.id);}else if(x.alternative!==null)throw Error('Alternativa ausente.');
     }
     if(Object.hasOwn(p,'candidates')){
-      if(p.schema_version!==4||p.method_version!=='editorial-v4'||!Array.isArray(p.candidates)||p.candidates.length>39)throw Error('Candidatos incompletos.');
+      if(p.schema_version!==4||!['editorial-v4','editorial-v5'].includes(p.method_version)||!Array.isArray(p.candidates)||p.candidates.length>39)throw Error('Candidatos incompletos.');
       const seen=new Set(p.players.map(x=>x.id));
       for(const c of p.candidates){
         if(!c||typeof c.id!=='string'||!/^[a-z0-9-]+$/.test(c.id)||seen.has(c.id)||typeof c.name!=='string'||!c.name.trim()||c.name.length>120||c.method!==p.method_version||!Number.isInteger(c.probability)||c.probability<5||c.probability>95||typeof c.reason!=='string'||c.reason.trim().length<10||c.reason.length>800||Object.hasOwn(c,'slot')||Object.hasOwn(c,'alternative'))throw Error('Candidato inválido.');

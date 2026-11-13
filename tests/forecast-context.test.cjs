@@ -190,6 +190,6 @@ test('context arrivals preserve an opened player and the keyboard focus',async()
 
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const asset of ['forecast-context.js','forecast-context.css','forecast-pitch.js','forecast-season-public.js']){const version={'forecast-context.js':222,'forecast-pitch.js':216,'forecast-context.css':222,'forecast-season-public.js':222}[asset];assert.ok(index.includes(asset+'?v='+version+(version>=215?'-20261113':'-20261112')));assert.ok(sw.includes(asset+'?v='+version+(version>=215?'-20261113':'-20261112')));}
+ for(const asset of ['forecast-context.js','forecast-context.css','forecast-pitch.js','forecast-season-public.js']){const version={'forecast-context.js':222,'forecast-pitch.js':224,'forecast-context.css':222,'forecast-season-public.js':222}[asset];assert.ok(index.includes(asset+'?v='+version+(version>=215?'-20261113':'-20261112')));assert.ok(sw.includes(asset+'?v='+version+(version>=215?'-20261113':'-20261112')));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
 });
