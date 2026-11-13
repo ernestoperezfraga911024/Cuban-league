@@ -1,6 +1,5 @@
 const APP_VERSION='200-20261104-club-contributions';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
-const OWNER_VISIT_EXCLUSION_KEY='cuban-league-owner-browser';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
 let PLAYER_CATALOG=null;
@@ -85,58 +84,6 @@ function matchdayLineupTeamCell(name,postponed=false){
     <span class="matchday-lineup-team-copy"><span class="name">${safe}</span><small>${postponed?'Pendiente':'Ver alineación'}</small></span>
     <span class="matchday-lineup-team-arrow" aria-hidden="true">›</span>
   </span>`;
-}
-
-function randomAnonymousId(){
-  if(window.crypto?.randomUUID)return window.crypto.randomUUID();
-  const bytes=new Uint8Array(16);
-  window.crypto?.getRandomValues?.(bytes);
-  bytes[6]=(bytes[6]&15)|64;
-  bytes[8]=(bytes[8]&63)|128;
-  const hex=[...bytes].map(value=>value.toString(16).padStart(2,'0')).join('');
-  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
-}
-
-function anonymousId(storageName,key){
-  try{
-    const storage=window[storageName];
-    const existing=storage.getItem(key);
-    if(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existing||''))return existing;
-    const created=randomAnonymousId();
-    storage.setItem(key,created);
-    return created;
-  }catch{
-    return randomAnonymousId();
-  }
-}
-
-async function trackSiteVisit(){
-  try{
-    if(localStorage.getItem(OWNER_VISIT_EXCLUSION_KEY)==='1')return false;
-  }catch{}
-  const config=window.CUBAN_LEAGUE_SUPABASE;
-  if(!config?.url||!config?.publishableKey)return false;
-  try{
-    const endpoint=`${config.url.replace(/\/$/,'')}/rest/v1/rpc/track_site_visit`;
-    const response=await fetch(endpoint,{
-      method:'POST',
-      cache:'no-store',
-      keepalive:true,
-      headers:{
-        apikey:config.publishableKey,
-        Authorization:`Bearer ${config.publishableKey}`,
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({
-        p_visitor_id:anonymousId('localStorage','cuban-league-visitor-id'),
-        p_session_id:anonymousId('sessionStorage','cuban-league-session-id'),
-        p_path:location.pathname||'/'
-      })
-    });
-    return response.ok;
-  }catch{
-    return false;
-  }
 }
 
 function activeParticipants(){
@@ -7358,7 +7305,6 @@ function syncPublishedData(){
 }
 
 async function init(){
-  trackSiteVisit();
   const catalogPromise=window.CubanLeaguePlayerCatalog
     ?window.CubanLeaguePlayerCatalog.load(DATA_VERSION).catch(()=>null)
     :Promise.resolve(null);

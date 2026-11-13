@@ -1,4 +1,4 @@
-/* Browser-local personalization only. This choice never authenticates a visitor. */
+/* Browser preference; optional audience module receives only the validated profile ID. Never authentication. */
 (()=>{
   'use strict';
   const KEY='cuban-league-viewer-v1';
@@ -42,6 +42,7 @@
     catch{storageAvailable=false;}
     updateControls();
     renderStandings();
+    window.CubanLeagueAnalytics?.identify(choice);
     announce(storageAvailable
       ?(selected()?`Perfil elegido: ${selected().name}.`:'Entraste como invitado.')
       :'No se pudo recordar la elección en este navegador. Se mantendrá durante esta visita.');
@@ -54,6 +55,7 @@
     catch{storageAvailable=false;}
     updateControls();
     renderStandings();
+    window.CubanLeagueAnalytics?.identify(choice);
     announce(storageAvailable?'Elección olvidada. Puedes elegir otro perfil cuando quieras.':'Elección borrada de esta visita; el navegador no permitió borrar el dato guardado.');
     // Deliberately do not reopen the prompt in the same visit.
     $('viewerChoose').focus();
@@ -190,9 +192,11 @@
     window.addEventListener('storage',event=>{
       if(event.key!==KEY&&event.key!==null)return;
       choice=readChoice();updateControls();renderStandings();
+      window.CubanLeagueAnalytics?.identify(choice);
       if($('viewerDialog').open){pendingId=selected()?.id??null;updatePending();}
     });
     updateControls();renderStandings();
+    window.CubanLeagueAnalytics?.start(participants,choice);
     if(!choice)requestAnimationFrame(()=>{
       // A choice in another tab may arrive before this frame.
       if(!choice)open();
