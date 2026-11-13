@@ -146,6 +146,6 @@ test('a news timeout cannot abort an already received XI body',async()=>{
 });
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const asset of ['forecast-context.js','forecast-context.css','forecast-pitch.js','forecast-season-public.js']){const version={'forecast-context.js':213,'forecast-pitch.js':215,'forecast-context.css':211,'forecast-season-public.js':215}[asset];assert.ok(index.includes(asset+'?v='+version+(version===215?'-20261113':'-20261112')));assert.ok(sw.includes(asset+'?v='+version+(version===215?'-20261113':'-20261112')));}
+ for(const asset of ['forecast-context.js','forecast-context.css','forecast-pitch.js','forecast-season-public.js']){const version={'forecast-context.js':213,'forecast-pitch.js':216,'forecast-context.css':211,'forecast-season-public.js':215}[asset];assert.ok(index.includes(asset+'?v='+version+(version>=215?'-20261113':'-20261112')));assert.ok(sw.includes(asset+'?v='+version+(version>=215?'-20261113':'-20261112')));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
 });

@@ -33,6 +33,15 @@
       roster.add(x.id);
       if(x.alternative){if(!/^[a-z0-9-]+$/.test(x.alternative.id)||typeof x.alternative.name!=='string'||!x.alternative.name.trim()||x.alternative.name.length>120)throw Error('Alternativa inválida.');roster.add(x.alternative.id);}else if(x.alternative!==null)throw Error('Alternativa ausente.');
     }
+    if(Object.hasOwn(p,'candidates')){
+      if(p.schema_version!==4||p.method_version!=='editorial-v4'||!Array.isArray(p.candidates)||p.candidates.length>39)throw Error('Candidatos incompletos.');
+      const seen=new Set(p.players.map(x=>x.id));
+      for(const c of p.candidates){
+        if(!c||typeof c.id!=='string'||!/^[a-z0-9-]+$/.test(c.id)||seen.has(c.id)||typeof c.name!=='string'||!c.name.trim()||c.name.length>120||c.method!==p.method_version||!Number.isInteger(c.probability)||c.probability<5||c.probability>95||typeof c.reason!=='string'||c.reason.trim().length<10||c.reason.length>800||Object.hasOwn(c,'slot')||Object.hasOwn(c,'alternative'))throw Error('Candidato inválido.');
+        seen.add(c.id);
+      }
+      if(p.players.some(x=>x.alternative&&!p.candidates.some(c=>c.id===x.alternative.id&&c.name===x.alternative.name)))throw Error('Alternativa sin evaluación.');
+    }
     legacy.candidates((p.players||[]).map(x=>({...x,alternative_id:x.alternative?.id??null})),roster);return p;
   }
   function choose(team,roundRows,pilotRows){

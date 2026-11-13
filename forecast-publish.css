@@ -81,3 +81,6 @@ body[data-section="forecasts"]:not([data-forecast-view="history"])::before{backg
 .fs-team{display:grid;grid-template-columns:minmax(145px,1fr) minmax(180px,2fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(127,145,168,.2);font-size:.83rem}
 .fs-identity{display:flex;align-items:center;gap:8px;min-width:0}.fs-identity img{object-fit:contain;flex:none}.fs-team-detail{display:grid;gap:4px;min-width:0}.fs-team-detail small{font-size:.72rem;line-height:1.5;overflow-wrap:anywhere}.fs-state{font-weight:700}.fs-reason{color:#c99142}.fs-actions{display:flex;flex-wrap:wrap;gap:5px}.fs-actions button{font-size:.72rem!important;padding:7px 10px!important;min-height:32px}.fs-team button:disabled{opacity:.45}
 @media(max-width:680px){.fs-team{grid-template-columns:minmax(0,1fr);gap:7px;padding:13px 0}.fs-actions{justify-content:flex-start}.fs-identity b{font-size:.84rem}}
+
+/* One shared estimate across the pitch alternative, squad and detail. */
+.fp-reserve .fp-prob{display:inline-block;align-self:center;font-size:11px;margin-top:3px;padding:2px 8px;line-height:1.2}.fp-reserve.fp-uncertain .fp-prob{background:#f4dfa5;color:#372c13}.fp-alt-name{white-space:normal;overflow-wrap:anywhere}
