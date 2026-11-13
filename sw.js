@@ -1,9 +1,9 @@
-const CACHE_NAME = 'cuban-league-v222-team-context';
+const CACHE_NAME = 'cuban-league-v223-news-days';
 const APP_SHELL = [
   './',
   './index.html',
-  './news.js?v=221-20261113',
-  './news.css?v=221-20261113',
+  './news.js?v=223-20261113',
+  './news.css?v=223-20261113',
   './news-admin.js?v=210-20261112',
   './styles.css?v=195-20261102-fast-navigation',
   './league-motion.css?v=197-20261102-smooth-tabs',
