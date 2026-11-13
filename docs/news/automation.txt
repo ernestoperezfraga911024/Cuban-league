@@ -1,3 +1,4 @@
+AVISO: protocolo histórico, sustituido por coverage-automation.txt y schedule-1500.sql (08:00, 11:00, 15:00 Miami).
 PROTOCOLO HISTÓRICO 12/11/2026 — sustituido por coverage-automation.txt tras instalar coverage.sql el 13/11/2026. Se conserva para documentar el comportamiento anterior; sus límites y horarios no rigen el nuevo productor.
 NOTICIAS — FLUJO INDEPENDIENTE AUTORIZADO EL 12/11/2026
 Esta sección amplía únicamente el alcance de noticias; todas las restricciones, métodos, tablas y horarios del flujo de alineaciones e historial permanecen intactos. Antes de cualquier salida global por ausencia de turno de probables/historial, ejecuta también el plan de noticias. No crear tareas, PR, migraciones, infraestructura ni usar servicios o modelos comerciales. Cero costes adicionales; solo navegación pública y conexiones existentes. Si se requiere conexión, aprobación o instalación, detente. Nunca enviar mensajes a terceros.
