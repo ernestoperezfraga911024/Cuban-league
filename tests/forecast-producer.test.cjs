@@ -81,6 +81,14 @@ test('unfinished review stays missing, lost delivery stays saved, corrupt public
  const p=await runMock({corrupt:true});assert.equal(p.result.counts.published,1);assert.equal(p.result.verified_publications,0);assert.equal(p.result.publication_complete,false);
 });
 module.exports={example,produce,mockGateway};
+test('closed empty run tolerates SQL null aggregate and never claims a publication or starts collection',async()=>{
+ const at=new Date().toISOString();
+ const gateway={runKey:'season-empty-test',recoveryRequest:null,state:async()=>({run:{expected:[],slot_at:at,started_at:at,finished_at:at},observed_at:at,attempts:[]}),audit:async()=>({observed_at:at,teams:null}),finish:()=>assert.fail('Closed run must not finish again')};
+ const result=await runSeason({gateway,makeCollector:()=>assert.fail('No source reading for an empty run'),reviewTeam:()=>assert.fail('No editorial review for an empty run')});
+ assert.equal(result.no_eligible_teams,true);assert.equal(result.publication_complete,false);assert.equal(result.verified_publications,0);assert.equal(result.finish,null);
+ gateway.state=async()=>({run:{expected:['test-home'],slot_at:at,started_at:at,finished_at:at},observed_at:at,attempts:[{team:'test-home',outcome:'ready'}]});
+ await assert.rejects(runSeason({gateway}),/Final audit did not return/);
+});
 test('concrete block needs club/source evidence; unfinished work cannot masquerade as a source failure',()=>{
  const {concreteBlock}=require('../scripts/forecast/editorial-producer.cjs'),x=example();
  assert.throws(()=>concreteBlock(x.packet,{kind:'timeout',source:'comuniate',detail:'No terminó a tiempo el trabajo.'}));

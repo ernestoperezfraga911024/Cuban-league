@@ -95,6 +95,10 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
   const finalState = await gateway.state();
   if (gateway.audit) {
     const audit=await gateway.audit();
+    // jsonb_agg returns SQL NULL for an empty expected set. That is a valid
+    // no-work run, never evidence that a lineup was published.
+    if (expected.length===0 && audit.teams===null) audit.teams=[];
+    if (!Array.isArray(audit.teams)) throw Error('Final audit did not return team results');
     if (audit.teams.length!==expected.length || new Set(audit.teams.map(a=>a.team)).size!==expected.length || audit.teams.some(a=>!expected.includes(a.team))) throw Error('Final audit does not cover the expected team set');
     for (const row of rows) {
       const a=audit.teams.find(a=>a.team===row.team);
@@ -112,6 +116,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
   }
   return {run_key:gateway.runKey,started_at:notBefore,finished_at:finalState.observed_at,expected:expected.length,
     counts,verified_publications:rows.filter(r => r.outcome === 'published' && r.verified !== false).length,
-    publication_complete:counts.published === expected.length && rows.every(r => r.verified !== false),finish,teams:rows,metrics:reader?.stats() || null};
+    no_eligible_teams:expected.length===0,
+    publication_complete:expected.length>0 && counts.published === expected.length && rows.every(r => r.verified !== false),finish,teams:rows,metrics:reader?.stats() || null};
 }
 module.exports={runSeason};

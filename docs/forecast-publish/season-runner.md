@@ -8,11 +8,11 @@ cuerpos recién leídos. Las cuentas, agregaciones y transiciones ya son código
 
 ## Estado y alcance
 
-La integración se entrega en el PR 108. No está activada por abrir el PR ni por
-fusionar código: la tarea existente debe recibir explícitamente el punto de
-entrada revisado cuando se autorice su activación. Esta entrega no cambia su
-prompt, horario, estado, modos, infraestructura o permisos. No crea otra tarea.
-No llama a noticias, salud o historial, que el dispatcher conserva por separado.
+El PR 108 se fusionó en main y Ernesto autorizó conectar la entrada con la tarea
+existente el 13/11/2026. A las18:25 Miami se verificó el prompt guardado, conservando
+íntegros el prompt anterior, horario, zona horaria, título y estado habilitado.
+No cambia modos, infraestructura o permisos ni crea otra tarea. El runner no
+llama a noticias, salud o historial, que el dispatcher conserva por separado.
 
 Se revisó la tarea `Automation_c13f1bff8fbc819196f8d0acb10432f9`: ejecuta el
 control de reloj horario, consulta planes independientes y tiene precedencia
@@ -151,10 +151,10 @@ contrato para timeout, trabajo pendiente o incertidumbre de un candidato opciona
   `cfd66a978f1a98fc7ccdaf501d36d541`. No debilita validadores ni hace migraciones
   en producción. Los mocks del ciclo de entrega no prueban una publicación real.
 
-La activación requiere revisar/fusionar este PR y autorizar el ajuste de entrada
-en la tarea existente; después verificar un turno real. Ni los tests locales ni
-el benchmark de lectura acreditan por sí solos ese recorrido en producción. No
-hay una medición de créditos/tokens ChatGPT ni una promesa de ahorro porcentual.
+La entrada está activada; queda pendiente verificar una nueva publicación con
+equipos elegibles a través de este runner. Ni los tests locales ni el benchmark
+de lectura acreditan por sí solos ese recorrido en producción. No hay una medición
+de créditos/tokens ChatGPT ni una promesa de ahorro porcentual.
 
 Resultado de esta revisión (13/11/2026): 60 pruebas específicas aprobadas. La suite
 completa ejecutada dio 445 aprobadas de446; su único fallo es el checksum antiguo
@@ -164,3 +164,11 @@ base main `1375170e2e1dcb730c057f99cb1231a624f147e4`. No se actualizó el checks
 ni se cambió el catálogo para ocultarlo. Posteriormente se añadió una prueba de
 navegación enlazada y se revalidó el conjunto específico. No se ejecutó una nueva
 publicación en producción durante esta revisión.
+
+Verificación de activación: el runner procesó en lectura el turno real ya cerrado
+`season-20261113-1800` entre18:27:26 y18:27:31 Miami. La base confirmó expected=[];
+se corrigió el agregado SQL null para conjuntos vacíos, sin llamar finish_run de
+nuevo ni leer fuentes/guardar/entregar. Resultado: no_eligible_teams=true,
+publication_complete=false, todos los recuentos0. La regresión de ese caso y el
+conjunto específico suman61 pruebas aprobadas. Esto prueba la conexión y la salida
+sin trabajo, no una nueva publicación ni el entorno de la futura tarea programada.
