@@ -58,6 +58,24 @@ test('query differences are distinct resources, never merged as one profile', as
   await assert.rejects(reader.read('https://www.predicted11.com/api/ballots'), /public Predicted11/);
 });
 
+test('public scripts share a reading while author/team ballot responses are always fresh', async () => {
+  let calls = 0;
+  const {reader} = setup({fetchImpl: async url => {
+    calls++;
+    return new Response(url.includes('/js/') ? 'public script' : '[]', {headers: {
+      'content-type': url.includes('/js/') ? 'application/javascript' : 'application/json',
+    }});
+  }});
+  const script = 'https://www.predicted11.com/js/profile-show.js?id=test';
+  await reader.readScript(script); await reader.readScript(script);
+  const ballot = 'https://frpg.predicted11.com/api/juegos/participacion-criterios/11/28/16/13/get/999-TESTONLY';
+  await reader.readBallot(ballot); await reader.readBallot(ballot);
+  assert.equal(calls, 3);
+  assert.deepEqual(reader.stats().by_kind.script, {requests: 2, downloads: 1, reused: 1});
+  assert.deepEqual(reader.stats().by_kind.ballot, {requests: 2, downloads: 2, reused: 0});
+  await assert.rejects(reader.readBallot('https://www.predicted11.com/es/usuario/test'));
+});
+
 test('failed reads are not cached or retried automatically', async () => {
   let calls = 0;
   const {reader} = setup({fetchImpl: async () => {
@@ -148,6 +166,19 @@ test('limits page sizes and cancels timed-out requests', async () => {
     signal.addEventListener('abort', () => reject(Error('timed out')), {once: true});
   })});
   await assert.rejects(slow.reader.read(URL), /timed out/);
+});
+
+test('follows one observed same-origin trailing-slash canonical redirect and preserves the first timestamp', async () => {
+  const urls = [], {reader} = setup({fetchImpl: async url => {
+    urls.push(url);
+    return urls.length === 1 ? new Response(null, {status: 301, headers: {location: 'https://www.predicted11.com/es/laliga'}}) : html('public');
+  }});
+  const page = await reader.read('https://www.predicted11.com/es/laliga/');
+  assert.equal(page.url, 'https://www.predicted11.com/es/laliga');
+  assert.equal(page.fetched_at, new Date(START).toISOString());
+  assert.equal(reader.stats().downloads, 2);
+  assert.equal((await reader.read('https://www.predicted11.com/es/laliga/')).reused, true);
+  assert.equal(urls.length, 2);
 });
 
 test('two-club producer can finish one club before starting its rival without changing extracted data', async () => {

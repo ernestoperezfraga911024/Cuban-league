@@ -6,13 +6,16 @@ const HOSTS = new Set(['www.futbolfantasy.com', 'www.jornadaperfecta.com',
   'www.comuniate.com', 'www.predicted11.com']);
 const TWO_HOURS = 2 * 60 * 60 * 1000;
 
-function publicUrl(value) {
+function publicUrl(value, kind = 'page') {
   const url = new URL(value);
-  if (url.protocol !== 'https:' || !HOSTS.has(url.hostname) || url.port ||
+  const script = kind === 'script' && url.hostname === 'www.predicted11.com' && url.pathname === '/js/profile-show.js';
+  const ballot = kind === 'ballot' && url.hostname === 'frpg.predicted11.com' &&
+    /^\/api\/juegos\/participacion-criterios\/\d+\/\d+\/\d+\/\d+\/get\/\d+-[A-Za-z0-9]+$/.test(url.pathname);
+  if (url.protocol !== 'https:' || !(kind === 'page' ? HOSTS.has(url.hostname) : script || ballot) || url.port ||
       url.username || url.password) throw Error('Only public HTTPS source URLs are allowed');
   // P11 API ballots remain separate requests per author/team/fixture; never deduplicate
   // them under the author's profile URL or accept embedded anonymous API credentials here.
-  if (url.hostname === 'www.predicted11.com' && !url.pathname.startsWith('/es/')) {
+  if (kind === 'page' && url.hostname === 'www.predicted11.com' && !url.pathname.startsWith('/es/')) {
     throw Error('Only public Predicted11 pages are allowed');
   }
   url.hash = '';
@@ -44,7 +47,7 @@ class ReadSession {
     this.queue = [];
     this.closed = false;
     this.metrics = {requests: 0, downloads: 0, reused: 0, failures: 0, bytes: 0,
-      download_ms: 0, by_host: {}};
+      download_ms: 0, by_host: {}, by_kind: {}};
     this.assertOpen();
   }
 
@@ -66,23 +69,33 @@ class ReadSession {
     else this.active--;
   }
 
-  async read(value, {refresh = false} = {}) {
+  readScript(value) { return this.read(value, {kind: 'script'}); }
+  readBallot(value) { return this.read(value, {kind: 'ballot'}); }
+
+  async read(value, {refresh = false, kind = 'page'} = {}) {
     this.assertOpen();
-    const url = publicUrl(value);
+    const url = publicUrl(value, kind);
     this.metrics.requests++;
+    this.metrics.by_kind[kind] ??= {requests: 0, downloads: 0, reused: 0};
+    this.metrics.by_kind[kind].requests++;
+    // The anonymous endpoint is discovered from the public profile and its script.
+    // Keep each author/team/jornada ballot fresh, without caching its response.
+    if (kind === 'ballot') return Object.freeze({...await this.download(url, kind), reused: false});
     // Concurrent callers share the SAME request even during an explicit second reading.
     if (this.inflight.has(url)) {
       const page = await this.inflight.get(url);
       this.assertOpen();
       this.metrics.reused++;
+      this.metrics.by_kind[kind].reused++;
       return Object.freeze({...page, reused: true});
     }
     if (!refresh && this.cache.has(url)) {
       this.metrics.reused++;
+      this.metrics.by_kind[kind].reused++;
       return Object.freeze({...this.cache.get(url), reused: true});
     }
     this.cache.delete(url); // A failed refresh must not resurrect the previous reading.
-    const work = this.download(url);
+    const work = this.download(url, kind);
     this.inflight.set(url, work);
     try {
       const page = await work;
@@ -92,7 +105,7 @@ class ReadSession {
     } finally { this.inflight.delete(url); }
   }
 
-  async download(url) {
+  async download(url, kind = 'page') {
     await this.acquire();
     const started = performance.now();
     let timer;
@@ -104,19 +117,36 @@ class ReadSession {
       const host = new URL(url).hostname;
       this.metrics.by_host[host] ??= {downloads: 0, bytes: 0};
       this.metrics.downloads++;
+      this.metrics.by_kind[kind].downloads++;
       this.metrics.by_host[host].downloads++;
-      const response = await this.fetchImpl(url, {method: 'GET', redirect: 'manual',
+      const options = {method: 'GET', redirect: 'manual',
         credentials: 'omit', signal: controller.signal,
-        headers: {Accept: 'text/html,application/xhtml+xml'}});
-      // Return errors to the collector. Do not follow sign-in redirects or retry a block.
+        headers: {Accept: kind === 'ballot' ? 'application/json' : kind === 'script' ? 'application/javascript,text/javascript' : 'text/html,application/xhtml+xml'}};
+      let response = await this.fetchImpl(url, options);
+      if (kind === 'page' && [301,308].includes(response.status) && response.headers.get('location')) {
+        const from = new URL(url), to = new URL(response.headers.get('location'), url);
+        // Only the observed canonical trailing-slash redirect, same origin/query/path.
+        // No login redirects, other paths, automatic chains or access-control retries.
+        if (to.origin === from.origin && to.search === from.search &&
+            to.pathname.replace(/\/$/, '') === from.pathname.replace(/\/$/, '') && to.pathname !== from.pathname) {
+          url = publicUrl(to.href);
+          await response.body?.cancel();
+          this.metrics.downloads++;
+          this.metrics.by_kind[kind].downloads++;
+          this.metrics.by_host[host].downloads++;
+          response = await this.fetchImpl(url, options);
+        }
+      }
+      // Return all other redirects/errors to the collector; never retry a block.
       if (!response.ok) {
         await response.body?.cancel();
         throw Error(`Public read failed: HTTP ${response.status}`);
       }
       const contentType = response.headers.get('content-type') || '';
-      if (!/^(text\/html|application\/xhtml\+xml)(;|$)/i.test(contentType)) {
+      const expected = kind === 'ballot' ? /^application\/json(;|$)/i : kind === 'script' ? /^(application|text)\/javascript(;|$)/i : /^(text\/html|application\/xhtml\+xml)(;|$)/i;
+      if (!expected.test(contentType)) {
         await response.body?.cancel();
-        throw Error('Expected a public HTML page');
+        throw Error(kind === 'page' ? 'Expected a public HTML page' : 'Unexpected public resource content type');
       }
       const chunks = [];
       let bytes = 0;
