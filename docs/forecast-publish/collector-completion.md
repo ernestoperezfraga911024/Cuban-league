@@ -1,5 +1,12 @@
 # Complete each club before starting the next
 
+The integrated reader/editorial/SQL runner and its activation boundaries are in
+[season-runner.md](season-runner.md). It preserves this completion contract.
+
+For the run-scoped public reading transport and compact agent bridge, see
+[read-session.md](read-session.md). Reuse only current-execution readings while
+preserving their original retrieval times; the team completion order below remains mandatory.
+
 The November 13 06:00 collector ended with 20 identical terminal blocks at the same timestamp. All three base sources were recorded as read, but no concrete unresolved player or validated proposal was retained. The next hourly execution correctly skipped these terminal attempts. This was incomplete collection classified as a data failure; the record does not establish 20 roster failures.
 
 Apply the following operational correction to the existing automation prompt. Preserve all other schedules, evidence requirements, methods and delivery controls.
