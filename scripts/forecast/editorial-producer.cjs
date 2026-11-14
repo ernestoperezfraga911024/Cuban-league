@@ -55,6 +55,14 @@ function compile(packet, review, roster, window) {
       r.season === f.season && same(r.observed_fixture, expected), team + ': calendario no contrastado en cuerpo de ' + id);
     requireThat(r.forecast === true, 'Once oficial disponible: no sustituir el pronóstico (' + team + ', ' + id + ')');
     requireThat(r.alternatives_complete === true && Array.isArray(r.alternatives), team + ': alternativas sin revisar en ' + id);
+    if(id==='comuniate'){
+      const captured=packet.comuniate_alternatives;
+      requireThat(captured && captured.sha256===page.sha256 && captured.url===page.url && captured.fetched_at===page.fetched_at && Array.isArray(captured.players),team+': falta control de alternativas de Comuniate');
+      for(const alt of captured.players){
+        requireThat(typeof alt.name==='string' && alt.name.trim() && probability(alt.probability),team+': alternativa de Comuniate ilegible');
+        requireThat(r.alternatives.some(a=>a.name===alt.name && a.probability===alt.probability),team+': alternativa de Comuniate omitida o modificada: '+alt.name);
+      }
+    }
     const observed = packet.observations[id];
     requireThat(observed?.length === 11 && new Set(observed.map(p => p.name)).size === 11, team + ': once incompleto de ' + id);
     const starters = observed.map(p => p.name), starter_ids = starters.map(resolve);

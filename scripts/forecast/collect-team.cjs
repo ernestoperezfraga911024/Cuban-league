@@ -35,6 +35,12 @@ function starters(body, source, side) {
     })).filter(n => n.name);
   });
 }
+function comuniateAlternatives(body) {
+  return document(body,d=>[...d.querySelectorAll('.cuerpo_campo .jugador_campo .alternativo')].map(n=>{
+    const label=text(n),match=label.match(/(?:^|\s)(\d{1,3})%\s*$/);
+    return {name:label.replace(/\s*\d{1,3}%\s*$/,'').trim(),probability:match?Number(match[1]):null};
+  }));
+}
 function layout(body, source, side) {
   return document(body, d => {
     const points = [];
@@ -127,6 +133,7 @@ class TeamCollector {
     for (const source of ['futbolfantasy', 'jornadaperfecta', 'comuniate']) {
       const page = bodies[source === 'comuniate' ? 'comuniate_team' : source];
       if (page) result.observations[source] = starters(page.body, source, side);
+      if(page && source==='comuniate')result.comuniate_alternatives={...result.docs.comuniate_team,players:comuniateAlternatives(page.body)};
       if (page && source !== 'comuniate') result.layouts[source] = {
         ...result.docs[source],points:layout(page.body,source,side),
       };
@@ -212,4 +219,4 @@ class TeamCollector {
   }
 }
 
-module.exports = {TeamCollector, starters, layout, ranking, eligible, classifyBallot};
+module.exports = {TeamCollector, starters, comuniateAlternatives, layout, ranking, eligible, classifyBallot};

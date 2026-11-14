@@ -1,0 +1,44 @@
+name: Cuban League · Controles de automatización
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'docs/automation/**'
+      - 'scripts/forecast/**'
+      - 'scripts/*forecast*.cjs'
+      - 'forecast-*.js'
+      - 'tests/automation-*.test.cjs'
+      - 'tests/forecast-*.test.cjs'
+      - 'tests/fixtures/forecast*'
+      - '.github/workflows/automation-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'AGENTS.md'
+      - 'docs/automation/**'
+      - 'scripts/forecast/**'
+      - 'scripts/*forecast*.cjs'
+      - 'forecast-*.js'
+      - 'tests/automation-*.test.cjs'
+      - 'tests/forecast-*.test.cjs'
+      - 'tests/fixtures/forecast*'
+      - '.github/workflows/automation-checks.yml'
+permissions:
+  contents: read
+concurrency:
+  group: automation-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - name: Verificar fallas conocidas sin red ni publicaciones
+        run: node --test tests/automation-*.test.cjs tests/forecast-collector.test.cjs tests/forecast-producer.test.cjs tests/forecast-producer-db.test.cjs tests/forecast-read-session.test.cjs tests/forecast-layout.test.cjs tests/forecast-source-summary.test.cjs tests/forecast-editorial-v5-db.test.cjs tests/dispatch-clock-db.test.cjs tests/news-coverage-db.test.cjs

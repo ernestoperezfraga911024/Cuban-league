@@ -21,9 +21,9 @@ test('producer and gateway run against PostgreSQL assess/build_team with the ins
  create function forecast_season.register_fixture(jsonb) returns jsonb language sql as $$select $1$$;`);
  const sql=read('docs/forecast-publish/editorial-v4.sql');await db.exec(sql.slice(sql.indexOf('CREATE OR REPLACE FUNCTION'),sql.indexOf('-- Arithmetic/evidence')));
  const rollback=read('docs/forecast-publish/candidates-rollback.sql');await db.exec(rollback.slice(rollback.indexOf('CREATE OR REPLACE FUNCTION')));
- await db.exec(read('docs/forecast-publish/candidates.sql'));await db.exec(read('docs/forecast-publish/editorial-v5.sql'));
+ await db.exec(read('docs/forecast-publish/candidates.sql'));await db.exec(read('docs/forecast-publish/editorial-v5.sql'));await db.exec(read('docs/forecast-publish/source-summary.sql'));
  const hashes=(await db.query("select md5(pg_get_functiondef('forecast_publish.assess(jsonb)'::regprocedure)) assess,md5(pg_get_functiondef('forecast_season.build_team(jsonb,interval)'::regprocedure)) builder")).rows[0];
- assert.deepEqual(hashes,{assess:'1e3dae90e7f37624d6b5ca686835cefe',builder:'cfd66a978f1a98fc7ccdaf501d36d541'});
+ assert.deepEqual(hashes,{assess:'1e3dae90e7f37624d6b5ca686835cefe',builder:'f30f730355203b835804b2f6c08b7188'});
  const x=example(),f=x.review.fixture,urls=Object.fromEntries(Object.entries(x.packet.docs).filter(([k])=>k!=='comuniate_team').map(([id,d])=>[id,d.url]));
  await db.query('insert into forecast_league.teams values($1,$2)',[x.packet.team,JSON.stringify(urls)]);
  await db.query('insert into forecast_season.fixtures values($1,$2,$3,$4,$5,$6)',[f.key,f.matchday,f.home,f.away,f.kickoff_at,JSON.stringify(urls)]);
