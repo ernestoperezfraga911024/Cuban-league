@@ -35,6 +35,32 @@ function starters(body, source, side) {
     })).filter(n => n.name);
   });
 }
+function layout(body, source, side) {
+  return document(body, d => {
+    const points = [];
+    if (source === 'futbolfantasy') {
+      for (const n of d.querySelectorAll(`.match-p11-side.row-${side} [data-onceff="titular"]`)) {
+        const coordinate = value => /^\d+(?:\.\d+)?%$/.test(value || '') ? Number(value.slice(0,-1)) : NaN;
+        const x=coordinate(n.dataset.onceffX),y=coordinate(n.dataset.onceffY);
+        [...n.querySelectorAll('.truncate-name')].forEach((name,i)=>points.push({name:text(name),kind:i?'alternative':'starter',x,y}));
+      }
+    } else if (source === 'jornadaperfecta') {
+      const field = d.querySelectorAll('.campo-futbol')[side === 'local' ? 0 : 1];
+      [...(field?.querySelectorAll('table') || [])].forEach((table,y)=> {
+        const cells=[...table.querySelectorAll('.campo-fila')];
+        cells.forEach((cell,i)=> {
+          const x=100*(i+0.5)/cells.length;
+          points.push({name:text(cell.querySelector('.player-name-pintar > a')),kind:'starter',x,y});
+          for(const alternative of cell.querySelectorAll('.alternatives-container .alternative')) {
+            const name=(text(alternative.querySelector('.player-name-pintar > a')) || text(alternative.querySelector('a[title]')) || text(alternative)).replace(/\s+\d{1,3}%\s*$/,'');
+            if(name) points.push({name,kind:'alternative',x,y});
+          }
+        });
+      });
+    }
+    return points;
+  });
+}
 function ranking(page, kind) {
   const authors = document(page.body, d => [...d.querySelectorAll('a.ranking-link-block')].slice(0, 7).map((n, i) => ({
     id: n.querySelector('[data-user-id]')?.getAttribute('data-user-id'), rank: i + 1,
@@ -86,7 +112,7 @@ class TeamCollector {
   async collect(team) {
     const started = performance.now();
     const result = {team: team.team, publication_ready: false, fixture_verified: false,
-      expected_fixture: team.fixture, docs: {}, observations: {}, errors: [], rankings: [], predictions: []};
+      expected_fixture: team.fixture, docs: {}, observations: {}, layouts: {}, errors: [], rankings: [], predictions: []};
     const side = team.fixture.home === team.team ? 'local' : 'visitante';
     const urls = {...team.fixture.source_urls, comuniate_team: team.comuniate_team_url};
     const bodies = {};
@@ -101,6 +127,9 @@ class TeamCollector {
     for (const source of ['futbolfantasy', 'jornadaperfecta', 'comuniate']) {
       const page = bodies[source === 'comuniate' ? 'comuniate_team' : source];
       if (page) result.observations[source] = starters(page.body, source, side);
+      if (page && source !== 'comuniate') result.layouts[source] = {
+        ...result.docs[source],points:layout(page.body,source,side),
+      };
     }
     // A base-source failure does not become a fabricated lineup or a DB block.
     if (bodies.futbolfantasy) {
@@ -183,4 +212,4 @@ class TeamCollector {
   }
 }
 
-module.exports = {TeamCollector, starters, ranking, eligible, classifyBallot};
+module.exports = {TeamCollector, starters, layout, ranking, eligible, classifyBallot};

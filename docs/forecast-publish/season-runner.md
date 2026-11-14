@@ -108,12 +108,34 @@ solo onces completos del roster. Ante acceso/partido/rankings no verificables:
 individual de un autor en ausencia de todos los demás. `unavailable`, `incomplete`
 y `not_created` se conservan separados, sin votos ni denominador.
 
-`selection:{formation,players:[{id,alternative_id}]}` contiene los once en orden
-táctico. Revisar su selección usando las cuatro fuentes y el método v5. El código
+`selection:{formation,players:[{id,alternative_id}],layout:{rows:[...]}}` contiene
+los once agrupados por fila táctica, desde portería hasta ataque. Dentro de cada
+fila, los slots representan **izquierda a derecha en la pantalla**, con portero
+abajo. Nunca usar el orden de enumeración del HTML ni invertir todas las filas.
+Revisar su selección usando las cuatro fuentes y el método v5. El código
 calcula porcentajes y exige una alternativa evaluada fuera del once si baja de70;
 para >=70 produce alternative:null. Puede rechazar la propuesta por esa condición:
 corregir la selección/alternativa con la **misma evidencia auténtica**, no rejuvenecer
 fechas. Nunca reducir la validación SQL para terminar.
+
+`layout.rows` tiene una referencia por fila, incluida portería:
+`{source:"jornadaperfecta",sha256:"HASH_DEL_CUERPO"}` (también admite
+`futbolfantasy`). El recolector extrae coordenadas reales en `packet.layouts`:
+FF usa `data-onceff-x/y`; JP usa las celdas de cada tabla del campo en orden visual.
+El productor ordena horizontalmente cada fila **sin cambiar selección, formación,
+alternativas ni porcentajes**. Elegir la fuente tras revisar el dibujo; no asumir
+que las fuentes coinciden. El hash, URL y fecha deben coincidir con el cuerpo leído.
+La pertenencia a la fila táctica sigue siendo una decisión editorial que se revisa.
+
+Si un seleccionado no aparece en el dibujo elegido, puede ocupar el puesto de un
+jugador observado que queda fuera del once mediante
+`anchors:[{id:"ID_SELECCIONADO",source_name:"NOMBRE_OBSERVADO",reason:"Sustitución táctica revisada y motivo"}]`
+en esa fila. No reasignar a otro puesto un jugador que ya tiene coordenadas ni
+usar un ancla ocupada. Los empates horizontales, ausencia de geometría o anclas
+ambiguas exigen otra fuente/revisión y dejan el equipo **missing**, nunca blocked
+por trabajo pendiente. No fabricar coordenadas. `compile` devuelve un informe
+`layout` con el orden y referencias para conservar junto a la revisión.
+Los `saved` se entregan intactos; esta comprobación solo actúa en lecturas nuevas.
 
 `facts[id]` permite reason y availability/rotation/context con el contrato habitual
 (value o points, reason, refs). Sin dato individual usa disponibilidad unknown,

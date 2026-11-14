@@ -3,6 +3,7 @@
 // fixture, probable/official status, identities, alternatives and confirmed outs.
 const {evaluate, selectAuthors, aggregate} = require('../../forecast-predicted11-method.js');
 const {isDeepStrictEqual: same} = require('node:util');
+const {orderSelection} = require('./lineup-layout.cjs');
 const BASE = ['futbolfantasy','jornadaperfecta','comuniate'];
 const SHAPES = ['4-2-3-1','4-4-2','4-3-3','3-5-2','5-3-2','3-4-3','3-4-2-1'];
 class EvidenceFailure extends Error {
@@ -118,6 +119,7 @@ function compile(packet, review, roster, window) {
   requireThat(SHAPES.includes(chosen?.formation) && chosen.players?.length === 11 && new Set(chosen.players.map(p => p.id)).size === 11, 'Selección requiere once y formación admitida');
   const selected = new Set(chosen.players.map(p => p.id));
   requireThat([...selected].every(id => byId.has(id) && union.has(id) && !out.has(id)), 'Titular ajeno, sin señal o baja confirmada');
+  const ordered = orderSelection(packet,chosen,resolve);
   for (const id of out) union.delete(id);
   const all = [...union];
   requireThat(all.length <= 50, 'Más de 39 candidatos: requiere revisión');
@@ -149,7 +151,7 @@ function compile(packet, review, roster, window) {
     evaluated.set(id,{id,name:byId.get(id).name,probability,reason:fact.reason || 'Estimación de titularidad según las fuentes y votos observados.',assessment});
   }
   const shape = chosen.formation.split('-').map(Number);
-  const players = chosen.players.map((choice,i) => {
+  const players = ordered.players.map((choice,i) => {
     const player = evaluated.get(choice.id), slot = i + 1;
     let alternative = null;
     if (player.probability < 70) {
@@ -167,7 +169,7 @@ function compile(packet, review, roster, window) {
     probability_kind:'editorial_uncalibrated',publication_allowed:false,status:'draft',method_version:'editorial-v5',
     limitations,sources,proposal:{formation:chosen.formation,players,candidates}};
   requireThat(Buffer.byteLength(JSON.stringify(payload)) <= 65536, 'Payload supera 64 KiB');
-  return {fixture:{...expected,season:f.season,sources:registered},payload};
+  return {fixture:{...expected,season:f.season,sources:registered},payload,layout:ordered.audit};
 }
 function concreteBlock(packet,failure) {
   requireThat(BASE.includes(failure?.source) && ['official','fixture','identity','lineup','access'].includes(failure?.kind) &&

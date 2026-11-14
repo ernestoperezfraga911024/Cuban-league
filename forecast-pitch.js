@@ -17,7 +17,8 @@
   }
   function render(host,payload,catalog,{preview=false,publishedAt=null,playerContext=null}={}){
     const round=window.CubanForecastRoundCore,extended=[2,3,4].includes(payload?.schema_version);
-    const p=extended?round.validate(payload):core.validate(payload);host.replaceChildren();
+    const validated=extended?round.validate(payload):core.validate(payload);
+    const p=window.CubanForecastLayoutRepair?.apply(validated,{publishedAt}) || validated;host.replaceChildren();
     const estimates=new Map((p.candidates||[]).map(c=>[c.id,c]));
     const alternativeText=a=>'Alternativa: '+a.name+(estimates.has(a.id)?' · '+estimates.get(a.id).probability+'%':'');
     const teamInfo=id=>round.config.teams.find(t=>t.id===id);

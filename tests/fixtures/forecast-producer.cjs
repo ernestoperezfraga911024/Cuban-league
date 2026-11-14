@@ -12,6 +12,10 @@ function example(team='test-home') {
     packet.observations[id]=roster.slice(0,11).map(p=>({name:p.name,probability:null}));
     review.sources[id]={fixture_sha256:doc.sha256,lineup_sha256:doc.sha256,season:fixture.season,observed_fixture:fixtureOf(fixture),forecast:true,alternatives_complete:true,alternatives:[{name:roster[11].name,probability:null}]};
   }
+  let offset=0;
+  const points=[1,4,2,3,1].flatMap((count,y)=>Array.from({length:count},(_,i)=>({name:roster[offset++].name,kind:'starter',x:100*(i+.5)/count,y})));
+  packet.layouts={jornadaperfecta:{...packet.docs.jornadaperfecta,points}};
+  review.selection.layout={rows:[1,4,2,3,1].map(()=>({source:'jornadaperfecta',sha256:packet.docs.jornadaperfecta.sha256}))};
   return {packet,review,roster,window:{notBefore:at,observedAt:at,expiresAt:new Date(now+7200000).toISOString()}};
 }
 module.exports={example};

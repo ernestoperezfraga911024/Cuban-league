@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v224-comuniate-default';
+const CACHE_NAME = 'cuban-league-v225-pitch-orientation';
 const APP_SHELL = [
   './',
   './index.html',
@@ -22,7 +22,8 @@ const APP_SHELL = [
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
   './forecast-round-core.js?v=224-20261113',
-  './forecast-pitch.js?v=224-20261113',
+  './forecast-layout-repair.js?v=225-20261114',
+  './forecast-pitch.js?v=225-20261114',
   './forecast-season-public.js?v=222-20261113',
   './forecast-context.js?v=222-20261113',
   './forecast-context.css?v=222-20261113',
@@ -179,7 +180,7 @@ self.addEventListener('fetch', event => {
     /\/news(?:-admin)?\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/admin.css') ||
     url.pathname.endsWith('/admin.js') ||
-    /\/forecast-(?:review(?:-core)?|publish(?:-core)?|round-(?:core|config)|season-(?:public|admin)|history(?:-core|-admin)?|context|delivery|pitch|public|editor)\.(?:js|css)$/.test(url.pathname) ||
+    /\/forecast-(?:review(?:-core)?|publish(?:-core)?|round-(?:core|config)|season-(?:public|admin)|history(?:-core|-admin)?|context|delivery|layout-repair|pitch|public|editor)\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/mister-import-helper.js') ||
     url.pathname.endsWith('/mister-import-core.js') ||
     url.pathname.endsWith('/player-catalog.js') ||
