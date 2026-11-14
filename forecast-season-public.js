@@ -24,7 +24,10 @@
    window.CubanForecastPitch.render(host,row.payload,catalog,{publishedAt:row.published_at,playerContext:context});
    if(!catalog)status.textContent+=' · Fotos no disponibles; se conservan nombres y explicaciones.';
   }catch{host.replaceChildren();status.textContent='No se pudo verificar la publicación actual. Reintenta para consultar el once vigente.';}
-  finally{context?.renderClub(host);context?.attach(host);context?.start();}
+  finally{
+   try{window.CubanSetPieces?.mount(host,selected,catalog);}catch{/* An optional reference must never block news or the XI. */}
+   context?.renderClub(host);context?.attach(host);context?.start();
+  }
  }
  const nav=section.querySelector('.forecast-clubs'),list=document.createElement('div');list.className='forecast-club-list';
  for(const team of [...teams].sort((a,b)=>a.name.localeCompare(b.name,'es'))){
