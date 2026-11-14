@@ -15,6 +15,28 @@
     }
     return frame;
   }
+  function sourceSummary(player,sources){
+    if(!Array.isArray(player.source_summary)||player.source_summary.length>4||new Set(player.source_summary.map(s=>s?.id)).size!==player.source_summary.length)return null;
+    const names={futbolfantasy:'FutbolFantasy',comuniate:'Comuniate',jornadaperfecta:'Jornada Perfecta',predicted11:'Predicted11'};
+    const list=el('ul',null,'fp-source-list');
+    for(const id of Object.keys(names)){
+      const s=player.source_summary.find(s=>s?.id===id),source=sources.find(s=>s.id===id);if(!s||!source)continue;
+      let message;
+      if(id==='predicted11'){
+        if(s.probability!==null||s.ballots!==source.ballots||!Number.isInteger(s.ballots)||s.ballots<0||s.ballots>14)continue;
+        if(s.ballots===0&&s.prediction==='not_available'&&s.votes===null)message='Sin onces completos disponibles en esta lectura.';
+        else if(s.ballots>0&&s.prediction==='consensus'&&Number.isInteger(s.votes)&&s.votes>=0&&s.votes<=s.ballots)message='Aparece en '+s.votes+' de '+s.ballots+' onces completos.';
+        else continue;
+      }else{
+        if(!['starter','alternative','not_listed'].includes(s.prediction)||(s.probability!==null&&(!Number.isInteger(s.probability)||s.probability<0||s.probability>100)))continue;
+        const signal={starter:'Lo incluye en el once',alternative:'Lo propone como alternativa',not_listed:'No figura en su propuesta'}[s.prediction];
+        message=s.probability===null?signal+'.':s.probability+'% de titularidad. '+signal+'.';
+      }
+      const item=el('li');item.append(el('strong',names[id]+': '),document.createTextNode(message));list.append(item);
+    }
+    if(!list.children.length)return null;
+    const block=el('div',null,'fp-source-summary');block.append(el('p','Según las fuentes consultadas:','fp-meta'),list);return block;
+  }
   function render(host,payload,catalog,{preview=false,publishedAt=null,playerContext=null}={}){
     const round=window.CubanForecastRoundCore,extended=[2,3,4].includes(payload?.schema_version);
     const validated=extended?round.validate(payload):core.validate(payload);
@@ -53,10 +75,15 @@
       if(selectedButton)selectedButton.setAttribute('aria-pressed','false');selectedButton=button;button.setAttribute('aria-pressed','true');
       detail.hidden=false;layout.classList.add('has-selection');
       detail.replaceChildren(el('span','EL JUGADOR','fp-eyebrow'),portrait(player,catalog),el('h3',player.name),el('p',player.slot?slotLabel(player.slot):({PT:'Portero',DF:'Defensa',MC:'Centrocampista',DL:'Delantero'}[player.position]||''),'fp-meta'));
-      if(Number.isInteger(player.probability))detail.append(el('b',player.probability+'% de titularidad estimada','fp-detail-prob'),el('p',player.reason));
+      if(Number.isInteger(player.probability)){
+        detail.append(el('b',player.probability+'% de titularidad estimada','fp-detail-prob'));
+        const summary=sourceSummary(player,p.sources);
+        if(summary)detail.append(summary);
+        if(!summary||player.reason!=='Estimación de titularidad según las fuentes y votos observados.')detail.append(el('p',player.reason));
+      }
       if(playerContext)detail.append(playerContext.detail(player));
       if(player.alternative){const a=el('div',null,'fp-alternative');a.append(portrait(player.alternative,catalog),el('span',alternativeText(player.alternative)));detail.append(a);}
-      if(Number.isInteger(player.probability))detail.append(el('p',['editorial-v3','editorial-v4','editorial-v5'].includes(player.method)?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.','fp-meta'));
+      if(Number.isInteger(player.probability))detail.append(el('p','Peso en el cálculo: '+(['editorial-v3','editorial-v4','editorial-v5'].includes(player.method)?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.'),'fp-meta'));
       if(Number.isInteger(player.probability))detail.append(el('small','Estimación editorial provisional.','fp-meta'));
       const back=el('button',player.slot?'Volver al campo':'Volver a la plantilla','fp-link');back.type='button';back.addEventListener('click',close);detail.append(back);detail.focus({preventScroll:true});try{detail.scrollIntoView?.({block:'nearest',behavior:'auto'});}catch{/* Cosmetic only. */}
     }

@@ -190,7 +190,7 @@ test('context arrivals preserve an opened player and the keyboard focus',async()
 
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const [asset,version] of Object.entries({'forecast-context.js':'222-20261113','forecast-context.css':'222-20261113','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'225-20261114','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
+ for(const [asset,version] of Object.entries({'forecast-context.js':'222-20261113','forecast-context.css':'222-20261113','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'227-20261114','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
 });
 
