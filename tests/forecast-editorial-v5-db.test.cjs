@@ -74,3 +74,61 @@ test('editorial v5 changes only the missing Comuniate starter percentage and pre
  await t.test('guard refuses repeat or unrelated function versions',async()=>{const hashes=(await db.query("select md5(pg_get_functiondef('forecast_publish.assess(jsonb)'::regprocedure)) assess,md5(pg_get_functiondef('forecast_season.build_team(jsonb,interval)'::regprocedure)) builder")).rows[0];await assert.rejects(db.exec(migration),/changed since review/);assert.deepEqual((await db.query("select md5(pg_get_functiondef('forecast_publish.assess(jsonb)'::regprocedure)) assess,md5(pg_get_functiondef('forecast_season.build_team(jsonb,interval)'::regprocedure)) builder")).rows[0],hashes);});
  }finally{await db.close();}
 });
+
+test('source summaries expose only validated evidence and refresh no other published data',async t=>{
+ const {db,p}=await setup();try{
+  await db.exec(migration);
+  const q=await version(db,p,'editorial-v5');
+  // A published percentage of zero must remain zero, not become the model fallback.
+  q.sources[0].player_observations[11].probability=0;q.proposal.candidates[0].assessment.sources[0].probability=0;
+  q.proposal.candidates[0].probability=await assess(db,q.proposal.candidates[0].assessment);
+  const previous=await build(db,q);
+  await db.query('insert into forecast_season.drafts values($1,$2,$3,now())',[q.team,JSON.stringify(q),JSON.stringify(previous)]);
+  await db.query('insert into public.forecast_season_public values($1,$2,now())',[q.team,JSON.stringify(previous)]);
+  await db.query('insert into forecast_season.archive values($1,$2,now())',['saved-history',JSON.stringify(previous)]);
+  const snapshot=async()=>(await db.query("select (select to_jsonb(d) from forecast_season.drafts d) draft,(select to_jsonb(p) from public.forecast_season_public p) public,(select to_jsonb(a) from forecast_season.archive a) archive")).rows[0];
+  const before=await snapshot();
+  const metadata=async()=>(await db.query("select oid,proacl::text,prosecdef,proconfig from pg_proc where oid='forecast_season.build_team(jsonb,interval)'::regprocedure")).rows[0];
+  const meta=await metadata();
+  await db.exec(read('docs/forecast-publish/source-summary.sql'));
+  const out=await build(db,q);
+  const strip=p=>{const copy=clone(p);for(const x of [...copy.players,...(copy.candidates||[])])delete x.source_summary;return copy;};
+  await t.test('future publications keep every existing value and include starter and candidate evidence',()=>{
+   assert.deepEqual(strip(out),previous);
+   assert.deepEqual(out.players[0].source_summary,[{id:'futbolfantasy',prediction:'starter',probability:null},{id:'jornadaperfecta',prediction:'starter',probability:null},{id:'comuniate',prediction:'starter',probability:null},{id:'predicted11',prediction:'not_available',probability:null,votes:null,ballots:0}]);
+   assert.deepEqual(out.candidates[0].source_summary[0],{id:'futbolfantasy',prediction:'alternative',probability:0});
+   assert.equal(out.players[0].assessment,undefined);assert.equal(out.players[0].source_summary[0].refs,undefined);
+  });
+  await t.test('the builder still rejects contradictory observations and probabilities',async()=>{
+   for(const change of [x=>x.proposal.players[0].assessment.sources[0].probability=20,x=>x.proposal.candidates[0].probability=90]){const bad=clone(q);change(bad);await assert.rejects(build(db,bad),e=>e.code==='22023');}
+  });
+  await t.test('function privileges and assessment implementation remain restricted',async()=>{
+   assert.deepEqual(await metadata(),meta);
+   for(const role of ['anon','authenticated','service_role'])assert.equal((await db.query("select has_function_privilege($1,'forecast_season.source_summary(jsonb)','EXECUTE') allowed",[role])).rows[0].allowed,false);
+   assert.equal(await assess(db,q.proposal.players[0].assessment),previous.players[0].probability);
+  });
+  await db.exec(read('docs/forecast-publish/source-summary-refresh.sql'));
+  await t.test('refresh preserves raw evidence, slots, scores, dates and history byte for byte',async()=>{
+   const after=await snapshot();
+   assert.deepEqual(strip(after.draft.projection),before.draft.projection);assert.deepEqual(strip(after.public.payload),before.public.payload);
+   assert.deepEqual({...after.draft,projection:before.draft.projection},before.draft);
+   assert.deepEqual({...after.public,payload:before.public.payload},before.public);assert.deepEqual(after.archive,before.archive);
+   assert.deepEqual(after.draft.projection,after.public.payload);
+  });
+  await t.test('refresh refuses unrelated projection differences instead of overwriting a forecast',async()=>{
+   const unexpected=clone(previous);unexpected.players[0].reason='A separately edited public explanation.';
+   await db.query('update forecast_season.drafts set projection=$1',[JSON.stringify(unexpected)]);
+   await db.query('update public.forecast_season_public set payload=$1',[JSON.stringify(unexpected)]);
+   await assert.rejects(db.exec(read('docs/forecast-publish/source-summary-refresh.sql')),/would change other forecast data/);
+   assert.deepEqual((await snapshot()).public.payload,unexpected);
+  });
+  await t.test('summary keeps actual Predicted11 counts, not a rounded model percentage',async()=>{
+   const e={sources:[{id:'predicted11',prediction:'consensus',probability:null,votes:4,ballots:6,reason:'Private context',refs:['https://example.com'],author_ids:['private']}]};
+   assert.deepEqual((await db.query('select forecast_season.source_summary($1::jsonb) s',[JSON.stringify(e)])).rows[0].s,[{id:'predicted11',prediction:'consensus',probability:null,votes:4,ballots:6}]);
+  });
+  await assert.rejects(db.exec(read('docs/forecast-publish/source-summary.sql')),/changed since review/);
+  await db.exec(read('docs/forecast-publish/source-summary-rollback.sql'));
+  assert.deepEqual(await build(db,q),previous);
+  await assert.rejects(db.exec(read('docs/forecast-publish/source-summary-rollback.sql')),/changed since source summary review/);
+ }finally{await db.close();}
+});

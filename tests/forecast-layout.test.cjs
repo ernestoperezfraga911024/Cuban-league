@@ -76,6 +76,6 @@ test('reviewed wings and unchanged Sevilla attack protect against a blanket reve
  assert.deepEqual(fixed('villarreal').slice(8),['a-moleiro','g-mikautadze','t-buchanan']);
 });
 test('public, admin and offline shell load the repair before the shared pitch with fresh asset versions',()=>{
- for(const name of ['index.html','admin.html']){const html=fs.readFileSync(name,'utf8');assert.ok(html.indexOf('forecast-layout-repair.js?v=225')<html.indexOf('forecast-pitch.js?v=225'));}
- const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/cuban-league-v226-set-pieces/);assert.match(sw,/forecast-layout-repair.js\?v=225/);assert.match(sw,/forecast-pitch.js\?v=225/);
+ for(const name of ['index.html','admin.html']){const html=fs.readFileSync(name,'utf8');assert.ok(html.indexOf('forecast-layout-repair.js?v=225')<html.indexOf('forecast-pitch.js?v=227'));}
+ const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/cuban-league-v227-source-summary/);assert.match(sw,/forecast-layout-repair.js\?v=225/);assert.match(sw,/forecast-pitch.js\?v=227/);
 });
