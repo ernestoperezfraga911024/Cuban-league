@@ -77,5 +77,5 @@ test('reviewed wings and unchanged Sevilla attack protect against a blanket reve
 });
 test('public, admin and offline shell load the repair before the shared pitch with fresh asset versions',()=>{
  for(const name of ['index.html','admin.html']){const html=fs.readFileSync(name,'utf8');assert.ok(html.indexOf('forecast-layout-repair.js?v=225')<html.indexOf('forecast-pitch.js?v=228'));}
- const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/cuban-league-v228-player-sheet/);assert.match(sw,/forecast-layout-repair.js\?v=225/);assert.match(sw,/forecast-pitch.js\?v=228/);
+ const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/cuban-league-v229-install-welcome/);assert.match(sw,/forecast-layout-repair.js\?v=225/);assert.match(sw,/forecast-pitch.js\?v=228/);
 });

@@ -199,7 +199,10 @@
     window.CubanLeagueAnalytics?.start(participants,choice);
     if(!choice)requestAnimationFrame(()=>{
       // A choice in another tab may arrive before this frame.
-      if(!choice)open();
+      const show=()=>{if(!choice)open();};
+      // Keep the installation invitation/guide and profile picker sequential.
+      if(window.CubanInstallWelcome)window.CubanInstallWelcome.whenReady(show);
+      else show();
     });
   }
   window.CubanLeagueViewer=Object.freeze({init,renderStandings});

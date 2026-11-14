@@ -1,4 +1,4 @@
-const APP_VERSION='200-20261104-club-contributions';
+const APP_VERSION='229-20261114-install-welcome';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -7152,7 +7152,7 @@ function setupShareCardStudio(){
 
 let deferredInstallPrompt=null;
 let installReturnFocus=null;
-const isStandalone=()=>window.matchMedia?.('(display-mode: standalone)')?.matches||window.navigator.standalone===true;
+const isStandalone=()=>window.CubanInstallWelcome?.isStandalone()||window.matchMedia?.('(display-mode: standalone)')?.matches||window.navigator.standalone===true;
 const isIOS=()=>/iphone|ipad|ipod/i.test(window.navigator.userAgent)||(window.navigator.platform==='MacIntel'&&window.navigator.maxTouchPoints>1);
 
 function closeInstallGuide(){
@@ -7161,11 +7161,14 @@ function closeInstallGuide(){
   modal.hidden=true;
   syncModalLock();
   installReturnFocus?.focus?.();
+  window.CubanInstallWelcome?.resume();
 }
 
 function openInstallGuide(){
   installReturnFocus=document.activeElement;
   if(!isIOS()){
+    $('installTitle').textContent='Instalar Cuban League';
+    document.querySelector('#installModal .eyebrow').textContent='ACCESO DESDE TU PANTALLA DE INICIO';
     $('installIntro').textContent='Puedes instalar Cuban League desde el navegador y abrirla como una aplicación independiente.';
     document.querySelector('.install-warning').hidden=true;
     $('copySafariLink').hidden=true;
@@ -7200,12 +7203,18 @@ async function copySafariUrl(){
 
 async function requestInstall(){
   if(!deferredInstallPrompt){openInstallGuide();return}
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
+  const prompt=deferredInstallPrompt;
   deferredInstallPrompt=null;
-  closeInstallGuide();
   $('nativeInstall').hidden=true;
-  if(isStandalone())$('installApp').hidden=true;
+  try{
+    await prompt.prompt();
+    await prompt.userChoice;
+    closeInstallGuide();
+  }catch{
+    // A prompt can expire or be refused; the existing manual guide still works.
+    openInstallGuide();
+  }
+  updateInstallUI();
 }
 
 function updateInstallUI(){
@@ -7221,6 +7230,7 @@ function setupPWA(){
   $('copySafariLink').onclick=copySafariUrl;
   $('closeInstall').onclick=closeInstallGuide;
   $('installModal').onclick=e=>{if(e.target.id==='installModal')closeInstallGuide()};
+  window.CubanInstallWelcome?.init({requestInstall});
 
   const syncConnection=()=>document.body.classList.toggle('is-offline',!navigator.onLine);
   window.addEventListener('online',syncConnection);
@@ -7235,11 +7245,13 @@ function setupPWA(){
 window.addEventListener('beforeinstallprompt',event=>{
   event.preventDefault();
   deferredInstallPrompt=event;
+  window.CubanInstallWelcome?.available();
   updateInstallUI();
 });
 
 window.addEventListener('appinstalled',()=>{
   deferredInstallPrompt=null;
+  window.CubanInstallWelcome?.installed();
   closeInstallGuide();
   updateInstallUI();
 });
@@ -7305,6 +7317,8 @@ function syncPublishedData(){
 }
 
 async function init(){
+  // The invitation and installer do not depend on downloading league data.
+  setupPWA();
   const catalogPromise=window.CubanLeaguePlayerCatalog
     ?window.CubanLeaguePlayerCatalog.load(DATA_VERSION).catch(()=>null)
     :Promise.resolve(null);
@@ -7550,7 +7564,6 @@ async function init(){
     ?navigator.share({title:'Cuban League',url:location.href})
     :navigator.clipboard.writeText(location.href);
   setupStandingsSwitcher();
-  setupPWA();
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
