@@ -1,15 +1,129 @@
 {
-  "methodology_version": "ops-v1",
+  "methodology_version": "ops-v2",
   "updated_on": "2026-11-14",
   "incidents": [
-    {"code":"unfinished-as-blocked","status":"guarded","failure":"Una revisión incompleta se registró como bloqueo terminal para los 20 equipos.","prevention":"Completar un club por vez; timeout o trabajo pendiente permanece missing, saved se entrega intacto.","tests":["tests/forecast-producer.test.cjs","tests/forecast-recovery-db.test.cjs"]},
-    {"code":"early-dispatch-exit","status":"guarded","failure":"Un arranque anticipado consulta el turno anterior y termina sin abrir el nuevo.","prevention":"dispatch_gate, espera real fuera de transacción y planes nuevos; cada flujo independiente.","tests":["tests/dispatch-clock-db.test.cjs"]},
-    {"code":"mirrored-lineup","status":"guarded","failure":"Orden del HTML interpretado como izquierda-derecha del campo.","prevention":"Geometría real y anclas revisadas; nunca invertir todas las filas.","tests":["tests/forecast-layout.test.cjs"]},
-    {"code":"comuniate-null-as-published","status":"guarded","failure":"Confundir porcentaje ausente con cero o con un porcentaje publicado.","prevention":"Guardar null; fallback interno v5=50 solo titular de Comuniate sin porcentaje. Cero explícito se conserva.","tests":["tests/forecast-editorial-v5-db.test.cjs","tests/forecast-source-summary.test.cjs"]},
-    {"code":"comuniate-alternative-omitted","status":"regression-tested-awaiting-run","failure":"Camavinga y Robert Navarro figuraban como alternativas en la lectura contrastada, pero su observación guardada era not_listed.","prevention":"Extraer .alternativo y exigir su inclusión literal antes de compilar. Revisión de identidad y porcentaje obligatoria.","tests":["tests/automation-methodology.test.cjs"]},
-    {"code":"bridge-json-truncated","status":"regression-tested-awaiting-run","failure":"Respuesta grande transferida por stdin llegó truncada; JSON inválido cerca del carácter 4079.","prevention":"Respuesta completa en archivo privado; stdin transporta solo ID/ruta. JSON inválido no se repara inventando contenido.","tests":["tests/automation-methodology.test.cjs"]},
-    {"code":"generic-source-explanation","status":"production-verified","failure":"La ficha perdió el detalle de cada fuente pese a conservar las observaciones privadas.","prevention":"source_summary generado por el servidor en titulares y candidatos; comparación íntegra de proyección.","tests":["tests/forecast-source-summary.test.cjs","tests/forecast-editorial-v5-db.test.cjs"]},
-    {"code":"news-incomplete-coverage","status":"guarded","failure":"Confundir tres índices o noticias del local con revisión completa de los 20 clubes.","prevention":"Ledger por hecho, cobertura por club y fuentes; pendientes no son descartes, deduplicar sin renovar fechas.","tests":["tests/news-coverage-db.test.cjs"]},
-    {"code":"catalog-hash-baseline","status":"known-unrelated","failure":"La prueba V174 compara el catálogo con un hash histórico anterior a altas ya realizadas.","prevention":"No cambiar catálogo ni checksum para ocultar el fallo; distinguirlo de nuevas regresiones.","tests":["tests/editorial-redesign.test.cjs"]}
+    {
+      "code": "unfinished-as-blocked",
+      "status": "guarded",
+      "failure": "Una revisión incompleta se registró como bloqueo terminal para los 20 equipos.",
+      "prevention": "Completar un club por vez; timeout o trabajo pendiente permanece missing, saved se entrega intacto.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-recovery-db.test.cjs"
+      ]
+    },
+    {
+      "code": "early-dispatch-exit",
+      "status": "guarded",
+      "failure": "Un arranque anticipado consulta el turno anterior y termina sin abrir el nuevo.",
+      "prevention": "dispatch_gate, espera real fuera de transacción y planes nuevos; cada flujo independiente.",
+      "tests": [
+        "tests/dispatch-clock-db.test.cjs"
+      ]
+    },
+    {
+      "code": "mirrored-lineup",
+      "status": "guarded",
+      "failure": "Orden del HTML interpretado como izquierda-derecha del campo.",
+      "prevention": "Geometría real y anclas revisadas; nunca invertir todas las filas.",
+      "tests": [
+        "tests/forecast-layout.test.cjs"
+      ]
+    },
+    {
+      "code": "comuniate-null-as-published",
+      "status": "guarded",
+      "failure": "Confundir porcentaje ausente con cero o con un porcentaje publicado.",
+      "prevention": "Guardar null; fallback interno v5=50 solo titular de Comuniate sin porcentaje. Cero explícito se conserva.",
+      "tests": [
+        "tests/forecast-editorial-v5-db.test.cjs",
+        "tests/forecast-source-summary.test.cjs"
+      ]
+    },
+    {
+      "code": "comuniate-alternative-omitted",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Camavinga y Robert Navarro figuraban como alternativas en la lectura contrastada, pero su observación guardada era not_listed.",
+      "prevention": "Extraer .alternativo y exigir su inclusión literal antes de compilar. Revisión de identidad y porcentaje obligatoria.",
+      "tests": [
+        "tests/automation-methodology.test.cjs"
+      ]
+    },
+    {
+      "code": "bridge-json-truncated",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Respuesta grande transferida por stdin llegó truncada; JSON inválido cerca del carácter 4079.",
+      "prevention": "Adaptador fijo y archivo obligatorio para todas las respuestas; fragmentos íntegros y corrección del mismo request sin repetir SQL.",
+      "tests": [
+        "tests/automation-methodology.test.cjs",
+        "tests/automation-runtime.test.cjs"
+      ]
+    },
+    {
+      "code": "generic-source-explanation",
+      "status": "production-verified",
+      "failure": "La ficha perdió el detalle de cada fuente pese a conservar las observaciones privadas.",
+      "prevention": "source_summary generado por el servidor en titulares y candidatos; comparación íntegra de proyección.",
+      "tests": [
+        "tests/forecast-source-summary.test.cjs",
+        "tests/forecast-editorial-v5-db.test.cjs"
+      ]
+    },
+    {
+      "code": "news-incomplete-coverage",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Confundir tres índices o noticias del local con revisión completa de los 20 clubes.",
+      "prevention": "Ledger por hecho, cobertura por club y fuentes; pendientes no son descartes, deduplicar sin renovar fechas. En auditoría expected/checked/pending cuentan clubes del run completo; published cuenta artículos. Ops-v2 valida la coherencia de cobertura.",
+      "tests": [
+        "tests/news-coverage-db.test.cjs",
+        "tests/automation-audit-db.test.cjs"
+      ]
+    },
+    {
+      "code": "catalog-hash-baseline",
+      "status": "known-unrelated",
+      "failure": "La prueba V174 compara el catálogo con un hash histórico anterior a altas ya realizadas.",
+      "prevention": "No cambiar catálogo ni checksum para ocultar el fallo; distinguirlo de nuevas regresiones.",
+      "tests": [
+        "tests/editorial-redesign.test.cjs"
+      ]
+    },
+    {
+      "code": "sql-unsupported-argument",
+      "status": "regression-tested-awaiting-run",
+      "failure": "El agente añadió read_only al conector y la llamada fue rechazada.",
+      "prevention": "El adaptador construye únicamente los tres argumentos admitidos; rechaza destino o claves ajenas.",
+      "tests": [
+        "tests/automation-runtime.test.cjs"
+      ]
+    },
+    {
+      "code": "identity-review-not-retried",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Una identidad sin resolver dejó Athletic pendiente sin corregir la revisión.",
+      "prevention": "Listar nombres capturados y pedir una única corrección con el mismo paquete; no crear alias automático.",
+      "tests": [
+        "tests/forecast-producer.test.cjs"
+      ]
+    },
+    {
+      "code": "error-inspection-aborts",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Una segunda falla al consultar estado dentro del catch abortó el runner sin checkpoint.",
+      "prevention": "Un reintento solo de lectura; persistir unknown y progreso, no finish. Reanudar solo tras salida confirmada y plan vigente.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/automation-runtime.test.cjs"
+      ]
+    },
+    {
+      "code": "audit-duplicate-incident",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Cada checkpoint repetía un incidente cuando cambiaba su resumen.",
+      "prevention": "Upsert de incidente por flujo/código dentro de la misma ejecución; conservar último resumen y otras ejecuciones.",
+      "tests": [
+        "tests/automation-audit-db.test.cjs"
+      ]
+    }
   ]
 }

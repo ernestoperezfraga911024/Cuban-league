@@ -122,3 +122,30 @@ test('fixture comparison normalizes equivalent UTC offsets without changing the 
  assert.deepEqual(fixtureOf(a),fixtureOf({...a,kickoff_at:'2026-11-21T13:00:00Z'}));
  assert.notDeepEqual(fixtureOf(a),fixtureOf({...a,kickoff_at:'2026-11-21T14:00:00Z'}));
 });
+
+test('missing identity is corrected once against the same evidence before any save',async()=>{
+ const m=mockGateway();m.x.packet.observations.futbolfantasy[0].name='Observed full name';let reads=0,reviews=0;const packet=m.x.packet;
+ const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>{reads++;return packet;}}}),reviewTeam:async request=>{
+  reviews++;assert.strictEqual(request.packet,packet);assert.ok(request.identity_names.includes('Observed full name'));assert.deepEqual(m.calls,[]);
+  if(reviews===1){assert.equal(request.correction,null);return m.x.review;}
+  assert.equal(request.correction.attempt,1);assert.match(request.correction.reason,/Observed full name/);
+  return {...m.x.review,identities:{'Observed full name':m.x.roster[0].id}};
+ }});
+ assert.equal(reads,1);assert.equal(reviews,2);assert.equal(result.publication_complete,true);assert.equal(result.metrics.review_corrections,1);
+ for(const key of ['wall_ms','read_ms','review_ms','sql_ms','sql_calls'])assert.ok(Number.isInteger(result.metrics[key])&&result.metrics[key]>=0);
+});
+test('second identity failure stays missing without saving or blocking',async()=>{
+ const m=mockGateway();m.x.packet.observations.futbolfantasy[0].name='Unknown player';let reviews=0;
+ const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async()=>{reviews++;return m.x.review;}});
+ assert.equal(reviews,2);assert.equal(result.counts.missing,1);assert.deepEqual(m.calls,['finish']);assert.equal(result.publication_complete,false);
+});
+test('lost error inspection gets one read retry; persistent loss returns unknown and never finishes the run',async()=>{
+ for(const failures of [1,2]){
+  const m=mockGateway(),state=m.gateway.state;let failed=false,inspections=0,closed=false;const checkpoints=[];
+  m.gateway.state=async()=>{if(failed&&inspections++<failures)throw Error('Connection unavailable');return state();};
+  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){closed=true;},stats(){return{}}},collector:{collect:async()=>{failed=true;throw Error('Read unavailable');}}}),reviewTeam:()=>assert.fail(),onEvent:async e=>checkpoints.push(e)});
+  assert.equal(closed,true);assert.equal(checkpoints.length,1);assert.equal(result.publication_complete,false);
+  if(failures===2){assert.equal(result.interrupted,true);assert.equal(result.counts.unknown,1);assert.equal(result.counts.missing,0);assert.deepEqual(m.calls,[]);assert.equal(inspections,2);}
+  else{assert.equal(result.counts.missing,1);assert.deepEqual(m.calls,['finish']);}
+ }
+});

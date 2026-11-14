@@ -1,11 +1,14 @@
 'use strict';
-const {compile,concreteBlock} = require('./editorial-producer.cjs');
+const {compile,concreteBlock,EvidenceFailure} = require('./editorial-producer.cjs');
 const {isDeepStrictEqual:same} = require('node:util');
 const {verifyPublication} = require('./season-gateway.cjs');
 // The existing dispatcher opens the run. This runner never creates/reopens a run,
 // modifies a schedule/mode, or treats an unfinished review as a terminal block.
 async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
-  let reader, collector, completedLoop=false;
+  const startMs=Date.now(),timing={sql_ms:0,read_ms:0,review_ms:0,sql_calls:0,review_corrections:0};
+  const timed=async(key,fn)=>{const start=Date.now();try{return await fn();}finally{timing[key]+=Date.now()-start;}};
+  gateway=new Proxy(gateway,{get(target,key){const value=Reflect.get(target,key);return typeof value==='function'?(...args)=>{timing.sql_calls++;return timed('sql_ms',()=>value.apply(target,args));}:value;}});
+  let reader, collector, completedLoop=false,interrupted=null;
   const rows=[], started = await gateway.state();
   if (!started.run) throw Error('Open the authorized run through its existing dispatcher first');
   const expected = started.run.expected;
@@ -16,7 +19,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
   const notBefore = started.observed_at;
   const terminalRun = started.run.finished_at || started.recovery?.closed_at;
   if (![notBefore,windowStart,expiresAt].every(v=>Number.isFinite(Date.parse(v))) || !terminalRun && (Date.parse(notBefore) < Date.parse(windowStart) || Date.parse(notBefore) >= Date.parse(expiresAt))) throw Error('Outside real database execution window');
-  const event = value => onEvent(value);
+  const event = value => onEvent({...value,metrics:{...timing,wall_ms:Date.now()-startMs}});
   try {
     for (const team of expected) {
       let fresh=false, projection;
@@ -29,7 +32,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
             projection = state.draft?.run_key === gateway.runKey+'-'+team ? state.draft.projection : null;
             verifyPublication(state,team,projection);
           }
-          rows.push({team,outcome:attempt.outcome,new_publication:false}); continue;
+          rows.push({team,outcome:attempt.outcome,new_publication:false});await event(rows.at(-1));continue;
         }
         if (terminalRun) { rows.push({team,outcome:attempt?.outcome || 'missing',reason:'Run already closed'}); continue; }
         if (attempt && attempt.outcome !== 'saved') throw Error('Unknown attempt state: '+attempt.outcome);
@@ -39,27 +42,39 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
           const item = plan.teams.find(t => t.team === team);
           if (!item?.fixture) throw Error('Missing next fixture: requires public calendar review');
           if (!collector) ({reader,collector} = await makeCollector({runKey:gateway.runKey,notBefore,expiresAt}));
-          const packet = await collector.collect(item);
+          const packet = await timed('read_ms',()=>collector.collect(item));
           const roster = await gateway.roster(team);
-          let review;
-          for (let followups=0; ; followups++) {
-            review = await reviewTeam({packet,roster,window:{notBefore,expiresAt}});
-            if (!review?.follow) break;
-            if (followups >= 12) throw Error('Additional reading limit reached; review remains missing');
-            await collector.follow(packet,review.follow.from,review.follow.url);
+          let review,built,correction=null,followups=0;
+          for (;;) {
+            review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,
+              identity_names:[...new Set([
+                ...Object.values(packet.observations||{}).flat().map(p=>p.name),
+                ...(packet.comuniate_alternatives?.players||[]).map(p=>p.name),
+                ...(packet.predictions||[]).filter(p=>p.status==='complete_unvalidated').flatMap(p=>(p.data?.participacion||[]).map(p=>p.nombre?.trim()))
+              ].filter(Boolean))]}));
+            if(review?.follow){
+              if(followups++>=12)throw Error('Additional reading limit reached; review remains missing');
+              await timed('read_ms',()=>collector.follow(packet,review.follow.from,review.follow.url));continue;
+            }
+            if(!review||review.deferred)throw Error(review?.reason||'Editorial review incomplete');
+            state=await gateway.state(team);
+            if(state.attempts.some(a=>a.team===team))throw Error('Concurrent attempt appeared during reading');
+            if(review.failure)break;
+            try{built=compile(packet,review,roster,{notBefore,expiresAt,observedAt:state.observed_at});break;}
+            catch(error){
+              if(!(error instanceof EvidenceFailure)||correction)throw error;
+              correction={attempt:1,reason:error.message};timing.review_corrections++;
+              // One correction, same captured bodies/timestamps and same roster.
+              // Every validator runs again; no inferred aliases or bypass.
+            }
           }
-          // Missing semantic work or source failures are reported, never bulk-blocked.
-          if (!review || review.deferred) throw Error(review?.reason || 'Editorial review incomplete');
-          state = await gateway.state(team);
-          if (state.attempts.some(a => a.team === team)) throw Error('Concurrent attempt appeared during reading');
           if (review.failure) {
             const failure=concreteBlock(packet,review.failure),before=state.public;
             await gateway.block(team,failure.reason,failure.checks);
             const after=await gateway.state(team),a=after.attempts.find(a=>a.team===team);
             if (a?.outcome!=='blocked' || !same(before?.payload,after.public?.payload) || before?.published_at!==after.public?.published_at) throw Error('Block preservation could not be verified');
-            rows.push({team,outcome:'blocked',new_publication:false,reason:failure.reason});event(rows.at(-1));continue;
+            rows.push({team,outcome:'blocked',new_publication:false,reason:failure.reason});await event(rows.at(-1));continue;
           }
-          const built = compile(packet,review,roster,{notBefore,expiresAt,observedAt:state.observed_at});
           const validation = await gateway.validate(team,built.fixture,built.payload);
           projection = validation.projection;
           const all = [...built.payload.proposal.players,...built.payload.proposal.candidates];
@@ -83,14 +98,26 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
         const published=verifyPublication(state,team,projection,{fresh,notBefore});
         rows.push({team,outcome:attempt.outcome,new_publication:published,reason:attempt.reason || null});
       } catch (error) {
-        const state = await gateway.state(team);
-        const a = state.attempts.find(a => a.team === team);
-        rows.push({team,outcome:a?.outcome || 'missing',verified:false,new_publication:false,reason:error.message});
+        let state;
+        // Only retry this read. Never blindly retry save/deliver after a lost reply.
+        try{state=await gateway.state(team);}catch{
+          try{state=await gateway.state(team);}catch(inspectError){interrupted=inspectError.message;}
+        }
+        const a=state?.attempts.find(a=>a.team===team);
+        rows.push({team,outcome:state?(a?.outcome||'missing'):'unknown',verified:false,new_publication:false,reason:error.message});
       }
-      event(rows.at(-1));
+      await event(rows.at(-1));
+      if(interrupted)break;
     }
     completedLoop=true;
   } finally { reader?.close(); }
+  if(interrupted){
+    const counts={published:0,ready:0,blocked:0,missing:0,saved:0,unknown:0};
+    for(const team of expected){const row=rows.find(r=>r.team===team);counts[row?.outcome||'unknown']++;}
+    return {run_key:gateway.runKey,expected:expected.length,counts,publication_complete:false,interrupted:true,
+      reason:interrupted,verified_publications:rows.filter(r=>r.outcome==='published'&&r.verified!==false).length,
+      teams:rows,metrics:{...reader?.stats(),...timing,wall_ms:Date.now()-startMs}};
+  }
   const finish = !terminalRun && completedLoop ? await gateway.finish() : null;
   const finalState = await gateway.state();
   if (gateway.audit) {
@@ -117,6 +144,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
   return {run_key:gateway.runKey,started_at:notBefore,finished_at:finalState.observed_at,expected:expected.length,
     counts,verified_publications:rows.filter(r => r.outcome === 'published' && r.verified !== false).length,
     no_eligible_teams:expected.length===0,
-    publication_complete:expected.length>0 && counts.published === expected.length && rows.every(r => r.verified !== false),finish,teams:rows,metrics:reader?.stats() || null};
+    publication_complete:expected.length>0 && counts.published === expected.length && rows.every(r => r.verified !== false),finish,teams:rows,
+    metrics:{...reader?.stats(),...timing,wall_ms:Date.now()-startMs}};
 }
 module.exports={runSeason};
