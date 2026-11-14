@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v227-source-summary';
+const CACHE_NAME = 'cuban-league-v228-player-sheet';
 const APP_SHELL = [
   './',
   './index.html',
@@ -18,18 +18,18 @@ const APP_SHELL = [
   './audience-admin.css?v=219-20261113',
   './viewer-profile.js?v=219-20261113',
   './viewer-profile.css?v=219-20261113',
-  './forecast-publish.css?v=227-20261114',
+  './forecast-publish.css?v=228-20261114',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
   './forecast-round-core.js?v=224-20261113',
   './forecast-layout-repair.js?v=225-20261114',
-  './forecast-pitch.js?v=227-20261114',
+  './forecast-pitch.js?v=228-20261114',
   './forecast-season-public.js?v=226-20261114',
   './set-pieces-core.js?v=226-20261114',
   './set-pieces.js?v=226-20261114',
   './set-pieces.css?v=226-20261114',
   './forecast-context.js?v=222-20261113',
-  './forecast-context.css?v=222-20261113',
+  './forecast-context.css?v=228-20261114',
   './forecast-season-admin.js?v=212-20261112',
   './forecast-history-core.js?v=209-20261112',
   './forecast-history.js?v=209-20261112',
