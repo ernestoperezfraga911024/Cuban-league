@@ -2,7 +2,8 @@
 const fs=require('node:fs/promises'),path=require('node:path');
 const MAX_BYTES=2*1024*1024;
 // Large connector responses never travel as a long terminal input line.
-async function responseValue(message,{directory,id}){
+async function responseValue(message,{directory,id,requireFile=false}){
+ if(requireFile&&!Object.hasOwn(message,'result_file'))throw Error('File response required; use response_path/result_file');
  if(!Object.hasOwn(message,'result_file'))return message;
  if(Object.hasOwn(message,'result')||Object.hasOwn(message,'error')||message.result_file!==path.join(directory,id+'-response.json'))throw Error('Unexpected response file');
  const info=await fs.lstat(message.result_file);

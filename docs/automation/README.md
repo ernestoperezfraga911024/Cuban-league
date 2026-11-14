@@ -1,4 +1,4 @@
-# Metodología operativa — ops-v1
+# Metodología operativa — ops-v2
 
 Estado: 14/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
 
@@ -27,11 +27,17 @@ Estado: 14/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-leagu
 5. Diferenciar publicado verificado, privado ready, bloqueado por causa concreta, saved y faltante. Falta de tiempo o revisión incompleta queda pendiente, nunca bloqueo terminal masivo. Un `finished_at` no acredita 20/20.
 6. Checkpoint en la bitácora tras cada flujo y cierre final con contadores reales, métricas disponibles y pendientes. En fallo abrupto, el inicio sin cierre permite localizar la interrupción. No convertir un resultado parcial en completado para cerrar el informe.
 
-## Transporte de respuestas grandes
+## Puente obligatorio y reanudación acotada
 
-El runner emite `path` de solicitud y `response_path` para respuesta. Ejecutar el SQL exacto por la conexión autorizada. Parsear el resultado completo en código, sin imprimirlo ni copiarlo del texto recortado del terminal. Escribir en `response_path` JSON UTF-8 `{"result":VALOR_REAL}` o `{"error":"ERROR_REAL"}`. Enviar por stdin únicamente `{"id":"ID_EMITIDO","result_file":"RESPONSE_PATH_EMITIDO"}`. El runner admite hasta 2 MiB, comprueba ruta/ID y rechaza archivos truncados o enlaces simbólicos. No fabricar llaves de cierre ni campos perdidos. La respuesta inline se conserva solo para valores pequeños.
+Usar `scripts/forecast/connector-bridge.cjs` mediante la receta de `connector-bridge.md`. El adaptador lee la solicitud, construye exactamente `{link_id,project_id,query}`, ejecuta el conector y conserva la respuesta completa en archivo privado por fragmentos. No añadir `read_only` ni otros argumentos; no reenviar manualmente JSON visible. Todas las respuestas SQL y review, incluso pequeñas, se envían por `response_path/result_file`. El runner rechaza inline y archivos truncados, rutas ajenas o enlaces simbólicos. Un error de formato permite corregir el archivo de la misma solicitud sin repetir SQL; al tercer mensaje inválido esa solicitud falla.
 
-Conservar el evento `team`, la revisión y `result.json` hasta registrar el resumen duradero. No guardar HTML, SQL completo, tokens o credenciales en la bitácora. No suprimir las comparaciones de payload para reducir tamaño. Si una herramienta truncó la respuesta en origen, volver a leer el estado necesario en partes por la vía autorizada; no ejecutar de nuevo una mutación a ciegas.
+Una instancia significa **una instancia concurrente**, no prohibición de reanudar después de una salida. Si el proceso termina, comprobar su salida y leer `checkpoint.json`/`result.json`. Consultar de nuevo plan, estado y ventana reales. Se permite como máximo **un reinicio correctivo por invocación**, solo tras resolver la causa, sin otro proceso activo, con el mismo código y run_key autorizado y el contexto de recuperación vigente. Si la ventana terminó, usar exclusivamente `resume_incomplete` cuando el servidor lo autorice. No forzar una clave, renovar evidencia, reabrir un turno ni repetir una mutación cuya respuesta se perdió. Saved se entrega intacto; terminales se verifican y saltan. Ante otro corte, dejar pendientes y continuar los demás flujos.
+
+Cada revisión recibe `identity_names` y, ante un fallo del productor, una sola solicitud `correction` con la razón exacta. Revisar el nombre contra el roster y perfiles enlazados auténticos; devolver una revisión completa corregida usando el mismo paquete y fechas. No crear aliases automáticos ni bajar controles. Si falla de nuevo queda missing, no blocked. La lista es ayuda para titulares/alternativas capturadas/P11; también revisar las alternativas añadidas manualmente en otras fuentes.
+
+Tras una excepción, el runner consulta el estado y admite un solo reintento de esa lectura. Si ambas consultas fallan, guarda un checkpoint conservador `unknown` y se detiene sin llamar finish ni convertir incertidumbre en missing/publicado. Los eventos `team` se guardan antes de continuar; el checkpoint local es para diagnóstico, nunca sustituye el estado de la base. Conservar revisiones y resultados hasta registrar un resumen duradero. No guardar HTML, SQL completo, tokens o credenciales en la bitácora.
+
+Los tiempos medidos `read_ms`, `review_ms` y `sql_ms` son tiempos acumulados de cada fase; SQL incluye la espera del puente. `wall_ms` es duración total. `sql_calls` cuenta solicitudes del gateway, no todas las herramientas de la conversación; no copiarlo como `tool_calls`. `review_corrections` no es un contador de reintentos HTTP. Métricas no disponibles siguen siendo null.
 
 ## Mejora continua y reutilización
 
@@ -44,3 +50,7 @@ Para comparar eficiencia: duración de pared, fase de lectura/revisión/SQL cuan
 La plantilla reutilizable para futuros procesos es: plan/clave idempotente → lectura → interpretación validada → escritura mínima → entrega verificada → métricas/incidencias → corrección con prueba. Cada nuevo proyecto define su destino, alcance y permisos; no hereda autorización para escribir en Cuban League u otros proyectos.
 
 Balón parado es un workflow independiente, determinista, descrito en `../set-pieces.md`; no duplicar sus dos descargas desde esta tarea. Su feed y los logs de Actions conservan trazabilidad. Sus fallos se revisan con los mismos criterios y pruebas específicas.
+
+## Verificación del mantenimiento ops-v2 (14/11/2026)
+
+164 pruebas relacionadas aprobadas, incluidas las regresiones nuevas y los controles de interfaz/contexto existentes. Una prueba de solo lectura con el conector real transfirió íntegros 95.000 caracteres Unicode; stdin recibió únicamente 73 caracteres de ID/ruta. No publicó una alineación ni acredita una ejecución completa de 20 clubes. Las incidencias que requieren ese recorrido permanecen `regression-tested-awaiting-run`. La duración de esa prueba no es una medición de ahorro del proceso completo.

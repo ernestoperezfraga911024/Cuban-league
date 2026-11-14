@@ -28,25 +28,29 @@ no en este script. No codificar horarios de noticias como horarios de probables.
    `run_key` devuelto y, si corresponde, su `recovery_request`. Este runner no llama
    `begin_run`, `begin_recovery`, `resume_incomplete` ni mantenimiento. No crea
    claves ni reabre turnos. Una recuperación se pasa en todas las transacciones.
-3. Ejecutar **una instancia** en un checkout revisado del código, con dependencias
+3. Ejecutar **una instancia concurrente** en un checkout revisado del código, con dependencias
    de package-lock instaladas. El proceso no depende de archivos de otro turno:
 
    ```text
    node scripts/run-forecast-season.cjs --existing-run RUN_KEY [RECOVERY_UUID]
    ```
 
-4. El puente emite líneas JSON con `event`, `id`, `path`. Leer el archivo señalado
-   y responder por la misma entrada estándar `{"id":"…","result":…}`. Los tipos:
-   - `sql`: objeto `{link_id,project_id,query}`. Ejecutarlo únicamente mediante la
-     conexión existente a Cuban League, sin modificar SQL, contexto ni destino.
-     Responder con el valor de la columna **result**, no con el envoltorio textual
-     de la herramienta ni con el resultado de set_config/register_fixture. Un
-     error SQL/de transporte se devuelve como `{"id":"…","error":"…"}`.
-   - `review`: paquete recién leído, roster autorizado y ventana. Leer los cuerpos
-     `packet.docs[*].path`, revisar su contenido y devolver el contrato inferior.
-     No copiar propuestas, timestamps ni payloads de diagnósticos anteriores.
-   - `team` y `finished`: resultados verificados y ruta del informe final. El
-     timeout de una respuesta deja trabajo pendiente; no autoriza bloquear clubes.
+4. El puente emite `event`, `id`, `path`, `response_path` y `response_format:file`.
+   Usar obligatoriamente el adaptador de `../automation/connector-bridge.md`:
+   - `sql`: el adaptador valida y envía exactamente `{link_id,project_id,query}` al
+     conector existente, extrae el valor completo de la columna result y escribe
+     la respuesta por fragmentos en archivo privado. Nunca añadir `read_only`.
+   - `review`: leer los cuerpos `packet.docs[*].path`, el roster, la ventana e
+     `identity_names`; devolver la revisión completa mediante `bridge.reply`.
+     Si llega `correction`, revisar su razón y corregir una sola vez con el mismo
+     paquete y fechas. No inventar identidades ni descartar candidatos observados.
+   - Solo `{"id":"…","result_file":"RUTA_EMITIDA"}` pasa por stdin. Inline no se
+     admite. `bridge_error` permite corregir el archivo pendiente sin repetir SQL;
+     la tercera respuesta inválida falla. Un error real se envía por archivo como
+     `{"error":"ERROR_REAL"}`, nunca como éxito vacío.
+   - `team`, `finished` e `interrupted` indican progreso y rutas de informe/checkpoint.
+     Si se perdió la conexión y no puede leerse estado tras un reintento, la salida
+     es partial/unknown; no llama finish ni afirma que faltan o se publicaron clubes.
 5. El proceso hace un club completo antes del siguiente. `saved` se entrega
    intacto, incluso si usa otro método. Terminales se verifican y saltan. Cada
    mutación vuelve a comprobar el intento, el plan y recuperaciones superpuestas
@@ -205,7 +209,7 @@ Los eventos sql/review incluyen ahora `response_path`. Para respuestas grandes,
 guardar ahí `{"result":VALOR_COMPLETO}` y responder por stdin
 `{"id":"ID","result_file":"RUTA_EMITIDA"}`. El archivo se lee íntegro y solo se
 acepta la ruta de esa solicitud. No copiar JSON truncado de una salida visible.
-Las respuestas inline pequeñas siguen siendo compatibles.
+Todas las respuestas, incluidas las pequeñas, usan archivo; el runner rechaza inline desde ops-v2.
 
 El paquete incluye `comuniate_alternatives` con cuerpo/hash/fecha y nombres/%
 extraídos de `.alternativo`. Su presencia es obligatoria en nuevas compilaciones:
@@ -214,3 +218,15 @@ null. El control no resuelve identidades ni sustituye la revisión semántica; e
 que una lista observada desaparezca silenciosamente. Guardar un borrador antiguo
 no se repite para añadir estos controles. Ambas protecciones tienen regresión
 local; su uso completo en una próxima publicación real sigue pendiente.
+
+## Recuperación operativa ops-v2
+
+Después de una salida confirmada se admite un único reinicio correctivo por
+invocación, sin otra instancia activa, tras releer plan/estado/ventana reales y
+corregir la causa. Conservar SHA, run_key autorizado y recovery_request vigente.
+Fuera de ventana solo `resume_incomplete` autorizado. El checkpoint local no
+permite saltarse esas consultas ni volver a publicar intentos terminales.
+Las pruebas de transporte, corrección única y corte están en
+`tests/automation-runtime.test.cjs` y `tests/forecast-producer.test.cjs`.
+La corrección SQL de la bitácora se prueba en `tests/automation-audit-db.test.cjs`.
+Pasar estas pruebas no acredita una nueva publicación de los 20 clubes.
