@@ -190,6 +190,20 @@ test('context arrivals preserve an opened player and the keyboard focus',async()
 
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const [asset,version] of Object.entries({'forecast-context.js':'222-20261113','forecast-context.css':'222-20261113','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'225-20261114','forecast-season-public.js':'222-20261113'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
+ for(const [asset,version] of Object.entries({'forecast-context.js':'222-20261113','forecast-context.css':'222-20261113','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'225-20261114','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
+});
+
+test('an optional set-piece failure leaves the XI, news and player details usable',async()=>{
+ const {dom,w}=browser();try{
+  const p=publication('real-madrid');let attempts=0;
+  w.CubanSetPieces={mount(){attempts++;throw Error('Optional panel unavailable');}};
+  setup(w,async u=>serve(u,{articles:[news(p.players[0].id,'injured')]}));
+  w.document.body.dataset.section='forecasts';await settle();
+  assert.ok(attempts>0);assert.equal(w.document.querySelectorAll('.fp-player').length,11);
+  assert.ok(w.document.querySelector('.fc-story'));
+  const player=w.document.querySelector('.fp-player');player.click();await tick();
+  assert.equal(w.document.querySelector('.fp-detail').hidden,false);
+  w.document.querySelector('.fp-detail .fp-link').click();assert.equal(w.document.querySelector('.fp-detail').hidden,true);
+ }finally{dom.window.close();}
 });

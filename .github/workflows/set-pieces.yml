@@ -1,0 +1,65 @@
+name: Cuban League · Balón parado
+
+on:
+  schedule:
+    - cron: '37 12 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'set-pieces*'
+      - 'scripts/*set-pieces.cjs'
+      - 'scripts/set-pieces/**'
+      - 'tests/set-pieces*.test.cjs'
+      - 'tests/fixtures/set-pieces/**'
+      - 'data/set-pieces.json'
+      - 'forecast-season-public.js'
+      - '.github/workflows/set-pieces.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'set-pieces*'
+      - 'scripts/*set-pieces.cjs'
+      - 'scripts/set-pieces/**'
+      - 'data/set-pieces.json'
+      - '.github/workflows/set-pieces.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: set-pieces-${{ github.event_name == 'pull_request' && github.ref || 'publication' }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: node --test tests/set-pieces*.test.cjs tests/forecast-context.test.cjs
+
+  refresh:
+    needs: verify
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'ernestoperezfraga911024/Cuban-league'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - name: Actualizar únicamente el archivo público de balón parado
+        run: node scripts/publish-set-pieces.cjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

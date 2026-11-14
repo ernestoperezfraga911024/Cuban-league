@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v225-pitch-orientation';
+const CACHE_NAME = 'cuban-league-v226-set-pieces';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,7 +24,10 @@ const APP_SHELL = [
   './forecast-round-core.js?v=224-20261113',
   './forecast-layout-repair.js?v=225-20261114',
   './forecast-pitch.js?v=225-20261114',
-  './forecast-season-public.js?v=222-20261113',
+  './forecast-season-public.js?v=226-20261114',
+  './set-pieces-core.js?v=226-20261114',
+  './set-pieces.js?v=226-20261114',
+  './set-pieces.css?v=226-20261114',
   './forecast-context.js?v=222-20261113',
   './forecast-context.css?v=222-20261113',
   './forecast-season-admin.js?v=212-20261112',
@@ -171,7 +174,13 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  if (url.pathname.endsWith('/data/set-pieces.json')) {
+    event.respondWith(fetch(request, {cache:'no-store'}));
+    return;
+  }
+
   if (
+    /\/set-pieces(?:-core)?\.(?:js|css)$/.test(url.pathname) ||
     /\/second-division(?:-core|-admin)?\.(?:js|css)$/.test(url.pathname) ||
     url.pathname.endsWith('/styles.css') ||
     url.pathname.endsWith('/mobile-navigation.css') ||
