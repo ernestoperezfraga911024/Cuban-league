@@ -12,6 +12,7 @@ function example(team='test-home') {
     packet.observations[id]=roster.slice(0,11).map(p=>({name:p.name,probability:null}));
     review.sources[id]={fixture_sha256:doc.sha256,lineup_sha256:doc.sha256,season:fixture.season,observed_fixture:fixtureOf(fixture),forecast:true,alternatives_complete:true,alternatives:[{name:roster[11].name,probability:null}]};
   }
+  packet.comuniate_alternatives={...packet.docs.comuniate_team,players:structuredClone(review.sources.comuniate.alternatives)};
   let offset=0;
   const points=[1,4,2,3,1].flatMap((count,y)=>Array.from({length:count},(_,i)=>({name:roster[offset++].name,kind:'starter',x:100*(i+.5)/count,y})));
   packet.layouts={jornadaperfecta:{...packet.docs.jornadaperfecta,points}};

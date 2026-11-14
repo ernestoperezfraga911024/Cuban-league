@@ -1,0 +1,76 @@
+VERIFICACIÓN DE COBERTURA POR CLUB: las páginas de partido de Jornada Perfecta pueden mostrar noticias solo del equipo local. Comprueba el encabezado real; no atribuyas ese índice al visitante. Contrasta con los índices generales recientes, la categoría y artículos del club. Si una categoría devuelve contenido antiguo, no la presentes como cobertura actual suficiente.
+
+ANEXO NOTICIAS — SITUACIÓN FÍSICA POR JUGADOR
+Este anexo amplía solo el contenido opcional de players en Noticias para mostrar la situación del futbolista junto al once y al resto de su plantilla. Conserva íntegramente fuentes, ventanas de ejecución, funciones autorizadas, modo Automático/Manual, retiradas, deduplicación y reglas editoriales. No cambia porcentajes ni métodos de alineaciones, historial, horarios o catálogo. No crea tareas, PR ni migraciones, ni autoriza reabrir un turno completado o la carga inicial.
+
+Al leer el cuerpo de una novedad relevante sobre el estado físico, añade a la entrada del jugador afectado en payload.players:
+"health":{"status":"doubt|injured|available","event_date":"YYYY-MM-DD","detail":"Hecho breve propio y atribuido, 10..500 caracteres","refs":["URL_REAL_INCLUIDA_EN_SOURCES"]}.
+No lo añadas a los compañeros citados como sustitutos. No deduzcas el estado de una categoría, titular, porcentaje, rumor o mera ausencia de noticias. Todas las referencias han de pertenecer a fuentes realmente leídas de ese payload.
+
+doubt: duda física actual descrita por la fuente (molestias, prueba pendiente o disponibilidad incierta).
+injured: lesión vigente o baja física acreditada por la lectura. No rebajar un diagnóstico publicado a molestias.
+available: información posterior que confirma el alta o que puede jugar, atribuida a quien lo confirma. El trabajo parcial o individual, la mejoría y una convocatoria por sí solos no son un alta. La confirmación de disponibilidad no exige cambiar certainty a confirmed: esa etiqueta sigue exigiendo lectura de fuente oficial directa.
+
+event_date es la fecha original del hecho en la fuente, NO fetched_at ni la fecha del guardado. Si no se puede establecer, omite health y conserva la noticia. detail conserva diagnóstico, estado y plazo estimado con su atribución cuando consten; incluye la diferencia entre plazo editorial y parte oficial. En dos cambios del mismo día verifica su orden real antes de actualizar; no publiques una versión anterior como posterior. Ante discrepancia física no resuelta usa doubt y explica las versiones, sin inventar un alta. Un traslado o rumor de fichaje nunca genera health.
+
+Cuando haya nueva evidencia del mismo proceso, conserva la key del acontecimiento, actualiza health para el jugador y explica el cambio real en change_note. Un alta posterior reemplaza la marca de lesión/duda al refrescar la página. No renueves fechas ni publiques duplicados para conseguir un icono. Las noticias anteriores sin health siguen visibles sin marca; añade el campo al publicar una novedad factual verificada, no mediante inferencias retrospectivas o escrituras directas. Mantén el límite de 16 KiB y las funciones instaladas save_draft/deliver. No trates estados o supuestos de los tests como noticias reales.
+FIN DEL ANEXO DE SITUACIÓN FÍSICA
+
+
+REGLA EDITORIAL DE NOTICIAS — RESUMEN COMPLETO DE LAS TRES FUENTES
+Ernesto precisa que se conserven FutbolFantasy, Jornada Perfecta y Comuniate; la mejora solicitada es la calidad del resumen. No descartar, ocultar ni reemplazar una fuente por otra. Puedes empezar la lectura por FutbolFantasy, pero consulta y combina la información relevante de las tres sin convertir ese orden en una exclusión. Esta regla afecta solo a Noticias; no cambia pesos ni cálculos de alineaciones.
+
+Lee el cuerpo completo de las noticias seleccionadas y agrupa las coberturas del mismo acontecimiento. Conserva los datos útiles de cada fuente y enlaza las que realmente utilices. No atribuyas una lectura a un índice, titular o fragmento. Si el acceso falla, permite una segunda lectura normal desde el enlace público del índice/equipo; no eludas bloqueos ni finjas acceso.
+
+Para lesiones, resume diagnóstico, estado actual, duración o intervalo estimado, quién lo estima, si lo confirma el club y consecuencias razonables para próximos partidos, cuando consten. Un plazo de 3–4 semanas debe conservarse como estimación atribuida, no reducirse a “varias semanas” ni omitirse por no ser oficial. No conviertas una duración orientativa en un plazo médico individual confirmado. Distingue el diagnóstico publicado de la incertidumbre del regreso. No conviertas una lesión con parte en simples molestias.
+
+Para ruedas de prensa, conserva las decisiones concretas, jugadores afectados y partido o plazo al que se refiere el técnico. Para fichajes, conserva el origen del rumor y su estado real sin cambiar el club del jugador. Usa título propio, resumen claro y lectura fantasy breve; evita llenar el resumen con advertencias genéricas que sustituyan datos relevantes.
+
+Si las fuentes coinciden, sintetiza sin repetir. Si discrepan en plazo o estado, atribuye las versiones y explica la diferencia, sin promediarlas ni inventar consenso. Una fuente oficial directa y posterior tiene prioridad factual para una confirmación, pero las estimaciones editoriales relevantes pueden explicarse con su atribución. Conserva la fecha original de cada información y la hora real de consulta.
+
+CORRECCIÓN PENDIENTE PARA EL PRÓXIMO TURNO VÁLIDO DE NOTICIAS:
+Revisa la noticia existente key=osasuna-aitor-gemelo-20261112. Vuelve a leer https://www.futbolfantasy.com/laliga/noticias/154650-parte-medico-oficial-de-aitor-fernandez-y-periodo-estimado-de-baja y https://www.jornadaperfecta.com/blog/aitor-fernandez-lesion-osasuna/ con sus horas reales. La lectura del 12/11 mostraba lesión en el gemelo interno derecho y orientación de 3–4 semanas en FF, sin plazo ni grado oficial del club. Si sigue vigente, actualiza ESA MISMA key para incluir el intervalo como orientación de FutbolFantasy, su carácter no oficial y la fecha original. Conserva los enlaces de FF y JP, y añade Comuniate si su artículo aporta hechos relevantes efectivamente leídos. Conserva el modo y la retirada; publica solo mediante las funciones instaladas y dentro de un turno válido. Si ya contiene esa corrección, no repetirla ni renovar fechas sin novedad. No reabrir la carga inicial, inventar un run_key ni modificar tablas directamente.
+FIN DE REGLA DE RESUMEN COMPLETO
+
+Ejecuta los dos flujos independientes autorizados: Noticias y alineaciones/historial. Las restricciones del protocolo de alineaciones que dicen no ampliar a noticias se refieren solo a ese flujo; la sección NOTICIAS siguiente autoriza expresamente su actualización separada. Completa ambos planes antes de terminar, aunque el otro no tenga turno.
+
+NOTICIAS — COBERTURA COMPLETA Y REANUDABLE AUTORIZADA EL 13/11/2026
+Esta sección sustituye el protocolo anterior de Noticias y elimina sus límites de 20 acontecimientos por turno y dos por equipo. Noticias abre turnos a las 08:00, 11:00 y 15:00 America/New_York. Las ejecuciones horarias existentes también retoman pendientes según league_news.plan(). No cambia alineaciones, métodos, salud, historial, catálogo ni sus horarios. Consulta este plan antes de cualquier salida global. Cero costes o servicios nuevos; solo navegación pública y conexiones existentes. No crear tareas, PR, migraciones, infraestructura ni cambiar permisos durante las ejecuciones periódicas. No enviar mensajes a terceros.
+Destino exclusivo Supabase link_id=link_6aad67ea13208191b8315f9bb7f2cce7 project_id=pyahosamoisqcbpvzwka; no USATAX. No leer secretos ni suplantar administradores. Escrituras autorizadas: league_news.begin_run, record_event, record_team, save_draft, deliver y finish_run. begin_exception requiere autorización interactiva expresa: NUNCA llamarlo desde la tarea periódica.
+
+1. PLAN Y CONTINUIDAD
+Consulta select now() as observed_at,league_news.plan() as news_plan;. Respeta run_key y pendientes devueltos. No inventes claves, reabras turnos terminados ni cambies fechas. Si run_key=null o completed=true, omite Noticias sin omitir los otros flujos. Si hay trabajo, llama begin_run(RUN_KEY). Consulta la cobertura y el ledger privados del run usando el contrato instalado de coverage.sql. Si faltan esas funciones, informa el bloqueo; no sustituyas la auditoría por escrituras directas.
+Tras begin_run vuelve a consultar plan(): el primer plan de un turno nuevo puede tener teams vacío antes de inicializar sus 20 clubes. Entrega primero borradores ready pendientes con deliver(key), sin reescribir contenido ni fechas. Manual/retirado permanece privado. Una evidencia vencida exige nueva lectura real si necesita nuevo guardado. No repitas publicaciones verificadas.
+
+2. REVISIÓN DE LOS 20 CLUBES
+Lee realmente los índices públicos:
+https://www.futbolfantasy.com/laliga/noticias
+https://www.jornadaperfecta.com/blog/categoria/ultimas-noticias/
+https://www.comuniate.com/
+Recorre enlaces de paginación, categoría o equipo hasta cubrir el periodo pendiente, sin detenerte en los primeros titulares. Revisa los 20 IDs de forecast_league.teams, también los clubes sin noticias publicadas. Un índice realmente leído puede reutilizarse entre clubes conservando su hora; completa con páginas del club cuando el índice no permita descartar omisiones. Consultar tres portadas no equivale a revisar los 20 clubes.
+Busca desde la última revisión COMPLETA de contrato2 (20 clubes revisados y sin fuentes parciales), con 24 horas de solapamiento. Los turnos históricos que solo acreditan tres índices no cumplen esta condición. Si nunca hubo revisión completa de 20 clubes, cubre al menos las últimas 72 horas. Recupera asuntos relevantes pendientes con su fecha original. Revisa el ledger que el servidor traslade de turnos vencidos; no renueves contenido antiguo sin novedad.
+Prioriza ruedas de prensa, decisiones de titularidad/rotación, lesiones, recuperaciones, entrenamientos y fichajes. Incluye rumores atribuidos y etiquetados. Una crónica solo genera noticia cuando aporta hechos de estos temas. No hay máximo editorial por club ni por turno. No inventes novedades para llenar clubes.
+
+3. LOTES Y AUDITORÍA
+Reparte clubes independientes en paralelo si hay agentes, con un coordinador de escrituras. Procesa lotes pequeños (por ejemplo cinco hechos), guardando, entregando y verificando cada noticia antes de continuar. No esperes a tener los 20 clubes redactados para guardar progreso.
+Registra cada acontecimiento relevante descubierto con record_event(RUN_KEY,{key,team,status:"pending",urls:[URLS_REALES],fetched_at:ISO_REAL,reason:TEXTO_10_A_500}). Mantén una key estable por jugador/club/acontecimiento. Tres medios del mismo hecho son una noticia. Deduplica también contra league_news.items por key y contenido; recent es una ventana limitada, no todo el histórico.
+Para enlaces descartados usa status:"omitted" y motivo concreto: duplicado del acontecimiento KEY, sin novedad factual, fuera de alcance o información superada. En duplicados añade duplicate_of:"KEY_EXISTENTE" y usa otra key de auditoría estable para el enlace omitido; no sustituyas el estado del acontecimiento publicado. No uses omitted para falta de tiempo, lectura incompleta o error técnico: son pending/failed para retomar. No declares lectura completa a partir de un titular. Si falla una fuente, permite un segundo acceso público normal; después registra el fallo real, continúa con hechos verificables y declara cobertura parcial. No eludas bloqueos.
+
+4. INFORMACIÓN SUFICIENTE SIN SALIR DE CUBAN LEAGUE
+Lee los cuerpos completos y combina los datos útiles de las tres fuentes realmente consultadas. Puedes empezar por FutbolFantasy sin excluir Jornada Perfecta ni Comuniate. Título, resumen e interpretación propios; no copiar artículos, párrafos ni fotos.
+El resumen explica qué pasó, afectados, estado actual, plazo o partido y siguiente paso conocido. En lesiones conserva diagnóstico y duración estimada, atribuyendo quién estima y distinguiendo plazo oficial. En ruedas de prensa conserva decisiones y nombres concretos. En fichajes conserva origen y estado real del rumor. Si discrepan, atribuye versiones sin inventar consenso. No sustituyas hechos con advertencias genéricas. Los enlaces sirven para comprobar y ampliar, no para completar un resumen vacío.
+Resuelve IDs y nombres exactos en forecast_league.roster. No inventes fichas ni cambies clubes por rumores. Si falta identidad, permite players:[] y nombre explícito en resumen, registrando alta pendiente.
+
+5. GUARDAR Y PUBLICAR
+Payload máximo16KiB:
+{"key":"clave-estable-del-hecho","season":"2026-27","team":"ID_CLUB","category":"press|injury|recovery|training|rotation|transfer","certainty":"confirmed|reported|doubt|rumor","title":"12..150 caracteres","summary":"20..900 caracteres propios y completos","impact":"10..500 caracteres de lectura fantasy","players":[{"id":"ID_ROSTER","name":"NOMBRE_CANONICO"}],"sources":[{"name":"Medio","kind":"media|official","url":"URL_REAL","fetched_at":"ISO_REAL","published_at":null,"published_label":"Fecha observada; señalar zona no especificada si procede","source_updated_at":null}],"change_note":"Primera publicación o cambio factual, máximo180 caracteres"}
+Confirmed exige fuente oficial directa leída; un medio que cita un parte se atribuye como reported. Molestias, trabajo individual o ausencia en Copa/selección no confirman baja en LaLiga. Rumor solo transfer. No modificar porcentajes. El anexo de salud permanece vigente.
+fetched_at es la consulta real, no el guardado. published_at solo con fecha/hora/zona fiables; si no, null y etiqueta original. source_updated_at=null si no consta. Evidencia con menos de dos horas al guardar. Usa delimitadores SQL seguros ausentes del JSON.
+Llama save_draft(RUN_KEY,PAYLOAD), deliver(KEY) y verifica league_news.items y public.news_public. El ledger se vincula al guardado/entrega. Published exige fila pública visible con payload esperado; unchanged no es publicación nueva. Manual/retirado queda ready. Conserva fallos concretos y continúa con otras noticias.
+
+6. CIERRE SIN FALSOS COMPLETADOS
+Tras revisar un club llama record_team(RUN_KEY,{team,checks:[{id:"futbolfantasy|jornadaperfecta|comuniate",url:URL_REAL,status:"read|unavailable",fetched_at:ISO_REAL}],note:TEXTO_10_A_500}). Exactamente las tres fuentes con fechas y evidencia reales del índice/club consultado. Registra antes sus novedades y descartes. Un club sin novedades también exige revisión real. No copies comprobaciones inexistentes ni marques read si no se leyó.
+Llama finish_run(RUN_KEY,CHECKS_DE_TRES_INDICES). El servidor exige todos los clubes y ausencia de pendientes/fallidos; si falta trabajo conserva incompleto. No fuerces completed ni borres pendientes. Tras terminar, reconsulta plan(): puede quedar otro turno vigente. Una fuente inaccesible se comunica como cobertura parcial.
+Verifica payloads públicos y news_status.progress. Informa hora Miami, clubes revisados/esperados, nuevas, actualizadas, sin cambios, privadas, descartadas y pendientes, además de limitaciones. No declares "todo actualizado" por una marca global. Ante interrupción deja cola persistida y enumera pendientes. Cero noticias nuevas es válido tras revisión registrada.
+FIN DE NOTICIAS — COBERTURA COMPLETA
+

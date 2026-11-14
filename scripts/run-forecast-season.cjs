@@ -4,6 +4,7 @@
 // Supabase connector and returns the result. No personal credentials or new service.
 const fs=require('node:fs/promises'),path=require('node:path'),{tmpdir}=require('node:os');
 const readline=require('node:readline');
+const {responseValue}=require('./forecast/bridge-response.cjs');
 const {SeasonGateway}=require('./forecast/season-gateway.cjs');
 const {runSeason}=require('./forecast/season-workflow.cjs');
 const {ReadSession}=require('./forecast/read-session.cjs');
@@ -17,9 +18,10 @@ async function main() {
   const emit=value=>process.stdout.write(JSON.stringify(value)+'\n');
   const rl=readline.createInterface({input:process.stdin});
   const rejectAll=reason=>{for(const p of pending.values()){clearTimeout(p.timer);p.reject(Error(reason));}pending.clear();};
-  rl.on('line',line=>{
+  rl.on('line',async line=>{
     try {const m=JSON.parse(line),p=pending.get(m.id);if(!p)throw Error('Unknown response id');
-      clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(String(m.error))):p.resolve(m.result);
+      const value=await responseValue(m,{directory,id:m.id});
+      clearTimeout(p.timer);pending.delete(m.id);value.error?p.reject(Error(String(value.error))):p.resolve(value.result);
     } catch(error){rejectAll(error.message);}
   });
   rl.on('close',()=>{closed=true;rejectAll('Input closed; resume existing saved/missing attempts');});
@@ -29,7 +31,7 @@ async function main() {
     await fs.writeFile(file,JSON.stringify(body),{flag:'wx',mode:0o600});
     return new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{pending.delete(id);reject(Error(kind+' response timed out; state must be reread'));},300000);
-      pending.set(id,{resolve,reject,timer});emit({event:kind,id,path:file});
+      pending.set(id,{resolve,reject,timer});emit({event:kind,id,path:file,response_path:path.join(directory,id+'-response.json')});
     });
   }
   const gateway=new SeasonGateway({runKey,recoveryRequest:recoveryRequest||null,execute:args=>request('sql',args)});

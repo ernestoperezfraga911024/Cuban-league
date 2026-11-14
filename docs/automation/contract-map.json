@@ -1,0 +1,101 @@
+{
+  "archived_prompt_sha256": "52d4991864fbcea8246786827133091dfd9c457aefbc0a32beeb579a722dea24",
+  "groups": {
+    "startup": [
+      "common",
+      "clock",
+      "schedule",
+      "recovery"
+    ],
+    "forecasts": [
+      "runner",
+      "method",
+      "forecast",
+      "candidates"
+    ],
+    "news": [
+      "coverage",
+      "news_health",
+      "news_editorial",
+      "news"
+    ],
+    "health": [
+      "health"
+    ],
+    "history": [
+      "history"
+    ]
+  },
+  "sections": [
+    {
+      "id": "runner",
+      "start": 0,
+      "end": 2720
+    },
+    {
+      "id": "coverage",
+      "start": 2720,
+      "end": 3092
+    },
+    {
+      "id": "method",
+      "start": 3092,
+      "end": 5162
+    },
+    {
+      "id": "clock",
+      "start": 5162,
+      "end": 7021
+    },
+    {
+      "id": "schedule",
+      "start": 7021,
+      "end": 7398
+    },
+    {
+      "id": "recovery",
+      "start": 7398,
+      "end": 12028
+    },
+    {
+      "id": "health",
+      "start": 12028,
+      "end": 17540
+    },
+    {
+      "id": "news_health",
+      "start": 17540,
+      "end": 20391
+    },
+    {
+      "id": "news_editorial",
+      "start": 20391,
+      "end": 23948
+    },
+    {
+      "id": "news",
+      "start": 23948,
+      "end": 32451
+    },
+    {
+      "id": "common",
+      "start": 32451,
+      "end": 34542
+    },
+    {
+      "id": "history",
+      "start": 34542,
+      "end": 41759
+    },
+    {
+      "id": "forecast",
+      "start": 41759,
+      "end": 60379
+    },
+    {
+      "id": "candidates",
+      "start": 60379,
+      "end": 63867
+    }
+  ]
+}

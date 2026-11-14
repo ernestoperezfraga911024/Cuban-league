@@ -194,3 +194,23 @@ nuevo ni leer fuentes/guardar/entregar. Resultado: no_eligible_teams=true,
 publication_complete=false, todos los recuentos0. La regresión de ese caso y el
 conjunto específico suman61 pruebas aprobadas. Esto prueba la conexión y la salida
 sin trabajo, no una nueva publicación ni el entorno de la futura tarea programada.
+
+## Metodología persistente (14/11/2026)
+
+La versión vigente se encuentra en `../automation/README.md`. El SHA de build_team
+tras el desglose público de fuentes es `f30f730355203b835804b2f6c08b7188`; assess
+mantiene `1e3dae90e7f37624d6b5ca686835cefe`. El test PostgreSQL incluye esta migración.
+
+Los eventos sql/review incluyen ahora `response_path`. Para respuestas grandes,
+guardar ahí `{"result":VALOR_COMPLETO}` y responder por stdin
+`{"id":"ID","result_file":"RUTA_EMITIDA"}`. El archivo se lee íntegro y solo se
+acepta la ruta de esa solicitud. No copiar JSON truncado de una salida visible.
+Las respuestas inline pequeñas siguen siendo compatibles.
+
+El paquete incluye `comuniate_alternatives` con cuerpo/hash/fecha y nombres/%
+extraídos de `.alternativo`. Su presencia es obligatoria en nuevas compilaciones:
+la revisión debe incluir cada alternativa capturada con su porcentaje real o
+null. El control no resuelve identidades ni sustituye la revisión semántica; evita
+que una lista observada desaparezca silenciosamente. Guardar un borrador antiguo
+no se repite para añadir estos controles. Ambas protecciones tienen regresión
+local; su uso completo en una próxima publicación real sigue pendiente.
