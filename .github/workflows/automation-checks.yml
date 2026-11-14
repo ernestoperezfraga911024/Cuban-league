@@ -42,3 +42,5 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Verificar fallas conocidas sin red ni publicaciones
         run: node --test tests/automation-*.test.cjs tests/forecast-collector.test.cjs tests/forecast-producer.test.cjs tests/forecast-producer-db.test.cjs tests/forecast-read-session.test.cjs tests/forecast-layout.test.cjs tests/forecast-source-summary.test.cjs tests/forecast-editorial-v5-db.test.cjs tests/dispatch-clock-db.test.cjs tests/news-coverage-db.test.cjs
+      - name: Verificar ficha, contexto y vista previa de alineaciones
+        run: node --test tests/forecast-player-sheet.test.cjs tests/forecast-publish.test.cjs tests/forecast-context.test.cjs tests/forecast-candidates.test.cjs tests/forecast-round.test.cjs tests/forecast-predicted11.test.cjs
