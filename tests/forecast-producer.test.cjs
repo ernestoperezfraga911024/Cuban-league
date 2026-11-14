@@ -116,3 +116,9 @@ test('final per-team audit detects a public row changed after delivery',async()=
  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async()=>m.x.review});
  assert.equal(result.counts.published,1);assert.equal(result.verified_publications,0);assert.equal(result.publication_complete,false);
 });
+test('fixture comparison normalizes equivalent UTC offsets without changing the instant',()=>{
+ const {fixtureOf}=require('../scripts/forecast/editorial-producer.cjs');
+ const a={key:'test',home:'a',away:'b',matchday:13,kickoff_at:'2026-11-21T13:00:00+00:00'};
+ assert.deepEqual(fixtureOf(a),fixtureOf({...a,kickoff_at:'2026-11-21T13:00:00Z'}));
+ assert.notDeepEqual(fixtureOf(a),fixtureOf({...a,kickoff_at:'2026-11-21T14:00:00Z'}));
+});

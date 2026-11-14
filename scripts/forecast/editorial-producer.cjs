@@ -9,7 +9,8 @@ class EvidenceFailure extends Error {
   constructor(message) { super(message); this.name = 'EvidenceFailure'; }
 }
 const requireThat = (ok, message) => { if (!ok) throw new EvidenceFailure(message); };
-const fixtureOf = f => Object.fromEntries(['key','home','away','matchday','kickoff_at'].map(k => [k,f[k]]));
+const fixtureOf = f => Object.fromEntries(['key','home','away','matchday','kickoff_at'].map(k =>
+  [k,k==='kickoff_at' && Number.isFinite(Date.parse(f[k])) ? new Date(f[k]).toISOString().replace('.000Z','Z') : f[k]]));
 const probability = n => n === null || Number.isInteger(n) && n >= 0 && n <= 100;
 
 function compile(packet, review, roster, window) {
