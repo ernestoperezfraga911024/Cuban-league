@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v228-player-sheet';
+const CACHE_NAME = 'cuban-league-v229-install-welcome';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,11 +12,13 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=219-20261113',
+  './app.js?v=229-20261114',
+  './install-welcome.js?v=229-20261114',
+  './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',
   './audience-admin.js?v=219-20261113',
   './audience-admin.css?v=219-20261113',
-  './viewer-profile.js?v=219-20261113',
+  './viewer-profile.js?v=229-20261114',
   './viewer-profile.css?v=219-20261113',
   './forecast-publish.css?v=228-20261114',
   './forecast-publish-core.js?v=204-20261111',

@@ -154,7 +154,7 @@ test('animations only use opacity/transform, respect reduced motion, and PWA cac
   }
   const reduced=rules.find(rule=>rule.media?.mediaText==='(prefers-reduced-motion:reduce)');assert.ok(reduced);
   assert.equal(reduced.cssRules[0].style.animation,'none');
-  for(const asset of ['viewer-profile.js?v=219-20261113','viewer-profile.css?v=219-20261113','app.js?v=219-20261113']){
+  for(const asset of ['viewer-profile.js?v=229-20261114','viewer-profile.css?v=219-20261113','app.js?v=229-20261114']){
     assert.ok(read('index.html').includes(asset));assert.ok(read('sw.js').includes(asset));
   }
 });

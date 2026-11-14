@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="competition-calendar.css?v=186-20261019-calendar">
 <link rel="stylesheet" href="matchday-general.css?v=199-20261104-compact-general">
 <link rel="stylesheet" href="club-stats.css?v=200-20261104-club-contributions">
+<link rel="stylesheet" href="install-welcome.css?v=229-20261114">
 <style id="home-mobile-shortcuts-v217">
 /* V217 — Los seis accesos de Inicio aparecen antes del podio en celular. */
 @media(max-width:700px){
@@ -1019,6 +1020,27 @@
 </dialog>
 <p id="viewerStatus" class="sr-only" role="status" aria-live="polite"></p>
 
+<dialog id="installWelcome" aria-labelledby="installWelcomeTitle" aria-describedby="installWelcomeDescription">
+  <div class="iw-header">
+    <span class="iw-brand">CUBAN LEAGUE</span>
+    <button type="button" id="installWelcomeClose" aria-label="Cerrar y continuar en la web" autofocus><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19"/></svg></button>
+  </div>
+  <div class="iw-content">
+    <img id="installWelcomeCrest" class="iw-crest" data-src="install-crest-3d.webp" width="640" height="640" alt="Escudo de Cuban League en tres dimensiones" decoding="async">
+    <h2 id="installWelcomeTitle" class="iw-title">La experiencia Cuban League</h2>
+    <p id="installWelcomeDescription" class="iw-description">Instala Cuban League para disfrutar de una experiencia más cómoda desde tu pantalla de inicio.</p>
+    <div class="iw-benefits">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Acceso directo</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>Pantalla completa</span>
+    </div>
+  </div>
+  <div class="iw-footer">
+    <button type="button" id="installWelcomeAction"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Instalar Cuban League</button>
+    <p class="iw-hint">Puedes seguir en la web tocando la ×</p>
+    <span class="iw-signature">CUBAN LEAGUE · TEMPORADA 2026/27</span>
+  </div>
+</dialog>
+
 <div id="installModal" class="modal install-modal" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
   <div class="install-card">
     <button type="button" id="closeInstall" class="install-close" aria-label="Cerrar instrucciones">✕</button>
@@ -1033,7 +1055,7 @@
       <li><b>Abre el enlace directamente en Safari.</b><span>Debes ver la barra de dirección de Safari. Si arriba dice WhatsApp o ChatGPT, copia el enlace y pégalo manualmente en Safari.</span></li>
       <li><b>Usa el botón oficial de Safari: □↑</b><span>Tócalo en la barra del navegador. No uses la flecha ↗ situada dentro de Cuban League.</span></li>
       <li><b>Selecciona “Add to Home Screen”.</b><span>También puede aparecer como “Añadir a pantalla de inicio”. Desliza hacia abajo en el menú de Safari.</span></li>
-      <li><b>Confirma con “Add” o “Añadir”.</b><span>El nuevo escudo de fútbol aparecerá en la pantalla del iPhone.</span></li>
+      <li><b>Confirma con “Add” o “Añadir”.</b><span>Si aparece “Abrir como app web”, déjalo activado. El escudo de Cuban League aparecerá en la pantalla del iPhone.</span></li>
     </ol>
     <button type="button" id="nativeInstall" class="install-primary" hidden>Instalar ahora</button>
   </div>
@@ -1065,5 +1087,5 @@
   </div>
 </div>
 <footer><p>Cuban League · Registro histórico oficial</p><small>Fotografías: Bernabéu por Badefa (CC0); Kylian Mbappé por Kirill Venediktov (CC BY-SA 3.0); Lamine Yamal por Biso (CC BY 4.0). Imágenes adaptadas para diseño.</small></footer>
-<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="site-analytics.js?v=219-20261113"></script><script src="viewer-profile.js?v=219-20261113"></script><script src="app.js?v=219-20261113"></script></body></html>
+<script src="supabase-config.js?v=161-20260902"></script><script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script><script src="matchday-general.js?v=199-20261104-compact-general"></script><script src="club-stats.js?v=200-20261104-club-contributions"></script><script src="site-analytics.js?v=219-20261113"></script><script src="viewer-profile.js?v=229-20261114"></script><script src="install-welcome.js?v=229-20261114"></script><script src="app.js?v=229-20261114"></script></body></html>
 
