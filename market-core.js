@@ -59,6 +59,10 @@
     .map(rival=>({...rival,events:rival.events.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference))}))
   })).sort((a,b)=>a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
  }
- const api={validate,select,stats,rank,clauseRivals,positions};
+ function topClauses(p){
+  const events=p.history.events.slice().sort((a,b)=>b.amount-a.amount||(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference));
+  let rank=0;return events.slice(0,10).map((event,i)=>{if(i===0||event.amount!==events[i-1].amount)rank=i+1;return {...event,rank};});
+ }
+ const api={validate,select,stats,rank,clauseRivals,topClauses,positions};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CubanLeagueMarketCore=api;
 })(typeof globalThis==='object'?globalThis:this);
