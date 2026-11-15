@@ -3,6 +3,11 @@ const { ORIGIN, DEFAULTS, fail, hash, transfer, validateSnapshot } = require('./
 const { readFeedDocument } = require('./dom.cjs');
 const { waitStable, assertLeague } = require('./collector.cjs');
 
+async function advanceFeed(page) {
+  // A tall final card may be visible while its bottom is still far off screen.
+  // The load marker follows the complete card, so scrolling it reaches the end.
+  await page.locator('.loading-more').scrollIntoViewIfNeeded();
+}
 function feedProgress(before, after) {
   if (!Array.isArray(after.cardIds) || typeof after.hasMore !== 'boolean') fail('unknown_feed_pagination');
   if (new Set(after.cardIds).size !== after.cardIds.length) fail('duplicate_feed_card');
@@ -53,7 +58,7 @@ async function collectHistory(page, snapshot, { wait = waitStable, progress = ()
   await go();
   const head = await wait(read, s => s.ready && s.cards > 0, { label: 'history_head' });
   const full = await paginateHistory(head, { read, wait, progress,
-    next: () => page.locator('.feed-cards .card[id]').last().scrollIntoViewIfNeeded() });
+    next: () => advanceFeed(page) });
   await go();
   const after = await wait(read, s => s.ready && s.cards > 0, { label: 'history_recheck' });
   const headEvents = normalizedEvents(head.events, snapshot);
@@ -122,4 +127,4 @@ function mergeLedger(previous, current) {
   result.ledgerHash = hash(result);
   return result;
 }
-module.exports = { feedProgress, paginateHistory, collectHistory, mergeLedger, validateLedger };
+module.exports = { advanceFeed, feedProgress, paginateHistory, collectHistory, mergeLedger, validateLedger };
