@@ -47,7 +47,11 @@ El adaptador valida destino y claves, lee el archivo de solicitud, invoca
 execute_sql exactamente con `{link_id,project_id,query}`, extrae la única columna
 result de la única fila esperada y escribe el valor completo en response_path.
 Conserva UTF-8 y caracteres de shell como datos, valida JSON y renombra el archivo
-completo antes de notificar al runner. Stdin transporta solo ID y ruta.
+completo antes de notificar al runner. La validación y el renombrado se ejecutan
+en la misma llamada de shell que escribe el último fragmento, después de cerrarlo;
+si falla cualquier fragmento no se notifica ni sustituye la última respuesta
+completa. Se mantienen fragmentos de 12.000 unidades y las guardas Unicode.
+Stdin transporta solo ID y ruta.
 
 Si falla el parseo conserva el resultado original en `response_path + '.tool'`.
 Inspeccionarlo como datos; nunca reparar JSON truncado inventando contenido ni

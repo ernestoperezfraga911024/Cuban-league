@@ -26,14 +26,18 @@ function createConnectorBridge(tools) {
   async function writeFile(file,value){
     const text=JSON.stringify(value);if(text.length>2097152)throw Error('Bridge response exceeds limit');
     // Small, shell-quoted chunks never pass through a PTY or interpolate data as code.
-    const code='import sys;from pathlib import Path;p=Path(sys.argv[1]);p.open(sys.argv[2],encoding="utf-8").write(sys.argv[3]);p.chmod(0o600)';
+    // Validate and atomically publish with the last chunk, avoiding a separate
+    // shell round trip per response. A failed chunk never notifies the runner.
+    const code=['import json,sys','from pathlib import Path','p=Path(sys.argv[1])',
+      'with p.open(sys.argv[2],encoding="utf-8") as handle:',
+      '    p.chmod(0o600)','    handle.write(sys.argv[3])',
+      'if sys.argv[4]:','    json.loads(p.read_text(encoding="utf-8"))','    p.replace(sys.argv[4])'].join('\n');
     for(let offset=0;offset<text.length;){
       let end=Math.min(offset+12000,text.length);
       if(end<text.length&&/[\uD800-\uDBFF]/.test(text[end-1]))end--;
-      await command(`python3 -c ${quote(code)} ${quote(file+'.tmp')} ${offset?'a':'w'} ${quote(text.slice(offset,end))}`);
+      await command(`python3 -c ${quote(code)} ${quote(file+'.tmp')} ${offset?'a':'w'} ${quote(text.slice(offset,end))} ${quote(end===text.length?file:'')}`);
       offset=end;
     }
-    await command(`python3 -c ${quote('import json,sys;from pathlib import Path;p=Path(sys.argv[1]);json.loads(p.read_text());p.replace(sys.argv[2])')} ${quote(file+'.tmp')} ${quote(file)}`);
   }
   function requestArgs(request){
     if(!request||Object.keys(request).sort().join(',')!=='link_id,project_id,query'||request.link_id!==destination.link_id||request.project_id!==destination.project_id||typeof request.query!=='string'||!request.query.trim())throw Error('Invalid SQL connector arguments');

@@ -1,6 +1,6 @@
 {
   "methodology_version": "ops-v2",
-  "updated_on": "2026-11-14",
+  "updated_on": "2026-11-15",
   "incidents": [
     {
       "code": "unfinished-as-blocked",
@@ -51,13 +51,14 @@
     },
     {
       "code": "bridge-json-truncated",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "Respuesta grande transferida por stdin llegó truncada; JSON inválido cerca del carácter 4079.",
       "prevention": "Adaptador fijo y archivo obligatorio para todas las respuestas; fragmentos íntegros y corrección del mismo request sin repetir SQL.",
       "tests": [
         "tests/automation-methodology.test.cjs",
         "tests/automation-runtime.test.cjs"
-      ]
+      ],
+      "production_evidence": "Turno season-20261115-0600: 216 respuestas completas por archivo, mayor de 91.000 caracteres; 20/20 publicados verificados. Optimización posterior de shell aún pendiente de turno real."
     },
     {
       "code": "generic-source-explanation",
@@ -90,21 +91,23 @@
     },
     {
       "code": "sql-unsupported-argument",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "El agente añadió read_only al conector y la llamada fue rechazada.",
       "prevention": "El adaptador construye únicamente los tres argumentos admitidos; rechaza destino o claves ajenas.",
       "tests": [
         "tests/automation-runtime.test.cjs"
-      ]
+      ],
+      "production_evidence": "Turno season-20261115-0600: 190 solicitudes SQL del gateway con el adaptador; 20/20 verificados y sin argumentos read_only."
     },
     {
       "code": "identity-review-not-retried",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "Una identidad sin resolver dejó Athletic pendiente sin corregir la revisión.",
       "prevention": "Listar nombres capturados y pedir una única corrección con el mismo paquete; no crear alias automático.",
       "tests": [
         "tests/forecast-producer.test.cjs"
-      ]
+      ],
+      "production_evidence": "Turno season-20261115-0600: Betis recibió correction por Antony y publicó tras resolver la identidad con la misma evidencia."
     },
     {
       "code": "error-inspection-aborts",
@@ -137,12 +140,13 @@
     },
     {
       "code": "review-alternative-incomplete",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "Atlético/Celta necesitaron completar alternativas evaluadas y la revisión se abandonó.",
       "prevention": "La regresión verifica corrección única, misma evidencia, ausencia de escritura antes de validar y salida missing si persiste.",
       "tests": [
         "tests/forecast-producer.test.cjs"
-      ]
+      ],
+      "production_evidence": "Turno season-20261115-0600: Celta, Madrid, Real Sociedad y Valencia completaron alternativas en correction y publicaron; ninguna quedó missing."
     },
     {
       "code": "antony-canonical-name-missed",
@@ -151,23 +155,53 @@
       "prevention": "Perfiles por club y equivalencias contrastadas acompañan cada revisión; fallo declarado de identidad también recibe corrección. No mapeo automático ni fuzzy matching.",
       "tests": [
         "tests/forecast-producer.test.cjs"
-      ]
+      ],
+      "production_evidence": "Turno 15/11: la primera revisión volvió a omitir Antony; correction lo resolvió y Betis publicó. Recuperación comprobada, prevención en la primera revisión todavía pendiente."
     },
     {
       "code": "payload-utc-format-mismatch",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "La fecha +00:00 compilaba, pero build_team rechazaba el payload al exigir UTC Z.",
       "prevention": "Normalizar fixture, observaciones y payload sin cambiar instante; rechazar fechas sin zona o fracciones no exactas. Regresión en PostgreSQL con el validador instalado.",
       "tests": [
         "tests/forecast-producer.test.cjs",
         "tests/forecast-producer-db.test.cjs"
-      ]
+      ],
+      "production_evidence": "Turno season-20261115-0600: Valencia recibió kickoff_at +00:00, fue validado por SQL y publicado; igualdad íntegra entre proyección privada y pública."
     },
     {
       "code": "scheduler-status-worker-mismatch",
       "status": "regression-tested-awaiting-run",
       "failure": "El programador reportó failed/completed_at mientras el trabajador seguía leyendo y publicando.",
       "prevention": "Bloqueo de kernel local adquirido antes de SQL/lectura, compartido entre run_keys/checkouts. Salida73 si ocupado; jamás quitarlo por antigüedad/estado. Coordinar otros entornos con salida real y guardas SQL.",
+      "tests": [
+        "tests/automation-runtime.test.cjs"
+      ]
+    },
+    {
+      "code": "review-source-duplicate",
+      "status": "guarded",
+      "failure": "Levante incluyó a Nacho Pérez como titular y alternativa de FutbolFantasy; el compilador rechazó la duplicación antes de guardar.",
+      "prevention": "Cotejar unicidad por fuente con el cuerpo original antes de responder. El turno 15/11 lo corrigió con la misma evidencia y publicó.",
+      "tests": [
+        "tests/forecast-producer.test.cjs"
+      ]
+    },
+    {
+      "code": "source-unavailable-omitted-from-summary",
+      "status": "guarded",
+      "failure": "El turno 15/11 publicó 20/20 pero omitió del resumen cinco lecturas P11 unavailable: cuatro HTTP 503 y un aborto por espera.",
+      "prevention": "Cerrar cotejando metrics.failures y estados unavailable por club; distinguir not_created e incomplete. Mantener evidencia y restricciones, sin reintento ciego ni votos inventados.",
+      "tests": [
+        "tests/forecast-read-session.test.cjs",
+        "tests/forecast-collector.test.cjs"
+      ]
+    },
+    {
+      "code": "bridge-extra-finalize-call",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Cada respuesta del puente requería una llamada de shell adicional solo para validar y renombrar el archivo.",
+      "prevention": "Cerrar, validar JSON y renombrar atómicamente en la llamada del último fragmento. Conservar tamaño, Unicode, permisos, una sola ejecución SQL y notificación posterior.",
       "tests": [
         "tests/automation-runtime.test.cjs"
       ]

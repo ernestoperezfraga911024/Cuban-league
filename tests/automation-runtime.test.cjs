@@ -32,6 +32,29 @@ test('real shell file transport preserves large Unicode and shell metacharacters
   await assert.rejects(bridge.reply({...event,response_path:'/tmp/elsewhere'},{result:1},42),/paths/);
  }finally{await fs.rm(directory,{recursive:true,force:true});}
 });
+test('bridge publishes a small response in one shell call and failed multi-chunk replies preserve the last complete file',async()=>{
+ const directory=await fs.mkdtemp(path.join(os.tmpdir(),'forecast-season-'));
+ try{
+  const event={id:'1',event:'review',path:path.join(directory,'1-review.json'),response_path:path.join(directory,'1-response.json')};
+  const run=promisify(execFile);let commands=0,notifications=0,failAt=Infinity;
+  const bridge=createConnectorBridge({
+   exec_command:async({cmd})=>{if(++commands===failAt)return {exit_code:1,output:'interrupted file write'};const r=await run('/bin/bash',['-c',cmd]);return {exit_code:0,output:r.stdout};},
+   write_stdin:async()=>{notifications++;return {exit_code:0};}
+  });
+  await bridge.reply(event,{result:{value:'first'}},42);
+  assert.equal(commands,1);assert.equal(notifications,1);
+  assert.deepEqual(JSON.parse(await fs.readFile(event.response_path,'utf8')),{result:{value:'first'}});
+  const large={result:{value:'Revisión ⚽😀 '.repeat(5000)}};
+  failAt=commands+2;
+  await assert.rejects(bridge.reply(event,large,42),/file command failed/);
+  assert.equal(notifications,1);
+  assert.deepEqual(JSON.parse(await fs.readFile(event.response_path,'utf8')),{result:{value:'first'}});
+  failAt=Infinity;await bridge.reply(event,large,42);
+  assert.equal(notifications,2);assert.deepEqual(JSON.parse(await fs.readFile(event.response_path,'utf8')),large);
+  assert.equal((await fs.stat(event.response_path)).mode&0o777,0o600);
+  await assert.rejects(fs.access(event.response_path+'.tmp'),{code:'ENOENT'});
+ }finally{await fs.rm(directory,{recursive:true,force:true});}
+});
 test('runner rejects inline/truncated replies but accepts the corrected file for the same pending request',async()=>{
  const lockRoot=await fs.mkdtemp(path.join(os.tmpdir(),'runner-protocol-test-'));
  const child=spawn(process.execPath,['scripts/run-forecast-season.cjs','--existing-run','season-protocol-test'],{stdio:['pipe','pipe','pipe'],env:{...process.env,TMPDIR:lockRoot}});
