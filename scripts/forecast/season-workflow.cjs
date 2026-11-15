@@ -1,5 +1,7 @@
 'use strict';
 const {compile,concreteBlock,EvidenceFailure} = require('./editorial-producer.cjs');
+const {LayoutFailure} = require('./lineup-layout.cjs');
+const {identityReference} = require('./identity-reference.cjs');
 const {isDeepStrictEqual:same} = require('node:util');
 const {verifyPublication} = require('./season-gateway.cjs');
 // The existing dispatcher opens the run. This runner never creates/reopens a run,
@@ -44,14 +46,15 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
           if (!collector) ({reader,collector} = await makeCollector({runKey:gateway.runKey,notBefore,expiresAt}));
           const packet = await timed('read_ms',()=>collector.collect(item));
           const roster = await gateway.roster(team);
+          const identity_names = [...new Set([
+            ...Object.values(packet.observations||{}).flat().map(p=>p.name),
+            ...(packet.comuniate_alternatives?.players||[]).map(p=>p.name),
+            ...(packet.predictions||[]).filter(p=>p.status==='complete_unvalidated').flatMap(p=>(p.data?.participacion||[]).map(p=>p.nombre?.trim()))
+          ].filter(Boolean))];
+          const identity_reference = identityReference(team,roster,identity_names);
           let review,built,correction=null,followups=0;
           for (;;) {
-            review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,
-              identity_names:[...new Set([
-                ...Object.values(packet.observations||{}).flat().map(p=>p.name),
-                ...(packet.comuniate_alternatives?.players||[]).map(p=>p.name),
-                ...(packet.predictions||[]).filter(p=>p.status==='complete_unvalidated').flatMap(p=>(p.data?.participacion||[]).map(p=>p.nombre?.trim()))
-              ].filter(Boolean))]}));
+            review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,identity_names,identity_reference}));
             if(review?.follow){
               if(followups++>=12)throw Error('Additional reading limit reached; review remains missing');
               await timed('read_ms',()=>collector.follow(packet,review.follow.from,review.follow.url));continue;
@@ -59,10 +62,18 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
             if(!review||review.deferred)throw Error(review?.reason||'Editorial review incomplete');
             state=await gateway.state(team);
             if(state.attempts.some(a=>a.team===team))throw Error('Concurrent attempt appeared during reading');
-            if(review.failure)break;
+            if(review.failure){
+              // A reviewer can otherwise bypass the compile correction by declaring
+              // an identity failure, even when the catalog has a verified reference.
+              if(review.failure.kind==='identity' && !correction){
+                correction={attempt:1,reason:'Revisar identidad contra identity_reference y perfiles del mismo club antes de bloquear: '+review.failure.detail};
+                timing.review_corrections++;continue;
+              }
+              break;
+            }
             try{built=compile(packet,review,roster,{notBefore,expiresAt,observedAt:state.observed_at});break;}
             catch(error){
-              if(!(error instanceof EvidenceFailure)||correction)throw error;
+              if(!(error instanceof EvidenceFailure || error instanceof LayoutFailure)||correction)throw error;
               correction={attempt:1,reason:error.message};timing.review_corrections++;
               // One correction, same captured bodies/timestamps and same roster.
               // Every validator runs again; no inferred aliases or bypass.

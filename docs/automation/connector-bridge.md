@@ -64,7 +64,10 @@ text(await bridge.reply(event, {result: review}, sessionId));
 ```
 
 No responder con el envoltorio de la herramienta ni con un texto truncado.
-`identity_names` es una lista de control, no un mapeo automático. Si aparece
+`identity_names` es una lista de control, no un mapeo automático. `identity_reference`
+incluye perfiles del catálogo y equivalencias revisadas del mismo club; confirmar
+`review.identities` con ellos, sin inferir por similitud ni tratar sus fechas históricas
+como una consulta nueva. Si aparece
 `correction`, resolver su razón con la misma evidencia y devolver la revisión
 completa. Un segundo fallo mantiene el equipo pendiente. Los eventos team se
 registran; finished/interrupted señalan dónde leer resultado y checkpoint.
@@ -72,3 +75,6 @@ registran; finished/interrupted señalan dónde leer resultado y checkpoint.
 No imprimir respuestas grandes ni suministrar read_only. El adaptador nunca
 reintenta SQL por su cuenta. La reanudación del proceso se rige por README.md;
 la base sigue siendo la autoridad para decidir qué ya se guardó o publicó.
+El CLI adquiere su bloqueo local antes del primer evento SQL; código73 significa
+otro lector vivo. No quitar el bloqueo ni lanzar otro por un estado failed del
+programador. La salida debe comprobarse en la sesión real del proceso.

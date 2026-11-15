@@ -30,6 +30,8 @@ test('producer and gateway run against PostgreSQL assess/build_team with the ins
  for(const p of x.roster)await db.query('insert into forecast_league.roster values($1,$2,$3)',[p.id,p.team,p.name]);
  let captured;
  const gateway=new SeasonGateway({runKey:'season-test',execute:async({query})=>{captured=query;try{const rs=await db.exec(query);return rs.find(r=>r.rows[0]?.result)?.rows[0].result;}catch(error){await db.exec('rollback');throw error;}}});
+ // Reproduce Valencia's real failure: JS accepted +00:00 but SQL requires UTC Z.
+ x.review.fixture.kickoff_at=x.review.fixture.kickoff_at.replace('Z','+00:00');
  for(const pct of [null,0,60,100]) {
   x.packet.observations.comuniate[0].probability=pct;
   const {payload,fixture}=compile(x.packet,x.review,x.roster,x.window),r=await gateway.validate(x.packet.team,fixture,payload);

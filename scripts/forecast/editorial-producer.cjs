@@ -10,8 +10,12 @@ class EvidenceFailure extends Error {
   constructor(message) { super(message); this.name = 'EvidenceFailure'; }
 }
 const requireThat = (ok, message) => { if (!ok) throw new EvidenceFailure(message); };
-const fixtureOf = f => Object.fromEntries(['key','home','away','matchday','kickoff_at'].map(k =>
-  [k,k==='kickoff_at' && Number.isFinite(Date.parse(f[k])) ? new Date(f[k]).toISOString().replace('.000Z','Z') : f[k]]));
+const fixtureOf = f => {
+  const instant = typeof f?.kickoff_at === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.0+)?(?:Z|[+-]\d{2}:\d{2})$/.test(f.kickoff_at) ? Date.parse(f.kickoff_at) : NaN;
+  requireThat(Number.isFinite(instant) && instant % 1000 === 0, 'Fecha del partido inválida: requiere zona horaria y segundos exactos');
+  return Object.fromEntries(['key','home','away','matchday','kickoff_at'].map(k =>
+    [k,k === 'kickoff_at' ? new Date(instant).toISOString().replace('.000Z','Z') : f[k]]));
+};
 const probability = n => n === null || Number.isInteger(n) && n >= 0 && n <= 100;
 
 function compile(packet, review, roster, window) {
@@ -52,7 +56,7 @@ function compile(packet, review, roster, window) {
     requireThat(r && page && match, team + ': falta fuente ' + id);
     checkTime(match.fetched_at); checkTime(page.fetched_at);
     requireThat(/^[a-f0-9]{64}$/.test(match.sha256) && /^[a-f0-9]{64}$/.test(page.sha256) && r.fixture_sha256 === match.sha256 && r.lineup_sha256 === page.sha256 &&
-      r.season === f.season && same(r.observed_fixture, expected), team + ': calendario no contrastado en cuerpo de ' + id);
+      r.season === f.season && same(fixtureOf(r.observed_fixture), expected), team + ': calendario no contrastado en cuerpo de ' + id);
     requireThat(r.forecast === true, 'Once oficial disponible: no sustituir el pronóstico (' + team + ', ' + id + ')');
     requireThat(r.alternatives_complete === true && Array.isArray(r.alternatives), team + ': alternativas sin revisar en ' + id);
     if(id==='comuniate'){
@@ -92,7 +96,7 @@ function compile(packet, review, roster, window) {
   if (p11review?.fixture_verified === true) {
     const match = packet.docs.p11match;
     requireThat(match && /^[a-f0-9]{64}$/.test(match.sha256) && p11review.fixture_sha256 === match.sha256 && p11review.season === f.season &&
-      same(p11review.observed_fixture,expected), 'Partido Predicted11 no coincide');
+      same(fixtureOf(p11review.observed_fixture),expected), 'Partido Predicted11 no coincide');
     requireThat(same(fixtureOf(packet.expected_fixture),expected), 'Predicted11 consultado para otro partido');
     rankings = packet.rankings;
     requireThat(rankings.length === 2 && new Set(rankings.map(r => r.kind)).size === 2, 'Faltan ambos rankings P11');
@@ -173,7 +177,7 @@ function compile(packet, review, roster, window) {
   limitations.push(`Lecturas actuales; evidencia más antigua ${new Date(oldest).toISOString()}. Antelación ${hours.toFixed(1)} h. ${disagreements} jugadores con desacuerdo entre fuentes base. P11: ${votes.ballots} onces completos, ${predictions.filter(p => p.status !== 'read').length} sin once útil. Estimaciones editoriales provisionales no calibradas.`);
   requireThat(limitations.join(' ').length >= 10 && limitations.join(' ').length <= 1200, 'Limitaciones fuera de tamaño');
   const payload = {schema_version:4,season:f.season,team,fixture_key:f.key,home:f.home,away:f.away,
-    opponent:team === f.home ? f.away : f.home,matchday:f.matchday,kickoff_at:f.kickoff_at,
+    opponent:team === f.home ? f.away : f.home,matchday:f.matchday,kickoff_at:expected.kickoff_at,
     probability_kind:'editorial_uncalibrated',publication_allowed:false,status:'draft',method_version:'editorial-v5',
     limitations,sources,proposal:{formation:chosen.formation,players,candidates}};
   requireThat(Buffer.byteLength(JSON.stringify(payload)) <= 65536, 'Payload supera 64 KiB');

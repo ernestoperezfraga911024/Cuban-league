@@ -139,6 +139,53 @@ test('second identity failure stays missing without saving or blocking',async()=
  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async()=>{reviews++;return m.x.review;}});
  assert.equal(reviews,2);assert.equal(result.counts.missing,1);assert.deepEqual(m.calls,['finish']);assert.equal(result.publication_complete,false);
 });
+test('layout and missing alternative failures get one full correction with unchanged evidence',async()=>{
+ for(const type of ['layout','alternative']) for(const corrected of [true,false]) {
+  const m=mockGateway(),original=structuredClone(m.x.review);let reviews=0,reads=0;
+  if(type==='layout')m.x.review.selection.layout.rows.pop();
+  else {m.x.packet.observations.comuniate[0].probability=0;delete m.x.review.selection.players[0].alternative_id;}
+  const before=structuredClone(m.x.packet);
+  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>{reads++;return m.x.packet;}}}),reviewTeam:async request=>{
+   reviews++;assert.deepEqual(request.packet,before);assert.deepEqual(m.calls,[]);
+   if(reviews===2){assert.equal(request.correction.attempt,1);assert.match(request.correction.reason,type==='layout'?/colocación pendiente/:/alternativa evaluada/);}
+   return reviews===2&&corrected?original:m.x.review;
+  }});
+  assert.equal(reviews,2);assert.equal(reads,1);assert.deepEqual(m.x.packet,before);
+  assert.equal(result.publication_complete,corrected);assert.equal(result.metrics.review_corrections,1);
+  assert.deepEqual(m.calls,corrected?['validate','save','deliver','finish']:['finish']);
+ }
+});
+test('declared identity failure also receives catalog references and one correction before a block',async()=>{
+ const m=mockGateway();let reviews=0;
+ const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async request=>{
+  reviews++;assert.equal(request.identity_reference.requires_review,true);assert.equal(request.identity_reference.players.length,m.x.roster.length);
+  if(reviews===1)return {failure:{source:'comuniate',kind:'identity',detail:'Nombre observado aún pendiente de contraste.',sha256:m.x.packet.docs.comuniate.sha256}};
+  assert.match(request.correction.reason,/identity_reference/);return m.x.review;
+ }});
+ assert.equal(reviews,2);assert.equal(result.publication_complete,true);assert.deepEqual(m.calls,['validate','save','deliver','finish']);
+});
+test('verified Antony reference is scoped to current roster/catalog and never silently maps an identity',()=>{
+ const {identityReference}=require('../scripts/forecast/identity-reference.cjs');
+ const roster=[{id:'a-santos',name:'A. Santos',team:'real-betis'}];
+ const ref=identityReference('real-betis',roster,['Antony','Anthony']);
+ assert.equal(ref.candidates.length,1);assert.equal(ref.candidates[0].observed_name,'Antony');assert.equal(ref.candidates[0].id,'a-santos');
+ assert.match(ref.candidates[0].profile_url,/61013\/antony-santos$/);assert.ok(ref.candidates[0].verified_alias.profile_sha256);
+ assert.equal(identityReference('real-betis',[],['Antony']).candidates.length,0);
+ assert.equal(identityReference('other',roster.map(p=>({...p,team:'other'})),['Antony']).candidates.length,0);
+ const x=example();x.packet.observations.comuniate[0].name='Antony';assert.throws(()=>produce(x),/identidad sin resolver/);
+});
+test('producer canonicalizes UTC offsets in payload and evidence without rounding or shifting the instant',()=>{
+ for(const offset of ['+00:00','-05:00']){
+  const x=example(),expected=x.review.fixture.kickoff_at;
+  const local=new Date(Date.parse(expected)+(offset==='-05:00'?-5:0)*3600000).toISOString().replace('Z',offset);
+  x.review.fixture.kickoff_at=local;for(const source of Object.values(x.review.sources))source.observed_fixture.kickoff_at=local;
+  const out=produce(x);assert.equal(out.payload.kickoff_at,expected);assert.equal(out.fixture.kickoff_at,expected);
+  assert.equal(x.review.fixture.kickoff_at,local);out.payload.sources.forEach(s=>assert.equal(s.observed_fixture.kickoff_at,expected));
+ }
+ for(const invalid of ['2026-11-21T13:00:00','not-a-date','2026-11-21T13:00:00.123Z','2026-11-21T13:00:00.000001Z','2026-11-21T13:00Z']){
+  const x=example();x.review.fixture.kickoff_at=invalid;assert.throws(()=>produce(x),/Fecha del partido inválida/);
+ }
+});
 test('lost error inspection gets one read retry; persistent loss returns unknown and never finishes the run',async()=>{
  for(const failures of [1,2]){
   const m=mockGateway(),state=m.gateway.state;let failed=false,inspections=0,closed=false;const checkpoints=[];

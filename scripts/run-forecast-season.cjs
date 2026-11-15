@@ -10,9 +10,14 @@ const {runSeason}=require('./forecast/season-workflow.cjs');
 const {ReadSession}=require('./forecast/read-session.cjs');
 const {TeamCollector}=require('./forecast/collect-team.cjs');
 const {evidenceStore}=require('./forecast/evidence-store.cjs');
+const {acquireRunnerLock}=require('./forecast/runner-lock.cjs');
 async function main() {
   const [flag,runKey,recoveryRequest,...extra]=process.argv.slice(2);
   if(flag!=='--existing-run'||!runKey||extra.length)throw Error('Usage: node scripts/run-forecast-season.cjs --existing-run RUN_KEY [RECOVERY_UUID]');
+  const lock=await acquireRunnerLock();
+  try {await runLocked(runKey,recoveryRequest,lock);} finally {await lock.release();}
+}
+async function runLocked(runKey,recoveryRequest,lock) {
   const directory=await fs.mkdtemp(path.join(tmpdir(),'forecast-season-'));
   const pending=new Map();let sequence=0,closed=false;
   const checkpoint={run_key:runKey,teams:[],status:'running'};
@@ -34,6 +39,7 @@ async function main() {
   });
   rl.on('close',()=>{closed=true;rejectAll('Input closed; resume existing saved/missing attempts');});
   async function request(kind,body) {
+    lock.assertHeld();
     if(closed)throw Error('Input closed; resume existing saved/missing attempts');
     const id=String(++sequence),file=path.join(directory,id+'-'+kind+'.json');
     await fs.writeFile(file,JSON.stringify(body),{flag:'wx',mode:0o600});
@@ -58,4 +64,4 @@ async function main() {
     emit({event:'interrupted',path:path.join(directory,'checkpoint.json'),reason:error.message});throw error;
   } finally {rejectAll('Runner closed');rl.close();}
 }
-if(require.main===module)main().catch(error=>{process.stderr.write(error.message+'\n');process.exitCode=1;});
+if(require.main===module)main().catch(error=>{process.stderr.write(error.message+'\n');process.exitCode=error.code==='RUNNER_BUSY'?73:1;});
