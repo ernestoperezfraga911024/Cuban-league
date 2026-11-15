@@ -4,10 +4,12 @@
  const core=window.CubanLeagueMarketCore,section=document.getElementById('market'),host=document.getElementById('marketBody');
  if(!core||!section||!host)return;
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const money=n=>n===null?'—':new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n)+' €';
+ const moneyFormat=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+ const millionFormats={1:new Intl.NumberFormat('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1}),2:new Intl.NumberFormat('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})};
+ const money=n=>n===null?'—':moneyFormat.format(n)+' €';
  const date=s=>new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}).format(new Date(s));
  const names={PT:'Porteros',DF:'Defensas',MC:'Centrocampistas',DL:'Delanteros'};
- const state={view:'players',search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20};
+ const state={view:'players',historyView:'ranking',search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20,info:false};
  let cached=null,cachedAt=0,pending=null,active=false,sequence=0;
  const teamRequests=new WeakMap();
  async function read(force=false){
@@ -28,29 +30,49 @@
   })();
   try{return await pending;}finally{pending=null;}
  }
- function photo(p){return p.photo?`<img src="${escape(p.photo)}" width="36" height="42" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:'<span class="market-avatar" aria-hidden="true">⚽</span>';}
+ const icon=name=>`<svg class="market-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${({search:'<circle cx="10.8" cy="10.8" r="7.3"/><path d="m16 16 5 5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/>'})[name]}</svg>`;
+ function price(n,digits=2){
+  if(n===null)return '<span class="market-price-empty">—</span>';
+  const label=n>=1000000?millionFormats[digits].format(n/1000000)+' M €':money(n);
+  return `<details class="market-price"><summary aria-label="${escape(money(n))}. Ver importe exacto" title="${escape(money(n))}">${escape(label)}</summary><span class="market-price-exact">${escape(money(n))}</span></details>`;
+ }
+ function participantPhoto(m){
+  // Reuse the catalog already loaded by app.js, matched by stable participant ID.
+  const participant=typeof DATA!=='undefined'?DATA?.participants?.find(p=>p.id===m.participantId):null;
+  const shield=participant?.shield;
+  if(typeof shield==='string'&&/^[\w/-]+\.(?:png|jpe?g|webp|svg)$/i.test(shield))return `<img class="market-participant-logo" src="${escape(shield)}" width="46" height="46" alt="" loading="lazy" decoding="async">`;
+  return `<span class="market-participant-fallback" aria-hidden="true">${escape(m.name.slice(0,2).toUpperCase())}</span>`;
+ }
+ function photo(p){return p.photo?`<img src="${escape(p.photo)}" width="46" height="50" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:'<span class="market-avatar" aria-hidden="true">⚽</span>';}
  function stamp(p){return `<p class="market-updated">Captura del ${escape(date(p.capturedAt))} · hora de Miami</p>${Date.now()-Date.parse(p.capturedAt)>86400000?'<p class="market-notice">Esta captura tiene más de 24 horas. Los valores y propietarios pueden haber cambiado.</p>':''}`;}
- function rows(p,players,showOwner=true){
+ function rows(p,players,showOwner=true,compact=false){
   const owners=new Map(p.managers.map(m=>[m.id,m.name]));
-  return `<div class="market-table-wrap"><table class="market-table"><thead><tr><th scope="col">Futbolista</th><th scope="col">Valor</th><th scope="col">Cláusula</th></tr></thead><tbody>${players.map(x=>`<tr><th scope="row"><div class="market-player">${photo(x)}<div><strong>${escape(x.name)}</strong><span>${escape(x.position)} · ${escape(x.club)}</span>${showOwner?`<span class="market-owner${x.ownerId===null?' is-free':''}">${escape(owners.get(x.ownerId)||'Libre')}</span>`:''}</div></div></th><td>${escape(money(x.value))}</td><td>${escape(money(x.clause))}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="market-table-wrap"><table class="market-table"><thead><tr><th scope="col">Futbolista</th><th scope="col">Valor</th><th scope="col">Cláusula</th></tr></thead><tbody>${players.map(x=>`<tr><th scope="row"><div class="market-player">${photo(x)}<div><strong>${escape(x.name)}</strong><span>${escape(x.position)} · ${escape(x.club)}</span>${showOwner?`<span class="market-owner${x.ownerId===null?' is-free':''}">${escape(owners.get(x.ownerId)||'Libre')}</span>`:''}</div></div></th><td>${compact?price(x.value):escape(money(x.value))}</td><td>${compact?price(x.clause):escape(money(x.clause))}</td></tr>`).join('')}</tbody></table></div>`;
  }
  function playerResults(){
   const target=document.getElementById('marketResults');if(!target||!cached)return;
   const players=core.select(cached,state);
-  target.innerHTML=`<p class="market-result-count" role="status">${players.length} futbolistas${state.owner==='all'?' · '+cached.players.filter(p=>p.ownerId===null).length+' libres':''}</p>${players.length?rows(cached,players.slice(0,state.limit)):'<p class="market-empty">No hay futbolistas con estos filtros.</p>'}${players.length>state.limit?`<button type="button" class="market-more" data-market-action="more">Ver más (${Math.min(state.limit,players.length)} de ${players.length})</button>`:''}`;
+  target.innerHTML=`<p class="market-result-count" role="status">${players.length} ${players.length===1?'futbolista':'futbolistas'}</p>${players.length?rows(cached,players.slice(0,state.limit),true,true):'<p class="market-empty">No hay futbolistas con estos filtros.</p>'}${players.length>state.limit?`<button type="button" class="market-more" data-market-action="more">Ver más <span aria-hidden="true">›</span><small>${Math.min(state.limit,players.length)} de ${players.length}</small></button>`:''}`;
  }
  function playerView(p){
-  return `<div class="market-filters"><label class="market-search">Buscar futbolista<input id="marketSearch" type="search" placeholder="Nombre, club o participante" value="${escape(state.search)}" autocomplete="off"></label><label>Propietario<select id="marketOwner"><option value="all">Todos los equipos</option><option value="free">Libres</option>${p.managers.slice().sort((a,b)=>a.name.localeCompare(b.name,'es')).map(m=>`<option value="${m.id}">${escape(m.name)}</option>`).join('')}</select></label><label>Ordenar por<select id="marketSort"><option value="value">Mayor valor</option><option value="clause">Mayor cláusula</option><option value="name">Nombre</option></select></label></div><div class="market-positions" role="group" aria-label="Filtrar por posición">${[['all','Todos'],...core.positions.map(pos=>[pos,pos])].map(([id,label])=>`<button type="button" data-market-position="${id}" aria-pressed="${state.position===id}">${label}</button>`).join('')}</div><div id="marketResults"></div>`;
+  return `<div class="market-filters"><label class="market-search"><span class="market-sr-only">Buscar por nombre, club o participante</span>${icon('search')}<input id="marketSearch" type="search" placeholder="Buscar futbolista" value="${escape(state.search)}" autocomplete="off"></label><label>Propietario<select id="marketOwner"><option value="all">Todos</option><option value="free">Libres</option>${p.managers.slice().sort((a,b)=>a.name.localeCompare(b.name,'es')).map(m=>`<option value="${m.id}">${escape(m.name)}</option>`).join('')}</select></label><label>Ordenar por<select id="marketSort"><option value="value">Mayor valor</option><option value="clause">Mayor cláusula</option><option value="name">Nombre</option></select></label></div><div class="market-positions" role="group" aria-label="Filtrar por posición">${[['all','Todos'],...core.positions.map(pos=>[pos,pos])].map(([id,label])=>`<button type="button" data-market-position="${id}" aria-pressed="${state.position===id}">${label}</button>`).join('')}</div><div id="marketResults"></div>`;
  }
  function historyView(p){
-  const metricLabels={made:'Dados',received:'Recibidos',spent:'Gastado',collected:'Cobrado'},owners=new Map(p.managers.map(m=>[m.id,m.name])),players=new Map(p.players.map(x=>[x.id,x]));
-  const events=p.history.events.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference));
-  return `<div class="market-notice"><strong>Historial recuperado · ${events.length} clausulazos${p.schemaVersion===2?' como mínimo':''}</strong><p>Cobertura parcial. Conservamos las fichas y el portal de Mister sin sumar sus coincidencias dos veces. Las operaciones sin fecha se muestran al final. Este ranking no representa necesariamente toda la temporada.</p><small>Revisado el ${escape(date(p.history.observedAt))}, hora de Miami. Solo se cuentan operaciones identificadas como «Cláusula».</small></div><div class="market-positions" role="group" aria-label="Ordenar ranking de clausulazos">${Object.entries(metricLabels).map(([key,label])=>`<button type="button" data-market-metric="${key}" aria-pressed="${state.metric===key}">${label}</button>`).join('')}</div><ol class="market-ranking">${core.rank(p,state.metric).map(m=>`<li><span class="market-rank">${m.rank}</span><div><strong>${escape(m.name)}</strong><small>${m.made} dados · ${m.received} recibidos</small><small>Gastado ${escape(money(m.spent))} · Cobrado ${escape(money(m.collected))}</small></div><b>${escape(state.metric==='made'||state.metric==='received'?m[state.metric]:money(m[state.metric]))}</b></li>`).join('')}</ol><h3 class="market-history-title">Operaciones recuperadas</h3><ul class="market-events">${events.slice(0,state.eventLimit).map(e=>`<li><div><strong>${escape(players.get(e.playerId).name)}</strong><span>${escape(owners.get(e.from))} → ${escape(owners.get(e.to))}</span>${e.date?`<time datetime="${e.date}">${e.date.split('-').reverse().join('/')}</time>`:'<span>Fecha no disponible</span>'}</div><b>${escape(money(e.amount))}</b></li>`).join('')}</ul>${events.length>state.eventLimit?`<button type="button" class="market-more" data-market-action="events">Ver más operaciones (${Math.min(state.eventLimit,events.length)} de ${events.length})</button>`:''}`;
+  const metricLabels={made:'Dados',received:'Recibidos',spent:'Gastado',collected:'Cobrado'};
+  const history=state.historyView==='events';
+  const info=`<div id="marketHistoryInfo" class="market-notice"${state.info?'':' hidden'}><strong>Sobre estos datos</strong><p>Cobertura parcial: ${p.history.events.length} clausulazos registrados${p.schemaVersion===2?' como mínimo':''}. El historial puede no incluir toda la temporada. Solo se cuentan operaciones identificadas como «Cláusula», sin duplicar coincidencias entre fuentes.</p><small>Revisado el ${escape(date(p.history.observedAt))}, hora de Miami. Las operaciones sin fecha aparecen al final.</small></div>`;
+  const toolbar=`<div class="market-history-toolbar"><h3>${history?'Historial':'Ranking'}</h3><div><button type="button" class="market-info-button" data-market-action="info" aria-label="Información sobre el historial" aria-expanded="${state.info}" aria-controls="marketHistoryInfo">${icon('info')}</button><button type="button" class="market-history-toggle" data-market-history="${history?'ranking':'events'}" aria-label="${history?'Volver al ranking':'Ver historial de operaciones'}">${icon('clock')}${history?'Ranking':'Historial'}</button></div></div>${info}`;
+  if(history){
+   const owners=new Map(p.managers.map(m=>[m.id,m.name])),players=new Map(p.players.map(x=>[x.id,x]));
+   const events=p.history.events.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference));
+   return toolbar+`<p class="market-result-count">${events.length} operaciones registradas</p><ul class="market-events">${events.slice(0,state.eventLimit).map(e=>`<li><div class="market-event-player">${photo(players.get(e.playerId))}<div><strong>${escape(players.get(e.playerId).name)}</strong><span>${escape(owners.get(e.from))} → ${escape(owners.get(e.to))}</span>${e.date?`<time datetime="${e.date}">${e.date.split('-').reverse().join('/')}</time>`:'<span>Fecha no disponible</span>'}</div></div><div class="market-event-amount">${price(e.amount)}</div></li>`).join('')}</ul>${events.length>state.eventLimit?`<button type="button" class="market-more" data-market-action="events">Ver más operaciones <small>${Math.min(state.eventLimit,events.length)} de ${events.length}</small></button>`:''}${events.length?'':'<p class="market-empty">Todavía no hay clausulazos registrados.</p>'}`;
+  }
+  return toolbar+`<div class="market-positions market-metrics" role="group" aria-label="Ordenar ranking de clausulazos">${Object.entries(metricLabels).map(([key,label])=>`<button type="button" data-market-metric="${key}" aria-pressed="${state.metric===key}">${label}</button>`).join('')}</div><ol class="market-ranking" aria-label="Ranking por ${metricLabels[state.metric].toLowerCase()}">${core.rank(p,state.metric).map(m=>`<li><span class="market-rank">${m.rank}</span>${participantPhoto(m)}<div class="market-ranking-main"><div class="market-ranking-name"><strong>${escape(m.name)}</strong><div class="market-ranking-value">${state.metric==='made'||state.metric==='received'?`<b>${m[state.metric]}</b>`:price(m[state.metric],1)}</div></div><small>${state.metric==='made'?m.received+' recibidos':state.metric==='received'?m.made+' dados':m.made+' dados · '+m.received+' recibidos'}</small><div class="market-ranking-money"><div><span>Pagado</span>${price(m.spent,1)}</div><div><span>Cobrado</span>${price(m.collected,1)}</div></div></div></li>`).join('')}</ol>`;
  }
  function render(){
   if(!cached){host.innerHTML='<p class="market-empty">El mercado todavía no tiene una captura publicada.</p>';return;}
   section.querySelectorAll('[data-market-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.marketView===state.view)));
-  host.innerHTML=stamp(cached)+(state.view==='players'?playerView(cached):historyView(cached));
+  host.innerHTML=(state.view==='players'?playerView(cached):historyView(cached))+(state.view==='players'&&Date.now()-Date.parse(cached.capturedAt)>86400000?'<p class="market-stale">Datos de hace más de 24 horas. Los valores pueden haber cambiado.</p>':'');
   if(state.view==='players'){document.getElementById('marketOwner').value=state.owner;document.getElementById('marketSort').value=state.sort;playerResults();}
  }
  async function load(force=false){
@@ -77,6 +99,8 @@
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.marketAction==='reload'){load(true);return;}
   if(b.dataset.marketView){state.view=b.dataset.marketView;render();return;}
+  if(b.dataset.marketHistory){state.historyView=b.dataset.marketHistory;state.info=false;render();section.querySelector('[data-market-history]')?.focus();return;}
+  if(b.dataset.marketAction==='info'){state.info=!state.info;document.getElementById('marketHistoryInfo').hidden=!state.info;b.setAttribute('aria-expanded',String(state.info));return;}
   if(b.dataset.marketPosition){state.position=b.dataset.marketPosition;state.limit=40;section.querySelectorAll('[data-market-position]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.marketPosition===state.position)));playerResults();return;}
   if(b.dataset.marketMetric){state.metric=b.dataset.marketMetric;render();section.querySelector(`[data-market-metric="${state.metric}"]`)?.focus();return;}
   if(b.dataset.marketAction==='more'){state.limit+=40;playerResults();section.querySelector('[data-market-action="more"]')?.focus();}
@@ -85,5 +109,7 @@
  function observe(){const next=document.body.dataset.section==='market';if(next&&!active){active=true;load();}else if(!next&&active){active=false;sequence++;section.setAttribute('aria-busy','false');}}
  new MutationObserver(observe).observe(document.body,{attributes:true,attributeFilter:['data-section']});
  document.addEventListener('visibilitychange',()=>{if(active&&!document.hidden)load();});
+ section.addEventListener('toggle',e=>{if(e.target.matches('details.market-price')&&e.target.open)section.querySelectorAll('details.market-price[open]').forEach(other=>{if(other!==e.target)other.open=false;});},true);
+ section.addEventListener('keydown',e=>{if(e.key==='Escape')section.querySelectorAll('details.market-price[open]').forEach(detail=>{detail.open=false;detail.querySelector('summary').focus();});});
  window.CubanLeagueMarket={showTeam};observe();
 })();

@@ -62,3 +62,40 @@ test('Market: transport failure is not an empty squad, retry succeeds and remove
   const next=d.createElement('div');d.body.append(next);await w.CubanLeagueMarket.showTeam(next,1);assert.match(next.textContent,/4Futbolistas/);
  }finally{w.close();}
 });
+test('Market editorial: stable participant logos, archive navigation, exact prices and preserved filters',async()=>{
+ const p=fixture();p.players[99].value=25136000;p.players[79].clause=121200000;
+ p.history.events=Array.from({length:45},(_,i)=>({...p.history.events[i%3],reference:'event-'+i,date:i===44?null:p.history.events[i%3].date}));
+ p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
+ const original=JSON.stringify(p);let reads=0;
+ const dom=setup(async()=>{reads++;return {ok:true,json:async()=>[{payload:p}]};}),w=dom.window,d=w.document;
+ w.DATA={participants:[{id:4,shield:'team-04.png'},{id:1,shield:'team-01.png'},{id:2,shield:'javascript:alert(1)'}]};
+ try{
+  d.body.dataset.section='market';await tick();await tick();
+  assert.equal(d.querySelector('#marketResults .market-price summary').textContent,'25,14 M €');
+  assert.equal(d.querySelector('#marketResults .market-price-exact').textContent,'25.136.000 €');
+  assert.equal(d.querySelector('#marketResults .market-price summary').getAttribute('aria-label'),'25.136.000 €. Ver importe exacto');
+  const search=d.getElementById('marketSearch');search.value='Futbolista 100';search.dispatchEvent(new w.Event('input',{bubbles:true}));
+  assert.equal(d.querySelector('.market-result-count').textContent,'1 futbolista');
+  d.querySelector('[data-market-view="history"]').click();
+  assert.equal(d.querySelector('#marketHistoryInfo').hidden,true);
+  assert.equal(d.querySelector('.market-events'),null);
+  assert.equal(d.querySelector('.market-updated'),null);
+  const rows=[...d.querySelectorAll('.market-ranking li')];
+  assert.equal(rows.find(row=>row.querySelector('strong').textContent==='Participante 1').querySelector('img').getAttribute('src'),'team-01.png');
+  assert.equal(rows.find(row=>row.querySelector('strong').textContent==='Participante 4').querySelector('img').getAttribute('src'),'team-04.png');
+  assert.ok(rows.find(row=>row.querySelector('strong').textContent==='Participante 2').querySelector('.market-participant-fallback'));
+  d.querySelector('[data-market-action="info"]').click();assert.equal(d.querySelector('#marketHistoryInfo').hidden,false);
+  d.querySelector('[data-market-action="info"]').click();assert.equal(d.querySelector('#marketHistoryInfo').hidden,true);
+  d.querySelector('[data-market-metric="spent"]').click();
+  assert.equal(d.querySelector('.market-ranking-value .market-price-exact').textContent,'75.000 €');
+  d.querySelector('[data-market-history="events"]').click();
+  assert.equal(d.querySelector('.market-ranking'),null);assert.equal(d.querySelectorAll('.market-events li').length,20);
+  d.querySelector('[data-market-action="events"]').click();assert.equal(d.querySelectorAll('.market-events li').length,40);
+  d.querySelector('[data-market-action="events"]').click();assert.equal(d.querySelectorAll('.market-events li').length,45);
+  assert.match(d.querySelector('.market-events li:last-child').textContent,/Fecha no disponible/);
+  d.querySelector('[data-market-history="ranking"]').click();assert.equal(d.querySelector('[data-market-metric="spent"]').getAttribute('aria-pressed'),'true');
+  d.querySelector('[data-market-view="players"]').click();assert.equal(d.getElementById('marketSearch').value,'Futbolista 100');assert.equal(d.querySelectorAll('#marketResults tbody tr').length,1);
+  const details=d.querySelector('.market-price');details.open=true;details.querySelector('summary').dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(details.open,false);
+  assert.equal(reads,1);assert.equal(JSON.stringify(p),original);
+ }finally{w.close();}
+});
