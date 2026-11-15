@@ -37,6 +37,10 @@ El resultado sigue siendo local y de solo lectura. Verificar las plantillas y la
 
 Al terminar, **detener el Codespace** desde GitHub para que deje de consumir tiempo de ejecución. El almacenamiento sigue contando mientras exista. No usarlo como servidor permanente ni prometer disponibilidad cuando esté detenido; el horario futuro se configurará por separado.
 
-Estado de validación: acceso manual de GitHub comprobado; inicio de sesión en Mister desde este escritorio y captura real todavía pendientes. Las pruebas del detector de sesión son sintéticas. La instalación de Chromium en el entorno de desarrollo de ChatGPT falló al descargar su archivo; eso no acredita un bloqueo de Mister ni verifica que la descarga funcione en Codespaces.
+Estado de validación del 15/11: acceso manual de GitHub comprobado; 19 pruebas sintéticas aprobadas localmente y en Actions. El primer Codespace con imagen universal se creó, pero el editor siguió en «Opening Remote / Building codespace», sin archivos ni terminal disponibles. El puerto 6080 tampoco fue accesible y GitHub rechazó detenerlo por no estar en un estado detenible. No se llegó al inicio de sesión de Mister ni se guardaron credenciales o lecturas en ese entorno. No se conoce todavía la causa de la espera.
+
+La configuración siguiente usa la imagen oficial de Node 22 en lugar de la universal y elimina la instalación redundante de Node. Esta simplificación está pendiente de una nueva prueba; no se presenta como solución comprobada. El entorno anterior requiere terminar de prepararse o eliminarse con confirmación antes de volver a probar. El código está conservado en el PR #119.
+
+La instalación de Chromium en el entorno de desarrollo de ChatGPT también falló al descargar su archivo; eso no acredita un bloqueo de Mister ni verifica que la descarga funcione en Codespaces. No activar publicación ni horarios basándose en estos resultados parciales.
 
 Referencias: [escritorio oficial desktop-lite](https://github.com/devcontainers/features/tree/main/src/desktop-lite), [puertos privados](https://docs.github.com/en/codespaces/reference/security-in-github-codespaces), [cuota y facturación](https://docs.github.com/en/billing/concepts/product-billing/github-codespaces).

@@ -1,8 +1,7 @@
 {
   "name": "Mister · prueba desde el celular",
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:3-22",
   "features": {
-    "ghcr.io/devcontainers/features/node:2": { "version": "22" },
     "ghcr.io/devcontainers/features/desktop-lite:1.2.10": {
       "noVncVersion": "1.6.0"
     }
