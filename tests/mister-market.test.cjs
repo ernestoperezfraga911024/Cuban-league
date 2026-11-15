@@ -462,3 +462,35 @@ test('fallo de una ficha conserva avance y el siguiente intento verifica equipos
   assert.equal(visited.filter(u => u.includes('/players/')).length, 1);
   assert.equal(visited.filter(u => u.includes('/users/')).length, 2);
 });
+
+const clauseStats = require('../scripts/mister-market/clause-stats.cjs');
+test('rankings de clausulazos distinguen comprador, perjudicado, gasto, ingreso y empates', () => {
+  const e = { reference: 'a', type: 'clause', fromOwnerId: '10', toOwnerId: '20', amount: 4000000 };
+  const report = clauseStats.summarizeClauses([e,
+    { ...e, reference: 'b', fromOwnerId: '20', toOwnerId: '10', amount: 6000000 },
+    { ...e, reference: 'c', type: 'purchase', amount: 100000000 }], meta.managers);
+  assert.deepEqual(report.totals, { clauseCount: 2, amount: 10000000 });
+  assert.deepEqual(report.participants.map(m => [m.made, m.received, m.spent, m.collected, m.net]),
+    [[1, 1, 6000000, 4000000, -2000000], [1, 1, 4000000, 6000000, 2000000]]);
+  assert.deepEqual(report.rankings.made.map(r => r.rank), [1, 1]);
+  assert.equal(report.rankings.spent[0].managerId, '10');
+  assert.equal(report.mostExpensive[0].amount, 6000000);
+  assert.equal(report.participants.reduce((n, m) => n + m.spent, 0), report.totals.amount);
+  assert.equal(report.participants.reduce((n, m) => n + m.collected, 0), report.totals.amount);
+  const unknown = clauseStats.summarizeClauses([{ ...e, fromOwnerId: null, fromName: 'Nombre anterior' }], meta.managers);
+  assert.equal(unknown.identityComplete, false); assert.equal(unknown.unresolved.length, 1);
+  assert.equal(unknown.participants[1].made, 1); assert.equal(unknown.participants[0].received, 0);
+});
+test('estadísticas no suman dos fuentes solapadas ni presentan el total de la temporada', () => {
+  const s = capture(), ledger = history.mergeLedger(null, historyCapture());
+  const verification = { leagueId: s.leagueId, snapshotHash: s.snapshotHash, completedAt: s.completedAt,
+    histories: s.players.map(p => ({ playerId: p.playerId, movements: p.playerId === '200' ? [{
+      type: 'clause', amount: 4000000, occurredOn: '2026-09-15',
+      from: { managerId: '10', name: 'Equipo A' }, to: { managerId: '20', name: 'Equipo B' } }] : [] })) };
+  const r = clauseStats.clauseReport(s, ledger, verification);
+  assert.equal(r.feed.totals.clauseCount, 1); assert.equal(r.profiles.totals.clauseCount, 1);
+  assert.equal(r.combined, null); assert.equal(r.feed.completeSeason, false);
+  assert.equal(r.profiles.completeSeason, false); assert.equal(r.publicationReady, false);
+  assert.throws(() => clauseStats.clauseReport(s, ledger, { ...verification, snapshotHash: 'wrong' }),
+    code('verification_snapshot_mismatch'));
+});

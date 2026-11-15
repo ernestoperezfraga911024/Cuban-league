@@ -10,18 +10,30 @@ const { waitForManualLogin, LOGIN_TIMEOUT_MS } = require('./mobile-login.cjs');
 const { browserOptions } = require('./browser-options.cjs');
 const { verifySnapshot } = require('./verification.cjs');
 const { collectHistory, mergeLedger } = require('./history.cjs');
+const { clauseReport } = require('./clause-stats.cjs');
 const { atomicJson, readJson, withLock, saveCapture } = require('./storage.cjs');
 const stateDir = path.resolve(__dirname, '../../.mister-market');
 const authFile = path.join(stateDir, 'auth.json');
 
 async function main() {
   const command = process.argv[2];
-  if (!['login', 'login-mobile', 'collect', 'verify', 'history'].includes(command)) {
-    console.log('Uso: node scripts/mister-market/cli.cjs login|login-mobile|collect|verify|history');
+  if (!['login', 'login-mobile', 'collect', 'verify', 'history', 'clause-stats'].includes(command)) {
+    console.log('Uso: node scripts/mister-market/cli.cjs login|login-mobile|collect|verify|history|clause-stats');
     process.exitCode = 1; return;
   }
-  const { chromium } = require('playwright');
   await withLock(stateDir, async () => {
+    if (command === 'clause-stats') {
+      const snapshot = await readJson(path.join(stateDir, 'latest.json'));
+      const ledger = await readJson(path.join(stateDir, 'feed-ledger.json'));
+      if (!snapshot || !ledger) fail('history_baseline_required');
+      const report = clauseReport(snapshot, ledger, await readJson(path.join(stateDir, 'verification.json')));
+      await atomicJson(path.join(stateDir, 'clause-stats.json'), report);
+      console.log(JSON.stringify({ status: 'clause_stats_complete', feedClauses: report.feed.totals.clauseCount,
+        profileClauses: report.profiles?.totals.clauseCount ?? null, reconciliation: report.reconciliation,
+        completeSeason: false, publicationReady: false, aiCalls: 0 }));
+      return;
+    }
+    const { chromium } = require('playwright');
     const reading = ['collect', 'verify', 'history'].includes(command);
     const auth = reading ? await readJson(authFile) : null;
     if (reading && !auth) fail('login_required');
