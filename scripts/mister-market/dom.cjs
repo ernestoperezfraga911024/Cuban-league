@@ -50,6 +50,8 @@ function readFeedDocument() {
   const cards = [...document.querySelectorAll('.feed-cards .card-transfer[id]')];
   return { leagueId: league ? new URL(league.href).searchParams.get('id_community') : null,
     ready: !!document.querySelector('.feed-cards'), cards: cards.length,
+    cardIds: [...document.querySelectorAll('.feed-cards .card[id]')].map(card => card.id),
+    hasMore: !!document.querySelector('.loading-more'),
     events: cards.flatMap(card => [...card.querySelectorAll(':scope > .player-list > li')].map(li => {
       const title = li.querySelector(':scope > .item > .title');
       const names = [...(title?.querySelectorAll('em') || [])].map(text);

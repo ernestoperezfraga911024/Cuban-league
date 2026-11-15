@@ -9,7 +9,8 @@
     "login": "node cli.cjs login",
     "login-mobile": "node cli.cjs login-mobile",
     "collect": "node cli.cjs collect",
-    "verify": "node cli.cjs verify"
+    "verify": "node cli.cjs verify",
+    "history": "node cli.cjs history"
   },
   "dependencies": { "playwright": "1.62.1" }
 }

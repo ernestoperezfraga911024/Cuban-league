@@ -277,6 +277,53 @@ test('la entrada se adapta al escritorio y la lectura conserva su tamaño establ
   assert.equal(reading.launch.headless, true);
   assert.deepEqual(reading.context.viewport, { width: 1280, height: 900 });
   assert.deepEqual(browserOptions('verify'), reading);
+  assert.deepEqual(browserOptions('history'), reading);
+});
+
+const history = require('../scripts/mister-market/history.cjs');
+test('historial pagina aunque reaparezca un ID conocido y exige el final observado', async () => {
+  const a = { ready: true, cardIds: ['feed-300', 'feed-290'], events: [], hasMore: true };
+  const b = { ...a, cardIds: [...a.cardIds, 'feed-295'] };
+  const end = { ...b, hasMore: false };
+  let reads = 0, clicks = 0;
+  const result = await history.paginateHistory(a, { read: async () => [b, end][reads++], next: async () => { clicks++; },
+    wait: async (read, accept) => { const state = await read(); assert.equal(accept(state), true); return state; } });
+  assert.equal(clicks, 2); assert.equal(result.endObserved, true); assert.equal(result.pages, 3);
+  assert.equal(history.feedProgress(a, a), false);
+  assert.throws(() => history.feedProgress(a, { ...a, cardIds: [...a.cardIds].reverse() }), code('feed_pagination_changed'));
+  assert.throws(() => history.feedProgress(a, { ...a, cardIds: [...a.cardIds, 'feed-300'] }), code('duplicate_feed_card'));
+  await assert.rejects(history.paginateHistory(a, { read: async () => a, next: async () => {}, maxPages: 1 }),
+    code('feed_pagination_limit'));
+  const withEvent = { ...a, events: [event()] };
+  assert.throws(() => history.feedProgress(withEvent, { ...b, events: [event({ amount: '1' })] }),
+    code('feed_changed_during_capture'));
+});
+function historyCapture(ids = ['300'], completedAt = '2026-11-15T10:00:00Z') {
+  const events = ids.map(id => core.transfer(event({ feedId: `feed-${id}` }), core.context(meta, config)));
+  return { leagueId: config.leagueId, season: config.season, startedAt: completedAt, completedAt,
+    endObserved: true, sourceCoverage: 'retained_feed_exhausted', pages: 3, events, headEventIds: [events[0].eventId] };
+}
+test('registro duradero deduplica por ID y conserva eventos que desaparecen del portal', () => {
+  const first = history.mergeLedger(null, historyCapture(['300', '290']));
+  assert.equal(first.baseline, true); assert.deepEqual(first.newlyObservedIds, []);
+  const second = history.mergeLedger(first, historyCapture(['300', '301'], '2026-11-15T22:00:00Z'));
+  assert.equal(second.events.length, 3); assert.equal(second.newlyObservedIds.length, 1);
+  assert.equal(second.continuity, 'previous_head_retained');
+  const again = history.mergeLedger(second, historyCapture(['300', '301'], '2026-11-15T22:01:00Z'));
+  assert.equal(again.events.length, 3); assert.deepEqual(again.newlyObservedIds, []);
+  assert.equal(again.events.find(e => e.sourceFeedId === 'feed-290').firstSeenAt, first.completedAt);
+  assert.equal(again.publicationReady, false); history.validateLedger(again);
+  assert.throws(() => history.validateLedger({ ...again, events: [] }), code('feed_ledger_hash_mismatch'));
+});
+test('registro detecta ventanas sin solapamiento, pausas largas, cambios e historial incompleto', () => {
+  const first = history.mergeLedger(null, historyCapture());
+  assert.equal(history.mergeLedger(first, historyCapture(['301'], '2026-11-15T22:00:00Z')).continuity, 'review_required');
+  assert.equal(history.mergeLedger(first, historyCapture(['300'], '2026-11-17T22:00:00Z')).continuity, 'review_required');
+  const changed = historyCapture(['300'], '2026-11-15T22:00:00Z'); changed.events[0].amount++;
+  assert.throws(() => history.mergeLedger(first, changed), code('feed_event_changed'));
+  assert.throws(() => history.mergeLedger(first, { ...historyCapture(), endObserved: false }), code('incomplete_feed_history'));
+  assert.throws(() => history.mergeLedger(first, { ...historyCapture(), leagueId: '978196' }), code('snapshot_context_mismatch'));
+  assert.throws(() => history.mergeLedger(first, historyCapture(['300'], '2026-11-14T22:00:00Z')), code('stale_capture'));
 });
 
 const verification = require('../scripts/mister-market/verification.cjs');

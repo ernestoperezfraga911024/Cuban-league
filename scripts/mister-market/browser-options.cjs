@@ -1,7 +1,7 @@
 'use strict';
 
 function browserOptions(command) {
-  const reading = command === 'collect' || command === 'verify';
+  const reading = ['collect', 'verify', 'history'].includes(command);
   return {
     launch: { headless: reading, ...(reading ? {} : { args: ['--start-maximized'] }) },
     context: { locale: 'es-ES', timezoneId: 'America/New_York',
