@@ -28,8 +28,8 @@ function event(overrides = {}) {
     from: { id: '10', name: 'Equipo A' }, to: { id: '20', name: 'Equipo B' }, amount: '4.000.000', ...overrides };
 }
 function code(name) { return error => error.code === name; }
-function evaluate(fn, body) {
-  const instance = new JSDOM(body, { url: `${core.ORIGIN}/search`, runScripts: 'outside-only' });
+function evaluate(fn, body, url = `${core.ORIGIN}/search`) {
+  const instance = new JSDOM(body, { url, runScripts: 'outside-only' });
   Object.defineProperty(instance.window.HTMLElement.prototype, 'offsetWidth', { get() { return this.hidden ? 0 : 10; } });
   try { return JSON.parse(JSON.stringify(instance.window.eval(`(${fn.toString()})()`))); }
   finally { instance.window.close(); }
@@ -276,4 +276,91 @@ test('la entrada se adapta al escritorio y la lectura conserva su tamaño establ
   const reading = browserOptions('collect');
   assert.equal(reading.launch.headless, true);
   assert.deepEqual(reading.context.viewport, { width: 1280, height: 900 });
+  assert.deepEqual(browserOptions('verify'), reading);
+});
+
+const verification = require('../scripts/mister-market/verification.cjs');
+test('contraste usa la plantilla actual, sin confundirla con el once de una jornada', () => {
+  const html = '<div class="team-lineup"><a class="player" href="players/999/antiguo"></a></div>'
+    + '<button data-tab="team" class="active">Equipo</button><div class="panels-users"><div class="panel-team">'
+    + '<ul class="player-list"><li><a class="player" href="players/200/actual"><div class="icons">'
+    + '<img class="team-logo" src="/teams/15.png"><div data-position="4"></div></div><div class="info">'
+    + '<div class="name">Jugador de prueba</div><div class="underName">€ 1.250.000 ↑</div></div></a></li></ul></div></div>';
+  const state = evaluate(dom.readTeamDocument, html, `${core.ORIGIN}/users/10/equipo-a`);
+  assert.equal(state.managerId, '10'); assert.equal(state.rows.length, 1);
+  assert.equal(verification.verifyTeam(state, meta.managers[0], capture()).playerCount, 1);
+  for (const invalid of [{ ...state, managerId: '20' }, { ...state, ready: false }]) {
+    assert.throws(() => verification.verifyTeam(invalid, meta.managers[0], capture()), code('roster_context_mismatch'));
+  }
+  for (const rows of [[], [...state.rows, ...state.rows], [{ ...state.rows[0], id: '999' }],
+    [{ ...state.rows[0], value: '€ 1.250.001' }]]) {
+    assert.throws(() => verification.verifyTeam({ ...state, rows }, meta.managers[0], capture()), code('roster_player_mismatch'));
+  }
+});
+test('los enlaces de participantes exigen identidad completa, liga y destino exactos', () => {
+  const state = { leagueId: config.leagueId, managers: meta.managers.map(m => ({ ...m, href: `users/${m.id}/equipo` })) };
+  assert.equal(verification.managerLinks(state, capture()).length, 2);
+  assert.throws(() => verification.managerLinks({ ...state, leagueId: '978196' }, capture()), code('wrong_league'));
+  for (const managers of [state.managers.slice(0, 1), [state.managers[0], state.managers[0]],
+    state.managers.map(m => ({ ...m, href: `https://example.org/users/${m.id}` }))]) {
+    assert.throws(() => verification.managerLinks({ ...state, managers }, capture()), code('roster_manager_mismatch'));
+  }
+});
+test('Últimos movimientos conserva fechas, tipos, importes y duplicados sin inventar cobertura', () => {
+  const item = '<li><div class="left"><div class="label">15 sept 2026 · Cláusula</div>'
+    + '<div class="value">De <strong>Equipo A</strong> a <strong>Equipo B</strong></div></div><div class="right">22.279.500</div></li>';
+  const state = evaluate(dom.readPlayerMovementsDocument, '<div class="section-title"><h4>Detalles</h4></div>'
+    + '<div class="section-title"><h4>Últimos movimientos</h4></div><div class="box-records"><ul>' + item + item + '</ul></div>'
+    + '<div class="section-title">Historial de puntos</div><div class="box-records">Dato no requerido</div>',
+  `${core.ORIGIN}/players/200/jugador-prueba`);
+  const history = verification.playerMovements(state, capture().players[1], capture());
+  assert.equal(history.movements.length, 2); assert.equal(history.coverage, 'latest_visible_per_player');
+  assert.equal(history.stableEventIds, false); assert.equal(history.movements[0].occurredOn, '2026-09-15');
+  assert.equal(history.movements[0].occurredAt, null); assert.equal(history.movements[0].type, 'clause');
+  assert.equal(history.movements[0].amount, 22279500); assert.equal(history.movements[0].from.managerId, '10');
+  assert.doesNotMatch(JSON.stringify(history), /Dato no requerido/);
+  const oldName = { ...state, rows: [{ ...state.rows[0], parties: ['Nombre antiguo', 'Equipo B'] }] };
+  assert.equal(verification.playerMovements(oldName, capture().players[1], capture()).movements[0].from.resolution, 'unresolved');
+  const signed = { ...state, rows: [{ ...state.rows[0], label: '13 jul 2026 · Fichaje', parties: ['Mister', 'Equipo A'] }] };
+  assert.equal(verification.playerMovements(signed, capture().players[1], capture()).movements[0].type, 'purchase');
+  signed.rows[0].parties = ['Equipo A', 'Equipo B'];
+  assert.equal(verification.playerMovements(signed, capture().players[1], capture()).movements[0].type, 'transfer');
+  assert.throws(() => verification.playerMovements({ ...state, playerId: '999' }, capture().players[1], capture()),
+    code('player_history_context_mismatch'));
+  assert.throws(() => verification.playerMovements({ ...state, recordsPresent: false }, capture().players[1], capture()),
+    code('player_history_context_mismatch'));
+});
+test('fecha de movimiento rechaza días imposibles y formatos no observados', () => {
+  assert.equal(verification.movementDate('29 feb 2024'), '2024-02-29');
+  for (const value of ['29 feb 2026', '31 abr 2026', '0 ene 2026', 'hace 2 horas', '15/09/2026', '15 september 2026']) {
+    assert.throws(() => verification.movementDate(value), code('invalid_movement_date'));
+  }
+});
+test('la verificación recorre todos los equipos y perfiles y rechaza cambios durante la lectura', async () => {
+  for (const changed of [false, true]) {
+    const snapshot = capture(); let url, activeTeam = false, feeds = 0;
+    const progress = [], visited = [];
+    const page = { setDefaultTimeout() {}, url: () => url,
+      async goto(next) { url = next; activeTeam = false; visited.push(next); },
+      getByRole(role, options) { assert.equal(role, 'button'); assert.equal(options.name, 'Equipo');
+        return { async click() { activeTeam = true; } }; },
+      async evaluate(fn) {
+        if (fn.name === 'readFeedDocument') return { leagueId: config.leagueId, ready: true, cards: 1,
+          events: changed && feeds++ ? [event()] : [] };
+        if (fn.name === 'readManagerDocument') return { leagueId: config.leagueId,
+          managers: meta.managers.map(m => ({ ...m, href: `users/${m.id}/equipo` })) };
+        if (fn.name === 'readTeamDocument') return { ready: activeTeam, managerId: url.split('/')[4],
+          rows: url.includes('/users/10/') ? [row('200')] : [] };
+        if (fn.name === 'readPlayerMovementsDocument') return { ready: true, playerId: url.split('/')[4],
+          sectionPresent: false, recordsPresent: false, rows: [] };
+        assert.fail('Unexpected read');
+      }
+    };
+    const run = () => verification.verifySnapshot(page, snapshot, { progress: s => progress.push(s),
+      wait: async (read, accept) => { const state = await read(); assert.equal(accept(state), true); return state; } });
+    if (changed) await assert.rejects(run(), code('feed_changed_during_verification'));
+    else { const result = await run(); assert.equal(result.teams.length, 2); assert.equal(result.histories.length, 2);
+      assert.equal(result.snapshotHash, snapshot.snapshotHash); assert.equal(result.publicationReady, false);
+      assert.equal(visited.filter(u => u.includes('/players/')).length, 2); assert.equal(progress.at(-1).completed, 2); }
+  }
 });

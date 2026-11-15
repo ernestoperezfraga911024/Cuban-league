@@ -60,4 +60,41 @@ function readFeedDocument() {
         amount: text(li.querySelector('.flow > .price')) };
     })) };
 }
-module.exports = { readMarketDocument, readFilterDocument, readFeedDocument };
+function readManagerDocument() {
+  const text = e => String(e?.textContent || '').replace(/\s+/g, ' ').trim();
+  const visible = e => !!e && !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+  const league = document.querySelector('a.active[href*="action/change?id_community="]');
+  return { leagueId: league ? new URL(league.href).searchParams.get('id_community') : null,
+    managers: [...document.querySelectorAll('a.btn.btn-sw-link.user[href^="users/"]')].filter(visible)
+      .map(a => ({ id: a.getAttribute('href')?.match(/users\/(\d+)/)?.[1],
+        name: text(a.querySelector('.info .name')), href: a.getAttribute('href') })) };
+}
+function readTeamDocument() {
+  const text = e => String(e?.textContent || '').replace(/\s+/g, ' ').trim();
+  const visible = e => !!e && !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+  const panel = document.querySelector('.panels-users .panel-team');
+  return { managerId: location.pathname.match(/^\/users\/(\d+)(?:\/|$)/)?.[1] || null,
+    ready: visible(panel) && !!document.querySelector('button[data-tab="team"].active'),
+    rows: panel ? [...panel.querySelectorAll('.player-list > li a.player')].filter(visible).map(a => ({
+      id: a.getAttribute('href')?.match(/players\/(\d+)/)?.[1] || null,
+      name: text(a.querySelector('.info .name')), value: text(a.querySelector('.info .underName')),
+      position: a.querySelector('[data-position]')?.getAttribute('data-position'),
+      clubId: a.querySelector('.icons img.team-logo')?.getAttribute('src')?.match(/teams\/(\d+)\.png/)?.[1] || null
+    })) : [] };
+}
+function readPlayerMovementsDocument() {
+  const text = e => String(e?.textContent || '').replace(/\s+/g, ' ').trim();
+  const headings = [...document.querySelectorAll('.section-title')];
+  const heading = headings.find(e => text(e) === 'Últimos movimientos');
+  const box = heading?.nextElementSibling;
+  return { playerId: location.pathname.match(/^\/players\/(\d+)(?:\/|$)/)?.[1] || null,
+    ready: headings.some(e => text(e) === 'Detalles'),
+    sectionPresent: !!heading, recordsPresent: !!box?.matches('.box-records'),
+    rows: box?.matches('.box-records') ? [...box.querySelectorAll(':scope > ul > li')].map(li => ({
+      label: text(li.querySelector('.left .label')),
+      parties: [...li.querySelectorAll('.left .value strong')].map(text),
+      amount: text(li.querySelector('.right'))
+    })) : [] };
+}
+module.exports = { readMarketDocument, readFilterDocument, readFeedDocument,
+  readManagerDocument, readTeamDocument, readPlayerMovementsDocument };

@@ -8,7 +8,8 @@
     "install-browser": "playwright install chromium",
     "login": "node cli.cjs login",
     "login-mobile": "node cli.cjs login-mobile",
-    "collect": "node cli.cjs collect"
+    "collect": "node cli.cjs collect",
+    "verify": "node cli.cjs verify"
   },
   "dependencies": { "playwright": "1.62.1" }
 }
