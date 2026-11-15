@@ -84,7 +84,7 @@ function resumeHistories(checkpoint, snapshot, feedHash, now = Date.now()) {
 }
 async function verifySnapshot(page, snapshot, { wait = waitStable, progress = () => {},
   checkpoint = null, saveCheckpoint = async () => {},
-  maxDuration = 12 * 60 * 1000 } = {}) {
+  maxDuration = 12 * 60 * 1000, teamsOnly = false } = {}) {
   validateSnapshot(snapshot);
   if (snapshot.leagueId !== DEFAULTS.leagueId) fail('wrong_league');
   const startedAt = new Date().toISOString(), deadline = Date.now() + maxDuration;
@@ -114,6 +114,7 @@ async function verifySnapshot(page, snapshot, { wait = waitStable, progress = ()
     teams.push(verifyTeam(state, manager, snapshot));
     progress({ phase: 'teams', completed: teams.length, expected: managers.length });
   }
+  if(teamsOnly){const after=await feed();if(hash(before.events)!==hash(after.events))fail('feed_changed_during_verification');return {schemaVersion:1,leagueId:snapshot.leagueId,snapshotHash:snapshot.snapshotHash,startedAt,completedAt:new Date().toISOString(),teams,feedStable:true,aiCalls:0};}
   const feedHash = hash(before.events);
   const histories = [...resumeHistories(checkpoint, snapshot, feedHash)];
   const evidenceStartedAt = histories.length ? checkpoint.startedAt : startedAt;
