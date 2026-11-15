@@ -208,13 +208,13 @@
     },
     {
       "code": "mister-mobile-codespace-disk-full",
-      "status": "regression-tested-awaiting-run",
+      "status": "remote-setup-verified-login-pending",
       "failure": "La imagen universal agotó el disco al extraer torch/lib/libtorch_cpu.so; Codespaces terminó en recuperación y no abrió el escritorio de Mister.",
       "prevention": "Imagen oficial específica de Node, sin instalación redundante de Node; regresión que excluye universal. Leer creation.log y reconstruir el mismo entorno con limpieza de imágenes, sin crear máquinas adicionales. Validar escritorio, puerto privado y login real por separado.",
       "tests": [
         "tests/mister-market.test.cjs"
       ],
-      "evidence": "Registro de creación del 15/11/2026 a las 17:00:06 UTC: no space left on device. Reconstrucción solicitada; todavía sin lectura real de Mister."
+      "evidence": "Registro de creación del 15/11/2026 a las 17:00:06 UTC: no space left on device. La reconstrucción con Node arrancó; puerto 6080 Private y escritorio noVNC con Chromium en Mister verificados visualmente. Login del lector y lectura completa pendientes."
     }
   ]
 }
