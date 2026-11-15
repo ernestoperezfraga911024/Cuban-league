@@ -215,6 +215,16 @@
         "tests/mister-market.test.cjs"
       ],
       "evidence": "Registro de creación del 15/11/2026 a las 17:00:06 UTC: no space left on device. La reconstrucción con Node arrancó; puerto 6080 Private y escritorio noVNC con Chromium en Mister verificados visualmente. Login del lector y lectura completa pendientes."
+    },
+    {
+      "code": "mister-mobile-login-timeout",
+      "status": "regression-tested-awaiting-run",
+      "failure": "El límite de quince minutos venció durante la entrada desde el celular. La ventana desapareció sin guardar auth.json; el escritorio fijo también obligaba a ver campos demasiado pequeños.",
+      "prevention": "Esperar hasta sesenta minutos, abrir entrada maximizada y sin viewport fijo; adaptar el escritorio al móvil. Confirmar mensaje de sesión guardada y liga correcta antes de leer. No inferir éxito del cierre ni registrar credenciales.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "mobile-login.log mostró manual_login_timeout y la comprobación de existencia devolvió sessionSaved=false. Corrección con 21 pruebas locales, login real pendiente."
     }
   ]
 }

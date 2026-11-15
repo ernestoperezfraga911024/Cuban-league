@@ -1,10 +1,11 @@
 'use strict';
 const { ORIGIN, DEFAULTS, fail } = require('./core.cjs');
 const { readMarketDocument } = require('./dom.cjs');
+const LOGIN_TIMEOUT_MS = 60 * 60 * 1000;
 
 // The user signs in directly inside the remote desktop. Do not inspect inputs,
 // passwords, OTPs, network requests or another browser's authentication state.
-async function waitForManualLogin(page, { timeout = 15 * 60 * 1000, interval = 1000,
+async function waitForManualLogin(page, { timeout = LOGIN_TIMEOUT_MS, interval = 1000,
   now = Date.now, sleep = ms => new Promise(resolve => setTimeout(resolve, ms)) } = {}) {
   const end = now() + timeout;
   let confirmed = 0;
@@ -23,4 +24,4 @@ async function waitForManualLogin(page, { timeout = 15 * 60 * 1000, interval = 1
   }
   fail('manual_login_timeout');
 }
-module.exports = { waitForManualLogin };
+module.exports = { waitForManualLogin, LOGIN_TIMEOUT_MS };

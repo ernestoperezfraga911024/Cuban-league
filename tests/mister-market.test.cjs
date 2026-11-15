@@ -252,3 +252,28 @@ test('configuración móvil no activa publicación, cron ni puertos adicionales'
   assert.match(configFile.image, /^mcr\.microsoft\.com\/devcontainers\/javascript-node:/);
   assert.deepEqual(Object.keys(configFile.features), ['ghcr.io/devcontainers/features/desktop-lite:1.2.10']);
 });
+
+test('entrada manual permite superar quince minutos, pero conserva un límite de espera', async () => {
+  let clock = 0;
+  const page = { isClosed: () => false, url: () => `${core.ORIGIN}/feed`,
+    evaluate: async () => ({ leagueId: clock >= 20 * 60000 ? core.DEFAULTS.leagueId : null }) };
+  await waitForManualLogin(page, { now: () => clock, sleep: async () => { clock += 10 * 60000; } });
+  assert.equal(clock, 30 * 60000);
+  clock = 0;
+  await assert.rejects(waitForManualLogin({ ...page, evaluate: async () => ({ leagueId: null }) },
+    { now: () => clock, sleep: async () => { clock += 10 * 60000; } }), code('manual_login_timeout'));
+  assert.equal(clock, 60 * 60000);
+});
+
+test('la entrada se adapta al escritorio y la lectura conserva su tamaño estable', () => {
+  const { browserOptions } = require('../scripts/mister-market/browser-options.cjs');
+  for (const command of ['login', 'login-mobile']) {
+    const options = browserOptions(command);
+    assert.equal(options.context.viewport, null);
+    assert.equal(options.launch.headless, false);
+    assert.ok(options.launch.args.includes('--start-maximized'));
+  }
+  const reading = browserOptions('collect');
+  assert.equal(reading.launch.headless, true);
+  assert.deepEqual(reading.context.viewport, { width: 1280, height: 900 });
+});

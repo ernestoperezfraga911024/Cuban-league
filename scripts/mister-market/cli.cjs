@@ -6,7 +6,8 @@ const readline = require('node:readline/promises');
 const { ORIGIN, DEFAULTS, MarketError, fail } = require('./core.cjs');
 const { readMarketDocument } = require('./dom.cjs');
 const { collect } = require('./collector.cjs');
-const { waitForManualLogin } = require('./mobile-login.cjs');
+const { waitForManualLogin, LOGIN_TIMEOUT_MS } = require('./mobile-login.cjs');
+const { browserOptions } = require('./browser-options.cjs');
 const { atomicJson, readJson, withLock, saveCapture } = require('./storage.cjs');
 const stateDir = path.resolve(__dirname, '../../.mister-market');
 const authFile = path.join(stateDir, 'auth.json');
@@ -21,16 +22,16 @@ async function main() {
   await withLock(stateDir, async () => {
     const auth = command === 'collect' ? await readJson(authFile) : null;
     if (command === 'collect' && !auth) fail('login_required');
-    const browser = await chromium.launch({ headless: command === 'collect' });
+    const options = browserOptions(command);
+    const browser = await chromium.launch(options.launch);
     try {
-      const context = await browser.newContext({ ...(auth ? { storageState: auth } : {}),
-        locale: 'es-ES', timezoneId: 'America/New_York', viewport: { width: 1280, height: 900 } });
+      const context = await browser.newContext({ ...options.context, ...(auth ? { storageState: auth } : {}) });
       const page = await context.newPage();
       if (command !== 'collect') {
         if (command === 'login' && !process.stdin.isTTY) fail('interactive_login_required');
         await page.goto(`${ORIGIN}/feed`, { waitUntil: 'domcontentloaded' });
         if (command === 'login-mobile') {
-          console.log('Esperando el inicio de sesión manual en Mister y la selección de primera división (máximo 15 minutos).');
+          console.log(`Esperando el inicio de sesión manual en Mister y la selección de primera división (máximo ${LOGIN_TIMEOUT_MS / 60000} minutos).`);
           await waitForManualLogin(page);
         } else {
           const input = readline.createInterface({ input: process.stdin, output: process.stdout });

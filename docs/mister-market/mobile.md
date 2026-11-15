@@ -14,8 +14,9 @@ La preparación instala Playwright y Chromium desde sus distribuidores oficiales
 
 1. En **Ports**, comprobar que el puerto **6080** figure como **Private**, y abrir su enlace. Debe estar protegido por tu inicio de sesión en GitHub. Nunca cambiarlo a Public ni compartirlo con terceros.
 2. En el escritorio web de noVNC, pulsar **Connect**. En la prueba de Codespaces se conectó sin un segundo formulario de contraseña; la protección externa es el acceso privado de GitHub. Si otra instalación solicita la contraseña predeterminada de desktop-lite, es `vscode`, distinta de la de Mister o GitHub. Mantener siempre el puerto Private.
-3. Dentro de la ventana de Mister, iniciar sesión y seleccionar la **primera división de Cuban League**. El programa espera hasta 15 minutos y guarda su sesión privada cuando confirma la comunidad correcta. No hace falta volver a una terminal para pulsar Enter.
-4. La ventana del programa se cierra al terminar. La sesión se guarda únicamente en `.mister-market/auth.json`, excluida de Git. No copiar ese archivo al chat, a commits o a artefactos de Actions.
+3. Dentro de la ventana de Mister, iniciar sesión y seleccionar la **primera división de Cuban League**. El programa espera hasta 60 minutos y guarda su sesión privada cuando confirma la comunidad correcta. No hace falta volver a una terminal para pulsar Enter.
+4. Para verlo cómodo en el celular, usar **Settings → Scaling mode → Remote resizing** en noVNC. La ventana de entrada se abre maximizada y adapta su contenido al escritorio; la lectura automática conserva su tamaño fijo.
+5. La ventana del programa se cierra al terminar. La sesión se guarda únicamente en `.mister-market/auth.json`, excluida de Git. No copiar ese archivo al chat, a commits o a artefactos de Actions.
 
 Si el inicio de sesión caduca o la ventana se cierra antes, desde la terminal del Codespace se puede iniciar otra prueba con:
 
@@ -46,3 +47,7 @@ Para otra espera larga, leer primero el registro de creación; no atribuirla a M
 La instalación de Chromium en el entorno de desarrollo de ChatGPT también falló al descargar su archivo; eso no acredita un bloqueo de Mister ni verifica que la descarga funcione en Codespaces. No activar publicación ni horarios basándose en estos resultados parciales.
 
 Referencias: [escritorio oficial desktop-lite](https://github.com/devcontainers/features/tree/main/src/desktop-lite), [puertos privados](https://docs.github.com/en/codespaces/reference/security-in-github-codespaces), [cuota y facturación](https://docs.github.com/en/billing/concepts/product-billing/github-codespaces).
+
+## Incidencia del primer inicio de sesión móvil
+
+El registro confirmó `manual_login_timeout`: el límite inicial de 15 minutos venció antes de confirmar la comunidad y no se guardó `auth.json`. El cierre de la ventana por sí solo no demuestra éxito. Se amplió la espera a 60 minutos y se eliminó el tamaño fijo de la ventana interactiva; solo el recolector mantiene 1280×900. Dos regresiones nuevas verifican ambos comportamientos (21 pruebas locales aprobadas). Pendiente confirmar el login real y la primera lectura. No guardar contraseñas ni entradas de formulario en registros o código.
