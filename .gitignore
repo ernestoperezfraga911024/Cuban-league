@@ -1,2 +1,5 @@
 node_modules/
 test-results/
+.mister-market/
+playwright/.auth/
+supabase/.temp/

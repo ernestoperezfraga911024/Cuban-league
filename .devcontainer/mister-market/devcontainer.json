@@ -1,0 +1,19 @@
+{
+  "name": "Mister · prueba desde el celular",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:3-22",
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1.2.10": {
+      "noVncVersion": "1.6.0"
+    }
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": { "label": "Escritorio privado de Mister", "onAutoForward": "notify" }
+  },
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+  "postCreateCommand": "npm --prefix scripts/mister-market ci --ignore-scripts && cd scripts/mister-market && npx playwright install --with-deps chromium",
+  "postAttachCommand": "node scripts/mister-market/start-mobile.cjs",
+  "customizations": {
+    "codespaces": { "openFiles": ["docs/mister-market/mobile.md"] }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "cuban-league-mister-market-reader",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lectura y comparación local de Mister, sin IA ni publicación",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "install-browser": "playwright install chromium",
+    "login": "node cli.cjs login",
+    "login-mobile": "node cli.cjs login-mobile",
+    "collect": "node cli.cjs collect",
+    "verify": "node cli.cjs verify",
+    "history": "node cli.cjs history",
+    "clause-stats": "node cli.cjs clause-stats"
+  },
+  "dependencies": { "playwright": "1.62.1" }
+}

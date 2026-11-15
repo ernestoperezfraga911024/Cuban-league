@@ -1,0 +1,41 @@
+name: Cuban League · Pruebas del lector de mercado
+on:
+  pull_request:
+    paths:
+      - '.devcontainer/mister-market/**'
+      - 'scripts/mister-market/**'
+      - 'tests/mister-market.test.cjs'
+      - 'market*'
+      - 'tests/market-*.test.cjs'
+      - 'tests/helpers/market-fixture.cjs'
+      - 'supabase/migrations/*_mister_market_archive.sql'
+      - '.github/workflows/mister-market-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.devcontainer/mister-market/**'
+      - 'scripts/mister-market/**'
+      - 'tests/mister-market.test.cjs'
+      - 'market*'
+      - 'tests/market-*.test.cjs'
+      - 'tests/helpers/market-fixture.cjs'
+      - 'supabase/migrations/*_mister_market_archive.sql'
+      - '.github/workflows/mister-market-checks.yml'
+permissions:
+  contents: read
+concurrency:
+  group: mister-market-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: node --test tests/mister-market.test.cjs tests/market-public.test.cjs tests/market-db.test.cjs

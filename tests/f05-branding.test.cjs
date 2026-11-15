@@ -97,7 +97,7 @@ test('cream, muted labels, accents and active controls retain accessible contras
 
 test('service worker precaches every active logo, icon and palette version',()=>{
   const sw=read('sw.js'),app=read('app.js');
-  assert.match(sw,/cuban-league-v230-squad-design/);
+  assert.match(sw,/cuban-league-v231-market/);
   assert.match(sw,/brand-f05\.css\?v=182-20261018-f05-2/);
   assert.match(app,/APP_VERSION='229-20261114-install-welcome'/);
   for(const name of ['cuban-league-f05-logo.svg',...Object.keys(images)])assert.ok(sw.includes(`'./${name}'`),name);

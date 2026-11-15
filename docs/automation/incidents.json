@@ -205,6 +205,64 @@
       "tests": [
         "tests/automation-runtime.test.cjs"
       ]
+    },
+    {
+      "code": "mister-mobile-codespace-disk-full",
+      "status": "read-only-run-verified",
+      "failure": "La imagen universal agotó el disco al extraer torch/lib/libtorch_cpu.so; Codespaces terminó en recuperación y no abrió el escritorio de Mister.",
+      "prevention": "Imagen oficial específica de Node, sin instalación redundante de Node; regresión que excluye universal. Leer creation.log y reconstruir el mismo entorno con limpieza de imágenes, sin crear máquinas adicionales. Validar escritorio, puerto privado y login real por separado.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "Registro del 15/11/2026 a las 17:00:06 UTC: no space left on device. La reconstrucción con Node arrancó; puerto 6080 Private y escritorio verificados. Posteriormente login propio y captura real con SHA 66cce081270e5959b5256bd81818d431a3b7b4d4: 538 jugadores, 20 participantes, 53.766 ms, sin publicación. Codespace detenido al finalizar."
+    },
+    {
+      "code": "mister-mobile-login-timeout",
+      "status": "read-only-run-verified",
+      "failure": "El límite de quince minutos venció durante la entrada desde el celular. La ventana desapareció sin guardar auth.json; el escritorio fijo también obligaba a ver campos demasiado pequeños.",
+      "prevention": "Esperar hasta sesenta minutos, abrir entrada maximizada y sin viewport fijo; adaptar el escritorio al móvil. Confirmar mensaje de sesión guardada y liga correcta antes de leer. No inferir éxito del cierre ni registrar credenciales.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "El primer intento dejó manual_login_timeout y sessionSaved=false. Tras la corrección y 21 pruebas aprobadas, Ernesto completó la entrada manual con teclado de pantalla: mensaje de sesión guardada, sessionSaved=true y lock liberado. El lector reutilizó esa sesión y terminó la captura a las 17:59:34 UTC del 15/11. No acredita acceso permanente ni publicación."
+    },
+    {
+      "code": "mister-mobile-keyboard-letters",
+      "status": "manual-workaround-verified",
+      "failure": "El usuario no podía introducir letras desde el teclado del iPhone dentro del escritorio remoto.",
+      "prevention": "Teclado de pantalla matchbox-keyboard del repositorio Debian, ventana compacta bajo el formulario y Layer Top. La entrada de credenciales la completa el usuario; no registrar teclas ni leer el contenido de la sesión. Instalación manual, pendiente integrarla en la configuración reproducible.",
+      "tests": [],
+      "manual_check": "El usuario completó el formulario y la sesión propia guardada fue reutilizada por la captura real de 538 jugadores. No hay regresión automatizada de teclado móvil."
+    },
+    {
+      "code": "mister-feed-visible-window",
+      "status": "read-only-run-verified",
+      "failure": "La pantalla inicial solo contenía 29 movimientos, mientras el diagnóstico por desplazamiento encontró 391. Los IDs no seguían un orden temporal estricto en el DOM.",
+      "prevention": "Paginar hasta la desaparición estable del marcador de carga, conservar prefijos y datos, no parar en el primer ID conocido. Registro acumulado por ID en un archivo atómico; primera lectura como base, controles de solapamiento y plazo, publicación desactivada.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "history inicial con SHA 9c7992d: 391 operaciones, 20 páginas, 51.396 ms. Segunda ejecución con 137881f6: conserva 391, newlyObserved=0, baseline=false y previous_head_retained. Archivo privado y atómico. No demuestra cobertura de toda la temporada."
+    },
+    {
+      "code": "mister-profile-history-identity",
+      "status": "read-only-run-verified",
+      "failure": "Últimos movimientos ofrece fecha y tipo, pero las filas observadas no incluyen ID estable y no acreditan historia ilimitada. Deduplicar por fecha/importe/nombres podría unir operaciones distintas.",
+      "prevention": "Conservar filas duplicadas y fechas con precisión de día, tipos explícitos y nombres antiguos sin resolver; guardar como evidencia separada. No sumar a los IDs del portal ni inventar una hora.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "verify con dde1f181 completó 20 equipos y 538 fichas: 1.842 movimientos, 443 Cláusula fechadas entre 15/08 y 14/11/2026, sin partes de cláusulas sin resolver. Máximo observado: 5 movimientos por ficha. 131 de los 132 clausulazos del portal tienen coincidencia por jugador/partes/importe; uno no. Esto no prueba identidad de eventos ni autoriza sumar ambas fuentes. Conciliación y cobertura completa pendientes."
+    },
+    {
+      "code": "mister-profile-without-biography",
+      "status": "read-only-run-verified",
+      "failure": "El recorrido completo se detuvo después de 504 fichas con page_not_settled: una ficha válida no tenía la sección Detalles. El diseño anterior no conservaba el avance de fichas.",
+      "prevention": "Reconocer alternativamente las dos secciones finales observadas Historial de valores y Historial de puntos. Guardar avance cada diez perfiles y al fallar; archivar cada ejecución. Reanudación solo con hash íntegro, mismo catálogo, misma ventana del portal y menos de 24 horas; revalidar equipos y portal.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "Tras diagnosticar la ficha válida sin biografía, verify con dde1f181 terminó las 538 fichas y 20 equipos en 699.056 ms. Checkpoint verified y evidencia por ejecución guardada. La reanudación tras fallo está probada sintéticamente; el recorrido real corregido no necesitó reanudar."
     }
   ]
 }
