@@ -1,7 +1,7 @@
 name: Cuban League · Mercado Mister
 on:
   schedule:
-    - cron: '0 4,17 * * *'
+    - cron: '0 4,9,13,17,21 * * *'
       timezone: America/New_York
   workflow_dispatch:
     inputs:

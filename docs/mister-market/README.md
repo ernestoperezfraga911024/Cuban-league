@@ -90,7 +90,11 @@ La carpeta está excluida de Git. Estos archivos sobreviven a detener el Codespa
 
 Una sesión puede caducar o necesitar nueva verificación. No se promete acceso perpetuo ni se sortean CAPTCHA o controles de acceso. Si el inicio de sesión real funciona pero la sesión guardada no, hay que diagnosticarlo antes de automatizar.
 
-## Cómo avanzar a las dos actualizaciones diarias
+## Programación actual
+
+El workflow de mercado está programado a las **04:00, 09:00, 13:00, 17:00 y 21:00 de Miami**, todos los días, sin IA. La metodología vigente está en [automation.md](automation.md). Las secciones siguientes conservan la preparación inicial; sus estados pendientes describen esa etapa anterior a la activación.
+
+## Preparación inicial de las dos actualizaciones diarias
 
 | Paso | Estado y condición |
 | --- | --- |
