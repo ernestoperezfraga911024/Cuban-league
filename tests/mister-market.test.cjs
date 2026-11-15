@@ -114,6 +114,32 @@ test('paginación espera crecimiento, detecta reordenamiento y tiene límite', a
   await assert.rejects(paginate(a, { next: async () => {}, read: async () => ({ ...b, rows: [{ id: '2' }, { id: '1' }] }),
     wait: async (read, accept) => accept(await read()) }), code('pagination_changed'));
 });
+test('una carga lenta supera veinte segundos sin aceptar datos anteriores ni reducir estabilidad', async () => {
+  let clock = 0;
+  const result = await waitStable(async () => ({ ready: clock >= 25000, value: 'loaded' }), s => s.ready,
+    { now: () => clock, sleep: async ms => { clock += ms; }, interval: 500, stableFor: 1500 });
+  assert.equal(result.ready, true); assert.equal(clock, 26500);
+});
+test('la espera sigue acotada y diagnostica sin incluir contenido de la página', async () => {
+  for (const unstable of [false, true]) {
+    let clock = 0;
+    await assert.rejects(waitStable(async () => ({ ready: unstable, value: clock, privateText: 'never-log-this' }), s => s.ready,
+      { now: () => clock, sleep: async ms => { clock += ms; }, interval: 1000, label: 'history_pagination' }), error => {
+      assert.equal(error.code, 'page_not_settled'); assert.equal(clock, 40000);
+      assert.deepEqual(error.waitDetails, { step: 'history_pagination', samples: 40,
+        acceptedSamples: unstable ? 40 : 0, changes: unstable ? 40 : 0, elapsedMs: 40000 });
+      assert.ok(!JSON.stringify(error).includes('never-log-this')); return true;
+    });
+  }
+  let reads = 0;
+  await assert.rejects(waitStable(async () => { reads++; core.fail('wrong_league'); }, () => true), code('wrong_league'));
+  assert.equal(reads, 1);
+});
+test('una respuesta que excede el plazo no se acepta como estable', async () => {
+  let clock = 0;
+  await assert.rejects(waitStable(async () => { if (clock) clock = 50000; return { ready: true }; }, s => s.ready,
+    { now: () => clock, sleep: async ms => { clock += ms; } }), code('page_not_settled'));
+});
 test('los filtros de precio, posición o favoritos no se confunden con catálogo completo', () => {
   const f = { owner: '-1', team: '0', position: '0', injured: false, stealable: false, ranges: [] };
   verifyFilters(f, '-1', []);

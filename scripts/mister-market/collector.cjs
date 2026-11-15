@@ -1,23 +1,31 @@
 'use strict';
 
-const { ORIGIN, DEFAULTS, fail, hash, context, snapshot } = require('./core.cjs');
+const { ORIGIN, DEFAULTS, fail, hash, context, snapshot, MarketError } = require('./core.cjs');
 const { readMarketDocument, readFilterDocument, readFeedDocument } = require('./dom.cjs');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const fingerprint = state => hash({ rows: state.rows, hasMore: state.hasMore });
 
-async function waitStable(read, accept, { timeout = 20000, stableFor = 1500, interval = 200,
-  now = Date.now, sleep = pause } = {}) {
-  const end = now() + timeout;
-  let signature, since;
+async function waitStable(read, accept, { timeout = 40000, stableFor = 1500, interval = 200,
+  now = Date.now, sleep = pause, label = 'unspecified' } = {}) {
+  const started = now(), end = started + timeout;
+  let signature, since, samples = 0, acceptedSamples = 0, changes = 0;
   while (now() < end) {
     const state = await read();
     const next = hash(state);
+    samples++;
     if (!accept(state)) { signature = undefined; since = undefined; }
-    else if (next !== signature) { signature = next; since = now(); }
-    else if (now() - since >= stableFor) return state;
+    else {
+      acceptedSamples++;
+      if (next !== signature) { signature = next; since = now(); changes++; }
+      else if (now() - since >= stableFor && now() < end) return state;
+    }
     await sleep(interval);
   }
-  fail('page_not_settled');
+  const error = new MarketError('page_not_settled');
+  // Counts and a static step label only; never include DOM data or credentials.
+  error.waitDetails = { step: /^[a-z_]+$/.test(label) ? label : 'unspecified',
+    samples, acceptedSamples, changes, elapsedMs: now() - started };
+  throw error;
 }
 function assertLeague(state, config) {
   if (state.leagueId !== config.leagueId) fail(state.leagueId ? 'wrong_league' : 'session_or_page_unavailable');
@@ -41,7 +49,7 @@ async function paginate(initial, { read, next, maxPages = 40, wait = waitStable 
     if (page >= maxPages) fail('pagination_limit');
     const before = state;
     await next();
-    state = await wait(read, s => s.ready && !s.popupOpen && pageExtended(before, s), { stableFor: 2000 });
+    state = await wait(read, s => s.ready && !s.popupOpen && pageExtended(before, s), { stableFor: 2000, label: 'market_pagination' });
   }
   return state;
 }
@@ -63,7 +71,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
   async function feed() {
     await go('/feed');
     const state = await wait(() => checked(readFeedDocument), s => s.ready && s.cards > 0,
-      { stableFor: 2500 });
+      { stableFor: 2500, label: 'market_feed' });
     return state.events;
   }
   const feedBefore = await feed();
@@ -85,7 +93,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
   await page.locator('#popup-content .search-players-filter-reset').click();
   // Mister closes the popup on reset. Re-open it before selecting a partition.
   await page.locator('#popup-content select[name="owner"]').waitFor({ state: 'hidden' });
-  await wait(readMarket, s => s.ready && !s.popupOpen && s.rows.length > 0);
+  await wait(readMarket, s => s.ready && !s.popupOpen && s.rows.length > 0, { label: 'market_filter_reset' });
   await openFilters();
   const meta = await checked(readFilterDocument);
   context(meta, config);
@@ -104,7 +112,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
     await page.locator('#popup-content select[name="owner"]').waitFor({ state: 'hidden' });
     // Closing the modal is not evidence of new data: wait for a different, stable list.
     const first = await wait(readMarket, s => s.ready && !s.popupOpen && s.rows.length > 0
-      && fingerprint(s) !== fingerprint(old), { stableFor: 2000 });
+      && fingerprint(s) !== fingerprint(old), { stableFor: 2000, label: 'market_partition' });
     const full = await paginate(first, { read: readMarket, wait,
       next: () => page.locator('.search-players-more').click() });
     await openFilters();
@@ -112,7 +120,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
     // Re-applying the same filter only closes this read-only search dialog.
     await page.locator('#popup-content .search-players-filter-apply').click();
     await page.locator('#popup-content select[name="owner"]').waitFor({ state: 'hidden' });
-    await wait(readMarket, s => s.ready && !s.popupOpen && s.rows.length > 0);
+    await wait(readMarket, s => s.ready && !s.popupOpen && s.rows.length > 0, { label: 'market_filter_recheck' });
     return { leagueId: full.leagueId, partition: kind, exhausted: true, filtersVerified: true, rows: full.rows };
   }
   const free = await partition('free', '-1', true);

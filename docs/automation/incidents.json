@@ -263,6 +263,27 @@
         "tests/mister-market.test.cjs"
       ],
       "evidence": "Tras diagnosticar la ficha válida sin biografía, verify con dde1f181 terminó las 538 fichas y 20 equipos en 699.056 ms. Checkpoint verified y evidencia por ejecución guardada. La reanudación tras fallo está probada sintéticamente; el recorrido real corregido no necesitó reanudar."
+    },
+    {
+      "code": "mister-schedule-not-dispatched",
+      "status": "investigating",
+      "failure": "El turno de mercado del 15/11/2026 a las 17:00 Miami no tenía ejecución schedule, trabajo ni cola al comprobarlo a las 17:15. Solo constaban las dos ejecuciones manuales anteriores.",
+      "cause": "No establecida por los registros disponibles. Workflow active, main como rama predeterminada y cron con America/New_York válidos. El horario anterior ya incluía 17:00; la ampliación a cinco lecturas se fusionó a las 17:02:08, por lo que ese commit no acredita el arranque de las 17:00. GitHub documenta demoras y descartes posibles, no una causa confirmada para este caso.",
+      "prevention": "Distinguir configuración, evento schedule iniciado y publicación verificada. Ante ausencia del evento, revisar estado/cola antes de una sola recuperación manual sync. Conservar horarios y validadores; no afirmar reparación del cron a partir del éxito manual. Procedimiento en docs/mister-market/automation.md.",
+      "tests": [],
+      "evidence": "Recuperación manual solicitada una sola vez a las 17:15:35 Miami en main 7623194326aca145c463c6b1c03e469bdbb33f80: run 43768278752, job 132978209946. Terminó a las 17:18:06 con page_not_settled y aiCalls=0, antes de publicar. Este fallo de lectura no explica la ausencia del evento schedule."
+    },
+    {
+      "code": "mister-page-settle-timeout",
+      "status": "regression-tested-awaiting-run",
+      "failure": "La recuperación manual 43768278752 terminó con page_not_settled tras unos 130 segundos de lectura. El log anterior solo guardaba el código final, sin fase ni paso.",
+      "cause": "Confirmado: venció una espera de estado estable de veinte segundos antes de publicar. La página exacta y el origen de la falta de progreso no se pueden reconstruir con aquel log. No se atribuye todavía a lentitud o paginación.",
+      "prevention": "Margen de cuarenta segundos, misma condición de datos completos y misma ventana de estabilidad; no repetir clicks ni escrituras. Registrar fase, progreso y paso de espera con contadores sin DOM ni credenciales. Si persiste, corregir el paso identificado por la ejecución real, sin relajar validadores.",
+      "tests": [
+        "tests/mister-market.test.cjs",
+        "tests/market-automation.test.cjs"
+      ],
+      "evidence": "47 regresiones relacionadas aprobadas. Carga simulada de 25 segundos aceptada solo después de estabilizarse; página sin progreso o cambiante y respuesta fuera de plazo siguen bloqueadas; error de liga se propaga sin reintento. Contención y diagnóstico pendientes de ejecución real."
     }
   ]
 }
