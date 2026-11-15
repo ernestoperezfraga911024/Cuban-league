@@ -284,6 +284,16 @@
         "tests/market-automation.test.cjs"
       ],
       "evidence": "47 regresiones relacionadas aprobadas. Carga simulada de 25 segundos aceptada solo después de estabilizarse; página sin progreso o cambiante y respuesta fuera de plazo siguen bloqueadas; error de liga se propaga sin reintento. Contención y diagnóstico pendientes de ejecución real."
+    },
+    {
+      "code": "forecast-cache-version-pinned",
+      "status": "regression-tested",
+      "failure": "El control general exigía el nombre v231 de la caché aunque main ya tenía v235-market-expensive.",
+      "prevention": "Comprobar versión numérica de caché igual o posterior a 231 y conservar las exigencias de los dos assets de reparación; no modificar la caché de la aplicación.",
+      "tests": [
+        "tests/forecast-layout.test.cjs"
+      ],
+      "evidence": "Fallo reproducible en el control de PR125; sw.js y la prueba eran idénticos a main anterior. Diez pruebas de layout aprobadas tras aceptar incrementos válidos."
     }
   ]
 }
