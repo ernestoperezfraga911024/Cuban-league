@@ -271,11 +271,11 @@
       "cause": "No establecida por los registros disponibles. Workflow active, main como rama predeterminada y cron con America/New_York válidos. El horario anterior ya incluía 17:00; la ampliación a cinco lecturas se fusionó a las 17:02:08, por lo que ese commit no acredita el arranque de las 17:00. GitHub documenta demoras y descartes posibles, no una causa confirmada para este caso.",
       "prevention": "Distinguir configuración, evento schedule iniciado y publicación verificada. Ante ausencia del evento, revisar estado/cola antes de una sola recuperación manual sync. Conservar horarios y validadores; no afirmar reparación del cron a partir del éxito manual. Procedimiento en docs/mister-market/automation.md.",
       "tests": [],
-      "evidence": "Recuperación manual solicitada una sola vez a las 17:15:35 Miami en main 7623194326aca145c463c6b1c03e469bdbb33f80: run 43768278752, job 132978209946. Terminó a las 17:18:06 con page_not_settled y aiCalls=0, antes de publicar. Este fallo de lectura no explica la ausencia del evento schedule."
+      "evidence": "Recuperación manual solicitada una sola vez a las 17:15:35 Miami en main 7623194326aca145c463c6b1c03e469bdbb33f80: run 43768278752, job 132978209946. Terminó a las 17:18:06 con page_not_settled y aiCalls=0, antes de publicar. Este fallo de lectura no explica la ausencia del evento schedule. La recuperación final con el arreglo de paginación sí publicó: run 43770209824 a las 17:38:58 Miami. Su evento sigue siendo workflow_dispatch; no demuestra funcionamiento del disparador schedule ni establece la causa de su ausencia."
     },
     {
       "code": "mister-page-settle-timeout",
-      "status": "diagnosed-pagination",
+      "status": "resolved-by-feed-pagination-fix",
       "failure": "La recuperación manual 43768278752 terminó con page_not_settled tras unos 130 segundos de lectura. El log anterior solo guardaba el código final, sin fase ni paso.",
       "cause": "Confirmado: venció una espera de estado estable de veinte segundos antes de publicar. La página exacta y el origen de la falta de progreso no se pueden reconstruir con aquel log. No se atribuye todavía a lentitud o paginación.",
       "prevention": "Margen de cuarenta segundos, misma condición de datos completos y misma ventana de estabilidad; no repetir clicks ni escrituras. Registrar fase, progreso y paso de espera con contadores sin DOM ni credenciales. Si persiste, corregir el paso identificado por la ejecución real, sin relajar validadores.",
@@ -283,7 +283,7 @@
         "tests/mister-market.test.cjs",
         "tests/market-automation.test.cjs"
       ],
-      "evidence": "47 regresiones relacionadas aprobadas. Carga simulada de 25 segundos aceptada solo después de estabilizarse; página sin progreso o cambiante y respuesta fuera de plazo siguen bloqueadas; error de liga se propaga sin reintento. Contención y diagnóstico pendientes de ejecución real. La ejecución real 43769412494 con 61aa5f3 verificó 20 equipos y 15 páginas/294 tarjetas; falló en history_pagination con 167 muestras y cero aceptadas después de 40 segundos. Ampliar el plazo no resolvió el bloqueo."
+      "evidence": "47 regresiones relacionadas aprobadas. Carga simulada de 25 segundos aceptada solo después de estabilizarse; página sin progreso o cambiante y respuesta fuera de plazo siguen bloqueadas; error de liga se propaga sin reintento. Contención y diagnóstico pendientes de ejecución real. La ejecución real 43769412494 con 61aa5f3 verificó 20 equipos y 15 páginas/294 tarjetas; falló en history_pagination con 167 muestras y cero aceptadas después de 40 segundos. Ampliar el plazo no resolvió el bloqueo. La corrección del marcador en PR126 permitió después terminar y publicar (run 43770209824). El margen de 40 segundos y los diagnósticos se conservan, pero la ampliación por sí sola no fue la solución."
     },
     {
       "code": "forecast-cache-version-pinned",
@@ -293,18 +293,18 @@
       "tests": [
         "tests/forecast-layout.test.cjs"
       ],
-      "evidence": "Fallo reproducible en el control de PR125; sw.js y la prueba eran idénticos a main anterior. Diez pruebas de layout aprobadas tras aceptar incrementos válidos."
+      "evidence": "Fallo reproducible en el control de PR125; sw.js y la prueba eran idénticos a main anterior. Diez pruebas de layout aprobadas tras aceptar incrementos válidos. El control general de PR125 pasó después de la corrección; también pasó el de PR126."
     },
     {
       "code": "mister-feed-tall-card-scroll",
-      "status": "regression-pending",
+      "status": "production-verified",
       "failure": "El historial no progresó después de 15 páginas y 294 tarjetas en run 43769412494. El lector solo hacía visible la última tarjeta; una tarjeta más alta que la pantalla puede quedarse centrada sin alcanzar el final que activa la siguiente carga.",
       "prevention": "Desplazar el marcador loading-more posterior a la tarjeta. Mantener el control de prefijos, eventos, crecimiento, final observado y estabilidad; jamás aceptar el historial parcial como completo.",
       "tests": [
         "tests/market-scroll.browser.cjs",
         "tests/mister-market.test.cjs"
       ],
-      "evidence": "La nueva prueba usa Chromium y una tarjeta local de 6.000px: reproduce el desplazamiento anterior y exige carga efectiva de la siguiente página con el marcador. Validación local del navegador impedida por descarga truncada; ejecución de CI y comprobación real pendientes."
+      "evidence": "CI job 132983633304: 53 pruebas del lector y la regresión real de Chromium aprobadas; la tarjeta local de 6.000px reproduce el fallo previo y el marcador permite terminar. Recuperación real verificada: run 43770209824, job 132984201488, main 7775a1ee2de5510399b1929b70aaf87e31dce016. Publicó 15/11/2026 22:38:58 UTC (17:38:58 Miami), outcome=published y visible=true; 538 jugadores, 20 equipos, 2 cambios, 392 eventos acumulados, 1 nuevo, 445 cláusulas documentadas, 0 gaps y aiCalls=0. Lectura 136.241 ms; trabajo completo 2m51s. Revisión c7ef8e866659047a1e3b24204ef90b846a04699a468d253e06669561a7006946. El historial superó la página 15 y agotó 20 páginas/357 tarjetas."
     }
   ]
 }
