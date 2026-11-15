@@ -28,6 +28,11 @@ async function withLock(dir, run) {
 async function saveCapture(dir, current) {
   const previous = await readJson(path.join(dir, 'latest.json'));
   const diff = compare(previous, current);
+  // Keep the catalog behind each evidence hash when the comparison baseline advances.
+  // Also archive an existing baseline created before this archive was introduced.
+  for (const capture of [previous, current].filter(Boolean)) {
+    await atomicJson(path.join(dir, 'captures', `${capture.snapshotHash}.json`), capture);
+  }
   const report = { schemaVersion: 1, capturedAt: current.completedAt, snapshotHash: current.snapshotHash,
     mode: 'read_only', publicationReady: false, aiCalls: 0, playerCount: current.players.length,
     ownedCount: current.players.filter(p => p.ownerId !== null).length,

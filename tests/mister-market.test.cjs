@@ -470,6 +470,17 @@ test('fallo de una ficha conserva avance y el siguiente intento verifica equipos
 });
 
 const clauseStats = require('../scripts/mister-market/clause-stats.cjs');
+test('al avanzar la base conserva ambas capturas para contrastar evidencias históricas', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'mister-archive-'));
+  try {
+    const first = capture(), second = capture({}, '2026-11-15T22:00:00Z');
+    await atomicJson(path.join(dir, 'latest.json'), first);
+    await saveCapture(dir, second);
+    assert.deepEqual(await readJson(path.join(dir, 'captures', `${first.snapshotHash}.json`)), first);
+    assert.deepEqual(await readJson(path.join(dir, 'captures', `${second.snapshotHash}.json`)), second);
+    assert.equal((await readJson(path.join(dir, 'latest.json'))).snapshotHash, second.snapshotHash);
+  } finally { await fs.rm(dir, { recursive: true, force: true }); }
+});
 test('rankings de clausulazos distinguen comprador, perjudicado, gasto, ingreso y empates', () => {
   const e = { reference: 'a', type: 'clause', fromOwnerId: '10', toOwnerId: '20', amount: 4000000 };
   const report = clauseStats.summarizeClauses([e,
