@@ -247,4 +247,8 @@ test('configuración móvil no activa publicación, cron ni puertos adicionales'
   assert.equal(configFile.otherPortsAttributes.onAutoForward, 'ignore');
   assert.equal(configFile.postAttachCommand, 'node scripts/mister-market/start-mobile.cjs');
   assert.doesNotMatch(JSON.stringify(configFile), /public|cron|collect|publish/);
+  // La imagen universal agotó el disco de Codespaces al extraer PyTorch.
+  // Este lector solo necesita Node y el escritorio; no volver a esa imagen.
+  assert.match(configFile.image, /^mcr\.microsoft\.com\/devcontainers\/javascript-node:/);
+  assert.deepEqual(Object.keys(configFile.features), ['ghcr.io/devcontainers/features/desktop-lite:1.2.10']);
 });
