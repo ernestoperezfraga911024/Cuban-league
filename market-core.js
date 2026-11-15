@@ -44,6 +44,21 @@
   const rows=stats(p).sort((a,b)=>b[metric]-a[metric]||a.name.localeCompare(b.name,'es'));
   let lastRank=0;return rows.map((row,i)=>{if(i===0||row[metric]!==rows[i-1][metric])lastRank=i+1;return {...row,rank:lastRank};});
  }
- const api={validate,select,stats,rank,positions};
+ // Incoming clauses: from is the participant who lost the footballer; to paid.
+ // Use the reconciled events as-is, including repeated transfers and unknown dates.
+ function clauseRivals(p){
+  const managers=new Map(p.managers.map(m=>[m.id,m]));
+  const targets=new Map(p.managers.map(m=>[m.id,{...m,received:0,rivals:new Map()}]));
+  for(const event of p.history.events){
+   const target=targets.get(event.from);target.received++;
+   if(!target.rivals.has(event.to))target.rivals.set(event.to,{...managers.get(event.to),count:0,events:[]});
+   const rival=target.rivals.get(event.to);rival.count++;rival.events.push(event);
+  }
+  return [...targets.values()].map(({rivals,...target})=>({...target,rivalCount:rivals.size,
+   top:[...rivals.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id)).slice(0,3)
+    .map(rival=>({...rival,events:rival.events.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference))}))
+  })).sort((a,b)=>a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
+ }
+ const api={validate,select,stats,rank,clauseRivals,positions};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CubanLeagueMarketCore=api;
 })(typeof globalThis==='object'?globalThis:this);
