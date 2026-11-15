@@ -2,7 +2,7 @@
 
 Alcance: comunidad649733, temporada2026-27, veinte participantes. Solo lecturas de Mister y publicación de la proyección de mercado. Los puntos, reglas, catálogo editorial y demás automatizaciones no se modifican.
 
-GitHub Actions ejecuta `.github/workflows/mister-market-sync.yml` a las04:00 y17:00 en `America/New_York`, con ajuste automático de horario de verano. GitHub puede retrasar una tarea programada. El sitio muestra la hora de la última captura y señala antigüedad mayor de24h. No usa modelos ni APIs de IA. Los recursos de GitHub y Supabase conservan sus límites propios.
+GitHub Actions ejecuta `.github/workflows/mister-market-sync.yml` cinco veces al día: **04:00, 09:00, 13:00, 17:00 y 21:00**, en `America/New_York` (hora de Miami), con ajuste automático de horario de verano. Esta ampliación, autorizada el 15/11/2026, conserva las lecturas de 04:00 y 17:00 y añade tres horarios al mismo workflow, sin crear otra tarea. GitHub puede retrasar una ejecución programada. No usa modelos ni APIs de IA. Los recursos de GitHub y Supabase conservan sus límites propios.
 
 ## Conciliación
 
