@@ -90,7 +90,10 @@ function readPlayerMovementsDocument() {
   const heading = headings.find(e => text(e) === 'Últimos movimientos');
   const box = heading?.nextElementSibling;
   return { playerId: location.pathname.match(/^\/players\/(\d+)(?:\/|$)/)?.[1] || null,
-    ready: headings.some(e => text(e) === 'Detalles'),
+    // Some players have no biographical details. Their two final history headings
+    // still prove that the profile body rendered; absence of Details is not a timeout.
+    ready: headings.some(e => text(e) === 'Detalles') ||
+      ['Historial de valores', 'Historial de puntos'].every(label => headings.some(e => text(e) === label)),
     sectionPresent: !!heading, recordsPresent: !!box?.matches('.box-records'),
     rows: box?.matches('.box-records') ? [...box.querySelectorAll(':scope > ul > li')].map(li => ({
       label: text(li.querySelector('.left .label')),

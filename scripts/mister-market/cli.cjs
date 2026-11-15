@@ -64,7 +64,13 @@ async function main() {
         const snapshot = await readJson(path.join(stateDir, 'latest.json'));
         if (!snapshot) fail('baseline_required');
         const start = Date.now();
-        const result = await verifySnapshot(page, snapshot, { progress: state => console.log(JSON.stringify(state)) });
+        const checkpointFile = path.join(stateDir, 'verification-progress.json');
+        const result = await verifySnapshot(page, snapshot, { progress: state => console.log(JSON.stringify(state)),
+          checkpoint: await readJson(checkpointFile), saveCheckpoint: async state => {
+            // Keep each run's evidence even if a later capture has a different catalog or feed.
+            await atomicJson(path.join(stateDir, 'verification-runs', `${state.startedAt.replace(/[:.]/g, '-')}.json`), state);
+            await atomicJson(checkpointFile, state);
+          } });
         await atomicJson(path.join(stateDir, 'verification.json'), result);
         console.log(JSON.stringify({ status: 'verification_complete', teams: result.teams.length,
           players: result.histories.length, playerMovements: result.movementCount,

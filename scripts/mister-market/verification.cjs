@@ -70,7 +70,20 @@ function playerMovements(state, player, snapshot) {
     coverage: 'latest_visible_per_player', stableEventIds: false, movements: rows };
 }
 
+function resumeHistories(checkpoint, snapshot, feedHash, now = Date.now()) {
+  if (!checkpoint) return [];
+  const { checkpointHash, ...data } = checkpoint;
+  if (hash(data) !== checkpointHash || checkpoint.schemaVersion !== 1
+    || !Array.isArray(checkpoint.histories)) fail('invalid_verification_checkpoint');
+  if (checkpoint.snapshotHash !== snapshot.snapshotHash || checkpoint.feedHash !== feedHash
+    || now - Date.parse(checkpoint.startedAt) > 24 * 60 * 60 * 1000) return [];
+  if (!Number.isFinite(Date.parse(checkpoint.startedAt)) || Date.parse(checkpoint.startedAt) > now
+    || checkpoint.histories.some((h, i) => h.playerId !== snapshot.players[i]?.playerId
+      || h.sourceUrl !== snapshot.players[i]?.sourceUrl)) fail('invalid_verification_checkpoint');
+  return checkpoint.histories;
+}
 async function verifySnapshot(page, snapshot, { wait = waitStable, progress = () => {},
+  checkpoint = null, saveCheckpoint = async () => {},
   maxDuration = 12 * 60 * 1000 } = {}) {
   validateSnapshot(snapshot);
   if (snapshot.leagueId !== DEFAULTS.leagueId) fail('wrong_league');
@@ -101,21 +114,39 @@ async function verifySnapshot(page, snapshot, { wait = waitStable, progress = ()
     teams.push(verifyTeam(state, manager, snapshot));
     progress({ phase: 'teams', completed: teams.length, expected: managers.length });
   }
-  const histories = [];
-  for (const player of snapshot.players) {
-    await go(player.sourceUrl);
-    const state = await wait(() => page.evaluate(readPlayerMovementsDocument),
-      s => s.ready && s.playerId === player.playerId, { stableFor: 300 });
-    histories.push(playerMovements(state, player, snapshot));
+  const feedHash = hash(before.events);
+  const histories = [...resumeHistories(checkpoint, snapshot, feedHash)];
+  const evidenceStartedAt = histories.length ? checkpoint.startedAt : startedAt;
+  async function save(status, failedPlayerId = null) {
+    const data = { schemaVersion: 1, snapshotHash: snapshot.snapshotHash, feedHash,
+      startedAt: evidenceStartedAt, updatedAt: new Date().toISOString(), status, failedPlayerId,
+      teams, histories, publicationReady: false };
+    await saveCheckpoint({ ...data, checkpointHash: hash(data) });
+  }
+  progress({ phase: 'player_histories_resumed', completed: histories.length, expected: snapshot.players.length });
+  for (const player of snapshot.players.slice(histories.length)) {
+    try {
+      await go(player.sourceUrl);
+      const state = await wait(() => page.evaluate(readPlayerMovementsDocument),
+        s => s.ready && s.playerId === player.playerId, { stableFor: 300 });
+      histories.push(playerMovements(state, player, snapshot));
+    } catch (error) {
+      await save('incomplete', player.playerId);
+      progress({ phase: 'player_history_failed', completed: histories.length, playerId: player.playerId });
+      throw error;
+    }
+    if (histories.length % 10 === 0) await save('in_progress');
     if (histories.length % 50 === 0 || histories.length === snapshot.players.length) {
       progress({ phase: 'player_histories', completed: histories.length, expected: snapshot.players.length });
     }
   }
+  await save('awaiting_feed_check');
   const after = await feed();
   if (hash(before.events) !== hash(after.events)) fail('feed_changed_during_verification');
+  await save('verified');
   return { schemaVersion: 1, leagueId: snapshot.leagueId, snapshotHash: snapshot.snapshotHash,
     startedAt, completedAt: new Date().toISOString(), publicationReady: false, aiCalls: 0,
     teams, histories, movementsCoverage: 'latest_visible_per_player',
     movementCount: histories.reduce((n, h) => n + h.movements.length, 0) };
 }
-module.exports = { managerLinks, verifyTeam, movementDate, playerMovements, verifySnapshot };
+module.exports = { managerLinks, verifyTeam, movementDate, playerMovements, resumeHistories, verifySnapshot };

@@ -383,6 +383,27 @@ test('fecha de movimiento rechaza días imposibles y formatos no observados', ()
     assert.throws(() => verification.movementDate(value), code('invalid_movement_date'));
   }
 });
+test('ficha sin datos biográficos usa las dos secciones finales y no confunde carga parcial con vacío', () => {
+  const partial = '<div class="section-title">Historial de valores</div>';
+  assert.equal(evaluate(dom.readPlayerMovementsDocument, partial).ready, false);
+  const state = evaluate(dom.readPlayerMovementsDocument,
+    partial + '<div class="section-title">Historial de puntos</div>', `${core.ORIGIN}/players/100/prueba`);
+  assert.equal(state.ready, true);
+  assert.deepEqual(verification.playerMovements(state, capture().players[0], capture()).movements, []);
+});
+test('reanudación exige hash, catálogo, ventana del portal y antigüedad compatibles', () => {
+  const snapshot = capture(), feedHash = core.hash([]), now = Date.now();
+  const data = { schemaVersion: 1, snapshotHash: snapshot.snapshotHash, feedHash,
+    startedAt: new Date(now).toISOString(), histories: [{ playerId: '100', sourceUrl: snapshot.players[0].sourceUrl }] };
+  const signed = value => ({ ...value, checkpointHash: core.hash(value) });
+  assert.equal(verification.resumeHistories(signed(data), snapshot, feedHash, now).length, 1);
+  assert.deepEqual(verification.resumeHistories(signed(data), snapshot, 'different', now), []);
+  assert.deepEqual(verification.resumeHistories(signed(data), snapshot, feedHash, now + 86400001), []);
+  assert.throws(() => verification.resumeHistories({ ...signed(data), histories: [] }, snapshot, feedHash, now),
+    code('invalid_verification_checkpoint'));
+  assert.throws(() => verification.resumeHistories(signed({ ...data, histories: [{ ...data.histories[0], playerId: '999' }] }),
+    snapshot, feedHash, now), code('invalid_verification_checkpoint'));
+});
 test('la verificación recorre todos los equipos y perfiles y rechaza cambios durante la lectura', async () => {
   for (const changed of [false, true]) {
     const snapshot = capture(); let url, activeTeam = false, feeds = 0;
@@ -410,4 +431,34 @@ test('la verificación recorre todos los equipos y perfiles y rechaza cambios du
       assert.equal(result.snapshotHash, snapshot.snapshotHash); assert.equal(result.publicationReady, false);
       assert.equal(visited.filter(u => u.includes('/players/')).length, 2); assert.equal(progress.at(-1).completed, 2); }
   }
+});
+
+test('fallo de una ficha conserva avance y el siguiente intento verifica equipos sin releer fichas guardadas', async () => {
+  const snapshot = capture(); let url, rejectSecond = true, saved;
+  const visited = [];
+  const page = { setDefaultTimeout() {}, url: () => url,
+    async goto(next) { url = next; visited.push(next); },
+    getByRole() { return { async click() {} }; },
+    async evaluate(fn) {
+      if (fn.name === 'readFeedDocument') return { leagueId: config.leagueId, ready: true, cards: 1, events: [] };
+      if (fn.name === 'readManagerDocument') return { leagueId: config.leagueId,
+        managers: meta.managers.map(m => ({ ...m, href: `users/${m.id}/equipo` })) };
+      if (fn.name === 'readTeamDocument') return { ready: true, managerId: url.split('/')[4],
+        rows: url.includes('/users/10/') ? [row('200')] : [] };
+      if (fn.name === 'readPlayerMovementsDocument') {
+        if (rejectSecond && url.includes('/players/200/')) core.fail('page_not_settled');
+        return { ready: true, playerId: url.split('/')[4], sectionPresent: false, recordsPresent: false, rows: [] };
+      }
+      assert.fail('Unexpected read');
+    } };
+  const options = { saveCheckpoint: async value => { saved = structuredClone(value); },
+    wait: async (read, accept) => { const state = await read(); assert.ok(accept(state)); return state; } };
+  await assert.rejects(verification.verifySnapshot(page, snapshot, options), code('page_not_settled'));
+  assert.equal(saved.status, 'incomplete'); assert.equal(saved.failedPlayerId, '200');
+  assert.equal(saved.histories.length, 1); assert.equal(saved.publicationReady, false);
+  rejectSecond = false; visited.length = 0;
+  const result = await verification.verifySnapshot(page, snapshot, { ...options, checkpoint: saved });
+  assert.equal(result.histories.length, 2); assert.equal(saved.status, 'verified');
+  assert.equal(visited.filter(u => u.includes('/players/')).length, 1);
+  assert.equal(visited.filter(u => u.includes('/users/')).length, 2);
 });
