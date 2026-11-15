@@ -21,6 +21,13 @@ test('producer rejects official XI, stale body review, stale reads, foreign IDs 
  }
  const x=example();x.packet.observations.comuniate[0].probability=0;delete x.review.selection.players[0].alternative_id;assert.throws(()=>produce(x),/alternativa evaluada/);
 });
+test('a source cannot list the same player as starter and alternative (Levante review regression)',()=>{
+ const x=example(),baseline=produce(x);
+ x.review.sources.futbolfantasy.alternatives.push({...x.packet.observations.futbolfantasy[0]});
+ assert.throws(()=>produce(x),/futbolfantasy: observación duplicada/);
+ x.review.sources.futbolfantasy.alternatives.pop();
+ assert.deepEqual(produce(x),baseline);
+});
 test('confirmed outs keep source evidence but are absent from proposals and candidates',()=>{
  const x=example();x.review.confirmed_out=[{id:x.roster[11].id,reason:'Baja confirmada para este partido de prueba.',refs:[x.packet.docs.futbolfantasy.url]}];
  assert.equal(produce(x).payload.proposal.candidates.length,0);

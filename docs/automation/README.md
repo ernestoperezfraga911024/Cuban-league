@@ -1,6 +1,6 @@
 # Metodología operativa — ops-v2
 
-Estado: 14/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
+Estado: 15/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
 
 ## Prioridades y límites vigentes
 
@@ -44,6 +44,39 @@ El productor normaliza el mismo instante del partido a UTC `Z` tanto en fixture 
 Tras una excepción, el runner consulta el estado y admite un solo reintento de esa lectura. Si ambas consultas fallan, guarda un checkpoint conservador `unknown` y se detiene sin llamar finish ni convertir incertidumbre en missing/publicado. Los eventos `team` se guardan antes de continuar; el checkpoint local es para diagnóstico, nunca sustituye el estado de la base. Conservar revisiones y resultados hasta registrar un resumen duradero. No guardar HTML, SQL completo, tokens o credenciales en la bitácora.
 
 Los tiempos medidos `read_ms`, `review_ms` y `sql_ms` son tiempos acumulados de cada fase; SQL incluye la espera del puente. `wall_ms` es duración total. `sql_calls` cuenta solicitudes del gateway, no todas las herramientas de la conversación; no copiarlo como `tool_calls`. `review_corrections` no es un contador de reintentos HTTP. Métricas no disponibles siguen siendo null.
+
+## Comprobación editorial y cierre tras el turno 15/11 06:00
+
+Antes de enviar la primera revisión, cotejar todos los nombres con `identity_names`
+y `identity_reference`, incluidas las equivalencias verificadas. Una referencia
+no reemplaza `review.identities`: Antony debe resolverse explícitamente contra
+su entrada vigente del mismo club. Comprobar que un jugador no figure dos veces
+en una misma fuente, por ejemplo simultáneamente titular y alternativa. Resolver
+esa contradicción con el cuerpo capturado, nunca eliminando una observación al azar.
+
+Revisar las alternativas evaluadas de **todos** los titulares cuyo porcentaje
+compuesto quede por debajo de 70, también cuando la fuente principal lo considere
+habitual. Usar el cálculo vigente; no subirlo a 70 para evitar la alternativa. Las
+alternativas necesitan identidad, puesto compatible y evidencia auténtica. Estos
+controles se añaden a la preparación de la revisión; no relajan el compilador ni
+amplían la única corrección permitida. Si falta evidencia, conservar el pendiente.
+
+Al cerrar, inspeccionar `result.json` y las solicitudes de corrección, además de
+los contadores finales. Contrastar `metrics.failures` con errores de paquetes y
+`predictions[].status=unavailable`; resumir causas y clubes en incidentes aunque
+20/20 haya publicado. `not_created` e `incomplete` son estados distintos, no errores
+HTTP ni votos cero. No reconsultar fuentes para completar el informe. No copiar
+URLs de la API de papeletas, tokens anónimos, HTML ni respuestas SQL al diario.
+Guardar contadores de correcciones y fallos del lector en `checks` (el esquema de
+métricas privado no admite claves nuevas), y mantener `retries` con su significado
+observado; nunca sumar automáticamente errores, correcciones y reintentos.
+
+La referencia comparable es [la auditoría del turno 15/11 06:00](reports/2026-11-15-0600.md).
+Sus 72m07s corresponden al runner de alineaciones, no al conjunto de flujos.
+`sql_ms` incluye conector, transferencia y espera del agente; no diagnostica por
+sí solo lentitud del motor de base de datos. Mantener el archivo completo y el
+mismo tamaño de fragmento: el puente ahora valida y renombra al escribir el último
+fragmento, ahorrando una llamada de shell por respuesta sin repetir SQL.
 
 ## Mejora continua y reutilización
 
