@@ -30,8 +30,9 @@ test('OIDC checks signature, exact repository/workflow/main, event type, audienc
 test('Session envelope is authenticated and decrypts only with its enrolled private key',async()=>{
  const {decryptSession}=await import('../supabase/functions/mister-market-sync/security.mjs'),{sealSession}=require('../scripts/mister-market/seal-session.cjs');
  const keys=generateKeyPairSync('rsa',{modulusLength:2048}),pub=keys.publicKey.export({format:'der',type:'spki'}).toString('base64'),priv=keys.privateKey.export({format:'der',type:'pkcs8'}).toString('base64');
- const state={cookies:[{name:'example',value:'sensitive-test'}],origins:[]},sealed=sealSession(state,pub);
+ const state={cookies:[{name:'example',value:'sensitive-test',domain:'mister.mundodeportivo.com'}],origins:[]},sealed=sealSession(state,pub);
  assert.ok(!JSON.stringify(sealed).includes('sensitive-test'));assert.deepEqual(await decryptSession(sealed,priv),state);
+ const filtered=sealSession({cookies:[...state.cookies,{name:'other',value:'unrelated',domain:'.unrelated.test'}],origins:[{origin:'https://unrelated.test',localStorage:[]}]},pub);assert.deepEqual(await decryptSession(filtered,priv),state);
  const broken={...sealed,body:sealed.body.slice(0,8)+'AAAA'+sealed.body.slice(12)};await assert.rejects(decryptSession(broken,priv));
 });
 test('Worker DB gates activation, isolates credentials, fences jobs and publishes atomically',async()=>{

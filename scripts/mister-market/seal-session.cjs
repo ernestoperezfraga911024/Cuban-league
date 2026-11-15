@@ -2,6 +2,7 @@
 const {randomBytes,publicEncrypt,createCipheriv,constants,createPublicKey}=require('node:crypto');
 const audience='https://pyahosamoisqcbpvzwka.supabase.co/functions/v1/mister-market-sync';
 function sealSession(state,publicKey){
+ state={cookies:state.cookies.filter(c=>['mister.mundodeportivo.com','.mister.mundodeportivo.com','.mundodeportivo.com','mundodeportivo.com'].includes(c.domain)),origins:state.origins.filter(o=>o.origin==='https://mister.mundodeportivo.com')};
  const key=randomBytes(32),iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from(audience));
  const body=Buffer.concat([cipher.update(JSON.stringify(state),'utf8'),cipher.final(),cipher.getAuthTag()]);
  const rsa=createPublicKey({key:Buffer.from(publicKey,'base64'),type:'spki',format:'der'});
