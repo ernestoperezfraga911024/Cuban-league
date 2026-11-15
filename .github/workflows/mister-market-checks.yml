@@ -2,12 +2,14 @@ name: Cuban League · Pruebas del lector de mercado
 on:
   pull_request:
     paths:
+      - '.devcontainer/mister-market/**'
       - 'scripts/mister-market/**'
       - 'tests/mister-market.test.cjs'
       - '.github/workflows/mister-market-checks.yml'
   push:
     branches: [main]
     paths:
+      - '.devcontainer/mister-market/**'
       - 'scripts/mister-market/**'
       - 'tests/mister-market.test.cjs'
       - '.github/workflows/mister-market-checks.yml'

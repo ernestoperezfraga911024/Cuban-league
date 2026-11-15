@@ -10,6 +10,7 @@ const dom = require('../scripts/mister-market/dom.cjs');
 const { collect, waitStable, paginate, verifyFilters, assertLeague } = require('../scripts/mister-market/collector.cjs');
 const { saveCapture, withLock, atomicJson, readJson } = require('../scripts/mister-market/storage.cjs');
 const config = { leagueId: '649733', season: '2026-27', expectedManagers: 2, expectedClubs: 1 };
+const { waitForManualLogin } = require('../scripts/mister-market/mobile-login.cjs');
 const meta = { leagueId: config.leagueId, managers: [{ id: '10', name: 'Equipo A' }, { id: '20', name: 'Equipo B' }],
   clubs: [{ id: '15', name: 'Club de prueba' }] };
 function row(id = '100', header = '') {
@@ -220,4 +221,30 @@ test('recorrido simulado completo reabre Limpiar y espera la sustitución y ampl
   assert.equal(result.players.filter(p => p.ownerId).length, 40);
   assert.equal(actions.filter(a => a === '.search-players-more').length, 1);
   assert.equal(result.publicationReady, false);
+});
+
+test('inicio móvil espera una sesión estable en la liga exacta y tolera navegación manual', async () => {
+  let clock = 0, calls = 0;
+  const page = { isClosed: () => false,
+    url: () => clock === 0 ? 'https://accounts.example.org/login' : `${core.ORIGIN}/feed`,
+    evaluate: async () => { calls++; if (clock === 1) throw new Error('navigation');
+      return { leagueId: clock < 3 ? '978196' : core.DEFAULTS.leagueId }; } };
+  await waitForManualLogin(page, { timeout: 10, interval: 1, now: () => clock, sleep: async () => { clock++; } });
+  assert.equal(clock, 4); assert.equal(calls, 4);
+});
+test('inicio móvil no acepta un dominio externo, una liga ajena ni una ventana cerrada', async () => {
+  for (const url of ['https://example.org/feed', `${core.ORIGIN}/feed`]) {
+    let clock = 0;
+    await assert.rejects(waitForManualLogin({ isClosed: () => false, url: () => url,
+      evaluate: async () => ({ leagueId: '978196' }) }, { timeout: 3, interval: 1,
+      now: () => clock, sleep: async () => { clock++; } }), code('manual_login_timeout'));
+  }
+  await assert.rejects(waitForManualLogin({ isClosed: () => true }), code('login_window_closed'));
+});
+test('configuración móvil no activa publicación, cron ni puertos adicionales', async () => {
+  const configFile = JSON.parse(await fs.readFile(path.join(__dirname, '../.devcontainer/mister-market/devcontainer.json'), 'utf8'));
+  assert.deepEqual(configFile.forwardPorts, [6080]);
+  assert.equal(configFile.otherPortsAttributes.onAutoForward, 'ignore');
+  assert.equal(configFile.postAttachCommand, 'node scripts/mister-market/start-mobile.cjs');
+  assert.doesNotMatch(JSON.stringify(configFile), /public|cron|collect|publish/);
 });

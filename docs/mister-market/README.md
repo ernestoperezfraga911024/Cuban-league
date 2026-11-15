@@ -21,6 +21,8 @@ Un programa de Node.js y Playwright abre su propio navegador, reutiliza una sesi
 
 ## Primera prueba en tu computadora
 
+Para la alternativa desde el iPhone, consultar [Prueba desde el celular](mobile.md). Usa un escritorio privado temporal de Codespaces; requiere comprobar la cuota y el acceso real.
+
 Requiere Node.js 22 o posterior, descargado desde [nodejs.org](https://nodejs.org/). En Windows, abrir PowerShell en la carpeta descargada del proyecto. El programa no necesita que escribas contraseñas en el chat.
 
 Desde la raíz del proyecto:
