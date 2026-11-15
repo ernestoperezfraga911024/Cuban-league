@@ -166,6 +166,20 @@ body.f05-theme[data-section="market"] main {
 .market-rivals-intro h4{font-size:15px;letter-spacing:-.02em;margin:0 0 6px;color:var(--market-ink)}
 .market-rivals-intro p,.market-rivals-note{font-size:12px;line-height:1.6;color:var(--market-muted);margin:0 0 12px}
 .market-rivals-note{margin:18px 0 0}
+.market-expensive{list-style:none;margin:0;padding:0}
+.market-expensive>li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;padding:19px 0;border-bottom:1px solid var(--market-line)}
+.market-expensive>li>.market-rank{padding-top:12px}
+.market-expensive-main{min-width:0}
+.market-expensive-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.market-expensive .market-event-player strong{display:block;font-size:15px;line-height:1.4;color:var(--market-ink);overflow-wrap:anywhere}
+.market-expensive .market-event-player time,.market-expensive .market-event-player>div>span{display:block;color:var(--market-muted);font-size:11px;line-height:1.6}
+.market-expensive-amount{flex:none;color:var(--market-gold);font-size:16px;font-weight:800}
+.market-expensive-parties{display:flex;gap:12px 24px;flex-wrap:wrap;margin-top:12px}
+.market-expensive-parties>div{display:flex;align-items:center;gap:6px;min-width:0}
+.market-expensive-parties>div>span:first-child{font-size:11px;color:var(--market-muted)}
+.market-expensive-parties strong{font-size:12px;font-weight:600;overflow-wrap:anywhere}
+.market-expensive-parties .market-participant-logo,.market-expensive-parties .market-participant-fallback{width:22px;height:22px;border-radius:5px;flex:none;font-size:9px}
+@media(max-width:600px){.market-expensive>li{grid-template-columns:18px minmax(0,1fr);gap:8px}.market-expensive .market-event-player{gap:7px}.market-expensive .market-event-player>img,.market-expensive .market-avatar{width:34px;height:40px}.market-expensive .market-event-player strong{font-size:13px}.market-expensive-amount{font-size:13px}.market-expensive-parties{display:grid;gap:7px}.market-expensive-parties>div>span:first-child{min-width:32px}}
 .market-target{border-bottom:1px solid var(--market-line)}
 .market-target>summary{display:grid;grid-template-columns:44px minmax(0,1fr) auto 12px;align-items:center;gap:12px;padding:17px 0;list-style:none;cursor:pointer;border-radius:5px}
 .market-target>summary::-webkit-details-marker{display:none}

@@ -36,6 +36,17 @@ test('Market: exact identities, prices, filters, historical totals and ties',()=
  assert.throws(()=>bindManagers([{id:'1',name:'Alvaro Jr'}],[{id:1,name:'Alvaro'}]));
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
+test('Most expensive clauses: top ten by historical amount, shared ranks, unknown dates and repeated players',()=>{
+ const p=fixture();p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
+ p.history.events=Array.from({length:12},(_,i)=>({reference:'event-'+i,playerId:'1',date:'2026-08-16',from:'1',to:'2',amount:(i+1)*1000}));
+ p.history.events[0].amount=100000000;p.history.events[0].date=null;p.history.events[1].amount=12000;
+ core.validate(p);const original=JSON.stringify(p),top=core.topClauses(p);
+ assert.equal(top.length,10);assert.equal(top[0].reference,'event-0');assert.equal(top[0].date,null);
+ assert.deepEqual(top.slice(0,4).map(event=>event.rank),[1,2,2,4]);
+ assert.deepEqual(top.map(event=>event.amount),[100000000,12000,12000,11000,10000,9000,8000,7000,6000,5000]);
+ assert.equal(new Set(top.map(event=>event.reference)).size,10);assert.equal(top.filter(event=>event.playerId==='1').length,10);
+ assert.equal(JSON.stringify(p),original);p.history.events=[];assert.deepEqual(core.topClauses(p),[]);
+});
 test('Market rivals: incoming direction, all 20, top three by count, alphabetical ties and repeated footballers',()=>{
  const p=fixture();p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
  ['Receptor','Líder','Zeta','Beta','Alfa'].forEach((name,i)=>p.managers[i].name=name);
@@ -57,6 +68,29 @@ function setup(fetch){
  for(const file of ['market-core.js','market.js'])dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
  return dom;
 }
+test('Most expensive clauses UI: payer/payee logos, safe names, exact prices and refresh from shared history',async()=>{
+ const p=fixture();p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
+ p.players[1].name='<img src=x onerror=alert(1)>';let reads=0;
+ const dom=setup(async()=>{reads++;return {ok:true,json:async()=>[{payload:structuredClone(p)}]};}),w=dom.window,d=w.document;
+ w.DATA={participants:[{id:1,shield:'team-01.png'},{id:2,shield:'team-02.png'}]};
+ try{
+  d.body.dataset.section='market';await tick();await tick();d.querySelector('[data-market-view="history"]').click();
+  d.querySelector('[data-market-metric="collected"]').click();d.querySelector('[data-market-history="expensive"]').click();
+  assert.equal(d.activeElement.dataset.marketHistory,'expensive');assert.equal(d.querySelectorAll('.market-expensive>li').length,3);
+  const first=d.querySelector('.market-expensive>li');assert.equal(first.querySelector('.market-event-player strong').textContent,p.players[1].name);assert.equal(d.querySelector('[onerror]'),null);
+  const parties=first.querySelectorAll('.market-expensive-parties>div');assert.equal(parties[0].textContent,'PagóParticipante 1');assert.equal(parties[1].textContent,'CobróParticipante 2');
+  assert.equal(parties[0].querySelector('img').getAttribute('src'),'team-01.png');assert.equal(parties[1].querySelector('img').getAttribute('src'),'team-02.png');
+  assert.equal(first.querySelector('.market-price-exact').textContent,'5000 €');assert.equal(reads,1);
+  p.history.events.push({reference:'new-expensive',playerId:'5',from:'3',to:'4',amount:98765432,date:null});
+  d.querySelector('[data-market-action="reload"]').click();await tick();await tick();
+  assert.equal(d.querySelector('.market-expensive .market-event-player strong').textContent,'Futbolista 5');assert.match(d.querySelector('.market-expensive>li').textContent,/Fecha no disponible/);
+  assert.equal(d.querySelector('.market-expensive .market-price summary').textContent,'98,77 M €');assert.equal(d.querySelector('.market-expensive .market-price-exact').textContent,'98.765.432 €');assert.equal(reads,2);
+  d.querySelector('[data-market-history="participants"]').click();assert.equal(d.querySelectorAll('.market-target').length,20);
+  d.querySelector('[data-market-history="ranking"]').click();assert.equal(d.querySelector('[data-market-metric="collected"]').getAttribute('aria-pressed'),'true');
+  d.querySelector('[data-market-history="expensive"]').click();p.history.events=[];d.querySelector('[data-market-action="reload"]').click();await tick();await tick();
+  assert.equal(d.querySelector('.market-expensive'),null);assert.match(d.getElementById('marketBody').textContent,/Todavía no hay clausulazos registrados/);
+ }finally{w.close();}
+});
 test('Market rivals: lazy accessible details, safe names and fresh history after Actualizar without extra reads',async()=>{
  let p=fixture(),reads=0;p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
  p.history.events[0].date=null;p.managers[1].name='<img src=x onerror=alert(1)>';p.players[0].name='<b>Futbolista</b>';
