@@ -22,7 +22,7 @@ async function paginateHistory(initial, { read, next, wait = waitStable, maxPage
     if (pages >= maxPages) fail('feed_pagination_limit');
     const before = state;
     await next();
-    state = await wait(read, s => s.ready && feedProgress(before, s), { stableFor: 1500 });
+    state = await wait(read, s => s.ready && feedProgress(before, s), { stableFor: 1500, label: 'history_pagination' });
     pages++;
     if (pages % 5 === 0) progress({ phase: 'feed_history', pages, cards: state.cardIds.length });
   }
@@ -51,11 +51,11 @@ async function collectHistory(page, snapshot, { wait = waitStable, progress = ()
     return assertLeague(await page.evaluate(readFeedDocument), snapshot);
   }
   await go();
-  const head = await wait(read, s => s.ready && s.cards > 0);
+  const head = await wait(read, s => s.ready && s.cards > 0, { label: 'history_head' });
   const full = await paginateHistory(head, { read, wait, progress,
     next: () => page.locator('.feed-cards .card[id]').last().scrollIntoViewIfNeeded() });
   await go();
-  const after = await wait(read, s => s.ready && s.cards > 0);
+  const after = await wait(read, s => s.ready && s.cards > 0, { label: 'history_recheck' });
   const headEvents = normalizedEvents(head.events, snapshot);
   if (hash(headEvents) !== hash(normalizedEvents(after.events, snapshot))) fail('feed_changed_during_capture');
   return { leagueId: snapshot.leagueId, season: snapshot.season, startedAt,

@@ -28,3 +28,19 @@ Ante sesión vencida, cambiar de formato, falta de filas o revisión en conflict
 ## Validación
 
 Regresiones offline: unión conservadora con multiplicidad, IDs repetidos, fechas desconocidas, firma y claims OIDC, alteración de sesión cifrada, permisos privados, activación, bloqueo concurrente, publicación atómica y conservación ante fallo. La prueba real y sus métricas se registran en la bitácora privada; estas pruebas sintéticas no acreditan funcionamiento recurrente.
+
+## Cuando no aparece una ejecución programada
+
+Separar tres estados: horario configurado en `main`, ejecución iniciada por un evento `schedule` y captura efectivamente publicada. Una ejecución manual correcta no acredita el disparador automático.
+
+1. Comprobar rama predeterminada, estado `active` del workflow, cron y zona IANA. Revisar la hora real de los commits del horario. Conservar los horarios autorizados; no cambiar a horas UTC fijas que desplacen Miami durante el verano.
+2. Consultar las ejecuciones del workflow exacto y su evento. Si no existe una ejecución ni un trabajo, todavía no hay un fallo del lector que pueda diagnosticarse por sus logs. No atribuirlo a sesión, Mister, base de datos o sintaxis sin evidencia.
+3. GitHub documenta posibles demoras e incluso descartes del evento `schedule`, especialmente al inicio de la hora: [documentación de schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). Es una posibilidad, no una prueba de la causa de un caso concreto.
+4. Para recuperar una lectura autorizada, comprobar primero que no haya trabajo activo o en cola. Solicitar una sola ejecución manual de `main` en modo `sync`; conservar concurrencia, identidad y todos los validadores. No repetir el despacho mientras se espera el resultado.
+5. Comprobar `outcome: published`, `visible: true`, revisión y métricas; si la respuesta de publicación es incierta, revisar la bitácora antes de cualquier reintento. Registrar por separado la recuperación manual y el disparador automático aún no comprobado.
+
+## Esperas y diagnóstico de la lectura
+
+Cada espera permite hasta cuarenta segundos para obtener datos completos y estables, conservando su ventana de estabilidad y sus comprobaciones de identidad, filtros, crecimiento y prefijos. No repite clicks, navegación ni publicación. Una página que no progresa sigue bloqueando la actualización; la última publicación válida permanece intacta. Los límites de cada fase y del trabajo siguen vigentes.
+
+El worker registra fase y cantidades de avance. Un `page_not_settled` incluye el paso fijo, número de muestras, muestras aceptables, cambios y tiempo transcurrido; nunca registra el DOM, la sesión ni credenciales. Cero muestras aceptables indica que no se cumplió la condición del paso; muestras aceptables cambiantes indican que no llegó a estabilizarse. Este diagnóstico no sustituye la revisión del paso concreto. La ampliación del margen es una contención probada sintéticamente, no prueba de la causa del fallo de 17:18 del 15/11. Tras una corrección, comprobar una nueva ejecución de main y su publicación; no reejecutar el SHA anterior ni repetir escrituras de resultado incierto.

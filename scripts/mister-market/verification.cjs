@@ -99,18 +99,18 @@ async function verifySnapshot(page, snapshot, { wait = waitStable, progress = ()
   async function feed() {
     await go('/feed');
     return wait(async () => assertLeague(await page.evaluate(readFeedDocument), snapshot),
-      s => s.ready && s.cards > 0, { stableFor: 1500 });
+      s => s.ready && s.cards > 0, { stableFor: 1500, label: 'verification_feed' });
   }
   const before = await feed();
   await go('/standings');
   const standings = await wait(() => page.evaluate(readManagerDocument),
-    s => s.leagueId === snapshot.leagueId && s.managers.length === snapshot.managers.length);
+    s => s.leagueId === snapshot.leagueId && s.managers.length === snapshot.managers.length, { label: 'verification_managers' });
   const managers = managerLinks(standings, snapshot), teams = [];
   for (const manager of managers) {
     await go(manager.url);
     await page.getByRole('button', { name: 'Equipo', exact: true }).click();
     const state = await wait(() => page.evaluate(readTeamDocument), s => s.ready && s.managerId === manager.id,
-      { stableFor: 500 });
+      { stableFor: 500, label: 'verification_team' });
     teams.push(verifyTeam(state, manager, snapshot));
     progress({ phase: 'teams', completed: teams.length, expected: managers.length });
   }
@@ -129,7 +129,7 @@ async function verifySnapshot(page, snapshot, { wait = waitStable, progress = ()
     try {
       await go(player.sourceUrl);
       const state = await wait(() => page.evaluate(readPlayerMovementsDocument),
-        s => s.ready && s.playerId === player.playerId, { stableFor: 300 });
+        s => s.ready && s.playerId === player.playerId, { stableFor: 300, label: 'verification_player_history' });
       histories.push(playerMovements(state, player, snapshot));
     } catch (error) {
       await save('incomplete', player.playerId);
