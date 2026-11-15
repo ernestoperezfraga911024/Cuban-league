@@ -11,7 +11,7 @@ class EvidenceFailure extends Error {
 }
 const requireThat = (ok, message) => { if (!ok) throw new EvidenceFailure(message); };
 const fixtureOf = f => {
-  const instant = typeof f?.kickoff_at === 'string' && /(?:Z|[+-]\d{2}:\d{2})$/.test(f.kickoff_at) ? Date.parse(f.kickoff_at) : NaN;
+  const instant = typeof f?.kickoff_at === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.0+)?(?:Z|[+-]\d{2}:\d{2})$/.test(f.kickoff_at) ? Date.parse(f.kickoff_at) : NaN;
   requireThat(Number.isFinite(instant) && instant % 1000 === 0, 'Fecha del partido inválida: requiere zona horaria y segundos exactos');
   return Object.fromEntries(['key','home','away','matchday','kickoff_at'].map(k =>
     [k,k === 'kickoff_at' ? new Date(instant).toISOString().replace('.000Z','Z') : f[k]]));

@@ -182,7 +182,7 @@ test('producer canonicalizes UTC offsets in payload and evidence without roundin
   const out=produce(x);assert.equal(out.payload.kickoff_at,expected);assert.equal(out.fixture.kickoff_at,expected);
   assert.equal(x.review.fixture.kickoff_at,local);out.payload.sources.forEach(s=>assert.equal(s.observed_fixture.kickoff_at,expected));
  }
- for(const invalid of ['2026-11-21T13:00:00','not-a-date','2026-11-21T13:00:00.123Z']){
+ for(const invalid of ['2026-11-21T13:00:00','not-a-date','2026-11-21T13:00:00.123Z','2026-11-21T13:00:00.000001Z','2026-11-21T13:00Z']){
   const x=example();x.review.fixture.kickoff_at=invalid;assert.throws(()=>produce(x),/Fecha del partido inválida/);
  }
 });
