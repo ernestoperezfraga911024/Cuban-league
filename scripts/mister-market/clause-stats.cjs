@@ -40,6 +40,7 @@ function clauseReport(snapshot, ledger, verification = null) {
   validateSnapshot(snapshot); validateLedger(ledger);
   if (ledger.leagueId !== snapshot.leagueId || ledger.season !== snapshot.season) fail('snapshot_context_mismatch');
   const feed = { coverage: 'retained_feed_accumulated', completeSeason: false,
+    coverageGaps: ledger.coverageGaps || [], reviewRequired: ledger.reviewRequired || false,
     ledgerHash: ledger.ledgerHash, observedThrough: ledger.completedAt,
     ...summarizeClauses(ledger.events.map(e => ({ ...e, reference: e.eventId })), snapshot.managers) };
   let profiles = null;
@@ -57,7 +58,7 @@ function clauseReport(snapshot, ledger, verification = null) {
   }
   // The profile rows have dates but no event IDs. Adding these two totals would
   // count the same operation twice; reconciliation is deliberately still pending.
-  const result = { schemaVersion: 1, leagueId: snapshot.leagueId, season: snapshot.season,
+  const result = { schemaVersion: 1, leagueId: snapshot.leagueId, season: snapshot.season, snapshotHash: snapshot.snapshotHash,
     generatedAt: new Date().toISOString(), feed, profiles,
     combined: null, reconciliation: 'pending', publicationReady: false, aiCalls: 0 };
   return { ...result, reportHash: hash(result) };

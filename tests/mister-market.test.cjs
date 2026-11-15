@@ -319,6 +319,12 @@ test('registro detecta ventanas sin solapamiento, pausas largas, cambios e histo
   const first = history.mergeLedger(null, historyCapture());
   assert.equal(history.mergeLedger(first, historyCapture(['301'], '2026-11-15T22:00:00Z')).continuity, 'review_required');
   assert.equal(history.mergeLedger(first, historyCapture(['300'], '2026-11-17T22:00:00Z')).continuity, 'review_required');
+  const gap = history.mergeLedger(first, historyCapture(['301'], '2026-11-17T22:00:00Z'));
+  assert.deepEqual(gap.coverageGaps[0].reasons, ['previous_head_missing', 'interval_over_24h']);
+  const recoveredWindow = history.mergeLedger(gap, historyCapture(['301'], '2026-11-17T23:00:00Z'));
+  assert.equal(recoveredWindow.continuity, 'previous_head_retained');
+  assert.equal(recoveredWindow.reviewRequired, true);
+  assert.equal(recoveredWindow.coverageGaps.length, 1);
   const changed = historyCapture(['300'], '2026-11-15T22:00:00Z'); changed.events[0].amount++;
   assert.throws(() => history.mergeLedger(first, changed), code('feed_event_changed'));
   assert.throws(() => history.mergeLedger(first, { ...historyCapture(), endObserved: false }), code('incomplete_feed_history'));

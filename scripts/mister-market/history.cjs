@@ -106,11 +106,17 @@ function mergeLedger(previous, current) {
   const overlap = previous && previous.headEventIds.length > 0
     && previous.headEventIds.every(id => incoming.has(id));
   const recent = previous && started - Date.parse(previous.completedAt) <= 24 * 60 * 60 * 1000;
+  const coverageGaps = [...(previous?.coverageGaps || [])];
+  if (previous && (!overlap || !recent)) coverageGaps.push({
+    previousCaptureAt: previous.completedAt, detectedAt: current.completedAt,
+    reasons: [!overlap && 'previous_head_missing', !recent && 'interval_over_24h'].filter(Boolean)
+  });
   const result = { schemaVersion: 1, leagueId: current.leagueId, season: current.season,
     initializedAt: previous?.initializedAt || current.completedAt, completedAt: current.completedAt,
     sourceCoverage: current.sourceCoverage, sourceWindowEventCount: current.events.length,
     headEventIds: current.headEventIds, pages: current.pages, baseline: !previous,
     continuity: !previous ? 'initial_baseline' : overlap && recent ? 'previous_head_retained' : 'review_required',
+    coverageGaps, reviewRequired: coverageGaps.length > 0,
     newlyObservedIds, events: [...merged.values()].sort((a, b) => a.eventId.localeCompare(b.eventId)),
     publicationReady: false, aiCalls: 0 };
   result.ledgerHash = hash(result);
