@@ -1,0 +1,38 @@
+name: Cuban League · Mercado Mister
+on:
+  schedule:
+    - cron: '0 4,17 * * *'
+      timezone: America/New_York
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'test guarda una copia privada; sync publica si está habilitado'
+        type: choice
+        options: [test, sync]
+        default: test
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: cuban-league-mister-market
+  cancel-in-progress: false
+jobs:
+  read:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Instalar lector fijado
+        run: npm ci --ignore-scripts --prefix scripts/mister-market
+      - name: Preparar Chromium
+        run: npx --no-install --prefix scripts/mister-market playwright install --with-deps chromium
+      - name: Leer, conciliar, verificar y conservar
+        env:
+          MARKET_MODE: ${{ github.event_name == 'schedule' && 'sync' || inputs.mode }}
+        run: node scripts/mister-market/worker.cjs

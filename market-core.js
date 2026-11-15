@@ -6,7 +6,7 @@
  function validate(p){
   const require=(ok)=>{if(!ok)throw Error('invalid_market_publication');};
   const money=n=>Number.isSafeInteger(n)&&n>=0;
-  require(p?.schemaVersion===1&&p.leagueId==='649733'&&p.season==='2026-27');
+  require([1,2].includes(p?.schemaVersion)&&p.leagueId==='649733'&&p.season==='2026-27');
   require(/^[a-f0-9]{64}$/.test(p.snapshotHash)&&Number.isFinite(Date.parse(p.capturedAt)));
   require(Array.isArray(p.managers)&&p.managers.length===20&&Array.isArray(p.players)&&p.players.length>=100);
   const managers=new Map(),participants=new Set(),players=new Set();
@@ -21,10 +21,10 @@
    players.add(x.id);
   }
   const history=p.history;
-  require(history?.completeSeason===false&&history.source==='player_profiles'&&history.reconciliation==='pending'&&Number.isFinite(Date.parse(history.observedAt))&&Array.isArray(history.events));
+  require(history?.completeSeason===false&&(p.schemaVersion===1?history.source==='player_profiles'&&history.reconciliation==='pending':history.source==='reconciled'&&history.reconciliation==='minimum_confirmed')&&Number.isFinite(Date.parse(history.observedAt))&&Array.isArray(history.events));
   const refs=new Set();
   for(const e of history.events){
-   require(typeof e.reference==='string'&&!refs.has(e.reference)&&players.has(e.playerId)&&managers.has(e.from)&&managers.has(e.to)&&e.from!==e.to&&money(e.amount)&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&Number.isFinite(Date.parse(e.date)));
+   require(typeof e.reference==='string'&&!refs.has(e.reference)&&players.has(e.playerId)&&managers.has(e.from)&&managers.has(e.to)&&e.from!==e.to&&money(e.amount)&&(p.schemaVersion===2&&e.date===null||/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&Number.isFinite(Date.parse(e.date))));
    refs.add(e.reference);
   }
   return p;
