@@ -32,7 +32,8 @@ test('modular contracts preserve every original authorized section byte for byte
 });
 test('runner consumes large file responses end to end with short stdin messages',async()=>{
  const {spawn}=require('node:child_process');
- const child=spawn(process.execPath,['scripts/run-forecast-season.cjs','--existing-run','season-bridge-test'],{stdio:['pipe','pipe','pipe']});
+ const lockRoot=await fs.mkdtemp(path.join(os.tmpdir(),'runner-bridge-test-'));
+ const child=spawn(process.execPath,['scripts/run-forecast-season.cjs','--existing-run','season-bridge-test'],{stdio:['pipe','pipe','pipe'],env:{...process.env,TMPDIR:lockRoot}});
  const readline=require('node:readline'),lines=readline.createInterface({input:child.stdout});
  let errors='',directory,finished,requests=0,chain=Promise.resolve();child.stderr.on('data',data=>errors+=data);
  const at=new Date().toISOString(),state={observed_at:at,run:{expected:[],slot_at:at,started_at:at,finished_at:at},attempts:[],padding:'Revisión íntegra '.repeat(10000)};
@@ -44,5 +45,5 @@ test('runner consumes large file responses end to end with short stdin messages'
   await fs.writeFile(event.response_path,JSON.stringify({result}));const message=JSON.stringify({id:event.id,result_file:event.response_path});assert.ok(message.length<512);child.stdin.write(message+'\n');
  }).catch(error=>{errors+=error.stack;child.kill();});});
  const exit=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('Bridge test timeout'));},15000);child.once('error',reject);child.once('close',code=>{clearTimeout(timer);resolve(code);});});
- await chain;try{assert.equal(exit,0,errors);assert.equal(finished.no_eligible_teams,true);assert.equal(finished.publication_complete,false);assert.equal(requests,3);}finally{if(directory)await fs.rm(directory,{recursive:true,force:true});}
+ await chain;try{assert.equal(exit,0,errors);assert.equal(finished.no_eligible_teams,true);assert.equal(finished.publication_complete,false);assert.equal(requests,3);}finally{await fs.rm(lockRoot,{recursive:true,force:true});}
 });

@@ -35,6 +35,14 @@ no en este script. No codificar horarios de noticias como horarios de probables.
    node scripts/run-forecast-season.cjs --existing-run RUN_KEY [RECOVERY_UUID]
    ```
 
+   El CLI usa flock en Linux antes de SQL/lectura, compartido entre checkouts y
+   run_keys del mismo entorno/usuario/TMPDIR. Código73: otro lector activo; no
+   reintentar ni quitar/cambiar el lock. La salida real libera el bloqueo; un
+   estado failed/completed_at externo no lo libera ni acredita fin del proceso.
+   Fuera de ese entorno siguen siendo necesarias la coordinación y las guardas
+   de base; no es un bloqueo distribuido. No invocar runSeason directamente para
+   eludirlo. No interrumpir el trabajo de otra sesión al desplegar una corrección.
+
 4. El puente emite `event`, `id`, `path`, `response_path` y `response_format:file`.
    Usar obligatoriamente el adaptador de `../automation/connector-bridge.md`:
    - `sql`: el adaptador valida y envía exactamente `{link_id,project_id,query}` al
@@ -101,6 +109,12 @@ hacerlo pasar: usar el recorrido de lectura/validación existente para ese club.
 `identities` mapea nombre observado a ID canónico cuando difiere de un nombre
 único exacto del roster. No hay fuzzy matching. Comprobar abreviaturas/homónimos
 mediante perfiles enlazados. Un jugador obligatorio sin resolver impide guardar.
+`identity_reference` acompaña la revisión con perfiles del catálogo del mismo
+club y equivalencias verificadas históricas, como Antony/A. Santos. No aplica
+IDs automáticamente ni acredita lecturas actuales. Confirmar el mapeo en
+`identities`; si se devuelve failure de identidad se pide una corrección antes
+de permitir un bloqueo concreto. La colocación y alternativas incompletas
+comparten ese único intento correctivo sobre el mismo paquete.
 `exclusions:[{source,name,reason}]` permite excluir una alternativa opcional sin
 identidad verificable y añade una limitación pública; no excluye titulares.
 
@@ -229,4 +243,8 @@ permite saltarse esas consultas ni volver a publicar intentos terminales.
 Las pruebas de transporte, corrección única y corte están en
 `tests/automation-runtime.test.cjs` y `tests/forecast-producer.test.cjs`.
 La corrección SQL de la bitácora se prueba en `tests/automation-audit-db.test.cjs`.
+El productor normaliza la fecha del payload, fixture y observaciones a UTC Z
+preservando el instante; la prueba PostgreSQL reproduce el caso +00:00 real.
+Las pruebas de proceso verifican exclusión de un segundo run desde otro checkout,
+salida por stdin cerrado y liberación tras SIGKILL sin consultar servicios reales.
 Pasar estas pruebas no acredita una nueva publicación de los 20 clubes.

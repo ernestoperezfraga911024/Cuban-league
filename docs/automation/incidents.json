@@ -124,6 +124,53 @@
       "tests": [
         "tests/automation-audit-db.test.cjs"
       ]
+    },
+    {
+      "code": "layout-review-not-retried",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Elche/Espanyol quedaron pendientes porque los errores de geometría escapaban a correction.",
+      "prevention": "LayoutFailure tipado recibe la única corrección completa sobre el mismo paquete; un segundo fallo permanece missing.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-layout.test.cjs"
+      ]
+    },
+    {
+      "code": "review-alternative-incomplete",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Atlético/Celta necesitaron completar alternativas evaluadas y la revisión se abandonó.",
+      "prevention": "La regresión verifica corrección única, misma evidencia, ausencia de escritura antes de validar y salida missing si persiste.",
+      "tests": [
+        "tests/forecast-producer.test.cjs"
+      ]
+    },
+    {
+      "code": "antony-canonical-name-missed",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Antony fue declarado ausente aunque el roster contenía A. Santos/a-santos.",
+      "prevention": "Perfiles por club y equivalencias contrastadas acompañan cada revisión; fallo declarado de identidad también recibe corrección. No mapeo automático ni fuzzy matching.",
+      "tests": [
+        "tests/forecast-producer.test.cjs"
+      ]
+    },
+    {
+      "code": "payload-utc-format-mismatch",
+      "status": "regression-tested-awaiting-run",
+      "failure": "La fecha +00:00 compilaba, pero build_team rechazaba el payload al exigir UTC Z.",
+      "prevention": "Normalizar fixture, observaciones y payload sin cambiar instante; rechazar fechas sin zona o fracciones no exactas. Regresión en PostgreSQL con el validador instalado.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-producer-db.test.cjs"
+      ]
+    },
+    {
+      "code": "scheduler-status-worker-mismatch",
+      "status": "regression-tested-awaiting-run",
+      "failure": "El programador reportó failed/completed_at mientras el trabajador seguía leyendo y publicando.",
+      "prevention": "Bloqueo de kernel local adquirido antes de SQL/lectura, compartido entre run_keys/checkouts. Salida73 si ocupado; jamás quitarlo por antigüedad/estado. Coordinar otros entornos con salida real y guardas SQL.",
+      "tests": [
+        "tests/automation-runtime.test.cjs"
+      ]
     }
   ]
 }

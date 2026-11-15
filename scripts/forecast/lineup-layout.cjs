@@ -1,8 +1,11 @@
 'use strict';
 // Screen coordinates, never DOM enumeration order, define left/right.
 // This module does not select a formation, XI, probabilities or alternatives.
+class LayoutFailure extends Error {
+  constructor(message) { super(message); this.name = 'LayoutFailure'; }
+}
 function orderSelection(packet, selection, resolve) {
-  const fail = message => { throw Error(`${packet.team}: colocación pendiente: ${message}`); };
+  const fail = message => { throw new LayoutFailure(`${packet.team}: colocación pendiente: ${message}`); };
   const sizes = [1, ...selection.formation.split('-').map(Number)];
   if (selection.layout?.rows?.length !== sizes.length) fail('falta una referencia por fila, incluida portería');
   const result = [], audit = [], usedAnchors = new Set(); let offset = 0;
@@ -50,4 +53,4 @@ function orderSelection(packet, selection, resolve) {
   }
   return {players:result,audit:{direction:'left-to-right',rows:audit,reordered:result.some((p,i)=>p.id!==selection.players[i].id)}};
 }
-module.exports = {orderSelection};
+module.exports = {orderSelection,LayoutFailure};

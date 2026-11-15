@@ -33,7 +33,8 @@ test('real shell file transport preserves large Unicode and shell metacharacters
  }finally{await fs.rm(directory,{recursive:true,force:true});}
 });
 test('runner rejects inline/truncated replies but accepts the corrected file for the same pending request',async()=>{
- const child=spawn(process.execPath,['scripts/run-forecast-season.cjs','--existing-run','season-protocol-test'],{stdio:['pipe','pipe','pipe']});
+ const lockRoot=await fs.mkdtemp(path.join(os.tmpdir(),'runner-protocol-test-'));
+ const child=spawn(process.execPath,['scripts/run-forecast-season.cjs','--existing-run','season-protocol-test'],{stdio:['pipe','pipe','pipe'],env:{...process.env,TMPDIR:lockRoot}});
  const lines=require('node:readline').createInterface({input:child.stdout});let directory,finished,errors='',sql=0,protocol=0,chain=Promise.resolve(),pending;
  child.stderr.on('data',data=>errors+=data);
  const at=new Date().toISOString(),state={observed_at:at,run:{expected:[],slot_at:at,started_at:at,finished_at:at},attempts:[],padding:'a'.repeat(57000)};
@@ -53,5 +54,31 @@ test('runner rejects inline/truncated replies but accepts the corrected file for
  }).catch(error=>{errors+=error.stack;child.kill();});});
  const exit=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('Timeout'));},15000);child.once('error',reject);child.once('close',code=>{clearTimeout(timer);resolve(code);});});await chain;
  try{assert.equal(exit,0,errors);assert.equal(protocol,2);assert.equal(sql,3);assert.equal(finished.publication_complete,false);assert.equal(JSON.parse(await fs.readFile(path.join(directory,'checkpoint.json'))).status,'partial');}
- finally{if(directory)await fs.rm(directory,{recursive:true,force:true});}
+ finally{await fs.rm(lockRoot,{recursive:true,force:true});}
+});
+test('runner excludes a second checkout/run before SQL and releases its kernel lock after SIGKILL',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'runner-lock-test-')),script=path.resolve('scripts/run-forecast-season.cjs');
+ const children=[];
+ const start=(key,cwd)=>{
+  const child=spawn(process.execPath,[script,'--existing-run',key],{cwd,stdio:['pipe','pipe','pipe'],env:{...process.env,TMPDIR:root}});
+  children.push(child);let stdout='',stderr='';child.stdout.on('data',d=>stdout+=d);child.stderr.on('data',d=>stderr+=d);
+  child.done=new Promise(resolve=>child.once('close',code=>resolve({code,stdout,stderr})));return child;
+ };
+ const firstEvent=child=>new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>reject(Error('No first SQL event')),5000);let buffer='';
+  child.stdout.on('data',d=>{buffer+=d;if(buffer.includes('\n')){clearTimeout(timer);resolve(JSON.parse(buffer.split('\n')[0]));}});
+  child.once('close',code=>{clearTimeout(timer);reject(Error('Runner exited before SQL: '+code));});
+ });
+ try{
+  const a=start('season-lock-first',process.cwd());assert.equal((await firstEvent(a)).event,'sql');
+  // Different run and checkout location; the first process is alive waiting for
+  // the bridge, even if an external scheduler reports failed/completed.
+  const b=start('season-lock-second',root),blocked=await b.done;
+  assert.equal(blocked.code,73);assert.equal(blocked.stdout,'');assert.match(blocked.stderr,/still active/);
+  a.kill('SIGKILL');await a.done;
+  const c=start('season-lock-resume',root);assert.equal((await firstEvent(c)).event,'sql');
+  c.stdin.end();await c.done;
+  const d=start('season-lock-after-close',root);assert.equal((await firstEvent(d)).event,'sql');
+  d.stdin.end();await d.done;
+ }finally{for(const child of children)if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');await Promise.all(children.map(c=>c.done));await fs.rm(root,{recursive:true,force:true});}
 });
