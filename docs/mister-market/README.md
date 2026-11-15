@@ -1,6 +1,8 @@
 # Lector de mercado y equipo actual — primera prueba
 
-Estado: **borrador de solo lectura, sin horario activo ni publicación**, 15/11/2026.
+Estado: **borrador con archivo privado duradero y vistas preparadas; sin horario activo ni publicación**, 15/11/2026.
+
+Detalle de implementación, permisos, recuperación y validación: [integración del 15/11](integration-2026-11-15.md).
 Destino previsto: primera división de Cuban League, comunidad Mister `649733`, temporada `2026-27`.
 
 ## Qué hace esta versión
@@ -84,7 +86,7 @@ Los archivos se guardan en `.mister-market/`, en la raíz del proyecto:
 | `feed-ledger.json` | Registro acumulado del portal, IDs observados, cobertura y hash, en un único archivo atómico. |
 | `run.lock` | Impide dos ejecuciones simultáneas en esta instalación. |
 
-La carpeta está excluida de Git. Estos archivos sobreviven a detener el Codespace. El 15/11 se exportó una copia privada externa sin credenciales con ambas capturas, verificación, registro del portal y estadísticas (2.028.467 bytes), y se comprobó su lectura e integridad. Es un respaldo puntual; antes de activar la automatización y ofrecer un historial permanente en la página hay que instalar almacenamiento privado duradero y recuperación automática. La sesión funciona como una credencial: conservarla en una computadora de confianza y fuera de carpetas compartidas. El programa no exporta la sesión del navegador de ChatGPT. [Playwright documenta esta separación y la protección del estado de autenticación](https://playwright.dev/docs/auth).
+La carpeta está excluida de Git. Estos archivos sobreviven a detener el Codespace. El 15/11 se exportó una copia privada externa sin credenciales con ambas capturas, verificación, registro del portal y estadísticas (2.028.467 bytes), y se comprobó su lectura e integridad. Es un respaldo puntual. También se instaló un archivo privado inmutable en la base de Cuban League, con restauración por hash comprobada. La conexión recurrente del lector con ese archivo y la conciliación de fuentes siguen pendientes. La sesión funciona como una credencial: conservarla en una computadora de confianza y fuera de carpetas compartidas. El programa no exporta la sesión del navegador de ChatGPT. [Playwright documenta esta separación y la protección del estado de autenticación](https://playwright.dev/docs/auth).
 
 Una sesión puede caducar o necesitar nueva verificación. No se promete acceso perpetuo ni se sortean CAPTCHA o controles de acceso. Si el inicio de sesión real funciona pero la sesión guardada no, hay que diagnosticarlo antes de automatizar.
 
@@ -95,8 +97,8 @@ Una sesión puede caducar o necesitar nueva verificación. No se promete acceso 
 | Lector y comparación sin IA | 35 pruebas del lector aprobadas localmente y en Actions, más 5 controles de metodología locales. Segunda captura real: 538 jugadores, 20 participantes, cero cambios y cero faltantes; 49.980 ms. |
 | Sesión independiente y captura real completa | Sesión propia confirmada y catálogo leído el 15/11; coherencia de archivos y plantillas derivadas comprobada. Los 20 equipos fueron contrastados con su pestaña Equipo, junto con las 538 fichas. |
 | Historial de movimientos | Dos lecturas reales conservan 391 operaciones sin duplicados. 538 fichas aportan 1.842 movimientos, entre ellos 443 clausulazos fechados. Conciliación entre fuentes pendiente. La fuente limita su historia disponible. |
-| Guardado privado en Cuban League | Pendiente de diseñar tablas y permisos mínimos; no usar credenciales en la web pública. |
-| Mercado y «Equipo actual» | Pendiente de conectar las vistas aprobadas a la misma versión de datos. |
+| Guardado privado en Cuban League | Instalado y comprobado: archivo gzip inmutable, hashes, restauración y permisos. Primera importación real conservada; todavía sin carga recurrente. |
+| Mercado y «Equipo actual» | Implementados en PR119 sobre una misma proyección; búsqueda, filtros, precios exactos y rankings parciales. Proyección preparada y oculta hasta revisión/publicación. |
 | Programación y publicación | Después de validar lo anterior, 04:00 y 17:00, zona `America/New_York`. |
 
 Opción prevista: GitHub Actions con ejecutor estándar del repositorio público existente. [GitHub documenta su gratuidad en repositorios públicos](https://docs.github.com/en/billing/concepts/product-billing/github-actions). No se contrata un ejecutor de pago. Antes de activarlo hay que probar el acceso de Mister desde ese entorno, almacenar la sesión como secreto y usar almacenamiento privado para los datos; no adjuntar sesiones o lecturas como artefactos públicos, commits o logs.

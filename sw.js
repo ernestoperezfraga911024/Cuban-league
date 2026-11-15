@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v230-squad-design';
+const CACHE_NAME = 'cuban-league-v231-market';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,7 +12,10 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=229-20261114',
+  './app.js?v=231-20261115',
+  './market-core.js?v=231-20261115',
+  './market.js?v=231-20261115',
+  './market.css?v=231-20261115',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',

@@ -5,6 +5,10 @@ on:
       - '.devcontainer/mister-market/**'
       - 'scripts/mister-market/**'
       - 'tests/mister-market.test.cjs'
+      - 'market*'
+      - 'tests/market-*.test.cjs'
+      - 'tests/helpers/market-fixture.cjs'
+      - 'supabase/migrations/*_mister_market_archive.sql'
       - '.github/workflows/mister-market-checks.yml'
   push:
     branches: [main]
@@ -12,6 +16,10 @@ on:
       - '.devcontainer/mister-market/**'
       - 'scripts/mister-market/**'
       - 'tests/mister-market.test.cjs'
+      - 'market*'
+      - 'tests/market-*.test.cjs'
+      - 'tests/helpers/market-fixture.cjs'
+      - 'supabase/migrations/*_mister_market_archive.sql'
       - '.github/workflows/mister-market-checks.yml'
 permissions:
   contents: read
@@ -30,4 +38,4 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --ignore-scripts
-      - run: node --test tests/mister-market.test.cjs
+      - run: node --test tests/mister-market.test.cjs tests/market-public.test.cjs tests/market-db.test.cjs

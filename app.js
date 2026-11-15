@@ -5174,7 +5174,7 @@ async function ensureProfileSeasonData({force=false}={}){
 }
 
 function setProfileView(view,{focus=false}={}){
-  const next=['summary','team','achievements','history'].includes(view)?view:'summary';
+  const next=['summary','team','current-team','achievements','history'].includes(view)?view:'summary';
   const scroller=document.querySelector('#playerModal .player-profile-modal');
   const tabs=scroller?.querySelector('.profile-view-tabs');
   const returnToTabs=Boolean(scroller&&tabs&&scroller.scrollTop>tabs.offsetTop);
@@ -5193,6 +5193,7 @@ function setProfileView(view,{focus=false}={}){
   if(returnToTabs)scroller.scrollTo({top:Math.max(0,tabs.offsetTop),behavior:'auto'});
   if(focus)document.querySelector(`[data-profile-view="${next}"]`)?.focus();
   if(next==='team')ensureProfileSeasonData();
+  if(next==='current-team')window.CubanLeagueMarket?.showTeam(document.getElementById('profileCurrentTeamContent'),PROFILE_SEASON_STATE?.participantId);
   if(next==='achievements')requestAnimationFrame(animateProfileAchievementUnlocks);
 }
 
@@ -5438,6 +5439,7 @@ function openPlayer(name){
   PROFILE_SEASON_REQUEST_TOKEN+=1;
   PROFILE_SEASON_STATE={
     name,
+    participantId:p.id,
     view:'summary',
     section:'summary',
     captainSort:'points',
@@ -5461,6 +5463,7 @@ function openPlayer(name){
 
     <nav class="profile-view-tabs" role="tablist" aria-label="Perfil de ${profileAttr(name)}">
       <button id="profileSummaryTab" class="is-active" type="button" role="tab" data-profile-view="summary" aria-controls="profileSummaryPanel" aria-selected="true" tabindex="0">Resumen</button>
+      <button id="profileCurrentTeamTab" type="button" role="tab" data-profile-view="current-team" aria-controls="profileCurrentTeamPanel" aria-selected="false" tabindex="-1">Equipo actual</button>
       <button id="profileTeamTab" type="button" role="tab" data-profile-view="team" aria-controls="profileTeamPanel" aria-selected="false" tabindex="-1">Equipo</button>
       <button id="profileAchievementsTab" type="button" role="tab" data-profile-view="achievements" aria-controls="profileAchievementsPanel" aria-selected="false" tabindex="-1">Logros</button>
       <button id="profileHistoryTab" type="button" role="tab" data-profile-view="history" aria-controls="profileHistoryPanel" aria-selected="false" tabindex="-1">Historia</button>
@@ -5471,6 +5474,10 @@ function openPlayer(name){
         ${profileSummaryMetricsMarkup(current)}
         ${profileFormCardMarkup(snapshot)}
       </div>
+    </section>
+
+    <section id="profileCurrentTeamPanel" class="profile-view-panel" role="tabpanel" aria-labelledby="profileCurrentTeamTab" data-profile-panel="current-team" hidden>
+      <div id="profileCurrentTeamContent"></div>
     </section>
 
     <section id="profileTeamPanel" class="profile-view-panel profile-season-panel" role="tabpanel" aria-labelledby="profileTeamTab" data-profile-panel="team" hidden>
@@ -7567,7 +7574,7 @@ async function init(){
   const launchParams=new URLSearchParams(location.search);
   const launchSection=launchParams.get('section');
   const launchHistoryView=launchParams.get('view');
-  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards','second-division','forecasts','news'].includes(launchSection)){
+  if(['home','current','matchdays','seasons','players','history','records','cup','champions','rules','cards','second-division','forecasts','news','market'].includes(launchSection)){
     requestAnimationFrame(()=>go(launchSection,launchHistoryView));
   }
   window.CubanLeagueViewer?.init(activeParticipants());
