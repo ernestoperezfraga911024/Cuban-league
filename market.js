@@ -31,10 +31,10 @@
   try{return await pending;}finally{pending=null;}
  }
  const icon=name=>`<svg class="market-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${({search:'<circle cx="10.8" cy="10.8" r="7.3"/><path d="m16 16 5 5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/>'})[name]}</svg>`;
- function price(n,digits=2){
+ function price(n,digits=2,sign=''){
   if(n===null)return '<span class="market-price-empty">—</span>';
-  const label=n>=1000000?millionFormats[digits].format(n/1000000)+' M €':money(n);
-  return `<details class="market-price"><summary aria-label="${escape(money(n))}. Ver importe exacto" title="${escape(money(n))}">${escape(label)}</summary><span class="market-price-exact">${escape(money(n))}</span></details>`;
+  const label=sign+(n>=1000000?millionFormats[digits].format(n/1000000)+' M €':money(n)),exact=sign+money(n);
+  return `<details class="market-price"><summary aria-label="${escape(exact)}. Ver importe exacto" title="${escape(exact)}">${escape(label)}</summary><span class="market-price-exact">${escape(exact)}</span></details>`;
  }
  function participantPhoto(m){
   // Reuse the catalog already loaded by app.js, matched by stable participant ID.
@@ -81,7 +81,7 @@
   }
   const tabs=`<div class="market-clause-tabs" role="group" aria-label="Análisis de clausulazos"><button type="button" data-market-history="ranking" aria-pressed="${state.historyView==='ranking'}">Ranking</button><button type="button" data-market-history="participants" aria-pressed="${state.historyView==='participants'}">Por participante</button></div>`;
   if(state.historyView==='participants')return toolbar+tabs+participantsHistory(p);
-  return toolbar+tabs+`<div class="market-positions market-metrics" role="group" aria-label="Ordenar ranking de clausulazos">${Object.entries(metricLabels).map(([key,label])=>`<button type="button" data-market-metric="${key}" aria-pressed="${state.metric===key}">${label}</button>`).join('')}</div><ol class="market-ranking" aria-label="Ranking por ${metricLabels[state.metric].toLowerCase()}">${core.rank(p,state.metric).map(m=>`<li><span class="market-rank">${m.rank}</span>${participantPhoto(m)}<div class="market-ranking-main"><div class="market-ranking-name"><strong>${escape(m.name)}</strong><div class="market-ranking-value">${state.metric==='made'||state.metric==='received'?`<b>${m[state.metric]}</b>`:price(m[state.metric],1)}</div></div><small>${state.metric==='made'?m.received+' recibidos':state.metric==='received'?m.made+' dados':m.made+' dados · '+m.received+' recibidos'}</small><div class="market-ranking-money"><div><span>Pagado</span>${price(m.spent,1)}</div><div><span>Cobrado</span>${price(m.collected,1)}</div></div></div></li>`).join('')}</ol>`;
+  return toolbar+tabs+`<div class="market-positions market-metrics" role="group" aria-label="Ordenar ranking de clausulazos">${Object.entries(metricLabels).map(([key,label])=>`<button type="button" data-market-metric="${key}" aria-pressed="${state.metric===key}">${label}</button>`).join('')}</div><ol class="market-ranking" aria-label="Ranking por ${metricLabels[state.metric].toLowerCase()}">${core.rank(p,state.metric).map(m=>`<li><span class="market-rank">${m.rank}</span>${participantPhoto(m)}<div class="market-ranking-main"><div class="market-ranking-name"><strong>${escape(m.name)}</strong><div class="market-ranking-value">${state.metric==='made'||state.metric==='received'?`<b>${m[state.metric]}</b>`:price(m[state.metric],1)}</div></div><small>${state.metric==='made'?m.received+' recibidos':state.metric==='received'?m.made+' dados':m.made+' dados · '+m.received+' recibidos'}</small><div class="market-ranking-money"><div><span>Gastado</span>${price(m.spent,1)}</div><div><span>Cobrado</span>${price(m.collected,1)}</div><div class="market-balance ${m.net>0?'is-positive':m.net<0?'is-negative':'is-zero'}"><span title="Cobrado menos gastado">Balance</span>${price(Math.abs(m.net),1,m.net>0?'+':m.net<0?'−':'')}</div></div></div></li>`).join('')}</ol>`;
  }
  function render(){
   if(!cached){host.innerHTML='<p class="market-empty">El mercado todavía no tiene una captura publicada.</p>';return;}

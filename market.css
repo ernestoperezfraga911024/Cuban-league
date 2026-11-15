@@ -79,6 +79,10 @@ body.f05-theme[data-section="market"] main {
 .market-ranking-money span{color:#b5c5ba}
 .market-ranking-money .market-price{font-weight:650}
 .market-ranking-money .market-price-exact{color:#fff8df}
+.market-balance.is-positive{color:#72dfaa}
+.market-balance.is-negative{color:#ff9898}
+.market-balance.is-zero{color:#b5c5ba}
+.market-balance .market-price-exact{color:inherit}
 .market-events li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid #315044}
 .market-event-player{display:flex;gap:10px;align-items:center;min-width:0}
 .market-event-player>div{min-width:0}
@@ -135,7 +139,9 @@ body.f05-theme[data-section="market"] main {
   .market-ranking li{grid-template-columns:18px 44px minmax(0,1fr);gap:9px;padding:16px 0}
   .market-participant-logo,.market-participant-fallback{width:44px;height:46px;border-radius:9px}
   .market-ranking-name>strong{font-size:14px}
-  .market-ranking-money{font-size:10px;gap:7px;letter-spacing:-.015em}
+  .market-ranking-money{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));font-size:10px;gap:7px;letter-spacing:-.015em}
+  .market-ranking-money>div{display:block}
+  .market-ranking-money>div>span{display:block}
   .market-ranking-money>div{gap:4px}
   .market-ranking-money>div+div{padding-left:7px}
   .market-ranking-value .market-price{font-size:13px}

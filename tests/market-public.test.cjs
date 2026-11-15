@@ -81,6 +81,22 @@ test('Market rivals: lazy accessible details, safe names and fresh history after
   assert.equal(refreshed.querySelectorAll('.market-rival-players li').length,3);assert.equal(reads,2);
   d.querySelector('[data-market-history="events"]').click();assert.equal(d.activeElement.dataset.marketHistory,'ranking');assert.equal(d.querySelectorAll('.market-events li').length,5);
   d.querySelector('[data-market-history="ranking"]').click();assert.equal(d.querySelectorAll('.market-ranking li').length,20);
+  const balances=[...d.querySelectorAll('.market-ranking li')];
+  const balance=balances.find(row=>row.querySelector('strong').textContent==='Participante 1').querySelector('.market-balance');
+  assert.ok(balance.classList.contains('is-positive'));assert.equal(balance.querySelector('.market-price-exact').textContent,'+12.343.000 €');
+ }finally{w.close();}
+});
+test('Market balances: collected minus spent, visible signs, exact amounts and neutral zero',async()=>{
+ const p=fixture();p.history.events[0].amount=25136000;
+ const original=JSON.stringify(p),dom=setup(async()=>({ok:true,json:async()=>[{payload:p}]})),w=dom.window,d=w.document;
+ try{
+  d.body.dataset.section='market';await tick();await tick();d.querySelector('[data-market-view="history"]').click();
+  const rows=[...d.querySelectorAll('.market-ranking li')],balance=id=>rows.find(row=>row.querySelector('strong').textContent==='Participante '+id).querySelector('.market-balance');
+  assert.ok(balance(1).classList.contains('is-positive'));assert.equal(balance(1).querySelector('summary').textContent,'+25,1 M €');assert.equal(balance(1).querySelector('.market-price-exact').textContent,'+25.131.000 €');
+  assert.ok(balance(2).classList.contains('is-negative'));assert.equal(balance(2).querySelector('summary').textContent,'−25,1 M €');assert.equal(balance(2).querySelector('.market-price-exact').textContent,'−25.131.000 €');
+  assert.equal(balance(2).querySelector('summary').getAttribute('aria-label'),'−25.131.000 €. Ver importe exacto');
+  assert.ok(balance(20).classList.contains('is-zero'));assert.equal(balance(20).querySelector('summary').textContent,'0 €');
+  assert.equal(core.stats(p).reduce((sum,row)=>sum+row.net,0),0);assert.equal(JSON.stringify(p),original);
  }finally{w.close();}
 });
 test('Market: lazy fetch, same capture for concurrent team/page, text escaping and filters',async()=>{
