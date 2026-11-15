@@ -166,17 +166,17 @@
     }
     pitch.append(field);layout.append(pitch,detail);shell.append(layout);
     if(playerContext||estimates.size){
-      const squad=el('section',null,'fp-squad');squad.append(el('h3','Resto de la plantilla'),el('p','Jugadores fuera del once previsto. Toca su foto para ver su situación.'));
+      const squad=el('section',null,'fp-squad');squad.append(el('h3','Resto de la plantilla'),el('p','Fuera del once previsto. Toca un jugador para ver su situación.'));
       const roster=playerContext?.roster||catalog?.players?.filter(x=>x.active&&x.clubId===p.team).map(x=>({id:x.id,name:x.displayName,position:x.position}))||[];
       const others=roster.filter(x=>!p.players.some(y=>y.id===x.id)).map(x=>({...x,...estimates.get(x.id)}));
       if(!(playerContext?playerContext.rosterAvailable:Array.isArray(catalog?.players)))squad.append(el('p','No se pudo cargar la plantilla. Pulsa Actualizar.'));
       else if(!others.length)squad.append(el('p','No hay más jugadores en la plantilla.'));
       for(const [position,label] of [['PT','Porteros'],['DF','Defensas'],['MC','Centrocampistas'],['DL','Delanteros']]){
         const group=others.filter(x=>x.position===position);if(!group.length)continue;
-        squad.append(el('h4',label));const line=el('div',null,'fp-reserves');
+        squad.append(el('h4',label+' · '+group.length));const line=el('div',null,'fp-reserves');
         for(const player of group){const b=el('button',null,'fp-reserve');b.type='button';b.setAttribute('data-player-id',player.id);b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',player.name+'. Ver situación');b.append(portrait(player,catalog),el('span',player.name,'fp-name'));if(Number.isInteger(player.probability)){b.classList.toggle('fp-uncertain',player.probability<70);b.append(el('b',player.probability+'%','fp-prob'));b.setAttribute('aria-label',player.name+', '+player.probability+' por ciento de titularidad. Ver explicación');}const badge=playerContext?.badge(player);if(badge){b.append(badge);b.setAttribute('aria-label',b.getAttribute('aria-label')+'. '+badge.getAttribute('aria-label')+'.');}b.addEventListener('click',()=>show(player,b));line.append(b);}squad.append(line);
       }
-      const legend=el('div',null,'fp-squad-legend');legend.append(el('span','? En duda','doubt'),el('span','+ Lesionado','injured'));squad.append(legend);shell.append(squad);
+      shell.append(squad);
     }
     const footer=el('div',null,'fp-evidence');const context=el('details',null,'fp-context');context.append(el('summary','Criterio y contexto del once'),el('p',p.note));footer.append(context);
     context.append(el('p',core.freshness(p),'fp-meta'));
