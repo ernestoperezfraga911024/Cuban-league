@@ -153,3 +153,36 @@ body.f05-theme[data-section="market"] main {
   .market-ranking-money{gap:2px 7px}
   .market-ranking-money>div+div{border:0;padding-left:0}
 }
+/* Clause recipients: the twenty participants share the existing capture. */
+.market-clause-tabs{display:flex;gap:20px;border-bottom:1px solid var(--market-line);margin:0 0 18px}
+#market .market-clause-tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--market-muted);min-height:44px;padding:8px 0;font-size:13px;font-weight:700;box-shadow:none;cursor:pointer}
+#market .market-clause-tabs button[aria-pressed="true"]{color:var(--market-gold);border-bottom-color:var(--market-gold)}
+.market-rivals-intro h4{font-size:15px;letter-spacing:-.02em;margin:0 0 6px;color:var(--market-ink)}
+.market-rivals-intro p,.market-rivals-note{font-size:12px;line-height:1.6;color:var(--market-muted);margin:0 0 12px}
+.market-rivals-note{margin:18px 0 0}
+.market-target{border-bottom:1px solid var(--market-line)}
+.market-target>summary{display:grid;grid-template-columns:44px minmax(0,1fr) auto 12px;align-items:center;gap:12px;padding:17px 0;list-style:none;cursor:pointer;border-radius:5px}
+.market-target>summary::-webkit-details-marker{display:none}
+.market-target>summary>.market-participant-logo,.market-target>summary>.market-participant-fallback{width:44px;height:44px}
+.market-target-name{min-width:0}
+.market-target-name>strong{display:block;font-size:15px;font-weight:800;line-height:1.4;overflow-wrap:anywhere}
+.market-target-name>span{display:block;font-size:11px;color:var(--market-muted);line-height:1.6;margin-top:3px;overflow-wrap:anywhere}
+.market-target-total{text-align:right;font-variant-numeric:tabular-nums}
+.market-target-total b{display:block;color:var(--market-gold);font-size:21px;line-height:1.2}
+.market-target-total>span{font-size:10px;color:var(--market-muted)}
+.market-target-chevron{font-size:23px;color:var(--market-gold);text-align:center}
+.market-target[open]>summary .market-target-chevron{transform:rotate(90deg)}
+.market-target-body{padding:0 0 18px 56px}
+.market-rivals,.market-rival-players{list-style:none;padding:0;margin:0}
+.market-rival+.market-rival{margin-top:20px}
+.market-rival-heading{display:flex;align-items:center;gap:9px;min-width:0;padding:10px 0;border-bottom:1px solid #294b3b}
+.market-rival-heading>.market-participant-logo,.market-rival-heading>.market-participant-fallback{width:30px;height:30px;border-radius:7px;font-size:11px;flex:none}
+.market-rival-heading>strong{min-width:0;flex:1;font-size:13px;overflow-wrap:anywhere}
+.market-rival-heading>span{font-size:11px;color:var(--market-gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+.market-rival-players>li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #28453780}
+.market-rival-players>li>div:first-child{min-width:0}
+.market-rival-players strong{display:block;font-size:12px;font-weight:600;overflow-wrap:anywhere}
+.market-rival-players time,.market-rival-players span:not(.market-price-exact){display:block;font-size:10px;color:var(--market-muted);line-height:1.7}
+.market-rival-price{color:var(--market-gold);font-size:12px;font-weight:650;flex:none}
+@media(min-width:900px){.market-rivals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}.market-rival+.market-rival{margin-top:0}}
+@media(max-width:600px){.market-target>summary{gap:9px;grid-template-columns:40px minmax(0,1fr) auto 10px}.market-target>summary>.market-participant-logo,.market-target>summary>.market-participant-fallback{width:40px;height:42px}.market-target-name>strong{font-size:14px}.market-target-name>span{font-size:10px}.market-target-body{padding-left:10px}.market-rival-heading>span{font-size:10px}}
