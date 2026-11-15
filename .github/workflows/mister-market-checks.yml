@@ -5,6 +5,7 @@ on:
       - '.devcontainer/mister-market/**'
       - 'scripts/mister-market/**'
       - 'tests/mister-market.test.cjs'
+      - 'tests/market-scroll.browser.cjs'
       - 'market*'
       - 'tests/market-*.test.cjs'
       - 'tests/helpers/market-fixture.cjs'
@@ -18,6 +19,7 @@ on:
       - '.devcontainer/mister-market/**'
       - 'scripts/mister-market/**'
       - 'tests/mister-market.test.cjs'
+      - 'tests/market-scroll.browser.cjs'
       - 'market*'
       - 'tests/market-*.test.cjs'
       - 'tests/helpers/market-fixture.cjs'
@@ -43,3 +45,7 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - run: node --test tests/mister-market.test.cjs tests/market-public.test.cjs tests/market-db.test.cjs tests/market-automation.test.cjs
+      - run: npm ci --ignore-scripts --prefix scripts/mister-market
+      - run: node scripts/mister-market/node_modules/playwright/cli.js install chromium --only-shell
+      - name: Probar paginación local sin acceder a Mister
+        run: node --test tests/market-scroll.browser.cjs
