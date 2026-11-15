@@ -63,8 +63,8 @@ Una sesión puede caducar o necesitar nueva verificación. No se promete acceso 
 
 | Paso | Estado y condición |
 | --- | --- |
-| Lector y comparación sin IA | Primera versión escrita; pruebas con datos ficticios. |
-| Sesión independiente y captura real completa | Pendiente de iniciar sesión con este programa y contrastar resultados. |
+| Lector y comparación sin IA | 21 pruebas aprobadas; primera lectura real completada. Comparación entre dos capturas reales todavía pendiente. |
+| Sesión independiente y captura real completa | Sesión propia confirmada y catálogo leído el 15/11; coherencia de archivos y plantillas derivadas comprobada. Contraste independiente con cada plantilla pendiente. |
 | Historial completo de movimientos | Pendiente de validar cobertura entre capturas y persistencia de IDs. |
 | Guardado privado en Cuban League | Pendiente de diseñar tablas y permisos mínimos; no usar credenciales en la web pública. |
 | Mercado y «Equipo actual» | Pendiente de conectar las vistas aprobadas a la misma versión de datos. |
@@ -97,14 +97,16 @@ Desde la raíz: `npm ci --ignore-scripts` y `node --test tests/mister-market.tes
 
 Las pruebas usan participantes ficticios y DOM reducido con la estructura observada. Cubren importes, identidad, propiedad, detección explícita de cláusulas, capturas parciales, cambios concurrentes, paginación, espera tras filtros, aislamiento de datos no necesarios, diferencias y conservación de la base local. No prueban el acceso real independiente, la cobertura completa del tablón ni una publicación en producción.
 
-Comprobación local del 15/11: **16 pruebas aprobadas**, instalación reproducible con `npm ci` y salida `login_required` al intentar recoger sin sesión. Base de desarrollo: `004f8db83f2fd451bd10a04323d7c526d157a71a`. No se guardaron credenciales ni datos reales en el repositorio.
+Comprobación inicial del 15/11: 16 pruebas aprobadas, instalación reproducible con `npm ci` y salida `login_required` al intentar recoger sin sesión. Las correcciones posteriores de acceso móvil elevaron el total a **21 pruebas aprobadas**, localmente y en Actions. Base de desarrollo: `004f8db83f2fd451bd10a04323d7c526d157a71a`. No se guardaron credenciales ni lecturas reales en el repositorio.
+
+Primera captura real, con código `66cce081270e5959b5256bd81818d431a3b7b4d4`, terminada el **15/11/2026 a las 17:59:34 UTC**: `read_only_complete`, **538 jugadores** (275 con propietario y 263 libres), **20 participantes**, **29 movimientos visibles**, **53.766 ms**, `baseline: true`, `aiCalls: 0` y `publicationReady: false`. Los 20 equipos derivados suman los mismos 275 jugadores, con entre 11 y 15 por equipo. Se verificaron el hash de la captura, la igualdad de hashes entre `latest`, `report` y `teams`, la regeneración exacta de las plantillas y la liberación del bloqueo. Es coherencia de esta captura, no contraste independiente con las 20 páginas de equipos ni cobertura histórica completa. GitHub confirmó que el Codespace quedó detenido al finalizar.
 
 Observaciones de la inspección del 15/11 y su seguimiento:
 
 | Incidente | Prevención | Estado |
 | --- | --- | --- |
-| `mister-filter-stale-list` | Esperar cambio y estabilidad de la lista tras «Aplicar»; cerrar el modal no basta. | Regresión sintética; pendiente de ejecución independiente. |
-| `mister-reset-closes-popup` | Reabrir el selector después de «Limpiar». | Recorrido simulado; pendiente de ejecución independiente. |
+| `mister-filter-stale-list` | Esperar cambio y estabilidad de la lista tras «Aplicar»; cerrar el modal no basta. | Regresión sintética y primera captura independiente completada el 15/11. |
+| `mister-reset-closes-popup` | Reabrir el selector después de «Limpiar». | Recorrido simulado y primera captura independiente completada el 15/11. |
 | `mister-feed-relative-comment-time` | No tratar la antigüedad de un comentario como fecha del movimiento. | Regresión sintética; `occurredAt` queda null. |
 | `mister-feed-visible-window` | Declarar cobertura parcial y bloquear publicación hasta validar historial. | Pendiente. |
 

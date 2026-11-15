@@ -40,7 +40,7 @@ Al terminar, **detener el Codespace** desde GitHub para que deje de consumir tie
 
 Estado de validación del 15/11: acceso manual de GitHub comprobado; 19 pruebas sintéticas aprobadas localmente y en Actions. El primer Codespace con imagen universal permaneció en «Opening Remote / Building codespace» y terminó en modo de recuperación. El registro de creación identificó la causa: `no space left on device` al extraer `torch/lib/libtorch_cpu.so` de la imagen universal. En ese primer intento el escritorio 6080 no estuvo disponible.
 
-Se cambió a la imagen oficial de Node 22 y se eliminó la instalación redundante de Node. La regresión de configuración impide volver a la imagen universal en esta prueba. Se actualizó el mismo Codespace mediante fast-forward y se solicitó **Full Rebuild**, que conserva el código y limpia las imágenes en caché. La reconstrucción posterior sí arrancó: se verificó el puerto 6080 como Private, la conexión a noVNC y una ventana de Chromium abierta en Mister. La sesión propia del lector sigue pendiente del inicio de sesión manual de Ernesto; todavía no hay lectura completa ni publicación validada. Aprobar las pruebas sintéticas y abrir Mister no acredita esos pasos pendientes. El código está conservado en el PR #119.
+Se cambió a la imagen oficial de Node 22 y se eliminó la instalación redundante de Node. La regresión de configuración impide volver a la imagen universal en esta prueba. Se actualizó el mismo Codespace mediante fast-forward y se solicitó **Full Rebuild**, que conserva el código y limpia las imágenes en caché. La reconstrucción posterior sí arrancó: se verificó el puerto 6080 como Private, la conexión a noVNC y una ventana de Chromium abierta en Mister. Posteriormente se confirmó la sesión propia y la primera lectura real descrita al final de esta guía. No hay publicación validada. El código está conservado en el PR #119.
 
 Para otra espera larga, leer primero el registro de creación; no atribuirla a Mister ni crear máquinas adicionales. Si está en recuperación, corregir la causa y reconstruir el mismo entorno. Al terminar o bloquearse la prueba, detenerlo y comprobar el estado. GitHub puede rechazar detenerlo mientras está construyéndose; nunca informar que se detuvo sin verificarlo.
 
@@ -50,4 +50,21 @@ Referencias: [escritorio oficial desktop-lite](https://github.com/devcontainers/
 
 ## Incidencia del primer inicio de sesión móvil
 
-El registro confirmó `manual_login_timeout`: el límite inicial de 15 minutos venció antes de confirmar la comunidad y no se guardó `auth.json`. El cierre de la ventana por sí solo no demuestra éxito. Se amplió la espera a 60 minutos y se eliminó el tamaño fijo de la ventana interactiva; solo el recolector mantiene 1280×900. Dos regresiones nuevas verifican ambos comportamientos (21 pruebas locales aprobadas). Pendiente confirmar el login real y la primera lectura. No guardar contraseñas ni entradas de formulario en registros o código.
+El registro confirmó `manual_login_timeout`: el límite inicial de 15 minutos venció antes de confirmar la comunidad y no se guardó `auth.json`. El cierre de la ventana por sí solo no demuestra éxito. Se amplió la espera a 60 minutos y se eliminó el tamaño fijo de la ventana interactiva; solo el recolector mantiene 1280×900. Dos regresiones nuevas verifican ambos comportamientos (21 pruebas aprobadas localmente y en Actions). El intento posterior confirmó la comunidad correcta, emitió el mensaje de sesión guardada y dejó `sessionSaved: true`, sin bloqueo activo. No guardar contraseñas ni entradas de formulario en registros o código.
+
+## Letras desde el iPhone
+
+En la prueba, el teclado del iPhone no permitía introducir letras en el escritorio remoto. Se instaló `matchbox-keyboard` desde el repositorio de Debian y se abrió un teclado de pantalla dentro del mismo escritorio:
+
+```sh
+sudo apt-get install -y --no-install-recommends matchbox-keyboard
+matchbox-keyboard --fontptsize 8 --rowspacing 0 --colspacing 0
+```
+
+Se redujo la ventana, se colocó debajo del formulario y se eligió **Layer → Top** en el menú de su barra de título para que no se ocultara al seleccionar el campo. Ernesto completó la entrada manual y el lector guardó la sesión. El programa no introduce ni registra contraseñas. Esta solución está comprobada manualmente en ese escritorio; el paquete todavía no forma parte de la configuración reproducible y deberá reinstalarse tras una reconstrucción completa.
+
+## Resultado real del 15/11/2026
+
+El lector reutilizó su sesión sin pedir otra entrada y terminó a las **17:59:34 UTC**, en **53.766 ms**: 538 jugadores, 20 participantes y 29 movimientos del tramo visible. La base contiene 275 jugadores con propietario y 263 libres; las 20 plantillas derivadas suman esos mismos 275 jugadores. Hashes de captura y archivos, regeneración de equipos y ausencia de bloqueo comprobados. `baseline: true`, `publicationReady: false`, `aiCalls: 0`.
+
+La primera lectura no demuestra aún la cobertura histórica de clausulazos ni sustituye el contraste con cada equipo. Los archivos permanecen privados en el Codespace, excluidos de Git. GitHub confirmó **Codespace stopped** al finalizar; no quedaron horarios activos. Véanse los límites y próximos pasos en [README.md](README.md).
