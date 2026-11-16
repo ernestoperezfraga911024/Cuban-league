@@ -26,7 +26,7 @@ El cron interno, sin ejecutar scheduler_tick manualmente, solicitó ambos trabaj
 
 El hash íntegro del historial (fechas, partes e importes) siguió siendo
 1c0ac3fe60dea302f88507f2b42365d47f794c6b489dad3d6060e6641dba053f.
-Conserva 443 cláusulas fechadas y dos desconocidas; no se inventaron fechas.
+En esa activación conservó 443 cláusulas fechadas y dos desconocidas; no se inventaron fechas.
 Ambas ejecuciones pertenecen a la ventana real del turno de 09:00; la activación
 ocurrió después de esa hora. Acreditan el recorrido del disparador, **todavía no
 la recurrencia de un turno posterior**. Próximo turno: 16/11/2026 13:00 Miami.
@@ -107,14 +107,14 @@ separado `worker_config.enabled`, como antes.
 
 ## Fechas de clausulazos
 
-La fecha del traspaso procede de `occurredOn` en los movimientos del perfil;
-`capturedAt`/`firstSeenAt` solo registran cuándo lo leyó el programa. Este cambio
-no reemplaza ni recalcula esas fechas. La prueba compara las filas históricas
-antes y después de publicar por el nuevo gate. En la lectura de producción del
-16/11 se observaron 443 cláusulas fechadas de 445 documentadas. Las dos sin fecha
-siguen siendo desconocidas: este disparador no las inventa ni añade un lector
-nuevo de perfiles. La ampliación para recuperar fechas faltantes debe contrastar
-el detalle real del jugador y conservar multiplicidad y evidencia.
+La fecha procede de occurredOn en el detalle del perfil; capturedAt/firstSeenAt
+solo indican cuándo se leyó. El disparador no reemplaza ni recalcula fechas.
+Al activar el reloj se conservaron 443 fechas de 445 cláusulas. La posterior
+[relectura selectiva de perfiles](profile-date-refresh.md) quedó incorporada y
+publicada mediante PR133 el 16/11/2026 a las 10:54:48 Miami: 444 fechas de 445,
+Kubo recuperado (15/11/2026) y De Jong pendiente porque la operación antigua
+no apareció entre los cinco movimientos observados en su ficha. Las 443 fechas
+anteriores, todos los participantes, importes y conteos permanecieron intactos.
 
 ## Dependencias y seguridad
 
