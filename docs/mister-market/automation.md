@@ -2,7 +2,7 @@
 
 Alcance: comunidad649733, temporada2026-27, veinte participantes. Solo lecturas de Mister y publicación de la proyección de mercado. Los puntos, reglas, catálogo editorial y demás automatizaciones no se modifican.
 
-GitHub Actions ejecuta `.github/workflows/mister-market-sync.yml` cinco veces al día: **04:00, 09:00, 13:00, 17:00 y 21:00**, en `America/New_York` (hora de Miami), con ajuste automático de horario de verano. Esta ampliación, autorizada el 15/11/2026, conserva las lecturas de 04:00 y 17:00 y añade tres horarios al mismo workflow, sin crear otra tarea. GitHub puede retrasar una ejecución programada. No usa modelos ni APIs de IA. Los recursos de GitHub y Supabase conservan sus límites propios.
+GitHub Actions está configurado para ejecutar `.github/workflows/mister-market-sync.yml` cinco veces al día: **04:00, 09:00, 13:00, 17:00 y 21:00**, en `America/New_York` (hora de Miami), con ajuste automático de horario de verano. Esta ampliación, autorizada el 15/11/2026, conserva las lecturas de 04:00 y 17:00 y añade tres horarios al mismo workflow, sin crear otra tarea. GitHub puede retrasar o descartar una ejecución programada; el arranque recurrente aún no está verificado. No usa modelos ni APIs de IA. Los recursos de GitHub y Supabase conservan sus límites propios.
 
 ## Conciliación
 
@@ -39,6 +39,8 @@ Separar tres estados: horario configurado en `main`, ejecución iniciada por un 
 4. Para recuperar una lectura autorizada, comprobar primero que no haya trabajo activo o en cola. Solicitar una sola ejecución manual de `main` en modo `sync`; conservar concurrencia, identidad y todos los validadores. No repetir el despacho mientras se espera el resultado.
 5. Comprobar `outcome: published`, `visible: true`, revisión y métricas; si la respuesta de publicación es incierta, revisar la bitácora antes de cualquier reintento. Registrar por separado la recuperación manual y el disparador automático aún no comprobado.
 
+En un diagnóstico persistente, comparar otros workflows `schedule` del mismo repositorio con el cron en el SHA real de cada ejecución. Separar hora prevista, `created_at` del run, `started_at` del job y publicación. Revisar ajustes y políticas sin modificarlos para probar. La [auditoría del 15/11](scheduler-audit-2026-11-15.md) encontró demoras de seis a siete horas en otros workflows UTC, mientras sus jobs arrancaron en segundos. Esto apunta al despacho de GitHub; su causa interna y el destino de los turnos de mercado siguen sin confirmar. No cerrar la incidencia ni cambiar horarios basándose solo en esta inferencia.
+
 ## Esperas y diagnóstico de la lectura
 
 Cada espera permite hasta cuarenta segundos para obtener datos completos y estables, conservando su ventana de estabilidad y sus comprobaciones de identidad, filtros, crecimiento y prefijos. No repite clicks, navegación ni publicación. Una página que no progresa sigue bloqueando la actualización; la última publicación válida permanece intacta. Los límites de cada fase y del trabajo siguen vigentes.
@@ -51,4 +53,4 @@ La paginación del portal desplaza el marcador `.loading-more`, situado después
 
 La ejecución manual [43770209824](https://github.com/ernestoperezfraga911024/Cuban-league/actions/runs/43770209824), con main `7775a1e`, superó la página 15 que había bloqueado la lectura anterior y agotó 20 páginas del portal. Publicó a las **17:38:58 Miami**: 538 jugadores, 20 equipos, dos cambios, 392 movimientos acumulados (uno nuevo), 445 cláusulas documentadas, cero gaps y cero llamadas de IA. Lectura 136.241 ms; ejecución completa 2m51s. Los intentos fallidos conservaron la publicación previa.
 
-La reparación de la paginación queda verificada por regresión con Chromium y una publicación real. El cron sigue activo con los cinco horarios autorizados, pero la ausencia del evento de las 17:00 continúa con causa no establecida. Una recuperación manual no prueba el próximo arranque automático.
+La reparación de la paginación queda verificada por regresión con Chromium y una publicación real. El cron sigue activo con los cinco horarios autorizados, pero en la consulta posterior a las 22:00 Miami seguían sin aparecer los eventos de las 17:00 y 21:00. La auditoría localiza la demora observada antes del arranque del lector, con retrasos también en otros workflows; la causa interna sigue sin establecerse. Una recuperación manual no prueba el próximo arranque automático.
