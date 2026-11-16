@@ -85,38 +85,48 @@ test('Most expensive clauses UI: payer/payee logos, safe names, exact prices and
   d.querySelector('[data-market-action="reload"]').click();await tick();await tick();
   assert.equal(d.querySelector('.market-expensive .market-event-player strong').textContent,'Futbolista 5');assert.match(d.querySelector('.market-expensive>li').textContent,/Fecha no disponible/);
   assert.equal(d.querySelector('.market-expensive .market-price summary').textContent,'98,77 M €');assert.equal(d.querySelector('.market-expensive .market-price-exact').textContent,'98.765.432 €');assert.equal(reads,2);
-  d.querySelector('[data-market-history="participants"]').click();assert.equal(d.querySelectorAll('.market-target').length,20);
   d.querySelector('[data-market-history="ranking"]').click();assert.equal(d.querySelector('[data-market-metric="collected"]').getAttribute('aria-pressed'),'true');
   d.querySelector('[data-market-history="expensive"]').click();p.history.events=[];d.querySelector('[data-market-action="reload"]').click();await tick();await tick();
   assert.equal(d.querySelector('.market-expensive'),null);assert.match(d.getElementById('marketBody').textContent,/Todavía no hay clausulazos registrados/);
  }finally{w.close();}
 });
-test('Market rivals: lazy accessible details, safe names and fresh history after Actualizar without extra reads',async()=>{
- let p=fixture(),reads=0;p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
+test('Ranking details: all 20 participants, one expanded, safe names and fresh history without extra reads',async()=>{
+ const p=fixture();let reads=0;p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';
  p.history.events[0].date=null;p.managers[1].name='<img src=x onerror=alert(1)>';p.players[0].name='<b>Futbolista</b>';
  const dom=setup(async()=>{reads++;return {ok:true,json:async()=>[{payload:structuredClone(p)}]};}),w=dom.window,d=w.document;
  w.DATA={participants:[{id:1,shield:'team-01.png'}]};
- const openTarget=id=>{const detail=d.querySelector(`[data-market-target="${id}"]`);detail.open=true;detail.dispatchEvent(new w.Event('toggle'));return detail;};
+ const openTarget=id=>{const button=d.querySelector(`[data-market-participant="${id}"]`);if(button.getAttribute('aria-expanded')!=='true')button.click();return d.getElementById(button.getAttribute('aria-controls'));};
  try{
   d.body.dataset.section='market';await tick();await tick();d.querySelector('[data-market-view="history"]').click();
-  d.querySelector('[data-market-history="participants"]').click();
-  assert.equal(d.activeElement.dataset.marketHistory,'participants');assert.equal(d.querySelectorAll('.market-target').length,20);
-  assert.equal(d.querySelectorAll('.market-rival').length,0);
-  const detail=openTarget('1');assert.equal(detail.querySelector('summary img').getAttribute('src'),'team-01.png');
+  assert.equal(d.querySelector('[data-market-history="participants"]'),null);
+  assert.equal(d.querySelectorAll('[data-market-participant]').length,20);assert.equal(d.querySelectorAll('.market-rival').length,0);
+  assert.doesNotMatch(d.getElementById('marketBody').textContent,/Quién te ha hecho|Quiénes le han dado/);
+  // Every manager can open their own details, including those with no events.
+  for(const manager of p.managers){
+   const detail=openTarget(manager.id),expected=core.clauseRivals(p).find(row=>row.id===manager.id);
+   assert.equal(detail.hidden,false);assert.equal(d.querySelectorAll('.market-ranking-detail:not([hidden])').length,1);
+   assert.equal(d.querySelectorAll('[data-market-participant][aria-expanded="true"]').length,1);
+   assert.deepEqual([...detail.querySelectorAll('.market-rival-heading strong')].map(el=>el.textContent),expected.top.map(rival=>rival.name));
+   assert.equal(detail.querySelectorAll('.market-rival-players>li').length,expected.top.reduce((sum,rival)=>sum+rival.events.length,0));
+   if(!expected.top.length)assert.match(detail.textContent,/Sin clausulazos recibidos/);
+  }
+  const detail=openTarget('1');assert.equal(d.querySelector('[data-market-row="1"] img').getAttribute('src'),'team-01.png');
   assert.equal(detail.querySelector('.market-rival-heading strong').textContent,p.managers[1].name);
   assert.equal(detail.querySelector('.market-rival-players strong').textContent,p.players[0].name);
   assert.match(detail.textContent,/Fecha no disponible/);assert.equal(detail.querySelector('.market-price-exact').textContent,'1000 €');
-  assert.equal(d.querySelector('[onerror]'),null);assert.match(openTarget('20').textContent,/Sin clausulazos recibidos/);
-  assert.equal(reads,1);
+  assert.equal(d.querySelector('[onerror]'),null);assert.equal(reads,1);
+  d.querySelector('[data-market-participant="1"]').click();assert.equal(detail.hidden,true);
+  d.querySelector('[data-market-row="1"] img').click();assert.equal(detail.hidden,false);
+  const exact=d.querySelector('[data-market-row="1"] .market-ranking-money summary');exact.click();assert.equal(detail.hidden,false);
+  d.querySelector('[data-market-metric="received"]').click();assert.equal(openTarget('1').hidden,false);
   p.history.events.push({reference:'new-1',playerId:'2',date:'2026-08-18',from:'1',to:'3',amount:12345000},{reference:'new-2',playerId:'3',date:'2026-08-19',from:'1',to:'3',amount:2000});
   d.querySelector('[data-market-action="reload"]').click();await tick();await tick();
-  const refreshed=openTarget('1');assert.equal(refreshed.querySelector('.market-target-total b').textContent,'3');
+  const refreshed=d.getElementById('marketParticipant1');assert.equal(refreshed.hidden,false);
   assert.equal(refreshed.querySelector('.market-rival-heading strong').textContent,'Participante 3');assert.equal(refreshed.querySelectorAll('.market-rival').length,2);
   assert.equal(refreshed.querySelectorAll('.market-rival-players li').length,3);assert.equal(reads,2);
-  d.querySelector('[data-market-history="events"]').click();assert.equal(d.activeElement.dataset.marketHistory,'ranking');assert.equal(d.querySelectorAll('.market-events li').length,5);
-  d.querySelector('[data-market-history="ranking"]').click();assert.equal(d.querySelectorAll('.market-ranking li').length,20);
-  const balances=[...d.querySelectorAll('.market-ranking li')];
-  const balance=balances.find(row=>row.querySelector('strong').textContent==='Participante 1').querySelector('.market-balance');
+  d.querySelector('[data-market-history="events"]').click();assert.equal(d.querySelectorAll('.market-events li').length,5);
+  d.querySelector('[data-market-history="ranking"]').click();assert.equal(d.querySelectorAll('.market-ranking>li').length,20);
+  const balance=d.querySelector('[data-market-row="1"] .market-balance');
   assert.ok(balance.classList.contains('is-positive'));assert.equal(balance.querySelector('.market-price-exact').textContent,'+12.343.000 €');
  }finally{w.close();}
 });
@@ -125,7 +135,7 @@ test('Market balances: collected minus spent, visible signs, exact amounts and n
  const original=JSON.stringify(p),dom=setup(async()=>({ok:true,json:async()=>[{payload:p}]})),w=dom.window,d=w.document;
  try{
   d.body.dataset.section='market';await tick();await tick();d.querySelector('[data-market-view="history"]').click();
-  const rows=[...d.querySelectorAll('.market-ranking li')],balance=id=>rows.find(row=>row.querySelector('strong').textContent==='Participante '+id).querySelector('.market-balance');
+  const rows=[...d.querySelectorAll('.market-ranking>li')],balance=id=>rows.find(row=>row.querySelector('strong').textContent==='Participante '+id).querySelector('.market-balance');
   assert.ok(balance(1).classList.contains('is-positive'));assert.equal(balance(1).querySelector('summary').textContent,'+25,1 M €');assert.equal(balance(1).querySelector('.market-price-exact').textContent,'+25.131.000 €');
   assert.ok(balance(2).classList.contains('is-negative'));assert.equal(balance(2).querySelector('summary').textContent,'−25,1 M €');assert.equal(balance(2).querySelector('.market-price-exact').textContent,'−25.131.000 €');
   assert.equal(balance(2).querySelector('summary').getAttribute('aria-label'),'−25.131.000 €. Ver importe exacto');
@@ -142,7 +152,7 @@ test('Market: lazy fetch, same capture for concurrent team/page, text escaping a
   resolve({ok:true,json:async()=>[{payload:p}]});await team;await tick();
   assert.equal(count,1);assert.match(d.getElementById('team').textContent,/4Futbolistas/);assert.equal(d.querySelectorAll('[onerror]').length,0);
   const search=d.getElementById('marketSearch');search.value='Futbolista 100';search.dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal(d.querySelectorAll('#marketResults tbody tr').length,1);
-  d.querySelector('[data-market-view="history"]').click();assert.match(d.getElementById('marketBody').textContent,/Cobertura parcial/);assert.equal(d.querySelectorAll('.market-ranking li').length,20);
+  d.querySelector('[data-market-view="history"]').click();assert.match(d.getElementById('marketBody').textContent,/Cobertura parcial/);assert.equal(d.querySelectorAll('.market-ranking>li').length,20);
  }finally{w.close();}
 });
 test('Market: transport failure is not an empty squad, retry succeeds and removed hosts stay untouched',async()=>{
@@ -171,7 +181,7 @@ test('Market editorial: stable participant logos, archive navigation, exact pric
   assert.equal(d.querySelector('#marketHistoryInfo').hidden,true);
   assert.equal(d.querySelector('.market-events'),null);
   assert.equal(d.querySelector('.market-updated'),null);
-  const rows=[...d.querySelectorAll('.market-ranking li')];
+  const rows=[...d.querySelectorAll('.market-ranking>li')];
   assert.equal(rows.find(row=>row.querySelector('strong').textContent==='Participante 1').querySelector('img').getAttribute('src'),'team-01.png');
   assert.equal(rows.find(row=>row.querySelector('strong').textContent==='Participante 4').querySelector('img').getAttribute('src'),'team-04.png');
   assert.ok(rows.find(row=>row.querySelector('strong').textContent==='Participante 2').querySelector('.market-participant-fallback'));
