@@ -4,6 +4,13 @@ const {parseSource,inspectReview}=require('../scripts/forecast/inspect-review.cj
 const {example}=require('./fixtures/forecast-producer.cjs');
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 
+test('partial ligament tear is not confused with partial training',()=>{
+ const row=(name,text)=>`<div class="elemento"><div class="datos"><a class="jugador">${name}</a>${text}</div></div>`;
+ const html='<section class="physical-status-widget local">'+row('Injured','Rotura parcial del ligamento. Baja')+row('Training','Entrenamiento parcial con el grupo')+'</section>';
+ const out=parseSource('futbolfantasy',html,{side:'local'}).health;
+ assert.deepEqual(out[0].signals,['out']);assert.deepEqual(out[1].signals,['partial_training']);
+});
+
 test('FF inspection scopes opponents and bench cards to the reviewed side without guessing percentages',()=>{
  const html=`<div class="fecha">LaLiga 2026/27 - Jornada 13</div>
  <section class="physical-status-widget local"><div class="elemento"><a class="jugador">Opponent</a><div class="datos">Opponent Baja</div></div></section>

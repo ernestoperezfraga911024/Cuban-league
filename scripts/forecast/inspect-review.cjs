@@ -11,7 +11,7 @@ const unique=rows=>[...new Map(rows.map(r=>[JSON.stringify(r),r])).values()];
 const signals=text=>[
  ['available',/disponible para|alta m[eé]dica/i],['doubt',/duda|tocado|molestias|pendiente de evoluci[oó]n/i],
  ['out',/\bbaja\b|lesionado|sancionado|rotura|fuera de la convocatoria/i],
- ['partial_training',/una parte con el grupo|parcial|parte del entrenamiento/i]
+ ['partial_training',/una parte con el grupo|entrenamiento parcial|(?:trabaja|entrena|entren[oó]) parcialmente|parcial con el grupo|parte del entrenamiento/i]
 ].filter(([,re])=>re.test(text)).map(([signal])=>signal);
 function parseSource(source,body,{side}){
  const dom=new JSDOM(body,{virtualConsole:new VirtualConsole()});

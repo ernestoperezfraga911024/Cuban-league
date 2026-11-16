@@ -3,19 +3,30 @@
 
 Usage: python3 scripts/export-forecast-trace.py OUTPUT.zip RUN_DIRECTORY [...]
 Original evidence stays untouched. The manifest hashes every regular input file;
-JSON reviews/results and visible HTML text are included for diagnosis, never reuse.
+JSON editorial reviews/results are included for diagnosis; source bodies are omitted.
 """
 import hashlib
 import json
 import re
 import sys
 import zipfile
-from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 SECRET = re.compile(r"token|password|secret|authorization|api.?key|cookie|guest.?id", re.I)
 URL = re.compile(r"https?://[^\s<>\"']+")
+UNTRUSTED_ENVELOPE = re.compile(r"<untrusted-data-([a-z0-9-]+)>\s*\n([\s\S]*?)\n</untrusted-data-\1>", re.I)
+SQL_TEXT = re.compile(r"\A\s*(?:(?:--[^\n]*(?:\n|$)|/\*[\s\S]*?\*/)\s*)*"
+                      r"(?:CREATE\s+(?:OR\s+REPLACE\s+)?(?:FUNCTION|PROCEDURE|TABLE|VIEW|TRIGGER|POLICY)\b"
+                      r"|ALTER\s+(?:FUNCTION|PROCEDURE|TABLE|VIEW|ROLE|POLICY)\b"
+                      r"|(?:BEGIN|DO)\s*(?:;|\$)|SELECT\s+[\s\S]*?(?:\bFROM\b|\bAS\s+\w+)[\s\S]*;\s*$"
+                      r"|INSERT\s+INTO\b|UPDATE\s+\S+\s+SET\b"
+                      r"|DELETE\s+FROM\b|GRANT\s+|REVOKE\s+)", re.I)
+HTML_TEXT = re.compile(r"<!doctype\s+html\b|<(?:html|body|head|script|style|article|div|section|p)(?:\s|>)", re.I)
+RAW_BODY_KEYS = {'html', 'raw_html', 'source_html', 'body_html', 'raw_body', 'raw_text',
+                 'article_body', 'article_text', 'source_body', 'source_text', 'full_text', 'full_body'}
+SOURCE_FIELDS = {'url', 'source_url', 'final_url', 'fetched_at', 'retrieved_at', 'content_type', 'mime_type'}
+TOKEN_METRICS = {'chatgpt_tokens', 'input_tokens', 'output_tokens', 'total_tokens', 'token_count'}
 
 
 def safe_text(value):
@@ -28,47 +39,57 @@ def safe_text(value):
     return value
 
 
-def sanitize(value):
+def omission(value, kind):
+    raw = (value if isinstance(value, str) else json.dumps(value, ensure_ascii=False, sort_keys=True)).encode()
+    return {'omitted': kind, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
+
+
+def sanitize(value, *, field='', sourced=False, tool_text=False):
     if isinstance(value, dict):
         result = {}
+        source_object = bool(SOURCE_FIELDS.intersection(value))
         for key, item in value.items():
-            if SECRET.search(key):
+            lower = key.lower()
+            measured_tokens = lower in TOKEN_METRICS and (item is None or type(item) is int)
+            if SECRET.search(key) and not measured_tokens:
                 result[key] = '[redacted]'
-            elif key == 'query':
-                raw = str(item).encode()
-                result[key] = {'omitted': 'SQL', 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
+            elif lower in ('query', 'sql', 'private_admin_raw'):
+                result[key] = omission(item, 'SQL')
             else:
-                result[key] = sanitize(item)
+                result[key] = sanitize(item, field=lower, sourced=source_object,
+                                       tool_text=lower == 'text' and value.get('type') == 'text')
         return result
     if isinstance(value, list):
-        return [sanitize(item) for item in value]
+        return [sanitize(item, field=field, sourced=sourced, tool_text=tool_text) for item in value]
     if isinstance(value, str):
         if value.lstrip().startswith(('{', '[')):
             try:
                 return json.dumps(sanitize(json.loads(value)), ensure_ascii=False)
             except (ValueError, RecursionError):
                 pass
+        # The SQL connector can encode its row JSON inside a prose envelope,
+        # itself nested in an MCP text block. Read that JSON strictly as data;
+        # retaining the wrapper verbatim would leak nested SQL definitions.
+        envelope = UNTRUSTED_ENVELOPE.search(value)
+        if envelope:
+            retained = omission(value, 'raw-tool-wrapper')
+            try:
+                retained['data'] = sanitize(json.loads(envelope.group(2)))
+            except (ValueError, RecursionError):
+                pass
+            return retained
+        if re.search(r'</?untrusted-data-[a-z0-9-]+>', value, re.I):
+            return omission(value, 'raw-tool-wrapper')
+        # Real news captures contain full pages in MCP content[].text; these are
+        # not our editorial summary/reason/timeline fields. Preserve structured
+        # JSON tool results above, but never export raw retrieved text or HTML.
+        if SQL_TEXT.search(value):
+            return omission(value, 'SQL')
+        if (tool_text or field in RAW_BODY_KEYS or HTML_TEXT.search(value)
+                or sourced and field in {'text', 'body', 'content'}):
+            return omission(value, 'source-body')
         return safe_text(value)
     return value
-
-
-class VisibleText(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.hidden = 0
-        self.parts = []
-
-    def handle_starttag(self, tag, attrs):
-        if tag in ('script', 'style', 'head'):
-            self.hidden += 1
-
-    def handle_endtag(self, tag):
-        if tag in ('script', 'style', 'head') and self.hidden:
-            self.hidden -= 1
-
-    def handle_data(self, data):
-        if not self.hidden and data.strip():
-            self.parts.append(data.strip())
 
 
 def export(output, directories):
@@ -113,15 +134,14 @@ def export(output, directories):
                     except (ValueError, UnicodeDecodeError):
                         entry['omitted_reason'] = 'Incomplete or invalid JSON; original hash retained'
                 elif file.suffix == '.html':
-                    parser = VisibleText()
-                    parser.feed(raw.decode('utf-8', errors='replace'))
-                    archive.writestr(relative + '.visible.txt', safe_text('\n'.join(parser.parts)))
-                    entry['included'] = 'visible-text-only'
+                    # Repeated captures could otherwise duplicate excerpts from
+                    # the same article across runs. Facts remain in reviewed JSON.
+                    entry['omitted_reason'] = 'Raw third-party HTML body; original hash retained'
                 else:
                     entry['omitted_reason'] = 'Raw transport/script artifact; original hash retained'
                 manifest['files'].append(entry)
         archive.writestr('manifest.json', json.dumps(manifest, indent=2))
-        archive.writestr('README.txt', 'Private diagnostic archive. Original timestamps/hashes and complete parsed reviews/results are retained. SQL text, scripts, access tokens and URL queries are omitted. Captured HTML is represented as visible text; original hashes identify the unmodified bodies. Not valid as new publication evidence.\n')
+        archive.writestr('README.txt', 'Private diagnostic archive. Original input-file timestamps, hashes and byte counts are retained in manifest.json. Parsed editorial reviews, results, extracted structured facts and metadata are retained after sanitization. SQL text/definitions, scripts, access tokens and URL queries are omitted. Raw source bodies embedded in JSON are replaced by hashes and byte counts; structured tool JSON is sanitized recursively. HTML bodies and raw text files are not included or excerpted. Original local evidence is unchanged. Not valid as new publication evidence.\n')
     return manifest
 
 
