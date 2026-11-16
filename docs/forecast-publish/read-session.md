@@ -115,8 +115,10 @@ guardado/entrega. Su identificador `READ_ONLY_DIAGNOSTIC` no es un run de la bas
 
 Las salidas marcan siempre `publication_ready:false` y `fixture_verified:false`.
 `complete_unvalidated` solo significa once nombres distintos recibidos: todavía
-requiere identidad en roster, calendario contrastado, bajas, propuestas y
-alternativas/candidatos, `assess/build_team` y los controles de publicación. Una
+requiere identidad en roster, calendario contrastado, propuestas y
+alternativas/candidatos, `assess/build_team` y los controles de publicación. El
+estado físico no interviene en esta revisión ni modifica el pronóstico; su
+símbolo directo de FF pertenece al flujo independiente. Una
 respuesta JSON vacía real de P11 se registra como `not_created`; errores de red,
 perfil o contrato como `unavailable`; jornada/equipo discrepante como `mismatch`.
 

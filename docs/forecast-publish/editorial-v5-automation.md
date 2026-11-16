@@ -1,3 +1,5 @@
+> Referencia histórica sustituida el 16/11/2026. No usar como instrucciones de ejecución. Para nuevas lecturas rigen `../automation/README.md`, `../automation/contracts/forecasts.md` y `editorial-v6.md`: cálculo solo por fuentes y estado físico directo de FF solo como símbolo. El texto siguiente conserva la evolución anterior.
+
 COMUNIATE SIN PORCENTAJE — EDITORIAL-V5 AUTORIZADO 13/11/2026
 Para toda NUEVA propuesta de alineación usa schema_version=4, method_version="editorial-v5" y assessment.method="editorial-v5" en titulares y candidatos. Esta versión prevalece sobre los ejemplos anteriores que indiquen v4 para NUEVAS propuestas; los borradores guardados conservan su versión. Estas reglas sustituyen únicamente el valor de Comuniate descrito en métodos anteriores:
 - Si Comuniate propone titular (prediction="starter") y NO publica porcentaje (probability=null), su señal interna es 50 en vez de 90.

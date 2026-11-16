@@ -45,7 +45,12 @@ ni reescribe publicaciones, borradores, registros, catálogo, modos o retiradas.
 La espera por bloqueos está limitada a cinco segundos y cada sentencia a treinta;
 si el sistema está ocupado o una comprobación falla, se revierte la transacción.
 
-Estado: preparado y probado localmente; instalación y ejecución real pendientes.
+Estado: integrado mediante PR137 (`db76a86a2f340399475065dfa52b7059e2b57b1d`)
+e instalado el 16/11/2026. La migración verificó que filas y permisos permanecieran
+idénticos. Comprobación de solo lectura en producción: las mismas fuentes dan 66
+sin metadatos, con lesión y con duda. Los recursos públicos de la web coinciden
+con el código integrado. La republicación deportiva completa se verifica por
+separado; esta prueba aritmética no acredita veinte clubes actualizados.
 Una futura actualización de la fórmula v5 debe conservar también la semántica
 v6 o sustituir esta delegación con pruebas de equivalencia explícitas.
 
