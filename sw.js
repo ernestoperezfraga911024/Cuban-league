@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v236-market-ranking';
+const CACHE_NAME = 'cuban-league-v237-market-petroleum';
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,8 +14,8 @@ const APP_SHELL = [
   './editorial-ui.js?v=176-20261015',
   './app.js?v=231-20261115',
   './market-core.js?v=235-20261115',
-  './market.js?v=236-20261116',
-  './market.css?v=236-20261116',
+  './market.js?v=237-20261116',
+  './market.css?v=237-20261116',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',
