@@ -9,7 +9,7 @@
  const money=n=>n===null?'—':moneyFormat.format(n)+' €';
  const date=s=>new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}).format(new Date(s));
  const names={PT:'Porteros',DF:'Defensas',MC:'Centrocampistas',DL:'Delanteros'};
- const state={view:'players',historyView:'ranking',search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20,info:false};
+ const state={view:'players',historyView:'ranking',participant:null,search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20,info:false};
  let cached=null,cachedAt=0,pending=null,active=false,sequence=0;
  const teamRequests=new WeakMap(),rivalCaptures=new WeakMap();
  async function read(force=false){
@@ -66,8 +66,20 @@
   const players=new Map(p.players.map(player=>[player.id,player]));
   return `<ul class="market-rivals">${target.top.map(rival=>`<li class="market-rival"><div class="market-rival-heading">${participantPhoto(rival)}<strong>${escape(rival.name)}</strong><span>${rival.count} ${rival.count===1?'clausulazo':'clausulazos'}</span></div><ul class="market-rival-players" aria-label="Futbolistas que ${escape(rival.name)} le fichó a ${escape(target.name)}">${rival.events.map(event=>`<li><div><strong>${escape(players.get(event.playerId).name)}</strong>${event.date?`<time datetime="${event.date}">${event.date.split('-').reverse().join('/')}</time>`:'<span>Fecha no disponible</span>'}</div><div class="market-rival-price">${price(event.amount)}</div></li>`).join('')}</ul></li>`).join('')}</ul>`;
  }
- function participantsHistory(p){
-  return `<div class="market-rivals-intro"><h4>Quién te ha hecho más clausulazos</h4><p>Abre un participante para ver sus tres principales rivales y los futbolistas que le quitaron.</p></div><div class="market-targets">${rivalRows(p).map(target=>`<details class="market-target" data-market-target="${target.id}"><summary>${participantPhoto(target)}<span class="market-target-name"><strong>${escape(target.name)}</strong><span>${target.top.length?target.top.map(rival=>escape(rival.name)).join(' · '):'Sin clausulazos registrados'}</span></span><span class="market-target-total"><b>${target.received}</b><span>recibidos</span></span><span class="market-target-chevron" aria-hidden="true">›</span></summary><div class="market-target-body"></div></details>`).join('')}</div><p class="market-rivals-note">Según el historial registrado. En caso de empate se ordena por nombre y se muestran hasta tres rivales.</p>`;
+ function participantDetails(p,id){
+  const target=rivalRows(p).find(row=>row.id===id);
+  return target?rivalDetails(p,target):'';
+ }
+ function toggleParticipant(id){
+  const next=state.participant===id?null:id;
+  section.querySelectorAll('[data-market-row]').forEach(row=>{
+   const open=row.dataset.marketRow===next,body=row.querySelector('.market-ranking-detail');
+   row.classList.toggle('is-expanded',open);
+   row.querySelector('[data-market-participant]').setAttribute('aria-expanded',String(open));
+   body.hidden=!open;
+   if(open&&!body.childElementCount)body.innerHTML=participantDetails(cached,next);
+  });
+  state.participant=next;
  }
  function expensiveHistory(p){
   const events=core.topClauses(p),players=new Map(p.players.map(player=>[player.id,player])),managers=new Map(p.managers.map(manager=>[manager.id,manager]));
@@ -78,16 +90,15 @@
   const metricLabels={made:'Dados',received:'Recibidos',spent:'Gastado',collected:'Cobrado'};
   const history=state.historyView==='events';
   const info=`<div id="marketHistoryInfo" class="market-notice"${state.info?'':' hidden'}><strong>Sobre estos datos</strong><p>Cobertura parcial: ${p.history.events.length} clausulazos registrados${p.schemaVersion===2?' como mínimo':''}. El historial puede no incluir toda la temporada. Solo se cuentan operaciones identificadas como «Cláusula», sin duplicar coincidencias entre fuentes.</p><small>Revisado el ${escape(date(p.history.observedAt))}, hora de Miami. En el historial cronológico, las operaciones sin fecha aparecen al final.</small></div>`;
-  const toolbar=`<div class="market-history-toolbar"><h3>${history?'Historial':state.historyView==='participants'?'Por participante':state.historyView==='expensive'?'Más caras':'Ranking'}</h3><div><button type="button" class="market-info-button" data-market-action="info" aria-label="Información sobre el historial" aria-expanded="${state.info}" aria-controls="marketHistoryInfo">${icon('info')}</button><button type="button" class="market-history-toggle" data-market-history="${history?'ranking':'events'}" aria-label="${history?'Volver al ranking':'Ver historial de operaciones'}">${icon('clock')}${history?'Ranking':'Historial'}</button></div></div>${info}`;
+  const toolbar=`<div class="market-history-toolbar"><h3>${history?'Historial':state.historyView==='expensive'?'Más caras':'Ranking'}</h3><div><button type="button" class="market-info-button" data-market-action="info" aria-label="Información sobre el historial" aria-expanded="${state.info}" aria-controls="marketHistoryInfo">${icon('info')}</button><button type="button" class="market-history-toggle" data-market-history="${history?'ranking':'events'}" aria-label="${history?'Volver al ranking':'Ver historial de operaciones'}">${icon('clock')}${history?'Ranking':'Historial'}</button></div></div>${info}`;
   if(history){
    const owners=new Map(p.managers.map(m=>[m.id,m.name])),players=new Map(p.players.map(x=>[x.id,x]));
    const events=p.history.events.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference));
    return toolbar+`<p class="market-result-count">${events.length} operaciones registradas</p><ul class="market-events">${events.slice(0,state.eventLimit).map(e=>`<li><div class="market-event-player">${photo(players.get(e.playerId))}<div><strong>${escape(players.get(e.playerId).name)}</strong><span>${escape(owners.get(e.from))} → ${escape(owners.get(e.to))}</span>${e.date?`<time datetime="${e.date}">${e.date.split('-').reverse().join('/')}</time>`:'<span>Fecha no disponible</span>'}</div></div><div class="market-event-amount">${price(e.amount)}</div></li>`).join('')}</ul>${events.length>state.eventLimit?`<button type="button" class="market-more" data-market-action="events">Ver más operaciones <small>${Math.min(state.eventLimit,events.length)} de ${events.length}</small></button>`:''}${events.length?'':'<p class="market-empty">Todavía no hay clausulazos registrados.</p>'}`;
   }
-  const tabs=`<div class="market-clause-tabs" role="group" aria-label="Análisis de clausulazos"><button type="button" data-market-history="ranking" aria-pressed="${state.historyView==='ranking'}">Ranking</button><button type="button" data-market-history="participants" aria-pressed="${state.historyView==='participants'}">Por participante</button><button type="button" data-market-history="expensive" aria-pressed="${state.historyView==='expensive'}">Más caras</button></div>`;
-  if(state.historyView==='participants')return toolbar+tabs+participantsHistory(p);
+  const tabs=`<div class="market-clause-tabs" role="group" aria-label="Análisis de clausulazos"><button type="button" data-market-history="ranking" aria-pressed="${state.historyView==='ranking'}">Ranking</button><button type="button" data-market-history="expensive" aria-pressed="${state.historyView==='expensive'}">Más caras</button></div>`;
   if(state.historyView==='expensive')return toolbar+tabs+expensiveHistory(p);
-  return toolbar+tabs+`<div class="market-positions market-metrics" role="group" aria-label="Ordenar ranking de clausulazos">${Object.entries(metricLabels).map(([key,label])=>`<button type="button" data-market-metric="${key}" aria-pressed="${state.metric===key}">${label}</button>`).join('')}</div><ol class="market-ranking" aria-label="Ranking por ${metricLabels[state.metric].toLowerCase()}">${core.rank(p,state.metric).map(m=>`<li><span class="market-rank">${m.rank}</span>${participantPhoto(m)}<div class="market-ranking-main"><div class="market-ranking-name"><strong>${escape(m.name)}</strong><div class="market-ranking-value">${state.metric==='made'||state.metric==='received'?`<b>${m[state.metric]}</b>`:price(m[state.metric],1)}</div></div><small>${state.metric==='made'?m.received+' recibidos':state.metric==='received'?m.made+' dados':m.made+' dados · '+m.received+' recibidos'}</small><div class="market-ranking-money"><div><span>Gastado</span>${price(m.spent,1)}</div><div><span>Cobrado</span>${price(m.collected,1)}</div><div class="market-balance ${m.net>0?'is-positive':m.net<0?'is-negative':'is-zero'}"><span title="Cobrado menos gastado">Balance</span>${price(Math.abs(m.net),1,m.net>0?'+':m.net<0?'−':'')}</div></div></div></li>`).join('')}</ol>`;
+  return toolbar+tabs+`<div class="market-positions market-metrics" role="group" aria-label="Ordenar ranking de clausulazos">${Object.entries(metricLabels).map(([key,label])=>`<button type="button" data-market-metric="${key}" aria-pressed="${state.metric===key}">${label}</button>`).join('')}</div><ol class="market-ranking" aria-label="Ranking por ${metricLabels[state.metric].toLowerCase()}">${core.rank(p,state.metric).map(m=>`<li class="market-ranking-item${state.participant===m.id?' is-expanded':''}" data-market-row="${m.id}"><span class="market-rank">${m.rank}</span>${participantPhoto(m)}<div class="market-ranking-main"><div class="market-ranking-name"><button type="button" class="market-participant-toggle" data-market-participant="${m.id}" aria-expanded="${state.participant===m.id}" aria-controls="marketParticipant${m.id}"><strong>${escape(m.name)}</strong><span class="market-participant-chevron" aria-hidden="true">›</span></button><div class="market-ranking-value">${state.metric==='made'||state.metric==='received'?`<b>${m[state.metric]}</b>`:price(m[state.metric],1)}</div></div><small>${state.metric==='made'?m.received+' recibidos':state.metric==='received'?m.made+' dados':m.made+' dados · '+m.received+' recibidos'}</small><div class="market-ranking-money"><div><span>Gastado</span>${price(m.spent,1)}</div><div><span>Cobrado</span>${price(m.collected,1)}</div><div class="market-balance ${m.net>0?'is-positive':m.net<0?'is-negative':'is-zero'}"><span title="Cobrado menos gastado">Balance</span>${price(Math.abs(m.net),1,m.net>0?'+':m.net<0?'−':'')}</div></div></div><div id="marketParticipant${m.id}" class="market-ranking-detail" role="region" aria-label="Clausulazos recibidos por ${escape(m.name)}"${state.participant===m.id?'':' hidden'}>${state.participant===m.id?participantDetails(p,m.id):''}</div></li>`).join('')}</ol>`;
  }
  function render(){
   if(!cached){host.innerHTML='<p class="market-empty">El mercado todavía no tiene una captura publicada.</p>';return;}
@@ -116,6 +127,8 @@
  section.addEventListener('input',e=>{if(e.target.id==='marketSearch'){state.search=e.target.value;state.limit=40;playerResults();}});
  section.addEventListener('change',e=>{if(e.target.id==='marketOwner')state.owner=e.target.value;else if(e.target.id==='marketSort')state.sort=e.target.value;else return;state.limit=40;playerResults();});
  section.addEventListener('click',e=>{
+  const row=e.target.closest('[data-market-row]');
+  if(row&&!e.target.closest('.market-ranking-detail,details.market-price')){toggleParticipant(row.dataset.marketRow);return;}
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.marketAction==='reload'){load(true);return;}
   if(b.dataset.marketView){state.view=b.dataset.marketView;render();return;}
@@ -129,11 +142,6 @@
  function observe(){const next=document.body.dataset.section==='market';if(next&&!active){active=true;load();}else if(!next&&active){active=false;sequence++;section.setAttribute('aria-busy','false');}}
  new MutationObserver(observe).observe(document.body,{attributes:true,attributeFilter:['data-section']});
  document.addEventListener('visibilitychange',()=>{if(active&&!document.hidden)load();});
- section.addEventListener('toggle',e=>{
-  const detail=e.target;if(!cached||!detail.matches('details[data-market-target]')||!detail.open)return;
-  const body=detail.querySelector('.market-target-body');if(body.childElementCount)return;
-  const target=rivalRows(cached).find(row=>row.id===detail.dataset.marketTarget);if(target)body.innerHTML=rivalDetails(cached,target);
- },true);
  section.addEventListener('toggle',e=>{if(e.target.matches('details.market-price')&&e.target.open)section.querySelectorAll('details.market-price[open]').forEach(other=>{if(other!==e.target)other.open=false;});},true);
  section.addEventListener('keydown',e=>{if(e.key==='Escape')section.querySelectorAll('details.market-price[open]').forEach(detail=>{detail.open=false;detail.querySelector('summary').focus();});});
  window.CubanLeagueMarket={showTeam};observe();
