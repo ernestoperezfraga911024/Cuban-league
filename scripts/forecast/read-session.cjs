@@ -2,6 +2,8 @@
 
 // Transport only. A retrieved page is NOT a verified fixture, lineup or prediction.
 const { performance } = require('node:perf_hooks');
+const {createHash}=require('node:crypto');
+const {errorCode}=require('./trace-journal.cjs');
 const HOSTS = new Set(['www.futbolfantasy.com', 'www.jornadaperfecta.com',
   'www.comuniate.com', 'www.predicted11.com']);
 const TWO_HOURS = 2 * 60 * 60 * 1000;
@@ -24,11 +26,12 @@ function publicUrl(value, kind = 'page') {
 
 class ReadSession {
   constructor({runKey, notBefore, expiresAt, fetchImpl = globalThis.fetch,
-    clock = Date.now, concurrency = 4, timeoutMs = 25000, maxBytes = 8 * 1024 * 1024}) {
+    clock = Date.now, concurrency = 4, timeoutMs = 25000, maxBytes = 8 * 1024 * 1024,trace=null}) {
     this.runKey = runKey;
     this.notBefore = Date.parse(notBefore);
     this.expiresAt = Date.parse(expiresAt);
     this.clock = clock;
+    this.trace=trace;this.traceTeam=null;this.traceSequence=0;
     if (typeof runKey !== 'string' || !runKey.trim() ||
         !Number.isFinite(this.notBefore) || !Number.isFinite(this.expiresAt) ||
         this.expiresAt <= this.notBefore || this.expiresAt - this.notBefore > TWO_HOURS) {
@@ -72,6 +75,12 @@ class ReadSession {
   readScript(value) { return this.read(value, {kind: 'script'}); }
   readBallot(value) { return this.read(value, {kind: 'ballot'}); }
 
+  traceRead(url,kind,status,details={}) {
+    if(!this.trace)return;
+    const host=new URL(url).hostname,source=host.includes('predicted11')?'predicted11':host.split('.')[1];
+    this.trace.record({phase:'read',status,source,kind,team:this.traceTeam,...details});
+  }
+
   async read(value, {refresh = false, kind = 'page'} = {}) {
     this.assertOpen();
     const url = publicUrl(value, kind);
@@ -87,11 +96,13 @@ class ReadSession {
       this.assertOpen();
       this.metrics.reused++;
       this.metrics.by_kind[kind].reused++;
+      this.traceRead(url,kind,'reused',{body_sha256:createHash('sha256').update(page.body).digest('hex')});
       return Object.freeze({...page, reused: true});
     }
     if (!refresh && this.cache.has(url)) {
       this.metrics.reused++;
       this.metrics.by_kind[kind].reused++;
+      this.traceRead(url,kind,'reused',{body_sha256:createHash('sha256').update(this.cache.get(url).body).digest('hex')});
       return Object.freeze({...this.cache.get(url), reused: true});
     }
     this.cache.delete(url); // A failed refresh must not resurrect the previous reading.
@@ -108,7 +119,9 @@ class ReadSession {
   async download(url, kind = 'page') {
     await this.acquire();
     const started = performance.now();
-    let timer;
+    const requestId='read-'+(++this.traceSequence);
+    let timer,httpStatus;
+    this.traceRead(url,kind,'started',{request_id:requestId});
     try {
       this.assertOpen();
       const fetchedAt = new Date(this.clock()).toISOString();
@@ -123,6 +136,7 @@ class ReadSession {
         credentials: 'omit', signal: controller.signal,
         headers: {Accept: kind === 'ballot' ? 'application/json' : kind === 'script' ? 'application/javascript,text/javascript' : 'text/html,application/xhtml+xml'}};
       let response = await this.fetchImpl(url, options);
+      httpStatus=response.status;
       if (kind === 'page' && [301,308].includes(response.status) && response.headers.get('location')) {
         const from = new URL(url), to = new URL(response.headers.get('location'), url);
         // Only the observed canonical trailing-slash redirect, same origin/query/path.
@@ -135,6 +149,7 @@ class ReadSession {
           this.metrics.by_kind[kind].downloads++;
           this.metrics.by_host[host].downloads++;
           response = await this.fetchImpl(url, options);
+          httpStatus=response.status;
         }
       }
       // Return all other redirects/errors to the collector; never retry a block.
@@ -163,9 +178,11 @@ class ReadSession {
       this.assertOpen();
       this.metrics.bytes += bytes;
       this.metrics.by_host[host].bytes += bytes;
+      const body=Buffer.concat(chunks).toString('utf8');
+      this.traceRead(url,kind,'completed',{request_id:requestId,http_status:httpStatus,bytes,duration_ms:Math.round(performance.now()-started),body_sha256:createHash('sha256').update(body).digest('hex')});
       return Object.freeze({run_key: this.runKey, url, fetched_at: fetchedAt,
-        http_status: response.status, body: Buffer.concat(chunks).toString('utf8')});
-    } catch (error) { this.metrics.failures++; throw error; }
+        http_status: response.status, body});
+    } catch (error) { this.metrics.failures++;this.traceRead(url,kind,'error',{request_id:requestId,duration_ms:Math.round(performance.now()-started),http_status:httpStatus,error_code:httpStatus>=400?'http_'+httpStatus:errorCode(error)});throw error; }
     finally {
       clearTimeout(timer);
       this.metrics.download_ms += performance.now() - started;

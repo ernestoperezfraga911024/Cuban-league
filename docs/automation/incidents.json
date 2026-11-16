@@ -322,6 +322,57 @@
       ],
       "evidence": "Antes del cambio: 445 cláusulas, 443 fechadas; hash de historial 1c0ac3fe60dea302f88507f2b42365d47f794c6b489dad3d6060e6641dba053f. Regresiones verifican igualdad de conteos/importes, referencias anteriores, duplicados, rotación de pendientes, fallos, contexto/portal, archivo comprimido y recorrido del worker en modo test. Ejecución real pendiente.",
       "production_evidence": "PR133 integrado en c13b2844d4a5475779445997eb9db8e547736bca, ambos controles CI aprobados (75 pruebas más paginación Chromium). Test 43900127968 completó 16/11/2026 10:49:42 Miami: dos fichas, 4.163 ms, una fecha recuperada, cero errores y publicación anterior intacta. El detalle de Kubo acredita 15/11/2026, Yovany R9 a ANDOBA THE BEST, 10.598.000. Sync 43900969655 publicó a 10:54:48, revisión 642c37c4973466e4588e8a8b23235f993cea94352c565b6261ca8fcb0066079d: 538 jugadores, 20 participantes, 445 cláusulas, 444 fechadas, cero gaps/IA/errores. Conservó las 443 fechas anteriores y todos los conteos, participantes e importes. Solo releyó De Jong (2.778 ms); la fecha de Kubo sobrevivió al archivo sin releer su ficha. De Jong sigue sin fecha: el detalle mostró cinco operaciones de 23/10 a 04/11, ninguna Arian a Rivaldo por 2.952.000. No se asignó otra fecha. Horarios y reloj enabled=true/sync sin cambios; estas comprobaciones fueron extraordinarias, no acreditan recurrencia del turno de 13:00."
+    },
+    {
+      "code": "runner-channel-closed",
+      "status": "regression-tested-awaiting-run",
+      "failure": "16/11 14:00: el proceso perdió el canal y el reinicio cerró stdin antes de aceptar su primera respuesta. Nueve equipos publicados y once pendientes.",
+      "prevention": "Transporte por archivos atómicos y events.ndjson para reconectar al mismo proceso sin stdin ni repetir SQL; conservar bloqueo y guardas.",
+      "tests": [
+        "tests/forecast-file-bridge.test.cjs",
+        "tests/automation-runtime.test.cjs"
+      ]
+    },
+    {
+      "code": "review-deadline-too-short",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Athletic: respuesta de revisión a los 300,862 segundos, después del límite fijo de 300 segundos.",
+      "prevention": "Plazo visible de revisión de hasta diez minutos y siempre dentro de la ventana original. Rechazar respuestas vencidas y conservar trazas.",
+      "tests": [
+        "tests/forecast-file-bridge.test.cjs"
+      ]
+    },
+    {
+      "code": "review-first-error-only",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Barcelona corrigió Eric García y después falló Joan García; Celta corrigió un duplicado y dejó otro; Getafe agotó la corrección antes de revisar geometría.",
+      "prevention": "Preflight conjunto de identidades, duplicados, filas y alternativas. Mantener una sola corrección y validadores originales.",
+      "tests": [
+        "tests/forecast-review-preflight.test.cjs",
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-layout.test.cjs"
+      ]
+    },
+    {
+      "code": "availability-conflict-unresolved",
+      "status": "review-procedure-added-awaiting-run",
+      "failure": "Elche incluyó Lemar con fuentes contradictorias; varias bajas de otros clubes se afirmaron sin conciliar Disponible/Duda de otra fuente.",
+      "prevention": "Lectura separada por equipo de las tres fuentes y conciliación explícita antes de excluir o elegir. Duda no equivale a baja confirmada. Revisión completa con evidencia nueva.",
+      "tests": [
+        "tests/forecast-producer.test.cjs"
+      ],
+      "evidence": "Auditoría de paquetes reales 16/11 14:00; la validación técnica no demuestra veracidad semántica de la revisión."
+    },
+    {
+      "code": "trace-checkpoints-overwritten",
+      "status": "regression-tested-awaiting-run",
+      "failure": "El resumen run_log reemplaza checkpoints; no permite reconstruir cada paso o pérdida del canal.",
+      "prevention": "Diario inmutable privado por proceso/secuencia, tiempos, fuentes y hashes; acuse final verificado y archivo diagnóstico privado.",
+      "tests": [
+        "tests/automation-trace.test.cjs",
+        "tests/automation-trace-db.test.cjs",
+        "tests/automation-trace-export.test.cjs"
+      ]
     }
   ]
 }

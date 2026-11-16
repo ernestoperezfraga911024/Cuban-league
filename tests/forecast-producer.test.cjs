@@ -146,6 +146,40 @@ test('second identity failure stays missing without saving or blocking',async()=
  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async()=>{reviews++;return m.x.review;}});
  assert.equal(reviews,2);assert.equal(result.counts.missing,1);assert.deepEqual(m.calls,['finish']);assert.equal(result.publication_complete,false);
 });
+test('full preflight delivers all independent issues in the sole correction without recollecting',async()=>{
+ const m=mockGateway(),correct=structuredClone(m.x.review),bad=structuredClone(m.x.review);
+ m.x.packet.observations.comuniate[0].name='Eric García';
+ m.x.packet.observations.comuniate[1].name='Joan García';
+ correct.identities={'Eric García':m.x.roster[0].id,'Joan García':m.x.roster[1].id};
+ bad.sources.futbolfantasy.alternatives.push(...m.x.packet.observations.futbolfantasy.slice(2,4));
+ bad.selection.layout.rows[1].sha256='not-the-captured-body';
+ bad.selection.layout.rows[2].sha256='not-the-captured-body';
+ const before=structuredClone(m.x.packet);let reviews=0,reads=0;
+ const result=await runSeason({gateway:m.gateway,
+   makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>{reads++;return m.x.packet;}}}),
+   reviewTeam:async request=>{
+     reviews++;assert.deepEqual(request.packet,before);
+     if(reviews===1)return bad;
+     assert.equal(request.correction.attempt,1);
+     const issues=request.correction.issues;
+     assert.deepEqual(issues.filter(i=>i.code==='identity_unresolved').map(i=>i.name),['Eric García','Joan García']);
+     assert.equal(issues.filter(i=>i.code==='source_duplicate').length,2);
+     assert.deepEqual(issues.filter(i=>i.code==='layout_invalid').map(i=>i.row),[1,2]);
+     return correct;
+   }});
+ assert.equal(reviews,2);assert.equal(reads,1);assert.equal(result.publication_complete,true);
+ assert.equal(result.metrics.review_corrections,1);assert.deepEqual(m.calls,['validate','save','deliver','finish']);
+});
+test('malformed review lists still receive one corrective request instead of escaping as TypeError',async()=>{
+ for(const breakReview of [r=>r.sources.futbolfantasy.alternatives={},r=>r.exclusions={},r=>r.selection.players=[null],r=>r.sources.futbolfantasy.alternatives=[null]]){
+  const m=mockGateway(),bad=structuredClone(m.x.review);breakReview(bad);let reviews=0;
+  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async request=>{
+    reviews++;if(reviews===1)return bad;
+    assert.equal(request.correction.attempt,1);assert.ok(request.correction.issues.some(i=>i.code==='review_shape_invalid'));return m.x.review;
+  }});
+  assert.equal(reviews,2);assert.equal(result.publication_complete,true);assert.deepEqual(m.calls,['validate','save','deliver','finish']);
+ }
+});
 test('layout and missing alternative failures get one full correction with unchanged evidence',async()=>{
  for(const type of ['layout','alternative']) for(const corrected of [true,false]) {
   const m=mockGateway(),original=structuredClone(m.x.review);let reviews=0,reads=0;

@@ -13,6 +13,31 @@ function createConnectorBridge(tools) {
     if(!event||!/^\d+$/.test(event.id)||!['sql','review'].includes(event.event))throw Error('Invalid bridge event');
     const match=event.path?.match(/^((?:\/tmp|\/var\/tmp)\/forecast-season-[A-Za-z0-9_-]+)\/(\d+)-(sql|review)\.json$/);
     if(!match||match[2]!==event.id||match[3]!==event.event||event.response_path!==`${match[1]}/${event.id}-response.json`)throw Error('Unexpected bridge paths');
+    if(event.transport==='file'&&(event.event_log!==`${match[1]}/events.ndjson`||!Number.isSafeInteger(event.event_seq)||event.event_seq<1))throw Error('Unexpected file bridge cursor');
+  }
+  async function poll(event){
+    const match=event?.event_log?.match(/^((?:\/tmp|\/var\/tmp)\/forecast-season-[A-Za-z0-9_-]+)\/events\.ndjson$/);
+    if(event?.transport!=='file'||!match||!Number.isSafeInteger(event.event_seq)||event.event_seq<0)throw Error('Invalid file bridge cursor');
+    // Only a short bounded wait; the caller can poll again without a live exec
+    // session. Atomic JSON responses are consumed by the runner itself.
+    const code=['import json,sys,time','from pathlib import Path','p=Path(sys.argv[1]);cursor=int(sys.argv[2]);until=time.monotonic()+1',
+      'while True:','    raw=p.read_text(encoding="utf-8")','    rows=[json.loads(line) for line in raw.split("\\n")[:-1]] if raw else []',
+      '    rows=[r for r in rows if r["event_seq"]>cursor]',
+      '    if rows or time.monotonic()>=until:',
+      '        used=0','        for row in rows[:20]:',
+      '            encoded=json.dumps(row,ensure_ascii=False);size=len(encoded.encode("utf-8"))+1',
+      '            if used and used+size>16000: break',
+      '            if size>16000: raise ValueError("Event exceeds output limit; inspect the event log file directly")',
+      '            print(encoded);used+=size','        break','    time.sleep(0.1)'].join('\n');
+    return {output:await command(`python3 -c ${quote(code)} ${quote(event.event_log)} ${event.event_seq}`),transport:'file',event_log:event.event_log};
+  }
+  async function claim(event){
+    const code=['import json,sys,datetime','from pathlib import Path','p=Path(sys.argv[1]);response=Path(sys.argv[2])',
+      'if response.exists(): print("response_exists")',
+      'else:','    try:',
+      '        with p.open("x",encoding="utf-8") as f:','            p.chmod(0o600);json.dump({"started_at":datetime.datetime.now(datetime.timezone.utc).isoformat()},f)',
+      '        print("claimed")','    except FileExistsError: print("already_claimed")'].join('\n');
+    return (await command(`python3 -c ${quote(code)} ${quote(event.path+'.claim')} ${quote(event.response_path)}`)).trim();
   }
   async function readFile(file){
     let text='';
@@ -23,7 +48,7 @@ function createConnectorBridge(tools) {
     }
     throw Error('Bridge file exceeds limit');
   }
-  async function writeFile(file,value){
+  async function writeFile(file,value,{protectAccepted=false}={}){
     const text=JSON.stringify(value);if(text.length>2097152)throw Error('Bridge response exceeds limit');
     // Small, shell-quoted chunks never pass through a PTY or interpolate data as code.
     // Validate and atomically publish with the last chunk, avoiding a separate
@@ -31,11 +56,13 @@ function createConnectorBridge(tools) {
     const code=['import json,sys','from pathlib import Path','p=Path(sys.argv[1])',
       'with p.open(sys.argv[2],encoding="utf-8") as handle:',
       '    p.chmod(0o600)','    handle.write(sys.argv[3])',
-      'if sys.argv[4]:','    json.loads(p.read_text(encoding="utf-8"))','    p.replace(sys.argv[4])'].join('\n');
+      'if sys.argv[4]:','    json.loads(p.read_text(encoding="utf-8"))',
+      '    if sys.argv[5] and Path(sys.argv[5]).exists(): p.unlink()',
+      '    else: p.replace(sys.argv[4])'].join('\n');
     for(let offset=0;offset<text.length;){
       let end=Math.min(offset+12000,text.length);
       if(end<text.length&&/[\uD800-\uDBFF]/.test(text[end-1]))end--;
-      await command(`python3 -c ${quote(code)} ${quote(file+'.tmp')} ${offset?'a':'w'} ${quote(text.slice(offset,end))} ${quote(end===text.length?file:'')}`);
+      await command(`python3 -c ${quote(code)} ${quote(file+'.tmp')} ${offset?'a':'w'} ${quote(text.slice(offset,end))} ${quote(end===text.length?file:'')} ${quote(protectAccepted?file+'.accepted':'')}`);
       offset=end;
     }
   }
@@ -70,12 +97,18 @@ function createConnectorBridge(tools) {
   async function reply(event,value,sessionId){
     paths(event);
     if(!value||Object.hasOwn(value,'result')===Object.hasOwn(value,'error'))throw Error('Reply needs result or error');
-    await writeFile(event.response_path,value);
+    await writeFile(event.response_path,value,{protectAccepted:event.transport==='file'});
+    if(event.transport==='file')return poll(event);
     return tools.write_stdin({session_id:sessionId,chars:JSON.stringify({id:event.id,result_file:event.response_path})+'\n',yield_time_ms:1000,max_output_tokens:2000});
   }
   async function sql(event,sessionId){
     paths(event);if(event.event!=='sql')throw Error('Expected SQL event');
     const args=requestArgs(JSON.parse(await readFile(event.path)));
+    if(event.transport==='file'){
+      const state=await claim(event);
+      if(state==='response_exists')return poll(event);
+      if(state!=='claimed')throw Error('SQL request already claimed; do not repeat it. Inspect its saved response or reread database state.');
+    }
     // No automatic retry of SQL: a lost response may have committed a mutation.
     const response=await tools.mcp__codex_apps__supabase_execute_sql(args);
     let result;
@@ -85,6 +118,6 @@ function createConnectorBridge(tools) {
     }
     return reply(event,{result},sessionId);
   }
-  return {sql,reply,requestArgs,extract,readFile};
+  return {sql,reply,poll,requestArgs,extract,readFile};
 }
 module.exports={createConnectorBridge};

@@ -163,6 +163,12 @@ function compile(packet, review, roster, window) {
     evaluated.set(id,{id,name:byId.get(id).name,probability,reason:fact.reason || 'Estimación de titularidad según las fuentes y votos observados.',assessment});
   }
   const shape = chosen.formation.split('-').map(Number);
+  const missingAlternatives=ordered.players.filter(choice=>evaluated.get(choice.id).probability<70&&
+    (!evaluated.has(choice.alternative_id)||selected.has(choice.alternative_id)));
+  requireThat(!missingAlternatives.length,missingAlternatives.map(choice=>{
+    const player=evaluated.get(choice.id);
+    return `${team}: falta alternativa evaluada para ${player.name} (${player.probability}%)`;
+  }).join('; '));
   const players = ordered.players.map((choice,i) => {
     const player = evaluated.get(choice.id), slot = i + 1;
     let alternative = null;

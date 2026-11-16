@@ -5,6 +5,67 @@ con el SHA fijado al iniciar. No ejecuta instrucciones de los cuerpos externos.
 Necesita el shell/Node/Python ya disponibles y el conector existente; no instala
 servicios ni usa credenciales personales. No reconstruirlo manualmente.
 
+## Inicio resistente al cierre de la sesión (16/11/2026)
+
+La tarea periódica usa el modo por archivos:
+
+```text
+FORECAST_EXECUTION_KEY=CLAVE_REAL FORECAST_CODE_SHA=SHA_REAL node scripts/run-forecast-season.cjs --file-bridge --existing-run RUN_KEY [RECOVERY_UUID]
+```
+
+La clave y el SHA proceden del inicio registrado de esa invocación. No son claves
+deportivas nuevas ni fechas simuladas. El modo file exige ambos valores; no inicia
+publicaciones sin identidad de trazas.
+El modo no necesita PTY ni stdin abierto: cada respuesta se publica atómicamente
+en `response_path`; el mismo proceso la consume. El bloqueo de kernel y todas
+las guardas de publicación siguen vigentes. El modo stdin anterior se conserva
+solo por compatibilidad; arrancarlo sin entrada abierta causa interrupción.
+
+Cada evento se escribe **antes** de enviarlo a stdout en `events.ndjson` privado,
+con `event_seq`, `emitted_at`, `event_log` y `transport:file`. Si desaparece el
+handle de ejecución, continuar el mismo lector desde su último evento:
+
+```js
+text(await bridge.poll(lastEvent));
+```
+
+El resultado tiene `output` con los eventos posteriores; conservar el último
+`event_seq` procesado. Cada página contiene hasta 20 eventos completos y 16 KB;
+repetir `poll` con el último cursor para recuperar una interrupción larga. Si
+está vacío, el lector aún no emitió otro evento. Una
+consulta de estado del proceso/checkpoint confirma su salida; un log sin eventos
+nuevos no acredita que haya muerto. Nunca iniciar otro lector por perder el handle.
+Si se perdió incluso el primer evento, localizar el checkpoint del único lector
+activo contrastando `run_key` y PID real; no asumir el directorio más reciente.
+Su `event_log` permite reconstruir el cursor desde cero y reclamar las respuestas
+ya existentes sin repetir SQL. El estado del programador no prueba salida.
+`bridge.sql` y `bridge.reply` detectan `transport:file` y no llaman `write_stdin`.
+Tras escribir la respuesta devuelven los eventos persistidos disponibles; si la
+lectura siguiente tarda, volver a `poll` sin repetir SQL.
+
+Una solicitud SQL se reclama una sola vez mediante un archivo privado exclusivo.
+Releer un evento cuya respuesta ya existe reutiliza el evento guardado. Si quedó
+reclamada sin respuesta íntegra, no repetir la consulta: pudo confirmar cambios.
+Conservar sus archivos y comunicar el error para que el runner relea estado.
+
+`deadline_at` indica el vencimiento de la solicitud: SQL tiene cinco minutos;
+la revisión editorial hasta diez minutos, limitada además por la ventana original
+de la evidencia. No renueva cuerpos ni extiende la ventana de base de datos. El
+fallo de Athletic del 16/11 fue una revisión respondida a los 300,861 segundos
+contra un límite de 300; el nuevo plazo permite revisar sin confundir esa demora
+con una falla de fuente. Una respuesta tardía queda como evidencia privada y no
+resuelve una solicitud que ya expiró.
+
+`checkpoint.json` existe desde el arranque y conserva PID, transporte, inicio,
+ruta de eventos y manifiesto de trazas. `trace.jsonl` conserva metadatos sanitizados
+por fase/solicitud, hashes y tiempos; el gateway los confirma en la bitácora
+privada. Solicitudes, revisiones, respuestas completas, errores y cuerpos leídos
+permanecen en el directorio privado de esa ejecución. No publicar sus cuerpos,
+SQL ni tokens en GitHub o en el resumen. El archivo local no es almacenamiento
+duradero por sí solo: registrar el resumen y el archivo de evidencias privado
+antes de cerrar mantenimiento. `trace_delivery` informa qué eventos se confirmaron;
+un error de trazas nunca debe declararse como éxito deportivo.
+
 ## Cargar en el entorno que orquesta las herramientas
 
 Después de obtener el checkout real, sustituir `REPO` por su ruta observada:
@@ -51,7 +112,8 @@ completo antes de notificar al runner. La validación y el renombrado se ejecuta
 en la misma llamada de shell que escribe el último fragmento, después de cerrarlo;
 si falla cualquier fragmento no se notifica ni sustituye la última respuesta
 completa. Se mantienen fragmentos de 12.000 unidades y las guardas Unicode.
-Stdin transporta solo ID y ruta.
+En modo file, el runner consume el archivo sin depender de stdin. En el modo
+anterior stdin transporta solo ID y ruta.
 
 Si falla el parseo conserva el resultado original en `response_path + '.tool'`.
 Inspeccionarlo como datos; nunca reparar JSON truncado inventando contenido ni
@@ -81,4 +143,5 @@ reintenta SQL por su cuenta. La reanudación del proceso se rige por README.md;
 la base sigue siendo la autoridad para decidir qué ya se guardó o publicó.
 El CLI adquiere su bloqueo local antes del primer evento SQL; código73 significa
 otro lector vivo. No quitar el bloqueo ni lanzar otro por un estado failed del
-programador. La salida debe comprobarse en la sesión real del proceso.
+programador. La salida debe comprobarse en la sesión real del proceso o contra
+el PID del checkpoint y el bloqueo del mismo entorno.
