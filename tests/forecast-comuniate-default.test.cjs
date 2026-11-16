@@ -17,7 +17,7 @@ function assessment(version='editorial-v5'){
 }
 const trace=(e,id)=>method.evaluate(e).trace.find(s=>s.id===id);
 test('v5 changes only an unnumbered Comuniate starter; legacy results and input evidence stay unchanged',()=>{
- assert.equal(method.METHOD,'editorial-v5');
+ assert.equal(method.METHOD,'editorial-v6');
  const e=assessment(),before=JSON.stringify(e);
  assert.equal(trace(e,'comuniate').signal,50);
  assert.equal(method.evaluate(e).probability,69);
@@ -33,7 +33,7 @@ test('v5 changes only an unnumbered Comuniate starter; legacy results and input 
  }
 });
 test('every explicit Comuniate percentage, including zero, overrides the fallback in all supported methods',()=>{
- for(const version of ['editorial-v3','editorial-v4','editorial-v5'])for(const prediction of ['starter','alternative','not_listed'])for(const percentage of [0,1,40,50,90,100]){
+ for(const version of ['editorial-v3','editorial-v4','editorial-v5','editorial-v6'])for(const prediction of ['starter','alternative','not_listed'])for(const percentage of [0,1,40,50,90,100]){
   const e=assessment(version);Object.assign(e.sources[2],{prediction,probability:percentage});
   assert.equal(trace(e,'comuniate').signal,percentage,version+' '+prediction+' '+percentage);
  }
@@ -56,7 +56,7 @@ test('missing Predicted11 remains neutral and renormalizes; source weights, rota
  const minimum=assessment();minimum.sources.slice(0,3).forEach(s=>s.probability=0);minimum.sources[3].votes=0;assert.equal(method.evaluate(minimum).probability,5);
 });
 test('v5 rejects malformed percentages, missing context, duplicate sources and confirmed absences',()=>{
- for(const change of [e=>e.sources[2].probability=undefined,e=>e.sources[2].probability='50',e=>e.sources[2].probability=-1,e=>e.sources[2].probability=100.5,e=>e.sources[2].probability=false,e=>e.sources[2].prediction='unknown',e=>e.sources[2].refs=[],e=>e.sources[2].id='futbolfantasy',e=>e.sources.pop(),e=>e.sources[3].votes=5,e=>e.confirmed_out=true,e=>e.availability.refs=[],e=>e.horizon.value='unknown',e=>e.role=context('preferred'),e=>e.method='editorial-v6']){
+ for(const change of [e=>e.sources[2].probability=undefined,e=>e.sources[2].probability='50',e=>e.sources[2].probability=-1,e=>e.sources[2].probability=100.5,e=>e.sources[2].probability=false,e=>e.sources[2].prediction='unknown',e=>e.sources[2].refs=[],e=>e.sources[2].id='futbolfantasy',e=>e.sources.pop(),e=>e.sources[3].votes=5,e=>e.confirmed_out=true,e=>e.availability.refs=[],e=>e.horizon.value='unknown',e=>e.role=context('preferred'),e=>e.method='editorial-v7']){
   const e=assessment();change(e);assert.throws(()=>method.evaluate(e));
  }
 });

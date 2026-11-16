@@ -53,3 +53,46 @@ test('v4 still rejects confirmed absences and incomplete or misleading evidence'
 test('v4 public payload is accepted without accepting mixed player methods',()=>{
  const p=v3();p.method_version='editorial-v4';p.players.forEach(x=>x.method='editorial-v4');assert.equal(round.validate(p),p);p.players[0].method='editorial-v3';assert.throws(()=>round.validate(p));
 });
+
+function v6Assessment(){return {method:'editorial-v6',sources:assessment().sources};}
+test('v6 computes from minimal source evidence with the same weights and Comuniate fallback',()=>{
+ const e=v6Assessment(),before=structuredClone(e),result=method.evaluate(e);
+ assert.equal(result.method,'editorial-v6');assert.equal(result.probability,67);
+ assert.deepEqual(result.trace.map(t=>t.nominal_weight),[30,20,20,30]);
+ assert.deepEqual(e,before);
+ e.sources[2].probability=null;
+ assert.equal(method.evaluate(e).probability,69);
+ assert.equal(method.evaluate(e).trace.find(t=>t.id==='comuniate').signal,50);
+ for(const [id,prediction,signal]of [['futbolfantasy','starter',90],['jornadaperfecta','starter',90],['comuniate','alternative',40],['comuniate','not_listed',25]]){
+  const q=v6Assessment(),source=q.sources.find(s=>s.id===id);Object.assign(source,{prediction,probability:null});
+  assert.equal(method.evaluate(q).trace.find(t=>t.id===id).signal,signal);
+ }
+});
+test('v6 is invariant to health, confirmed exclusions, horizon, rotation and context metadata',()=>{
+ const baseline=v6Assessment(),expected=method.evaluate(baseline);
+ for(const availability of ['clear','concern','unknown'])for(const rotation of ['low','possible','high'])for(const points of [-10,0,10]){
+  const e={...structuredClone(baseline),confirmed_out:true,availability:evidence(availability),rotation:evidence(rotation),horizon:evidence('distant'),context:{points,reason:'Un ajuste que no debe afectar al método nuevo.',refs:[ref]}};
+  const before=structuredClone(e);assert.deepEqual(method.evaluate(e),expected);assert.deepEqual(e,before);
+ }
+ // Legacy metadata is not a prerequisite for evaluating source-only evidence.
+ assert.deepEqual(method.evaluate({...baseline,confirmed_out:true,availability:null,rotation:null,horizon:null,context:null}),expected);
+});
+test('v6 distinguishes missing P11 from zero votes and retains explicit zero percentages',()=>{
+ const e=v6Assessment();Object.assign(e.sources[3],{prediction:'not_available',votes:null,ballots:0});
+ let result=method.evaluate(e);assert.equal(result.probability,63);assert.equal(result.trace[3].effective_weight,0);
+ assert.ok(Math.abs(result.trace[0].effective_weight-300/7)<1e-10);
+ Object.assign(e.sources[3],{prediction:'consensus',votes:0,ballots:4});assert.equal(method.evaluate(e).probability,44);
+ for(const id of ['futbolfantasy','jornadaperfecta','comuniate'])for(const prediction of ['starter','alternative','not_listed']){
+  const q=v6Assessment();Object.assign(q.sources.find(s=>s.id===id),{prediction,probability:0});
+  assert.equal(method.evaluate(q).trace.find(t=>t.id===id).signal,0);
+ }
+ for(const [signal,votes,expected]of [[0,0,5],[100,4,95]]){
+  const q=v6Assessment();q.sources.slice(0,3).forEach(s=>s.probability=signal);q.sources[3].votes=votes;
+  assert.equal(method.evaluate(q).probability,expected);
+ }
+});
+test('v6 still rejects incomplete sources, invalid identities of sources, misleading references and bad vote counts',()=>{
+ for(const change of [e=>e.sources.pop(),e=>e.sources[0].id='comuniate',e=>e.sources[3].votes=5,e=>e.sources[3].ballots=0,e=>e.sources[3].probability=75,e=>e.sources[0].probability=3.5,e=>e.sources[2].probability=undefined,e=>e.sources[1].refs=['https://www.jornadaperfecta.com.evil.test/'],e=>e.sources[3].refs=['https://user@www.predicted11.com/es/laliga/'],e=>e.sources[0].refs=[],e=>e.sources[0].prediction='healthy']){
+  const e=v6Assessment();change(e);assert.throws(()=>method.evaluate(e));
+ }
+});

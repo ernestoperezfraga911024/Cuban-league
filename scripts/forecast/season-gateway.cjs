@@ -112,7 +112,7 @@ function verifyPublication(state,team,projection,{fresh=false,notBefore}={}) {
     Date.parse(p.published_at) !== Date.parse(a.published_at) ||
     !Number.isFinite(Date.parse(p.published_at)) || Date.parse(p.published_at) < Date.parse(state.run.started_at) ||
     p.payload.players?.length !== 11 || new Set(p.payload.players.map(x => x.id)).size !== 11) throw Error(team + ': la fila pública no coincide con la entrega');
-  if (fresh && (p.payload.method_version !== 'editorial-v5' || !Array.isArray(p.payload.candidates) ||
+  if (fresh && (p.payload.method_version !== 'editorial-v6' || !Array.isArray(p.payload.candidates) ||
     new Set(p.payload.candidates.map(x => x.id)).size !== p.payload.candidates.length ||
     p.payload.candidates.some(x => p.payload.players.some(y => y.id === x.id)) ||
     !Number.isFinite(Date.parse(p.payload.evidence_at)) || Date.parse(p.payload.evidence_at) < Date.parse(notBefore))) throw Error(team + ': publicación nueva sin evidencia/candidatos válidos');

@@ -5,9 +5,11 @@ FutbolFantasy aporta un estado físico independiente de las noticias. Duda muest
 
 El feed público solo contiene observaciones entregadas. En Manual, Publicar en el panel existente entrega también los estados físicos listos. Retirar el club oculta sus observaciones mediante RLS; no cambia el modo ni lo restaura una lectura. Una petición fallida conserva la publicación anterior con su fecha. Una observación antigua o un conflicto de igual hora no reemplaza evidencia más reciente.
 
-Se consulta el feed una vez al abrir/actualizar Alineaciones, con paginación. Cambiar de escudo no hace peticiones. Un fallo del feed físico no impide mostrar el once ni las noticias. La interfaz no infiere estados a partir de titulares o porcentajes; solo muestra datos explícitos. Una noticia de acontecimiento posterior puede superar una observación de FF; actualizar la fecha de importación de una noticia antigua no lo consigue.
+Se consulta el feed del club seleccionado al abrir/actualizar Alineaciones, con paginación. Cambiar de escudo cancela el contexto anterior y consulta el nuevo club. Un fallo del feed físico no impide mostrar el once ni las noticias. La interfaz no infiere estados a partir de titulares o porcentajes; solo muestra datos explícitos. El símbolo procede exclusivamente del estado directo de FutbolFantasy. Ninguna noticia, aunque sea posterior o de FF, puede crearlo, reemplazarlo ni borrarlo. El estado físico no modifica porcentajes, selección del once, candidatos, alternativas ni posiciones; las alineaciones se calculan solo con las fuentes de pronósticos elegidas.
 
-## Aplicación y comprobación
+## Instalación original y comprobación
+
+Los pasos de instalación siguientes documentan la incorporación original de salud. Las tablas y RPC ya instalados se conservan; la separación de iconos autorizada el 16/11/2026 solo requiere los assets actuales y las instrucciones vigentes. No volver a ejecutar la migración original.
 1. Revisar `health-and-two-daily.sql`: tablas nuevas aisladas, RPC privados sin permisos para clientes y extensión guardada de las funciones existentes. Las definiciones originales deben coincidir exactamente.
 2. Ejecutar migración + `tests/forecast-health-db.sql` dentro de una transacción de prueba y terminar con ROLLBACK. Las pruebas internas revierten sus datos, modos y retiradas.
 3. Aplicar la migración en una transacción y repetir las comprobaciones antes del COMMIT. Nunca guardar evidencia sintética.

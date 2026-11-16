@@ -355,13 +355,13 @@
     },
     {
       "code": "availability-conflict-unresolved",
-      "status": "review-procedure-added-awaiting-run",
+      "status": "superseded-by-source-only-rule",
       "failure": "Elche incluyó Lemar con fuentes contradictorias; varias bajas de otros clubes se afirmaron sin conciliar Disponible/Duda de otra fuente.",
-      "prevention": "Lectura separada por equipo de las tres fuentes y conciliación explícita antes de excluir o elegir. Duda no equivale a baja confirmada. Revisión completa con evidencia nueva.",
+      "prevention": "La instrucción posterior de Ernesto sustituye la conciliación médica: no excluir ni sustituir jugadores por salud. Las señales de las cuatro fuentes determinan el pronóstico; el estado directo FF solo añade el icono. Incluir a Lemar no es un error por sí mismo. Ver forecast-medical-exclusion-source-only.",
       "tests": [
         "tests/forecast-producer.test.cjs"
       ],
-      "evidence": "Auditoría de paquetes reales 16/11 14:00; la validación técnica no demuestra veracidad semántica de la revisión."
+      "evidence": "Auditoría de paquetes reales 16/11 14:00; la validación técnica no demuestra veracidad semántica de la revisión. La revisión inicial contenía un criterio médico incorrecto, expresamente corregido por el usuario el 16/11/2026; se conserva como antecedente, no como regla activa."
     },
     {
       "code": "trace-checkpoints-overwritten",
@@ -373,6 +373,22 @@
         "tests/automation-trace-db.test.cjs",
         "tests/automation-trace-export.test.cjs"
       ]
+    },
+    {
+      "code": "forecast-medical-exclusion-source-only",
+      "status": "regression-tested-awaiting-run",
+      "failure": "El productor v5 descartaba jugadores de confirmed_out y parte de sus observaciones/candidaturas; la revisión podía usar noticias y salud para seleccionar titulares o alternativas. El índice pedía conciliar estados médicos de varias fuentes.",
+      "cause": "La disponibilidad estaba acoplada a la unión de candidatos y a la revisión, aunque v5 ya no restaba puntos por availability. La instrucción vigente requiere cálculo exclusivo con fuentes e iconos FF independientes.",
+      "prevention": "Productor v6 sin filtros médicos; cálculo JS/SQL basado solo en FF/JP/Comuniate/P11. Todas las señales y ceros observados se conservan. El índice no extrae estados de Comuniate ni noticias JP para la alineación, y no compara fuentes médicas. El estado FF queda marcado icon_only. Los métodos históricos y saved mantienen su versión.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-producer-db.test.cjs",
+        "tests/forecast-predicted11.test.cjs",
+        "tests/forecast-editorial-v6-db.test.cjs",
+        "tests/forecast-inspect-review.test.cjs",
+        "tests/forecast-context.test.cjs"
+      ],
+      "evidence": "Regresiones locales de invariancia ante confirmed_out, availability, rotation y context; conservación de votos P11, alternativas y ceros. Instalación y revisión pública real de los veinte clubes pendientes; no se acreditan con estas pruebas sintéticas."
     }
   ]
 }

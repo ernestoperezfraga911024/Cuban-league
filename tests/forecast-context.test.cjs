@@ -16,20 +16,24 @@ test('direct physical evidence works without a news article, clears on availabil
   assert.equal(context.create(p.team,[],null,false,[directHealth(id,'injured')]).badge({id}).textContent,'+');
  }finally{dom.window.close();}
 });
-test('an old article reimport does not override current FF availability; a later dated event can',()=>{
+test('news from any source and date cannot replace a direct FF icon or supply a missing one',()=>{
  const {dom,context}=browser();try{
   const old=news('player','injured','2026-11-11');old.updated_at='2026-11-13T20:00:00Z';
   const physical=directHealth('player','available');assert.equal(context.currentHealth([old],'player',[physical]).status,'available');
   const later=news('player','doubt','2026-11-13');later.payload.sources[0].fetched_at='2026-11-13T20:00:00Z';
-  assert.equal(context.currentHealth([later],'player',[physical]).status,'doubt');
-  // Same-day dated publication, rather than import time, resolves ordering.
+  assert.equal(context.currentHealth([later],'player',[physical]).status,'available');
   const sameDay=news('player','injured');sameDay.payload.sources[0].published_at='2026-11-12T20:01:00Z';
-  assert.equal(context.currentHealth([sameDay],'player',[physical]).status,'injured');
+  assert.equal(context.currentHealth([sameDay],'player',[physical]).status,'available');
+  for(const [name,url] of [['Comuniate','https://www.comuniate.com/noticias/test'],['Jornada Perfecta','https://www.jornadaperfecta.com/blog/test'],['FutbolFantasy',source]]){
+   const article=news('player','injured','2026-11-13');Object.assign(article.payload.sources[0],{name,url});article.payload.players[0].health.refs=[url];
+   assert.equal(context.currentHealth([article],'player',[physical]).status,'available');
+   assert.equal(context.currentHealth([article],'player',[]),null);
+  }
  }finally{dom.window.close();}
 });
 test('physical feed validates identities, domain, dates, state and pagination',async()=>{
  const {dom,w,context}=browser();try{
-  for(const mutate of [r=>r.team='foreign',r=>r.player_id='another',r=>r.payload.status='constructor',r=>r.payload.source.url='https://www.futbolfantasy.com.evil.test/equipos/real-madrid',r=>r.payload.source.fetched_at=null,r=>r.payload.source.fetched_at='2099-01-01T00:00:00Z']){
+  for(const mutate of [r=>r.team='foreign',r=>r.player_id='another',r=>r.payload.status='constructor',r=>r.payload.source.id='comuniate',r=>r.payload.source.id='jornadaperfecta',r=>r.payload.source.url='https://www.futbolfantasy.com.evil.test/equipos/real-madrid',r=>r.payload.source.fetched_at=null,r=>r.payload.source.fetched_at='2099-01-01T00:00:00Z']){
    const row=directHealth('player');mutate(row);assert.equal(context.validHealth(row),false);
   }
   w.CUBAN_LEAGUE_SUPABASE={url:'https://db.test',publishableKey:'public'};const calls=[];
@@ -59,16 +63,17 @@ test('health belongs to the named player; partial training, an unrelated report 
   assert.equal(context.health([news('other','available'),injury],'injured').status,'injured');
  }finally{dom.window.close();}
 });
-test('later availability removes the question/cross without changing the XI or percentage',()=>{
+test('only direct FF availability removes its icon; news updates leave the XI and percentages intact',()=>{
  const {dom,w,context}=browser();try{
   const p=publication('real-madrid'),player=p.players[0],before=JSON.stringify(p),injury=news(player.id,'injured','2026-11-11'),clear=news(player.id,'available');
   const old=structuredClone(injury);old.updated_at='2026-11-12T21:00:00Z'; // Import time is not the event date.
-  const current=context.create('real-madrid',[old,clear],null);
+  const current=context.create('real-madrid',[old,clear],null,false,[directHealth(player.id,'available')]);
   assert.equal(current.badge(player),null);assert.match(current.detail(player).textContent,/Disponible/);
   w.CubanForecastPitch.render(w.document.getElementById('forecastPublicBody'),p,null,{playerContext:current});
   assert.equal(w.document.querySelectorAll('.fp-player').length,11);assert.equal(JSON.stringify(p),before);
   const relapse=news(player.id,'doubt');relapse.updated_at='2026-11-12T21:01:00Z';
-  assert.equal(context.create('real-madrid',[clear,relapse],null).badge(player).textContent,'?');
+  assert.equal(context.create('real-madrid',[clear,relapse],null,false,[directHealth(player.id,'available')]).badge(player),null);
+  assert.equal(context.create('real-madrid',[clear,relapse],null,false,[directHealth(player.id,'doubt')]).badge(player).textContent,'?');
  }finally{dom.window.close();}
 });
 test('invalid, hidden, future and unreferenced health evidence never creates a marker',()=>{
@@ -84,7 +89,7 @@ test('club/player news uses safe text, source links and actual information/consu
   const row=news('player');row.payload.title='<img src=x onerror=alert(1)>';row.payload.summary='<script>alert(1)</script>';
   const c=context.create('real-madrid',[row,news('foreign','doubt','2026-11-12','fc-barcelona')],null),host=dom.window.document.createElement('div');c.renderClub(host);
   assert.equal(host.querySelectorAll('.fc-story').length,1);assert.equal(host.querySelector('img,script'),null);assert.equal(host.querySelector('summary').textContent,row.payload.title);assert.equal(host.querySelector('a').rel,'noopener noreferrer');
-  const detail=c.detail({id:'player'});assert.match(detail.textContent,/12\/11\/2026/);assert.match(detail.textContent,/Revisada:.*Miami/);assert.doesNotMatch(detail.textContent,/Invalid Date/);assert.equal(detail.querySelectorAll('details[open]').length,0);
+  const detail=c.detail({id:'player'});assert.match(detail.textContent,/2026-11-12/);assert.equal(detail.querySelector('.fc-health-label'),null);assert.doesNotMatch(detail.textContent,/Invalid Date/);assert.equal(detail.querySelectorAll('details[open]').length,0);
   const legacy=news('player');delete legacy.payload.players[0].health;
   const legacyDetail=context.create('real-madrid',[legacy],null).detail({id:'player'});assert.equal(legacyDetail.querySelectorAll('details[open]').length,0);legacyDetail.querySelector('summary').click();assert.equal(legacyDetail.querySelector('details').open,true);
  }finally{dom.window.close();}
@@ -94,7 +99,7 @@ test('rest of squad uses active catalog identities, excludes all XI and supports
   w.fetch=async()=>({ok:true,json:async()=>JSON.parse(read('catalog/players.json'))});const catalog=await w.CubanLeaguePlayerCatalog.load(),p=publication('real-madrid');
   const reserve=catalog.players.find(x=>x.active&&x.clubId===p.team&&!p.players.some(y=>y.id===x.id));assert.ok(reserve);
   const rows=[news(p.players[0].id),news(reserve.id,'injured')],host=w.document.getElementById('forecastPublicBody');
-  w.CubanForecastPitch.render(host,p,catalog,{playerContext:context.create(p.team,rows,catalog)});
+  w.CubanForecastPitch.render(host,p,catalog,{playerContext:context.create(p.team,rows,catalog,false,[directHealth(p.players[0].id),directHealth(reserve.id,'injured')])});
   assert.equal(host.querySelector('.fp-detail').hidden,true);
   const buttons=[...host.querySelectorAll('.fp-reserve')],ids=buttons.map(b=>b.dataset.playerId),expected=catalog.players.filter(x=>x.active&&x.clubId===p.team&&!p.players.some(y=>y.id===x.id));
   assert.deepEqual(new Set(ids),new Set(expected.map(x=>x.id)));assert.equal(new Set(ids).size,ids.length);
@@ -133,7 +138,7 @@ test('the XI appears while selected-club context is unresolved, without waiting 
  }finally{dom.window.close();}
 });
 
-test('old injuries and subsequent clearances remain accurate beyond the recent news page',async()=>{
+test('FF icons remain independent of paged news and do not require a medical news scan',async()=>{
  const {dom,w}=browser();try{
   const p=publication('real-madrid'),injured=p.players[0].id,available=p.players[1].id;
   const old=news(injured,'injured','2026-10-01');old.updated_at='2026-10-01T20:00:00Z';
@@ -141,7 +146,7 @@ test('old injuries and subsequent clearances remain accurate beyond the recent n
   const clear=news(available,'available','2026-10-03');clear.updated_at='2026-10-03T20:00:00Z';
   const recent=Array.from({length:30},(_,i)=>{const r=news('unrelated-'+i);delete r.payload.players[0].health;return r;});
   const articles=[...recent,old,before,clear],calls=[];
-  setup(w,async(u)=>{calls.push(String(u));return serve(u,{articles});});w.document.body.dataset.section='forecasts';await settle();
+  setup(w,async(u)=>{calls.push(String(u));return serve(u,{articles,physical:[directHealth(injured,'injured'),directHealth(available,'available')]});});w.document.body.dataset.section='forecasts';await settle();
   assert.equal(w.document.querySelectorAll('.fc-club-news .fc-story').length,5);
   const bad=w.document.querySelector('[data-player-id="'+injured+'"]'),good=w.document.querySelector('[data-player-id="'+available+'"]');
   assert.equal(bad.querySelector('.fc-health').textContent,'+');assert.equal(good.querySelector('.fc-health'),null);
@@ -150,6 +155,7 @@ test('old injuries and subsequent clearances remain accurate beyond the recent n
   const more=[...w.document.querySelectorAll('.fc-club-news button')].find(b=>/más|anteriores/i.test(b.textContent));assert.ok(more);more.click();await settle();
   assert.ok(w.document.querySelectorAll('.fc-club-news .fc-story').length>5);assert.equal(w.document.querySelector('[data-player-id="'+injured+'"] .fc-health').textContent,'+');
   assert.equal(w.document.querySelector('.fp-detail').hidden,false,'paging must preserve open player');
+  assert.ok(!calls.some(u=>new URL(u).searchParams.get('payload->players')==='cs.'+JSON.stringify([{health:{}}])),'icons must not fetch or cross-check medical news');
  }finally{dom.window.close();}
 });
 
@@ -163,6 +169,20 @@ test('switching clubs cancels context; late responses cannot update the new club
   assert.equal(w.document.querySelector('.fp-detail').hidden,true);assert.equal(w.document.querySelectorAll('.fc-health,.fc-story').length,0);
   assert.equal(w.document.querySelector('[data-forecast-team="fc-barcelona"]').getAttribute('aria-pressed'),'true');
   assert.equal(calls.filter(u=>u.includes('forecast_season_public')).length,1);
+ }finally{dom.window.close();}
+});
+
+test('FF icon loading succeeds when news fails, and health failure never falls back to article status',async()=>{
+ const {dom,w}=browser();try{
+  const p=publication('real-madrid'),id=p.players[0].id,forecasts=feed(),before=JSON.stringify(forecasts);let failHealth=false,failNews=true;
+  setup(w,async u=>String(u).includes('forecast_health_public')&&failHealth?{ok:false,json:async()=>[]}:
+   serve(u,{forecasts,articles:[news(id,'injured')],physical:[directHealth(id,'doubt')],failNews}));
+  w.document.body.dataset.section='forecasts';await settle();
+  assert.equal(w.document.querySelector('[data-player-id="'+id+'"] .fc-health').textContent,'?');
+  assert.equal(w.document.querySelectorAll('.fp-player').length,11);assert.equal(JSON.stringify(forecasts),before);
+  failNews=false;failHealth=true;w.document.getElementById('forecastPublicReload').click();await settle();
+  assert.equal(w.document.querySelectorAll('.fc-health').length,0);assert.equal(w.document.querySelectorAll('.fc-story').length,1);
+  assert.equal(w.document.querySelectorAll('.fp-player').length,11);assert.equal(JSON.stringify(forecasts),before);
  }finally{dom.window.close();}
 });
 
@@ -182,7 +202,7 @@ test('context arrivals preserve an opened player and the keyboard focus',async()
   const pending=[],p=publication('real-madrid'),articles=[news(p.players[0].id,'injured')];
   setup(w,async(u)=>String(u).includes('forecast_season_public')?serve(u):new Promise(resolve=>pending.push({resolve,u})));
   w.document.body.dataset.section='forecasts';await settle();const button=w.document.querySelector('[data-player-id="'+p.players[0].id+'"]');button.click();await tick();const detail=w.document.querySelector('.fp-detail'),back=detail.querySelector('.fp-link');back.focus();
-  for(const request of pending)request.resolve(serve(request.u,{articles}));await settle();
+  for(const request of pending)request.resolve(serve(request.u,{articles,physical:[directHealth(p.players[0].id,'injured')]}));await settle();
   assert.equal(w.document.querySelector('.fp-detail'),detail);assert.equal(detail.hidden,false);assert.equal(w.document.activeElement,back);assert.match(detail.querySelector('.fc-player-context').textContent,/Lesionado/);
   back.click();assert.equal(detail.hidden,true);assert.equal(w.document.activeElement,button);
  }finally{dom.window.close();}
@@ -190,7 +210,7 @@ test('context arrivals preserve an opened player and the keyboard focus',async()
 
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const [asset,version] of Object.entries({'forecast-context.js':'222-20261113','forecast-context.css':'230-20261114-squad-design','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'230-20261114-squad-design','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
+ for(const [asset,version] of Object.entries({'forecast-context.js':'238-20261116-ff-icons','forecast-round-core.js':'238-20261116-source-only','forecast-context.css':'230-20261114-squad-design','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'238-20261116-source-only','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
 });
 

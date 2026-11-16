@@ -1,6 +1,7 @@
 'use strict';
 // Mechanical assembly only. The reviewer must inspect current captured bodies for
-// fixture, probable/official status, identities, alternatives and confirmed outs.
+// fixture, probable/official status, identities and source-supported alternatives.
+// Medical status belongs to the independent FF icon feed, never this calculation.
 const {evaluate, selectAuthors, aggregate} = require('../../forecast-predicted11-method.js');
 const {isDeepStrictEqual: same} = require('node:util');
 const {orderSelection} = require('./lineup-layout.cjs');
@@ -18,16 +19,26 @@ const fixtureOf = f => {
 };
 const probability = n => n === null || Number.isInteger(n) && n >= 0 && n <= 100;
 
+// PostgreSQL jsonb text inserts one space after structural commas and colons.
+// Count those separators outside strings so the local 64 KiB gate agrees with SQL.
+function jsonbByteLength(value) {
+  const text=JSON.stringify(value); let spaces=0,quoted=false,escaped=false;
+  for(const c of text){
+    if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;}
+    else if(c==='"')quoted=true;
+    else if(c===','||c===':')spaces++;
+  }
+  return Buffer.byteLength(text)+spaces;
+}
+
 function compile(packet, review, roster, window) {
   const f = review.fixture, team = packet.team;
   requireThat(f && f.season === '2026-27' && [f.home,f.away].includes(team), 'Partido revisado inválido');
   const expected = fixtureOf(f);
-  requireThat(review.availability_reviewed === true, team + ': falta revisar las bajas confirmadas');
   const byId = new Map(roster.map(p => [p.id,p]));
   requireThat(byId.size === roster.length && roster.every(p => p.team === team), 'Roster ajeno o duplicado');
   const exclusions = review.exclusions || [];
   const limitations = [...(review.limitations || [])];
-  const knownUrls = new Set(Object.values(packet.docs).map(d => d.url));
   const checkTime = value => {
     const n = Date.parse(value);
     requireThat(Number.isFinite(n) && n >= Date.parse(window.notBefore) && n < Date.parse(window.expiresAt) &&
@@ -40,15 +51,6 @@ function compile(packet, review, roster, window) {
     requireThat(byId.has(id), team + ': identidad sin resolver: ' + name);
     return id;
   };
-  const refs = item => {
-    requireThat(item && typeof item.reason === 'string' && item.reason.trim().length >= 10 &&
-      Array.isArray(item.refs) && item.refs.length && item.refs.every(u => knownUrls.has(u)), 'Hecho sin referencia consultada');
-    return item;
-  };
-  const out = new Set();
-  for (const fact of review.confirmed_out || []) {
-    requireThat(byId.has(fact.id), 'Baja ajena al roster'); refs(fact); out.add(fact.id);
-  }
   const registered = [], sources = [], union = new Set();
   for (const id of BASE) {
     const r = review.sources?.[id], match = packet.docs[id];
@@ -130,37 +132,26 @@ function compile(packet, review, roster, window) {
   const chosen = review.selection;
   requireThat(SHAPES.includes(chosen?.formation) && chosen.players?.length === 11 && new Set(chosen.players.map(p => p.id)).size === 11, 'Selección requiere once y formación admitida');
   const selected = new Set(chosen.players.map(p => p.id));
-  requireThat([...selected].every(id => byId.has(id) && union.has(id) && !out.has(id)), 'Titular ajeno, sin señal o baja confirmada');
+  requireThat([...selected].every(id => byId.has(id) && union.has(id)), 'Titular ajeno o sin señal de las fuentes');
   const ordered = orderSelection(packet,chosen,resolve);
-  for (const id of out) union.delete(id);
   const all = [...union];
   requireThat(all.length <= 50, 'Más de 39 candidatos: requiere revisión');
   for (const s of sources) s.player_observations = all.map(id => s.id === 'predicted11' ? {
     player_id:id,prediction:votes.ballots ? 'consensus' : 'not_available',probability:null,
     votes:votes.ballots ? votes.counts.get(id) || 0 : null,ballots:votes.ballots,
   } : s.player_observations.find(o => o.player_id === id) || {player_id:id,prediction:'not_listed',probability:null});
-  // Retain source starters even when a confirmed out is excluded from our proposal.
-  for (const s of sources.slice(0,3)) for (const id of s.starter_ids) if (!s.player_observations.some(o => o.player_id === id)) {
-    const raw = packet.observations[s.id].find(p => resolve(p.name) === id);
-    s.player_observations.push({player_id:id,prediction:'starter',probability:raw.probability});
-  }
   const oldest = Math.min(...sources.map(s => checkTime(s.fetched_at)));
   const hours = (Date.parse(f.kickoff_at) - oldest) / 3600000;
   requireThat(hours > 0, 'El encuentro ya comenzó');
-  const horizon = hours <= 48 ? 'near' : hours <= 120 ? 'medium' : 'distant';
   const evaluated = new Map();
   for (const id of all) {
-    const fact = review.facts?.[id] || {}, reference = sources[0].url;
-    const assessment = {method:'editorial-v5',confirmed_out:false,sources:sources.map(s => {
+    const assessment = {method:'editorial-v6',sources:sources.map(s => {
       const {player_id,...o} = s.player_observations.find(o => o.player_id === id);
       return {id:s.id,...o,reason:s.id === 'predicted11' ? `${o.ballots} onces completos; ${o.votes ?? 'sin'} votos.` :
         `${o.prediction}; ${o.probability === null ? 'sin porcentaje publicado' : o.probability + '% de titularidad observado'}.`,refs:[s.url]};
-    }),availability:refs(fact.availability || {value:'unknown',reason:'Sin confirmación física individual en las páginas revisadas.',refs:[reference]}),
-    rotation:refs(fact.rotation || {value:'low',reason:'Sin ajuste adicional acreditado por rotación deportiva.',refs:[reference]}),
-    horizon:{value:horizon,reason:`Antelación real de ${hours.toFixed(1)} horas; sin descuento.`,refs:[reference]},
-    context:refs(fact.context || {points:0,reason:'Sin ajuste contextual adicional a las señales observadas.',refs:[reference]})};
+    })};
     const probability = evaluate(assessment).probability;
-    evaluated.set(id,{id,name:byId.get(id).name,probability,reason:fact.reason || 'Estimación de titularidad según las fuentes y votos observados.',assessment});
+    evaluated.set(id,{id,name:byId.get(id).name,probability,reason:'Cálculo de titularidad según las fuentes y votos observados.',assessment});
   }
   const shape = chosen.formation.split('-').map(Number);
   const missingAlternatives=ordered.players.filter(choice=>evaluated.get(choice.id).probability<70&&
@@ -184,9 +175,9 @@ function compile(packet, review, roster, window) {
   requireThat(limitations.join(' ').length >= 10 && limitations.join(' ').length <= 1200, 'Limitaciones fuera de tamaño');
   const payload = {schema_version:4,season:f.season,team,fixture_key:f.key,home:f.home,away:f.away,
     opponent:team === f.home ? f.away : f.home,matchday:f.matchday,kickoff_at:expected.kickoff_at,
-    probability_kind:'editorial_uncalibrated',publication_allowed:false,status:'draft',method_version:'editorial-v5',
+    probability_kind:'editorial_uncalibrated',publication_allowed:false,status:'draft',method_version:'editorial-v6',
     limitations,sources,proposal:{formation:chosen.formation,players,candidates}};
-  requireThat(Buffer.byteLength(JSON.stringify(payload)) <= 65536, 'Payload supera 64 KiB');
+  requireThat(jsonbByteLength(payload) <= 65536, 'Payload supera 64 KiB en formato JSONB del servidor');
   return {fixture:{...expected,season:f.season,sources:registered},payload,layout:ordered.audit};
 }
 function concreteBlock(packet,failure) {
@@ -202,4 +193,4 @@ function concreteBlock(packet,failure) {
   });
   return {reason:`${packet.team}, ${failure.source}: ${failure.kind==='official'?'Once oficial disponible: no sustituir el pronóstico. ':''}${failure.detail}`,checks};
 }
-module.exports = {compile,EvidenceFailure,fixtureOf,concreteBlock};
+module.exports = {compile,EvidenceFailure,fixtureOf,concreteBlock,jsonbByteLength};

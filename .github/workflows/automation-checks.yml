@@ -4,6 +4,7 @@ on:
     paths:
       - 'AGENTS.md'
       - 'docs/automation/**'
+      - 'docs/forecast-publish/**'
       - 'docs/news/**'
       - 'scripts/forecast/**'
       - 'scripts/*forecast*.cjs'
@@ -19,6 +20,7 @@ on:
     paths:
       - 'AGENTS.md'
       - 'docs/automation/**'
+      - 'docs/forecast-publish/**'
       - 'docs/news/**'
       - 'scripts/forecast/**'
       - 'scripts/*forecast*.cjs'
@@ -47,8 +49,8 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - name: Verificar fallas conocidas sin red ni publicaciones
-        run: node --test tests/automation-*.test.cjs tests/forecast-file-bridge.test.cjs tests/forecast-collector.test.cjs tests/forecast-producer.test.cjs tests/forecast-producer-db.test.cjs tests/forecast-read-session.test.cjs tests/forecast-layout.test.cjs tests/forecast-review-preflight.test.cjs tests/forecast-inspect-review.test.cjs tests/forecast-source-summary.test.cjs tests/forecast-editorial-v5-db.test.cjs tests/dispatch-clock-db.test.cjs tests/news-coverage-db.test.cjs
+        run: node --test tests/automation-*.test.cjs tests/forecast-file-bridge.test.cjs tests/forecast-collector.test.cjs tests/forecast-producer.test.cjs tests/forecast-producer-db.test.cjs tests/forecast-read-session.test.cjs tests/forecast-layout.test.cjs tests/forecast-review-preflight.test.cjs tests/forecast-inspect-review.test.cjs tests/forecast-source-summary.test.cjs tests/forecast-editorial-v5-db.test.cjs tests/forecast-editorial-v6-db.test.cjs tests/dispatch-clock-db.test.cjs tests/news-coverage-db.test.cjs
       - name: Verificar ficha, contexto y vista previa de alineaciones
-        run: node --test tests/forecast-player-sheet.test.cjs tests/forecast-publish.test.cjs tests/forecast-context.test.cjs tests/forecast-candidates.test.cjs tests/forecast-round.test.cjs tests/forecast-predicted11.test.cjs
+        run: node --test tests/forecast-player-sheet.test.cjs tests/forecast-publish.test.cjs tests/forecast-context.test.cjs tests/forecast-context-loader.test.cjs tests/forecast-candidates.test.cjs tests/forecast-round.test.cjs tests/forecast-predicted11.test.cjs tests/forecast-comuniate-default.test.cjs tests/forecast-v6-presentation.test.cjs
       - name: Verificar noticias y prevención de duplicados
         run: node --test tests/news*.test.cjs

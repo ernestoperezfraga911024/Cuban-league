@@ -97,5 +97,10 @@
       "start": 60379,
       "end": 63867
     }
-  ]
+  ],
+  "archived_contracts": {
+    "health": "archive/health-contract-20261114.md",
+    "news": "archive/news-contract-20261114.md",
+    "forecasts": "archive/forecasts-contract-20261114.md"
+  }
 }
