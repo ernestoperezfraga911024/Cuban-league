@@ -2,6 +2,7 @@
 const {compile,concreteBlock,EvidenceFailure} = require('./editorial-producer.cjs');
 const {LayoutFailure} = require('./lineup-layout.cjs');
 const {identityReference} = require('./identity-reference.cjs');
+const {reviewPreflight} = require('./review-preflight.cjs');
 const {isDeepStrictEqual:same} = require('node:util');
 const {verifyPublication} = require('./season-gateway.cjs');
 // The existing dispatcher opens the run. This runner never creates/reopens a run,
@@ -49,12 +50,19 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
           const identity_names = [...new Set([
             ...Object.values(packet.observations||{}).flat().map(p=>p.name),
             ...(packet.comuniate_alternatives?.players||[]).map(p=>p.name),
+            ...Object.values(packet.layouts||{}).flatMap(layout=>(layout.points||[]).map(p=>p.name)),
             ...(packet.predictions||[]).filter(p=>p.status==='complete_unvalidated').flatMap(p=>(p.data?.participacion||[]).map(p=>p.nombre?.trim()))
           ].filter(Boolean))];
           const identity_reference = identityReference(team,roster,identity_names);
           let review,built,correction=null,followups=0;
           for (;;) {
-            review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,identity_names,identity_reference}));
+            review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,identity_names,identity_reference,
+              review_requirements:[
+                'Resolver todos los nombres observados y alternativas antes de enviar; no corregir solamente el primer nombre de un error.',
+                'Una observación canónica por jugador y fuente. Si el cuerpo muestra un titular como alternativa de otro puesto, conservar el titular, explicar la redundancia revisada en limitations y conservar el cuerpo original.',
+                'Revisar cada fila con coordenadas reales. Elegir otra fuente si la formación elegida mezcla posiciones horizontales iguales; nunca fabricar coordenadas.',
+                'Cada alternativa de un titular bajo70 requiere compatibilidad táctica revisada: cotejar el puesto y la relación observada, no reutilizar un candidato indiscriminadamente en todas las líneas.'
+              ]}));
             if(review?.follow){
               if(followups++>=12)throw Error('Additional reading limit reached; review remains missing');
               await timed('read_ms',()=>collector.follow(packet,review.follow.from,review.follow.url));continue;
@@ -71,10 +79,17 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
               }
               break;
             }
-            try{built=compile(packet,review,roster,{notBefore,expiresAt,observedAt:state.observed_at});break;}
+            try{
+              const issues=reviewPreflight(packet,review,roster);
+              if(issues.length){
+                const error=new EvidenceFailure(issues.map(i=>i.message).join('; '));
+                error.issues=issues;throw error;
+              }
+              built=compile(packet,review,roster,{notBefore,expiresAt,observedAt:state.observed_at});break;
+            }
             catch(error){
               if(!(error instanceof EvidenceFailure || error instanceof LayoutFailure)||correction)throw error;
-              correction={attempt:1,reason:error.message};timing.review_corrections++;
+              correction={attempt:1,reason:error.message,...(error.issues?{issues:error.issues}:{})};timing.review_corrections++;
               // One correction, same captured bodies/timestamps and same roster.
               // Every validator runs again; no inferred aliases or bypass.
             }

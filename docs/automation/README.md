@@ -1,6 +1,6 @@
 # Metodología operativa — ops-v2
 
-Estado: 15/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
+Estado: 16/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
 
 ## Prioridades y límites vigentes
 
@@ -95,3 +95,53 @@ Balón parado es un workflow independiente, determinista, descrito en `../set-pi
 164 pruebas relacionadas aprobadas, incluidas las regresiones nuevas y los controles de interfaz/contexto existentes. Una prueba de solo lectura con el conector real transfirió íntegros 95.000 caracteres Unicode; stdin recibió únicamente 73 caracteres de ID/ruta. No publicó una alineación ni acredita una ejecución completa de 20 clubes. Las incidencias que requieren ese recorrido permanecen `regression-tested-awaiting-run`. La duración de esa prueba no es una medición de ahorro del proceso completo.
 
 Mantenimiento posterior a la ejecución extraordinaria del 14/11: 169 pruebas relacionadas aprobadas. Las regresiones reproducen el reintento de colocación/alternativa, la revisión de fallo declarado de identidad, referencias Antony restringidas al roster, fechas +00:00 aceptadas por PostgreSQL tras normalizar el payload y exclusión de procesos desde distintos checkouts, incluida salida forzada. Sin nuevas publicaciones ni cambios de SQL, catálogo, puntuaciones, pesos o horarios. Son correcciones probadas en código; su próxima ejecución deportiva real debe confirmar la validación en producción.
+
+
+## Revisión de fiabilidad y calidad del 16/11
+
+Esta revisión prevalece sobre las recetas anteriores de entrada estándar. En las
+nuevas ejecuciones usar obligatoriamente `--file-bridge` y las variables
+`FORECAST_EXECUTION_KEY` y `FORECAST_CODE_SHA` reales de la invocación. Abrir el
+run por su dispatcher antes de iniciar el CLI. El transporte de respuestas sigue
+siendo por archivo íntegro y atómico, pero ya no depende de mantener stdin ni un
+identificador de sesión abierto. Guardar el directorio y el último cursor de
+`events.ndjson`; si se pierde el identificador de shell, reconectar al mismo
+proceso con el adaptador, nunca iniciar otra instancia por ese motivo. El bloqueo
+local y todas las guardas transaccionales permanecen vigentes.
+
+Las solicitudes incluyen plazo real; la revisión dispone de hasta diez minutos,
+limitados siempre por el vencimiento original de la evidencia. SQL conserva su
+plazo acotado. Una respuesta tardía no renueva lecturas ni reabre la solicitud.
+El marcador de ejecución del adaptador impide repetir una consulta por volver a
+leer un evento. Una respuesta SQL perdida exige comprobar estado antes de decidir.
+
+Antes del primer envío, inspeccionar el paquete con el lector de diagnóstico del
+repositorio y seguir `review-checklist.md`. El preflight devuelve juntos los
+nombres sin resolver, duplicados y problemas de geometría. No reemplaza la
+revisión humana del agente, no corrige identidades por similitud y no amplía la
+única corrección permitida. Si una fuente repite un titular como alternativa,
+revisar el cuerpo, mantenerlo una sola vez en las observaciones canónicas y
+explicar la contradicción en limitations; conservar el cuerpo original.
+
+Conciliar la disponibilidad entre las tres fuentes. «Duda», ausencia de una lista
+o una fecha estimada no equivalen por sí solas a baja confirmada para el partido.
+No marcar ausencia confirmada sin resolver evidencias que dicen «Disponible».
+Alternativas: comprobar pareja táctica real o justificar la sustitución; las
+posiciones generales del catálogo son ayuda, no un bloqueo automático para
+jugadores polivalentes. Ninguna de estas comprobaciones cambia pesos o cálculos.
+
+Cada nueva ejecución conserva eventos privados detallados según `trace-events.md`
+y un paquete de diagnóstico. Al cerrar, verificar el acuse de persistencia de
+todas las trazas deportivas. Si falla, conservar el diario local y registrar la
+incidencia; no repetir escrituras deportivas para reconstruir una respuesta.
+Exportar el directorio de la ejecución con `scripts/export-forecast-trace.py` y
+conservar el ZIP privado con la capacidad de archivos existente. Registrar su
+identificador real en los checks del informe. Si no está disponible, informar
+que el archivo detallado sigue pendiente, sin afirmar que se guardó. No publicar
+estos archivos en el repositorio público. Los datos exportados son para diagnóstico,
+nunca evidencia nueva. Los hashes originales permiten comprobar su procedencia.
+
+La reparación interactiva y sus pruebas se documentan en
+`reports/2026-11-16-1400-diagnosis.md`. La ejecución periódica sigue sin permiso
+para modificar código/esquema: únicamente utiliza las funciones instaladas de
+publicación, `automation_ops.record_run` y `automation_ops.record_trace`.

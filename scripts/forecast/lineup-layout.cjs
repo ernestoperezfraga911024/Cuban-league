@@ -4,13 +4,19 @@
 class LayoutFailure extends Error {
   constructor(message) { super(message); this.name = 'LayoutFailure'; }
 }
-function orderSelection(packet, selection, resolve) {
+function inspectSelection(packet, selection, resolve, collectIssues = false) {
   const fail = message => { throw new LayoutFailure(`${packet.team}: colocación pendiente: ${message}`); };
+  const issues = [];
   const sizes = [1, ...selection.formation.split('-').map(Number)];
-  if (selection.layout?.rows?.length !== sizes.length) fail('falta una referencia por fila, incluida portería');
+  if (selection.layout?.rows?.length !== sizes.length) {
+    if (!collectIssues) fail('falta una referencia por fila, incluida portería');
+    issues.push({row:null,message:`${packet.team}: colocación pendiente: falta una referencia por fila, incluida portería`});
+  }
   const result = [], audit = [], usedAnchors = new Set(); let offset = 0;
   for (const [row, size] of sizes.entries()) {
-    const ref = selection.layout.rows[row], source = ref?.source;
+    const priorAnchors=collectIssues?new Set(usedAnchors):null;
+    try {
+    const ref = selection.layout?.rows?.[row], source = ref?.source;
     const captured = packet.layouts?.[source], doc = packet.docs[source];
     if (!['futbolfantasy','jornadaperfecta'].includes(source) || !captured || !doc ||
         captured.sha256 !== doc.sha256 || ref.sha256 !== doc.sha256 ||
@@ -49,8 +55,16 @@ function orderSelection(packet, selection, resolve) {
     placed.sort((a,b)=>a.point.x-b.point.x);
     result.push(...placed.map(p=>p.choice));
     audit.push({source,sha256:doc.sha256,ids:placed.map(p=>p.choice.id),anchors});
-    offset += size;
+    } catch (error) {
+      if (!collectIssues || !(error instanceof LayoutFailure)) throw error;
+      issues.push({row,message:error.message});
+      // A failed diagnostic row must not invent an occupied anchor downstream.
+      usedAnchors.clear();for(const id of priorAnchors)usedAnchors.add(id);
+    } finally { offset += size; }
   }
+  if (collectIssues) return issues;
   return {players:result,audit:{direction:'left-to-right',rows:audit,reordered:result.some((p,i)=>p.id!==selection.players[i].id)}};
 }
-module.exports = {orderSelection,LayoutFailure};
+const orderSelection = (packet,selection,resolve) => inspectSelection(packet,selection,resolve);
+const diagnoseLayout = (packet,selection,resolve) => inspectSelection(packet,selection,resolve,true);
+module.exports = {orderSelection,diagnoseLayout,LayoutFailure};

@@ -102,6 +102,7 @@ class TeamCollector {
   constructor(reader, capture) { this.reader = reader; this.capture = capture; }
 
   async follow(packet, from, url) {
+    this.reader.traceTeam=packet.team;
     const parent = packet.docs[from];
     if (!parent) throw Error('Follow requires a page already read in this execution');
     const page = await this.reader.read(parent.url);
@@ -116,6 +117,7 @@ class TeamCollector {
   }
 
   async collect(team) {
+    this.reader.traceTeam=team.team;
     const started = performance.now();
     const result = {team: team.team, publication_ready: false, fixture_verified: false,
       expected_fixture: team.fixture, docs: {}, observations: {}, layouts: {}, errors: [], rankings: [], predictions: []};

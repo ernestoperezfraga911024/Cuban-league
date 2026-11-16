@@ -1,6 +1,6 @@
 # Bitácora privada
 
-Solo `automation_ops.record_run(jsonb)` y lecturas de `automation_ops.run_log` en Cuban League. No exponer esta tabla al navegador ni otorgar permisos a anon/authenticated/service_role. Máximo 16 KiB por entrada. No requiere servicios ni suscripciones nuevos.
+Resumen: `automation_ops.record_run(jsonb)` y lecturas de `automation_ops.run_log` en Cuban League. Trazas detalladas: `automation_ops.record_trace(jsonb)` y lecturas de `automation_ops.trace_events`, según `trace-events.md`. No exponer esta tabla al navegador ni otorgar permisos a anon/authenticated/service_role. Máximo 16 KiB por entrada. No requiere servicios ni suscripciones nuevos.
 
 `execution_key`: `cuban-league-` + scheduled_for UTC sin puntuación (minúsculas), o el inicio real si falta scheduled_for. No sustituye el run_key deportivo. Una invocación usa una sola clave. `scheduled_for` es el contexto real o null. `code_sha` es el SHA de main realmente leído/ejecutado; no un mínimo ni ejemplo. Mantenerlo fijo toda la invocación. Cambios de metodología/código no se hacen a mitad de una ejecución.
 
@@ -37,3 +37,11 @@ Un fallo del registro permite un reintento con la misma clave y reporte. Si pers
 Reversión de esta función: dejar de llamarla y restaurar el prompt anterior. Conservar las filas para auditoría. No hace falta borrar tablas o datos deportivos.
 
 Mantenimiento ops-v2: instalar únicamente `audit-v2.sql` sobre la función privada ya existente, tras verificar su definición y probarla. Conserva tabla, filas, permisos y RLS; no reinstalar todo `audit.sql`. Reversión del código: restaurar el commit anterior; el protocolo v2 requiere prompt y runner compatibles. La función v2 sigue aceptando informes ops-v1.
+
+
+Las trazas detalladas son anexas e inmutables; no sustituyen el resumen ni los
+registros deportivos. Conservar el resultado del volcado final y la cantidad de
+eventos confirmados. No llamar «trazas completas» a un acuse con eventos pendientes.
+Noticias conserva además su ledger de artículos y cobertura por club; incluir
+sus archivos de diagnóstico en la misma conservación privada al cerrar el flujo.
+El estado del programador siempre se informa separado de completitud y calidad.
