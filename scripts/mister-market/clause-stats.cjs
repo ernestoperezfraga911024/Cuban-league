@@ -48,8 +48,9 @@ function clauseReport(snapshot, ledger, verification = null) {
     if (verification.snapshotHash !== snapshot.snapshotHash || verification.leagueId !== snapshot.leagueId
       || verification.histories?.length !== snapshot.players.length
       || verification.histories.some((h, i) => h.playerId !== snapshot.players[i].playerId)) fail('verification_snapshot_mismatch');
-    profiles = { coverage: 'latest_visible_per_player', completeSeason: false,
-      observedThrough: verification.completedAt, playersChecked: verification.histories.length,
+    profiles = { coverage: verification.profileRefresh ? 'accumulated_observed_profile_windows' : 'latest_visible_per_player', completeSeason: false,
+      observedThrough: verification.profileRefresh?.completedAt || verification.completedAt,
+      baselineObservedAt: verification.completedAt, playersChecked: verification.histories.length,
       ...summarizeClauses(verification.histories.flatMap(h => h.movements.map((m, index) => ({
         reference: `${h.playerId}:row:${index}`, playerId: h.playerId, type: m.type, amount: m.amount,
         occurredOn: m.occurredOn, fromOwnerId: m.from.managerId, toOwnerId: m.to.managerId,

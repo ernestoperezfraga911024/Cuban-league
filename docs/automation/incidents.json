@@ -309,6 +309,18 @@
         "tests/mister-market.test.cjs"
       ],
       "evidence": "CI job 132983633304: 53 pruebas del lector y la regresión real de Chromium aprobadas; la tarjeta local de 6.000px reproduce el fallo previo y el marcador permite terminar. Recuperación real verificada: run 43770209824, job 132984201488, main 7775a1ee2de5510399b1929b70aaf87e31dce016. Publicó 15/11/2026 22:38:58 UTC (17:38:58 Miami), outcome=published y visible=true; 538 jugadores, 20 equipos, 2 cambios, 392 eventos acumulados, 1 nuevo, 445 cláusulas documentadas, 0 gaps y aiCalls=0. Lectura 136.241 ms; trabajo completo 2m51s. Revisión c7ef8e866659047a1e3b24204ef90b846a04699a468d253e06669561a7006946. El historial superó la página 15 y agotó 20 páginas/357 tarjetas."
+    },
+    {
+      "code": "mister-undated-clause-profile-not-refreshed",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Dos cláusulas del portal estaban contabilizadas sin fecha porque el worker reutilizaba las fichas de la verificación anterior: F. De Jong, Arian Mirandez Li a Rivaldo, 2.952.000; T. Kubo, Yovany R9 a ANDOBA THE BEST, 10.598.000.",
+      "cause": "El worker verificaba equipos con teamsOnly y conciliaba el nuevo feed con backup.verification sin releer los perfiles pendientes.",
+      "prevention": "Relectura selectiva y acotada de perfiles con fechas pendientes; coincidencia exacta, multiconjuntos, conservación de todas las filas previas y del total por partes/importe. Evidencia privada por lectura y persistencia en archivo. Fallos o ambigüedad permanecen pendientes; no inventar fechas ni elegir una fila arbitraria. Ver docs/mister-market/profile-date-refresh.md.",
+      "tests": [
+        "tests/market-profile-refresh.test.cjs",
+        "tests/market-automation.test.cjs"
+      ],
+      "evidence": "Antes del cambio: 445 cláusulas, 443 fechadas; hash de historial 1c0ac3fe60dea302f88507f2b42365d47f794c6b489dad3d6060e6641dba053f. Regresiones verifican igualdad de conteos/importes, referencias anteriores, duplicados, rotación de pendientes, fallos, contexto/portal, archivo comprimido y recorrido del worker en modo test. Ejecución real pendiente."
     }
   ]
 }

@@ -2,6 +2,7 @@
 const {collect}=require('./collector.cjs'),{verifySnapshot}=require('./verification.cjs'),{collectHistory,mergeLedger}=require('./history.cjs');
 const {compare,fail,MarketError}=require('./core.cjs'),{clauseReport}=require('./clause-stats.cjs');
 const {restoreArchive}=require('./restore-archive.cjs'),{prepare}=require('./publication.cjs'),{sealSession}=require('./seal-session.cjs');
+const {refreshPendingDates}=require('./profile-refresh.cjs');
 const endpoint='https://pyahosamoisqcbpvzwka.supabase.co/functions/v1/mister-market-sync';
 async function rpc(action,data){
  const url=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);url.searchParams.set('audience',endpoint);
@@ -29,11 +30,13 @@ async function run({request=rpc,mode=process.env.MARKET_MODE||'test',dispatchId=
   if(JSON.stringify(current.movements.map(e=>e.eventId).sort())!==JSON.stringify(history.headEventIds.slice().sort()))fail('feed_changed_during_verification');
   stage('reconciliation');
   const ledger=mergeLedger(backup.feedLedger,history);
-  const next={...backup,exportedAt:new Date().toISOString(),captures:[baseline,current],rosterVerification:rosters,feedLedger:ledger,clauseStatistics:clauseReport(baseline,ledger,backup.verification)};
+  stage('profile_dates');
+  const refreshed=await refreshPendingDates(page,current,ledger,backup.verification,{progress});
+  const next={...backup,exportedAt:new Date().toISOString(),captures:[baseline,current],rosterVerification:rosters,feedLedger:ledger,verification:refreshed.verification,clauseStatistics:clauseReport(baseline,ledger,refreshed.verification)};
   const participants=require('../../data.json').participants;
   const prepared=prepare(next,participants,{reconciled:true});
   const sealedSession=sealSession(await context.storageState(),state.publicKey);
-  const metrics={methodology:'mister-market-v2',aiCalls:0,players:current.players.length,teams:rosters.teams.length,changes:delta.changes.length,feedEvents:ledger.events.length,newEvents:ledger.newlyObservedIds.length,documentedClauses:prepared.payload.history.events.length,coverageGaps:ledger.coverageGaps.length,readMs:Date.now()-start};
+  const metrics={methodology:'mister-market-v2',aiCalls:0,players:current.players.length,teams:rosters.teams.length,changes:delta.changes.length,feedEvents:ledger.events.length,newEvents:ledger.newlyObservedIds.length,documentedClauses:prepared.payload.history.events.length,coverageGaps:ledger.coverageGaps.length,...refreshed.metrics,readMs:Date.now()-start};
   // Once finish is sent its outcome may be unknown. Never retry a write or mark
   // it failed merely because the response was lost; inspect the durable run.
   stage('publication');finishing=true;
