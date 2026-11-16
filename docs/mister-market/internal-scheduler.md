@@ -7,11 +7,31 @@ en GitHub, con su identidad OIDC, sesión sellada, lease y publicación atómica
 
 ## Estado de esta entrega
 
-Implementación preparada y pruebas locales; **no activada**. La configuración
-nace deshabilitada y en modo `test`. No se ha instalado una credencial de GitHub.
-El éxito del 16/11 a las 04:05 Miami corresponde al cron nativo anterior, no a
-este disparador. No se da por resuelta la incidencia hasta verificar recorridos
-reales del reloj nuevo.
+**Activado en producción el 16/11/2026**, enabled=true y dispatch_mode=sync.
+PR131 integrado en b951a3780d99c797aab6dd3fe5eafdfa61e2d9cc; migración instalada,
+Edge Function versión 2 desplegada y job privado cada minuto. Credencial limitada
+a Actions de este repositorio guardada en Vault; vence el **14/02/2027** y debe
+renovarse antes de esa fecha manteniendo el mismo alcance.
+
+El cron interno, sin ejecutar scheduler_tick manualmente, solicitó ambos trabajos:
+
+- Prueba [43894481782](https://github.com/ernestoperezfraga911024/Cuban-league/actions/runs/43894481782): solicitud 10:16:00 Miami, HTTP200, worker 10:16:42–10:18:51,
+  resultado tested, 538 jugadores, 20 participantes, 396 eventos acumulados,
+  445 cláusulas, 0 gaps y aiCalls=0. Lectura 130.417 ms.
+  La revisión pública anterior permaneció intacta.
+- Publicación [43895193458](https://github.com/ernestoperezfraga911024/Cuban-league/actions/runs/43895193458): solicitud 10:20:00 Miami, HTTP200, worker 10:20:50–10:22:52,
+  resultado published y visible=true, 538 jugadores, 20 participantes,
+  396 eventos, 445 cláusulas, 0 gaps y aiCalls=0. Lectura 121.730 ms.
+  Revisión 30466300a4dc005e917e6fd61b4ce404227002adce636769607fbb9e1ff804b1.
+
+El hash íntegro del historial (fechas, partes e importes) siguió siendo
+1c0ac3fe60dea302f88507f2b42365d47f794c6b489dad3d6060e6641dba053f.
+Conserva 443 cláusulas fechadas y dos desconocidas; no se inventaron fechas.
+Ambas ejecuciones pertenecen a la ventana real del turno de 09:00; la activación
+ocurrió después de esa hora. Acreditan el recorrido del disparador, **todavía no
+la recurrencia de un turno posterior**. Próximo turno: 16/11/2026 13:00 Miami.
+Mantener la incidencia abierta hasta verificar esa recurrencia; no se promete
+puntualidad garantizada ni vigilancia externa.
 
 ## Funcionamiento y límites
 
