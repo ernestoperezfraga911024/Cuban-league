@@ -46,3 +46,25 @@ mantiene la publicación anterior; después debe comprobarse la publicación syn
 y la reutilización del archivo. Las pruebas sintéticas están en
 tests/market-profile-refresh.test.cjs; el resultado real se registra en el PR de
 entrega y la bitácora. No declarar una fecha recuperada antes de observarla.
+
+## Verificación real del 16/11/2026
+
+PR133, SHA c13b2844d4a5475779445997eb9db8e547736bca. Ambos controles CI
+aprobados: 75 pruebas del lector/BD/interfaz/disparador y paginación Chromium.
+
+- [Test 43900127968](https://github.com/ernestoperezfraga911024/Cuban-league/actions/runs/43900127968): terminó a las 10:49:42 Miami; dos fichas en 4.163 ms, una fecha recuperada y cero errores. La revisión pública anterior permaneció intacta.
+- [Sync 43900969655](https://github.com/ernestoperezfraga911024/Cuban-league/actions/runs/43900969655): publicó a las 10:54:48 Miami, visible=true, 538 jugadores, 20 participantes, 445 cláusulas, 444 fechadas, cero gaps y aiCalls=0. Solo releyó la ficha aún pendiente, en 2.778 ms; Kubo mantuvo su fecha desde el archivo.
+
+La fecha recuperada de **T. Kubo es 15/11/2026**, Yovany R9 a ANDOBA THE BEST,
+10.598.000. Se compararon las 443 fechas anteriores y el multiconjunto completo
+de jugador/partes/importes: idénticos. Revisión pública final:
+642c37c4973466e4588e8a8b23235f993cea94352c565b6261ca8fcb0066079d.
+
+**F. De Jong sigue sin fecha** para Arian Mirandez Li a Rivaldo, 2.952.000.
+La lectura real mostró cinco movimientos, del 23/10 al 04/11; ninguno acredita
+esa operación. Queda not_found y se conserva la fecha desconocida. Esto describe
+la ventana observada, no demuestra que el dato sea inaccesible por cualquier
+otra vista de Mister. No se usó la fecha de otro clausulazo ni de captura.
+
+El reloj continúa enabled=true/sync con los cinco horarios. Estas dos ejecuciones
+extraordinarias verifican lector y publicación; no prueban recurrencia futura.

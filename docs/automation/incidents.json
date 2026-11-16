@@ -312,7 +312,7 @@
     },
     {
       "code": "mister-undated-clause-profile-not-refreshed",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "Dos cláusulas del portal estaban contabilizadas sin fecha porque el worker reutilizaba las fichas de la verificación anterior: F. De Jong, Arian Mirandez Li a Rivaldo, 2.952.000; T. Kubo, Yovany R9 a ANDOBA THE BEST, 10.598.000.",
       "cause": "El worker verificaba equipos con teamsOnly y conciliaba el nuevo feed con backup.verification sin releer los perfiles pendientes.",
       "prevention": "Relectura selectiva y acotada de perfiles con fechas pendientes; coincidencia exacta, multiconjuntos, conservación de todas las filas previas y del total por partes/importe. Evidencia privada por lectura y persistencia en archivo. Fallos o ambigüedad permanecen pendientes; no inventar fechas ni elegir una fila arbitraria. Ver docs/mister-market/profile-date-refresh.md.",
@@ -320,7 +320,8 @@
         "tests/market-profile-refresh.test.cjs",
         "tests/market-automation.test.cjs"
       ],
-      "evidence": "Antes del cambio: 445 cláusulas, 443 fechadas; hash de historial 1c0ac3fe60dea302f88507f2b42365d47f794c6b489dad3d6060e6641dba053f. Regresiones verifican igualdad de conteos/importes, referencias anteriores, duplicados, rotación de pendientes, fallos, contexto/portal, archivo comprimido y recorrido del worker en modo test. Ejecución real pendiente."
+      "evidence": "Antes del cambio: 445 cláusulas, 443 fechadas; hash de historial 1c0ac3fe60dea302f88507f2b42365d47f794c6b489dad3d6060e6641dba053f. Regresiones verifican igualdad de conteos/importes, referencias anteriores, duplicados, rotación de pendientes, fallos, contexto/portal, archivo comprimido y recorrido del worker en modo test. Ejecución real pendiente.",
+      "production_evidence": "PR133 integrado en c13b2844d4a5475779445997eb9db8e547736bca, ambos controles CI aprobados (75 pruebas más paginación Chromium). Test 43900127968 completó 16/11/2026 10:49:42 Miami: dos fichas, 4.163 ms, una fecha recuperada, cero errores y publicación anterior intacta. El detalle de Kubo acredita 15/11/2026, Yovany R9 a ANDOBA THE BEST, 10.598.000. Sync 43900969655 publicó a 10:54:48, revisión 642c37c4973466e4588e8a8b23235f993cea94352c565b6261ca8fcb0066079d: 538 jugadores, 20 participantes, 445 cláusulas, 444 fechadas, cero gaps/IA/errores. Conservó las 443 fechas anteriores y todos los conteos, participantes e importes. Solo releyó De Jong (2.778 ms); la fecha de Kubo sobrevivió al archivo sin releer su ficha. De Jong sigue sin fecha: el detalle mostró cinco operaciones de 23/10 a 04/11, ninguna Arian a Rivaldo por 2.952.000. No se asignó otra fecha. Horarios y reloj enabled=true/sync sin cambios; estas comprobaciones fueron extraordinarias, no acreditan recurrencia del turno de 13:00."
     }
   ]
 }
