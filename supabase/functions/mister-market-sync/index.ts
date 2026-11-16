@@ -21,7 +21,10 @@ Deno.serve(async(req:Request)=>{
   const body=JSON.parse(new TextDecoder().decode(bytes));
   if(!['begin','finish','fail'].includes(body.action))throw Error('invalid_action');
   const data=body.data||{};
-  if(body.action==='begin')data.mode=claims.event_name==='schedule'?'sync':data.mode;
+  if(body.action==='begin'){
+   data.event=claims.event_name;
+   data.mode=claims.event_name==='schedule'?'sync':data.mode;
+  }
   const base=Deno.env.get('SUPABASE_URL')!;const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   if(base!=='https://pyahosamoisqcbpvzwka.supabase.co'||!key)throw Error('configuration_error');
   const response=await fetch(`${base}/rest/v1/rpc/mister_market_worker`,{method:'POST',headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({p_action:body.action,p_run:`${claims.run_id}:${claims.run_attempt}`,p_sha:claims.sha,p_data:data}),signal:AbortSignal.timeout(60000)});

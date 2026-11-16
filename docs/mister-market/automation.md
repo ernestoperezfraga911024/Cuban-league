@@ -54,3 +54,7 @@ La paginación del portal desplaza el marcador `.loading-more`, situado después
 La ejecución manual [43770209824](https://github.com/ernestoperezfraga911024/Cuban-league/actions/runs/43770209824), con main `7775a1e`, superó la página 15 que había bloqueado la lectura anterior y agotó 20 páginas del portal. Publicó a las **17:38:58 Miami**: 538 jugadores, 20 equipos, dos cambios, 392 movimientos acumulados (uno nuevo), 445 cláusulas documentadas, cero gaps y cero llamadas de IA. Lectura 136.241 ms; ejecución completa 2m51s. Los intentos fallidos conservaron la publicación previa.
 
 La reparación de la paginación queda verificada por regresión con Chromium y una publicación real. El cron sigue activo con los cinco horarios autorizados, pero en la consulta posterior a las 22:00 Miami seguían sin aparecer los eventos de las 17:00 y 21:00. La auditoría localiza la demora observada antes del arranque del lector, con retrasos también en otros workflows; la causa interna sigue sin establecerse. Una recuperación manual no prueba el próximo arranque automático.
+
+## Disparador interno preparado (16/11/2026)
+
+La implementación y su activación por etapas están en [internal-scheduler.md](internal-scheduler.md). Conserva el lector y los cinco horarios, añade un reloj privado en Supabase y deduplica el respaldo nativo. Nace deshabilitado y en modo test; no confundir las regresiones locales con una ejecución real del nuevo reloj.
