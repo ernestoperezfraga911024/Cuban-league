@@ -1,5 +1,7 @@
 # Contexto de alineaciones por equipo
 
+Actualización 16/11/2026: la carga de iconos consulta únicamente el estado directo de FutbolFantasy; ya no se ejecuta la consulta adicional del historial sanitario de noticias. Los artículos conservan su paginación independiente. Las mediciones y reglas descritas abajo corresponden a la versión del 13/11, no a una nueva medición del cambio actual. Véase `player-health.md` para la regla vigente.
+
 El once deja de esperar a que se descargue el archivo completo de noticias. La lectura de los 20 pronósticos y el catálogo conserva su comportamiento; después se inicia el contexto del equipo seleccionado.
 
 - Cinco noticias iniciales por club, con una fila adicional para detectar si hay más. El botón solicita las siguientes veinte mediante cursor de fecha y clave, conservando los microsegundos del servidor.

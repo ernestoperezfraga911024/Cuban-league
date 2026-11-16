@@ -6,7 +6,7 @@ const {SeasonGateway}=require('../scripts/forecast/season-gateway.cjs');
 const read=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8');
 // Import shared synthetic data without importing another test module.
 const {example}=require('./fixtures/forecast-producer.cjs');
-test('producer and gateway run against PostgreSQL assess/build_team with the installed v5 hashes',async()=>{
+test('producer and gateway run against PostgreSQL v6 with the installed legacy hashes preserved',async()=>{
  const db=new PGlite();try{
  await db.exec(`create role anon;create role authenticated;create role service_role;
  create schema forecast_league;create schema forecast_season;create schema forecast_publish;
@@ -24,6 +24,7 @@ test('producer and gateway run against PostgreSQL assess/build_team with the ins
  await db.exec(read('docs/forecast-publish/candidates.sql'));await db.exec(read('docs/forecast-publish/editorial-v5.sql'));await db.exec(read('docs/forecast-publish/source-summary.sql'));
  const hashes=(await db.query("select md5(pg_get_functiondef('forecast_publish.assess(jsonb)'::regprocedure)) assess,md5(pg_get_functiondef('forecast_season.build_team(jsonb,interval)'::regprocedure)) builder")).rows[0];
  assert.deepEqual(hashes,{assess:'1e3dae90e7f37624d6b5ca686835cefe',builder:'f30f730355203b835804b2f6c08b7188'});
+ await db.exec(read('docs/forecast-publish/editorial-v6.sql'));
  const x=example(),f=x.review.fixture,urls=Object.fromEntries(Object.entries(x.packet.docs).filter(([k])=>k!=='comuniate_team').map(([id,d])=>[id,d.url]));
  await db.query('insert into forecast_league.teams values($1,$2)',[x.packet.team,JSON.stringify(urls)]);
  await db.query('insert into forecast_season.fixtures values($1,$2,$3,$4,$5,$6)',[f.key,f.matchday,f.home,f.away,f.kickoff_at,JSON.stringify(urls)]);
@@ -36,7 +37,7 @@ test('producer and gateway run against PostgreSQL assess/build_team with the ins
   x.packet.observations.comuniate[0].probability=pct;
   const {payload,fixture}=compile(x.packet,x.review,x.roster,x.window),r=await gateway.validate(x.packet.team,fixture,payload);
   assert.equal(r.projection.players.length,11);assert.equal(r.projection.candidates.length,1);
-  assert.equal(r.scores.length,12);assert.equal(r.projection.method_version,'editorial-v5');
+  assert.equal(r.scores.length,12);assert.equal(r.projection.method_version,'editorial-v6');
   assert.equal(r.projection.players[0].probability,payload.proposal.players[0].probability);
  }
  assert.match(captured,/set_config/);

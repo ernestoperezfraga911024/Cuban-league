@@ -21,14 +21,40 @@ test('captured Comuniate alternative cannot silently become not_listed or gain a
  for(const mutate of [x=>x.review.sources.comuniate.alternatives=[],x=>x.review.sources.comuniate.alternatives[0].probability=50,x=>delete x.packet.comuniate_alternatives]){const x=example();mutate(x);assert.throws(()=>compile(x.packet,x.review,x.roster,x.window),/alternativa/);}
  const x=example(),out=compile(x.packet,x.review,x.roster,x.window);assert.equal(out.payload.sources[2].player_observations[11].prediction,'alternative');assert.equal(out.payload.sources[2].player_observations[11].probability,null);
 });
-test('modular contracts preserve every original authorized section byte for byte',async()=>{
+test('archived modular contracts preserve every original authorized section byte for byte',async()=>{
  const dir=path.join(__dirname,'../docs/automation'),original=await fs.readFile(path.join(dir,'previous-prompt-20261114.txt'),'utf8'),map=JSON.parse(await fs.readFile(path.join(dir,'contract-map.json')));
  assert.equal(createHash('sha256').update(original).digest('hex'),map.archived_prompt_sha256);
  assert.equal(map.sections[0].start,0);assert.equal(map.sections.at(-1).end,original.length);
  map.sections.slice(1).forEach((s,i)=>assert.equal(s.start,map.sections[i].end));
  const ids=Object.values(map.groups).flat();assert.equal(new Set(ids).size,map.sections.length);assert.equal(ids.length,map.sections.length);
- for(const [name,keys]of Object.entries(map.groups)){const expected=keys.map(k=>{const s=map.sections.find(s=>s.id===k);return original.slice(s.start,s.end);}).join('');assert.equal(await fs.readFile(path.join(dir,'contracts',name+'.md'),'utf8'),expected);}
+ for(const [name,keys]of Object.entries(map.groups)){const expected=keys.map(k=>{const s=map.sections.find(s=>s.id===k);return original.slice(s.start,s.end);}).join('');const archived=map.archived_contracts?.[name];if(archived)assert.match(archived,/^archive\/[a-z-]+-contract-\d{8}\.md$/);assert.equal(await fs.readFile(path.join(dir,archived||('contracts/'+name+'.md')),'utf8'),expected);}
  const registry=JSON.parse(await fs.readFile(path.join(dir,'incidents.json')));for(const incident of registry.incidents)for(const file of incident.tests)await fs.access(path.join(__dirname,'..',file));
+});
+test('active health and news instructions keep FF icons independent from forecast calculations',async()=>{
+ const root=path.join(__dirname,'..');
+ for(const file of ['docs/automation/contracts/health.md','docs/forecast-publish/physical-status-automation.txt','docs/forecast-publish/physical-status.md']){
+  const text=await fs.readFile(path.join(root,file),'utf8');
+  assert.match(text,/exclusivamente del estado directo de FutbolFantasy/,file);
+  assert.match(text,/no modifican? porcentajes, selección del once, candidatos, alternativas ni posiciones/,file);
+  assert.doesNotMatch(text,/noticia posterior verificable puede reemplazar|noticia de acontecimiento posterior puede superar/,file);
+ }
+ for(const file of ['docs/automation/contracts/news.md','docs/news/player-health-automation.txt']){
+  const text=await fs.readFile(path.join(root,file),'utf8');
+  assert.match(text,/ninguna noticia crea, sustituye ni borra esos iconos/,file);
+  assert.match(text,/no reemplaza el símbolo observado en FutbolFantasy/,file);
+  assert.doesNotMatch(text,/alta posterior reemplaza la marca/,file);
+ }
+});
+test('active forecasts contract uses source-only v6 without medical exclusions or adjustment inputs',async()=>{
+ const text=await fs.readFile(path.join(__dirname,'../docs/automation/contracts/forecasts.md'),'utf8');
+ assert.match(text,/method_version="editorial-v6" y assessment.method="editorial-v6"/);
+ assert.match(text,/Solo method y sources son necesarios/);
+ assert.match(text,/Conserva los jugadores observados en las fuentes aunque su estado físico sea lesionado o duda/);
+ assert.match(text,/Excluye únicamente los once elegidos y las identidades inciertas/);
+ assert.match(text,/no uses salud como filtro de disponibilidad/);
+ assert.doesNotMatch(text,/No propongas bajas confirmadas|Excluye[^.]*bajas confirmadas|"confirmed_out"\s*:|"availability"\s*:|"rotation"\s*:|"context"\s*:|"horizon"\s*:/);
+ assert.doesNotMatch(text,/method_version[=:][" ]*editorial-v[1-5]|ASSESSMENT_COMPLETO_EDITORIAL_V[1-5]|Método vigente editorial-v[1-5]/);
+ for(const requirement of [/Pesos FF30\/JP20\/Comuniate20\/P1130/,/incluido 0/,/starter50,alternative40,not_listed25 para Comuniate/,/primeros siete del ranking GENERAL/,/primeros siete del ranking GLOBAL/,/probability<70 exige alternativa/,/Redondea solo al final; mínimo5 y máximo95/])assert.match(text,requirement);
 });
 test('runner consumes large file responses end to end with short stdin messages',async()=>{
  const {spawn}=require('node:child_process');

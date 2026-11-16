@@ -1,12 +1,17 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {compile,fixtureOf}=require('../scripts/forecast/editorial-producer.cjs');
+const {compile,fixtureOf,jsonbByteLength}=require('../scripts/forecast/editorial-producer.cjs');
 const {SeasonGateway,literal,verifyPublication}=require('../scripts/forecast/season-gateway.cjs');
 const {runSeason}=require('../scripts/forecast/season-workflow.cjs');
 const {example}=require('./fixtures/forecast-producer.cjs');
 const produce=x=>compile(x.packet,x.review,x.roster,x.window);
-test('producer builds v5 eleven, independent candidate and absent P11 without a zero vote',()=>{
+test('producer builds v6 eleven, independent candidate and absent P11 without a zero vote',()=>{
  const x=example(),{payload}=produce(x);
+ assert.equal(payload.method_version,'editorial-v6');
+ for(const player of [...payload.proposal.players,...payload.proposal.candidates]) {
+  assert.equal(player.assessment.method,'editorial-v6');
+  assert.deepEqual(Object.keys(player.assessment).sort(),['method','sources']);
+ }
  assert.equal(payload.proposal.players[0].probability,79);assert.equal(payload.proposal.candidates[0].probability,40);
  assert.equal(payload.proposal.candidates.length,1);assert.equal(payload.sources[2].player_observations[0].probability,null);
  assert.equal(payload.sources[3].player_observations[0].votes,null);assert.equal(payload.publication_allowed,false);
@@ -16,7 +21,7 @@ test('producer builds v5 eleven, independent candidate and absent P11 without a 
  assert.equal(produce(x).payload.proposal.players[0].alternative.id,x.roster[11].id);
 });
 test('producer rejects official XI, stale body review, stale reads, foreign IDs and incomplete alternatives',()=>{
- for(const mutate of [x=>x.review.sources.comuniate.forecast=false,x=>x.review.sources.futbolfantasy.fixture_sha256='old',x=>x.packet.docs.futbolfantasy.fetched_at='2020-01-01T00:00:00Z',x=>x.review.selection.players[0].id='someone-else',x=>x.review.sources.comuniate.alternatives_complete=false,x=>x.review.availability_reviewed=false,x=>x.review.sources.comuniate.observed_fixture.matchday=14]) {
+ for(const mutate of [x=>x.review.sources.comuniate.forecast=false,x=>x.review.sources.futbolfantasy.fixture_sha256='old',x=>x.packet.docs.futbolfantasy.fetched_at='2020-01-01T00:00:00Z',x=>x.review.selection.players[0].id='someone-else',x=>x.review.sources.comuniate.alternatives_complete=false,x=>x.review.sources.comuniate.observed_fixture.matchday=14]) {
   const x=example();mutate(x);assert.throws(()=>produce(x));
  }
  const x=example();x.packet.observations.comuniate[0].probability=0;delete x.review.selection.players[0].alternative_id;assert.throws(()=>produce(x),/alternativa evaluada/);
@@ -28,10 +33,53 @@ test('a source cannot list the same player as starter and alternative (Levante r
  x.review.sources.futbolfantasy.alternatives.pop();
  assert.deepEqual(produce(x),baseline);
 });
-test('confirmed outs keep source evidence but are absent from proposals and candidates',()=>{
- const x=example();x.review.confirmed_out=[{id:x.roster[11].id,reason:'Baja confirmada para este partido de prueba.',refs:[x.packet.docs.futbolfantasy.url]}];
- assert.equal(produce(x).payload.proposal.candidates.length,0);
- x.review.confirmed_out[0].id=x.roster[0].id;assert.throws(()=>produce(x),/baja confirmada/);
+test('medical and editorial metadata cannot remove players or change proposal, sources or geometry',()=>{
+ const x=example();
+ // Force a genuine sub-70 starter and keep the observed zero on the candidate.
+ // Both used to be vulnerable to confirmed_out exclusions.
+ x.packet.observations.comuniate[0].probability=0;
+ x.review.sources.futbolfantasy.alternatives[0].probability=0;
+ const baseline=produce(x),before=structuredClone(x.packet);
+ assert.equal(baseline.payload.proposal.players[0].alternative.id,x.roster[11].id);
+ const mutations=[
+  r=>{delete r.availability_reviewed;delete r.confirmed_out;delete r.facts;},
+  r=>{r.availability_reviewed=false;r.confirmed_out=x.roster.slice(0,12).map(p=>({id:p.id,reason:'Baja médica declarada por el revisor.',refs:[x.packet.docs.futbolfantasy.url]}));},
+  r=>{r.availability_reviewed=true;r.confirmed_out=[{id:'not-a-roster-id'}];},
+  r=>{r.facts=Object.fromEntries(x.roster.map(p=>[p.id,{reason:'Excluir por lesión y cambiar el suplente.',availability:{value:'concern'},rotation:{value:'high'},context:{points:-10}}]));},
+  r=>{r.facts=Object.fromEntries(x.roster.map(p=>[p.id,{reason:'Dar prioridad por alta médica.',availability:{value:'clear'},rotation:{value:'low'},context:{points:10}}]));}
+ ];
+ for(const mutate of mutations){
+  const changed=structuredClone(x);mutate(changed.review);
+  assert.deepEqual(produce(changed),baseline);
+  assert.deepEqual(changed.packet,before);
+ }
+ const candidate=x.roster[11].id;
+ assert.equal(baseline.payload.sources[0].player_observations.find(o=>o.player_id===candidate).probability,0);
+ assert.ok(baseline.payload.proposal.candidates.some(p=>p.id===candidate));
+});
+test('JSONB byte accounting counts UTF-8 and structural spaces without treating punctuation in strings as separators',()=>{
+ const examples=[
+  [null,'null'],
+  [{},'{}'],
+  [[], '[]'],
+  [{a:1,b:[true,null,{c:'á, : 😀'}]},'{"a": 1, "b": [true, null, {"c": "á, : 😀"}]}'],
+  [{text:'a"b\\c\n,:'},'{"text": "a\\"b\\\\c\\n,:"}']
+ ];
+ for(const [value,postgresText]of examples)assert.equal(jsonbByteLength(value),Buffer.byteLength(postgresText));
+});
+test('producer rejects a payload that fits compact JSON but exceeds the PostgreSQL JSONB byte limit',()=>{
+ const x=example(),baseline=produce(x).payload,oldUrl=x.packet.docs.futbolfantasy.url;
+ const compact=JSON.stringify(baseline),occurrences=compact.split(oldUrl).length-1;
+ assert.ok(occurrences>0);
+ const padding='x'.repeat(Math.floor((65536-Buffer.byteLength(compact))/occurrences));
+ const expanded=JSON.parse(compact.replaceAll(oldUrl,oldUrl+padding));
+ // PostgreSQL jsonb::text inserts one space after object colons and container
+ // commas. Serialize a test oracle independently of the production byte counter.
+ const pgText=v=>Array.isArray(v)?'['+v.map(pgText).join(', ')+']':v&&typeof v==='object'?'{'+Object.entries(v).map(([k,val])=>JSON.stringify(k)+': '+pgText(val)).join(', ')+'}':JSON.stringify(v);
+ assert.ok(Buffer.byteLength(JSON.stringify(expanded))<=65536);
+ assert.ok(Buffer.byteLength(pgText(expanded))>65536);
+ x.packet.docs.futbolfantasy.url=oldUrl+padding;
+ assert.throws(()=>produce(x),/64 KiB|65536|JSONB/i);
 });
 test('uncertain optional candidate is explicitly excluded; mandatory identity still fails',()=>{
  const x=example();x.review.sources.comuniate.alternatives.push({name:'Unknown optional',probability:null});
@@ -50,6 +98,13 @@ test('complete P11 votes, missing, failed and incomplete authors have distinct d
  const {payload}=produce(x),p11=payload.sources[3];
  assert.equal(p11.predictions.length,6);assert.equal(p11.player_observations[0].ballots,1);assert.equal(p11.player_observations[0].votes,1);
  assert.equal(payload.proposal.players[0].probability,85);assert.equal(p11.player_observations.at(-1).votes,0);
+ const candidateBallot=structuredClone(x),candidate=candidateBallot.roster[11];
+ candidateBallot.packet.predictions[0].data.participacion[10]={nombre:candidate.name};
+ const candidateBaseline=produce(candidateBallot);
+ candidateBallot.review.confirmed_out=[{id:candidate.id,reason:'Exclusión médica antigua que no debe borrar votos.',refs:[candidateBallot.packet.docs.futbolfantasy.url]}];
+ assert.deepEqual(produce(candidateBallot),candidateBaseline);
+ assert.equal(candidateBaseline.payload.sources[3].player_observations.find(o=>o.player_id===candidate.id).votes,1);
+ assert.ok(candidateBaseline.payload.proposal.candidates.some(p=>p.id===candidate.id));
  x.packet.predictions[0].data.participacion[0].nombre='Unknown P11';assert.throws(()=>produce(x),/Unknown P11/);
 });
 test('SQL gateway pins destination, quotes payload and sets recovery context in every transaction',async()=>{

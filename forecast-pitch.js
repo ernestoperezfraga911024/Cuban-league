@@ -144,7 +144,8 @@
       }
       if(Number.isInteger(player.probability)){
         const method=el('details',null,'fp-detail-method');method.append(el('summary','Cómo se calcula'));
-        method.append(el('p','Peso en el cálculo: '+(['editorial-v3','editorial-v4','editorial-v5'].includes(player.method)?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.'),'fp-meta'));
+        method.append(el('p','Peso en el cálculo: '+(['editorial-v3','editorial-v4','editorial-v5','editorial-v6'].includes(player.method)?(p.sources.find(s=>s.id==='predicted11')?.ballots>0?'Predicted11 30% · FutbolFantasy 30% · Jornada Perfecta 20% · Comuniate 20%.':'Sin onces completos de Predicted11: FutbolFantasy 42,86% · Jornada Perfecta 28,57% · Comuniate 28,57%.'):player.method==='editorial-v2'?'Fuentes 80% · Rol 20% · Ajustes por contexto.':player.method==='editorial-v1'?'Método editorial v1.':'Revisión editorial manual.'),'fp-meta'));
+        if(player.method==='editorial-v6')method.append(el('p','Calculado solo con las fuentes. El estado físico de FutbolFantasy se muestra como aviso y no modifica el porcentaje ni el once.','fp-meta'));
         method.append(el('p','Lectura más antigua: '+date(p.evidence_at),'fp-meta'));detail.append(method,el('small','Estimación editorial provisional.','fp-detail-note'));
       }
       const footer=el('div',null,'fp-sheet-footer'),back=el('button',player.slot?'Volver al campo':'Volver a la plantilla','fp-link');back.type='button';back.addEventListener('click',close);footer.append(back);detail.append(footer);

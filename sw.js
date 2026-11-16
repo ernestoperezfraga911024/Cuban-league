@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v237-market-petroleum';
+const CACHE_NAME = 'cuban-league-v238-forecast-source-only';
 const APP_SHELL = [
   './',
   './index.html',
@@ -26,14 +26,14 @@ const APP_SHELL = [
   './forecast-publish.css?v=228-20261114',
   './forecast-publish-core.js?v=204-20261111',
   './forecast-round-config.js?v=206-20261111',
-  './forecast-round-core.js?v=224-20261113',
+  './forecast-round-core.js?v=238-20261116-source-only',
   './forecast-layout-repair.js?v=225-20261114',
-  './forecast-pitch.js?v=230-20261114-squad-design',
+  './forecast-pitch.js?v=238-20261116-source-only',
   './forecast-season-public.js?v=226-20261114',
   './set-pieces-core.js?v=226-20261114',
   './set-pieces.js?v=226-20261114',
   './set-pieces.css?v=226-20261114',
-  './forecast-context.js?v=222-20261113',
+  './forecast-context.js?v=238-20261116-ff-icons',
   './forecast-context.css?v=230-20261114-squad-design',
   './forecast-season-admin.js?v=212-20261112',
   './forecast-history-core.js?v=209-20261112',

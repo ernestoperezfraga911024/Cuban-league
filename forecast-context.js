@@ -1,4 +1,4 @@
-/* Public club news and explicit, player-specific health observations. */
+/* Public club news; independent FutbolFantasy health icons never change forecasts. */
 (() => {
  'use strict';
  const labels={doubt:'En duda',injured:'Lesionado',available:'Disponible'};
@@ -63,13 +63,12 @@
   throw Error('Consulta cancelada');
  }
 
- function currentHealth(rows,id,physical){
-  const article=health(rows,id),direct=physical.find(r=>r.player_id===id&&validHealth(r));
-  if(!direct)return article;
-  const p=direct.payload,at=Date.parse(p.source.fetched_at);
-  // A new article can supersede a snapshot only with a verifiably later event.
-  // Its import/refresh time alone never turns older reporting into newer evidence.
-  if(article&&(article.event_date>new Date(at).toISOString().slice(0,10)||article.row.payload.sources.some(s=>article.refs.includes(s.url)&&Date.parse(s.source_updated_at||s.published_at)>at)))return article;
+ function currentHealth(_news,id,physical=[]){
+  // News remains available in its own panels. Its health fields, dates and
+  // sources cannot create, clear or supersede a FutbolFantasy status icon.
+  const direct=physical.find(r=>r.player_id===id&&validHealth(r));
+  if(!direct)return null;
+  const p=direct.payload;
   return {status:p.status,detail:p.detail,refs:[p.source.url],fetched_at:p.source.fetched_at,event_date:p.event_date||null,direct:true};
  }
  function health(rows,id,now=Date.now()){
@@ -125,10 +124,10 @@
   if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
   const makePage=()=>({rows:[],cursor:null,hasMore:false,busy:false,error:false,appendFailed:false,status:'idle'});
   const club=makePage(),players=new Map(),views=new Set(),clubViews=new Set(),baseLabels=new WeakMap();
-  const medical={rows:[],physical:[],status:'idle',error:false};
+  const medical={physical:[],status:'idle',error:false};
   let host=null,started=false;
   const roster=(catalog?.players||[]).filter(p=>p.active&&p.clubId===team).map(p=>({id:p.id,name:p.displayName,position:p.position}));
-  const state=id=>medical.status==='ready'?currentHealth(medical.rows,id,medical.physical):null;
+  const state=id=>medical.status==='ready'?currentHealth(null,id,medical.physical):null;
   const active=box=>!life.aborted&&box.isConnected&&host?.contains(box);
   function action(text,key,fn,disabled=false){const b=el('button',text,'fc-load-more');b.type='button';b.dataset.contextAction=key;b.disabled=disabled;b.addEventListener('click',fn);return b;}
   function preserve(box,render){
@@ -200,8 +199,8 @@
   }
   async function loadMedical(){
    if(life.aborted||medical.status==='loading')return;medical.status='loading';medical.error=false;refresh();
-   try{const [articles,physical]=await withTimeout(s=>Promise.all([loadHealthNews(team,s),loadHealth(team,s)]));if(life.aborted)return;medical.rows=articles;medical.physical=physical;medical.status='ready';}
-   catch{if(!life.aborted){medical.rows=[];medical.physical=[];medical.status='error';medical.error=true;}}
+   try{const physical=await withTimeout(s=>loadHealth(team,s));if(life.aborted)return;medical.physical=physical;medical.status='ready';}
+   catch{if(!life.aborted){medical.physical=[];medical.status='error';medical.error=true;}}
    finally{if(!life.aborted)refresh();}
   }
   return {

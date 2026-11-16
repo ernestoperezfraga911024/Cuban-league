@@ -4,6 +4,14 @@ Este índice de lectura reduce búsquedas repetidas sin sustituir la revisión
 editorial, el compilador, la validación SQL ni la comparación pública exacta.
 No hace red, no escribe datos, no propone un once y no certifica el calendario.
 
+Regla vigente de Ernesto del 16/11/2026: las alineaciones son un cálculo de
+FF/JP/Comuniate/P11. El estado físico solo añade un símbolo separado procedente
+del estado directo de FutbolFantasy; nunca elimina una observación, cambia un
+porcentaje o decide titular, suplente, posición o alternativa. Cualquier texto
+médico directo FF que el índice muestre solo ayuda al flujo separado del icono.
+El índice no extrae noticias médicas JP ni estados de Comuniate, ni genera
+conflictos clínicos entre fuentes para resolver el once.
+
 ```sh
 node scripts/forecast/inspect-review.cjs RUTA_REVIEW.json [RUTA_RESPUESTA_REVIEW.json]
 ```
@@ -29,19 +37,18 @@ nueva, ni cambiar hashes o fechas para aceptar un cuerpo.
    como alternativa de otro puesto. Verificarlo en el cuerpo, conservar su
    observación titular y explicar la redundancia revisada en `limitations`.
    Conservar el archivo y geometría originales; no deduplicar a ciegas ni alterar
-   porcentajes. Una alternativa que no duplica un titular no puede desaparecer. El control de
+   porcentajes. Conservar todas las observaciones verificables de alternativas y
+   banquillo, también las de 0%; la sección médica no crea ni elimina señales.
+   Una alternativa que no duplica un titular no puede desaparecer. El control de
    `.alternativo` de Comuniate sigue exigiendo todas sus entradas capturadas; si
    sus datos son contradictorios, no omitirlas para eludir ese control.
-4. **Disponibilidad conciliada.** Revisar las lesiones y sanciones FF de ese lado
-   del partido, las noticias JP del equipo y las fichas Comuniate. El índice
-   conserva iconos y texto: “Tocado/Duda” puede coexistir con “Baja”. Las etiquetas
-   `signals` son indicios textuales, no diagnóstico ni confirmación de ausencia.
-   Una noticia vieja, entrenamiento parcial o presencia en un once probable no
-   prueba alta médica. Una discrepancia exige comparar fechas y evidencia más
-   específica del próximo partido; si es necesario, seguir un enlace público
-   auténtico mediante el protocolo del runner. Documentar la resolución con
-   referencias en `facts`, `confirmed_out` y/o `limitations`; no asignar una baja
-   definitiva ni ignorar otra fuente por conveniencia.
+4. **Cálculo independiente de salud.** Usar editorial-v6 con las observaciones
+   reales de las cuatro fuentes. No exigir `availability_reviewed`, no preparar
+   `confirmed_out` para filtrar jugadores ni introducir ajustes de salud en
+   `facts`, rotación o contexto. Si FF muestra un porcentaje junto a un icono,
+   conservar ese porcentaje; no corregir a la fuente con un parte médico. El
+   símbolo se actualiza por el flujo FF directo separado, sin noticias de otras
+   fuentes. No seguir enlaces clínicos para decidir la alineación.
 5. **Puestos y alternativas.** `alternative_pairs` conserva parejas que realmente
    comparten celda o puesto y las coordenadas observadas. Los porcentajes son los
    publicados; `null` no significa cero ni `100 - titular`. FF busca porcentajes
@@ -50,7 +57,8 @@ nueva, ni cambiar hashes o fechas para aceptar un cuerpo.
    `alternative_checks` requiere revisión táctica cuando no encuentra pareja
    directa. Es una pista, no prueba de incompatibilidad. El catálogo aporta solo
    posición amplia; una pareja MC/DL puede ser correcta cuando el cuerpo la
-   respalda. No reutilizar un suplente para todas las posiciones automáticamente.
+   respalda. Elegir once y alternativas por el cálculo y el puesto observado,
+   nunca por salud. No reutilizar un suplente para todas las posiciones automáticamente.
 6. **Geometría.** Elegir por fila la fuente cuyo dibujo corresponde a la formación
    revisada. Un valor horizontal repetido puede proceder de dos líneas tácticas
    diferentes. No desplazarlo arbitrariamente ni invertir filas: revisar otra
@@ -83,12 +91,13 @@ necesarias bajo70; 22 tenían apoyo de mismo puesto capturado. Elche Fer Niño69
 Tete Morente y Málaga Larrubia65 → Joaquín Muñoz carecían de pareja directa o
 justificación escrita. No se concluye que sean tácticamente imposibles.
 
-También faltaba conciliación documentada para Lemar (Elche, incluido pese a baja
-FF y entrenamiento parcial JP), Bright Ede (Deportivo, excluido aunque FF decía
-Disponible para J13), Lookman y Cristian Romero (Atlético), Jofre Carreras
-(Espanyol) y Del Castillo (Osasuna); para estos cuatro últimos casos FF decía
-Duda para J13 mientras Comuniate motivaba la exclusión. Es evidencia de revisión
-incompleta, no confirmación de que todas esas bajas fueran incorrectas.
+La auditoría inicial también intentó conciliar estados médicos de Lemar, Bright
+Ede, Lookman, Cristian Romero, Jofre Carreras y Del Castillo. Ese criterio quedó
+corregido por la instrucción posterior de Ernesto: ni una lesión FF ni una duda
+de otra fuente justifican alterar las señales de alineación. La reparación debe
+recuperar las observaciones que se hubieran filtrado por salud y resolver once y
+alternativas con el cálculo y los puestos, sin otra revisión clínica. Incluir a
+Lemar en un pronóstico no constituye por sí mismo un error porque tenga un icono.
 
 Estas observaciones describen capturas históricas del turno; no constituyen una
 revisión actual de los veinte clubes. Una corrección completa requiere lectura

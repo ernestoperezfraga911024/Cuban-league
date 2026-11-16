@@ -6,7 +6,6 @@ const catalog=require('../../catalog/players.json').players;
 const clean=node=>node?.textContent.replace(/\s+/g,' ').trim()||'';
 const direct=node=>[...(node?.childNodes||[])].filter(n=>n.nodeType===3).map(clean).join(' ').trim();
 const pct=value=>/^\d{1,3}%?$/.test(value||'')&&Number(value.replace('%',''))<=100?Number(value.replace('%','')):null;
-const key=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const unique=rows=>[...new Map(rows.map(r=>[JSON.stringify(r),r])).values()];
 const signals=text=>[
  ['available',/disponible para|alta m[eé]dica/i],['doubt',/duda|tocado|molestias|pendiente de evoluci[oó]n/i],
@@ -40,12 +39,9 @@ function parseSource(source,body,{side}){
     }
    }
   }else if(source==='jornadaperfecta'){
-   const field=d.querySelectorAll('.campo-futbol')[side==='local'?0:1],news=[...d.querySelectorAll(`.partido-ultimas-noticias.${side}`)];
-   result.scope={lineup_found:!!field,news_sections:news.length,side};
-   for(const section of news)for(const li of section.querySelectorAll('li')){
-    const a=li.querySelector('a[href]'),title=clean(a?.querySelector('span'))||clean(a),age=clean(li.querySelector('.partido-ultimas-noticias-fecha'));
-    if(a&&title)result.news.push({title,age,url:a.getAttribute('href'),signals:signals(title)});
-   }
+   const field=d.querySelectorAll('.campo-futbol')[side==='local'?0:1];
+   result.scope={lineup_found:!!field,side};
+   // News and medical labels are not lineup observations or physical-status inputs.
    [...(field?.querySelectorAll('table')||[])].forEach((table,y)=>{
     const cells=[...table.querySelectorAll('.campo-fila')];
     cells.forEach((cell,i)=>{
@@ -60,13 +56,7 @@ function parseSource(source,body,{side}){
   }else if(source==='comuniate_team'||source==='comuniate'){
    const columns=[...d.querySelectorAll('.cm-lineup-col')];
    const root=source==='comuniate_team'?d:columns.length===2?columns[side==='local'?0:1]:null;
-   result.scope={team_page:source==='comuniate_team',lineup_columns:columns.length,health_scope_found:!!root,side};
-   for(const row of root?.querySelectorAll('.ficha-player')||[]){
-    const name=clean(row.querySelector('.player-name')),text=clean(row.querySelector('.player-row')||row);
-    const labels=[...row.querySelectorAll('.player-status-icon[alt]')].map(n=>n.getAttribute('alt'));
-    const detected=signals(text+' '+labels.join(' '));
-    if(name&&detected.length)result.health.push({name,text,status_labels:labels,signals:detected});
-   }
+   result.scope={team_page:source==='comuniate_team',lineup_columns:columns.length,lineup_scope_found:!!root,side};
    for(const cell of root?.querySelectorAll('.cuerpo_campo .jugador_campo')||[]){
     const starter=direct(cell.querySelector('.nombre_jugador'));
     for(const alt of cell.querySelectorAll('.alternativo')){
@@ -87,29 +77,21 @@ function inspectReview(request,{review=null,readFile=path=>fs.readFileSync(path)
   observations:p.observations,layouts:Object.fromEntries(Object.entries(p.layouts||{}).map(([k,v])=>[k,{sha256:v.sha256,points:v.points}])),
   identities:request.identity_names,roster:roster.map(r=>{const c=catalogPlayers.find(c=>c.id===r.id&&c.club_id===p.team);return {...r,catalog_position_hint:c?.position||null,profile_url:c?.mister_source?.url||c?.source?.url||null};}),
   identity_reference:request.identity_reference,sources:[],potential_availability_conflicts:[],alternative_checks:[],errors:[...(p.errors||[])],
-  limitations:['Texto e indicios extraídos, no verificación semántica ni confirmación médica.','Una sección ausente no acredita ausencia de bajas.','Las posiciones del catálogo son pistas amplias: no invalidan una pareja táctica documentada.','Las contradicciones solo se agrupan por nombre normalizado o identidad explícita; ausencia de alerta no prueba acuerdo.']};
- const records=[];
+  physical_status_policy:{source:'futbolfantasy',purpose:'icon_only',affects_lineup:false},
+  limitations:['Texto extraído, no verificación semántica ni confirmación médica.','El estado físico directo FF solo informa el símbolo: nunca modifica titulares, candidatos, porcentajes, puestos o alternativas.','Una sección FF ausente no acredita ausencia de bajas.','Las posiciones del catálogo son pistas amplias: no invalidan una pareja táctica documentada.']};
  for(const source of ['futbolfantasy','jornadaperfecta','comuniate','comuniate_team','p11match']){
   const doc=p.docs?.[source];if(!doc)continue;
   try{
    const bytes=readFile(doc.path),sha=crypto.createHash('sha256').update(bytes).digest('hex');
    if(sha!==doc.sha256)throw Error('Body hash mismatch; inspect original captured file');
    const value={source,url:doc.url,sha256:doc.sha256,fetched_at:doc.fetched_at,...parseSource(source,bytes.toString('utf8'),{side})};
-   for(const row of value.health){row.resolved_id=resolve(row.name);records.push({...row,source});}
+   for(const row of value.health)row.resolved_id=resolve(row.name);
    for(const row of value.alternative_pairs){row.starter_id=resolve(row.starter);row.alternative_id=resolve(row.alternative);}
-   for(const row of value.news){
-    row.literal_name_mentions=(request.identity_names||[]).filter(name=>name&&(' '+key(row.title)+' ').includes(' '+key(name)+' '));
-    for(const name of row.literal_name_mentions)records.push({name,resolved_id:resolve(name),source,text:row.title,signals:row.signals});
-   }
    report.sources.push(value);
   }catch(error){report.errors.push({source,kind:'inspection_error',message:error.message});}
  }
- const groups=new Map();
- for(const r of records){const id=r.resolved_id?'id:'+r.resolved_id:'name:'+key(r.name);if(!groups.has(id))groups.set(id,[]);groups.get(id).push(r);}
- for(const [group,evidence] of groups){
-  const observed=new Set(evidence.flatMap(r=>r.signals));
-  if(observed.has('out')&&['available','doubt','partial_training'].some(s=>observed.has(s)))report.potential_availability_conflicts.push({group,resolved_id:evidence.find(r=>r.resolved_id)?.resolved_id||null,requires_review:true,evidence});
- }
+ // Keep the legacy empty field for consumers, but never compare medical sources
+ // or request reconciliation as part of choosing the lineup.
  for(const choice of Array.isArray(review?.selection?.players)?review.selection.players:[]){
   if(!choice?.alternative_id)continue;
   const evidence=report.sources.flatMap(s=>s.alternative_pairs.filter(pair=>
