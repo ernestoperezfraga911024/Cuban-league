@@ -10,6 +10,10 @@ on:
         type: choice
         options: [test, sync]
         default: test
+      dispatch_id:
+        description: 'Identificador privado del disparador; dejar vacío para ejecución manual'
+        type: string
+        default: ''
 permissions:
   contents: read
   id-token: write
@@ -35,4 +39,5 @@ jobs:
       - name: Leer, conciliar, verificar y conservar
         env:
           MARKET_MODE: ${{ github.event_name == 'schedule' && 'sync' || inputs.mode }}
+          MARKET_DISPATCH_ID: ${{ inputs.dispatch_id }}
         run: node scripts/mister-market/worker.cjs

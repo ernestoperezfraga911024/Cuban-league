@@ -10,8 +10,8 @@ async function rpc(action,data){
  const response=await fetch(endpoint,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({action,data}),signal:AbortSignal.timeout(90000)});
  const result=await response.json();if(!response.ok)fail(/^[a-z_]+$/.test(result.error)?result.error:'worker_transport_failed');return result;
 }
-async function run({request=rpc,mode=process.env.MARKET_MODE||'test'}={}){
- const start=Date.now(),state=await request('begin',{mode});if(state.skipped){console.log(JSON.stringify(state));return state;}
+async function run({request=rpc,mode=process.env.MARKET_MODE||'test',dispatchId=process.env.MARKET_DISPATCH_ID||''}={}){
+ const start=Date.now(),state=await request('begin',{mode,dispatchId});if(state.skipped){console.log(JSON.stringify(state));return state;}
  let browser,finishing=false,phase='setup';
  const progress=details=>console.log(JSON.stringify({status:'reading',...details,elapsedMs:Date.now()-start,aiCalls:0}));
  const stage=name=>{phase=name;progress({phase});};

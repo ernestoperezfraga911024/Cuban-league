@@ -266,12 +266,15 @@
     },
     {
       "code": "mister-schedule-not-dispatched",
-      "status": "investigating",
+      "status": "regression-tested-awaiting-activation",
       "failure": "Los turnos de mercado del 15/11/2026 a las 17:00 y 21:00 Miami no tenían ejecución schedule, trabajo ni cola en la consulta posterior a las 22:00. Constaban cinco ejecuciones manuales.",
       "cause": "Localizada antes del arranque del lector; la causa interna de GitHub sigue sin establecerse. Workflow active, main, cron IANA y permisos comprobados. Otros workflows UTC del mismo repositorio se crearon seis a siete horas tarde el 15/11; sus primeros jobs arrancaron dos y tres segundos después de crearse. Esto apunta al despacho schedule, sin demostrar si los turnos de mercado están demorados o descartados. El cron anterior ya incluía 17:00; la ampliación se fusionó a las 17:02:08. GitHub documenta demoras y descartes posibles, pero no había un incidente global confirmado para esas fechas.",
-      "prevention": "Distinguir horario previsto, creación del run, inicio del job y publicación. Contrastar cron con el SHA real de otros runs; revisar permisos sin cambiarlos. Conservar horarios y validadores, comprobar cola antes de una recuperación y no acreditar schedule con éxito manual. Auditoría y propuesta de reloj independiente aún no instalada en docs/mister-market/scheduler-audit-2026-11-15.md.",
-      "tests": [],
-      "evidence": "Recuperación manual 43768278752 (main 7623194326aca145c463c6b1c03e469bdbb33f80, job 132978209946): 17:15:35–17:18:06 Miami, page_not_settled y aiCalls=0 antes de publicar; no explica la falta del evento schedule. Recuperación corregida 43770209824: creada 17:36:11, job iniciado 17:36:15 y publicación 17:38:58; sigue siendo workflow_dispatch. Comparación del 15/11: Balón parado 43750249427, previsto 07:37, creado 14:03:39; respaldo 43735230076, previsto 04:17, creado 11:23:42. Cron contrastado en SHA 004f8db83f2fd451bd10a04323d7c526d157a71a. El 14/11 también hubo demoras de 5h49m54s y 6h33m48s. Configuración y comprobaciones detalladas en la auditoría, sobre main d0e3695313d7c14b0e9f982f60274efe5a8cc106."
+      "prevention": "Reloj interno Supabase preparado: turnos únicos en Miami, máximo tres solicitudes espaciadas, deduplicación de dispatch y schedule nativo, confirmación durable por worker y conservación de lease/OIDC/publicación. Instalación deshabilitada y modo test; falta credencial limitada a Actions del repositorio y prueba real. Ver docs/mister-market/internal-scheduler.md.",
+      "tests": [
+        "tests/market-scheduler.test.cjs",
+        "tests/market-automation.test.cjs"
+      ],
+      "evidence": "Recuperación manual 43768278752 (main 7623194326aca145c463c6b1c03e469bdbb33f80, job 132978209946): 17:15:35–17:18:06 Miami, page_not_settled y aiCalls=0 antes de publicar; no explica la falta del evento schedule. Recuperación corregida 43770209824: creada 17:36:11, job iniciado 17:36:15 y publicación 17:38:58; sigue siendo workflow_dispatch. Comparación del 15/11: Balón parado 43750249427, previsto 07:37, creado 14:03:39; respaldo 43735230076, previsto 04:17, creado 11:23:42. Cron contrastado en SHA 004f8db83f2fd451bd10a04323d7c526d157a71a. El 14/11 también hubo demoras de 5h49m54s y 6h33m48s. Configuración y comprobaciones detalladas en la auditoría, sobre main d0e3695313d7c14b0e9f982f60274efe5a8cc106. El 16/11/2026 el cron nativo creó run 43836198437 a las 04:02:26 Miami y publicó a las 04:05:09: 538 jugadores, 20 participantes, 445 cláusulas, 443 fechadas y aiCalls=0. Esto no acredita el reloj nuevo. Sus regresiones locales verifican calendario/DST, privilegios, intentos acotados, duplicados, respuesta perdida, lease vencido y conservación de fechas. Pendiente activar y medir recurrencia real."
     },
     {
       "code": "mister-page-settle-timeout",
