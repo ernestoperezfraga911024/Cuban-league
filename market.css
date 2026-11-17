@@ -60,6 +60,10 @@ body.f05-theme[data-section="market"] main {
 .market-player span{display:block;font-size:11px;font-weight:400;color:#a5adae;line-height:1.55;overflow-wrap:anywhere}
 .market-player .market-owner{color:#c1c7c7}
 .market-player .is-free{color:#9abbac}
+.market-player .market-player-points{margin-top:5px;color:#b4cbbb;line-height:1.45}
+.market-player-points b{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums}
+.market-player-points small{display:block;color:#a5adae;font-size:10px;font-weight:400}
+.market-points-note{font-size:11px;line-height:1.55;color:#a5adae;margin:0 0 12px}
 .market-price{position:relative;display:inline-block;max-width:100%;font-variant-numeric:tabular-nums}
 .market-price summary{display:block;list-style:none;cursor:pointer;border-radius:4px;white-space:nowrap;font:inherit;color:inherit;padding:8px 0;margin:-8px 0}
 .market-price summary::-webkit-details-marker{display:none}

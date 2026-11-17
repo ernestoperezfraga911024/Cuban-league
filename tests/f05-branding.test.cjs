@@ -99,7 +99,7 @@ test('service worker precaches every active logo, icon and palette version',()=>
   const sw=read('sw.js'),app=read('app.js');
   assert.ok(Number(sw.match(/cuban-league-v(\d+)/)?.[1])>=231);
   assert.match(sw,/brand-f05\.css\?v=182-20261018-f05-2/);
-  assert.match(app,/APP_VERSION='229-20261114-install-welcome'/);
+  assert.match(app,/APP_VERSION='242-20261117-player-points'/);
   for(const name of ['cuban-league-f05-logo.svg',...Object.keys(images)])assert.ok(sw.includes(`'./${name}'`),name);
   assert.doesNotMatch(sw,/cuban-league-green-logo|icon-green-|favicon-green|apple-touch-icon-green/);
 });

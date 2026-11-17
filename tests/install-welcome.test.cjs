@@ -94,7 +94,7 @@ test('blocked storage never blocks closing; unsupported dialogs leave the existi
 
 test('the welcome is public-only, versioned offline shell includes logic, decorative assets stay on demand',()=>{
   const html=read('index.html'),sw=read('sw.js');
-  for(const name of ['install-welcome.js','install-welcome.css','app.js','viewer-profile.js']){const version=name==='app.js'?'231-20261115':'229-20261114';assert.ok(html.includes(name+'?v='+version));assert.ok(sw.includes(name+'?v='+version));}
+  for(const name of ['install-welcome.js','install-welcome.css','app.js','viewer-profile.js']){const version=name==='app.js'?'242-20261117-player-points':'229-20261114';assert.ok(html.includes(name+'?v='+version));assert.ok(sw.includes(name+'?v='+version));}
   assert.doesNotMatch(read('admin.html'),/installWelcome|install-welcome/);
   assert.doesNotMatch(sw,/['"]\.\/install-(stadium|crest-3d)\.webp/);
   assert.ok(fs.statSync('install-stadium.webp').size+fs.statSync('install-crest-3d.webp').size<160000);
