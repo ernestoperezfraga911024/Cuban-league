@@ -46,18 +46,19 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
           if (!item?.fixture) throw Error('Missing next fixture: requires public calendar review');
           if (!collector) ({reader,collector} = await makeCollector({runKey:gateway.runKey,notBefore,expiresAt}));
           const packet = await timed('read_ms',()=>collector.collect(item));
-          const roster = await gateway.roster(team);
+          let roster = await gateway.roster(team);
           const identity_names = [...new Set([
             ...Object.values(packet.observations||{}).flat().map(p=>p.name),
             ...(packet.comuniate_alternatives?.players||[]).map(p=>p.name),
             ...Object.values(packet.layouts||{}).flatMap(layout=>(layout.points||[]).map(p=>p.name)),
             ...(packet.predictions||[]).filter(p=>p.status==='complete_unvalidated').flatMap(p=>(p.data?.participacion||[]).map(p=>p.nombre?.trim()))
           ].filter(Boolean))];
-          const identity_reference = identityReference(team,roster,identity_names);
+          let identity_reference = identityReference(team,roster,identity_names);
           let review,built,correction=null,followups=0;
           for (;;) {
             review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,identity_names,identity_reference,
               review_requirements:[
+                'Regla de Ernesto: si falta un jugador, investigar y verificar identidad y club, buscar duplicados, añadir únicamente la ficha comprobada al catálogo y al roster y conservar evidencia. No bloquear por ausencia del catálogo sin investigar. No inventar IDs externos ni confundir homónimos. Tras el alta confirmada devolver catalog_updated:true e identities explícitas; el runner relee el roster sin cambiar fuentes, fechas ni porcentajes.',
                 'En cada puesto queda el mayor porcentaje final calculado entre las opciones tácticamente compatibles. Revisar todas las opciones de las fuentes y declararlas en alternative_id o alternative_ids; el productor las ordena después del cálculo. Nunca conservar un titular por el orden inicial de una fuente. Si el ganador ya ocupa otro puesto, revisar la distribución compatible sin duplicar jugadores ni ocultar la alternativa. Empates conservan la selección revisada. Salud no interviene.',
                 'Resolver todos los nombres observados y alternativas antes de enviar; no corregir solamente el primer nombre de un error.',
                 'Un titular puede ser alternativa de otro jugador o dibujo. Conservar todas las alternativas capturadas; el compilador cuenta una sola señal titular por fuente. Solo ignorar la relación de un jugador como alternativa de sí mismo, conservando su titularidad y el cuerpo original.',
@@ -71,6 +72,13 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
             if(!review||review.deferred)throw Error(review?.reason||'Editorial review incomplete');
             state=await gateway.state(team);
             if(state.attempts.some(a=>a.team===team))throw Error('Concurrent attempt appeared during reading');
+            if(review.catalog_updated===true){
+              const refreshed=await gateway.roster(team);
+              if(!Array.isArray(refreshed)||new Set(refreshed.map(p=>p.id)).size!==refreshed.length||
+                refreshed.some(p=>p.team!==team)||roster.some(p=>!refreshed.some(q=>q.id===p.id&&q.name===p.name&&q.team===p.team)))
+                throw Error('Catalog refresh must only add verified players; existing identities cannot change');
+              roster=refreshed;identity_reference=identityReference(team,roster,identity_names);
+            }
             if(review.failure){
               // A reviewer can otherwise bypass the compile correction by declaring
               // an identity failure, even when the catalog has a verified reference.
@@ -91,7 +99,8 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
             catch(error){
               if(!(error instanceof EvidenceFailure || error instanceof LayoutFailure)||correction)throw error;
               correction={attempt:1,reason:error.message,...(error.issues?{issues:error.issues}:{})};timing.review_corrections++;
-              // One correction, same captured bodies/timestamps and same roster.
+              // One correction, same captured bodies/timestamps. A verified
+              // catalog addition may refresh the roster explicitly above.
               // Every validator runs again; no inferred aliases or bypass.
             }
           }

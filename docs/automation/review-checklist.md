@@ -1,5 +1,13 @@
 # Revisión íntegra de evidencia por club
 
+**Nueva regla del17/11/2026:** ante un jugador ausente, investigar identidad y
+club, comprobar duplicados y añadir la ficha verificada al catálogo y roster.
+Está autorizado persistir esa alta y sus alias; la falta de catálogo por sí sola
+no bloquea. Tras el alta devolver `catalog_updated:true` e identidades explícitas
+para releer el roster sin alterar evidencia ni fechas. Ver la regla de alta
+verificada en docs/automation/README.md. Prevalece sobre los límites anteriores
+de catálogo de este contrato.
+
 **Prioridad vigente de Ernesto (17/11/2026):** después de calcular, ocupa cada
 puesto la opción compatible con mayor porcentaje final. No conservar el titular
 inicial si su alternativa lo supera. Revisar todas las opciones del puesto,

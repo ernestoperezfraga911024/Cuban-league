@@ -3,11 +3,31 @@
     "team": "real-betis",
     "id": "a-santos",
     "mister_id": "61013",
-    "names": ["Antony", "Antony Santos", "Antony Matheus dos Santos"],
+    "names": [
+      "Antony",
+      "Antony Santos",
+      "Antony Matheus dos Santos"
+    ],
     "catalog_url": "https://mister.mundodeportivo.com/players/61013/antony-santos",
     "profile_url": "https://www.futbolfantasy.com/jugadores/antony/laliga-26-27",
     "verified_at": "2026-11-14T23:34:47.591Z",
     "profile_sha256": "4758cb3e78f79f1362da571a6a1fdec84ef038c723739333ed5753f1f98b2a8f",
     "reason": "Perfil consultado: Antony Matheus dos Santos; catálogo del mismo club: A. Santos, Mister61013. Referencia de identidad histórica, no lectura deportiva nueva."
+  },
+  {
+    "team": "celta-vigo",
+    "id": "mister-68516",
+    "mister_id": "68516",
+    "names": [
+      "Burcio",
+      "H. Burcio",
+      "Hugo Burcio",
+      "Hugo Burcio García"
+    ],
+    "catalog_url": "https://www.futbolfantasy.com/jugadores/hugo-burcio/laliga-26-27",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/hugo-burcio/laliga-26-27",
+    "verified_at": "2026-11-17T21:05:12.301590Z",
+    "profile_sha256": "46b0c37d08493a37af3d17d8d73af0d81f295a50833dd1d5eea8ff3385382e5b",
+    "reason": "FF: Hugo Burcio García, Burcio, mediocampista, 31/10/2006; Comuniate confirma Celta y fecha. Catálogo Mister capturado:68516, H. Burcio, Celta, MC. No confundir con Hugo Álvarez ni Hugo González."
   }
 ]

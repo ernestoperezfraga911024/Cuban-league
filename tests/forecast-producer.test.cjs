@@ -346,3 +346,30 @@ test('promotion over 70 removes the displayed alternative but preserves the old 
  const out=produce(x).payload.proposal;assert.equal(out.players[6].probability,75);assert.equal(out.players[6].alternative,null);
  assert.equal(out.candidates.find(p=>p.id===x.roster[6].id).probability,30);
 });
+
+test('verified catalog additions refresh the roster in the same review without rereading sources',async()=>{
+ for(const change of ['add','rename','remove','foreign','duplicate']){
+  const m=mockGateway(),full=structuredClone(m.x.roster),missing=full.filter(p=>p.id!==full[11].id);let reads=0;
+  m.gateway.roster=async()=>{
+   if(++reads===1)return missing;
+   const next=structuredClone(full);
+   if(change==='rename')next[0].name='Another person';
+   if(change==='remove')next.shift();
+   if(change==='foreign')next[11].team='other';
+   if(change==='duplicate')next.push({...next[0]});
+   return next;
+  };
+  const before=structuredClone(m.x.packet);
+  const result=await runSeason({gateway:m.gateway,makeCollector:async()=>({reader:{close(){},stats(){return{}}},collector:{collect:async()=>m.x.packet}}),reviewTeam:async r=>{assert.equal(r.roster.length,13);return {...m.x.review,catalog_updated:true};}});
+  assert.equal(reads,2);assert.deepEqual(m.x.packet,before);
+  assert.equal(result.publication_complete,change==='add');
+  assert.deepEqual(m.calls,change==='add'?['validate','save','deliver','finish']:['finish']);
+ }
+});
+test('Burcio verified aliases resolve to one Celta identity and never a different Hugo',()=>{
+ const {identityReference}=require('../scripts/forecast/identity-reference.cjs');
+ const roster=[{id:'mister-68516',name:'H. Burcio',team:'celta-vigo'}];
+ const ref=identityReference('celta-vigo',roster,['Burcio','H. Burcio','Hugo Burcio','Hugo Burcio García','Hugo Álvarez']);
+ assert.equal(ref.candidates.length,4);assert.ok(ref.candidates.every(p=>p.id==='mister-68516'&&p.verified_alias));
+ assert.equal(identityReference('other',roster,['Burcio']).candidates.length,0);
+});

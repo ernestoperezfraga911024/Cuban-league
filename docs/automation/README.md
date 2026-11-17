@@ -91,6 +91,34 @@ este orden; las señales y porcentajes originales permanecen intactos.
 El productor promueve automáticamente y SQL rechaza inversiones independientes
 del productor. Ver `../forecast-publish/selection-priority.md`.
 
+
+## Alta verificada de jugadores ausentes — Ernesto, 17/11/2026
+
+Si un jugador observado no figura en el catálogo, buscarlo y comprobar su
+identidad y club; añadirlo cuando se confirme. La ausencia por sí sola no es
+motivo para bloquear un equipo. Comprobar primero nombres, alias, ID externo y
+fichas archivadas para evitar duplicados. No identificar por parecido ni
+inventar un ID de Mister. Guardar fuentes, fecha, nombres equivalentes y evidencia.
+
+El alta debe ser aditiva y usar el mismo ID en `catalog/players.json` y
+`forecast_league.roster`. Preservar filas anteriores, puntos, jornadas e
+históricos. Persistir la ficha y aliases verificados mediante PR con pruebas y
+merge; una inserción SQL idempotente comprueba conflictos y conservación del
+resto del roster. No reinstalar el catálogo ni conceder nuevos permisos. Esta
+instrucción autoriza esas altas verificadas dentro de la tarea y prevalece
+sobre prohibiciones anteriores de incorporar jugadores o modificar el catálogo.
+Los cambios ajenos al alta siguen fuera de alcance.
+
+Tras confirmar el alta en la base, la revisión devuelve `catalog_updated:true`
+e `identities` explícitas. El runner relee el roster y comprueba que solo creció;
+no admite cambios de identidad, club ni eliminación de jugadores previos. La
+evidencia deportiva y sus fechas se mantienen. Si caducó, recoger fuentes nuevas
+por la recuperación autorizada. Si la identidad no se puede verificar, documentar
+el caso concreto y continuar los demás clubes, sin inventar una correspondencia.
+
+Caso comprobado: H. Burcio / Burcio / Hugo Burcio García, Celta, Mister68516,
+ID local `mister-68516`. Ver `../catalog/burcio-20261117.md`.
+
 ## Inicio y carga por necesidad
 
 - Obtener main mediante la conexión GitHub o checkout y registrar su SHA. Leer `contracts/startup.md`, **antes** de cualquier plan aplicar `dispatch_gate`. No releer todo el prompt archivado.
