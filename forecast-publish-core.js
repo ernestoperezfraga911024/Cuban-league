@@ -12,7 +12,7 @@
     try{const u=new URL(source.url);return u.protocol==='https:' && u.hostname===domains[source.id] && !u.username && !u.password && !u.port ? u.href : '';}
     catch{return '';}
   }
-  function candidates(players,roster){
+  function candidates(players,roster,{allowStarterAlternative=false}={}){
     if(!Array.isArray(players)||players.length!==11||new Set(players.map(p=>p.id)).size!==11||new Set(players.map(p=>p.slot)).size!==11)
       throw Error('El once necesita 11 jugadores y puestos distintos.');
     for(const p of players){
@@ -20,7 +20,7 @@
       if(!Number.isInteger(p.probability)||p.probability<0||p.probability>100) throw Error('Los porcentajes deben ser enteros entre 0 y 100.');
       if(typeof p.reason!=='string'||p.reason.trim().length<10||p.reason.trim().length>800) throw Error('Cada jugador necesita un motivo de 10 a 800 caracteres.');
       if(p.probability<70){
-        if(!roster.has(p.alternative_id)||players.some(x=>x.id===p.alternative_id)) throw Error('Cada porcentaje bajo 70 necesita una alternativa fuera del once.');
+        if(!roster.has(p.alternative_id)||p.alternative_id===p.id||(!allowStarterAlternative&&players.some(x=>x.id===p.alternative_id))) throw Error(allowStarterAlternative?'Cada porcentaje bajo 70 necesita una alternativa distinta y evaluada.':'Cada porcentaje bajo 70 necesita una alternativa fuera del once.');
       }else if(p.alternative_id!==null) throw Error('Desde 70 la alternativa debe ser null.');
     }
     return players;

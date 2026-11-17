@@ -4,6 +4,18 @@ const {parseSource,inspectReview}=require('../scripts/forecast/inspect-review.cj
 const {example}=require('./fixtures/forecast-producer.cjs');
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 
+test('same-player alternatives are flagged and never used as tactical evidence; other starter links remain',()=>{
+ const x=example(),a=x.roster[1],b=x.roster[2];
+ const html=`<div class="match-p11-side row-local"><div data-onceff="titular"><span class="truncate-name">${a.name}</span><span class="truncate-name">Alias of A</span><span class="truncate-name">${b.name}</span></div></div>`;
+ x.packet.docs={futbolfantasy:{path:'ff',sha256:hash(html),fetched_at:x.window.notBefore,url:'https://www.futbolfantasy.com/partido/test'}};
+ x.review.identities={'Alias of A':a.id};x.review.selection.players=[{id:a.id,alternative_id:a.id},{id:b.id,alternative_id:a.id}];
+ const out=inspectReview({packet:x.packet,roster:x.roster},{review:x.review,readFile:()=>Buffer.from(html),catalogPlayers:[]});
+ assert.equal(out.sources[0].alternative_pairs[0].ignored_self_alternative,true);
+ assert.equal(out.sources[0].alternative_pairs[1].ignored_self_alternative,false);
+ assert.equal(out.alternative_checks[0].direct_pair_evidence.length,0);
+ assert.equal(out.alternative_checks[1].direct_pair_evidence.length,1);
+});
+
 test('partial ligament tear is not confused with partial training',()=>{
  const row=(name,text)=>`<div class="elemento"><div class="datos"><a class="jugador">${name}</a>${text}</div></div>`;
  const html='<section class="physical-status-widget local">'+row('Injured','Rotura parcial del ligamento. Baja')+row('Training','Entrenamiento parcial con el grupo')+'</section>';

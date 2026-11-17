@@ -86,7 +86,10 @@ function inspectReview(request,{review=null,readFile=path=>fs.readFileSync(path)
    if(sha!==doc.sha256)throw Error('Body hash mismatch; inspect original captured file');
    const value={source,url:doc.url,sha256:doc.sha256,fetched_at:doc.fetched_at,...parseSource(source,bytes.toString('utf8'),{side})};
    for(const row of value.health)row.resolved_id=resolve(row.name);
-   for(const row of value.alternative_pairs){row.starter_id=resolve(row.starter);row.alternative_id=resolve(row.alternative);}
+   for(const row of value.alternative_pairs){
+    row.starter_id=resolve(row.starter);row.alternative_id=resolve(row.alternative);
+    row.ignored_self_alternative=!!(row.starter_id&&row.starter_id===row.alternative_id)||row.starter===row.alternative;
+   }
    report.sources.push(value);
   }catch(error){report.errors.push({source,kind:'inspection_error',message:error.message});}
  }
@@ -95,7 +98,7 @@ function inspectReview(request,{review=null,readFile=path=>fs.readFileSync(path)
  for(const choice of Array.isArray(review?.selection?.players)?review.selection.players:[]){
   if(!choice?.alternative_id)continue;
   const evidence=report.sources.flatMap(s=>s.alternative_pairs.filter(pair=>
-   pair.starter_id===choice.id&&pair.alternative_id===choice.alternative_id||pair.starter_id===choice.alternative_id&&pair.alternative_id===choice.id
+   !pair.ignored_self_alternative&&(pair.starter_id===choice.id&&pair.alternative_id===choice.alternative_id||pair.starter_id===choice.alternative_id&&pair.alternative_id===choice.id)
   ).map(pair=>({source:s.source,sha256:s.sha256,fetched_at:s.fetched_at,...pair})));
   report.alternative_checks.push({player_id:choice.id,alternative_id:choice.alternative_id,
    player_position_hint:report.roster.find(p=>p.id===choice.id)?.catalog_position_hint||null,

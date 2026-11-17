@@ -56,6 +56,28 @@ const snapshot=async db=>(await db.query(`select
  (select jsonb_agg(jsonb_build_object('oid',c.oid,'acl',c.relacl,'rls',c.relrowsecurity,'force_rls',c.relforcerowsecurity) order by c.oid) from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.relkind='r' and n.nspname in('forecast_league','forecast_season','forecast_health','public')) tables`)).rows[0];
 const variants=[{}, {confirmed_out:true}, {confirmed_out:null,availability:{value:'injured'}}, {confirmed_out:false,availability:{value:'doubt',refs:[]}}, {availability:'unavailable',rotation:{value:'high'},context:{points:-10},horizon:{value:'distant'}}, {availability:{value:'available',reason:'A different medical report.'},rotation:null,context:{points:9999},horizon:null}, {health:{status:'injured',source:'external'},role:{value:0},confirmed_out:['test-1']}];
 
+test('starter alternatives apply only to v6 and preserve all rows, percentages and function metadata',async()=>{
+ const{db,p}=await setup();try{
+  await db.exec(migration);const q=await asV6(db,p),before=await build(db,q),legacy=await build(db,p);
+  await db.query('insert into forecast_season.drafts values($1,$2,$3,now())',[q.team,JSON.stringify(q),JSON.stringify(before)]);
+  const rows=await snapshot(db),meta=await metadata(db),oldHashes=await hashes(db);
+  const low=x=>{for(const s of x.sources.slice(0,3))s.player_observations[1].probability=50;for(const s of x.proposal.players[1].assessment.sources.slice(0,3))s.probability=50;Object.assign(x.proposal.players[1],{probability:50,alternative:{id:'test-3',name:'Test player 3'}});};
+  low(q);await assert.rejects(build(db,q),/Falta alternativa fuera del once/);
+  await db.exec(read('docs/forecast-publish/starter-alternatives.sql'));
+  assert.deepEqual(await snapshot(db),rows);assert.deepEqual(await metadata(db),meta);assert.equal((await hashes(db)).assess,oldHashes.assess);
+  assert.deepEqual(await build(db,p),legacy);
+  const out=await build(db,q);assert.equal(out.players.length,11);assert.equal(out.candidates.length,1);
+  assert.equal(out.players[1].alternative.id,'test-3');assert.equal(out.players[1].probability,50);assert.equal(out.players[2].probability,79);
+  for(const metadata of variants){const x=clone(q);Object.assign(x.proposal.players[1].assessment,metadata);assert.deepEqual(await build(db,x),out);}
+  const old=clone(p);low(old);await assert.rejects(build(db,old),/Falta alternativa/);
+  for(const id of ['test-2','unknown','test-24']){const x=clone(q);x.proposal.players[1].alternative.id=id;await assert.rejects(build(db,x));}
+  const duplicate=clone(q);duplicate.sources[0].player_observations.push({...duplicate.sources[0].player_observations[1]});await assert.rejects(build(db,duplicate),/Identidades de fuente/);
+  const changed=clone(q);changed.proposal.players[2].probability=50;await assert.rejects(build(db,changed));
+  const final=await hashes(db);assert.equal(final.builder,'105206b17439613a07159868f261bc9e');await assert.rejects(db.exec(read('docs/forecast-publish/starter-alternatives.sql')),/changed since starter-alternative review/);await db.exec('rollback');assert.deepEqual(await hashes(db),final);
+  await db.exec(read('docs/forecast-publish/starter-alternatives-rollback.sql'));assert.deepEqual(await hashes(db),oldHashes);assert.deepEqual(await snapshot(db),rows);assert.deepEqual(await metadata(db),meta);await assert.rejects(build(db,q),/Falta alternativa fuera del once/);
+ }finally{await db.close();}
+});
+
 test('source-only v6 preserves older methods and makes forecasts invariant to external metadata',async t=>{
  const{db,p}=await setup();try{
   assert.deepEqual(await hashes(db),{assess:'1e3dae90e7f37624d6b5ca686835cefe',builder:'f30f730355203b835804b2f6c08b7188'});

@@ -33,15 +33,17 @@ nueva, ni cambiar hashes o fechas para aceptar un cuerpo.
    completas, alternativas capturadas y alternativas añadidas. Acentos y
    abreviaturas no se completan automáticamente. `identity_reference` y los
    perfiles del mismo club son ayuda, no una nueva lectura ni un mapeo aprobado.
-3. **Una observación por jugador y fuente.** Los cuerpos pueden repetir un titular
-   como alternativa de otro puesto. Verificarlo en el cuerpo, conservar su
-   observación titular y explicar la redundancia revisada en `limitations`.
-   Conservar el archivo y geometría originales; no deduplicar a ciegas ni alterar
-   porcentajes. Conservar todas las observaciones verificables de alternativas y
-   banquillo, también las de 0%; la sección médica no crea ni elimina señales.
-   Una alternativa que no duplica un titular no puede desaparecer. El control de
-   `.alternativo` de Comuniate sigue exigiendo todas sus entradas capturadas; si
-   sus datos son contradictorios, no omitirlas para eludir ese control.
+3. **Titular y alternativa pueden coexistir.** Regla de Ernesto del 17/11:
+   un regular puede ser alternativa de otro jugador/dibujo, incluso estando en
+   nuestro once. Conservar todas las entradas capturadas en la revisión. El
+   productor usa una sola señal por jugador/fuente, priorizando su aparición
+   titular y su porcentaje original; no sumar ni promediar apariciones. Si el
+   jugador es alternativa de sí mismo, ignorar únicamente esa relación y
+   conservar el titular. El índice la marca `ignored_self_alternative` tras
+   resolver IDs. Conservar cuerpos, parejas y revisión para auditoría, incluidos
+   ceros y null. Las alternativas de Comuniate siguen completas en la revisión;
+   no eliminarlas manualmente. Dos identidades titular duplicadas, alternativas
+   sin identidad o porcentajes inválidos siguen requiriendo corrección.
 4. **Cálculo independiente de salud.** Usar editorial-v6 con las observaciones
    reales de las cuatro fuentes. No exigir `availability_reviewed`, no preparar
    `confirmed_out` para filtrar jugadores ni introducir ajustes de salud en
@@ -58,7 +60,8 @@ nueva, ni cambiar hashes o fechas para aceptar un cuerpo.
    directa. Es una pista, no prueba de incompatibilidad. El catálogo aporta solo
    posición amplia; una pareja MC/DL puede ser correcta cuando el cuerpo la
    respalda. Elegir once y alternativas por el cálculo y el puesto observado,
-   nunca por salud. No reutilizar un suplente para todas las posiciones automáticamente.
+   nunca por salud. Un titular puede cubrir otro puesto con evidencia, pero nunca
+   ser alternativa de sí mismo. No reutilizar un suplente para todas las posiciones automáticamente.
 6. **Geometría.** Elegir por fila la fuente cuyo dibujo corresponde a la formación
    revisada. Un valor horizontal repetido puede proceder de dos líneas tácticas
    diferentes. No desplazarlo arbitrariamente ni invertir filas: revisar otra

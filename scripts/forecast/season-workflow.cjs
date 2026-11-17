@@ -59,7 +59,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
             review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,identity_names,identity_reference,
               review_requirements:[
                 'Resolver todos los nombres observados y alternativas antes de enviar; no corregir solamente el primer nombre de un error.',
-                'Una observación canónica por jugador y fuente. Si el cuerpo muestra un titular como alternativa de otro puesto, conservar el titular, explicar la redundancia revisada en limitations y conservar el cuerpo original.',
+                'Un titular puede ser alternativa de otro jugador o dibujo. Conservar todas las alternativas capturadas; el compilador cuenta una sola señal titular por fuente. Solo ignorar la relación de un jugador como alternativa de sí mismo, conservando su titularidad y el cuerpo original.',
                 'Revisar cada fila con coordenadas reales. Elegir otra fuente si la formación elegida mezcla posiciones horizontales iguales; nunca fabricar coordenadas.',
                 'Cada alternativa de un titular bajo70 requiere compatibilidad táctica revisada: cotejar el puesto y la relación observada, no reutilizar un candidato indiscriminadamente en todas las líneas.'
               ]}));

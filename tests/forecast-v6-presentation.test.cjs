@@ -11,6 +11,19 @@ function fixture(ballots=6){
  return p;
 }
 function browser(){const dom=new JSDOM('<main></main>',{runScripts:'outside-only',url:'https://test.invalid/'}),w=dom.window;for(const file of ['forecast-publish-core.js','forecast-round-config.js','forecast-round-core.js','forecast-pitch.js','forecast-context.js'])w.eval(fs.readFileSync(file,'utf8'));return {dom,w,host:w.document.querySelector('main')};}
+test('v6 renders another starter as an alternative with its single evaluated percentage',()=>{
+ const p=fixture(),target=p.players[2],other=p.players[3];target.alternative={id:other.id,name:other.name};
+ assert.equal(round.validate(p),p);const before=JSON.stringify(p),b=browser();try{
+  b.w.CubanForecastPitch.render(b.host,p,null,{preview:true});
+  assert.equal(b.host.querySelectorAll('.fp-player').length,11);
+  const node=[...b.host.querySelectorAll('.fp-player')].find(x=>x.dataset.playerId===target.id);
+  assert.ok(node.querySelector('.fp-alt-name').textContent.includes(other.name+' · '+other.probability+'%'));
+  node.click();assert.ok(b.host.querySelector('.fp-alternative').textContent.includes(other.probability+'%'));
+  assert.equal(JSON.stringify(p),before);
+ }finally{b.dom.window.close();}
+ for(const wrong of [target.id,'unknown']){const q=structuredClone(p);q.players[2].alternative.id=wrong;assert.throws(()=>round.validate(q));}
+ const legacy=structuredClone(p);legacy.method_version='editorial-v5';[...legacy.players,...legacy.candidates].forEach(x=>x.method='editorial-v5');assert.throws(()=>round.validate(legacy));
+});
 test('v6 public projections accept source summaries and candidates without private health assessments',()=>{
  const p=fixture(),before=JSON.stringify(p);assert.equal(round.validate(p),p);assert.equal(JSON.stringify(p),before);
  assert.equal(p.players[0].assessment,undefined);

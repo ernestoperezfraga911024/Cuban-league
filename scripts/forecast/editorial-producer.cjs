@@ -51,7 +51,7 @@ function compile(packet, review, roster, window) {
     requireThat(byId.has(id), team + ': identidad sin resolver: ' + name);
     return id;
   };
-  const registered = [], sources = [], union = new Set();
+  const registered = [], sources = [], source_roles = [], union = new Set();
   for (const id of BASE) {
     const r = review.sources?.[id], match = packet.docs[id];
     const page = packet.docs[id === 'comuniate' ? 'comuniate_team' : id];
@@ -80,6 +80,13 @@ function compile(packet, review, roster, window) {
         const excluded = exclusions.find(e => e.source === id && e.name === alt.name && typeof e.reason === 'string' && e.reason.length >= 10);
         if (!excluded) throw error;
         limitations.push(`${id}: candidato opcional ${alt.name} excluido: ${excluded.reason}`);
+        continue;
+      }
+      requireThat(probability(alt.probability), id + ': porcentaje inválido de alternativa');
+      // A starter may also cover another slot. Count the source once using its
+      // primary starter signal; retain the secondary role in the private review.
+      if (starter_ids.includes(player_id)) {
+        source_roles.push({source:id,player_id,starter_probability:observations.find(o=>o.player_id===player_id).probability,alternative_probability:alt.probability});
         continue;
       }
       observations.push({player_id, prediction:'alternative', probability:alt.probability});
@@ -155,7 +162,7 @@ function compile(packet, review, roster, window) {
   }
   const shape = chosen.formation.split('-').map(Number);
   const missingAlternatives=ordered.players.filter(choice=>evaluated.get(choice.id).probability<70&&
-    (!evaluated.has(choice.alternative_id)||selected.has(choice.alternative_id)));
+    (!evaluated.has(choice.alternative_id)||choice.id===choice.alternative_id));
   requireThat(!missingAlternatives.length,missingAlternatives.map(choice=>{
     const player=evaluated.get(choice.id);
     return `${team}: falta alternativa evaluada para ${player.name} (${player.probability}%)`;
@@ -164,7 +171,7 @@ function compile(packet, review, roster, window) {
     const player = evaluated.get(choice.id), slot = i + 1;
     let alternative = null;
     if (player.probability < 70) {
-      requireThat(evaluated.has(choice.alternative_id) && !selected.has(choice.alternative_id), `${team}: falta alternativa evaluada para ${player.name} (${player.probability}%)`);
+      requireThat(evaluated.has(choice.alternative_id) && choice.id!==choice.alternative_id, `${team}: falta alternativa evaluada para ${player.name} (${player.probability}%)`);
       alternative = {id:choice.alternative_id,name:byId.get(choice.alternative_id).name};
     }
     return {...player,slot,position:slot === 1 ? 'GK' : slot <= 1 + shape[0] ? 'DF' : slot > 11 - shape.at(-1) ? 'FW' : 'MF',alternative};
@@ -178,7 +185,7 @@ function compile(packet, review, roster, window) {
     probability_kind:'editorial_uncalibrated',publication_allowed:false,status:'draft',method_version:'editorial-v6',
     limitations,sources,proposal:{formation:chosen.formation,players,candidates}};
   requireThat(jsonbByteLength(payload) <= 65536, 'Payload supera 64 KiB en formato JSONB del servidor');
-  return {fixture:{...expected,season:f.season,sources:registered},payload,layout:ordered.audit};
+  return {fixture:{...expected,season:f.season,sources:registered},payload,layout:ordered.audit,source_roles};
 }
 function concreteBlock(packet,failure) {
   requireThat(BASE.includes(failure?.source) && ['official','fixture','identity','lineup','access'].includes(failure?.kind) &&

@@ -20,18 +20,15 @@ test('one preflight lists Eric and Joan Garcia together without guessing accent 
  assert.deepEqual(x.roster,before.roster);
 });
 
-test('Celta regression reports every starter-alternative duplicate and preserves original evidence',()=>{
- const x=example();
- x.review.sources.futbolfantasy.alternatives.push(...x.packet.observations.futbolfantasy.slice(0,2));
- const before=structuredClone(x),issues=reviewPreflight(x.packet,x.review,x.roster);
- assert.deepEqual(issues.filter(i=>i.code==='source_duplicate').map(i=>i.id),x.roster.slice(0,2).map(p=>p.id));
- assert.deepEqual(x,before);
- assert.throws(()=>compile(x.packet,x.review,x.roster,x.window),/observación duplicada/);
- // A reviewed omission must remove both redundancies, not only the first issue.
- x.review.sources.futbolfantasy.alternatives.pop();
- assert.equal(reviewPreflight(x.packet,x.review,x.roster).filter(i=>i.code==='source_duplicate').length,1);
+test('Celta and Levante starter-alternative roles are accepted without double counting',()=>{
+ const x=example();x.review.sources.futbolfantasy.alternatives.push(...x.packet.observations.futbolfantasy.slice(0,2));
+ const before=structuredClone(x);assert.deepEqual(reviewPreflight(x.packet,x.review,x.roster),[]);
+ const out=compile(x.packet,x.review,x.roster,x.window);
+ assert.equal(out.source_roles.length,2);assert.equal(out.payload.sources[0].player_observations.length,12);assert.deepEqual(x,before);
+ x.packet.observations.futbolfantasy[1].name=x.roster[0].name;
+ assert.ok(reviewPreflight(x.packet,x.review,x.roster).some(i=>i.code==='source_duplicate'));
+ assert.throws(()=>compile(x.packet,x.review,x.roster,x.window),/once incompleto/);
 });
-
 test('Getafe regression reports identity plus all row collisions before the sole correction',()=>{
  const x=example();
  x.packet.observations.comuniate[10].name='Ünal';

@@ -48,7 +48,7 @@
     const round=window.CubanForecastRoundCore,extended=[2,3,4].includes(payload?.schema_version);
     const validated=extended?round.validate(payload):core.validate(payload);
     const p=window.CubanForecastLayoutRepair?.apply(validated,{publishedAt}) || validated;host.replaceChildren();
-    const estimates=new Map((p.candidates||[]).map(c=>[c.id,c]));
+    const estimates=new Map([...(p.method_version==='editorial-v6'?p.players:[]),...(p.candidates||[])].map(c=>[c.id,c]));
     const teamInfo=id=>round.config.teams.find(t=>t.id===id);
     const slotLabel=slot=>extended?round.label(p.formation,slot):core.SLOTS[slot-1];
     const shell=el('article',null,'fp-card');

@@ -142,7 +142,7 @@ los once agrupados por fila táctica, desde portería hasta ataque. Dentro de ca
 fila, los slots representan **izquierda a derecha en la pantalla**, con portero
 abajo. Nunca usar el orden de enumeración del HTML ni invertir todas las filas.
 Revisar su selección usando las cuatro fuentes y el método v6. El código
-calcula porcentajes y exige una alternativa evaluada fuera del once si baja de70;
+calcula porcentajes y exige una alternativa distinta y evaluada (otro titular o candidato) si baja de70;
 para >=70 produce alternative:null. Puede rechazar la propuesta por esa condición:
 corregir la selección/alternativa con la **misma evidencia auténtica**, no rejuvenecer
 fechas. Elegir titulares y alternativas por porcentajes calculados y puestos
@@ -275,3 +275,8 @@ preservando el instante; la prueba PostgreSQL reproduce el caso +00:00 real.
 Las pruebas de proceso verifican exclusión de un segundo run desde otro checkout,
 salida por stdin cerrado y liberación tras SIGKILL sin consultar servicios reales.
 Pasar estas pruebas no acredita una nueva publicación de los 20 clubes.
+
+Regla posterior de Ernesto, 17/11/2026: un titular puede ser alternativa de otro
+jugador/dibujo. Conservar todas las entradas capturadas; el productor cuenta una
+sola señal titular por fuente. Si es alternativa de sí mismo, ignorar esa relación
+y conservar el titular. Ver `../automation/review-checklist.md`. No usar salud para decidir.
