@@ -1,4 +1,4 @@
-const APP_VERSION='229-20261114-install-welcome';
+const APP_VERSION='242-20261117-player-points';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -506,6 +506,7 @@ async function syncLiveCurrentStats({render=true}={}){
       LEAGUE_STATS_STATE.error='';
     }
     PUBLISHED_MATCHDAYS=[...new Set(LIVE_MATCHDAY_ROWS.map(row=>row.matchday))].sort((a,b)=>a-b);
+    if(publishedStatsChanged)window.CubanLeaguePlayerPoints?.store.invalidate();
     if(!PUBLISHED_MATCHDAYS.includes(SELECTED_MATCHDAY)){
       SELECTED_MATCHDAY=PUBLISHED_MATCHDAYS.length?PUBLISHED_MATCHDAYS[PUBLISHED_MATCHDAYS.length-1]:null;
     }
@@ -4918,7 +4919,8 @@ async function ensureLeagueStatsData({force=false}={}){
   LEAGUE_STATS_STATE.error='';
   renderLeagueStatsContent();
   try{
-    const rows=await fetchPublishedLeagueStatsRows(controller.signal);
+    const pointStore=window.CubanLeaguePlayerPoints?.store;
+    const rows=pointStore?.configured?await pointStore.readRows({force:force&&pointStore.snapshot().status==='ready'}):await fetchPublishedLeagueStatsRows(controller.signal);
     if(token!==LEAGUE_STATS_REQUEST_TOKEN)return;
     const data=buildLeagueStats(rows);
     LEAGUE_CAPTAIN_DETAILS.set(data,{rows,index:null});
@@ -7347,6 +7349,12 @@ async function init(){
     $('heroKpis').appendChild(retry);
     return;
   }
+  window.CubanLeaguePlayerPoints?.store.configure({
+    load:()=>withPublicRequestTimeout(signal=>fetchPublishedLeagueStatsRows(signal)),
+    options:()=>({catalog:PLAYER_CATALOG,participants:DATA.participants,
+      season:window.CUBAN_LEAGUE_SUPABASE?.season||DATA.currentSeason,
+      captainAdjustment:leagueNoBonusCaptainAdjustment,isEmpty:isPublishedEmptyLineupPlayer})
+  });
   renderCurrent();
   renderMatchdayCenter();
   renderHomeLive();

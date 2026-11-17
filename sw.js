@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v241-home-clauses';
+const CACHE_NAME = 'cuban-league-v242-player-points';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,10 +12,11 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=231-20261115',
+  './app.js?v=242-20261117-player-points',
+  './player-points.js?v=242-20261117-player-points',
   './market-core.js?v=235-20261115',
-  './market.js?v=241-20261117-home-clauses',
-  './market.css?v=237-20261116',
+  './market.js?v=242-20261117-player-points',
+  './market.css?v=242-20261117-player-points',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',

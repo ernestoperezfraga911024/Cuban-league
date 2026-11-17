@@ -13,6 +13,28 @@
  const state={view:'players',historyView:'ranking',participant:null,search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20,info:false};
  let cached=null,cachedAt=0,pending=null,active=false,sequence=0;
  const teamRequests=new WeakMap(),rivalCaptures=new WeakMap();
+ const pointStore=window.CubanLeaguePlayerPoints?.store;
+ const pointFormat=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+ function pointsContent(id){
+  const snapshot=pointStore?.snapshot(),model=snapshot?.model;
+  if(!model)return snapshot?.status==='error'?'Puntos no disponibles':'Consultando puntos…';
+  const player=model.playersByMisterId.get(String(id));
+  if(!player)return 'Sin puntos registrados';
+  if(player.points===null)return 'Puntos pendientes de verificar';
+  const n=player.matchdays.length,bonus=player.captainBonus;
+  return `<b>${escape(pointFormat.format(player.points))} pts en liga</b><small>${n} ${n===1?'jornada':'jornadas'}${bonus===null?' · Bonus pendiente':bonus?` · ${bonus>0?'+':''}${escape(pointFormat.format(bonus))} bonus`:''}${player.provisional?' · Provisional':''}</small>`;
+ }
+ function playerPoints(id){return `<span class="market-player-points" data-player-points="${escape(id)}">${pointsContent(id)}</span>`;}
+ function refreshPoints(){
+  document.querySelectorAll('[data-player-points]').forEach(el=>{el.innerHTML=pointsContent(el.dataset.playerPoints);});
+  document.querySelectorAll('[data-player-points-note]').forEach(el=>{
+   const partial=pointStore?.snapshot().model?.partial;
+   el.textContent='Puntos de los XI publicados en Cuban League. El bonus de capitán va separado.'+(partial?' Hay jornadas con datos incompletos.':'');
+  });
+ }
+ function loadPoints(force=false){if(pointStore)void pointStore.readRows({force}).catch(()=>{});}
+ const pointsNote=()=>'<p class="market-points-note" data-player-points-note>Puntos de los XI publicados en Cuban League. El bonus de capitán va separado.</p>';
+ pointStore?.subscribe(refreshPoints);
  async function read(force=false){
   if(pending)return pending;
   if(!force&&cached&&Date.now()-cachedAt<120000)return cached;
@@ -48,12 +70,13 @@
  function stamp(p){return `<p class="market-updated">Captura del ${escape(date(p.capturedAt))} · hora de Miami</p>${Date.now()-Date.parse(p.capturedAt)>86400000?'<p class="market-notice">Esta captura tiene más de 24 horas. Los valores y propietarios pueden haber cambiado.</p>':''}`;}
  function rows(p,players,showOwner=true,compact=false){
   const owners=new Map(p.managers.map(m=>[m.id,m.name]));
-  return `<div class="market-table-wrap"><table class="market-table"><thead><tr><th scope="col">Futbolista</th><th scope="col">Valor</th><th scope="col">Cláusula</th></tr></thead><tbody>${players.map(x=>`<tr><th scope="row"><div class="market-player">${photo(x)}<div><strong>${escape(x.name)}</strong><span>${escape(x.position)} · ${escape(x.club)}</span>${showOwner?`<span class="market-owner${x.ownerId===null?' is-free':''}">${escape(owners.get(x.ownerId)||'Libre')}</span>`:''}</div></div></th><td>${compact?price(x.value):escape(money(x.value))}</td><td>${compact?price(x.clause):escape(money(x.clause))}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="market-table-wrap"><table class="market-table"><thead><tr><th scope="col">Futbolista</th><th scope="col">Valor</th><th scope="col">Cláusula</th></tr></thead><tbody>${players.map(x=>`<tr><th scope="row"><div class="market-player">${photo(x)}<div><strong>${escape(x.name)}</strong><span>${escape(x.position)} · ${escape(x.club)}</span>${showOwner?`<span class="market-owner${x.ownerId===null?' is-free':''}">${escape(owners.get(x.ownerId)||'Libre')}</span>`:''}${playerPoints(x.id)}</div></div></th><td>${compact?price(x.value):escape(money(x.value))}</td><td>${compact?price(x.clause):escape(money(x.clause))}</td></tr>`).join('')}</tbody></table></div>`;
  }
  function playerResults(){
   const target=document.getElementById('marketResults');if(!target||!cached)return;
   const players=core.select(cached,state);
-  target.innerHTML=`<p class="market-result-count" role="status">${players.length} ${players.length===1?'futbolista':'futbolistas'}</p>${players.length?rows(cached,players.slice(0,state.limit),true,true):'<p class="market-empty">No hay futbolistas con estos filtros.</p>'}${players.length>state.limit?`<button type="button" class="market-more" data-market-action="more">Ver más <span aria-hidden="true">›</span><small>${Math.min(state.limit,players.length)} de ${players.length}</small></button>`:''}`;
+  target.innerHTML=`<p class="market-result-count" role="status">${players.length} ${players.length===1?'futbolista':'futbolistas'}</p>${pointsNote()}${players.length?rows(cached,players.slice(0,state.limit),true,true):'<p class="market-empty">No hay futbolistas con estos filtros.</p>'}${players.length>state.limit?`<button type="button" class="market-more" data-market-action="more">Ver más <span aria-hidden="true">›</span><small>${Math.min(state.limit,players.length)} de ${players.length}</small></button>`:''}`;
+  refreshPoints();
  }
  function playerView(p){
   return `<div class="market-filters"><label class="market-search"><span class="market-sr-only">Buscar por nombre, club o participante</span>${icon('search')}<input id="marketSearch" type="search" placeholder="Buscar futbolista" value="${escape(state.search)}" autocomplete="off"></label><label>Propietario<select id="marketOwner"><option value="all">Todos</option><option value="free">Libres</option>${p.managers.slice().sort((a,b)=>a.name.localeCompare(b.name,'es')).map(m=>`<option value="${m.id}">${escape(m.name)}</option>`).join('')}</select></label><label>Ordenar por<select id="marketSort"><option value="value">Mayor valor</option><option value="clause">Mayor cláusula</option><option value="name">Nombre</option></select></label></div><div class="market-positions" role="group" aria-label="Filtrar por posición">${[['all','Todos'],...core.positions.map(pos=>[pos,pos])].map(([id,label])=>`<button type="button" data-market-position="${id}" aria-pressed="${state.position===id}">${label}</button>`).join('')}</div><div id="marketResults"></div>`;
@@ -109,6 +132,7 @@
   if(state.view==='players'){document.getElementById('marketOwner').value=state.owner;document.getElementById('marketSort').value=state.sort;playerResults();}
  }
  async function load(force=false){
+  if(state.view==='players')loadPoints(force);
   const current=++sequence;host.innerHTML='<p class="market-empty" role="status">Consultando el mercado…</p>';section.setAttribute('aria-busy','true');
   try{await read(force);if(current===sequence&&active)render();}
   catch{if(current===sequence&&active)host.innerHTML='<p class="market-empty" role="alert">No se pudo cargar el mercado. Pulsa Actualizar para reintentar.</p>';}
@@ -116,13 +140,15 @@
  }
  async function showTeam(target,participantId,force=false){
   if(!target)return;
+  loadPoints(force);
   const token={};teamRequests.set(target,token);target.innerHTML='<p class="market-empty" role="status">Consultando equipo actual…</p>';target.setAttribute('aria-busy','true');
   try{
    const p=await read(force);if(teamRequests.get(target)!==token||!target.isConnected)return;
    const manager=p?.managers.find(m=>m.participantId===Number(participantId));
    if(!manager){target.innerHTML='<p class="market-empty">Todavía no hay una plantilla actual publicada para este participante.</p>';return;}
    const players=p.players.filter(x=>x.ownerId===manager.id),value=players.reduce((total,x)=>total+x.value,0);
-   target.innerHTML=`<div class="market-team-summary"><div><strong>${players.length}</strong><span>Futbolistas</span></div><div><strong>${escape(money(value))}</strong><span>Valor de plantilla</span></div></div>${stamp(p)}<p class="market-team-note">Plantilla completa en el momento de la captura. No es la alineación de una jornada.</p>${core.positions.map(pos=>{const group=players.filter(x=>x.position===pos).sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,'es'));return group.length?`<h3 class="market-group-title">${names[pos]} <span>${group.length}</span></h3>${rows(p,group,false)}`:'';}).join('')}${players.length?'':'<p class="market-empty">Este participante no tenía futbolistas en esta captura.</p>'}`;
+   target.innerHTML=`<div class="market-team-summary"><div><strong>${players.length}</strong><span>Futbolistas</span></div><div><strong>${escape(money(value))}</strong><span>Valor de plantilla</span></div></div>${stamp(p)}${pointsNote()}<p class="market-team-note">Plantilla completa en el momento de la captura. No es la alineación de una jornada.</p>${core.positions.map(pos=>{const group=players.filter(x=>x.position===pos).sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,'es'));return group.length?`<h3 class="market-group-title">${names[pos]} <span>${group.length}</span></h3>${rows(p,group,false)}`:'';}).join('')}${players.length?'':'<p class="market-empty">Este participante no tenía futbolistas en esta captura.</p>'}`;
+   refreshPoints();
   }catch{if(teamRequests.get(target)===token&&target.isConnected){target.innerHTML='<p class="market-empty" role="alert">No se pudo cargar la plantilla.</p>';const b=document.createElement('button');b.type='button';b.className='market-more';b.textContent='Reintentar';b.onclick=()=>showTeam(target,participantId,true);target.append(b);}}
   finally{if(teamRequests.get(target)===token)target.setAttribute('aria-busy','false');}
  }
@@ -134,7 +160,7 @@
   if(row&&!e.target.closest('.market-ranking-detail,details.market-price')){toggleParticipant(row.dataset.marketRow);return;}
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.marketAction==='reload'){load(true);return;}
-  if(b.dataset.marketView){state.view=b.dataset.marketView;render();return;}
+  if(b.dataset.marketView){state.view=b.dataset.marketView;if(state.view==='players')loadPoints();render();return;}
   if(b.dataset.marketHistory){state.historyView=b.dataset.marketHistory;state.info=false;render();(section.querySelector(`[data-market-history="${state.historyView}"]`)||section.querySelector('[data-market-history]'))?.focus();return;}
   if(b.dataset.marketAction==='info'){state.info=!state.info;document.getElementById('marketHistoryInfo').hidden=!state.info;b.setAttribute('aria-expanded',String(state.info));return;}
   if(b.dataset.marketPosition){state.position=b.dataset.marketPosition;state.limit=40;section.querySelectorAll('[data-market-position]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.marketPosition===state.position)));playerResults();return;}

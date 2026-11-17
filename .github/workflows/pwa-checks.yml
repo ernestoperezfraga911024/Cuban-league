@@ -5,6 +5,8 @@ on:
       - 'install-*'
       - 'index.html'
       - 'app.js'
+      - 'player-points.js'
+      - 'tests/player-points.test.cjs'
       - 'viewer-profile.js'
       - 'sw.js'
       - 'tests/install-welcome.test.cjs'
@@ -15,6 +17,8 @@ on:
       - 'install-*'
       - 'index.html'
       - 'app.js'
+      - 'player-points.js'
+      - 'tests/player-points.test.cjs'
       - 'viewer-profile.js'
       - 'sw.js'
       - 'tests/install-welcome.test.cjs'
@@ -33,4 +37,4 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --ignore-scripts
-      - run: node --test tests/install-welcome.test.cjs tests/viewer-profile.test.cjs tests/navigation-motion.test.cjs tests/public-loading.test.cjs tests/forecast-player-sheet.test.cjs
+      - run: node --test tests/install-welcome.test.cjs tests/viewer-profile.test.cjs tests/navigation-motion.test.cjs tests/public-loading.test.cjs tests/forecast-player-sheet.test.cjs tests/player-points.test.cjs
