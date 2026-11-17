@@ -63,6 +63,9 @@ body.f05-theme[data-section="market"] main {
 .market-player .market-player-visual{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 46px}
 .market-player .market-player-points{display:grid;place-items:center;box-sizing:border-box;width:30px;height:30px;border:1px solid #c2b28f66;border-radius:50%;background:#253033;color:#d7c7a7;font-size:11px;font-weight:750;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
 .market-player-points-detail{display:block;margin-top:5px;color:#a5adae;font-size:10px;font-weight:400;line-height:1.5}
+.market-player .market-captain-bonus{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:2px 5px;box-sizing:border-box;max-width:100%;margin-top:7px;padding:4px 7px;border:1px solid #c2b28f40;border-radius:7px;background:#c2b28f0d;color:#d7c7a7;font-size:12px;font-weight:500;line-height:1.25;white-space:nowrap}
+.market-player .market-captain-bonus b{font-size:14px;font-weight:750;font-variant-numeric:tabular-nums}
+.market-player .market-captain-bonus.is-negative{border-color:#dca59a40;background:#dca59a0d;color:#e1b2a8}
 .market-points-note{font-size:11px;line-height:1.55;color:#a5adae;margin:0 0 12px}
 .market-price{position:relative;display:inline-block;max-width:100%;font-variant-numeric:tabular-nums}
 .market-price summary{display:block;list-style:none;cursor:pointer;border-radius:4px;white-space:nowrap;font:inherit;color:inherit;padding:8px 0;margin:-8px 0}

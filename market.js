@@ -22,14 +22,16 @@
   if(!player)return {number:'—',label:'Sin puntos registrados',detail:''};
   if(player.points===null)return {number:'—',label:'Puntos pendientes de verificar',detail:''};
   const n=player.matchdays.length,bonus=player.captainBonus;
-  const number=pointFormat.format(player.points),detail=`${n} ${n===1?'jornada':'jornadas'}${bonus===null?' · Bonus pendiente':bonus?` · ${bonus>0?'+':''}${pointFormat.format(bonus)} bonus`:''}${player.provisional?' · Provisional':''}`;
-  return {number,label:`${number} puntos en liga. ${detail}`,detail};
+  const number=pointFormat.format(player.points),detail=`${n} ${n===1?'jornada':'jornadas'}${bonus===null?' · Bonus pendiente':''}${player.provisional?' · Provisional':''}`;
+  const captain=bonus?`${bonus>0?'+':''}${pointFormat.format(bonus)}`:'';
+  return {number,label:`${number} puntos en liga. ${captain?`Bonus de capitán ${captain}. `:''}${detail}`,detail,captain,negativeBonus:bonus<0};
  }
  function playerPoints(id){const p=pointsContent(id);return `<span class="market-player-points" data-player-points="${escape(id)}" role="img" aria-label="${escape(p.label)}" title="${escape(p.label)}">${escape(p.number)}</span>`;}
- function playerPointsDetail(id){return `<small class="market-player-points-detail" data-player-points-detail="${escape(id)}">${escape(pointsContent(id).detail)}</small>`;}
+ function pointsDetailContent(p){return `${p.captain?`<span class="market-captain-bonus${p.negativeBonus?' is-negative':''}" aria-label="Bonus de capitán: ${escape(p.captain)} puntos">Capitán <b>${escape(p.captain)}</b></span>`:''}${p.detail?`<small class="market-player-points-detail">${escape(p.detail)}</small>`:''}`;}
+ function playerPointsDetail(id){return `<div data-player-points-detail="${escape(id)}">${pointsDetailContent(pointsContent(id))}</div>`;}
  function refreshPoints(){
   document.querySelectorAll('[data-player-points]').forEach(el=>{const p=pointsContent(el.dataset.playerPoints);el.textContent=p.number;el.setAttribute('aria-label',p.label);el.title=p.label;});
-  document.querySelectorAll('[data-player-points-detail]').forEach(el=>{el.textContent=pointsContent(el.dataset.playerPointsDetail).detail;});
+  document.querySelectorAll('[data-player-points-detail]').forEach(el=>{el.innerHTML=pointsDetailContent(pointsContent(el.dataset.playerPointsDetail));});
   document.querySelectorAll('[data-player-points-note]').forEach(el=>{
    const partial=pointStore?.snapshot().model?.partial;
    el.textContent='Puntos de los XI publicados en Cuban League. El bonus de capitán va separado.'+(partial?' Hay jornadas con datos incompletos.':'');
