@@ -66,16 +66,52 @@
     return `<span class="mg-avatar"><span aria-hidden="true">${escape(p.name.slice(0,1))}</span>${src?`<img src="${escape(src)}" loading="lazy" decoding="async" alt="">`:''}</span>`;
   }
   const dates=days=>days.map(day=>`J${day}`).join(' · ');
+  const scoreOf=(p,kind)=>kind==='best'||kind==='worst'?p[kind].points:kind==='streaks'?p.bestRun:p[kind];
+  const detailOf=(p,kind)=>kind==='best'||kind==='worst'?dates(p[kind].days):kind==='streaks'?(p.bestStart===p.bestEnd?`J${p.bestStart}`:`J${p.bestStart}–J${p.bestEnd}`):'';
+  function trigger(p,kind){
+    const record=kind==='best'||kind==='worst'?p[kind]:null;
+    return record?`data-matchday-lineup-player="${escape(p.name)}" data-matchday="${record.days[0]}" aria-label="Ver alineación de ${escape(p.name)} en J${record.days[0]}"`:`data-profile-player="${escape(p.name)}" aria-label="Ver perfil de ${escape(p.name)}"`;
+  }
+  // Both points charts share a zero-based scale, extended for real negative scores.
+  function pointsScale(){
+    const values=[...model.best.map(p=>p.best.points),...model.worst.map(p=>p.worst.points)];
+    const low=Math.min(0,...values),high=Math.max(100,...values),raw=(high-low)/3;
+    const magnitude=10**Math.floor(Math.log10(raw));
+    const step=[1,2,5,10].map(n=>n*magnitude).find(n=>n>=raw);
+    const min=Math.floor(low/step)*step,max=Math.ceil(high/step)*step;
+    const ticks=[];for(let n=min;n<=max;n+=step)ticks.push(n);
+    return {min,max,ticks};
+  }
+  const position=(value,scale)=>(value-scale.min)/(scale.max-scale.min)*100;
+  function axis(scale){
+    return `<div class="mg-axis" aria-hidden="true">${scale.ticks.map(value=>`<span style="--mg-pos:${position(value,scale)}%">${number.format(value)}</span>`).join('')}</div>`;
+  }
+  function bar(value,scale){
+    const zero=position(0,scale),end=position(value,scale);
+    return `<span class="mg-track" aria-hidden="true" style="--mg-zero:${zero}%;--mg-start:${Math.min(zero,end)}%;--mg-size:${Math.abs(end-zero)}%;--mg-end:${end}%"><span class="mg-zero"></span><span class="mg-bar"></span><span class="mg-dot"></span></span>`;
+  }
+  function icon(kind){
+    return kind==='wins'?'<svg class="mg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0V3Zm0 2H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 14v6m-4 1h8"/></svg>':'<span class="mg-icon mg-icon-bars" aria-hidden="true"><i></i><i></i><i></i></span>';
+  }
   function board(title,entries,kind,tone=''){
-    const top=entries.filter(p=>p.rank<=3);
+    const top=entries.filter(p=>p.rank<=3),records=kind==='best'||kind==='worst';
+    const maximum=Math.max(1,...top.map(p=>scoreOf(p,kind)));
+    const step=Math.max(1,Math.ceil(maximum/4)),max=Math.ceil(maximum/step)*step;
+    const scale=records?pointsScale():{min:0,max,ticks:Array.from({length:max/step+1},(_,i)=>i*step)};
     const item=p=>{
-      const record=kind==='best'||kind==='worst'?p[kind]:null;
-      const value=record?record.points:kind==='streaks'?p.bestRun:p[kind];
-      const detail=record?dates(record.days):kind==='streaks'?(p.bestStart===p.bestEnd?`J${p.bestStart}`:`J${p.bestStart}–J${p.bestEnd}`):'';
-      const trigger=record?`data-matchday-lineup-player="${escape(p.name)}" data-matchday="${record.days[0]}" aria-label="Ver alineación de ${escape(p.name)} en J${record.days[0]}"`:`data-profile-player="${escape(p.name)}" aria-label="Ver perfil de ${escape(p.name)}"`;
-      return `<li><span class="mg-rank">${p.rank}</span><button type="button" class="mg-person" ${trigger}>${photo(p)}<span><b>${escape(p.name)}</b>${detail?`<small>${detail}</small>`:''}</span></button><b class="mg-value">${number.format(value)}</b></li>`;
+      const value=scoreOf(p,kind),detail=detailOf(p,kind);
+      return `<li><span class="mg-rank">${p.rank}</span><button type="button" class="mg-person" ${trigger(p,kind)}>${photo(p)}<span><b>${escape(p.name)}</b>${detail?`<small>${detail}</small>`:''}</span></button>${bar(value,scale)}<b class="mg-value">${number.format(value)}</b></li>`;
     };
-    return `<section class="mg-section ${tone}" aria-label="${title}"><header><h3>${title}</h3><span>${kind==='best'||kind==='worst'?'Puntos':kind==='streaks'?'Seguidas':'Jornadas'}</span></header>${top.length?`<ol class="mg-ranking">${top.slice(0,3).map(item).join('')}</ol>`:'<p class="mg-empty">Sin registros.</p>'}${top.length>3?`<details class="mg-ties"><summary>${top.length-3} más empatados en el top 3</summary><ol class="mg-ranking">${top.slice(3).map(item).join('')}</ol></details>`:''}</section>`;
+    const column=p=>{
+      const value=scoreOf(p,kind),detail=detailOf(p,kind);
+      return `<li class="mg-column"><div class="mg-column-plot" style="--mg-height:${position(value,scale)}%"><b class="mg-value">${number.format(value)}</b><span class="mg-column-bar" aria-hidden="true"></span></div><button type="button" class="mg-person" ${trigger(p,kind)}>${photo(p)}<span><b>${escape(p.name)}</b>${detail?`<small>${detail}</small>`:''}<small class="mg-column-rank">Puesto ${p.rank}</small></span></button></li>`;
+    };
+    const chart=records?`<ol class="mg-ranking">${top.slice(0,3).map(item).join('')}</ol><div class="mg-score-axis">${axis(scale)}</div>`:`<div class="mg-columns"><div class="mg-column-grid" aria-hidden="true">${scale.ticks.map(value=>`<span style="--mg-level:${position(value,scale)}%"><i>${value}</i></span>`).join('')}</div><ol>${top.slice(0,3).map(column).join('')}</ol></div>`;
+    return `<section class="mg-section ${tone} mg-${kind}" aria-label="${title}"><header><h3>${icon(kind)}${title}</h3><span>${records?'Puntos':kind==='streaks'?'Seguidas':'Jornadas'}</span></header>${top.length?chart:'<p class="mg-empty">Sin registros.</p>'}${top.length>3?`<details class="mg-ties"><summary>${top.length-3} más empatados en el top 3</summary><ol class="mg-ranking">${top.slice(3).map(item).join('')}</ol></details>`:''}</section>`;
+  }
+  function streak(active){
+    if(!active)return '<div class="mg-live"><span>Racha actual: sin cierre completo verificable.</span></div>';
+    return `<div class="mg-live"><button type="button" class="mg-person" ${trigger(active,'leads')}>${photo(active)}<span><small>Racha del líder</small><b>${escape(active.name)}</b></span></button><span class="mg-live-value"><b>${active.run}</b><small>${active.run===1?'jornada seguida':'jornadas seguidas'}</small></span><div class="mg-timeline" aria-label="${active.run} ${active.run===1?'jornada consecutiva':'jornadas consecutivas'}, de J${active.runStart} a J${model.latest}"><span>J${active.runStart}</span><span class="mg-timeline-marks" aria-hidden="true">${Array.from({length:active.run},()=>'<i></i>').join('')}</span>${active.run>1?`<span>J${model.latest}</span>`:''}</div></div>`;
   }
   function render(nextHost,nextModel,status){
     if(!nextHost)return;
@@ -89,7 +125,7 @@
     host.innerHTML=`<div class="mg-heading"><div><span class="mg-kicker">TEMPORADA ${escape(model.season)}</span><h2>Resumen de temporada</h2></div><span class="mg-stamp">${model.latest?`J1–J${model.latest}`:'Sin jornadas'}</span></div>
       <p data-mg-status class="mg-status" role="status"></p>
       ${model.latest?`<div class="mg-sheet">
-      <div class="mg-live">${active?`<button type="button" class="mg-person" data-profile-player="${escape(active.name)}" aria-label="Ver perfil de ${escape(active.name)}">${photo(active)}<span><small>Racha actual del líder · J${active.runStart}–J${model.latest}</small><b>${escape(active.name)}</b></span></button><span class="mg-live-value"><b>${active.run}</b><small>${active.run===1?'jornada seguida':'jornadas seguidas'}</small></span>`:'<span>Racha actual: sin cierre completo verificable.</span>'}</div>
+      ${streak(active)}
       <div class="mg-grid">${board('Mejores jornadas',model.best,'best','mg-best')}${board('Peores jornadas',model.worst,'worst','mg-worst')}${board('Jornadas ganadas',model.wins,'wins')}${board('Jornadas como líder',model.leads,'leads')}${board('Racha más larga de liderazgo',model.streaks,'streaks')}</div>
       </div><details class="mg-help"><summary>Cómo se calculan estos datos</summary><p>Una mejor y peor marca por participante. Los empates comparten puesto y las victorias semanales se comparten a igual puntuación. Los lideratos y rachas respetan la clasificación general y sus desempates. Solo temporada actual; los registros se actualizan al corregir resultados.</p></details>`:'<div class="mg-empty"><h3>Sin jornadas publicadas</h3><p>El resumen aparecerá cuando haya resultados.</p></div>'}`;
     updateStatus(status);

@@ -12,7 +12,7 @@ const roster=source.participants.filter(p=>p.active!==false);
 const plain=x=>JSON.parse(JSON.stringify(x));
 const freeze=x=>{Object.freeze(x);Object.values(x).forEach(v=>{if(v&&typeof v==='object'&&!Object.isFrozen(v))freeze(v);});return x;};
 function builder(){const sandbox={Intl};vm.runInNewContext(read('matchday-general.js'),sandbox);return sandbox.CubanMatchdayGeneral.build;}
-test('V199 preserves the complete V198 aggregation and ranking implementation byte-for-byte',()=>{
+test('Chart redesign preserves the complete original aggregation and ranking implementation byte-for-byte',()=>{
   const script=read('matchday-general.js');
   assert.equal(createHash('sha256').update(script.slice(0,script.indexOf('  let host=null'))).digest('hex'),'9e05199e9e5305ec4c14609bd550e230b9a804ffb3c971d11374d18615a64a95');
 });
@@ -92,11 +92,11 @@ test('lazy integration preserves official ranks/weekly award rules and caches th
     assert.equal(t.doc.querySelectorAll('#matchdayGeneralPanel .mg-section').length,5);assert.equal(m.frames.length,38);
   }finally{t.dom.window.close();}
 });
-test('compact overview has no chart, animation work or large cards and retains cached DOM',async()=>{
+test('CSS charts retain cached DOM without animation work or heavy chart dependencies',async()=>{
   const t=await setup();try{
     t.api.set([1,2,3].flatMap(dayRows));t.api.go('matchdays');
     const host=t.doc.getElementById('matchdayGeneralPanel'),sheet=host.querySelector('.mg-sheet');
-    assert.equal(host.querySelector('svg,canvas,[data-mg-play],.mg-card'),null);
+    assert.equal(host.querySelector('canvas,[data-mg-play],.mg-card'),null);
     assert.doesNotMatch(host.textContent,/La carrera por la liga|Reproducir/);
     assert.equal(host.querySelectorAll('.mg-section').length,5);
     assert.equal(host.querySelectorAll('.mg-live').length,1);assert.equal(t.frames.size,0);
@@ -129,7 +129,7 @@ test('compact ranking keeps every cutoff tie accessible and record/profile desti
     const css=read('matchday-general.css');
     assert.match(css,/min-height:44px/);assert.match(css,/min-height:48px/);
     assert.match(css,/width:30px;height:30px/);assert.match(css,/overflow-wrap:anywhere/);
-    assert.doesNotMatch(css,/box-shadow:0|linear-gradient|mg-card|mg-chart/);
+    assert.doesNotMatch(css,/box-shadow:0|mg-card|@keyframes/);
   }finally{t.dom.window.close();}
 });
 test('compact overview retains keyboard-accessible three-tab navigation with reduced motion',async()=>{
@@ -152,6 +152,51 @@ test('new UI escapes names, rejects unsafe photos, scopes styles and versions al
     assert.equal(w.document.querySelector('[onerror]'),null);assert.equal(w.document.querySelector('img'),null);assert.match(w.document.body.textContent,/<img/);
     const walk=rules=>{for(const r of rules){if(r.selectorText)assert.ok(r.selectorText.split(',').every(s=>s.trim().startsWith('#matchdayGeneralPanel')||s.trim().startsWith('#matchdays[data-matchday-mode=')||s.trim()==='#matchdays>.matchday-view-tabs button'),r.selectorText);if(r.cssRules)walk(r.cssRules);}};
     walk(CSSOM.parse(read('matchday-general.css')).cssRules);
-    for(const file of ['matchday-general.js','matchday-general.css']){assert.ok(read('index.html').includes(file+'?v=199-20261104-compact-general'));assert.ok(read('sw.js').includes(file+'?v=199-20261104-compact-general'));}
+    for(const file of ['matchday-general.js','matchday-general.css']){assert.ok(read('index.html').includes(file+'?v=240-20261117-summary-charts'));assert.ok(read('sw.js').includes(file+'?v=240-20261117-summary-charts'));}
+  }finally{dom.window.close();}
+});
+
+test('chart scales preserve equal scores, real zero and negative scores on a shared axis',()=>{
+  const dom=new JSDOM('<div id="matchdayGeneralPanel"></div>',{runScripts:'outside-only'});
+  try{
+    const w=dom.window;w.eval(read('matchday-general.js'));
+    const host=w.document.getElementById('matchdayGeneralPanel');
+    const input=fixture([[91,91,90,-4],[10,0,15,-1]]);
+    const model=w.CubanMatchdayGeneral.build(input);freeze(model);
+    w.CubanMatchdayGeneral.render(host,model,'ready');
+    const best=[...host.querySelectorAll('.mg-best > .mg-ranking > li')];
+    const sizes=best.map(li=>li.querySelector('.mg-track').style.getPropertyValue('--mg-size'));
+    assert.equal(sizes[0],sizes[1]);assert.ok(parseFloat(sizes[2])<parseFloat(sizes[0]));
+    const worst=[...host.querySelectorAll('.mg-worst > .mg-ranking > li')];
+    assert.equal(worst[0].querySelector('.mg-value').textContent,'-4');
+    const negative=worst[0].querySelector('.mg-track').style;
+    assert.ok(parseFloat(negative.getPropertyValue('--mg-end'))<parseFloat(negative.getPropertyValue('--mg-zero')));
+    assert.equal(worst[1].querySelector('.mg-value').textContent,'0');
+    assert.equal(worst[1].querySelector('.mg-track').style.getPropertyValue('--mg-size'),'0%');
+    assert.equal(host.querySelector('.mg-best .mg-axis').textContent,host.querySelector('.mg-worst .mg-axis').textContent);
+    for(const track of host.querySelectorAll('.mg-track')){
+      for(const name of ['--mg-start','--mg-size','--mg-end','--mg-zero']){
+        const value=parseFloat(track.style.getPropertyValue(name));assert.ok(value>=0&&value<=100);
+      }
+    }
+    assert.equal(host.querySelectorAll('.mg-timeline-marks i').length,model.active.run);
+  }finally{dom.window.close();}
+});
+test('win columns use proportional heights and preserve all tied profile links',()=>{
+  const dom=new JSDOM('<div id="matchdayGeneralPanel"></div>',{runScripts:'outside-only'});
+  try{
+    const w=dom.window;w.eval(read('matchday-general.js'));
+    const host=w.document.getElementById('matchdayGeneralPanel');
+    const model=w.CubanMatchdayGeneral.build(fixture([[10,9,0,0],[10,10,0,0],[0,10,0,0],[20,0,0,0]]));
+    w.CubanMatchdayGeneral.render(host,model,'ready');
+    const columns=[...host.querySelectorAll('.mg-wins .mg-column')];
+    assert.deepEqual(columns.map(c=>c.querySelector('.mg-value').textContent),['3','2']);
+    const heights=columns.map(c=>parseFloat(c.querySelector('.mg-column-plot').style.getPropertyValue('--mg-height')));
+    assert.ok(Math.abs(heights[0]/heights[1]-1.5)<1e-8);
+    assert.deepEqual(columns.map(c=>c.querySelector('button').dataset.profilePlayer),['A','B']);
+    const full=w.CubanMatchdayGeneral.build(fixture(Array.from({length:38},()=>[10,9,8,7])));
+    w.CubanMatchdayGeneral.render(host,full,'ready');
+    assert.equal(host.querySelectorAll('.mg-timeline-marks i').length,38);
+    assert.match(host.querySelector('.mg-timeline').getAttribute('aria-label'),/J1 a J38/);
   }finally{dom.window.close();}
 });
