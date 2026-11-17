@@ -440,6 +440,17 @@
         "tests/market-public.test.cjs"
       ],
       "evidence": "Último fallo observado 44102131050:1. Publicación protegida: 538 jugadores y 447 cláusulas a 16/11 21:02:41 Miami. Diagnóstico 44107565397: 529 actuales, 253 libres, 276 en plantillas; nueve ausentes iguales en ambas lecturas, sin publicación. Confirmación por club y producción pendientes."
+    },
+    {
+      "code": "mister-navigation-reader-failed",
+      "status": "diagnostic-ready",
+      "failure": "Pruebas reales44109765830 y44110138717 se detuvieron en market con reader_failed a los22 y26 segundos, antes de verificar ausencias por club.",
+      "cause": "Pendiente: el registro anterior omitía paso, clase de error y estado de navegación.",
+      "prevention": "Pasos estáticos de navegación y diagnóstico de solo booleanos, ruta clasificada y líneas de código propias. Nunca mensajes de error, HTML, cookies ni URL con parámetros. Sin relajar controles ni repetir escrituras.",
+      "tests": [
+        "tests/market-catalog.test.cjs"
+      ],
+      "evidence": "Ambos intentos quedaron failed y conservaron la publicación anterior; diagnóstico nuevo pendiente de ejecución."
     }
   ]
 }

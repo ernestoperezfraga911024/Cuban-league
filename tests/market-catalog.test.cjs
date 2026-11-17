@@ -97,3 +97,15 @@ test('Club searches reject a reappearing player, missing/changed rows, wrong lea
     await assert.rejects(confirmFreeAbsences(f.page,f.current,[f.candidate],{wait:f.wait}),new RegExp(code));
   }
 });
+
+test('Reader diagnostic omits secrets, error messages, URLs and raw DOM',async()=>{
+ const {readerDiagnostic,readSessionDiagnostic}=require('../scripts/mister-market/reader-diagnostic.cjs');
+ const err=new Error('secret-token-and-HTML');err.name='TimeoutError';
+ err.stack='Error: secret-token-and-HTML\n at go (/home/runner/repo/scripts/mister-market/collector.cjs:74:2)';
+ const result=await readerDiagnostic(err,{url:()=> 'https://mister.mundodeportivo.com/new-onboarding/?secret=hidden',
+  evaluate:async fn=>{assert.equal(fn,readSessionDiagnostic);return {activeLeague:false,passwordForm:true};}});
+ assert.equal(result.browserError,'timeout');assert.equal(result.page,'/new-onboarding/');
+ assert.deepEqual(result.source,[{file:'collector.cjs',line:74}]);
+ assert.ok(!JSON.stringify(result).includes('secret'));assert.ok(!JSON.stringify(result).includes('HTML'));
+ assert.equal((await readerDiagnostic(err,{url:()=> 'https://other.example/private',evaluate:async()=>{throw Error('secret');}})).page,'external');
+});
