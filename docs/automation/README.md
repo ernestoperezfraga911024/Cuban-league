@@ -180,3 +180,11 @@ La reparación interactiva y sus pruebas se documentan en
 `reports/2026-11-16-1400-diagnosis.md`. La ejecución periódica sigue sin permiso
 para modificar código/esquema: únicamente utiliza las funciones instaladas de
 publicación, `automation_ops.record_run` y `automation_ops.record_trace`.
+
+## Recuperación tras un turno vacío
+
+La corrección revisada está en `../forecast-publish/recovery-resume.md`. La
+recuperación busca el turno reciente con pendientes; los turnos vacíos no ocultan
+trabajo anterior. Un turno posterior asume solo los clubes de su propio alcance.
+No se reabren terminales ni se renuevan borradores caducados. La instalación y
+la comprobación real se registran en la bitácora privada.
