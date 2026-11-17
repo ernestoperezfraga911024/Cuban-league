@@ -443,14 +443,14 @@
     },
     {
       "code": "mister-navigation-reader-failed",
-      "status": "diagnostic-ready",
+      "status": "regression-tested-awaiting-run",
       "failure": "Pruebas reales44109765830 y44110138717 se detuvieron en market con reader_failed a los22 y26 segundos, antes de verificar ausencias por club.",
-      "cause": "Pendiente: el registro anterior omitía paso, clase de error y estado de navegación.",
-      "prevention": "Pasos estáticos de navegación y diagnóstico de solo booleanos, ruta clasificada y líneas de código propias. Nunca mensajes de error, HTML, cookies ni URL con parámetros. Sin relajar controles ni repetir escrituras.",
+      "cause": "Diagnóstico44111187399: timeout en collector.cjs:71, esperando el enlace activo de la liga649733. La página /feed estaba cargada, con comunidad activa, sin login ni consentimiento pendiente. Falta seleccionar explícitamente la liga esperada al iniciar; ID de la comunidad activa pendiente de registrar en el recorrido corregido.",
+      "prevention": "Seleccionar al comenzar únicamente el enlace existente de la cuenta para649733, con origen/ruta/parámetro exactos; verificar selección. No cambiar de comunidad a mitad de una captura: bloquear ante contexto ajeno. Mantener diagnóstico sin HTML ni credenciales.",
       "tests": [
         "tests/market-catalog.test.cjs"
       ],
-      "evidence": "Ambos intentos quedaron failed y conservaron la publicación anterior; diagnóstico nuevo pendiente de ejecución."
+      "evidence": "Ambos intentos quedaron failed y conservaron la publicación anterior; diagnóstico nuevo pendiente de ejecución. El timeout real ocurrió en wait_active_league, no en lectura de jugadores. Regresiones verifican selección exacta, no repetir si ya es correcta y rechazo de enlaces ajenos o inexistentes."
     }
   ]
 }

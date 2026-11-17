@@ -214,6 +214,7 @@ test('recorrido simulado completo reabre Limpiar y espera la sustitución y ampl
     setDefaultTimeout() {}, url: () => url,
     async goto(next) { url = next; },
     async evaluate(fn) {
+      if (fn.name === 'readLeagueDocument') return { leagueId: config.leagueId, links: [] };
       if (fn.name === 'readFeedDocument') return { leagueId: config.leagueId, ready: true, cards: 1, events: [] };
       if (fn.name === 'readFilterDocument') {
         assert.equal(popup, true);
