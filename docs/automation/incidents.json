@@ -431,14 +431,15 @@
     },
     {
       "code": "mister-missing-catalog-players",
-      "status": "diagnostic-ready",
+      "status": "regression-tested-awaiting-run",
       "failure": "El 17/11 los turnos 04:00 y 09:00 Miami arrancaron y terminaron con missing_catalog_players antes de verificar equipos/publicar.",
-      "cause": "La lectura omitió IDs de la captura anterior; pendiente identificar IDs y causa mediante diagnóstico de solo lectura.",
-      "prevention": "Una segunda captura completa y acotada; diagnóstico de IDs deportivos y conteos. Se mantiene el bloqueo si falta cualquier jugador, sin unir lecturas ni reutilizar valores antiguos.",
+      "cause": "Run 44107565397 leyó 529 jugadores dos veces, frente a 538 previos. Faltaron los mismos nueve IDs antes libres:67931,70499,71019,71505,71622,1153038,2586746,3368896,4947928. Ninguno tiene cláusulas históricas. La guarda asumía catálogo monótono; una ausencia persistente del buscador bloqueaba todo el mercado. No se afirma retirada deportiva de los jugadores.",
+      "prevention": "Dos catálogos iguales y búsqueda independiente por club de todos los libres esperados; máximo 20 ausentes y 5% del catálogo. Propietarios anteriores, referencias de cláusulas, listas cambiantes, ligas ajenas, errores de filtros o nuevas operaciones bloquean. Verificar 20 plantillas antes de publicar. Conservar fila anterior, última observación y evidencia en catalogAbsences del archivo privado, además de todos los perfiles históricos. No reutilizar valores viejos como actuales ni inventar ventas o fechas.",
       "tests": [
-        "tests/market-catalog.test.cjs"
+        "tests/market-catalog.test.cjs",
+        "tests/market-public.test.cjs"
       ],
-      "evidence": "Último fallo observado 44102131050:1. Publicación protegida: 538 jugadores y 447 cláusulas a 16/11 21:02:41 Miami."
+      "evidence": "Último fallo observado 44102131050:1. Publicación protegida: 538 jugadores y 447 cláusulas a 16/11 21:02:41 Miami. Diagnóstico 44107565397: 529 actuales, 253 libres, 276 en plantillas; nueve ausentes iguales en ambas lecturas, sin publicación. Confirmación por club y producción pendientes."
     }
   ]
 }

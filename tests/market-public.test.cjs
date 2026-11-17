@@ -200,3 +200,31 @@ test('Market editorial: stable participant logos, archive navigation, exact pric
   assert.equal(reads,1);assert.equal(JSON.stringify(p),original);
  }finally{w.close();}
 });
+
+test('Confirmed free absence archives the exact old row and keeps all clause dates and totals',async()=>{
+ const p=fixture();p.players.push({...p.players[99],id:'101',name:'Former free player'});
+ const s={schemaVersion:1,leagueId:p.leagueId,season:p.season,catalogComplete:true,publicationReady:false,
+  startedAt:'2026-11-15T19:00:00Z',completedAt:p.capturedAt,
+  managers:p.managers.map(m=>({id:m.id,name:m.name})),clubs:[{id:'1',name:'Club'}],movements:[],
+  players:p.players.map(x=>({playerId:x.id,name:x.name,position:x.position,clubId:'1',photoUrl:null,
+   marketValue:x.value,clauseValue:x.clause,ownerId:x.ownerId,ownershipStatus:x.ownerId?'owned':'free'}))};
+ s.snapshotHash=hash(s);
+ const ledger={schemaVersion:1,leagueId:p.leagueId,season:p.season,publicationReady:false,completedAt:p.capturedAt,events:[],headEventIds:[]};ledger.ledgerHash=hash(ledger);
+ const v={leagueId:p.leagueId,snapshotHash:s.snapshotHash,completedAt:p.capturedAt,
+  teams:p.managers.map(m=>({managerId:m.id,verified:true,playerCount:p.players.filter(x=>x.ownerId===m.id).length})),
+  histories:p.players.map(x=>({playerId:x.id,movements:p.history.events.filter(e=>e.playerId===x.id).map(e=>({type:'clause',amount:e.amount,occurredOn:e.date,from:{managerId:e.from,name:'Participante '+e.from},to:{managerId:e.to,name:'Participante '+e.to}}))}))};
+ const backup={schemaVersion:1,leagueId:p.leagueId,season:p.season,exportedAt:p.capturedAt,completeSeason:false,captures:[s],verification:v,feedLedger:ledger,clauseStatistics:clauseReport(s,ledger,v)};
+ const participants=p.managers.map(m=>({id:m.participantId,name:m.name})),before=prepare(backup,participants,{reconciled:true});
+ const current=structuredClone(s);current.players.pop();current.startedAt=current.completedAt='2026-11-16T14:00:00Z';delete current.snapshotHash;current.snapshotHash=hash(current);
+ const result=await require('../scripts/mister-market/catalog-read.cjs').collectComplete({},s,{read:async()=>current,protectedPlayerIds:before.payload.history.events.map(e=>e.playerId)});
+ const evidence={status:'not_listed_in_search',previousSnapshotHash:s.snapshotHash,lastSeenAt:s.completedAt,
+  observedAt:current.completedAt,players:result.absentFreePlayers,readings:result.readings,clubs:[]};
+ const next={...backup,captures:[s,current],rosterVerification:{...v,snapshotHash:current.snapshotHash,feedStable:true},catalogAbsences:[evidence]};
+ const prepared=prepare(next,participants,{reconciled:true}),restored=restoreArchive(prepared.archive);
+ assert.deepEqual(prepared.payload.history.events,before.payload.history.events);
+ assert.deepEqual(restored.catalogAbsences[0].players,[s.players.at(-1)]);
+ assert.deepEqual(restored.verification,backup.verification);assert.deepEqual(restored.captures[0],s);
+ assert.equal(prepared.payload.players.length,100);assert.equal(prepared.payload.players.some(x=>x.id==='101'),false);
+ assert.deepEqual(prepare(restored,participants,{reconciled:true}).payload,prepared.payload);
+ const invalid=structuredClone(next);invalid.rosterVerification.teams.pop();assert.throws(()=>prepare(invalid,participants),/unverified_teams/);
+});
