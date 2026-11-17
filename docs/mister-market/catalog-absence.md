@@ -27,7 +27,7 @@ Si un jugador tiene cláusulas o estaba en una plantilla, continúa el bloqueo.
 No cambia esquema público, puntos, participantes, calendario ni reloj.
 
 Pruebas: market-catalog y market-public, además del resto del lector.
-Estado: pruebas sintéticas; confirmación real por club y publicación pendientes.
+Estado: confirmado en búsqueda real por siete clubes y publicación verificada; evidencia abajo.
 
 ## Comunidad activa al iniciar
 
@@ -36,4 +36,24 @@ la espera del enlace activo de 649733 agotó veinte segundos. El lector ahora
 selecciona al empezar el enlace existente de esa comunidad, con origen y destino
 exactos, y verifica el resultado. Si no existe ese acceso, se detiene. Un cambio
 de liga durante la captura bloquea la lectura; nunca se mezcla información.
-Validación real de esta selección y recuperación del mercado todavía pendientes.
+Arranque en la liga correcta y publicación real verificados. La rama que cambia desde otra comunidad está probada por regresión; no se forzó la selección del usuario en producción.
+
+## Comprobación real
+
+Test 44112318960: 17/11/2026, 10:20:17 Miami. Dos catálogos, siete búsquedas
+por club, nueve ausencias confirmadas y veinte plantillas verificadas. La copia
+pública anterior permaneció idéntica durante la prueba.
+
+Sync 44113488818: publicó a las 10:24:47 Miami, SHA 05f840e73cb2db67f0f8ed349b2a2f9be5bebf04,
+revisión 7133d9e9a709c620bec214ca51ab7a858d840960612f62745e9c5babe2c24f0b.
+529 jugadores, 20 participantes, 447 cláusulas y 446 fechas. Conservó las 445
+fechas previamente conocidas y recuperó L. Rioja, 17/11/2026, por 3.282.000.
+La fecha antigua de F. De Jong sigue pendiente; no se inventó. Se verificaron
+importe/partes por grupo, perfiles completos, captura base y las nueve filas
+archivadas, también después de esta segunda ejecución. Cero gaps, errores de
+perfiles e IA. Un catálogo, una ficha pendiente y 136.669 ms de lectura.
+
+El reloj interno y el worker permanecen habilitados; cron por minuto y modo sync.
+Esta recuperación fue extraordinaria. No acredita por sí sola el próximo turno
+programado. 89 regresiones locales del lector aprobadas; la prueba intermitente
+de Predicted11 del control general consta como ajena en las revisiones.

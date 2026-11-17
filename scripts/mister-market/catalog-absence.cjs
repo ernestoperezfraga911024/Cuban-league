@@ -30,8 +30,8 @@ async function confirmFreeAbsences(page, current, candidates, { wait = waitStabl
   await page.locator('#popup-content select[name="owner"]').waitFor({ state: 'hidden' });
   await wait(read, s => s.ready && !s.popupOpen && s.rows.length > 0, { label: 'absence_filter_reset' });
   await open();
-  const meta = await checked(readFilterDocument); context(meta);
-  if (hash(meta.managers) !== hash(current.managers) || hash(meta.clubs) !== hash(current.clubs)) fail('catalog_context_changed');
+  const meta = await checked(readFilterDocument), ctx = context(meta);
+  if (hash(ctx.managers) !== hash(current.managers) || hash(ctx.clubs) !== hash(current.clubs)) fail('catalog_context_changed');
   const ranges = meta.ranges;
   if (ranges.length !== 4 || ranges.some(r => !/^\d+$/.test(r.value || ''))
     || ranges.filter(r => r.name.endsWith('_from')).some(r => Number(r.value) !== 0)
