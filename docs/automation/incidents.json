@@ -464,6 +464,16 @@
         "tests/forecast-producer.test.cjs"
       ],
       "evidence": "Burcio confirmado como Hugo Burcio García del Celta, Mister68516. SQL aditivo idempotente y aliases probados; ver bitácora para resultado de la recuperación deportiva."
+    },
+    {
+      "code": "news-empty-uninitialized-plan",
+      "status": "regression-tested-awaiting-run",
+      "failure": "El 17/11 se omitió el turno de Noticias15:00: run_key pendiente y completed=false se interpretaron como no_due porque teams todavía estaba vacío.",
+      "prevention": "prepare_run inicializa y devuelve has_work explícito antes de inspeccionar clubes; horario08/11/16 Miami. Un error de arranque no es ausencia de trabajo.",
+      "tests": [
+        "tests/news-startup-db.test.cjs"
+      ],
+      "evidence": "Plan real news-20261117-15 sin inicializar a21:24Z; bitácora21:00 lo marcó not_due. Instalación y recuperación real se verifican por separado."
     }
   ]
 }

@@ -35,8 +35,8 @@ FIN DE REGLA DE RESUMEN COMPLETO
 Ejecuta los dos flujos independientes autorizados: Noticias y alineaciones/historial. Las restricciones del protocolo de alineaciones que dicen no ampliar a noticias se refieren solo a ese flujo; la sección NOTICIAS siguiente autoriza expresamente su actualización separada. Completa ambos planes antes de terminar, aunque el otro no tenga turno.
 
 NOTICIAS — COBERTURA COMPLETA Y REANUDABLE AUTORIZADA EL 13/11/2026
-Esta sección sustituye el protocolo anterior de Noticias y elimina sus límites de 20 acontecimientos por turno y dos por equipo. Noticias abre turnos a las 08:00, 11:00 y 15:00 America/New_York. Las ejecuciones horarias existentes también retoman pendientes según league_news.plan(). No cambia alineaciones, métodos, salud, historial, catálogo ni sus horarios. Consulta este plan antes de cualquier salida global. Cero costes o servicios nuevos; solo navegación pública y conexiones existentes. No crear tareas, PR, migraciones, infraestructura ni cambiar permisos durante las ejecuciones periódicas. No enviar mensajes a terceros.
-Destino exclusivo Supabase link_id=link_6aad67ea13208191b8315f9bb7f2cce7 project_id=pyahosamoisqcbpvzwka; no USATAX. No leer secretos ni suplantar administradores. Escrituras autorizadas: league_news.begin_run, record_event, record_team, save_draft, deliver y finish_run. begin_exception requiere autorización interactiva expresa: NUNCA llamarlo desde la tarea periódica.
+Esta sección sustituye el protocolo anterior de Noticias y elimina sus límites de 20 acontecimientos por turno y dos por equipo. Noticias abre turnos a las 08:00, 11:00 y 16:00 America/New_York. Las ejecuciones horarias existentes también retoman pendientes según league_news.plan(). No cambia alineaciones, métodos, salud, historial, catálogo ni sus horarios. Consulta este plan antes de cualquier salida global. Cero costes o servicios nuevos; solo navegación pública y conexiones existentes. No crear tareas, PR, migraciones, infraestructura ni cambiar permisos durante las ejecuciones periódicas. No enviar mensajes a terceros.
+Destino exclusivo Supabase link_id=link_6aad67ea13208191b8315f9bb7f2cce7 project_id=pyahosamoisqcbpvzwka; no USATAX. No leer secretos ni suplantar administradores. Escrituras autorizadas: league_news.prepare_run, league_news.begin_run, record_event, record_team, save_draft, deliver y finish_run. begin_exception requiere autorización interactiva expresa: NUNCA llamarlo desde la tarea periódica.
 
 1. PLAN Y CONTINUIDAD
 Consulta select now() as observed_at,league_news.plan() as news_plan;. Respeta run_key y pendientes devueltos. No inventes claves, reabras turnos terminados ni cambies fechas. Si run_key=null o completed=true, omite Noticias sin omitir los otros flujos. Si hay trabajo, llama begin_run(RUN_KEY). Consulta la cobertura y el ledger privados del run usando el contrato instalado de coverage.sql. Si faltan esas funciones, informa el bloqueo; no sustituyas la auditoría por escrituras directas.
@@ -74,3 +74,22 @@ Llama finish_run(RUN_KEY,CHECKS_DE_TRES_INDICES). El servidor exige todos los cl
 Verifica payloads públicos y news_status.progress. Informa hora Miami, clubes revisados/esperados, nuevas, actualizadas, sin cambios, privadas, descartadas y pendientes, además de limitaciones. No declares "todo actualizado" por una marca global. Ante interrupción deja cola persistida y enumera pendientes. Cero noticias nuevas es válido tras revisión registrada.
 FIN DE NOTICIAS — COBERTURA COMPLETA
 
+
+## Arranque de Noticias — corrección del 17/11/2026
+
+Noticias abre a las 08:00, 11:00 y 16:00 America/New_York. Tras dispatch_gate,
+llamar siempre `select league_news.prepare_run();` antes de decidir si corresponde
+trabajo. Esta función privada consulta el plan, inicializa mediante begin_run y
+vuelve a consultar los 20 clubes. `has_work=true` obliga a procesar el turno.
+Solo `action=not_due|completed` permite omitirlo. Si falla la función, informar
+el error; nunca transformarlo en no_due. Un plan con run_key y completed=false
+pero teams=[] representa un turno SIN INICIALIZAR, no ausencia de noticias.
+No usar como criterio la cantidad de artículos, clubes o pendientes anterior a
+begin_run. El arranque no lee fuentes, no publica y no acredita cobertura.
+Conservar revisión real de 20 clubes, deduplicación y verificación pública.
+
+Las tres fuentes y el resto de flujos conservan sus reglas. La función no
+concede permisos públicos ni cambia Automático/Manual. Repetirla tras respuesta
+perdida es idempotente. Al cerrar, consultar el plan actual de nuevo; si tiene
+trabajo, no declarar Noticias not_due ni el conjunto completado.
+Ver `docs/news/startup-1600.md` para instalación y regresiones.

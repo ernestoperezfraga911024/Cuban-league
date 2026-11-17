@@ -1,5 +1,5 @@
 ESTADO FÍSICO DE FUTBOLFANTASY Y DOS TURNOS GENERALES — AMPLIACIÓN AUTORIZADA
-Alineaciones: 06:00 y 14:00 America/New_York revisan TODOS los 20 clubes, aunque falten más de 48 horas. Se conservan 13:00 para partidos pendientes de hoy y 18:00 para encuentros dentro de 48 horas. El servidor forecast_season.plan() decide el turno; no recuperar ventanas vencidas. Noticias mantiene 08:00, 11:00 y 15:00; historial permanece independiente.
+Alineaciones: 06:00 y 14:00 America/New_York revisan TODOS los 20 clubes, aunque falten más de 48 horas. Se conservan 13:00 para partidos pendientes de hoy y 18:00 para encuentros dentro de 48 horas. El servidor forecast_season.plan() decide el turno; no recuperar ventanas vencidas. Noticias mantiene 08:00, 11:00 y 16:00; historial permanece independiente.
 
 Esta ampliación autoriza exclusivamente forecast_health.save_batch(jsonb) y forecast_health.deliver(text), además de lecturas de forecast_health.drafts y public.forecast_health_public, para la situación física. No modifica noticias, catálogo, porcentajes ni historial. No llamar publish_ready ni comandos de administrador desde la tarea. Cero servicios nuevos, costes, infraestructura, tareas, PR, migraciones o cambios de permisos durante las ejecuciones periódicas.
 
