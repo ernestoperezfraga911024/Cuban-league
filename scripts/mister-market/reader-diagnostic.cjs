@@ -1,8 +1,10 @@
 'use strict';
-// Only booleans, static labels and our source line numbers; never HTML or error messages.
+// Only booleans, numeric league IDs, static labels and our source line numbers; never HTML or error messages.
 function readSessionDiagnostic() {
  const visible=e=>!!e&&!!(e.offsetWidth||e.offsetHeight||e.getClientRects().length);
- return { activeLeague:!!document.querySelector('a.active[href*="action/change?id_community="]'),
+ const active=document.querySelector('a.active[href*="action/change?id_community="]');
+ const leagueId=active?new URL(active.href).searchParams.get('id_community'):null;
+ return { activeLeagueId:/^[1-9]\d*$/.test(leagueId||'')?leagueId:null,activeLeague:!!document.querySelector('a.active[href*="action/change?id_community="]'),
   passwordForm:!!document.querySelector('input[type="password"]'),
   feed:!!document.querySelector('.feed-cards'), search:!!document.querySelector('.search-players-list'),
   consent:visible(document.querySelector('#didomi-notice')),

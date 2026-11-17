@@ -28,3 +28,12 @@ No cambia esquema público, puntos, participantes, calendario ni reloj.
 
 Pruebas: market-catalog y market-public, además del resto del lector.
 Estado: pruebas sintéticas; confirmación real por club y publicación pendientes.
+
+## Comunidad activa al iniciar
+
+El diagnóstico 44111187399 encontró el portal abierto y una comunidad activa, pero
+la espera del enlace activo de 649733 agotó veinte segundos. El lector ahora
+selecciona al empezar el enlace existente de esa comunidad, con origen y destino
+exactos, y verifica el resultado. Si no existe ese acceso, se detiene. Un cambio
+de liga durante la captura bloquea la lectura; nunca se mezcla información.
+Validación real de esta selección y recuperación del mercado todavía pendientes.

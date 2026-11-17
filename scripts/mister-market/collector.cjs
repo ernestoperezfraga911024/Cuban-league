@@ -2,6 +2,7 @@
 
 const { ORIGIN, DEFAULTS, fail, hash, context, snapshot, MarketError } = require('./core.cjs');
 const { readMarketDocument, readFilterDocument, readFeedDocument } = require('./dom.cjs');
+const { selectLeague, readLeagueDocument } = require('./league-context.cjs');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const fingerprint = state => hash({ rows: state.rows, hasMore: state.hasMore });
 
@@ -64,11 +65,17 @@ async function collect(page, config = DEFAULTS, { wait = waitStable, progress = 
     if (url.origin !== ORIGIN) fail('session_or_page_unavailable');
     return assertLeague(await page.evaluate(fn), config);
   }
+  let initialNavigation = true;
   async function go(path) {
     progress({ phase: 'market', step: path === '/feed' ? 'navigate_feed' : 'navigate_search' });
     await page.goto(`${ORIGIN}${path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    progress({ phase: 'market', step: 'wait_active_league' });
-    await page.locator(`a.active[href*="id_community=${config.leagueId}"]`).waitFor({ state: 'attached' });
+    if (new URL(page.url()).origin !== ORIGIN) fail('session_or_page_unavailable');
+    if (initialNavigation) { initialNavigation = false; await selectLeague(page, config, { wait, progress }); }
+    else {
+      const selected = await wait(() => page.evaluate(readLeagueDocument), s => !!s.leagueId,
+        { stableFor: 300, label: 'active_league' });
+      assertLeague(selected, config);
+    }
   }
   async function feed() {
     await go('/feed');

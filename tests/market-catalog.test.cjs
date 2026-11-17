@@ -109,3 +109,34 @@ test('Reader diagnostic omits secrets, error messages, URLs and raw DOM',async()
  assert.ok(!JSON.stringify(result).includes('secret'));assert.ok(!JSON.stringify(result).includes('HTML'));
  assert.equal((await readerDiagnostic(err,{url:()=> 'https://other.example/private',evaluate:async()=>{throw Error('secret');}})).page,'external');
 });
+
+const {selectLeague}=require('../scripts/mister-market/league-context.cjs');
+test('Uses the exact existing target league link when the account opens a different community',async()=>{
+ let leagueId='978196';const visits=[],events=[];
+ const page={url:()=> 'https://mister.mundodeportivo.com/feed',
+  evaluate:async()=>({leagueId,links:['https://mister.mundodeportivo.com/action/change?id_community=649733']}),
+  goto:async url=>{visits.push(url);leagueId='649733';}};
+ const wait=async(read,accept)=>{const s=await read();assert.ok(accept(s));return s;};
+ assert.equal(await selectLeague(page,{leagueId:'649733'},{wait,progress:e=>events.push(e)}),true);
+ assert.deepEqual(visits,['https://mister.mundodeportivo.com/action/change?id_community=649733']);
+ assert.equal(events[0].previousLeagueId,'978196');
+ assert.equal(await selectLeague(page,{leagueId:'649733'},{wait}),false);assert.equal(visits.length,1);
+});
+test('Missing, foreign or ambiguous target navigation cannot select another league',async()=>{
+ for(const link of ['', 'https://evil.example/action/change?id_community=649733',
+  'https://mister.mundodeportivo.com/action/delete?id_community=649733',
+  'https://mister.mundodeportivo.com/action/change?id_community=978196',
+  'https://mister.mundodeportivo.com/action/change?id_community=649733&other=1']){
+  let visits=0;
+  const page={evaluate:async()=>({leagueId:'978196',links:link?[link]:[]}),goto:async()=>{visits++;}};
+  await assert.rejects(selectLeague(page,{leagueId:'649733'},{wait:async read=>read()}),/target_league_unavailable/);
+  assert.equal(visits,0);
+ }
+});
+
+test('League selection reads the active ID and existing navigation links from rendered markup',()=>{
+ const {JSDOM}=require('jsdom'),vm=require('node:vm'),{readLeagueDocument}=require('../scripts/mister-market/league-context.cjs');
+ const dom=new JSDOM('<a class="active" href="/action/change?id_community=978196">Other</a><a href="/action/change?id_community=649733">Cuban League</a>',{url:'https://mister.mundodeportivo.com/feed'});
+ const s=vm.runInNewContext('('+readLeagueDocument.toString()+')()',{document:dom.window.document,URL});
+ assert.equal(s.leagueId,'978196');assert.equal(s.links[1],'https://mister.mundodeportivo.com/action/change?id_community=649733');
+});
