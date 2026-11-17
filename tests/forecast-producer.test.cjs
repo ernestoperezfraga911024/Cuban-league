@@ -26,12 +26,23 @@ test('producer rejects official XI, stale body review, stale reads, foreign IDs 
  }
  const x=example();x.packet.observations.comuniate[0].probability=0;delete x.review.selection.players[0].alternative_id;assert.throws(()=>produce(x),/alternativa evaluada/);
 });
-test('a source cannot list the same player as starter and alternative (Levante review regression)',()=>{
- const x=example(),baseline=produce(x);
- x.review.sources.futbolfantasy.alternatives.push({...x.packet.observations.futbolfantasy[0]});
- assert.throws(()=>produce(x),/futbolfantasy: observación duplicada/);
- x.review.sources.futbolfantasy.alternatives.pop();
- assert.deepEqual(produce(x),baseline);
+test('starter plus alternative retains the primary signal once without changing evidence',()=>{
+ for(const source of ['futbolfantasy','jornadaperfecta','comuniate']){
+  const x=example(),baseline=produce(x),alt={name:x.roster[0].name,probability:0};
+  x.review.sources[source].alternatives.push(alt);
+  if(source==='comuniate')x.packet.comuniate_alternatives.players.push({...alt});
+  const before=structuredClone(x),out=produce(x);
+  assert.deepEqual(out.payload,baseline.payload);assert.deepEqual(x,before);
+  assert.deepEqual(out.source_roles,[{source,player_id:x.roster[0].id,starter_probability:null,alternative_probability:0}]);
+  if(source==='comuniate'){x.review.sources[source].alternatives.pop();assert.throws(()=>produce(x),/omitida o modificada/);}
+ }
+});
+test('a selected starter can cover another slot; self and unknown alternatives still fail',()=>{
+ const x=example();x.packet.observations.comuniate[1].probability=0;
+ x.review.selection.players[1].alternative_id=x.roster[2].id;
+ const out=produce(x);assert.equal(out.payload.proposal.players[1].alternative.id,x.roster[2].id);
+ assert.equal(out.payload.proposal.players.length,11);assert.equal(out.payload.proposal.candidates.length,1);
+ for(const id of [x.roster[1].id,'unknown']){x.review.selection.players[1].alternative_id=id;assert.throws(()=>produce(x),/alternativa evaluada/);}
 });
 test('medical and editorial metadata cannot remove players or change proposal, sources or geometry',()=>{
  const x=example();
@@ -206,7 +217,7 @@ test('full preflight delivers all independent issues in the sole correction with
  m.x.packet.observations.comuniate[0].name='Eric García';
  m.x.packet.observations.comuniate[1].name='Joan García';
  correct.identities={'Eric García':m.x.roster[0].id,'Joan García':m.x.roster[1].id};
- bad.sources.futbolfantasy.alternatives.push(...m.x.packet.observations.futbolfantasy.slice(2,4));
+ bad.sources.futbolfantasy.alternatives.push({...bad.sources.futbolfantasy.alternatives[0],probability:10});
  bad.selection.layout.rows[1].sha256='not-the-captured-body';
  bad.selection.layout.rows[2].sha256='not-the-captured-body';
  const before=structuredClone(m.x.packet);let reviews=0,reads=0;
@@ -218,7 +229,7 @@ test('full preflight delivers all independent issues in the sole correction with
      assert.equal(request.correction.attempt,1);
      const issues=request.correction.issues;
      assert.deepEqual(issues.filter(i=>i.code==='identity_unresolved').map(i=>i.name),['Eric García','Joan García']);
-     assert.equal(issues.filter(i=>i.code==='source_duplicate').length,2);
+     assert.equal(issues.filter(i=>i.code==='source_duplicate').length,1);
      assert.deepEqual(issues.filter(i=>i.code==='layout_invalid').map(i=>i.row),[1,2]);
      return correct;
    }});

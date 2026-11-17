@@ -40,9 +40,10 @@
         if(!c||typeof c.id!=='string'||!/^[a-z0-9-]+$/.test(c.id)||seen.has(c.id)||typeof c.name!=='string'||!c.name.trim()||c.name.length>120||c.method!==p.method_version||!Number.isInteger(c.probability)||c.probability<5||c.probability>95||typeof c.reason!=='string'||c.reason.trim().length<10||c.reason.length>800||Object.hasOwn(c,'slot')||Object.hasOwn(c,'alternative'))throw Error('Candidato inválido.');
         seen.add(c.id);
       }
-      if(p.players.some(x=>x.alternative&&!p.candidates.some(c=>c.id===x.alternative.id&&c.name===x.alternative.name)))throw Error('Alternativa sin evaluación.');
+      const evaluated=p.method_version==='editorial-v6'?[...p.players,...p.candidates]:p.candidates;
+      if(p.players.some(x=>x.alternative&&!evaluated.some(c=>c.id===x.alternative.id&&c.name===x.alternative.name)))throw Error('Alternativa sin evaluación.');
     }
-    legacy.candidates((p.players||[]).map(x=>({...x,alternative_id:x.alternative?.id??null})),roster);return p;
+    legacy.candidates((p.players||[]).map(x=>({...x,alternative_id:x.alternative?.id??null})),roster,{allowStarterAlternative:p.schema_version===4&&p.method_version==='editorial-v6'});return p;
   }
   function choose(team,roundRows,pilotRows){
     const round=roundRows.find(r=>r.team===team),pilot=team==='real-madrid'?pilotRows[0]:null;

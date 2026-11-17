@@ -22,8 +22,7 @@ Los porcentajes siguen siendo estimaciones no calibradas.
 La evaluación nueva tiene solo `method: "editorial-v6"` y `sources`. Si llegan
 campos médicos o de ajustes heredados, no influyen en el cálculo ni son requisitos.
 Las observaciones, votos, referencias, identidades y fechas conservan sus
-validaciones. Un titular por debajo de 70 requiere una alternativa evaluada
-fuera del once. Las coordenadas y las alternativas siguen la evidencia de las
+validaciones. Un titular por debajo de 70 requiere una alternativa distinta y evaluada, que puede ser otro titular o un candidato. Las coordenadas y las alternativas siguen la evidencia de las
 alineaciones, sin utilizar salud para sustituirlas.
 
 ## Instalación y compatibilidad
@@ -74,3 +73,8 @@ Reversión: comparar primero las definiciones instaladas y restaurar ambas
 definiciones anteriores revisadas, sin sobrescribir cambios posteriores. No
 reescribir los datos v6 ya guardados como si fueran v5: conservar su versión y
 sus trazas. No deshacer las publicaciones o estados físicos para revertir código.
+
+Regla posterior de Ernesto, 17/11/2026: un titular puede ser alternativa de otro
+jugador/dibujo. Conservar todas las entradas capturadas; el productor cuenta una
+sola señal titular por fuente. Si es alternativa de sí mismo, ignorar esa relación
+y conservar el titular. Ver `../automation/review-checklist.md`. No usar salud para decidir.

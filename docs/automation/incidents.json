@@ -400,6 +400,21 @@
       "tests": [
         "tests/forecast-resume-incomplete-db.test.cjs"
       ]
+    },
+    {
+      "code": "forecast-starter-alternative-role",
+      "status": "regression-tested-awaiting-run",
+      "failure": "17/11 06:00: Celta, Levante y Real Madrid bloqueados por coexistencia titular/alternativa; regla del usuario del 17/11 declara válidos los roles distintos e ignora autorreferencias.",
+      "prevention": "Priorizar señal titular una vez por fuente sin borrar alternativas capturadas. Permitir otro titular como alternativa v6 con evaluación propia. Ignorar relación consigo mismo y conservar titular. SQL y UI mantienen once único, umbral, identidad y cálculo.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-producer-db.test.cjs",
+        "tests/forecast-review-preflight.test.cjs",
+        "tests/forecast-inspect-review.test.cjs",
+        "tests/forecast-editorial-v6-db.test.cjs",
+        "tests/forecast-v6-presentation.test.cjs"
+      ],
+      "evidence": "Regresiones locales de FF/JP/Comuniate, cero y null, fuentes completas, alias, alternativa titular, SQL y vista pública; ejecución deportiva con esta regla pendiente."
     }
   ]
 }

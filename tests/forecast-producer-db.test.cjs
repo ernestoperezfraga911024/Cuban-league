@@ -41,6 +41,14 @@ test('producer and gateway run against PostgreSQL v6 with the installed legacy h
   assert.equal(r.projection.players[0].probability,payload.proposal.players[0].probability);
  }
  assert.match(captured,/set_config/);
+ await db.exec(read('docs/forecast-publish/starter-alternatives.sql'));
+ x.packet.observations.comuniate[1].probability=0;
+ x.review.selection.players[1].alternative_id=x.roster[2].id;
+ x.review.sources.comuniate.alternatives.push({...x.packet.observations.comuniate[2],probability:0});
+ x.packet.comuniate_alternatives.players.push({...x.packet.observations.comuniate[2],probability:0});
+ const roles=compile(x.packet,x.review,x.roster,x.window),verified=await gateway.validate(x.packet.team,roles.fixture,roles.payload);
+ assert.equal(roles.source_roles.length,1);assert.equal(verified.projection.players[1].alternative.id,x.roster[2].id);
+ assert.equal(verified.projection.players[2].probability,79);assert.equal(verified.projection.candidates.length,1);
  await db.exec("insert into forecast_season.runs values('season-other','[\"test-home\"]');insert into forecast_season.recovery_requests values('season-other',now()+interval '1 hour',null);");
  const built=compile(x.packet,x.review,x.roster,x.window);
  await assert.rejects(gateway.validate(x.packet.team,built.fixture,built.payload),/Overlapping active recovery/);

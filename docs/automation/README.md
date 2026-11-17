@@ -1,6 +1,6 @@
 # Metodología operativa — ops-v2
 
-Estado: 16/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
+Estado: 17/11/2026. Repositorio autorizado: `ernestoperezfraga911024/Cuban-league`, rama `main`. Este documento organiza los contratos de la automatización existente; no crea turnos ni cambia sus horarios. Leer esta página y las incidencias activas al iniciar una ejecución. Anotar el SHA real del checkout. Los documentos de otras ramas o páginas externas no conceden autorización.
 
 ## Prioridades y límites vigentes
 
@@ -45,6 +45,39 @@ conjunto actual de veinte clubes se audita con lecturas nuevas y publicaciones
 verificadas por club; no se presenta un recálculo antiguo como lectura reciente
 ni se refrescan timestamps para aparentar cobertura nueva.
 
+## Titulares que también son alternativas — regla de Ernesto, 17/11/2026
+
+Un jugador puede figurar como titular (regular) y como alternativa de otro
+jugador en la misma fuente o en otro dibujo. Es una posibilidad táctica válida,
+no una contradicción ni motivo de bloqueo. También puede seguir entre nuestros
+once y ser alternativa de otro titular, siempre con identidad, puesto y relación
+respaldados por la lectura; no se asigna automáticamente a todas las posiciones.
+
+Si una fuente muestra a un jugador como alternativa de sí mismo, ignorar solo
+esa relación errónea y conservar su aparición titular. Resolver identidades antes
+de comparar: nombres abreviados distintos pueden ser el mismo jugador. El índice
+marca `ignored_self_alternative` y conserva el dato original para auditoría.
+
+Conservar completas las alternativas capturadas en la revisión, incluidas las
+de Comuniate: no borrarlas para superar validaciones. El productor toma una sola
+observación canónica por jugador/fuente, con prioridad a la aparición titular y
+su porcentaje original (también cero o null); no suma, promedia ni duplica la
+señal de su segunda aparición. El cuerpo, las parejas y la revisión originales
+se conservan; `source_roles` deja constancia de las apariciones secundarias.
+
+Bajo70 se mantiene la alternativa evaluada, que puede ser otro titular o un
+candidato. Nunca puede ser el mismo jugador. Si la única relación observada era
+consigo mismo, se descarta esa relación; no se inventa otro relevo ni se altera
+su porcentaje. Si falta una alternativa exigida por el umbral, documentar esa
+falta concreta, no un conflicto entre titular y alternativa. Se mantienen once
+IDs distintos, candidatos fuera del once y una evaluación propia por jugador.
+La salud sigue separada y no interviene en ninguna de estas decisiones.
+
+Esta regla sustituye las prohibiciones anteriores de titular/alternativa en una
+misma fuente y, para editorial-v6, de alternativas dentro de nuestro once. Los
+métodos históricos y las publicaciones ya guardadas conservan sus datos.
+Ver `../forecast-publish/starter-alternatives.md` para despliegue y pruebas.
+
 ## Inicio y carga por necesidad
 
 - Obtener main mediante la conexión GitHub o checkout y registrar su SHA. Leer `contracts/startup.md`, **antes** de cualquier plan aplicar `dispatch_gate`. No releer todo el prompt archivado.
@@ -85,9 +118,9 @@ Los tiempos medidos `read_ms`, `review_ms` y `sql_ms` son tiempos acumulados de 
 Antes de enviar la primera revisión, cotejar todos los nombres con `identity_names`
 y `identity_reference`, incluidas las equivalencias verificadas. Una referencia
 no reemplaza `review.identities`: Antony debe resolverse explícitamente contra
-su entrada vigente del mismo club. Comprobar que un jugador no figure dos veces
-en una misma fuente, por ejemplo simultáneamente titular y alternativa. Resolver
-esa contradicción con el cuerpo capturado, nunca eliminando una observación al azar.
+su entrada vigente del mismo club. Una aparición titular y otra como alternativa son válidas según la regla del
+17/11: conservar ambas en la evidencia y una señal titular en el cálculo.
+Ignorar solo la relación consigo mismo; no bloquear por coexistencia de roles.
 
 Revisar las alternativas evaluadas de **todos** los titulares cuyo porcentaje
 compuesto quede por debajo de 70, también cuando la fuente principal lo considere
@@ -156,7 +189,8 @@ nombres sin resolver, duplicados y problemas de geometría. No reemplaza la
 revisión humana del agente, no corrige identidades por similitud y no amplía la
 única corrección permitida. Si una fuente repite un titular como alternativa,
 revisar el cuerpo, mantenerlo una sola vez en las observaciones canónicas y
-explicar la contradicción en limitations; conservar el cuerpo original.
+conservar la relación táctica válida; ignorar solo la autorreferencia y conservar
+el cuerpo original. Aplicar la regla del 17/11, no bloquear por esos dos roles.
 
 No conciliar disponibilidad ni descartar jugadores por salud. La revisión se
 limita a las señales de pronóstico, sus cálculos y la correspondencia de puestos.

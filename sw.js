@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v238-forecast-source-only';
+const CACHE_NAME = 'cuban-league-v239-alternative-roles';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,11 +24,11 @@ const APP_SHELL = [
   './viewer-profile.js?v=229-20261114',
   './viewer-profile.css?v=219-20261113',
   './forecast-publish.css?v=228-20261114',
-  './forecast-publish-core.js?v=204-20261111',
+  './forecast-publish-core.js?v=239-20261117-alternative-roles',
   './forecast-round-config.js?v=206-20261111',
-  './forecast-round-core.js?v=238-20261116-source-only',
+  './forecast-round-core.js?v=239-20261117-alternative-roles',
   './forecast-layout-repair.js?v=225-20261114',
-  './forecast-pitch.js?v=238-20261116-source-only',
+  './forecast-pitch.js?v=239-20261117-alternative-roles',
   './forecast-season-public.js?v=226-20261114',
   './set-pieces-core.js?v=226-20261114',
   './set-pieces.js?v=226-20261114',
