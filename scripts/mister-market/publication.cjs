@@ -33,7 +33,7 @@ function prepare(backup,participants,{reconciled=false}={}){
   history:reconciled?(()=>{const {evidence,...publicHistory}=require('./reconciliation.cjs').reconcile(v,backup.feedLedger);return publicHistory;})():{source:'player_profiles',completeSeason:false,reconciliation:'pending',observedAt:v.completedAt,
    events:v.histories.flatMap(h=>h.movements.flatMap((m,i)=>m.type==='clause'?[{reference:`${h.playerId}:row:${i}`,playerId:h.playerId,date:m.occurredOn,from:m.from.managerId,to:m.to.managerId,amount:m.amount}]:[]))}});
  // Only the explicit reader export is archived. Browser credentials are never accepted.
- const keys=['schemaVersion','leagueId','season','exportedAt','completeSeason','captures','verification','feedLedger','clauseStatistics','rosterVerification'];
+ const keys=['schemaVersion','leagueId','season','exportedAt','completeSeason','captures','verification','feedLedger','clauseStatistics','rosterVerification','catalogAbsences'];
  if(Object.keys(backup).some(k=>!keys.includes(k)))fail('unexpected_backup_field');
  const bytes=Buffer.from(JSON.stringify(backup)), compressed=gzipSync(bytes);
  return {payload,archive:{sha256:createHash('sha256').update(compressed).digest('hex'),rawSha256:createHash('sha256').update(bytes).digest('hex'),rawBytes:bytes.length,compressedBase64:compressed.toString('base64')},

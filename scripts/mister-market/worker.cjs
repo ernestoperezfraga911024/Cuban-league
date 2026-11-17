@@ -4,6 +4,8 @@ const {fail,MarketError}=require('./core.cjs'),{clauseReport}=require('./clause-
 const {restoreArchive}=require('./restore-archive.cjs'),{prepare}=require('./publication.cjs'),{sealSession}=require('./seal-session.cjs');
 const {refreshPendingDates}=require('./profile-refresh.cjs');
 const {collectComplete}=require('./catalog-read.cjs');
+const {confirmFreeAbsences}=require('./catalog-absence.cjs');
+const {reconcile}=require('./reconciliation.cjs');
 const endpoint='https://pyahosamoisqcbpvzwka.supabase.co/functions/v1/mister-market-sync';
 async function rpc(action,data){
  const url=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);url.searchParams.set('audience',endpoint);
@@ -23,7 +25,15 @@ async function run({request=rpc,mode=process.env.MARKET_MODE||'test',dispatchId=
   const context=await browser.newContext({storageState:state.storageState,locale:'es-ES',timezoneId:'America/New_York',viewport:{width:1280,height:900}});
   delete state.storageState;const page=await context.newPage();
   stage('market');
-  const {current,delta,catalogReads}=await collectComplete(page,previous,{read:collect,progress});
+  const protectedPlayerIds=[...new Set(reconcile(backup.verification,backup.feedLedger).events.map(e=>e.playerId))];
+  const {current,delta,catalogReads,absentFreePlayers,readings}=await collectComplete(page,previous,{read:collect,progress,protectedPlayerIds});
+  const catalogAbsences=[...(backup.catalogAbsences||[])];
+  if(absentFreePlayers.length){
+   stage('catalog_confirmation');
+   const clubs=await confirmFreeAbsences(page,current,absentFreePlayers,{progress});
+   catalogAbsences.push({status:'not_listed_in_search',previousSnapshotHash:previous.snapshotHash,lastSeenAt:previous.completedAt,
+    observedAt:current.completedAt,players:absentFreePlayers,readings,clubs});
+  }
   stage('teams');
   const rosters=await verifySnapshot(page,current,{teamsOnly:true,maxDuration:6*60000,progress});
   stage('history');
@@ -33,11 +43,11 @@ async function run({request=rpc,mode=process.env.MARKET_MODE||'test',dispatchId=
   const ledger=mergeLedger(backup.feedLedger,history);
   stage('profile_dates');
   const refreshed=await refreshPendingDates(page,current,ledger,backup.verification,{progress});
-  const next={...backup,exportedAt:new Date().toISOString(),captures:[baseline,current],rosterVerification:rosters,feedLedger:ledger,verification:refreshed.verification,clauseStatistics:clauseReport(baseline,ledger,refreshed.verification)};
+  const next={...backup,catalogAbsences,exportedAt:new Date().toISOString(),captures:[baseline,current],rosterVerification:rosters,feedLedger:ledger,verification:refreshed.verification,clauseStatistics:clauseReport(baseline,ledger,refreshed.verification)};
   const participants=require('../../data.json').participants;
   const prepared=prepare(next,participants,{reconciled:true});
   const sealedSession=sealSession(await context.storageState(),state.publicKey);
-  const metrics={methodology:'mister-market-v2',aiCalls:0,catalogReads,players:current.players.length,teams:rosters.teams.length,changes:delta.changes.length,feedEvents:ledger.events.length,newEvents:ledger.newlyObservedIds.length,documentedClauses:prepared.payload.history.events.length,coverageGaps:ledger.coverageGaps.length,...refreshed.metrics,readMs:Date.now()-start};
+  const metrics={methodology:'mister-market-v2',aiCalls:0,catalogReads,confirmedFreeAbsences:absentFreePlayers.length,players:current.players.length,teams:rosters.teams.length,changes:delta.changes.length,feedEvents:ledger.events.length,newEvents:ledger.newlyObservedIds.length,documentedClauses:prepared.payload.history.events.length,coverageGaps:ledger.coverageGaps.length,...refreshed.metrics,readMs:Date.now()-start};
   // Once finish is sent its outcome may be unknown. Never retry a write or mark
   // it failed merely because the response was lost; inspect the durable run.
   stage('publication');finishing=true;

@@ -31,8 +31,8 @@ function assertLeague(state, config) {
   if (state.leagueId !== config.leagueId) fail(state.leagueId ? 'wrong_league' : 'session_or_page_unavailable');
   return state;
 }
-function verifyFilters(filters, owner, resetRanges) {
-  if (filters.owner !== owner || filters.team !== '0' || filters.position !== '0'
+function verifyFilters(filters, owner, resetRanges, team = '0') {
+  if (filters.owner !== owner || filters.team !== team || filters.position !== '0'
     || filters.injured !== false || filters.stealable === true) fail('unexpected_filters');
   if (hash(filters.ranges) !== hash(resetRanges)) fail('unexpected_price_filter');
 }
