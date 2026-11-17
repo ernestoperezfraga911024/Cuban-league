@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v243-point-badges';
+const CACHE_NAME = 'cuban-league-v244-captain-bonus';
 const APP_SHELL = [
   './',
   './index.html',
@@ -15,8 +15,8 @@ const APP_SHELL = [
   './app.js?v=242-20261117-player-points',
   './player-points.js?v=242-20261117-player-points',
   './market-core.js?v=235-20261115',
-  './market.js?v=243-20261117-point-badges',
-  './market.css?v=243-20261117-point-badges',
+  './market.js?v=244-20261117-captain-bonus',
+  './market.css?v=244-20261117-captain-bonus',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',
