@@ -1,5 +1,12 @@
 # Probabilidades basadas solo en las cuatro fuentes
 
+**Prioridad vigente de Ernesto (17/11/2026):** después de calcular, ocupa cada
+puesto la opción compatible con mayor porcentaje final. No conservar el titular
+inicial si su alternativa lo supera. Revisar todas las opciones del puesto,
+conservar once únicos y coordenadas; empates mantienen la selección revisada.
+El productor promueve y SQL rechaza inversiones. Salud no interviene.
+Ver [selection-priority.md](selection-priority.md).
+
 `editorial-v6` calcula el porcentaje únicamente con las observaciones de
 FutbolFantasy, Jornada Perfecta, Comuniate y los onces completos válidos de
 Predicted11. El estado físico se publica por separado y solo añade su símbolo:

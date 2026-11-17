@@ -78,6 +78,19 @@ misma fuente y, para editorial-v6, de alternativas dentro de nuestro once. Los
 métodos históricos y las publicaciones ya guardadas conservan sus datos.
 Ver `../forecast-publish/starter-alternatives.md` para despliegue y pruebas.
 
+
+## Mayor porcentaje por puesto — prioridad vigente, 17/11/2026
+
+Después del cálculo, cada puesto lo ocupa la opción tácticamente compatible de
+mayor porcentaje final. Nunca publicar una alternativa con más porcentaje que
+su titular: Bernal55 / De Jong43 implica Bernal titular y De Jong alternativa.
+Revisar todas las opciones del puesto (`alternative_id` / `alternative_ids`),
+conservar el orden del campo y resolver conflictos de once único antes de
+publicar. Un empate conserva la selección revisada. Salud e iconos no alteran
+este orden; las señales y porcentajes originales permanecen intactos.
+El productor promueve automáticamente y SQL rechaza inversiones independientes
+del productor. Ver `../forecast-publish/selection-priority.md`.
+
 ## Inicio y carga por necesidad
 
 - Obtener main mediante la conexión GitHub o checkout y registrar su SHA. Leer `contracts/startup.md`, **antes** de cualquier plan aplicar `dispatch_gate`. No releer todo el prompt archivado.

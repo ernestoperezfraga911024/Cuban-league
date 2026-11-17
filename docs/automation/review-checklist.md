@@ -1,5 +1,12 @@
 # Revisión íntegra de evidencia por club
 
+**Prioridad vigente de Ernesto (17/11/2026):** después de calcular, ocupa cada
+puesto la opción compatible con mayor porcentaje final. No conservar el titular
+inicial si su alternativa lo supera. Revisar todas las opciones del puesto,
+conservar once únicos y coordenadas; empates mantienen la selección revisada.
+El productor promueve y SQL rechaza inversiones. Salud no interviene.
+Ver [../forecast-publish/selection-priority.md](../forecast-publish/selection-priority.md).
+
 Este índice de lectura reduce búsquedas repetidas sin sustituir la revisión
 editorial, el compilador, la validación SQL ni la comparación pública exacta.
 No hace red, no escribe datos, no propone un once y no certifica el calendario.

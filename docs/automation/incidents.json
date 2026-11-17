@@ -415,6 +415,19 @@
         "tests/forecast-v6-presentation.test.cjs"
       ],
       "evidence": "Regresiones locales de FF/JP/Comuniate, cero y null, fuentes completas, alias, alternativa titular, SQL y vista pública; ejecución deportiva con esta regla pendiente."
+    },
+    {
+      "code": "forecast-alternative-higher-than-starter",
+      "status": "regression-tested-awaiting-run",
+      "failure": "17/11: De Jong43 titular y Bernal55 alternativa; siete parejas invertidas en seis publicaciones actuales.",
+      "cause": "El productor calculaba porcentajes tras recibir la selección y conservaba los titulares iniciales sin comparar las alternativas. SQL verificaba la aritmética pero no el orden.",
+      "prevention": "Calcular primero y promover la opción compatible de mayor porcentaje en el mismo puesto. Recalcular candidatos; exigir once únicos. SQL rechaza toda pareja v6 invertida. No alterar fuentes, pesos ni iconos. Empates conservan selección revisada.",
+      "tests": [
+        "tests/forecast-producer.test.cjs",
+        "tests/forecast-producer-db.test.cjs",
+        "tests/forecast-editorial-v6-db.test.cjs"
+      ],
+      "evidence": "Regresión43/55, revisión de cinco votos P11, empates, opciones múltiples, conflicto táctico, SQL independiente y reparación acotada. Ver bitácora para instalación y corrección real; no confundir con una lectura deportiva nueva."
     }
   ]
 }

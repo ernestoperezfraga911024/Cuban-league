@@ -187,3 +187,62 @@ test('v6 passes the existing save/deliver path and preserves saved v5, delivery 
   });
  }finally{await db.close();}
 });
+
+test('priority guard rejects inversions independently, preserves legacy/data/metadata and rolls back exactly',async()=>{
+ const {db,p}=await setup();try{
+  await db.exec(migration);await db.exec(read('docs/forecast-publish/starter-alternatives.sql'));
+  const q=await asV6(db,p),legacy=await build(db,p),baseline=await build(db,q),rows=await snapshot(db),meta=await metadata(db),prior=await hashes(db);
+  for(const s of q.sources.slice(0,3))s.player_observations[1].probability=50;
+  for(const s of q.proposal.players[1].assessment.sources.slice(0,3))s.probability=50;
+  Object.assign(q.proposal.players[1],{probability:50,alternative:{id:'test-3',name:'Test player 3'}});
+  assert.equal((await build(db,q)).players[1].probability,50);
+  await db.exec(read('docs/forecast-publish/selection-priority.sql'));
+  assert.equal((await hashes(db)).builder,'12773c40d7f05de2ba5b01b824204f9d');
+  assert.deepEqual(await snapshot(db),rows);assert.deepEqual(await metadata(db),meta);assert.deepEqual(await build(db,p),legacy);
+  await assert.rejects(build(db,q),/alternativa supera al titular/);
+  // Another starter remains a valid alternative at equal or lower probability.
+  for(const s of q.sources.slice(0,3))s.player_observations[2].probability=50;
+  for(const s of q.proposal.players[2].assessment.sources.slice(0,3))s.probability=50;
+  Object.assign(q.proposal.players[2],{probability:50,alternative:{id:'test-12',name:'Test player 12'}});
+  assert.equal((await build(db,q)).players[1].alternative.id,'test-3');
+  const missing=clone(q);delete missing.proposal.candidates;await assert.rejects(build(db,missing),/alternativa supera al titular/);
+  await db.exec(read('docs/forecast-publish/selection-priority-rollback.sql'));
+  assert.deepEqual(await hashes(db),prior);assert.deepEqual(await snapshot(db),rows);assert.deepEqual(await metadata(db),meta);
+  assert.equal(baseline.players.length,11);
+ }finally{await db.close();}
+});
+
+test('interactive correction changes only reviewed current pairs and keeps evidence, timestamps, archive and original attempts',async()=>{
+ const {db,p}=await setup();try{
+  await db.exec(migration);await db.exec(read('docs/forecast-publish/starter-alternatives.sql'));
+  const q=await asV6(db,p);
+  for(const s of q.sources.slice(0,3)){s.player_observations[6].probability=43;s.player_observations[11].probability=55;}
+  for(const s of q.proposal.players[6].assessment.sources.slice(0,3))s.probability=43;
+  for(const s of q.proposal.candidates[0].assessment.sources.slice(0,3))s.probability=55;
+  Object.assign(q.proposal.players[6],{probability:43,alternative:{id:'test-12',name:'Test player 12'}});q.proposal.candidates[0].probability=55;
+  const original=await build(db,q);
+  await db.exec("alter table forecast_season.drafts add paused boolean default false,add outcome text default 'published';alter table public.forecast_season_public add status text default 'published';create schema automation_ops;create table automation_ops.receipts(payload jsonb);create function automation_ops.record_run(p jsonb) returns jsonb language plpgsql as $$begin insert into automation_ops.receipts values(p);return p;end$$;");
+  await db.query('insert into forecast_season.drafts(team,payload,projection,checked_at) values($1,$2,$3,now())',[q.team,JSON.stringify(q),JSON.stringify(original)]);
+  await db.query('insert into public.forecast_season_public(team,payload,published_at) values($1,$2,now())',[q.team,JSON.stringify(original)]);
+  await db.query('insert into forecast_season.archive values($1,$2,now())',['unchanged-history',JSON.stringify(original)]);
+  const before=await snapshot(db);
+  const t=(await db.query("select d.team,md5(to_jsonb(d)::text) draft_hash,md5(to_jsonb(p)::text) public_hash from forecast_season.drafts d join public.forecast_season_public p using(team)")).rows[0];
+  t.pairs=[{from:'test-7',to:'test-12'}];
+  await db.exec(read('docs/forecast-publish/selection-priority.sql'));
+  const {repairSql}=require('../scripts/forecast/priority-repair.cjs');
+  const sql=repairSql({targets:[t],codeSha:'a'.repeat(40),executionKey:'cuban-league-20261117t150000z'});
+  const stale=repairSql({targets:[{...t,public_hash:'0'.repeat(32)}],codeSha:'a'.repeat(40),executionKey:'cuban-league-20261117t150000z'});
+  await assert.rejects(db.exec(stale),/Current publication changed/);await db.exec('rollback');assert.deepEqual(await snapshot(db),before);
+  await db.exec(sql);
+  const after=await snapshot(db),current=after.public[0].payload;
+  assert.equal(current.players[6].id,'test-12');assert.equal(current.players[6].probability,55);assert.equal(current.players[6].alternative.id,'test-7');assert.equal(current.candidates[0].probability,43);
+  assert.deepEqual(current.sources,original.sources);assert.equal(current.evidence_at,original.evidence_at);
+  assert.equal(after.public[0].published_at,before.public[0].published_at);assert.equal(after.drafts[0].checked_at,before.drafts[0].checked_at);
+  assert.deepEqual(after.drafts[0].payload.sources,before.drafts[0].payload.sources);
+  for(const key of Object.keys(before).filter(k=>!['drafts','public'].includes(k)))assert.deepEqual(after[key],before[key]);
+  assert.deepEqual(after.drafts[0].projection,current);
+  const audit=(await db.query('select payload from automation_ops.receipts')).rows[0].payload;
+  assert.equal(audit.status,'maintenance');assert.equal(audit.report.checks.length,5);assert.ok(audit.report.checks.every(x=>typeof x==='string'&&x.length<=180));
+  await assert.rejects(db.exec(sql),/Current publication changed/);await db.exec('rollback');assert.deepEqual(await snapshot(db),after);
+ }finally{await db.close();}
+});

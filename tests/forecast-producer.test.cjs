@@ -39,6 +39,7 @@ test('starter plus alternative retains the primary signal once without changing 
 });
 test('a selected starter can cover another slot; self and unknown alternatives still fail',()=>{
  const x=example();x.packet.observations.comuniate[1].probability=0;
+ x.packet.observations.comuniate[2].probability=0;
  x.review.selection.players[1].alternative_id=x.roster[2].id;
  const out=produce(x);assert.equal(out.payload.proposal.players[1].alternative.id,x.roster[2].id);
  assert.equal(out.payload.proposal.players.length,11);assert.equal(out.payload.proposal.candidates.length,1);
@@ -115,7 +116,9 @@ test('complete P11 votes, missing, failed and incomplete authors have distinct d
  candidateBallot.review.confirmed_out=[{id:candidate.id,reason:'Exclusión médica antigua que no debe borrar votos.',refs:[candidateBallot.packet.docs.futbolfantasy.url]}];
  assert.deepEqual(produce(candidateBallot),candidateBaseline);
  assert.equal(candidateBaseline.payload.sources[3].player_observations.find(o=>o.player_id===candidate.id).votes,1);
- assert.ok(candidateBaseline.payload.proposal.candidates.some(p=>p.id===candidate.id));
+ assert.equal(candidateBaseline.payload.proposal.players[10].id,candidate.id);
+ assert.equal(candidateBaseline.payload.proposal.players[10].probability,58);
+ assert.ok(candidateBaseline.payload.proposal.candidates.some(p=>p.id===x.roster[10].id));
  x.packet.predictions[0].data.participacion[0].nombre='Unknown P11';assert.throws(()=>produce(x),/Unknown P11/);
 });
 test('SQL gateway pins destination, quotes payload and sets recovery context in every transaction',async()=>{
@@ -302,4 +305,44 @@ test('lost error inspection gets one read retry; persistent loss returns unknown
   if(failures===2){assert.equal(result.interrupted,true);assert.equal(result.counts.unknown,1);assert.equal(result.counts.missing,0);assert.deepEqual(m.calls,[]);assert.equal(inspections,2);}
   else{assert.equal(result.counts.missing,1);assert.deepEqual(m.calls,['finish']);}
  }
+});
+
+test('De Jong/Bernal regression: final 55 beats 43 in the same slot, sources and other positions unchanged',()=>{
+ const x=require('./fixtures/forecast-producer.cjs').priorityExample(),input=structuredClone(x),out=produce(x);
+ const promoted=out.payload.proposal.players[6],demoted=out.payload.proposal.candidates.find(p=>p.id===x.roster[6].id);
+ assert.equal(promoted.id,x.roster[11].id);assert.equal(promoted.probability,55);assert.equal(promoted.slot,7);assert.equal(promoted.position,'MF');
+ assert.equal(promoted.alternative.id,x.roster[6].id);assert.equal(demoted.probability,43);assert.equal(demoted.slot,undefined);
+ assert.deepEqual(out.payload.proposal.players.filter(p=>p.slot!==7).map(p=>p.id),x.roster.slice(0,11).filter((p,i)=>i!==6).map(p=>p.id));
+ assert.equal(new Set(out.payload.proposal.players.map(p=>p.id)).size,11);
+ assert.equal(out.layout.promotions.length,1);assert.equal(out.layout.rows[2].ids[1],x.roster[11].id);assert.equal(out.layout.rows[2].source_slot_ids[1],x.roster[6].id);
+ assert.deepEqual(x,input);
+ // Changing only the reviewed initial occupant must not change source evidence
+ // or any player's calculated score. Health is equally irrelevant to promotion.
+ const score=p=>Object.fromEntries([...p.proposal.players,...p.proposal.candidates].map(x=>[x.id,x.probability]));
+ const y=structuredClone(x);y.review.confirmed_out=[{id:x.roster[11].id}];y.review.facts={};assert.deepEqual(produce(y),out);
+ assert.equal(score(out.payload)[x.roster[6].id],43);
+ for(const s of out.payload.sources.slice(0,3))assert.ok(s.starter_ids.includes(x.roster[6].id));
+ assert.deepEqual(promoted.assessment.sources.map(s=>s.probability),[50,40,null,null]);
+ assert.equal(promoted.assessment.sources[3].votes,4);assert.equal(demoted.assessment.sources[3].votes,1);
+});
+test('slot priority handles ties, multiple compatible options, cycles and occupied winners without duplicates',()=>{
+ const {prioritizeSlots}=require('../scripts/forecast/selection-priority.cjs');
+ const evaluated=new Map(Object.entries({a:43,b:55,c:80,d:55,e:40}).map(([id,probability])=>[id,{probability}]));
+ const fail=m=>{throw Error(m);};
+ assert.equal(prioritizeSlots([{id:'b',alternative_id:'d'}],evaluated,fail).players[0].id,'b');
+ assert.equal(prioritizeSlots([{id:'a',alternative_id:'b',alternative_ids:['c','e']}],evaluated,fail).players[0].id,'c');
+ assert.equal(prioritizeSlots([{id:'a',alternative_id:'a'}],evaluated,fail).players[0].alternative_id,null);
+ assert.throws(()=>prioritizeSlots([{id:'a',alternative_id:'b'},{id:'b',alternative_id:'e'}],evaluated,fail),/distribución táctica/);
+ assert.throws(()=>prioritizeSlots([{id:'a',alternative_id:'b'},{id:'b',alternative_id:'a'}],evaluated,fail),/dos puestos/);
+ const valid=prioritizeSlots([{id:'c',alternative_id:'b'},{id:'b',alternative_id:'e'}],evaluated,fail);assert.deepEqual(valid.players.map(p=>p.id),['c','b']);
+ assert.throws(()=>prioritizeSlots([{id:'a',alternative_ids:'bad'}],evaluated,fail),/lista/);
+});
+test('promotion over 70 removes the displayed alternative but preserves the old starter as a candidate',()=>{
+ const x=example();for(const source of Object.keys(x.review.sources)){
+  x.packet.observations[source][6].probability=30;
+  x.review.sources[source].alternatives[0].probability=75;
+ }
+ x.packet.comuniate_alternatives.players=structuredClone(x.review.sources.comuniate.alternatives);
+ const out=produce(x).payload.proposal;assert.equal(out.players[6].probability,75);assert.equal(out.players[6].alternative,null);
+ assert.equal(out.candidates.find(p=>p.id===x.roster[6].id).probability,30);
 });

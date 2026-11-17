@@ -1,5 +1,12 @@
 # Conexión del lector con el cálculo de alineaciones
 
+**Prioridad vigente de Ernesto (17/11/2026):** después de calcular, ocupa cada
+puesto la opción compatible con mayor porcentaje final. No conservar el titular
+inicial si su alternativa lo supera. Revisar todas las opciones del puesto,
+conservar once únicos y coordenadas; empates mantienen la selección revisada.
+El productor promueve y SQL rechaza inversiones. Salud no interviene.
+Ver [selection-priority.md](selection-priority.md).
+
 El productor reúne evidencia revisada, genera assessments/candidatos y ejecuta
 el contrato existente de validación, guardado, entrega y comprobación pública.
 No es un extractor semántico autónomo: el agente de la automatización sigue
