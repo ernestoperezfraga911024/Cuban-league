@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v239-alternative-roles';
+const CACHE_NAME = 'cuban-league-v240-summary-charts';
 const APP_SHELL = [
   './',
   './index.html',
@@ -42,8 +42,8 @@ const APP_SHELL = [
   './forecast-history.css?v=209-20261112',
   './club-stats.js?v=200-20261104-club-contributions',
   './club-stats.css?v=200-20261104-club-contributions',
-  './matchday-general.js?v=199-20261104-compact-general',
-  './matchday-general.css?v=199-20261104-compact-general',
+  './matchday-general.js?v=240-20261117-summary-charts',
+  './matchday-general.css?v=240-20261117-summary-charts',
   './second-division.js?v=190-20261022',
   './second-division.css?v=190-20261022',
   './second-division-core.js?v=190-20261022',
