@@ -10,7 +10,7 @@ La migración `migration.sql` es aditiva y se aplica una vez en el proyecto exis
 
 ## Lectura editorial
 
-El protocolo actual está en `coverage-automation.txt`. Se incorpora a la tarea horaria existente: el servidor abre noticias a las 08:00, 11:00 y 15:00 America/New_York y retoma pendientes en las ejecuciones horarias, sin alterar los turnos de alineaciones ni el historial. La ampliación y actualización extraordinaria del 13/11/2026 están autorizadas. No se añade otra tarea ni servicio.
+El protocolo actual está en `coverage-automation.txt`. Se incorpora a la tarea horaria existente: el servidor abre noticias a las 08:00, 11:00 y 16:00 America/New_York y retoma pendientes en las ejecuciones horarias, sin alterar los turnos de alineaciones ni el historial. La ampliación y actualización extraordinaria del 13/11/2026 están autorizadas. No se añade otra tarea ni servicio.
 
 Se leen índices y artículos de FutbolFantasy, Jornada Perfecta y Comuniate; las confirmaciones se contrastan en fuentes oficiales cuando están disponibles. Los rumores se identifican como tales. Resúmenes y lectura fantasy son propios; no se copian artículos o fotos. Una ausencia en Copa/selección no se convierte en baja de LaLiga. Las fechas de consulta no sustituyen las fechas de publicación. Si falta zona horaria, se conserva la fecha observada como etiqueta sin inventar una hora UTC.
 

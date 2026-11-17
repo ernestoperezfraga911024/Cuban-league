@@ -16,7 +16,7 @@ Esta comprobación va ANTES de cualquier plan o salida global. No sustituye ning
 FIN RELOJ DE ARRANQUE
 
 HORARIO DE NOTICIAS ACTUALIZADO POR ERNESTO EL 13/11/2026
-Noticias abre turnos a las 08:00, 11:00 y 15:00 America/New_York. El turno de las 15:00 sustituye al de las 14:00. Esta regla prevalece sobre cualquier horario antiguo de Noticias. Alineaciones mantiene 06:00, 13:00, 14:00 y 18:00. No abandones colas antiguas: continúa usando league_news.plan() y sus run_key reales.
+Noticias abre turnos a las 08:00, 11:00 y 16:00 America/New_York. El turno de las 16:00 sustituye al de las 15:00 por instrucción de Ernesto del 17/11/2026. Esta regla prevalece sobre cualquier horario antiguo de Noticias. Alineaciones mantiene 06:00, 13:00, 14:00 y 18:00. No abandones colas antiguas: continúa usando league_news.plan() y sus run_key reales.
 
 RECUPERACIÓN DE EJECUCIONES INCOMPLETAS — CORRECCIÓN AUTORIZADA 13/11/2026
 Estas instrucciones tienen prioridad exclusivamente sobre las reglas antiguas que impedían continuar alineaciones faltantes después de vencer una ventana. No cambian horarios, fuentes, método, modo Manual/Automático, equipos retirados, noticias, salud ni historial.
@@ -35,3 +35,22 @@ Conserva las horas reales de consulta. Si una lectura pública normal de búsque
 Comprueba finalmente 11 titulares distintos por club, alternativas requeridas, candidatos con sus propios porcentajes, partido correcto y fechas reales. La recarga de la página o la actualización de un club no demuestra la publicación del resto.
 FIN DE CORRECCIÓN DE RECUPERACIÓN
 
+
+## Arranque de Noticias — corrección del 17/11/2026
+
+Noticias abre a las 08:00, 11:00 y 16:00 America/New_York. Tras dispatch_gate,
+llamar siempre `select league_news.prepare_run();` antes de decidir si corresponde
+trabajo. Esta función privada consulta el plan, inicializa mediante begin_run y
+vuelve a consultar los 20 clubes. `has_work=true` obliga a procesar el turno.
+Solo `action=not_due|completed` permite omitirlo. Si falla la función, informar
+el error; nunca transformarlo en no_due. Un plan con run_key y completed=false
+pero teams=[] representa un turno SIN INICIALIZAR, no ausencia de noticias.
+No usar como criterio la cantidad de artículos, clubes o pendientes anterior a
+begin_run. El arranque no lee fuentes, no publica y no acredita cobertura.
+Conservar revisión real de 20 clubes, deduplicación y verificación pública.
+
+Las tres fuentes y el resto de flujos conservan sus reglas. La función no
+concede permisos públicos ni cambia Automático/Manual. Repetirla tras respuesta
+perdida es idempotente. Al cerrar, consultar el plan actual de nuevo; si tiene
+trabajo, no declarar Noticias not_due ni el conjunto completado.
+Ver `docs/news/startup-1600.md` para instalación y regresiones.
