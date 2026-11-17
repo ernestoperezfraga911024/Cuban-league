@@ -80,7 +80,7 @@ function clubBrowser(options={}){
         else if(selector.includes('reset')){popup=false;owner=team='0';}
         else if(selector.includes('apply')){popup=false;rows=[raw('1')];if(options.found)rows.push(raw('2'));if(options.changed)rows[0].value='101';}}}),
     evaluate:async fn=>{
-      if(fn.name==='readFilterDocument')return {...ctx,owner,team,position:'0',injured:false,stealable:false,ranges};
+      if(fn.name==='readFilterDocument')return {...ctx,managers:options.spaces?ctx.managers.map(m=>({...m,name:m.name.replace(' ','  ')})):ctx.managers,owner,team,position:'0',injured:false,stealable:false,ranges};
       if(fn.name==='readFeedDocument')return {...ctx,ready:true,cards:1,events:options.feedChanged?[{feedId:'feed-1',playerId:'1',name:'Player 1',title:'Fichaje',from:{id:null,name:'Mister'},to:{id:'1',name:'Manager 1'},amount:'100'}]:[]};
       return {...ctx,leagueId:options.wrongLeague?'other':ctx.leagueId,ready:true,popupOpen:popup,search:'',favorites:false,hasMore:false,rows};
     }};
@@ -139,4 +139,9 @@ test('League selection reads the active ID and existing navigation links from re
  const dom=new JSDOM('<a class="active" href="/action/change?id_community=978196">Other</a><a href="/action/change?id_community=649733">Cuban League</a>',{url:'https://mister.mundodeportivo.com/feed'});
  const s=vm.runInNewContext('('+readLeagueDocument.toString()+')()',{document:dom.window.document,URL});
  assert.equal(s.leagueId,'978196');assert.equal(s.links[1],'https://mister.mundodeportivo.com/action/change?id_community=649733');
+});
+
+test('Club confirmation uses the same normalized manager identities as the complete catalog',async()=>{
+ const f=clubBrowser({spaces:true});
+ assert.equal((await confirmFreeAbsences(f.page,f.current,[f.candidate],{wait:f.wait})).length,1);
 });

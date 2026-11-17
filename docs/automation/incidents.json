@@ -431,7 +431,7 @@
     },
     {
       "code": "mister-missing-catalog-players",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "El 17/11 los turnos 04:00 y 09:00 Miami arrancaron y terminaron con missing_catalog_players antes de verificar equipos/publicar.",
       "cause": "Run 44107565397 leyó 529 jugadores dos veces, frente a 538 previos. Faltaron los mismos nueve IDs antes libres:67931,70499,71019,71505,71622,1153038,2586746,3368896,4947928. Ninguno tiene cláusulas históricas. La guarda asumía catálogo monótono; una ausencia persistente del buscador bloqueaba todo el mercado. No se afirma retirada deportiva de los jugadores.",
       "prevention": "Dos catálogos iguales y búsqueda independiente por club de todos los libres esperados; máximo 20 ausentes y 5% del catálogo. Propietarios anteriores, referencias de cláusulas, listas cambiantes, ligas ajenas, errores de filtros o nuevas operaciones bloquean. Verificar 20 plantillas antes de publicar. Conservar fila anterior, última observación y evidencia en catalogAbsences del archivo privado, además de todos los perfiles históricos. No reutilizar valores viejos como actuales ni inventar ventas o fechas.",
@@ -439,18 +439,20 @@
         "tests/market-catalog.test.cjs",
         "tests/market-public.test.cjs"
       ],
-      "evidence": "Último fallo observado 44102131050:1. Publicación protegida: 538 jugadores y 447 cláusulas a 16/11 21:02:41 Miami. Diagnóstico 44107565397: 529 actuales, 253 libres, 276 en plantillas; nueve ausentes iguales en ambas lecturas, sin publicación. Confirmación por club y producción pendientes."
+      "evidence": "Último fallo observado 44102131050:1. Publicación protegida: 538 jugadores y 447 cláusulas a 16/11 21:02:41 Miami. Diagnóstico 44107565397: 529 actuales, 253 libres, 276 en plantillas; nueve ausentes iguales en ambas lecturas, sin publicación. Confirmación por club y producción pendientes.",
+      "production_evidence": "Test 44112318960 terminó 17/11/2026 10:20:17 Miami: 529 jugadores, 20 plantillas, dos catálogos y siete búsquedas por club; nueve filas anteriores archivadas íntegramente. Sync 44113488818 publicó 10:24:47 Miami sobre 05f840e73cb2db67f0f8ed349b2a2f9be5bebf04, revisión 7133d9e9a709c620bec214ca51ab7a858d840960612f62745e9c5babe2c24f0b. 447 cláusulas, 446 fechadas; preservó las 445 fechas anteriores, todos los conteos/importes, captura base, perfiles y evidencia de ausencias. Cero errores de perfiles, gaps e IA. La segunda ejecución necesitó un solo catálogo, cero reconfirmaciones y 136.669 ms de lectura. Reloj sync y cron por minuto activos, sin error. Normalización de nombres en comprobación por club probada con regresión; no afirma cambio de nombres en esa lectura real."
     },
     {
       "code": "mister-navigation-reader-failed",
-      "status": "regression-tested-awaiting-run",
-      "failure": "Pruebas reales44109765830 y44110138717 se detuvieron en market con reader_failed a los22 y26 segundos, antes de verificar ausencias por club.",
-      "cause": "Diagnóstico44111187399: timeout en collector.cjs:71, esperando el enlace activo de la liga649733. La página /feed estaba cargada, con comunidad activa, sin login ni consentimiento pendiente. Falta seleccionar explícitamente la liga esperada al iniciar; ID de la comunidad activa pendiente de registrar en el recorrido corregido.",
-      "prevention": "Seleccionar al comenzar únicamente el enlace existente de la cuenta para649733, con origen/ruta/parámetro exactos; verificar selección. No cambiar de comunidad a mitad de una captura: bloquear ante contexto ajeno. Mantener diagnóstico sin HTML ni credenciales.",
+      "status": "startup-verified",
+      "failure": "Pruebas reales 44109765830 y 44110138717 se detuvieron en market con reader_failed a los 22 y 26 segundos, antes de verificar ausencias por club.",
+      "cause": "Diagnóstico 44111187399: timeout en collector.cjs:71, esperando el enlace activo de la liga 649733. La página /feed estaba cargada, con comunidad activa, sin login ni consentimiento pendiente. Falta seleccionar explícitamente la liga esperada al iniciar; ID de la comunidad activa pendiente de registrar en el recorrido corregido.",
+      "prevention": "Seleccionar al comenzar únicamente el enlace existente de la cuenta para 649733, con origen/ruta/parámetro exactos; verificar selección. No cambiar de comunidad a mitad de una captura: bloquear ante contexto ajeno. Mantener diagnóstico sin HTML ni credenciales.",
       "tests": [
         "tests/market-catalog.test.cjs"
       ],
-      "evidence": "Ambos intentos quedaron failed y conservaron la publicación anterior; diagnóstico nuevo pendiente de ejecución. El timeout real ocurrió en wait_active_league, no en lectura de jugadores. Regresiones verifican selección exacta, no repetir si ya es correcta y rechazo de enlaces ajenos o inexistentes."
+      "evidence": "Ambos intentos quedaron failed y conservaron la publicación anterior; diagnóstico nuevo pendiente de ejecución. El timeout real ocurrió en wait_active_league, no en lectura de jugadores. Regresiones verifican selección exacta, no repetir si ya es correcta y rechazo de enlaces ajenos o inexistentes.",
+      "production_evidence": "Ernesto seleccionó Cuban League y el test 44112318960 superó el bloqueo y terminó. El sync 44113488818, con selección explícita instalada en 05f840e, arrancó en la liga correcta y publicó. La navegación desde otra comunidad está cubierta por regresiones de enlace exacto y confirmación; no se forzó un cambio de comunidad del usuario para probar esa rama en producción."
     }
   ]
 }
