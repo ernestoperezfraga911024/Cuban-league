@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v240-summary-charts';
+const CACHE_NAME = 'cuban-league-v241-home-clauses';
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,7 +14,7 @@ const APP_SHELL = [
   './editorial-ui.js?v=176-20261015',
   './app.js?v=231-20261115',
   './market-core.js?v=235-20261115',
-  './market.js?v=237-20261116',
+  './market.js?v=241-20261117-home-clauses',
   './market.css?v=237-20261116',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',

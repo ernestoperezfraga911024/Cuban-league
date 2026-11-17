@@ -15,7 +15,9 @@
 <link rel="stylesheet" href="matchday-general.css?v=240-20261117-summary-charts">
 <link rel="stylesheet" href="club-stats.css?v=200-20261104-club-contributions">
 <link rel="stylesheet" href="install-welcome.css?v=229-20261114">
-<style id="home-mobile-shortcuts-v217">
+<style id="home-mobile-shortcuts-v241">
+.hero-photo .actions button[data-go="market"]>span:first-child,
+.hero-photo .actions button[data-go="forecasts"]>span:first-child{min-width:0;text-align:left}
 /* V217 — Los seis accesos de Inicio aparecen antes del podio en celular. */
 @media(max-width:700px){
   .hero-photo .hero-shell{
@@ -179,7 +181,7 @@
 <link rel="stylesheet" href="viewer-profile.css?v=219-20261113">
 <script src="second-division-core.js?v=190-20261022" defer></script>
 <script src="second-division.js?v=190-20261022" defer></script>
-<script src="editorial-ui.js?v=176-20261015" defer></script><link rel="stylesheet" href="news.css?v=223-20261113"><script src="news.js?v=223-20261113" defer></script><link rel="stylesheet" href="market.css?v=237-20261116"><script src="market-core.js?v=235-20261115" defer></script><script src="market.js?v=237-20261116" defer></script></head><body class="classic-mobile-nav f05-theme" data-section="home">
+<script src="editorial-ui.js?v=176-20261015" defer></script><link rel="stylesheet" href="news.css?v=223-20261113"><script src="news.js?v=223-20261113" defer></script><link rel="stylesheet" href="market.css?v=237-20261116"><script src="market-core.js?v=235-20261115" defer></script><script src="market.js?v=241-20261117-home-clauses" defer></script></head><body class="classic-mobile-nav f05-theme" data-section="home">
 <a class="skip-link" href="#mainContent">Saltar al contenido</a>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
@@ -219,7 +221,7 @@
     </div>
     <div class="actions">
       <button type="button" data-go="current"><span>Clasificación</span><span class="action-arrow" aria-hidden="true">→</span></button>
-      <button type="button" class="secondary" data-go="rules"><span>Reglamento</span><span class="action-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="secondary" data-go="market" data-market-view="history"><span>Clausulazos</span><span class="action-arrow" aria-hidden="true">→</span></button>
       <button type="button" class="secondary" data-go="champions"><span>Champions</span><span class="action-arrow" aria-hidden="true">→</span></button>
       <button type="button" class="secondary" data-go="cup"><span>Copa</span><span class="action-arrow" aria-hidden="true">→</span></button>
       <button type="button" class="secondary" data-go="news"><span>Noticias</span><span class="action-arrow" aria-hidden="true">→</span></button>
