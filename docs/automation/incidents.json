@@ -1,6 +1,6 @@
 {
   "methodology_version": "ops-v2",
-  "updated_on": "2026-11-16",
+  "updated_on": "2026-11-17",
   "incidents": [
     {
       "code": "unfinished-as-blocked",
@@ -428,6 +428,17 @@
         "tests/forecast-editorial-v6-db.test.cjs"
       ],
       "evidence": "Regresión43/55, revisión de cinco votos P11, empates, opciones múltiples, conflicto táctico, SQL independiente y reparación acotada. Ver bitácora para instalación y corrección real; no confundir con una lectura deportiva nueva."
+    },
+    {
+      "code": "mister-missing-catalog-players",
+      "status": "diagnostic-ready",
+      "failure": "El 17/11 los turnos 04:00 y 09:00 Miami arrancaron y terminaron con missing_catalog_players antes de verificar equipos/publicar.",
+      "cause": "La lectura omitió IDs de la captura anterior; pendiente identificar IDs y causa mediante diagnóstico de solo lectura.",
+      "prevention": "Una segunda captura completa y acotada; diagnóstico de IDs deportivos y conteos. Se mantiene el bloqueo si falta cualquier jugador, sin unir lecturas ni reutilizar valores antiguos.",
+      "tests": [
+        "tests/market-catalog.test.cjs"
+      ],
+      "evidence": "Último fallo observado 44102131050:1. Publicación protegida: 538 jugadores y 447 cláusulas a 16/11 21:02:41 Miami."
     }
   ]
 }
