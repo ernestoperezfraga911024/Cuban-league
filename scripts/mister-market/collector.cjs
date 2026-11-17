@@ -54,7 +54,7 @@ async function paginate(initial, { read, next, maxPages = 40, wait = waitStable 
   return state;
 }
 
-async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
+async function collect(page, config = DEFAULTS, { wait = waitStable, progress = () => {} } = {}) {
   const startedAt = new Date().toISOString();
   const deadline = Date.now() + 12 * 60 * 1000;
   page.setDefaultTimeout(20000);
@@ -65,7 +65,9 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
     return assertLeague(await page.evaluate(fn), config);
   }
   async function go(path) {
+    progress({ phase: 'market', step: path === '/feed' ? 'navigate_feed' : 'navigate_search' });
     await page.goto(`${ORIGIN}${path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    progress({ phase: 'market', step: 'wait_active_league' });
     await page.locator(`a.active[href*="id_community=${config.leagueId}"]`).waitFor({ state: 'attached' });
   }
   async function feed() {
@@ -76,6 +78,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
   }
   const feedBefore = await feed();
   await go('/search');
+  progress({ phase: 'market', step: 'wait_search_list' });
   await page.locator('.search-players-list').waitFor({ state: 'visible' });
   await page.locator('input.search-players-input').fill('');
   const readMarket = async () => {
@@ -86,6 +89,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
   const initial = await checked(readMarketDocument);
   if (initial.favorites) await page.locator('.search-players-filter-favs').click();
   async function openFilters() {
+    progress({ phase: 'market', step: 'open_filters' });
     await page.locator('.search-players-filter-btn').click();
     await page.locator('#popup-content select[name="owner"]').waitFor({ state: 'visible' });
   }
@@ -106,6 +110,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable } = {}) {
   async function partition(kind, owner, alreadyOpen) {
     if (!alreadyOpen) await openFilters();
     const old = await readMarket();
+    progress({ phase: 'market', step: kind === 'free' ? 'select_free' : 'select_owned' });
     await page.locator('#popup-content select[name="owner"]').selectOption(owner);
     verifyFilters(await checked(readFilterDocument), owner, resetRanges);
     await page.locator('#popup-content .search-players-filter-apply').click();
