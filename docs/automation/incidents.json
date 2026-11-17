@@ -389,6 +389,17 @@
         "tests/forecast-context.test.cjs"
       ],
       "evidence": "Regresiones locales de invariancia ante confirmed_out, availability, rotation y context; conservación de votos P11, alternativas y ceros. Instalación y revisión pública real de los veinte clubes pendientes; no se acreditan con estas pruebas sintéticas."
+    },
+    {
+      "code": "forecast-empty-slot-masks-incomplete",
+      "status": "regression-tested-awaiting-run",
+      "flow": "forecasts",
+      "evidence": "16/11/2026 21:00 Miami: el turno vacío de las 18:00 ocultó cuatro pendientes del turno de las 14:00. Confirmado en las definiciones SQL instaladas.",
+      "cause": "resume_incomplete seleccionaba el último turno sin comprobar pendientes; begin_recovery automático exigía igualmente ese último turno.",
+      "prevention": "Elegir el último turno realmente incompleto dentro de 24 horas; los turnos posteriores asumen solo sus propios equipos. Conservar terminales, saved, plazos y exclusión concurrente.",
+      "tests": [
+        "tests/forecast-resume-incomplete-db.test.cjs"
+      ]
     }
   ]
 }
