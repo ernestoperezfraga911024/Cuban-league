@@ -5,6 +5,7 @@
 const {evaluate, selectAuthors, aggregate} = require('../../forecast-predicted11-method.js');
 const {isDeepStrictEqual: same} = require('node:util');
 const {orderSelection} = require('./lineup-layout.cjs');
+const {prioritizeSlots} = require('./selection-priority.cjs');
 const BASE = ['futbolfantasy','jornadaperfecta','comuniate'];
 const SHAPES = ['4-2-3-1','4-4-2','4-3-3','3-5-2','5-3-2','3-4-3','3-4-2-1'];
 class EvidenceFailure extends Error {
@@ -160,14 +161,16 @@ function compile(packet, review, roster, window) {
     const probability = evaluate(assessment).probability;
     evaluated.set(id,{id,name:byId.get(id).name,probability,reason:'Cálculo de titularidad según las fuentes y votos observados.',assessment});
   }
+  const priority = prioritizeSlots(ordered.players,evaluated,message=>requireThat(false,team+': '+message));
+  const finalSelected = new Set(priority.players.map(p=>p.id));
   const shape = chosen.formation.split('-').map(Number);
-  const missingAlternatives=ordered.players.filter(choice=>evaluated.get(choice.id).probability<70&&
+  const missingAlternatives=priority.players.filter(choice=>evaluated.get(choice.id).probability<70&&
     (!evaluated.has(choice.alternative_id)||choice.id===choice.alternative_id));
   requireThat(!missingAlternatives.length,missingAlternatives.map(choice=>{
     const player=evaluated.get(choice.id);
     return `${team}: falta alternativa evaluada para ${player.name} (${player.probability}%)`;
   }).join('; '));
-  const players = ordered.players.map((choice,i) => {
+  const players = priority.players.map((choice,i) => {
     const player = evaluated.get(choice.id), slot = i + 1;
     let alternative = null;
     if (player.probability < 70) {
@@ -176,7 +179,7 @@ function compile(packet, review, roster, window) {
     }
     return {...player,slot,position:slot === 1 ? 'GK' : slot <= 1 + shape[0] ? 'DF' : slot > 11 - shape.at(-1) ? 'FW' : 'MF',alternative};
   });
-  const candidates = all.filter(id => !selected.has(id)).map(id => evaluated.get(id));
+  const candidates = all.filter(id => !finalSelected.has(id)).map(id => evaluated.get(id));
   const disagreements = all.filter(id => new Set(sources.slice(0,3).map(s => s.starter_ids.includes(id))).size > 1).length;
   limitations.push(`Lecturas actuales; evidencia más antigua ${new Date(oldest).toISOString()}. Antelación ${hours.toFixed(1)} h. ${disagreements} jugadores con desacuerdo entre fuentes base. P11: ${votes.ballots} onces completos, ${predictions.filter(p => p.status !== 'read').length} sin once útil. Estimaciones editoriales provisionales no calibradas.`);
   requireThat(limitations.join(' ').length >= 10 && limitations.join(' ').length <= 1200, 'Limitaciones fuera de tamaño');
@@ -185,7 +188,14 @@ function compile(packet, review, roster, window) {
     probability_kind:'editorial_uncalibrated',publication_allowed:false,status:'draft',method_version:'editorial-v6',
     limitations,sources,proposal:{formation:chosen.formation,players,candidates}};
   requireThat(jsonbByteLength(payload) <= 65536, 'Payload supera 64 KiB en formato JSONB del servidor');
-  return {fixture:{...expected,season:f.season,sources:registered},payload,layout:ordered.audit,source_roles};
+  // Geometry belongs to the reviewed slot. A promotion takes that same slot,
+  // without mirroring/reordering other positions or inventing coordinates.
+  let offset=0;
+  const layout={...ordered.audit,promotions:priority.promotions,rows:ordered.audit.rows.map(row=>{
+    const ids=priority.players.slice(offset,offset+row.ids.length).map(p=>p.id);offset+=row.ids.length;
+    return {...row,source_slot_ids:row.ids,ids};
+  })};
+  return {fixture:{...expected,season:f.season,sources:registered},payload,layout,source_roles};
 }
 function concreteBlock(packet,failure) {
   requireThat(BASE.includes(failure?.source) && ['official','fixture','identity','lineup','access'].includes(failure?.kind) &&

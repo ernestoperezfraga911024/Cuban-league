@@ -58,6 +58,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
           for (;;) {
             review = await timed('review_ms',()=>reviewTeam({packet,roster,window:{notBefore,expiresAt},correction,identity_names,identity_reference,
               review_requirements:[
+                'En cada puesto queda el mayor porcentaje final calculado entre las opciones tácticamente compatibles. Revisar todas las opciones de las fuentes y declararlas en alternative_id o alternative_ids; el productor las ordena después del cálculo. Nunca conservar un titular por el orden inicial de una fuente. Si el ganador ya ocupa otro puesto, revisar la distribución compatible sin duplicar jugadores ni ocultar la alternativa. Empates conservan la selección revisada. Salud no interviene.',
                 'Resolver todos los nombres observados y alternativas antes de enviar; no corregir solamente el primer nombre de un error.',
                 'Un titular puede ser alternativa de otro jugador o dibujo. Conservar todas las alternativas capturadas; el compilador cuenta una sola señal titular por fuente. Solo ignorar la relación de un jugador como alternativa de sí mismo, conservando su titularidad y el cuerpo original.',
                 'Revisar cada fila con coordenadas reales. Elegir otra fuente si la formación elegida mezcla posiciones horizontales iguales; nunca fabricar coordenadas.',

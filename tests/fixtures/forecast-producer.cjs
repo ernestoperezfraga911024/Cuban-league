@@ -20,3 +20,21 @@ function example(team='test-home') {
   return {packet,review,roster,window:{notBefore:at,observedAt:at,expiresAt:new Date(now+7200000).toISOString()}};
 }
 module.exports={example};
+
+// Exact source signals behind the De Jong 43 / Bernal 55 inversion, synthetic
+// identities/fixture and current timestamps so no live data is published.
+function priorityExample(){
+ const x=example(),at=x.window.notBefore;
+ for(const [source,starter,alternative] of [['futbolfantasy',50,50],['jornadaperfecta',60,40],['comuniate',50,null]]){
+  x.packet.observations[source][6].probability=starter;
+  x.review.sources[source].alternatives[0].probability=alternative;
+ }
+ x.packet.comuniate_alternatives.players=structuredClone(x.review.sources.comuniate.alternatives);
+ const authors=Array.from({length:7},(_,i)=>({id:String(i+1),rank:i+1,url:'https://www.predicted11.com/es/usuario/'+(i===0?'FutbolFantasy':'author'+i)}));
+ x.packet.rankings=['club','global'].map(kind=>({kind,url:'https://www.predicted11.com/es/laliga/'+(kind==='club'?'ranking-equipo/test-home':'ranking-global'),fetched_at:at,authors}));
+ x.packet.docs.p11match={url:'https://www.predicted11.com/es/laliga/partido/test',fetched_at:at,sha256:'b'.repeat(64)};
+ x.review.predicted11={fixture_verified:true,fixture_sha256:'b'.repeat(64),season:'2026-27',observed_fixture:fixtureOf(x.review.fixture)};
+ x.packet.predictions=authors.slice(1).map((a,i)=>({author_id:a.id,url:a.url,fetched_at:at,ballot_fetched_at:at,status:i<5?'complete_unvalidated':'not_created',data:{participacion:x.roster.slice(0,11).map((p,j)=>({nombre:j===6&&i<4?x.roster[11].name:p.name}))}}));
+ return x;
+}
+module.exports.priorityExample=priorityExample;

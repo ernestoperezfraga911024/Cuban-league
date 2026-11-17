@@ -43,12 +43,27 @@ test('producer and gateway run against PostgreSQL v6 with the installed legacy h
  assert.match(captured,/set_config/);
  await db.exec(read('docs/forecast-publish/starter-alternatives.sql'));
  x.packet.observations.comuniate[1].probability=0;
+ x.packet.observations.comuniate[2].probability=0;
  x.review.selection.players[1].alternative_id=x.roster[2].id;
  x.review.sources.comuniate.alternatives.push({...x.packet.observations.comuniate[2],probability:0});
  x.packet.comuniate_alternatives.players.push({...x.packet.observations.comuniate[2],probability:0});
  const roles=compile(x.packet,x.review,x.roster,x.window),verified=await gateway.validate(x.packet.team,roles.fixture,roles.payload);
  assert.equal(roles.source_roles.length,1);assert.equal(verified.projection.players[1].alternative.id,x.roster[2].id);
- assert.equal(verified.projection.players[2].probability,79);assert.equal(verified.projection.candidates.length,1);
+ assert.equal(verified.projection.players[2].probability,64);assert.equal(verified.projection.candidates.length,1);
+ await db.exec(read('docs/forecast-publish/selection-priority.sql'));
+ const regression=require('./fixtures/forecast-producer.cjs').priorityExample();
+ // Use the already registered fixture with the same instant (test creation can cross a second).
+ regression.review.fixture=structuredClone(x.review.fixture);
+ for(const source of Object.values(regression.review.sources))source.observed_fixture=structuredClone(x.review.sources.futbolfantasy.observed_fixture);
+ regression.review.predicted11.observed_fixture=structuredClone(x.review.sources.futbolfantasy.observed_fixture);
+ const prioritized=compile(regression.packet,regression.review,regression.roster,regression.window);
+ const proof=await gateway.validate(regression.packet.team,prioritized.fixture,prioritized.payload);
+ assert.equal(proof.projection.players[6].probability,55);assert.equal(proof.projection.players[6].alternative.id,x.roster[6].id);
+ // Restore the old inverted selection without changing any percentage or observation.
+ const inverted=structuredClone(prioritized.payload),winner=inverted.proposal.players[6],loser=inverted.proposal.candidates[0];
+ inverted.proposal.players[6]={...loser,slot:7,position:'MF',alternative:{id:winner.id,name:winner.name}};
+ const {slot,position,alternative,...candidate}=winner;inverted.proposal.candidates=[candidate];
+ await assert.rejects(gateway.validate(x.packet.team,prioritized.fixture,inverted),/alternativa supera al titular/);
  await db.exec("insert into forecast_season.runs values('season-other','[\"test-home\"]');insert into forecast_season.recovery_requests values('season-other',now()+interval '1 hour',null);");
  const built=compile(x.packet,x.review,x.roster,x.window);
  await assert.rejects(gateway.validate(x.packet.team,built.fixture,built.payload),/Overlapping active recovery/);

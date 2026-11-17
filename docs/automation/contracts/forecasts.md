@@ -1,4 +1,11 @@
 LECTOR COMPARTIDO Y ENTREGA POR CÓDIGO — ACTIVACIÓN AUTORIZADA POR ERNESTO 13/11/2026 (PR 108)
+
+**Prioridad vigente de Ernesto (17/11/2026):** después de calcular, ocupa cada
+puesto la opción compatible con mayor porcentaje final. No conservar el titular
+inicial si su alternativa lo supera. Revisar todas las opciones del puesto,
+conservar once únicos y coordenadas; empates mantienen la selección revisada.
+El productor promueve y SQL rechaza inversiones. Salud no interviene.
+Ver [../../forecast-publish/selection-priority.md](../../forecast-publish/selection-priority.md).
 Usa para alineaciones la integración fusionada en ernestoperezfraga911024/Cuban-league, rama main, versión mínima b0bd009af694e2991541f5452e3ba7469cf0c09a (incluye la corrección de turnos vacíos). Lee docs/forecast-publish/season-runner.md y read-session.md del repositorio autorizado. No dependas de archivos temporales, cachés o propuestas de turnos anteriores.
 1. Conserva PRIMERO el control de reloj real y la apertura/reanudación autorizada descritos abajo. Con el run_key real ya abierto, ejecuta una sola instancia: node scripts/run-forecast-season.cjs --existing-run RUN_KEY [RECOVERY_UUID]. El UUID solo se pasa si fue devuelto por la base. Nunca inventes claves ni abras otra recuperación para probar el código.
 2. Obtén el código revisado de main en el entorno existente; usa sus dependencias fijadas (npm ci --ignore-scripts si faltan). Sin nuevos servicios, costes, secretos, credenciales personales ni instalación de conexiones. Si ese entorno no permite ejecutar el runner, informa la limitación y continúa con el protocolo original autorizado; no declares haberlo usado.
