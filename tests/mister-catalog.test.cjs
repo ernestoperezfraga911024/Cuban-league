@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,575);
+    assert.equal(c.recordCount,576);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -102,4 +102,25 @@ test('retratos de Mister solo aceptan el origen y formato verificados',async()=>
     assert.equal(asset('https://evil.example/photo.png'),'');
     assert.equal(asset('https://cdn-mister.mundodeportivo.com.evil.example/file/cdn-common/players/1385821.png'),'');
   } finally { dom.window.close(); }
+});
+
+test('Burcio has one verified catalog identity shared with forecasts and searchable full name',async()=>{
+ const {dom,catalog:c}=await catalog();try{
+  const p=c.resolve({misterPlayerId:'68516'});assert.equal(p.id,'mister-68516');assert.equal(p.clubId,'celta-vigo');
+  assert.equal(c.search('Hugo Burcio')[0].id,'mister-68516');
+  const raw=JSON.parse(fs.readFileSync(require.resolve('../catalog/players.json'),'utf8'));
+  assert.equal(raw.players.filter(p=>p.mister_id==='68516').length,1);
+  assert.equal(raw.record_count,raw.players.filter(p=>p.active!==false).length);
+ }finally{dom.window.close();}
+});
+test('Burcio roster insertion is idempotent, preserves earlier players and rejects a conflicting identity',async()=>{
+ const {PGlite}=require('@electric-sql/pglite'),db=new PGlite();try{
+  await db.exec("create schema forecast_league;create table forecast_league.roster(id text primary key,team text,name text);insert into forecast_league.roster values('h-alvarez','celta-vigo','H. Álvarez');");
+  const sql=fs.readFileSync(require.resolve('../docs/catalog/burcio-20261117.sql'),'utf8');
+  await db.exec(sql);await db.exec(sql);
+  assert.deepEqual((await db.query('select * from forecast_league.roster order by id')).rows,[{id:'h-alvarez',team:'celta-vigo',name:'H. Álvarez'},{id:'mister-68516',team:'celta-vigo',name:'H. Burcio'}]);
+  await db.exec("insert into forecast_league.roster values('other','other-team','Hugo Burcio');");
+  await assert.rejects(db.exec(sql),/Conflicto de identidad/);
+  assert.equal((await db.query('select count(*)::int n from forecast_league.roster')).rows[0].n,3);
+ }finally{await db.close();}
 });

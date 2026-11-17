@@ -453,6 +453,17 @@
       ],
       "evidence": "Ambos intentos quedaron failed y conservaron la publicación anterior; diagnóstico nuevo pendiente de ejecución. El timeout real ocurrió en wait_active_league, no en lectura de jugadores. Regresiones verifican selección exacta, no repetir si ya es correcta y rechazo de enlaces ajenos o inexistentes.",
       "production_evidence": "Ernesto seleccionó Cuban League y el test 44112318960 superó el bloqueo y terminó. El sync 44113488818, con selección explícita instalada en 05f840e, arrancó en la liga correcta y publicó. La navegación desde otra comunidad está cubierta por regresiones de enlace exacto y confirmación; no se forzó un cambio de comunidad del usuario para probar esa rama en producción."
+    },
+    {
+      "code": "forecast-player-missing-from-catalog",
+      "status": "regression-tested-awaiting-run",
+      "failure": "Celta quedó pendiente por H. Burcio, alternativa observada en Jornada Perfecta, aunque la identidad se podía contrastar con FutbolFantasy, Comuniate y el catálogo Mister capturado.",
+      "prevention": "Regla17/11: investigar, comprobar duplicados y añadir ficha/roster verificados. Guardar alias y evidencia. Releer roster con catalog_updated:true después del alta; solo aceptar adiciones, sin cambios a identidades previas ni a fechas/fuentes. No bloquear por mera ausencia.",
+      "tests": [
+        "tests/mister-catalog.test.cjs",
+        "tests/forecast-producer.test.cjs"
+      ],
+      "evidence": "Burcio confirmado como Hugo Burcio García del Celta, Mister68516. SQL aditivo idempotente y aliases probados; ver bitácora para resultado de la recuperación deportiva."
     }
   ]
 }

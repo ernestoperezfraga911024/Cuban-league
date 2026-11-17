@@ -54,6 +54,7 @@ test('producer and gateway run against PostgreSQL v6 with the installed legacy h
  const regression=require('./fixtures/forecast-producer.cjs').priorityExample();
  // Use the already registered fixture with the same instant (test creation can cross a second).
  regression.review.fixture=structuredClone(x.review.fixture);
+ regression.packet.expected_fixture=structuredClone(x.packet.expected_fixture);
  for(const source of Object.values(regression.review.sources))source.observed_fixture=structuredClone(x.review.sources.futbolfantasy.observed_fixture);
  regression.review.predicted11.observed_fixture=structuredClone(x.review.sources.futbolfantasy.observed_fixture);
  const prioritized=compile(regression.packet,regression.review,regression.roster,regression.window);
