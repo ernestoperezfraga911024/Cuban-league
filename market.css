@@ -60,9 +60,9 @@ body.f05-theme[data-section="market"] main {
 .market-player span{display:block;font-size:11px;font-weight:400;color:#a5adae;line-height:1.55;overflow-wrap:anywhere}
 .market-player .market-owner{color:#c1c7c7}
 .market-player .is-free{color:#9abbac}
-.market-player .market-player-points{margin-top:5px;color:#b4cbbb;line-height:1.45}
-.market-player-points b{font-size:12px;font-weight:750;font-variant-numeric:tabular-nums}
-.market-player-points small{display:block;color:#a5adae;font-size:10px;font-weight:400}
+.market-player .market-player-visual{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 46px}
+.market-player .market-player-points{display:grid;place-items:center;box-sizing:border-box;width:30px;height:30px;border:1px solid #c2b28f66;border-radius:50%;background:#253033;color:#d7c7a7;font-size:11px;font-weight:750;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.market-player-points-detail{display:block;margin-top:5px;color:#a5adae;font-size:10px;font-weight:400;line-height:1.5}
 .market-points-note{font-size:11px;line-height:1.55;color:#a5adae;margin:0 0 12px}
 .market-price{position:relative;display:inline-block;max-width:100%;font-variant-numeric:tabular-nums}
 .market-price summary{display:block;list-style:none;cursor:pointer;border-radius:4px;white-space:nowrap;font:inherit;color:inherit;padding:8px 0;margin:-8px 0}
@@ -149,7 +149,8 @@ body.f05-theme[data-section="market"] main {
   .market-table th:first-child{width:49%}
   .market-table td{font-size:11px;letter-spacing:-.025em}
   .market-player{gap:7px}
-  .market-player img,.market-player>.market-avatar{width:40px;height:46px}
+  .market-player img,.market-player .market-avatar{width:40px;height:46px}
+  .market-player .market-player-visual{flex-basis:40px}
   .market-player strong{font-size:13px}
   .market-player span{font-size:10px;line-height:1.55}
   .market-ranking>li{grid-template-columns:18px 44px minmax(0,1fr);gap:9px;padding:16px 0}
@@ -165,7 +166,8 @@ body.f05-theme[data-section="market"] main {
 @media(max-width:360px){
   body.f05-theme[data-section="market"] main{padding-left:10px!important;padding-right:10px!important}
   .market-table th:first-child{width:47%}
-  .market-player img,.market-player>.market-avatar{width:32px;height:40px}
+  .market-player img,.market-player .market-avatar{width:32px;height:40px}
+  .market-player .market-player-visual{flex-basis:32px}
   .market-player{gap:6px}
   .market-player strong{font-size:12px}
   #market .market-positions button{font-size:12px;padding-inline:4px}

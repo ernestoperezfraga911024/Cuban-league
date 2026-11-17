@@ -13,7 +13,7 @@ const tick=()=>new Promise(resolve=>setImmediate(resolve));
 test('the shared points module loads before app initialization and every changed asset is available offline',()=>{
  const html=read('index.html'),sw=read('sw.js');
  for(const name of ['app.js','player-points.js','market.js','market.css']){
-  const asset=name+'?v=242-20261117-player-points';assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
+  const asset=name+'?v='+(name.startsWith('market.')?'243-20261117-point-badges':'242-20261117-player-points');assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
  }
  assert.ok(html.indexOf('<script src="player-points.js')<html.indexOf('<script src="app.js'));
  assert.doesNotMatch(html,/<script src="player-points[^>]+defer/);
@@ -88,11 +88,14 @@ test('market and team panels show the same linked score and update in place with
  try{
   d.body.dataset.section='market';await tick();await tick();
   await w.CubanLeagueMarket.showTeam(d.getElementById('team'),fixture.managers[0].participantId);
-  assert.match(d.querySelector('[data-player-points="1"]').textContent,/8 pts en liga.*16 bonus/);
-  assert.match(d.querySelector('#team [data-player-points="1"]').textContent,/8 pts en liga/);
+  assert.equal(d.querySelector('[data-player-points="1"]').textContent,'8');
+  assert.match(d.querySelector('[data-player-points="1"]').getAttribute('aria-label'),/8 puntos en liga.*16 bonus/);
+  assert.equal(d.querySelector('#team .market-player-visual [data-player-points="1"]').textContent,'8');
+  assert.match(d.querySelector('#team [data-player-points-detail="1"]').textContent,/16 bonus/);
   const reads=marketReads;rows[0].lineup[10].displayed_points=30;w.CubanLeaguePlayerPoints.store.invalidate();await tick();
-  assert.match(d.querySelector('#team [data-player-points="1"]').textContent,/10 pts en liga/);assert.equal(marketReads,reads);
-  assert.match(d.querySelector('[data-player-points="61"]').textContent,/Sin puntos registrados/);
+  assert.equal(d.querySelector('#team [data-player-points="1"]').textContent,'10');assert.equal(marketReads,reads);
+  assert.equal(d.querySelector('[data-player-points="61"]').textContent,'—');
+  assert.match(d.querySelector('[data-player-points="61"]').getAttribute('aria-label'),/Sin puntos registrados/);
  }finally{w.close();}
 });
 test('the existing publication poll refreshes player points even when a correction leaves the team total unchanged',async()=>{
