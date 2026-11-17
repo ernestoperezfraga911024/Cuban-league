@@ -126,6 +126,7 @@
   }catch{if(teamRequests.get(target)===token&&target.isConnected){target.innerHTML='<p class="market-empty" role="alert">No se pudo cargar la plantilla.</p>';const b=document.createElement('button');b.type='button';b.className='market-more';b.textContent='Reintentar';b.onclick=()=>showTeam(target,participantId,true);target.append(b);}}
   finally{if(teamRequests.get(target)===token)target.setAttribute('aria-busy','false');}
  }
+ document.addEventListener('click',e=>{if(e.target.closest('.hero-photo .actions [data-go="market"][data-market-view="history"]'))state.view='history';},true);
  section.addEventListener('input',e=>{if(e.target.id==='marketSearch'){state.search=e.target.value;state.limit=40;playerResults();}});
  section.addEventListener('change',e=>{if(e.target.id==='marketOwner')state.owner=e.target.value;else if(e.target.id==='marketSort')state.sort=e.target.value;else return;state.limit=40;playerResults();});
  section.addEventListener('click',e=>{
