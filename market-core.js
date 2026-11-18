@@ -63,6 +63,36 @@
   const events=p.history.events.slice().sort((a,b)=>b.amount-a.amount||(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference));
   let rank=0;return events.slice(0,10).map((event,i)=>{if(i===0||event.amount!==events[i-1].amount)rank=i+1;return {...event,rank};});
  }
- const api={validate,select,stats,rank,clauseRivals,topClauses,positions};
+ // One row per confirmed owner. A lineup's contribution already includes captain
+ // bonus; never multiply it again or use the footballer's deduplicated base score.
+ function playerOwners(p,playerId,pointsPlayer=null){
+  const player=p.players.find(x=>x.id===String(playerId));if(!player)return [];
+  const managers=new Map(p.managers.map(m=>[m.id,m])),byParticipant=new Map(p.managers.map(m=>[String(m.participantId),m]));
+  const owners=new Map();
+  function add(id){
+   const manager=managers.get(id);if(!manager)return null;
+   if(!owners.has(id))owners.set(id,{...manager,current:id===player.ownerId,lastMovement:null,matchdays:[],points:null,average:null,provisional:false});
+   return owners.get(id);
+  }
+  add(player.ownerId);
+  for(const event of p.history.events){
+   if(event.playerId!==player.id)continue;
+   for(const id of [event.from,event.to]){const owner=add(id);if(owner&&event.date&&(!owner.lastMovement||event.date>owner.lastMovement))owner.lastMovement=event.date;}
+  }
+  if(pointsPlayer?.misterId===player.id)for(const day of pointsPlayer.matchdays){
+   for(const appearance of day.appearances){
+    const manager=byParticipant.get(String(appearance.participantId)),owner=manager&&add(manager.id);
+    if(!owner||owner.matchdays.includes(day.matchday))continue;
+    owner.matchdays.push(day.matchday);owner.points=(owner.points??0)+appearance.contributionPoints;
+    owner.provisional=owner.provisional||appearance.provisional;
+   }
+  }
+  for(const owner of owners.values()){
+   owner.matchdays.sort((a,b)=>a-b);
+   if(owner.matchdays.length)owner.average=owner.points/owner.matchdays.length;
+  }
+  return [...owners.values()].sort((a,b)=>Number(b.current)-Number(a.current)||(b.matchdays.at(-1)||0)-(a.matchdays.at(-1)||0)||(b.lastMovement||'').localeCompare(a.lastMovement||'')||a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
+ }
+ const api={validate,select,stats,rank,clauseRivals,topClauses,playerOwners,positions};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CubanLeagueMarketCore=api;
 })(typeof globalThis==='object'?globalThis:this);
