@@ -160,7 +160,7 @@
         button.setAttribute('aria-label',player.name+', '+slotLabel(slot)+', '+player.probability+' por ciento. Ver explicación.');
         button.append(portrait(player,catalog),el('span',player.name,'fp-name'),el('b',player.probability+'%','fp-prob'));
         const badge=playerContext?.badge(player);if(badge){button.append(badge);button.setAttribute('aria-label',button.getAttribute('aria-label')+' '+badge.getAttribute('aria-label')+'.');}
-        if(player.alternative)button.append(el('small','Alt. '+player.alternative.name+(estimates.has(player.alternative.id)?' · '+estimates.get(player.alternative.id).probability+'%':''),'fp-alt-name'));
+        if(player.alternative)button.append(el('small',player.alternative.name,'fp-alt-name'));
         button.addEventListener('click',()=>show(player,button));row.append(button);
       }
       field.append(row);

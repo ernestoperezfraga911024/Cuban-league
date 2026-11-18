@@ -11,13 +11,13 @@ function fixture(ballots=6){
  return p;
 }
 function browser(){const dom=new JSDOM('<main></main>',{runScripts:'outside-only',url:'https://test.invalid/'}),w=dom.window;for(const file of ['forecast-publish-core.js','forecast-round-config.js','forecast-round-core.js','forecast-pitch.js','forecast-context.js'])w.eval(fs.readFileSync(file,'utf8'));return {dom,w,host:w.document.querySelector('main')};}
-test('v6 renders another starter as an alternative with its single evaluated percentage',()=>{
+test('v6 shows another starter by name as an alternative and keeps the estimate in the detail',()=>{
  const p=fixture(),target=p.players[2],other=p.players[3];target.alternative={id:other.id,name:other.name};
  assert.equal(round.validate(p),p);const before=JSON.stringify(p),b=browser();try{
   b.w.CubanForecastPitch.render(b.host,p,null,{preview:true});
   assert.equal(b.host.querySelectorAll('.fp-player').length,11);
   const node=[...b.host.querySelectorAll('.fp-player')].find(x=>x.dataset.playerId===target.id);
-  assert.ok(node.querySelector('.fp-alt-name').textContent.includes(other.name+' · '+other.probability+'%'));
+  assert.equal(node.querySelector('.fp-alt-name').textContent,other.name);
   node.click();assert.ok(b.host.querySelector('.fp-alternative').textContent.includes(other.probability+'%'));
   assert.equal(JSON.stringify(p),before);
  }finally{b.dom.window.close();}

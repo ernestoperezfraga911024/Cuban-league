@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v247-profile-chart';
+const CACHE_NAME = 'cuban-league-v248-alternative-name';
 const APP_SHELL = [
   './',
   './index.html',
@@ -32,7 +32,7 @@ const APP_SHELL = [
   './forecast-round-config.js?v=206-20261111',
   './forecast-round-core.js?v=239-20261117-alternative-roles',
   './forecast-layout-repair.js?v=225-20261114',
-  './forecast-pitch.js?v=239-20261117-alternative-roles',
+  './forecast-pitch.js?v=248-20261118-alternative-name',
   './forecast-season-public.js?v=226-20261114',
   './set-pieces-core.js?v=226-20261114',
   './set-pieces.js?v=226-20261114',
