@@ -1,4 +1,4 @@
-const APP_VERSION='242-20261117-player-points';
+const APP_VERSION='246-20261118-ideal-xi';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -5082,6 +5082,14 @@ function profileSeasonPlayersMarkup(data){
     </div>`;
 }
 
+function profileSeasonIdealMarkup(data){
+  const xi=window.CubanLeagueIdealXI?.build(data);
+  if(!xi)return '<div class="profile-season-empty"><h4>Todavía no hay un XI histórico</h4><p>Aparecerá con la primera alineación completa publicada.</p></div>';
+  const number=value=>Math.round(value).toLocaleString('es');
+  const playerMarkup=player=>`<li class="profile-ideal-player" data-ideal-player="${profileAttr(player.playerId||player.key)}" title="${profileAttr(player.playerName)} · ${profileSeasonFormat(player.contributionPoints)} puntos con bonus · ${player.appearances} jornadas"><span class="profile-ideal-photo" aria-hidden="true">${profileAttr(matchdayLineupInitials(player.playerName))}${player.photo?`<img data-player-catalog-image src="${profileAttr(player.photo)}" alt="" loading="lazy" decoding="async">`:''}</span><b class="profile-ideal-points" aria-label="${profileSeasonFormat(player.contributionPoints)} puntos con bonus">${number(player.contributionPoints)}</b><span class="profile-ideal-name">${profileAttr(player.playerName)}</span><small class="profile-ideal-appearances">${player.appearances} ${player.appearances===1?'jornada':'jornadas'}</small></li>`;
+  return `<section class="profile-ideal-xi" aria-label="XI histórico de ${profileAttr(data.name)}"><header class="profile-ideal-head"><div><h4>XI histórico ideal</h4><p>Formación más usada · ${xi.uses} ${xi.uses===1?'jornada':'jornadas'}</p></div><b class="profile-ideal-formation">${xi.formation}</b></header><div class="profile-ideal-pitch">${xi.lines.map(line=>`<ul class="profile-ideal-line" aria-label="${MATCHDAY_LINEUP_POSITION_LABELS[line.position]}" style="--xi-cols:${line.count>5?3:line.count}">${line.players.map(playerMarkup).join('')}${Array.from({length:line.missing},()=>'<li class="profile-ideal-player is-empty"><span class="profile-ideal-photo" aria-hidden="true">—</span><span class="profile-ideal-name">Sin datos</span></li>').join('')}</ul>`).join('')}</div><div class="profile-ideal-total"><span>Aporte acumulado del XI</span><b>${number(xi.total)} pts</b></div><p class="profile-ideal-note">Los que más puntos aportaron a ${profileAttr(data.name)} en cada posición, incluido el bonus de capitán. Incluye futbolistas que ya no están en su plantilla.</p><p class="profile-ideal-note">Puntos acumulados en distintas jornadas; no es una alineación de un único partido. En empate de puntos, primero quien más jornadas fue alineado.${xi.provisional?' Hay jornadas provisionales.':''}${xi.missingLineups?` Faltan XI en ${xi.missingLineups} jornadas publicadas.`:''}${!xi.complete?' No hay suficientes futbolistas registrados en alguna posición.':''}</p></section>`;
+}
+
 function profileSeasonLoadingMarkup(){
   return `<div class="profile-season-loading" role="status" aria-live="polite"><span class="lineup-loader" aria-hidden="true"></span><div><b>Preparando la temporada</b><small>Sumando jornadas, capitanes y futbolistas utilizados…</small></div></div>`;
 }
@@ -5106,7 +5114,7 @@ function renderProfileSeasonContent(){
     host.innerHTML=profileSeasonLoadingMarkup();
     return;
   }
-  const section=state.section||'summary';
+  const section=state.section||'ideal';
   const data=state.data;
   const updated=data.latestUpdate
     ?new Intl.DateTimeFormat('es',{dateStyle:'medium',timeStyle:'short'}).format(data.latestUpdate)
@@ -5117,13 +5125,14 @@ function renderProfileSeasonContent(){
     </header>
     <nav class="profile-season-subtabs" role="tablist" aria-label="Estadísticas de la temporada">
       ${[
+        ['ideal','XI ideal'],
         ['summary','Resumen'],
         ['captains','Capitanes'],
         ['players','Jugadores']
       ].map(([value,label])=>`<button id="profileSeason${value[0].toUpperCase()}${value.slice(1)}Tab" type="button" role="tab" data-profile-season-section="${value}" aria-controls="profileSeasonSectionPanel" aria-selected="${section===value?'true':'false'}" tabindex="${section===value?'0':'-1'}">${label}</button>`).join('')}
     </nav>
     <section id="profileSeasonSectionPanel" class="profile-season-section-panel" role="tabpanel" aria-labelledby="profileSeason${section[0].toUpperCase()}${section.slice(1)}Tab">
-      ${section==='captains'?profileSeasonCaptainsMarkup(data):section==='players'?profileSeasonPlayersMarkup(data):profileSeasonSummaryMarkup(data)}
+      ${section==='ideal'?profileSeasonIdealMarkup(data):section==='captains'?profileSeasonCaptainsMarkup(data):section==='players'?profileSeasonPlayersMarkup(data):profileSeasonSummaryMarkup(data)}
     </section>
     <p class="profile-season-updated">Actualizado con datos publicados · ${updated}</p>`;
 }
@@ -5201,7 +5210,7 @@ function setProfileView(view,{focus=false}={}){
 
 function setProfileSeasonSection(section,{focus=false}={}){
   if(!PROFILE_SEASON_STATE)return;
-  PROFILE_SEASON_STATE.section=['summary','captains','players'].includes(section)?section:'summary';
+  PROFILE_SEASON_STATE.section=['ideal','summary','captains','players'].includes(section)?section:'ideal';
   renderProfileSeasonContent();
   if(focus)document.querySelector(`[data-profile-season-section="${PROFILE_SEASON_STATE.section}"]`)?.focus();
 }
@@ -5443,7 +5452,7 @@ function openPlayer(name){
     name,
     participantId:p.id,
     view:'summary',
-    section:'summary',
+    section:'ideal',
     captainSort:'points',
     playerSort:'points',
     status:'idle',

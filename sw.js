@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v245-player-owners';
+const CACHE_NAME = 'cuban-league-v246-ideal-xi';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,7 +12,9 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=242-20261117-player-points',
+  './app.js?v=246-20261118-ideal-xi',
+  './ideal-xi.js?v=246-20261118-ideal-xi',
+  './ideal-xi.css?v=246-20261118-ideal-xi',
   './player-points.js?v=242-20261117-player-points',
   './market-core.js?v=245-20261118-player-owners',
   './market.js?v=245-20261118-player-owners',
