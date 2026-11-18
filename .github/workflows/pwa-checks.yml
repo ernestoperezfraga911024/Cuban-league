@@ -7,6 +7,8 @@ on:
       - 'app.js'
       - 'player-points.js'
       - 'ideal-xi.*'
+      - 'profile-chart.css'
+      - 'tests/profile-chart.test.cjs'
       - 'tests/ideal-xi.test.cjs'
       - 'tests/player-points.test.cjs'
       - 'viewer-profile.js'
@@ -21,6 +23,8 @@ on:
       - 'app.js'
       - 'player-points.js'
       - 'ideal-xi.*'
+      - 'profile-chart.css'
+      - 'tests/profile-chart.test.cjs'
       - 'tests/ideal-xi.test.cjs'
       - 'tests/player-points.test.cjs'
       - 'viewer-profile.js'
@@ -41,4 +45,4 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --ignore-scripts
-      - run: node --test tests/install-welcome.test.cjs tests/viewer-profile.test.cjs tests/navigation-motion.test.cjs tests/public-loading.test.cjs tests/forecast-player-sheet.test.cjs tests/player-points.test.cjs tests/ideal-xi.test.cjs
+      - run: node --test tests/install-welcome.test.cjs tests/viewer-profile.test.cjs tests/navigation-motion.test.cjs tests/public-loading.test.cjs tests/forecast-player-sheet.test.cjs tests/player-points.test.cjs tests/ideal-xi.test.cjs tests/profile-chart.test.cjs

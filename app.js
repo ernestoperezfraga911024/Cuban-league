@@ -1,4 +1,4 @@
-const APP_VERSION='246-20261118-ideal-xi';
+const APP_VERSION='247-20261118-profile-chart';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -3000,9 +3000,8 @@ function profileCurrentSnapshot(name){
     ?null
     :LIVE_MATCHDAY_ROWS.find(row=>row.matchday===latestMatchday&&row.participantName===name)||null;
   const movement=latestMatchday==null||index<0?null:movementForMatchday(latestMatchday).get(name);
-  const recent=PUBLISHED_MATCHDAYS
+  const matchdays=PUBLISHED_MATCHDAYS
     .filter(matchday=>latestMatchday==null||matchday<=latestMatchday)
-    .slice(-5)
     .map(matchday=>{
       const row=LIVE_MATCHDAY_ROWS.find(item=>item.matchday===matchday&&item.participantName===name)||null;
       return {matchday,points:row?.points??null,played:Boolean(row)};
@@ -3013,7 +3012,7 @@ function profileCurrentSnapshot(name){
     player,
     movement,
     latestRow,
-    recent,
+    matchdays,
     above:index>0?standings[index-1]:null,
     below:index>=0&&index<standings.length-1?standings[index+1]:null
   };
@@ -3044,18 +3043,37 @@ function profileDistanceMarkup(snapshot){
   return items.length?items.map(item=>`<span>${item}</span>`).join('<i aria-hidden="true">·</i>'):'<span>Clasificación sin rivales activos</span>';
 }
 
-function profileRecentFormMarkup(snapshot){
-  const rows=snapshot.recent.filter(item=>item.played&&Number.isFinite(item.points));
+function profileMatchdayScoreTone(points){
+  if(points>=100)return 'brilliant';
+  if(points>=80)return 'gold';
+  if(points>=50)return 'green';
+  if(points>=40)return 'orange';
+  return 'red';
+}
+
+function profileMatchdayChartMarkup(snapshot){
+  const rows=snapshot.matchdays||[];
+  const scored=rows.filter(item=>item.played&&Number.isFinite(item.points));
   if(!rows.length)return '<div class="profile-summary-empty">Todavía no hay jornadas publicadas.</div>';
-  const maximum=Math.max(1,...rows.map(item=>Math.abs(item.points)));
-  const average=rows.reduce((sum,item)=>sum+item.points,0)/rows.length;
-  return `<div class="profile-form-bars" style="--profile-form-count:${rows.length}" role="img" aria-label="Puntos recientes: ${rows.map(item=>`jornada ${item.matchday}, ${item.points} puntos`).join('; ')}">
+  const upper=Math.max(100,Math.ceil(Math.max(0,...scored.map(item=>item.points))/20)*20);
+  const lower=Math.min(0,Math.floor(Math.min(0,...scored.map(item=>item.points))/20)*20);
+  const range=upper-lower;
+  const baseline=(-lower/range)*100;
+  const average=scored.length?scored.reduce((sum,item)=>sum+item.points,0)/scored.length:null;
+  return `<div class="profile-chart-scroll" tabindex="0" role="region" aria-label="Puntos de todas las jornadas. Desliza horizontalmente para recorrerlas.">
+    <ol class="profile-score-chart" style="--chart-count:${rows.length};--chart-baseline:${baseline}%" aria-label="Puntos por jornada, incluido el bonus de capitán">
       ${rows.map(item=>{
-        const height=Math.max(18,Math.round((Math.abs(item.points)/maximum)*100));
-        return `<div class="profile-form-bar${item.points<0?' is-negative':''}"><b>${item.points.toLocaleString('es')}</b><span><i style="height:${height}%"></i></span><small>J${item.matchday}</small></div>`;
+        const available=item.played&&Number.isFinite(item.points);
+        const value=available?item.points.toLocaleString('es'):'—';
+        const height=available?Math.abs(item.points)/range*100:0;
+        const tone=available?profileMatchdayScoreTone(item.points):'pending';
+        const label=`Jornada ${item.matchday}: ${available?`${value} puntos`:'pendiente'}`;
+        return `<li class="profile-chart-column is-${tone}${available&&item.points<0?' is-negative':''}" style="--bar-height:${height}%" aria-label="${label}" title="${label}"><span class="profile-chart-plot" aria-hidden="true"><i></i><b>${value}</b></span><small aria-hidden="true">J${item.matchday}</small></li>`;
       }).join('')}
-    </div>
-    <p class="profile-form-average">Promedio <b>${average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</b></p>`;
+    </ol>
+  </div>
+  <div class="profile-chart-footer"><span>Promedio <b>${average==null?'—':average.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})}</b></span><small>Incluye bonus de capitán</small></div>
+  <ul class="profile-chart-legend" aria-label="Colores por puntuación"><li class="is-red">&lt;40</li><li class="is-orange">40–49</li><li class="is-green">50–79</li><li class="is-gold">80–99</li><li class="is-brilliant">100+</li></ul>`;
 }
 
 function profileAchievementPreviewMarkup(name,earnedAchievements){
@@ -3111,7 +3129,7 @@ function profileSummaryMetricsMarkup(current){
 }
 
 function profileFormCardMarkup(snapshot){
-  return `<section id="profileCurrentForm" class="profile-form-card"><h3>Forma reciente</h3>${profileRecentFormMarkup(snapshot)}</section>`;
+  return `<section id="profileCurrentForm" class="profile-form-card profile-matchdays-card"><header class="profile-chart-heading"><h3>Puntos por jornada</h3><span>${snapshot.matchdays.length} jornadas</span></header>${profileMatchdayChartMarkup(snapshot)}</section>`;
 }
 
 function refreshOpenProfileCurrentSummary(){
@@ -3149,7 +3167,14 @@ function refreshOpenProfileCurrentSummary(){
   }
   if(score)score.outerHTML=profileScoreHeroMarkup(name,snapshot,current,currentLabel,latestLabel);
   if(metrics)metrics.outerHTML=profileSummaryMetricsMarkup(current);
-  if(form)form.outerHTML=profileFormCardMarkup(snapshot);
+  if(form){
+    const chart=form.querySelector('.profile-chart-scroll');
+    const chartScroll=chart?.scrollLeft||0;
+    const chartFocused=chart===document.activeElement;
+    form.outerHTML=profileFormCardMarkup(snapshot);
+    const updatedChart=$('profileCurrentForm')?.querySelector('.profile-chart-scroll');
+    if(updatedChart){updatedChart.scrollLeft=chartScroll;if(chartFocused)updatedChart.focus({preventScroll:true});}
+  }
   if(achievementPanel)achievementPanel.innerHTML=profileAchievementsPanelMarkup(achievements,earnedAchievements,achievementPercent);
   refreshOpenAchievementDetail(earnedAchievements);
   if(PROFILE_SEASON_STATE.view==='achievements')requestAnimationFrame(animateProfileAchievementUnlocks);
