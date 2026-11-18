@@ -210,7 +210,7 @@ test('context arrivals preserve an opened player and the keyboard focus',async()
 
 test('entry points and service worker ship the same version; context CSS parses',()=>{
  const index=read('index.html'),sw=read('sw.js'),css=read('forecast-context.css');
- for(const [asset,version] of Object.entries({'forecast-context.js':'238-20261116-ff-icons','forecast-round-core.js':'239-20261117-alternative-roles','forecast-context.css':'230-20261114-squad-design','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'239-20261117-alternative-roles','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
+ for(const [asset,version] of Object.entries({'forecast-context.js':'238-20261116-ff-icons','forecast-round-core.js':'239-20261117-alternative-roles','forecast-context.css':'230-20261114-squad-design','forecast-layout-repair.js':'225-20261114','forecast-pitch.js':'248-20261118-alternative-name','forecast-season-public.js':'226-20261114'})){assert.ok(index.includes(asset+'?v='+version));assert.ok(sw.includes(asset+'?v='+version));}
  assert.ok(index.indexOf('forecast-context.js')<index.indexOf('forecast-season-public.js'));assert.match(sw,/\|context\|/);assert.ok(require('rrweb-cssom').parse(css).cssRules.length>10);assert.match(css,/@media\(max-width:350px\)/);
 });
 

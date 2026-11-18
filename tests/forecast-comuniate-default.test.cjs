@@ -92,7 +92,7 @@ test('shared public and admin renderer accepts v5 candidates and keeps the four-
   const host=w.document.getElementById('host');
   for(const version of ['editorial-v4','editorial-v5'])for(const preview of [false,true]){
    const p=publicFixture(version),before=JSON.stringify(p),catalog={players:p.candidates.map(c=>({id:c.id,displayName:c.name,active:true,clubId:p.team,position:'MC'})),playersById:new Map()};w.CubanForecastPitch.render(host,p,catalog,{preview});
-   assert.equal(host.querySelectorAll('.fp-player').length,11);assert.match(host.querySelector('.fp-alt-name').textContent,/38%/);
+   assert.equal(host.querySelectorAll('.fp-player').length,11);assert.equal(host.querySelector('.fp-alt-name').textContent,p.candidates[0].name);
    const reserve=host.querySelector('.fp-reserve[data-player-id="'+p.candidates[0].id+'"]');assert.ok(reserve);reserve.click();
    assert.match(host.querySelector('.fp-detail').textContent,/38% de titularidad/);assert.match(host.querySelector('.fp-detail').textContent,/Predicted11 30%/);
    assert.doesNotMatch(host.querySelector('.fp-detail').textContent,/Revisión editorial manual/);assert.equal(JSON.stringify(p),before);
