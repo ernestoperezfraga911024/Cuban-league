@@ -12,8 +12,8 @@ const options={catalog,participants,season:'2026/27',captainAdjustment:context.l
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 test('the shared points module loads before app initialization and every changed asset is available offline',()=>{
  const html=read('index.html'),sw=read('sw.js');
- for(const name of ['app.js','player-points.js','market.js','market.css']){
-  const asset=name+'?v='+(name.startsWith('market.')?'244-20261117-captain-bonus':'242-20261117-player-points');assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
+ for(const name of ['app.js','player-points.js','market.js','market.css','market-core.js']){
+  const asset=name+'?v='+(name.startsWith('market')?'245-20261118-player-owners':'242-20261117-player-points');assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
  }
  assert.ok(html.indexOf('<script src="player-points.js')<html.indexOf('<script src="app.js'));
  assert.doesNotMatch(html,/<script src="player-points[^>]+defer/);
@@ -123,5 +123,57 @@ test('the existing publication poll refreshes player points even when a correcti
   const result=await w.pointAppTest.syncLiveCurrentStats({render:false});assert.equal(result.changed,true);
   await store.readRows();assert.equal(lineupReads,2);assert.equal(store.snapshot().model.playersById.get('p10').points,10);
   await w.pointAppTest.syncLiveCurrentStats({render:false});assert.equal(lineupReads,2);
+ }finally{w.close();}
+});
+
+test('owner contributions include captain bonus, zero and negative rounds, repeated ownership and both owners in one round',()=>{
+ const core=require('../market-core.js'),p=require('./helpers/market-fixture.cjs')();
+ p.players[0].id='110';p.players[0].ownerId='3';
+ p.history.events=p.history.events.filter(e=>e.playerId==='1').map(e=>({...e,playerId:'110'}));
+ p.history.events.push({reference:'return',playerId:'110',date:null,from:'2',to:'1',amount:2000});
+ const a=row(),b=row(2),c=row(3),d=row(3,'Dos');b.lineup[10].displayed_points=0;c.lineup[10].displayed_points=-6;d.lineup[10].displayed_points=16;d.lineup[10].captain_multiplier=2;
+ const model=build({...options,rows:[a,b,c,d]}),before=JSON.stringify(p),player=model.playersByMisterId.get('110');
+ const owners=core.playerOwners(p,'110',player),one=owners.find(x=>x.id==='1'),two=owners.find(x=>x.id==='2');
+ assert.equal(owners.length,3);assert.equal(owners[0].id,'3');assert.equal(owners[0].current,true);assert.equal(owners[0].points,null);assert.equal(owners[0].average,null);
+ assert.deepEqual(one.matchdays,[1,2,3]);assert.equal(one.points,18);assert.equal(one.average,6);
+ assert.equal(two.points,16);assert.equal(two.average,16);assert.deepEqual(two.matchdays,[3]);
+ assert.equal(owners.reduce((sum,x)=>sum+(x.points||0),0),player.contributionPoints);
+ assert.equal(JSON.stringify(p),before);assert.equal(core.playerOwners(p,'2',player).some(x=>x.points!==null),false);
+ p.players[0].ownerId=null;assert.equal(core.playerOwners(p,'110',player).some(x=>x.current),false);
+ // The XI alone is enough to identify an owner; no clause is required.
+ p.history.events=[];assert.deepEqual(core.playerOwners(p,'110',player).map(x=>x.id).sort(),['1','2']);
+ const corrected=structuredClone(a);corrected.updated_at='2026-11-18T00:00:00Z';corrected.lineup[10].displayed_points=30;
+ const fixed=build({...options,rows:[a,corrected,b,c,d]}).playersByMisterId.get('110');
+ assert.equal(core.playerOwners(p,'110',fixed).find(x=>x.id==='1').points,24);
+});
+test('player disclosure uses existing data, escapes names, keeps prices separate and refreshes owner totals in place',async()=>{
+ const fixture=require('./helpers/market-fixture.cjs')(),dom=new JSDOM('<body data-section="home"><section id="market"><button data-market-action="reload">Actualizar</button><div id="marketBody"></div></section></body>',{runScripts:'outside-only',url:'https://league.test/'});
+ const w=dom.window,d=w.document;let marketReads=0;
+ fixture.players[0].name='Uno <b>especial</b>';fixture.managers[0].name='<img src=x onerror=alert(1)>';
+ w.fetch=async()=>{marketReads++;return {ok:true,json:async()=>[{payload:structuredClone(fixture)}]};};
+ w.CUBAN_LEAGUE_SUPABASE={url:'https://db.test',publishableKey:'public'};w.DATA={participants:[{id:1,shield:'team-01.png'}]};
+ for(const f of ['player-points.js','market-core.js','market.js'])w.eval(read(f));
+ const localCatalog={playersById:new Map(catalog.playersById)};localCatalog.playersById.set('p10',{misterId:'1'});
+ let rows=[row()];w.CubanLeaguePlayerPoints.store.configure({load:async()=>structuredClone(rows),options:()=>({...options,catalog:localCatalog})});
+ try{
+  d.body.dataset.section='market';await tick();await tick();
+  const search=d.getElementById('marketSearch');search.value='Uno';search.dispatchEvent(new w.Event('input',{bubbles:true}));
+  const button=d.querySelector('[data-market-player="1"]');button.click();
+  const panel=()=>d.getElementById('marketPlayerOwners1');
+  assert.equal(button.getAttribute('aria-expanded'),'true');assert.equal(panel().querySelectorAll('li').length,2);
+  assert.equal(panel().querySelector('img').getAttribute('src'),'team-01.png');assert.equal(d.querySelector('[onerror]'),null);
+  assert.deepEqual([...panel().querySelector('[data-player-owner="1"]').querySelectorAll('.market-owner-stat')].map(el=>el.textContent),['24','1','24']);
+  assert.match(panel().textContent,/Sin XI publicados/);assert.equal(marketReads,1);
+  d.querySelector('[data-market-player-row="1"] .market-price summary').click();assert.ok(panel());
+  rows[0].lineup[10].displayed_points=30;w.CubanLeaguePlayerPoints.store.invalidate();await tick();
+  assert.equal(panel().querySelector('.market-owner-stat').textContent,'30');assert.equal(marketReads,1);assert.equal(d.querySelectorAll('.market-player-detail-row').length,1);
+  fixture.players[0].ownerId='2';d.querySelector('[data-market-action="reload"]').click();await tick();await tick();
+  assert.equal(panel().querySelector('li').dataset.playerOwner,'2');assert.equal(marketReads,2);
+  d.querySelector('[data-market-player="1"]').dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+  assert.equal(panel(),null);assert.equal(d.activeElement.dataset.marketPlayer,'1');
+  d.querySelector('[data-market-player-row="1"] .market-player-visual').click();assert.ok(panel());
+  search.value='';d.getElementById('marketSearch').value='';d.getElementById('marketSearch').dispatchEvent(new w.Event('input',{bubbles:true}));
+  d.querySelector('[data-market-player="100"]').click();assert.equal(d.querySelectorAll('.market-player-detail-row').length,1);assert.equal(panel(),null);
+  assert.match(d.getElementById('marketPlayerOwners100').textContent,/Actualmente libre/);
  }finally{w.close();}
 });

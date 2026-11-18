@@ -10,11 +10,12 @@
  const date=s=>new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'}).format(new Date(s));
  const clauseDate=s=>`${Number(s.slice(8,10))} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][Number(s.slice(5,7))-1]}`;
  const names={PT:'Porteros',DF:'Defensas',MC:'Centrocampistas',DL:'Delanteros'};
- const state={view:'players',historyView:'ranking',participant:null,search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20,info:false};
+ const state={view:'players',historyView:'ranking',participant:null,player:null,search:'',owner:'all',position:'all',sort:'value',metric:'made',limit:40,eventLimit:20,info:false};
  let cached=null,cachedAt=0,pending=null,active=false,sequence=0;
  const teamRequests=new WeakMap(),rivalCaptures=new WeakMap();
  const pointStore=window.CubanLeaguePlayerPoints?.store;
  const pointFormat=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+ const averageFormat=new Intl.NumberFormat('es-ES',{maximumFractionDigits:2});
  function pointsContent(id){
   const snapshot=pointStore?.snapshot(),model=snapshot?.model;
   if(!model)return {number:snapshot?.status==='error'?'—':'…',label:snapshot?.status==='error'?'Puntos no disponibles':'Consultando puntos',detail:''};
@@ -32,11 +33,13 @@
  function refreshPoints(){
   document.querySelectorAll('[data-player-points]').forEach(el=>{const p=pointsContent(el.dataset.playerPoints);el.textContent=p.number;el.setAttribute('aria-label',p.label);el.title=p.label;});
   document.querySelectorAll('[data-player-points-detail]').forEach(el=>{el.innerHTML=pointsDetailContent(pointsContent(el.dataset.playerPointsDetail));});
+  refreshOwnerDetails();
   document.querySelectorAll('[data-player-points-note]').forEach(el=>{
    const partial=pointStore?.snapshot().model?.partial;
    el.textContent='Puntos de los XI publicados en Cuban League. El bonus de capitán va separado.'+(partial?' Hay jornadas con datos incompletos.':'');
   });
  }
+ function refreshOwnerDetails(){const panel=document.getElementById('marketPlayerOwners'+state.player);if(panel&&cached)panel.innerHTML=ownerDetails(cached,state.player);}
  function loadPoints(force=false){if(pointStore)void pointStore.readRows({force}).catch(()=>{});}
  const pointsNote=()=>'<p class="market-points-note" data-player-points-note>Puntos de los XI publicados en Cuban League. El bonus de capitán va separado.</p>';
  pointStore?.subscribe(refreshPoints);
@@ -73,14 +76,31 @@
  }
  function photo(p){return p.photo?`<img src="${escape(p.photo)}" width="46" height="50" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:'<span class="market-avatar" aria-hidden="true">⚽</span>';}
  function stamp(p){return `<p class="market-updated">Captura del ${escape(date(p.capturedAt))} · hora de Miami</p>${Date.now()-Date.parse(p.capturedAt)>86400000?'<p class="market-notice">Esta captura tiene más de 24 horas. Los valores y propietarios pueden haber cambiado.</p>':''}`;}
- function rows(p,players,showOwner=true,compact=false){
+ function rows(p,players,showOwner=true,compact=false,expandable=false){
   const owners=new Map(p.managers.map(m=>[m.id,m.name]));
-  return `<div class="market-table-wrap"><table class="market-table"><thead><tr><th scope="col">Futbolista</th><th scope="col">Valor</th><th scope="col">Cláusula</th></tr></thead><tbody>${players.map(x=>`<tr><th scope="row"><div class="market-player"><span class="market-player-visual">${photo(x)}${playerPoints(x.id)}</span><div><strong>${escape(x.name)}</strong><span>${escape(x.position)} · ${escape(x.club)}</span>${showOwner?`<span class="market-owner${x.ownerId===null?' is-free':''}">${escape(owners.get(x.ownerId)||'Libre')}</span>`:''}${playerPointsDetail(x.id)}</div></div></th><td>${compact?price(x.value):escape(money(x.value))}</td><td>${compact?price(x.clause):escape(money(x.clause))}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="market-table-wrap"><table class="market-table"><thead><tr><th scope="col">Futbolista</th><th scope="col">Valor</th><th scope="col">Cláusula</th></tr></thead><tbody>${players.map(x=>`<tr${expandable?` data-market-player-row="${x.id}"${state.player===x.id?' class="is-expanded"':''}`:''}><th scope="row"><div class="market-player"><span class="market-player-visual">${photo(x)}${playerPoints(x.id)}</span><div>${expandable?`<button type="button" class="market-player-toggle" data-market-player="${x.id}" aria-expanded="${state.player===x.id}" aria-controls="marketPlayerOwners${x.id}" aria-label="Dueños y rendimiento de ${escape(x.name)}"><strong>${escape(x.name)}</strong><span aria-hidden="true">⌄</span></button>`:`<strong>${escape(x.name)}</strong>`}<span>${escape(x.position)} · ${escape(x.club)}</span>${showOwner?`<span class="market-owner${x.ownerId===null?' is-free':''}">${escape(owners.get(x.ownerId)||'Libre')}</span>`:''}${playerPointsDetail(x.id)}</div></div></th><td>${compact?price(x.value):escape(money(x.value))}</td><td>${compact?price(x.clause):escape(money(x.clause))}</td></tr>${expandable&&state.player===x.id?ownerDetailRow(p,x.id):''}`).join('')}</tbody></table></div>`;
+ }
+ function ownerDetails(p,id){
+  const snapshot=pointStore?.snapshot(),model=snapshot?.model,player=p.players.find(x=>x.id===id);
+  const owners=core.playerOwners(p,id,model?.playersByMisterId.get(id));
+  const score=(n)=>model?(n===null?'—':pointFormat.format(n)):'—';
+  return `<div class="market-owners-heading"><h4>Dueños y rendimiento</h4>${player?.ownerId===null?'<span>Actualmente libre</span>':''}</div><p class="market-owners-help">Puntos y media con bonus de capitán. Jornadas en su XI.</p>${!model?`<p class="market-owners-status" role="status">${snapshot?.status==='error'?'No se pudieron cargar las estadísticas. Pulsa Actualizar para reintentar.':'Consultando puntos por dueño…'}</p>`:''}${owners.length?`<div class="market-owners-labels" aria-hidden="true"><span>Dueño</span><span>Pts</span><span>J</span><span>Media</span></div><ul class="market-owners-list">${owners.map(owner=>`<li data-player-owner="${owner.id}"><div class="market-owner-identity">${participantPhoto(owner)}<div><strong>${escape(owner.name)}</strong>${owner.current?'<span class="market-owner-current">Actual</span>':''}${model&&!owner.matchdays.length?'<small>Sin XI publicados</small>':''}${owner.provisional?'<small>Provisional</small>':''}</div></div><span class="market-owner-stat" aria-label="Puntos con bonus: ${score(owner.points)}">${score(owner.points)}</span><span class="market-owner-stat" aria-label="Jornadas alineado: ${model?owner.matchdays.length:'no disponibles'}">${model?owner.matchdays.length:'—'}</span><span class="market-owner-stat market-owner-average" aria-label="Media con bonus: ${model&&owner.average!==null?averageFormat.format(owner.average):'no disponible'}">${model&&owner.average!==null?averageFormat.format(owner.average):'—'}</span>${owner.lastMovement?`<small class="market-owner-movement">Último movimiento: <time datetime="${owner.lastMovement}">${owner.lastMovement.split('-').reverse().join('/')}</time></small>`:''}</li>`).join('')}</ul>`:'<p class="market-empty">Todavía no hay dueños registrados.</p>'}<p class="market-owners-footnote">Según movimientos y XI publicados. Puede faltar historial anterior.${model?.partial?' Hay jornadas con datos incompletos.':''}</p>`;
+ }
+ function ownerDetailRow(p,id){return `<tr class="market-player-detail-row"><td colspan="3"><div id="marketPlayerOwners${id}" class="market-player-owners" role="region" aria-label="Dueños y rendimiento de ${escape(p.players.find(x=>x.id===id).name)}">${ownerDetails(p,id)}</div></td></tr>`;}
+ function togglePlayer(id){
+  const next=state.player===id?null:id;
+  section.querySelectorAll('.market-player-detail-row').forEach(row=>row.remove());
+  section.querySelectorAll('[data-market-player-row]').forEach(row=>{
+   const open=row.dataset.marketPlayerRow===next;row.classList.toggle('is-expanded',open);
+   row.querySelector('[data-market-player]').setAttribute('aria-expanded',String(open));
+   if(open)row.insertAdjacentHTML('afterend',ownerDetailRow(cached,next));
+  });
+  state.player=next;
  }
  function playerResults(){
   const target=document.getElementById('marketResults');if(!target||!cached)return;
   const players=core.select(cached,state);
-  target.innerHTML=`<p class="market-result-count" role="status">${players.length} ${players.length===1?'futbolista':'futbolistas'}</p>${pointsNote()}${players.length?rows(cached,players.slice(0,state.limit),true,true):'<p class="market-empty">No hay futbolistas con estos filtros.</p>'}${players.length>state.limit?`<button type="button" class="market-more" data-market-action="more">Ver más <span aria-hidden="true">›</span><small>${Math.min(state.limit,players.length)} de ${players.length}</small></button>`:''}`;
+  target.innerHTML=`<p class="market-result-count" role="status">${players.length} ${players.length===1?'futbolista':'futbolistas'}</p>${pointsNote()}${players.length?rows(cached,players.slice(0,state.limit),true,true,true):'<p class="market-empty">No hay futbolistas con estos filtros.</p>'}${players.length>state.limit?`<button type="button" class="market-more" data-market-action="more">Ver más <span aria-hidden="true">›</span><small>${Math.min(state.limit,players.length)} de ${players.length}</small></button>`:''}`;
   refreshPoints();
  }
  function playerView(p){
@@ -161,6 +181,8 @@
  section.addEventListener('input',e=>{if(e.target.id==='marketSearch'){state.search=e.target.value;state.limit=40;playerResults();}});
  section.addEventListener('change',e=>{if(e.target.id==='marketOwner')state.owner=e.target.value;else if(e.target.id==='marketSort')state.sort=e.target.value;else return;state.limit=40;playerResults();});
  section.addEventListener('click',e=>{
+  const playerRow=e.target.closest('[data-market-player-row]');
+  if(playerRow&&!e.target.closest('details.market-price')){togglePlayer(playerRow.dataset.marketPlayerRow);return;}
   const row=e.target.closest('[data-market-row]');
   if(row&&!e.target.closest('.market-ranking-detail,details.market-price')){toggleParticipant(row.dataset.marketRow);return;}
   const b=e.target.closest('button');if(!b)return;
@@ -177,6 +199,6 @@
  new MutationObserver(observe).observe(document.body,{attributes:true,attributeFilter:['data-section']});
  document.addEventListener('visibilitychange',()=>{if(active&&!document.hidden)load();});
  section.addEventListener('toggle',e=>{if(e.target.matches('details.market-price')&&e.target.open)section.querySelectorAll('details.market-price[open]').forEach(other=>{if(other!==e.target)other.open=false;});},true);
- section.addEventListener('keydown',e=>{if(e.key==='Escape')section.querySelectorAll('details.market-price[open]').forEach(detail=>{detail.open=false;detail.querySelector('summary').focus();});});
+ section.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.player){const id=state.player;togglePlayer(id);section.querySelector(`[data-market-player="${id}"]`)?.focus();}if(e.key==='Escape')section.querySelectorAll('details.market-price[open]').forEach(detail=>{detail.open=false;detail.querySelector('summary').focus();});});
  window.CubanLeagueMarket={showTeam};observe();
 })();
