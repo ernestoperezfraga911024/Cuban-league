@@ -93,6 +93,32 @@
   }
   return [...owners.values()].sort((a,b)=>Number(b.current)-Number(a.current)||(b.matchdays.at(-1)||0)-(a.matchdays.at(-1)||0)||(b.lastMovement||'').localeCompare(a.lastMovement||'')||a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
  }
- const api={validate,select,stats,rank,clauseRivals,topClauses,playerOwners,positions};
+ // The public ledger contains clauses, not every sale. Do not infer a sale or
+ // assign lifetime owner points to an individual purchase (including rebuys).
+ function performance(p,model=null){
+  const players=new Map(p.players.map(player=>[player.id,player]));
+  const rows=new Map(p.managers.map(m=>[m.id,{...m,spent:0,events:[]}]));
+  for(const event of p.history.events){
+   const manager=rows.get(event.to),player=players.get(event.playerId);
+   if(!manager||!player)continue;
+   manager.spent+=event.amount;
+   manager.events.push({...event,player});
+  }
+  return [...rows.values()].map(manager=>({...manager,events:manager.events
+   .sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference))
+   .map(event=>{
+    const pointsPlayer=model?.playersByMisterId.get(event.playerId);
+    const appearances=(pointsPlayer?.matchdays||[]).flatMap(day=>day.appearances
+     .filter(a=>String(a.participantId)===String(manager.participantId))
+     .map(a=>({...a,matchday:day.matchday})));
+    const total=field=>appearances.length&&appearances.every(a=>Number.isFinite(a[field]))?appearances.reduce((n,a)=>n+a[field],0):null;
+    return {...event,purchases:manager.events.filter(e=>e.playerId===event.playerId).length,
+     ownerPoints:total('contributionPoints'),ownerBase:total('points'),ownerBonus:total('captainBonus'),
+     appearances,partial:!!model?.partial,provisional:appearances.some(a=>a.provisional),
+     // No reliable historical round windows in the existing public projection.
+     operationPoints:null};
+   })})).sort((a,b)=>a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
+ }
+ const api={validate,select,stats,rank,clauseRivals,topClauses,playerOwners,performance,positions};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CubanLeagueMarketCore=api;
 })(typeof globalThis==='object'?globalThis:this);
