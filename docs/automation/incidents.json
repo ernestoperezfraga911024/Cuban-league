@@ -1,6 +1,6 @@
 {
   "methodology_version": "ops-v2",
-  "updated_on": "2026-11-17",
+  "updated_on": "2026-11-19",
   "incidents": [
     {
       "code": "unfinished-as-blocked",
@@ -474,6 +474,16 @@
         "tests/news-startup-db.test.cjs"
       ],
       "evidence": "Plan real news-20261117-15 sin inicializar a21:24Z; bitácora21:00 lo marcó not_due. Instalación y recuperación real se verifican por separado."
+    },
+    {
+      "code": "mister-pagination-empty-terminal-batch",
+      "status": "regression-tested-awaiting-run",
+      "failure": "250 libres: el quinto clic conserva 250 filas y oculta Ver más; el lector exigía crecimiento incluso al finalizar.",
+      "prevention": "Aceptar fin sin crecimiento solo con botón ausente, lista íntegra idéntica, IDs únicos y estabilidad de 2 segundos; mantener resto de controles.",
+      "tests": [
+        "tests/mister-market.test.cjs"
+      ],
+      "evidence": "Diagnóstico real 44608939846: 50→100→150→200→250; página 5 rows=250, hasMore=false, ready=true, popupOpen=false, prefixMatches=true. Corrección aún pendiente de ejecución real."
     }
   ]
 }

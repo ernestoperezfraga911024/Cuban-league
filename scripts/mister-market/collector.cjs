@@ -44,6 +44,16 @@ function pageExtended(before, after) {
   if (new Set(ids).size !== ids.length) fail('duplicate_page_row');
   return true;
 }
+// Mister may return an empty final batch after a full page (e.g. 250 free players).
+// Accept that terminal signal only with the complete, unchanged list; waitStable
+// still requires two seconds of identical observations after the click.
+function pageFinished(before, after) {
+  if (after.hasMore !== false || !before.rows.length || after.rows.length !== before.rows.length) return false;
+  if (before.rows.some((p, i) => p.id !== after.rows[i]?.id)) fail('pagination_changed');
+  const ids = after.rows.map(p => p.id);
+  if (new Set(ids).size !== ids.length) fail('duplicate_page_row');
+  return hash(before.rows) === hash(after.rows);
+}
 async function paginate(initial, { read, next, maxPages = 40, wait = waitStable, progress = () => {} }) {
   let state = initial;
   for (let page = 1; state.hasMore; page++) {
@@ -56,7 +66,7 @@ async function paginate(initial, { read, next, maxPages = 40, wait = waitStable,
     await next();
     try {
       state = await wait(async () => { last = await read(); return last; },
-        s => s.ready && !s.popupOpen && pageExtended(before, s),
+        s => s.ready && !s.popupOpen && (pageExtended(before, s) || pageFinished(before, s)),
         { stableFor: 2000, label: 'market_pagination' });
       progress({ phase: 'market', step: 'pagination_after', page, beforeRows: before.rows.length, ...summary(state) });
     } catch (error) {
