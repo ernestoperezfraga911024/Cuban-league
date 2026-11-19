@@ -456,6 +456,23 @@
     });
   }
 
+  function playerGoalsForDraft(payload, rows) {
+    const players = Object.create(null);
+    for (const row of rows) {
+      const rawSlots = payload.managers[row.misterRank - 1].lineup;
+      row.lineup.forEach((slot, index) => {
+        const raw = rawSlots[index];
+        if (!['scored','did-not-play'].includes(raw.status) || !Number.isSafeInteger(raw.goals) || raw.goals < 0) return;
+        if (slot.player_id in players && players[slot.player_id] !== raw.goals) {
+          throw new Error('Mister devolvió dos cifras de goles para ' + slot.player_name + '. Revisa la captura.');
+        }
+        players[slot.player_id] = raw.goals;
+      });
+    }
+    return Object.keys(players).length ? {season:payload.season, matchday:payload.matchday,
+      leagueId:payload.league.id, gameweekId:payload.gameweekId, players} : null;
+  }
+
   function officialXiForDraft(payload, rows) {
     const xi = payload.officialXi;
     if (payload.provisional || !xi || xi.gameweekId !== payload.gameweekId
@@ -597,7 +614,9 @@
       state.misterImportSaving = true;
       $('cancelMisterImportButton').disabled = true;
       state.suspendAutoSave = true;
+      const goals = playerGoalsForDraft(payload, chosen);
       applyMisterRows(chosen);
+      if (goals) state.playerGoalsToSave = goals;
       if (pending.officialXi) state.officialXiToSave = pending.officialXi;
       if (payload.provisional) $('postponedToggle').checked = true;
       setMisterImportStatus('Guardando el borrador…');
@@ -618,6 +637,7 @@
       $('cancelMisterImportButton').textContent = 'Cerrar';
       setMisterImportStatus('Borrador guardado: Jornada ' + request.matchday + '. ' + chosen.length + ' participantes importados'
         + (keep.size ? '; ' + keep.size + ' conservados' : '') + (pending.officialXi && !state.officialXiToSave ? ' · Once ideal guardado' : '')
+        + (goals ? (state.playerGoalsToSave ? ' · Goles individuales pendientes de sincronizar' : ' · Goles individuales guardados') : '')
         + (state.officialXiToSave ? ' · Once ideal pendiente de sincronizar' : '') + '. Solo tú publicas.', 'success');
       flashMessage('Jornada ' + request.matchday + ' guardada en borrador. Revisa los datos antes de publicar.');
     } catch (error) {
@@ -2577,7 +2597,8 @@
       localStorage.setItem(localDraftKey(), JSON.stringify({
         savedAt: new Date().toISOString(),
         restoreGeneration: state.matchdayRestoreGeneration || state.serverRestoreGeneration || '',
-        cloudSynced: cloudSynced && !state.officialXiToSave,
+        cloudSynced: cloudSynced && !state.officialXiToSave && !state.playerGoalsToSave,
+        playerGoalsToSave: state.playerGoalsToSave || null,
         officialXiToSave: state.officialXiToSave || null,
         cloudWriteRevision: cloudWriteRevision || '',
         rows,
@@ -2618,6 +2639,7 @@
         rows,
         savedAt: parsed.savedAt,
         milestone: parsed.milestone || null,
+        playerGoalsToSave: parsed.playerGoalsToSave || null,
         officialXiToSave: parsed.officialXiToSave || null,
         cloudSynced: parsed.cloudSynced === true && restoreGenerationCurrent,
         cloudWriteRevision: String(parsed.cloudWriteRevision || '')
@@ -2745,6 +2767,7 @@
     const matchday = state.matchday;
     const champions = isChampionsMode();
     const wasPublished = state.published;
+    const playerGoals = state.playerGoalsToSave;
     const officialXi = state.officialXiToSave;
     const milestone = champions ? null : gatherMilestone();
     const rows = gatherRows(false, true);
@@ -2799,6 +2822,7 @@
           return false;
         }
 
+        if (playerGoals && !restoreStateAvailable) throw new Error('Los goles individuales siguen en este dispositivo. Vuelve a guardar al recuperar la conexión con la base.');
         let savedRows = [];
         let savedWriteRevision = expectedWriteRevision;
         if (restoreStateAvailable) {
@@ -2814,7 +2838,16 @@
             p_expected_write_revision: expectedWriteRevision || null
           };
           let result;
-          if (officialXi) {
+          if (playerGoals) {
+            result = await state.client.rpc('save_matchday_draft_with_player_goals', {...params,
+              p_player_goals: playerGoals, p_official_xi: officialXi || null});
+            if (result.error?.code === 'PGRST202') throw new Error('El servidor aún no admite goles individuales. La captura sigue guardada en este dispositivo.');
+            if (!result.error && result.data?.rows?.length) {
+              if (state.playerGoalsToSave === playerGoals) state.playerGoalsToSave = null;
+              if (state.officialXiToSave === officialXi) state.officialXiToSave = null;
+            }
+          }
+          if (officialXi && (!result || result.error?.code === 'PGRST202')) {
             result = await state.client.rpc('save_matchday_draft_with_official_xi', {...params, p_official_xi: officialXi});
             if (!result.error && result.data?.rows?.length && state.officialXiToSave === officialXi) state.officialXiToSave = null;
           }
@@ -3064,6 +3097,7 @@
   async function loadMatchday() {
     if (!state.client) return;
     const requestId = ++state.loadRequestId;
+    state.playerGoalsToSave = null;
     state.officialXiToSave = null;
     const season = currentSeasonKey();
     const matchday = state.matchday;
@@ -3269,6 +3303,7 @@
     );
     if (localDraftConflict) archiveCurrentLocalDraft();
     const localDraft = localDraftConflict ? null : localDraftCandidate;
+    state.playerGoalsToSave = localDraft?.playerGoalsToSave || null;
     state.officialXiToSave = localDraft?.officialXiToSave || null;
     const cloudMilestone = !milestoneResult.error && Array.isArray(milestoneResult.data)
       ? milestoneResult.data[0] || null

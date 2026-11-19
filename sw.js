@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v251-official-pitch';
+const CACHE_NAME = 'cuban-league-v252-player-goals';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,7 +12,7 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=251-20261119-official-pitch',
+  './app.js?v=252-20261119-player-goals',
   './ideal-xi.js?v=246-20261118-ideal-xi',
   './profile-chart.css?v=247-20261118-profile-chart',
   './ideal-xi.css?v=246-20261118-ideal-xi',
@@ -58,7 +58,7 @@ const APP_SHELL = [
   './supabase-config.js?v=161-20260902',
   './admin.html',
   './admin.css?v=176-20261015-classic-navigation',
-  './admin.js?v=249-20261119-official-xi',
+  './admin.js?v=252-20261119-player-goals',
   './mister-import-core.js?v=249-20261119-official-xi',
   './admin-manifest.json',
   './supabase.js',

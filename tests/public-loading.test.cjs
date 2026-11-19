@@ -24,7 +24,7 @@ function setup(){
   w.CUBAN_LEAGUE_SUPABASE={url:'https://league.test',publishableKey:'test-public',season:'2026/27'};
   w.fetch=async()=>{throw new Error('Unexpected network request');};
   w.eval(read('app.js').replace(/init\(\);\s*$/,`window.loadingTest={
-    init,syncPublishedData,syncAchievementMilestones,renderHomeLive,
+    init,syncPublishedData,syncAchievementMilestones,renderHomeLive,matchdayLineupPlayerMarkup,
     fetchPublishedMatchdayLineup,fetchPublishedProfileSeasonRows,fetchPublishedLeagueStatsRows,
     signature:profileSeasonPublishedRowsSignature,
     setData(data){DATA=data;},
@@ -228,5 +228,29 @@ test('failed initial data load offers retry instead of rejecting init',async()=>
     assert.match(doc.getElementById('heroKpis').textContent,/No se pudo cargar la página/);
     assert.equal(doc.querySelector('#heroKpis button').textContent,'Volver a intentar');
     assert.equal(doc.getElementById('heroKpis').getAttribute('aria-busy'),'false');
+  }finally{dom.window.close();}
+});
+
+test('lineup reads individual goals with the starters, and an older database still serves the XI',async()=>{
+  const {dom,w,api}=setup();
+  const urls=[];
+  try{
+    w.fetch=async url=>{
+      urls.push(new URL(url).searchParams.get('select'));
+      return response([{lineup:[],player_goals:{mbappe:2}}]);
+    };
+    const result=await api.fetchPublishedMatchdayLineup('Ernesto',5);
+    assert.equal(result.playerGoals.mbappe,2);
+    assert.deepEqual(urls,['lineup,player_goals']);
+    const player={playerName:'Mbappé',displayedPoints:30,position:'DL',isCaptain:true,captainMultiplier:3};
+    assert.match(api.matchdayLineupPlayerMarkup(player,false,2),/⚽ 2 goles/);
+    assert.doesNotMatch(api.matchdayLineupPlayerMarkup(player,false),/⚽/);
+    w.fetch=async url=>{
+      const select=new URL(url).searchParams.get('select');
+      return select==='lineup'?response([{lineup:[player]}]):{ok:false,status:400,text:async()=>'unknown column player_goals'};
+    };
+    const older=await api.fetchPublishedMatchdayLineup('Ernesto',5);
+    assert.equal(older.lineup.length,1);
+    assert.equal(older.playerGoals,null);
   }finally{dom.window.close();}
 });

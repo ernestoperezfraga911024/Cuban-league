@@ -1,4 +1,4 @@
-const APP_VERSION='251-20261119-official-pitch';
+const APP_VERSION='252-20261119-player-goals';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1555,13 +1555,13 @@ function matchdayLineupOfficialStats(name,matchday){
   };
 }
 
-async function fetchPublishedMatchdayLineup(name,matchday,signal){
+async function fetchPublishedMatchdayLineup(name,matchday,signal,includeGoals=true){
   await PLAYER_CATALOG_PROMISE;
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!config?.url||!config?.publishableKey)throw new Error('Supabase no está configurado');
   const season=config.season||DATA.currentSeason;
   const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
-  endpoint.searchParams.set('select','lineup');
+  endpoint.searchParams.set('select',includeGoals?'lineup,player_goals':'lineup');
   endpoint.searchParams.set('season',`eq.${season}`);
   endpoint.searchParams.set('matchday',`eq.${matchday}`);
   endpoint.searchParams.set('participant_name',`eq.${name}`);
@@ -1578,6 +1578,9 @@ async function fetchPublishedMatchdayLineup(name,matchday,signal){
   });
   if(!response.ok){
     const errorText=await response.text().catch(()=>'');
+    if(includeGoals && (response.status===400 || response.status===404) && /player_goals/i.test(errorText)){
+      return fetchPublishedMatchdayLineup(name,matchday,signal,false);
+    }
     if((response.status===400||response.status===404)&&/lineup|schema cache|column/i.test(errorText)){
       return {lineup:null,schemaMissing:true};
     }
@@ -1586,6 +1589,7 @@ async function fetchPublishedMatchdayLineup(name,matchday,signal){
   const rows=await response.json();
   return {
     lineup:Array.isArray(rows)&&rows.length?rows[0]?.lineup??null:null,
+    playerGoals:rows?.[0]?.player_goals||null,
     schemaMissing:false
   };
 }
@@ -1663,11 +1667,12 @@ function renderMatchdayLineupState(participant,matchday,official,{type='empty',s
     </section>`;
 }
 
-function matchdayLineupPlayerMarkup(player,isMvp){
+function matchdayLineupPlayerMarkup(player,isMvp,goals){
   const emptyPosition=player.isEmptyPosition===true;
   const safeName=profileAttr(player.playerName);
   const safeClub=profileAttr(player.clubName||'Club no registrado');
   const points=matchdayLineupNumber(player.displayedPoints);
+  const goalLabel=Number.isSafeInteger(goals) && goals>0 ? goals + (goals===1?' gol':' goles') : '';
   const captainLabel=player.isCaptain?`, capitán por ${matchdayLineupMultiplier(player.captainMultiplier)}`:'';
   const initials=profileAttr(matchdayLineupInitials(player.playerName));
   const marker=emptyPosition
@@ -1680,12 +1685,13 @@ function matchdayLineupPlayerMarkup(player,isMvp){
     :player.crest
     ?`<small class="has-crest" title="${safeClub}"><img data-player-catalog-image src="${profileAttr(player.crest)}" alt="" loading="lazy"><span>${safeClub}</span></small>`
     :`<small title="${safeClub}">${safeClub}</small>`;
-  return `<article class="matchday-field-player${player.isCaptain?' is-captain':''}${isMvp?' is-mvp':''}${emptyPosition?' is-empty-position':''}" aria-label="${safeName}, ${MATCHDAY_LINEUP_POSITION_LABELS[player.position]}, ${points} puntos${captainLabel}">
+  return `<article class="matchday-field-player${player.isCaptain?' is-captain':''}${isMvp?' is-mvp':''}${emptyPosition?' is-empty-position':''}" aria-label="${safeName}, ${MATCHDAY_LINEUP_POSITION_LABELS[player.position]}, ${points} puntos${captainLabel}${goalLabel?', '+goalLabel:''}">
     ${marker}
     ${player.isCaptain?`<span class="matchday-field-captain">C ×${matchdayLineupMultiplier(player.captainMultiplier)}</span>`:''}
     ${isMvp?'<span class="matchday-field-mvp" title="MVP del equipo" aria-hidden="true">★</span>':''}
     <strong title="${safeName}">${safeName}</strong>
     ${club}
+    ${goalLabel?`<small class="matchday-field-goals">⚽ ${goalLabel}</small>`:''}
     <b${player.displayedPoints < 0 ? ' class="is-negative"' : ''}>${points}</b>
   </article>`;
 }
@@ -1702,7 +1708,7 @@ function matchdayLineupLimitedLabels(labels,limit=3){
   return `${visible.join(', ')} y ${remaining} más`;
 }
 
-function renderPublishedMatchdayLineup(participant,matchday,official,players){
+function renderPublishedMatchdayLineup(participant,matchday,official,players,playerGoals=null){
   const content=$('lineupModalContent');
   if(!content)return;
   const totals={PT:0,DF:0,MC:0,DL:0};
@@ -1742,7 +1748,7 @@ function renderPublishedMatchdayLineup(participant,matchday,official,players){
     const linePlayers=players.filter(player=>player.position===position);
     if(!linePlayers.length)return '';
     return `<section class="matchday-field-line matchday-field-line-${position.toLowerCase()}" style="--lineup-count:${linePlayers.length}" aria-label="${MATCHDAY_LINEUP_POSITION_LABELS[position]}">
-      ${linePlayers.map(player=>matchdayLineupPlayerMarkup(player,mvpPlayers.has(player))).join('')}
+      ${linePlayers.map(player=>matchdayLineupPlayerMarkup(player,mvpPlayers.has(player),playerGoals?.[player.playerId])).join('')}
     </section>`;
   }).join('');
   const captainMarkup=captain
@@ -1773,6 +1779,17 @@ function renderPublishedMatchdayLineup(participant,matchday,official,players){
         }).join('')}
       </div>
     </article>`;
+  let goalNote='';
+  if(playerGoals){
+    const observations=eligibleMvpPlayers.map(player=>playerGoals[player.playerId]);
+    const confirmed=observations.filter(Number.isSafeInteger);
+    const recorded=confirmed.reduce((sum,n)=>sum+n,0);
+    if(confirmed.length<observations.length){
+      goalNote='Goles confirmados en '+confirmed.length+' de '+observations.length+' futbolistas.';
+    }else if(official.played && Number.isInteger(official.standing?.goals) && recorded!==official.standing.goals){
+      goalNote='Goles en las fichas de Mister: '+recorded+' · Total publicado del equipo: '+official.standing.goals+'.';
+    }
+  }
   const emptyCount=players.filter(player=>player.isEmptyPosition).length;
   content.setAttribute('aria-busy','false');
   content.innerHTML=`${matchdayLineupHeaderMarkup(participant,matchday,official,{formation,playerCount:players.length,emptyCount})}
@@ -1782,6 +1799,7 @@ function renderPublishedMatchdayLineup(participant,matchday,official,players){
       <section class="matchday-lineup-field-card" aria-labelledby="matchdayLineupFieldTitle">
         <div class="matchday-lineup-field-head"><div><span class="eyebrow">ONCE UTILIZADO</span><h3 id="matchdayLineupFieldTitle">Formación ${formation}</h3></div><span>${players.length}/11</span></div>
         <div class="matchday-lineup-field" role="group" aria-label="Alineación de ${profileAttr(participant.name)} en la jornada ${matchday}">${fieldLines}</div>
+        ${goalNote?`<p class="muted">${goalNote}</p>`:''}
       </section>
       <aside class="matchday-lineup-analysis" aria-label="Análisis de la alineación">${captainMarkup}${mvpMarkup}${totalsMarkup}</aside>
     </div>`;
@@ -1841,7 +1859,7 @@ async function openMatchdayLineup(name,matchday){
       renderMatchdayLineupState(participant,day,official,{type:'empty',schemaMissing:result.schemaMissing});
       return;
     }
-    renderPublishedMatchdayLineup(participant,day,official,players);
+    renderPublishedMatchdayLineup(participant,day,official,players,result.playerGoals);
   }catch(error){
     if(error?.name==='AbortError'||requestToken!==LINEUP_MODAL_REQUEST_TOKEN||modal.hidden)return;
     renderMatchdayLineupState(participant,day,official,{type:'error'});
@@ -1873,7 +1891,7 @@ async function refreshOpenMatchdayLineup(){
     if(!players.length){
       renderMatchdayLineupState(participant,day,official,{type:'empty',schemaMissing:result.schemaMissing});
     }else{
-      renderPublishedMatchdayLineup(participant,day,official,players);
+      renderPublishedMatchdayLineup(participant,day,official,players,result.playerGoals);
     }
     return true;
   }catch(error){

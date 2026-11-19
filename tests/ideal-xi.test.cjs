@@ -68,7 +68,7 @@ test('Equipo opens on the XI, retains other tabs, escapes player names and rebui
 });
 test('historical XI assets load before app, are cached offline, and are refreshed with profile publications',()=>{
  const html=read('index.html'),sw=read('sw.js'),app=read('app.js');
- for(const file of ['ideal-xi.js','ideal-xi.css','app.js']){assert.ok(html.includes(file+'?v='+(file==='app.js'?'251-20261119-official-pitch':'246-20261118-ideal-xi')));assert.ok(sw.includes(file+'?v='+(file==='app.js'?'251-20261119-official-pitch':'246-20261118-ideal-xi')));}
+ for(const file of ['ideal-xi.js','ideal-xi.css','app.js']){assert.ok(html.includes(file+'?v='+(file==='app.js'?'252-20261119-player-goals':'246-20261118-ideal-xi')));assert.ok(sw.includes(file+'?v='+(file==='app.js'?'252-20261119-player-goals':'246-20261118-ideal-xi')));}
  assert.ok(html.indexOf('<script src="ideal-xi.js')<html.indexOf('<script src="app.js'));
  assert.match(app,/if\(liveStatsChanged\)ensureProfileSeasonData\(\{force:true\}\)/);
 });
