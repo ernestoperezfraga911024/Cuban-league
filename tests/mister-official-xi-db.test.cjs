@@ -19,7 +19,7 @@ async function setup(db) {
     create function extensions.digest(bytea,text) returns bytea language sql as $$select sha256($1)$$;
   `);
   const files = ['supabase-setup.sql', ...[57,59,65,114,116,124].map(n=>fs.readdirSync(root).find(f=>f.startsWith('SUPABASE-V'+n+'-'))),
-    'supabase-v163-negative-balance.sql', 'supabase-v170-cup-mister-order.sql', migration];
+    'supabase-v163-negative-balance.sql', 'supabase-v170-cup-mister-order.sql', migration, 'supabase/migrations/20261119170338_official_xi_portraits.sql'];
   for (const file of files) {
     let sql = read(file);
     if (file.startsWith('SUPABASE-V124')) {
@@ -75,7 +75,7 @@ test('Mister XI follows real V124 draft, publish, correction, undo and backup re
     let publicXi=await get();
     assert.equal(publicXi.length,11);
     assert.deepEqual(publicXi[3].participants,[]);
-    assert.deepEqual(publicXi[10],{position:'DL',playerName:'Jugador 10',points:20,participants:['Ernesto']});
+    assert.deepEqual(publicXi[10],{playerId:'player-10',misterPlayerId:'310',position:'DL',playerName:'Jugador 10',points:20,participants:['Ernesto']});
     const confirmed = await backup();
     await db.exec('set role anon');
     assert.deepEqual(await get(),publicXi);

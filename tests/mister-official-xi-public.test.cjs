@@ -34,11 +34,27 @@ test('public matchday loads only on opening, separates pending from error and di
       position,playerName:'Jugador '+i,points:i,participants:i?[]:['Ernesto']
     }));
     players[1].playerName='<img src=x>';
+    players[1].misterPlayerId='invalid/path';
+    players[0].misterPlayerId='58954';
     requests[3].resolve({ok:true,json:async()=>players});await tick();
     assert.equal(panel.querySelectorAll('li').length,11);
-    assert.match(panel.querySelector('li').textContent,/PTJugador 0Ernesto0 pts/);
-    assert.equal(panel.querySelector('img'),null);
-    assert.match(panel.textContent,/Sin coincidencia en los XI publicados/);
+    const lines=[...panel.querySelectorAll('.xi-field > ul')];
+    assert.deepEqual(lines.map(row=>row.getAttribute('aria-label')),['Delanteros','Centrocampistas','Defensas','Portero']);
+    assert.deepEqual(lines.map(row=>row.children.length),[2,5,3,1]);
+    assert.equal(panel.querySelector('.xi-formation').textContent,'3–5–2');
+    assert.equal(panel.querySelector('.xi-total').textContent,'55 pts');
+    const keeper=lines[3].firstElementChild;
+    assert.equal(keeper.querySelector('.xi-name').textContent,'Jugador 0');
+    assert.equal(keeper.querySelector('.xi-owner').textContent,'Ernesto');
+    assert.equal(keeper.querySelector('.xi-points').textContent,'0 pts');
+    assert.equal(lines[2].firstElementChild.querySelector('.xi-name').textContent,'<img src=x>');
+    assert.equal(panel.querySelectorAll('img').length,1);
+    const photo=keeper.querySelector('img');
+    assert.equal(photo.src,'https://cdn-mister.mundodeportivo.com/file/cdn-common/players/58954.png');
+    photo.dispatchEvent(new w.Event('error'));
+    assert.equal(keeper.querySelector('img'),null);
+    assert.equal(keeper.querySelector('.fp-initials').hidden,false);
+    assert.ok(panel.querySelector('[aria-label="Sin coincidencia en los XI publicados"]'));
   }finally{dom.window.close();}
 });
 
