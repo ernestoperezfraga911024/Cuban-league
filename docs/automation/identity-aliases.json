@@ -29,5 +29,18 @@
     "verified_at": "2026-11-17T21:05:12.301590Z",
     "profile_sha256": "46b0c37d08493a37af3d17d8d73af0d81f295a50833dd1d5eea8ff3385382e5b",
     "reason": "FF: Hugo Burcio García, Burcio, mediocampista, 31/10/2006; Comuniate confirma Celta y fecha. Catálogo Mister capturado:68516, H. Burcio, Celta, MC. No confundir con Hugo Álvarez ni Hugo González."
+  },
+  {
+    "team": "real-sociedad",
+    "id": "dani-diaz",
+    "names": [
+      "Dani Díaz",
+      "Daniel Díaz Gándara"
+    ],
+    "catalog_url": "https://www.futbolfantasy.com/jugadores/dani-diaz",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/dani-diaz",
+    "verified_at": "2026-11-19T13:54:01.688Z",
+    "profile_sha256": "953716be546aaf41b52ff8bf7a7ad05332e41170d44a61624d387c41198f678e",
+    "reason": "FutbolFantasy identifica a Daniel Díaz Gándara. Comuniate 3805 confirma Real Sociedad, delantero y nacimiento el 22/06/2006. El catálogo de mercado consultado no aportó una ficha Mister verificable."
   }
 ]
