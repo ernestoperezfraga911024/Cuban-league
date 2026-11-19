@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,577);
+    assert.equal(c.recordCount,578);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -136,4 +136,31 @@ test('Dani Díaz retains his verified Real Sociedad identity without an inferred
     const refs = identityReference(player.clubId, [{id:player.id, name:'Dani Díaz', team:player.clubId}], ['Daniel Díaz Gándara']);
     assert.equal(refs.candidates[0].verified_alias.id, player.id);
   } finally { dom.window.close(); }
+});
+
+test('Unai Santos retains his verified Osasuna identity without an inferred Mister ID', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const player = c.resolve({playerId: 'unai-santos'});
+    assert.equal(player.clubId, 'osasuna');
+    assert.equal(player.position, 'DF');
+    assert.equal(c.search('Unai Santos')[0].id, player.id);
+    assert.equal(c.search('Unai Santos Mañeru')[0].id, player.id);
+    assert.ok(!player.misterId);
+  } finally { dom.window.close(); }
+});
+
+test('Unai Santos roster insertion is idempotent and preserves prior identities', async () => {
+  const {PGlite}=require('@electric-sql/pglite'),db=new PGlite();
+  try {
+    await db.exec("create schema forecast_league;create table forecast_league.roster(id text primary key,team text,name text);insert into forecast_league.roster values('r-garcia','osasuna','R. García');");
+    const sql=fs.readFileSync(require.resolve('../docs/catalog/unai-santos-20261119.sql'),'utf8');
+    await db.exec(sql); await db.exec(sql);
+    assert.deepEqual((await db.query('select * from forecast_league.roster order by id')).rows,[
+      {id:'r-garcia',team:'osasuna',name:'R. García'},
+      {id:'unai-santos',team:'osasuna',name:'U. Santos'}
+    ]);
+    await db.exec("insert into forecast_league.roster values('other','osasuna','Unai Santos');");
+    await assert.rejects(db.exec(sql),/Conflicto de identidad/);
+  } finally { await db.close(); }
 });

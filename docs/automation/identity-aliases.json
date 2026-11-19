@@ -42,5 +42,18 @@
     "verified_at": "2026-11-19T13:54:01.688Z",
     "profile_sha256": "953716be546aaf41b52ff8bf7a7ad05332e41170d44a61624d387c41198f678e",
     "reason": "FutbolFantasy identifica a Daniel Díaz Gándara. Comuniate 3805 confirma Real Sociedad, delantero y nacimiento el 22/06/2006. El catálogo de mercado consultado no aportó una ficha Mister verificable."
+  },
+  {
+    "team": "osasuna",
+    "id": "unai-santos",
+    "names": [
+      "U. Santos",
+      "Unai Santos",
+      "Unai Santos Mañeru"
+    ],
+    "catalog_url": "https://www.laliga.com/jugador/unai-santos-1",
+    "profile_url": "https://www.osasuna.es/en/osasuna-rayo-squadlist-26-27",
+    "verified_at": "2026-11-19T19:38:00Z",
+    "reason": "LaLiga confirma Unai Santos, defensa de Osasuna, nacido el 03/11/2005. Osasuna lo incluye como defensa del primer equipo y documenta su contrato con Osasuna Promesas. No se atribuye ID Mister ni perfil Mister no verificado."
   }
 ]
