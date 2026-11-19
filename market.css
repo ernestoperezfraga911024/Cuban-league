@@ -1,4 +1,37 @@
 /* Petroleum graphite: restrained surfaces and compact editorial rows. */
+/* Participant -> purchase -> operation. Shared palette, no dashboard cards. */
+#market .market-performance-intro h3,#market .market-performance-title h3{font:650 1.5rem/1.25 Manrope,system-ui,sans-serif;color:var(--market-ink);margin:0}
+.market-performance-intro p,.market-performance-title p{color:var(--market-muted);font-size:1rem;margin:6px 0 20px}
+.market-performance-people,.market-performance-events{list-style:none;padding:0;margin:0}
+.market-performance-people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+#market :is(.market-performance-people,.market-performance-events) button{display:flex;align-items:center;gap:14px;width:100%;min-height:80px;text-align:left;padding:14px 4px;border:0;border-bottom:1px solid var(--market-line);border-radius:0;background:transparent;color:var(--market-ink);box-shadow:none;cursor:pointer;font-size:1rem}
+#market :is(.market-performance-people,.market-performance-events) button:hover{background:#1c2526}
+#market :is(.market-performance-people,.market-performance-events) button:focus-visible{outline:2px solid var(--market-gold);outline-offset:2px}
+.market-performance-people button>span:not(.market-participant-fallback){min-width:0}
+.market-performance-people strong,.market-performance-events strong{display:block;overflow-wrap:anywhere}
+.market-performance-people small,.market-performance-events small{display:block;font-size:.875rem;line-height:1.5;color:var(--market-muted);font-weight:400}
+.market-performance-spent{margin-left:auto;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:.875rem}
+.market-performance-title{display:flex;align-items:center;gap:12px;margin:20px 0}
+.market-performance-title img{object-fit:contain;flex-shrink:0}
+#market .market-performance-back,#market .market-performance-close{background:transparent;border:1px solid var(--market-line);border-radius:6px;color:var(--market-ink);padding:10px 14px;box-shadow:none;font-size:.875rem;cursor:pointer;min-height:44px}
+.market-performance-note{color:var(--market-muted);font-size:.875rem;line-height:1.65;margin:16px 0}
+#market .market-performance-dialog{background:#182223;color:#f0f0e9;border:1px solid #536061;border-radius:14px;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 40px);padding:24px;overflow:auto;box-shadow:0 20px 90px #0009;font:1rem/1.6 Manrope,system-ui,sans-serif}
+.market-performance-dialog::backdrop{background:#050b0ccc}
+#market .market-performance-close{display:block;margin-left:auto}
+.market-performance-facts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}
+.market-performance-facts dt,.market-performance-scores dt{color:var(--market-muted);font-size:.875rem}
+.market-performance-facts dd,.market-performance-scores dd{margin:0;font-weight:650;overflow-wrap:anywhere}
+.market-performance-pending{border-left:2px solid var(--market-gold);padding:8px 14px;background:#202b2c;font-size:.875rem}
+.market-performance-pending p{margin:6px 0}
+.market-performance-context{margin-top:26px;border-top:1px solid var(--market-line);padding-top:18px}
+.market-performance-context h4{margin:0;color:var(--market-ink);font-size:1rem}
+.market-performance-context p{font-size:.875rem;color:var(--market-muted)}
+.market-performance-scores{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.market-performance-scores dd{font-size:1.5rem;font-variant-numeric:tabular-nums}
+.market-performance-context summary{cursor:pointer;padding:12px 0;font-size:.875rem}
+.market-performance-rounds{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:right;font-size:.875rem;font-variant-numeric:tabular-nums}
+.market-performance-rounds>*:nth-child(4n+1){text-align:left}
+@media(max-width:640px){.market-performance-people{grid-template-columns:1fr}.market-performance-events .market-event-player{gap:8px;min-width:0}.market-performance-events .market-event-player img{width:32px;height:40px}.market-performance-events .market-performance-spent{max-width:100px}#market .market-performance-dialog{padding:18px}.market-performance-facts{gap:12px}.market-history-toolbar{flex-wrap:wrap}}
 body.f05-theme[data-section="market"]{background:#111a1b;color:#f0f0e9}
 body.f05-theme[data-section="market"]::before{background:#111a1b!important;background-image:none!important}
 body.f05-theme[data-section="market"] :is(.topbar,.main-nav,.editorial-mobile-nav){background:#111a1b;border-color:#374143;box-shadow:none}
