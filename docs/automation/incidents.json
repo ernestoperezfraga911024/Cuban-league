@@ -477,13 +477,14 @@
     },
     {
       "code": "mister-pagination-empty-terminal-batch",
-      "status": "regression-tested-awaiting-run",
+      "status": "production-verified",
       "failure": "250 libres: el quinto clic conserva 250 filas y oculta Ver más; el lector exigía crecimiento incluso al finalizar.",
       "prevention": "Aceptar fin sin crecimiento solo con botón ausente, lista íntegra idéntica, IDs únicos y estabilidad de 2 segundos; mantener resto de controles.",
       "tests": [
         "tests/mister-market.test.cjs"
       ],
-      "evidence": "Diagnóstico real 44608939846: 50→100→150→200→250; página 5 rows=250, hasMore=false, ready=true, popupOpen=false, prefixMatches=true. Corrección aún pendiente de ejecución real."
+      "evidence": "Diagnóstico 44608939846: 50→100→150→200→250; clic 5 conserva 250, hasMore=false, lista visible e íntegra. Captura publicada de las 09:01 Miami del 19/11 tenía 253 libres y 276 con dueño; la corregida tiene 250 libres y 279 con dueño. El fallo aparece al acabar en lote exacto de 50.",
+      "production_evidence": "Run 44611412265:1 con SHA 7a416c010a0f7d112c99d7c16d0396c28893024b: clic 5 aceptó 250→250 estable, hasMore=false. Publicó 19/11/2026 15:45:22 Miami, 529 jugadores, 20 equipos, 9 movimientos nuevos, 461 cláusulas documentadas, coverageGaps=0, aiCalls=0. Conserva 1 fecha de perfil pendiente preexistente. Revisión 98848716b1737e1988fc8a70f60918a80ebfbb891ef7e49f6acac1e52e45d8c6."
     }
   ]
 }
