@@ -13,7 +13,7 @@ const tick=()=>new Promise(resolve=>setImmediate(resolve));
 test('the shared points module loads before app initialization and every changed asset is available offline',()=>{
  const html=read('index.html'),sw=read('sw.js');
  for(const name of ['app.js','player-points.js','market.js','market.css','market-core.js']){
-  const asset=name+'?v='+(name.startsWith('market')?'245-20261118-player-owners':name==='app.js'?'249-20261119-official-xi':'242-20261117-player-points');assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
+  const asset=name+'?v='+(name.startsWith('market')?'245-20261118-player-owners':name==='app.js'?'250-20261119-classification-xi':'242-20261117-player-points');assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
  }
  assert.ok(html.indexOf('<script src="player-points.js')<html.indexOf('<script src="app.js'));
  assert.doesNotMatch(html,/<script src="player-points[^>]+defer/);

@@ -150,9 +150,9 @@ test('new UI escapes names, rejects unsafe photos, scopes styles and versions al
     const name='<img src=x onerror=alert(1)>';const input={participants:[{name,photo:'javascript:alert(1)'}],rows:[{participantName:name,matchday:1,points:3}],standings:()=>[{name,position:1,points:3}],season:'2026/27'};
     w.CubanMatchdayGeneral.render(w.document.getElementById('matchdayGeneralPanel'),w.CubanMatchdayGeneral.build(input),'ready');
     assert.equal(w.document.querySelector('[onerror]'),null);assert.equal(w.document.querySelector('img'),null);assert.match(w.document.body.textContent,/<img/);
-    const walk=rules=>{for(const r of rules){if(r.selectorText)assert.ok(r.selectorText.split(',').every(s=>s.trim().startsWith('#matchdayGeneralPanel')||s.trim().startsWith('#matchdays[data-matchday-mode=')||s.trim()==='#matchdays>.matchday-view-tabs button'),r.selectorText);if(r.cssRules)walk(r.cssRules);}};
+    const walk=rules=>{for(const r of rules){if(r.selectorText)assert.ok(r.selectorText.split(',').every(s=>s.trim().startsWith('#matchdayGeneralPanel')||s.trim().startsWith('.official-matchday-xi ')||s.trim().startsWith('#matchdays[data-matchday-mode=')||s.trim()==='#matchdays>.matchday-view-tabs button'),r.selectorText);if(r.cssRules)walk(r.cssRules);}};
     walk(CSSOM.parse(read('matchday-general.css')).cssRules);
-    for(const asset of ['matchday-general.js?v=240-20261117-summary-charts','matchday-general.css?v=249-20261119-official-xi']){assert.ok(read('index.html').includes(asset));assert.ok(read('sw.js').includes(asset));}
+    for(const asset of ['matchday-general.js?v=240-20261117-summary-charts','matchday-general.css?v=250-20261119-classification-xi']){assert.ok(read('index.html').includes(asset));assert.ok(read('sw.js').includes(asset));}
   }finally{dom.window.close();}
 });
 

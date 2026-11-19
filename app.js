@@ -1,4 +1,4 @@
-const APP_VERSION='249-20261119-official-xi';
+const APP_VERSION='250-20261119-classification-xi';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -917,6 +917,7 @@ function renderClassificationMatchday(){
   empty.hidden=true;
   content.hidden=false;
 
+  bindOfficialMatchdayXi(SELECTED_CLASSIFICATION_MATCHDAY,$('classificationOfficialXi'));
   const standings=weeklyStandings(SELECTED_CLASSIFICATION_MATCHDAY);
   const hasStandings=standings.length>0;
   const bestPoints=hasStandings?standings[0].points:0;
@@ -1924,8 +1925,7 @@ function renderMatchdayArchive(){
   });
 }
 
-function bindOfficialMatchdayXi(matchday){
-  const panel=$('officialMatchdayXi');
+function bindOfficialMatchdayXi(matchday,panel=$('officialMatchdayXi')){
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!panel || !config?.url || !config?.publishableKey)return;
   const season=config.season || DATA.currentSeason;
