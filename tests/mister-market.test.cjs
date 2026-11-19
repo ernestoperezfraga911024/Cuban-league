@@ -538,3 +538,71 @@ test('estadísticas no suman dos fuentes solapadas ni presentan el total de la t
   assert.throws(() => clauseStats.clauseReport(s, ledger, { ...verification, snapshotHash: 'wrong' }),
     code('verification_snapshot_mismatch'));
 });
+
+test('paginación termina tras lote final vacío con 250 filas íntegras y estables', async () => {
+  const rows = Array.from({ length: 250 }, (_, i) => ({ id: String(i + 1), value: '1000' }));
+  const initial = { ready: true, popupOpen: false, rows, hasMore: true };
+  let clock = 0, clicks = 0;
+  const logs = [];
+  const result = await paginate(initial, {
+    next: async () => { clicks++; },
+    read: async () => ({ ...initial, hasMore: false }),
+    progress: entry => logs.push(entry),
+    wait: (read, accept, options) => waitStable(read, accept, {
+      ...options, now: () => clock, sleep: async ms => { clock += ms; }
+    })
+  });
+  assert.equal(clicks, 1);
+  assert.equal(clock, 2000);
+  assert.deepEqual(result.rows, rows);
+  assert.equal(result.hasMore, false);
+  assert.equal(logs.at(-1).step, 'pagination_after');
+  assert.equal(logs.at(-1).rows, 250);
+  assert.equal(logs.at(-1).beforeRows, 250);
+  assert.ok(!JSON.stringify(logs).includes('value'));
+});
+test('fin sin crecimiento no acepta botón visible, lista oculta, popup, pérdidas ni cambios', async () => {
+  const initial = { ready: true, popupOpen: false, rows: [{ id: '1', value: '1000' }, { id: '2', value: '2000' }], hasMore: true };
+  const invalid = [
+    initial,
+    { ...initial, ready: false, hasMore: false },
+    { ...initial, popupOpen: true, hasMore: false },
+    { ...initial, hasMore: false, rows: initial.rows.slice(0, 1) },
+    { ...initial, hasMore: false, rows: [{ id: '1', value: 'changed' }, initial.rows[1]] },
+    { ...initial, hasMore: undefined }
+  ];
+  for (const state of invalid) {
+    let clock = 0;
+    await assert.rejects(paginate(initial, {
+      next: async () => {}, read: async () => state,
+      wait: (read, accept, options) => waitStable(read, accept, {
+        ...options, timeout: 3000, now: () => clock, sleep: async ms => { clock += ms; }
+      })
+    }), code('page_not_settled'));
+  }
+  for (const rows of [[initial.rows[1], initial.rows[0]], [{id:'1'}, {id:'1'}]]) {
+    await assert.rejects(paginate(initial, {
+      next: async () => {}, read: async () => ({...initial, rows, hasMore:false}),
+      wait: async (read, accept) => accept(await read())
+    }), code('pagination_changed'));
+  }
+  const duplicate = {...initial, rows:[{id:'1'}, {id:'1'}]};
+  await assert.rejects(paginate(duplicate, {
+    next: async () => {}, read: async () => ({...duplicate, hasMore:false}),
+    wait: async (read, accept) => accept(await read())
+  }), code('duplicate_page_row'));
+});
+test('ocultación transitoria del botón no termina una carga que después crece', async () => {
+  const initial = { ready: true, popupOpen: false, rows: [{id:'1'}], hasMore: true };
+  let clock = 0;
+  const result = await paginate(initial, {
+    next: async () => {},
+    read: async () => clock < 1000 ? {...initial, hasMore:false}
+      : clock < 2000 ? initial : {...initial, rows:[...initial.rows,{id:'2'}], hasMore:false},
+    wait: (read, accept, options) => waitStable(read, accept, {
+      ...options, now: () => clock, sleep: async ms => {clock += ms;}
+    })
+  });
+  assert.equal(clock, 4000);
+  assert.equal(result.rows.length, 2);
+});
