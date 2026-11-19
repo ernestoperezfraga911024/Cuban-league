@@ -93,7 +93,16 @@
     if (!hasData(current) || canonical(current) === canonical(incoming)) return false;
     return baseline ? canonical(current) !== canonical(baseline) : protectExisting;
   }
-  const api = { key, number, points, statistics, summarize, canonical, conflict };
+  function validOfficialXiPlayers(players) {
+    return Array.isArray(players) && players.length === 11
+      && players.every(p => typeof p?.misterPlayerId === 'string' && /^[1-9]\d{0,19}$/.test(p.misterPlayerId)
+        && typeof p.playerName === 'string' && p.playerName.trim() && p.playerName.length <= 120
+        && ['PT', 'DF', 'MC', 'DL'].includes(p.position) && Number.isFinite(p.points))
+      && new Set(players.map(p => p.misterPlayerId)).size === 11
+      && players.filter(p => p.position === 'PT').length === 1
+      && ['DF','MC','DL'].every(position => players.some(p => p.position === position));
+  }
+  const api = { validOfficialXiPlayers, key, number, points, statistics, summarize, canonical, conflict };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.CubanMisterImportCore = api;
 })(typeof globalThis === 'object' ? globalThis : this);

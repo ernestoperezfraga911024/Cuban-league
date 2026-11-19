@@ -98,5 +98,6 @@ test('removing forecast hooks and the explicit audience integration restores the
   .replace("      window.CubanForecastReview?.authorize();\n", '')
   .replace("      window.CubanForecastReview?.init({ client: state.client });\n", '')
   .replace("    window.CubanForecastReview?.reset();\n", '');
- assert.equal(require('node:crypto').createHash('sha256').update(normalized).digest('hex'),'0a3133578c36615963a7832cdc18c906e2c672d645e5877fa5ae4f2dadcecdfa');
+ // Baseline includes the reviewed Primera official-XI draft integration, independent of forecast hooks.
+ assert.equal(require('node:crypto').createHash('sha256').update(normalized).digest('hex'),'1aa0e319e945f9b8962de4d90b16b13f0eb6b4110efd6a79ab3521c8fdd4137a');
 });

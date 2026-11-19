@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v248-alternative-name';
+const CACHE_NAME = 'cuban-league-v249-official-xi';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,7 +12,7 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=247-20261118-profile-chart',
+  './app.js?v=249-20261119-official-xi',
   './ideal-xi.js?v=246-20261118-ideal-xi',
   './profile-chart.css?v=247-20261118-profile-chart',
   './ideal-xi.css?v=246-20261118-ideal-xi',
@@ -47,7 +47,7 @@ const APP_SHELL = [
   './club-stats.js?v=200-20261104-club-contributions',
   './club-stats.css?v=200-20261104-club-contributions',
   './matchday-general.js?v=240-20261117-summary-charts',
-  './matchday-general.css?v=240-20261117-summary-charts',
+  './matchday-general.css?v=249-20261119-official-xi',
   './second-division.js?v=190-20261022',
   './second-division.css?v=190-20261022',
   './second-division-core.js?v=190-20261022',
@@ -58,8 +58,8 @@ const APP_SHELL = [
   './supabase-config.js?v=161-20260902',
   './admin.html',
   './admin.css?v=176-20261015-classic-navigation',
-  './admin.js?v=219-20261113',
-  './mister-import-core.js?v=169',
+  './admin.js?v=249-20261119-official-xi',
+  './mister-import-core.js?v=249-20261119-official-xi',
   './admin-manifest.json',
   './supabase.js',
   './supabase-js-LICENSE.txt',

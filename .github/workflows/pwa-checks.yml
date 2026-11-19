@@ -12,6 +12,11 @@ on:
       - 'tests/ideal-xi.test.cjs'
       - 'tests/player-points.test.cjs'
       - 'viewer-profile.js'
+      - 'mister-extension/**'
+      - 'mister-import-core.js'
+      - 'admin.js'
+      - 'tests/mister-*.test.cjs'
+      - 'supabase/migrations/*_mister_official_xi.sql'
       - 'sw.js'
       - 'tests/install-welcome.test.cjs'
       - '.github/workflows/pwa-checks.yml'
@@ -28,6 +33,11 @@ on:
       - 'tests/ideal-xi.test.cjs'
       - 'tests/player-points.test.cjs'
       - 'viewer-profile.js'
+      - 'mister-extension/**'
+      - 'mister-import-core.js'
+      - 'admin.js'
+      - 'tests/mister-*.test.cjs'
+      - 'supabase/migrations/*_mister_official_xi.sql'
       - 'sw.js'
       - 'tests/install-welcome.test.cjs'
       - '.github/workflows/pwa-checks.yml'
@@ -46,3 +56,4 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - run: node --test tests/install-welcome.test.cjs tests/viewer-profile.test.cjs tests/navigation-motion.test.cjs tests/public-loading.test.cjs tests/forecast-player-sheet.test.cjs tests/player-points.test.cjs tests/ideal-xi.test.cjs tests/profile-chart.test.cjs
+      - run: node --test tests/mister-pipeline.test.cjs tests/mister-transport.test.cjs tests/mister-official-xi-*.test.cjs
