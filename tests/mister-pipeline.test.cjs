@@ -75,7 +75,7 @@ async function adminFor(payload) {
   w.CUBAN_LEAGUE_SUPABASE={season:'2026/27'};
   w.fetch=async()=>({ok:true,json:async()=>JSON.parse(read('catalog/players.json'))});
   w.eval(core);w.eval(read('player-catalog.js'));
-  w.eval(read('admin.js').replace('  boot();','  window.testImport = {state, normalizeMisterPayload, lineupMetrics, displayMisterReview, importedRowData, officialXiForDraft};'));
+  w.eval(read('admin.js').replace('  boot();','  window.testImport = {state, normalizeMisterPayload, lineupMetrics, displayMisterReview, importedRowData, officialXiForDraft, playerGoalsForDraft};'));
   const api=w.testImport;api.state.participants=roster;api.state.matchday=payload.matchday;api.state.catalog=await w.CubanLeaguePlayerCatalog.load();
   return {dom,api,rows:api.normalizeMisterPayload(payload,payload.gameweekId)};
 }
@@ -131,6 +131,26 @@ test('jornada en curso conserva avisos; estadística ausente sigue siendo null e
   assert.equal(payload.managers[0].lineup[0].status,'pending');assert.equal(payload.managers[0].lineup[0].didPlay,null);
   assert.equal(payload.managers[0].goals,null);assert.ok(payload.warnings.length>=20);
   const {dom,rows}=await adminFor(payload);assert.equal(rows[0].goals,null);assert.equal(rows[0].points,10);dom.window.close();
+});
+
+test('goals follow the resolved slot and never multiply for a captain or turn pending into zero',async()=>{
+  const payload=await captureFixture();
+  const {dom,api,rows}=await adminFor(payload);
+  try {
+    const row=rows[0],raw=payload.managers[row.misterRank-1].lineup;
+    const captain=0;
+    Object.assign(raw[captain],{isCaptain:true,captainMultiplier:3});
+    const others=raw.map((p,i)=>i).filter(i=>i!==captain);
+    Object.assign(raw[captain],{goals:2,status:'scored'});
+    Object.assign(raw[others[0]],{goals:0,status:'pending'});
+    Object.assign(raw[others[1]],{goals:null,status:'scored'});
+    Object.assign(raw[others[2]],{goals:0,status:'did-not-play'});
+    const map=api.playerGoalsForDraft(payload,[row]).players;
+    assert.equal(map[row.lineup[captain].player_id],2);
+    assert.equal(map[row.lineup[others[0]].player_id],undefined);
+    assert.equal(map[row.lineup[others[1]].player_id],undefined);
+    assert.equal(map[row.lineup[others[2]].player_id],0);
+  } finally {dom.window.close();}
 });
 
 test('J6: Carlos y Cristian Romero mantienen identidades y clubes distintos aunque ambos se llamen C. Romero',async()=>{
@@ -235,12 +255,14 @@ test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conser
     matchdayWriteRevision:'revision-0',restoreStateAvailable:true,lineupParticipantName:roster[0].name});
   state.catalog=await w.CubanLeaguePlayerCatalog.load();
   const calls=[];
-  state.client={rpc:async(name,params)=>{calls.push({name,params});assert.equal(name,'save_matchday_draft_v124');return{data:{rows:params.p_rows,writeRevision:'revision-'+calls.length},error:null};}};
+  state.client={rpc:async(name,params)=>{calls.push({name,params});assert.equal(name,'save_matchday_draft_with_player_goals');return{data:{rows:params.p_rows,writeRevision:'revision-'+calls.length},error:null};}};
   api.renderPlayerRows([]);
   const request={requestId:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday:8,season:'2026/27',gameweekId:8008,protectExisting:false,startFingerprint:api.importFingerprint()};
   state.misterImportRequest=request;state.misterImportBusy=true;
   await api.finishMisterImport(payload,request);
   assert.equal(calls.length,1,w.document.getElementById('misterImportStatus').textContent);
+  assert.equal(calls[0].params.p_player_goals.matchday,8);
+  assert.equal(calls[0].params.p_player_goals.players['mister-5340038'],0);
   assert.ok(calls[0].params.p_rows.every(row=>row.published===false));
   assert.equal(calls[0].params.p_rows.length,20);
   for(const [name,playerId,clubId] of [['Juventus','mister-5340038','valencia'],['Esteban Dominguez','mister-5235247','alaves']]){
@@ -301,7 +323,7 @@ test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conser
   }))};
   const expectedRows=JSON.stringify(api.gatherRows(false,true));
   state.client.rpc=async(name,params)=>{
-    assert.equal(name,'save_matchday_draft_with_official_xi');
+    assert.equal(name,'save_matchday_draft_with_player_goals');
     assert.equal(params.p_official_xi.players.length,11);
     assert.equal(JSON.stringify(params.p_rows),expectedRows);
     calls.push({name,params});

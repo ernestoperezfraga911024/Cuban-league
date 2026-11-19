@@ -19,7 +19,8 @@ async function setup(db) {
     create function extensions.digest(bytea,text) returns bytea language sql as $$select sha256($1)$$;
   `);
   const files = ['supabase-setup.sql', ...[57,59,65,114,116,124].map(n=>fs.readdirSync(root).find(f=>f.startsWith('SUPABASE-V'+n+'-'))),
-    'supabase-v163-negative-balance.sql', 'supabase-v170-cup-mister-order.sql', migration, 'supabase/migrations/20261119170338_official_xi_portraits.sql'];
+    'supabase-v163-negative-balance.sql', 'supabase-v170-cup-mister-order.sql', migration, 'supabase/migrations/20261119170338_official_xi_portraits.sql',
+    'supabase/migrations/20261119180500_mister_player_goals.sql'];
   for (const file of files) {
     let sql = read(file);
     if (file.startsWith('SUPABASE-V124')) {
@@ -104,4 +105,55 @@ test('Mister XI follows real V124 draft, publish, correction, undo and backup re
     await restore(confirmed);
     assert.deepEqual(await get(),publicXi);
   } finally { await db.close(); }
+});
+
+test('individual goals survive draft backups, older clients and partial reimports, and follow publication and undo',async()=>{
+  const db=new PGlite();
+  try {
+    await setup(db);
+    const scalar=async(sql,args=[])=>Object.values((await db.query(sql,args)).rows[0])[0];
+    const generation=await scalar('select restore_generation from private.league_backup_state');
+    const lineup=['PT','DF','DF','DF','MC','MC','MC','MC','DL','DL','DL'].map((position,i)=>({
+      position,slot_number:i+1,player_id:'p'+i,player_name:'Jugador '+i,club_id:'club',club_name:'Club',
+      displayed_points:4,is_captain:i===10,captain_multiplier:i===10?2:1
+    }));
+    const rows=[{participant_name:'Ernesto',points:44,goals:5,clean_sheets:0,red_cards:0,lineup}];
+    const rev=async()=> (await db.query("select write_revision from private.matchday_write_state where season='2026/27' and matchday=12")).rows[0]?.write_revision||null;
+    const run=async(name,packet)=>{
+      const gen=await scalar('select restore_generation from private.league_backup_state');
+      const args=['2026/27',12,JSON.stringify(rows),true,'2026-11-01',false,false,gen,await rev()];
+      if(packet)args.push(JSON.stringify(packet));
+      return scalar('select public.'+name+'('+args.map((_,i)=>'$'+(i+1)).join(',')+')',args);
+    };
+    const ctx={season:'2026/27',matchday:12,gameweekId:4053,leagueId:'649733'};
+    const save=players=>run('save_matchday_draft_with_player_goals',{...ctx,players});
+    const publish=()=>run('publish_matchday_revision_v124');
+    const get=()=>scalar("select (select public.player_goals(s) from public.matchday_stats s where published limit 1)");
+    await assert.rejects(run('save_matchday_draft_with_player_goals',{...ctx,matchday:11,players:{p0:1}}),/context/);
+    await assert.rejects(save({p0:null}),/Invalid player goals/);
+    await save({p0:2,p3:0,p10:3});
+    assert.equal(await get(),null);
+    const backup=await scalar("select private.capture_league_backup('manual',null)");
+    await run('save_matchday_draft_v124');
+    await publish();
+    const expected={p0:2,p3:0,p10:3};
+    await db.exec('set role anon');
+    assert.deepEqual(await get(),expected);
+    await assert.rejects(db.exec('select public.save_matchday_draft_with_player_goals(null,null,null,null,null,null,null,null,null,null)'),/permission denied/);
+    await db.exec('reset role');
+    await save({p10:0}); // A genuine correction, followed by an incomplete reread.
+    await save({p4:1});
+    assert.deepEqual(await get(),expected);
+    await publish();
+    assert.deepEqual(await get(),{...expected,p4:1,p10:0});
+    assert.equal(await scalar("select goals from public.matchday_stats where published"),5);
+    const id=await scalar('select id from public.matchday_change_log where not undone order by created_at desc,id desc limit 1');
+    await scalar("select public.undo_last_matchday_publication_v124('2026/27',12,$1,$2,$3)",[generation,await rev(),id]);
+    assert.deepEqual(await get(),expected);
+    const dataRevision=await scalar('select data_revision from private.league_backup_state');
+    await scalar("select public.restore_league_backup($1,'RESTAURAR',$2,$3)",[backup,generation,dataRevision]);
+    assert.equal(await get(),null);
+    await publish();
+    assert.deepEqual(await get(),expected);
+  } finally {await db.close();}
 });
