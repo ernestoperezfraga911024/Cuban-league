@@ -101,6 +101,33 @@
     const day = dayLinks().find(link => link.classList.contains('selected'));
     if (!day || Number(new URL(day.href).searchParams.get('gw')) !== job.discovery.gameweekId) throw new Error('La jornada activa cambió. La captura se detuvo.');
   }
+  async function readOfficialXi(job) {
+    const {gameweekId} = job.discovery;
+    // Mister opens the gameweek in the same document. No new login, tab or permissions.
+    location.hash = 'gameweek/' + gameweekId;
+    return wait(() => {
+      if (league().id !== job.discovery.league.id) throw new Error('Cambió la liga de Mister.');
+      const view = [...document.querySelectorAll('.sw-gameweek')].find(visible);
+      const selected = [...(view?.closest('.sw') || view || document).querySelectorAll('button.selected[data-id]')]
+        .find(button => visible(button) && Number(button.dataset.id) === gameweekId);
+      if (Number(selected?.dataset.id) !== gameweekId || text(selected) !== 'J' + job.matchday) return;
+      const headings = [...view.querySelectorAll('h3')].filter(visible);
+      const team = headings.find(h => text(h) === 'Equipo de la jornada')?.closest('.gameweek-lineup');
+      if (!team || !headings.some(h => text(h) === 'Finalizada')) return;
+      const cards = [...team.querySelectorAll('a.lineup-player.best-xi')];
+      if (cards.length !== 11) return;
+      const players = cards.map(card => ({
+        misterPlayerId: card.dataset.id_player,
+        playerName: text(card.querySelector('.info .name')),
+        position: ['PT', 'DF', 'MC', 'DL'][Number(card.dataset.position) - 1],
+        points: core.number(text(card.querySelector('.info .points'))),
+        misterClubId: card.querySelector('img.team-logo')?.src.match(/teams\/(\d+)\./)?.[1] || ''
+      }));
+      if (cards.some(card => Number(card.dataset.id_gameweek) !== gameweekId)
+          || !core.validOfficialXiPlayers(players)) return;
+      return {matchday: job.matchday, gameweekId, players};
+    }, 'Mister aún no muestra un once final completo para esta jornada.', 6000);
+  }
   async function collect(job) {
     if (running) return;
     running = true;
@@ -188,6 +215,15 @@
       const payload = {schemaVersion:3,source:'mister.mundodeportivo.com',season:job.season,matchday:job.matchday,
         gameweekId,league:job.discovery.league,capturedStartedAt,capturedAt:new Date().toISOString(),
         provisional:output.some(m=>m.lineup.some(p=>p.status==='pending')),warnings,managers:output};
+      if (job.readOfficialXi && !payload.provisional) {
+        try {
+          show('Leyendo el once ideal oficial de la Jornada ' + job.matchday + '…');
+          payload.officialXi = await readOfficialXi(job);
+        } catch (error) {
+          if (stopped) throw error;
+          warnings.push('Once ideal pendiente de verificar. Puedes volver a importarlo al cierre.');
+        }
+      }
       await send('RESULT',{id:job.id,payload});
       show('Lectura terminada. Vuelve a administración y espera “Borrador guardado”.');
     } catch (error) {

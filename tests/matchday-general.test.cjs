@@ -152,7 +152,7 @@ test('new UI escapes names, rejects unsafe photos, scopes styles and versions al
     assert.equal(w.document.querySelector('[onerror]'),null);assert.equal(w.document.querySelector('img'),null);assert.match(w.document.body.textContent,/<img/);
     const walk=rules=>{for(const r of rules){if(r.selectorText)assert.ok(r.selectorText.split(',').every(s=>s.trim().startsWith('#matchdayGeneralPanel')||s.trim().startsWith('#matchdays[data-matchday-mode=')||s.trim()==='#matchdays>.matchday-view-tabs button'),r.selectorText);if(r.cssRules)walk(r.cssRules);}};
     walk(CSSOM.parse(read('matchday-general.css')).cssRules);
-    for(const file of ['matchday-general.js','matchday-general.css']){assert.ok(read('index.html').includes(file+'?v=240-20261117-summary-charts'));assert.ok(read('sw.js').includes(file+'?v=240-20261117-summary-charts'));}
+    for(const asset of ['matchday-general.js?v=240-20261117-summary-charts','matchday-general.css?v=249-20261119-official-xi']){assert.ok(read('index.html').includes(asset));assert.ok(read('sw.js').includes(asset));}
   }finally{dom.window.close();}
 });
 

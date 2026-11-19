@@ -456,6 +456,25 @@
     });
   }
 
+  function officialXiForDraft(payload, rows) {
+    const xi = payload.officialXi;
+    if (payload.provisional || !xi || xi.gameweekId !== payload.gameweekId
+        || xi.matchday !== payload.matchday || !importCore.validOfficialXiPlayers(xi.players)) return null;
+    // The existing importer may have resolved a catalogue alias. Reuse that exact slot identity.
+    const alignedIds = new Map();
+    for (const row of rows) {
+      const manager = payload.managers[row.misterRank - 1];
+      manager.lineup.forEach((slot, index) => {
+        if (slot.misterPlayerId) alignedIds.set(slot.misterPlayerId, row.lineup[index].player_id);
+      });
+    }
+    return {leagueId: payload.league.id, season: payload.season, matchday: xi.matchday,
+      gameweekId: xi.gameweekId, players: xi.players.map(({misterPlayerId, playerName, position, points}) => ({
+        misterPlayerId, playerName, position, points,
+        playerId: alignedIds.get(misterPlayerId) || state.catalog.resolve({misterPlayerId})?.id || null
+      }))};
+  }
+
   function applyMisterRows(rows) {
     if (state.published && !state.editingPublished) startCorrection();
     clearTimeout(state.autoSaveTimer);
@@ -523,7 +542,12 @@
     $('misterImportDetails').textContent = 'Captura: ' + new Date(payload.capturedAt).toLocaleString('es')
       + ' · ' + (payload.provisional ? 'Provisional' : 'Revisar antes de publicar')
       + (messages.length ? '\n' + messages.join('\n') : '\nSin incidencias detectadas en la captura.');
-    state.misterImportPending = {payload,rows,request,fingerprint:importFingerprint()};
+    const officialXi = officialXiForDraft(payload, rows);
+    $('misterImportDetails').textContent += officialXi
+      ? '\nOnce ideal oficial · ' + officialXi.players.map(p => p.playerName + ' (' + p.points + ')').join(' · ')
+      : payload.provisional ? '\nOnce ideal pendiente del cierre de Mister.'
+        : '\nSin once ideal verificado en esta captura. Si usas una extensión anterior, actualiza a 1.2.0.';
+    state.misterImportPending = {payload,rows,request,officialXi,fingerprint:importFingerprint()};
     const list = $('misterImportConflicts');
     list.replaceChildren();
     conflicts.forEach(row => {
@@ -574,6 +598,7 @@
       $('cancelMisterImportButton').disabled = true;
       state.suspendAutoSave = true;
       applyMisterRows(chosen);
+      if (pending.officialXi) state.officialXiToSave = pending.officialXi;
       if (payload.provisional) $('postponedToggle').checked = true;
       setMisterImportStatus('Guardando el borrador…');
       const saved = await persistDraft({manual:true});
@@ -592,7 +617,8 @@
       $('misterImportReview').hidden = true;
       $('cancelMisterImportButton').textContent = 'Cerrar';
       setMisterImportStatus('Borrador guardado: Jornada ' + request.matchday + '. ' + chosen.length + ' participantes importados'
-        + (keep.size ? '; ' + keep.size + ' conservados' : '') + '. Solo tú publicas.', 'success');
+        + (keep.size ? '; ' + keep.size + ' conservados' : '') + (pending.officialXi && !state.officialXiToSave ? ' · Once ideal guardado' : '')
+        + (state.officialXiToSave ? ' · Once ideal pendiente de sincronizar' : '') + '. Solo tú publicas.', 'success');
       flashMessage('Jornada ' + request.matchday + ' guardada en borrador. Revisa los datos antes de publicar.');
     } catch (error) {
       setMisterImportStatus(String(error.message || error), 'error');
@@ -2551,7 +2577,8 @@
       localStorage.setItem(localDraftKey(), JSON.stringify({
         savedAt: new Date().toISOString(),
         restoreGeneration: state.matchdayRestoreGeneration || state.serverRestoreGeneration || '',
-        cloudSynced,
+        cloudSynced: cloudSynced && !state.officialXiToSave,
+        officialXiToSave: state.officialXiToSave || null,
         cloudWriteRevision: cloudWriteRevision || '',
         rows,
         milestone: isChampionsMode() ? null : milestone || gatherMilestone()
@@ -2591,6 +2618,7 @@
         rows,
         savedAt: parsed.savedAt,
         milestone: parsed.milestone || null,
+        officialXiToSave: parsed.officialXiToSave || null,
         cloudSynced: parsed.cloudSynced === true && restoreGenerationCurrent,
         cloudWriteRevision: String(parsed.cloudWriteRevision || '')
       } : null;
@@ -2717,6 +2745,7 @@
     const matchday = state.matchday;
     const champions = isChampionsMode();
     const wasPublished = state.published;
+    const officialXi = state.officialXiToSave;
     const milestone = champions ? null : gatherMilestone();
     const rows = gatherRows(false, true);
     const postponed = hasPostponedMatches();
@@ -2773,7 +2802,7 @@
         let savedRows = [];
         let savedWriteRevision = expectedWriteRevision;
         if (restoreStateAvailable) {
-          const { data, error } = await state.client.rpc('save_matchday_draft_v124', {
+          const params = {
             p_season: season,
             p_matchday: matchday,
             p_rows: rows,
@@ -2783,7 +2812,15 @@
             p_is_year_end: milestone?.isYearEnd === true,
             p_restore_generation: restoreGeneration,
             p_expected_write_revision: expectedWriteRevision || null
-          });
+          };
+          let result;
+          if (officialXi) {
+            result = await state.client.rpc('save_matchday_draft_with_official_xi', {...params, p_official_xi: officialXi});
+            if (!result.error && result.data?.rows?.length && state.officialXiToSave === officialXi) state.officialXiToSave = null;
+          }
+          // Older databases still accept the ordinary draft. Keep the XI locally for a retry.
+          if (!result || result.error?.code === 'PGRST202') result = await state.client.rpc('save_matchday_draft_v124', params);
+          const {data, error} = result;
           if (error) throw error;
           savedRows = Array.isArray(data?.rows) ? data.rows : [];
           savedWriteRevision = String(data?.writeRevision || '');
@@ -3027,6 +3064,7 @@
   async function loadMatchday() {
     if (!state.client) return;
     const requestId = ++state.loadRequestId;
+    state.officialXiToSave = null;
     const season = currentSeasonKey();
     const matchday = state.matchday;
     const champions = isChampionsMode();
@@ -3231,6 +3269,7 @@
     );
     if (localDraftConflict) archiveCurrentLocalDraft();
     const localDraft = localDraftConflict ? null : localDraftCandidate;
+    state.officialXiToSave = localDraft?.officialXiToSave || null;
     const cloudMilestone = !milestoneResult.error && Array.isArray(milestoneResult.data)
       ? milestoneResult.data[0] || null
       : null;

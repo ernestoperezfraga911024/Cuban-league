@@ -9,7 +9,7 @@ const core=read('mister-import-core.js');
 const league=JSON.parse(read('data.json'));
 const roster=league.participants.filter(p=>p.active!==false);
 function escape(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-async function captureFixture({pending=false,missingStats=false,negative=false,sourceLineup=null,matchday=3,gameweekId=4044}={}) {
+async function captureFixture({officialView=null,pending=false,missingStats=false,negative=false,sourceLineup=null,matchday=3,gameweekId=4044}={}) {
   const ids=roster.map((p,i)=>String(100+i));
   const html=`<a class="active" href="https://mister.mundodeportivo.com/action/change?id_community=649733">1ra div Cubanleague</a>
     <button data-tab="gameweek" class="active">Jornada</button><a data-partial class="selected" href="/standings?gw=${gameweekId}">J${matchday}</a>
@@ -18,7 +18,7 @@ async function captureFixture({pending=false,missingStats=false,negative=false,s
   const w=dom.window;
   Object.defineProperty(w.HTMLElement.prototype,'offsetWidth',{get(){return 10;}});
   let listener;let done;const completed=new Promise(resolve=>done=resolve);
-  const job={id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday,season:'2026/27'};
+  const job={id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday,season:'2026/27',readOfficialXi:officialView!==null};
   w.chrome={runtime:{id:'test-extension',onMessage:{addListener(fn){listener=fn;}},sendMessage:async msg=>{
     if(msg.type==='MISTER_READY')return{ok:true,job};
     if(msg.type==='DISCOVERED') {job.discovery=msg.input.discovery;setTimeout(()=>listener({type:'RUN',job},{id:'test-extension'},()=>{}),0);}
@@ -32,6 +32,7 @@ async function captureFixture({pending=false,missingStats=false,negative=false,s
   w.document.addEventListener('click',event=>{
     const manager=event.target.closest('a.user');
     if(manager){
+      event.preventDefault();
       w.document.querySelector('.team-lineup')?.remove();
       const id=manager.getAttribute('href').split('/')[1];
       const container=w.document.createElement('div');container.className='team-lineup';
@@ -55,6 +56,14 @@ async function captureFixture({pending=false,missingStats=false,negative=false,s
     }
     if(event.target.closest('.popup-close')) w.document.querySelector('#overlay')?.remove();
   });
+  if(officialView!==null){
+    w.addEventListener('hashchange',()=>{
+      w.document.body.insertAdjacentHTML('beforeend',officialView);
+      // Keep the production polling semantics without a six-second wait for a rejected panel.
+      const time=Date.now();
+      w.Date.now=()=>time+(Date.now()-time)*12;
+    });
+  }
   w.eval(core);w.eval(read('mister-extension/collector.js'));
   const timer=setTimeout(()=>done({error:'fixture timeout'}),4000);
   const result=await completed;clearTimeout(timer);dom.window.close();
@@ -66,7 +75,7 @@ async function adminFor(payload) {
   w.CUBAN_LEAGUE_SUPABASE={season:'2026/27'};
   w.fetch=async()=>({ok:true,json:async()=>JSON.parse(read('catalog/players.json'))});
   w.eval(core);w.eval(read('player-catalog.js'));
-  w.eval(read('admin.js').replace('  boot();','  window.testImport = {state, normalizeMisterPayload, lineupMetrics, displayMisterReview, importedRowData};'));
+  w.eval(read('admin.js').replace('  boot();','  window.testImport = {state, normalizeMisterPayload, lineupMetrics, displayMisterReview, importedRowData, officialXiForDraft};'));
   const api=w.testImport;api.state.participants=roster;api.state.matchday=payload.matchday;api.state.catalog=await w.CubanLeaguePlayerCatalog.load();
   return {dom,api,rows:api.normalizeMisterPayload(payload,payload.gameweekId)};
 }
@@ -118,7 +127,7 @@ test('20 participantes: DOM de Mister → captura → alineaciones válidas del 
   dom.window.close();
 });
 test('jornada en curso conserva avisos; estadística ausente sigue siendo null en borrador',async()=>{
-  const payload=await captureFixture({pending:true,missingStats:true});assert.equal(payload.provisional,true);
+  const payload=await captureFixture({pending:true,missingStats:true,officialView:officialJ11Html()});assert.equal(payload.provisional,true);assert.equal(payload.officialXi,undefined);
   assert.equal(payload.managers[0].lineup[0].status,'pending');assert.equal(payload.managers[0].lineup[0].didPlay,null);
   assert.equal(payload.managers[0].goals,null);assert.ok(payload.warnings.length>=20);
   const {dom,rows}=await adminFor(payload);assert.equal(rows[0].goals,null);assert.equal(rows[0].points,10);dom.window.close();
@@ -284,6 +293,23 @@ test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conser
   assert.equal(state.misterImportRequest.requestId,retry.requestId);
   assert.match(w.document.getElementById('misterImportStatus').textContent,/2 incidencias/);
   assert.equal(w.document.getElementById('retryMisterImportButton').hidden,false);
+
+  // The optional snapshot uses a single protected draft write, even if only the XI changes.
+  const positions=['PT','DF','DF','DF','MC','MC','MC','MC','MC','DL','DL'];
+  const officialXi={matchday:8,gameweekId:8008,players:positions.map((position,i)=>({
+    position,misterPlayerId:String(9000+i),playerName:'Prueba '+i,points:i
+  }))};
+  const expectedRows=JSON.stringify(api.gatherRows(false,true));
+  state.client.rpc=async(name,params)=>{
+    assert.equal(name,'save_matchday_draft_with_official_xi');
+    assert.equal(params.p_official_xi.players.length,11);
+    assert.equal(JSON.stringify(params.p_rows),expectedRows);
+    calls.push({name,params});
+    return {data:{rows:params.p_rows,writeRevision:'revision-4'}};
+  };
+  await api.finishMisterImport({...changedOrder,officialXi},retry);
+  assert.equal(calls.length,4,w.document.getElementById('misterImportStatus').textContent);
+  assert.match(w.document.getElementById('misterImportStatus').textContent,/Once ideal guardado/);
   dom.window.close();
 });
 
@@ -341,3 +367,49 @@ test('A. Santiago de Yovany resuelve por Mister 5521760 sin confundir a Y. Santi
     assert.equal(changed.points,manager.points);
   } finally {dom.window.close();}
 });
+
+// Verified team, IDs, positions and provider points in Mister's closed J11 (4052).
+function officialJ11Html(){
+  const lines=[
+    [4,[[52375,'L. Yamal',18],[48657,'Raphinha',15]]],
+    [3,[[17989,'J. de Frutos',19],[55009,'F. López',16],[53114,'J. Bellingham',14],[557,'P. Fornals',14],[29223,'M. Soriano',14]]],
+    [2,[[71021,'A. Grimaldo',15],[11472,'L. Cabrera',15],[63,'M. Bartra',14]]],
+    [1,[[17615,'S. Herrera',11]]]
+  ];
+  const cards=lines.map(([pos,players])=>players.map(([id,label,pts])=>
+    `<a class="lineup-player best-xi" data-id_player="${id}" data-id_gameweek="4052" data-position="${pos}">
+      <span class="info"><span class="name">${label}</span><b class="points">${pts}</b></span></a>`).join('')).join('');
+  return `<div class="sw"><div class="sw-gameweek"><button data-id="4052" class="selected">J11</button>
+    <h3>Finalizada</h3><div class="gameweek-lineup"><h3>Equipo de la jornada</h3>${cards}</div>
+    <div class="gameweek-lineup"><h3>1º con 91 pts</h3>${cards}</div></div></div>`;
+}
+test('J11 reads the eleven official cards, distinct from the matchday winner; numbers stay independent of captains',async()=>{
+  const payload=await captureFixture({matchday:11,gameweekId:4052,officialView:officialJ11Html()});
+  assert.equal(payload.officialXi.players.length,11);
+  assert.equal(payload.officialXi.players.find(p=>p.misterPlayerId==='52375').points,18);
+  assert.equal(payload.officialXi.players.find(p=>p.misterPlayerId==='17989').position,'MC');
+  const {dom,api,rows}=await adminFor(payload);
+  try{
+    const xi=api.officialXiForDraft(payload,rows);
+    const yamal=xi.players.find(p=>p.misterPlayerId==='52375');
+    assert.equal(yamal.playerId,api.state.catalog.resolve({misterPlayerId:'52375'}).id);
+    assert.equal(xi.season,payload.season);
+    assert.equal(api.officialXiForDraft({...payload,provisional:true},rows),null);
+    assert.equal(api.officialXiForDraft({...payload,officialXi:{...payload.officialXi,matchday:12}},rows),null);
+  }finally{dom.window.close();}
+});
+for(const [name,change] of [
+  ['another day selected',s=>s.replace('>J11<','>J12<')],
+  ['live gameweek',s=>s.replace('Finalizada','En juego')],
+  ['duplicate identity',s=>s.replaceAll('48657','52375')],
+  ['wrong source day on one card',s=>s.replace('data-id_gameweek="4052"','data-id_gameweek="4053"')],
+  ['incomplete XI with adjacent winning eleven',s=>s.replace('lineup-player best-xi','lineup-player')],
+]){
+  test('optional XI preserves all 20 scores with '+name,async()=>{
+    const payload=await captureFixture({matchday:11,gameweekId:4052,officialView:change(officialJ11Html())});
+    assert.equal(payload.officialXi,undefined);
+    assert.equal(payload.managers.length,20);
+    assert.ok(payload.managers.every(m=>m.points===11));
+    assert.match(payload.warnings.join(' '),/Once ideal pendiente/);
+  });
+}

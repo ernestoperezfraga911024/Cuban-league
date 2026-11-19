@@ -77,7 +77,7 @@ async function handle(message, sender) {
   const input = message.input || {};
   if (String(message.type).startsWith('SECOND_')) return secondDivisionMessage(message.type, input, sender);
   if (isAdmin(sender.url)) {
-    if (message.type === 'HELLO') return { version: '1.1.2', bridgeProtocol: 2, notPlayedIcon: true, secondDivision: true, secondHistory: true, secondEmptySlots: true };
+    if (message.type === 'HELLO') return { version: '1.2.0', officialXi: true, bridgeProtocol: 2, notPlayedIcon: true, secondDivision: true, secondHistory: true, secondEmptySlots: true };
     if (message.type === 'START') {
       const secondEntries = await chrome.storage.session.get(null);
       if (Object.entries(secondEntries).some(([key, job]) => key.startsWith('second-job:') && job.status === 'reading' && Date.now() - job.createdAt < TTL))
@@ -95,7 +95,7 @@ async function handle(message, sender) {
         }
       }
       const job = { id: crypto.randomUUID(), adminTabId: sender.tab.id, createdAt: Date.now(),
-        matchday: input.matchday, season: input.season, status: 'discovering', progress: 'Abriendo Mister…' };
+        matchday: input.matchday, season: input.season, readOfficialXi: true, status: 'discovering', progress: 'Abriendo Mister…' };
       // Create blank first so the content script cannot race the tab-to-job binding.
       const tab = await chrome.tabs.create({ url: 'about:blank', active: true });
       job.misterTabId = tab.id;

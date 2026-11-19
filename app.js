@@ -1,4 +1,4 @@
-const APP_VERSION='247-20261118-profile-chart';
+const APP_VERSION='249-20261119-official-xi';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1924,9 +1924,66 @@ function renderMatchdayArchive(){
   });
 }
 
+function bindOfficialMatchdayXi(matchday){
+  const panel=$('officialMatchdayXi');
+  const config=window.CUBAN_LEAGUE_SUPABASE;
+  if(!panel || !config?.url || !config?.publishableKey)return;
+  const season=config.season || DATA.currentSeason;
+  const revision=LIVE_MATCHDAY_ROWS.filter(row=>row.matchday===matchday).map(row=>row.updatedAt || '').sort().at(-1);
+  const key=JSON.stringify([season,matchday,revision]);
+  if(panel.dataset.key===key)return;
+  panel.dataset.key=key;
+  const body=panel.querySelector('.official-xi-body');
+  let loading=false, loaded=false;
+  body.replaceChildren();
+  const load=async()=>{
+    if(!panel.open || loading || loaded)return;
+    loading=true;
+    body.textContent='Cargando el once ideal…';
+    try{
+      const response=await withPublicRequestTimeout(signal=>fetch(config.url.replace(/\/$/,'')+'/rest/v1/rpc/get_published_official_xi',{
+        method:'POST',cache:'no-store',signal,
+        headers:{apikey:config.publishableKey,Authorization:'Bearer '+config.publishableKey,'Content-Type':'application/json'},
+        body:JSON.stringify({p_season:season,p_matchday:matchday})
+      }));
+      if(!response.ok)throw new Error();
+      const players=await response.json();
+      if(panel.dataset.key!==key)return;
+      if(players===null){
+        body.textContent='Todavía no hay un once ideal oficial publicado para esta jornada.';
+      }else{
+        if(!Array.isArray(players) || players.length!==11)throw new Error();
+        const list=document.createElement('ul');
+        for(const position of ['PT','DF','MC','DL']){
+          for(const player of players.filter(p=>p.position===position)){
+            const item=document.createElement('li');
+            const role=document.createElement('span');
+            const name=document.createElement('strong');
+            const owner=document.createElement('small');
+            const points=document.createElement('b');
+            role.textContent=position;
+            name.textContent=player.playerName;
+            owner.textContent=player.participants.length ? player.participants.join(' · ') : 'Sin coincidencia en los XI publicados';
+            points.textContent=player.points+' pts';
+            item.append(role,name,owner,points);
+            list.append(item);
+          }
+        }
+        body.replaceChildren(list);
+      }
+      loaded=true;
+    }catch{
+      if(panel.dataset.key===key)body.textContent='No se pudo cargar el once ideal. Cierra y abre el apartado para reintentar.';
+    }finally{loading=false;}
+  };
+  panel.ontoggle=load;
+  if(panel.open)load();
+}
+
 function renderMatchdayDetails(){
   const matchday=SELECTED_MATCHDAY;
   if(matchday==null)return;
+  bindOfficialMatchdayXi(matchday);
   const weekly=weeklyStandings(matchday);
   const movements=movementForMatchday(matchday);
   const previous=previousPublishedMatchday(matchday);
