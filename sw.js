@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v250-classification-xi';
+const CACHE_NAME = 'cuban-league-v251-official-pitch';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,7 +12,7 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=250-20261119-classification-xi',
+  './app.js?v=251-20261119-official-pitch',
   './ideal-xi.js?v=246-20261118-ideal-xi',
   './profile-chart.css?v=247-20261118-profile-chart',
   './ideal-xi.css?v=246-20261118-ideal-xi',
@@ -47,7 +47,7 @@ const APP_SHELL = [
   './club-stats.js?v=200-20261104-club-contributions',
   './club-stats.css?v=200-20261104-club-contributions',
   './matchday-general.js?v=240-20261117-summary-charts',
-  './matchday-general.css?v=250-20261119-classification-xi',
+  './matchday-general.css?v=251-20261119-official-pitch',
   './second-division.js?v=190-20261022',
   './second-division.css?v=190-20261022',
   './second-division-core.js?v=190-20261022',

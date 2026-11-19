@@ -1,4 +1,4 @@
-const APP_VERSION='250-20261119-classification-xi';
+const APP_VERSION='251-20261119-official-pitch';
 const DATA_VERSION='174-20261014-mister-j8-catalog';
 const ACHIEVEMENT_SEEN_KEY='cuban-league-seen-achievements-v1';
 let DATA;
@@ -1925,6 +1925,56 @@ function renderMatchdayArchive(){
   });
 }
 
+function officialXiPitch(players,matchday){
+  const view=$('officialXiPitchTemplate').content.cloneNode(true);
+  const field=view.querySelector('.xi-field');
+  const lines=[['DL','Delanteros'],['MC','Centrocampistas'],['DF','Defensas'],['PT','Portero']];
+  const formation=[];
+  for(const [position,label] of lines){
+    const teammates=players.filter(player=>player.position===position);
+    if(!teammates.length || (position==='PT' && teammates.length!==1))throw new Error('Formación incompleta');
+    if(position!=='PT')formation.unshift(teammates.length);
+    const row=document.createElement('ul');
+    row.className='xi-line';
+    row.setAttribute('aria-label',label);
+    row.style.setProperty('--xi-columns',String(teammates.length));
+    for(const player of teammates){
+      if(!Number.isFinite(player.points))throw new Error('Puntuación inválida');
+      const item=$('officialXiPlayerTemplate').content.firstElementChild.cloneNode(true);
+      item.querySelector('.xi-name').textContent=player.playerName;
+      item.querySelector('.xi-points').textContent=player.points+' pts';
+      const owner=item.querySelector('.xi-owner');
+      owner.textContent=player.participants.length?player.participants.join(' · '):'Sin coincidencia';
+      owner.setAttribute('aria-label',player.participants.length?'Alineado por '+owner.textContent:'Sin coincidencia en los XI publicados');
+      const initials=item.querySelector('.fp-initials');
+      initials.textContent=player.playerName.trim().split(/\s+/).slice(0,2).map(word=>word[0]).join('');
+      const photo=PLAYER_CATALOG?.resolve({playerId:player.playerId,misterPlayerId:player.misterPlayerId})?.photo;
+      const providerPhoto=/^[1-9]\d{0,19}$/.test(player.misterPlayerId)
+        ?'https://cdn-mister.mundodeportivo.com/file/cdn-common/players/'+player.misterPlayerId+'.png':'';
+      if(photo || providerPhoto){
+        const img=document.createElement('img');
+        img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+        img.onload=()=>{initials.hidden=true;};
+        img.onerror=()=>{
+          if(providerPhoto && img.src!==providerPhoto){img.src=providerPhoto;return;}
+          img.remove();initials.hidden=false;
+        };
+        img.src=photo || providerPhoto;
+        item.querySelector('.fp-portrait').append(img);
+      }
+      row.append(item);
+    }
+    field.append(row);
+  }
+  const system=formation.join('–');
+  const total=players.reduce((sum,player)=>sum+player.points,0);
+  field.setAttribute('aria-label','Once ideal de Mister de la jornada '+matchday+', formación '+system);
+  view.querySelector('.xi-day').textContent='Jornada '+matchday;
+  view.querySelector('.xi-formation').textContent=system;
+  view.querySelector('.xi-total').textContent=total.toLocaleString('es')+' pts';
+  return view;
+}
+
 function bindOfficialMatchdayXi(matchday,panel=$('officialMatchdayXi')){
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!panel || !config?.url || !config?.publishableKey)return;
@@ -1953,23 +2003,7 @@ function bindOfficialMatchdayXi(matchday,panel=$('officialMatchdayXi')){
         body.textContent='Todavía no hay un once ideal oficial publicado para esta jornada.';
       }else{
         if(!Array.isArray(players) || players.length!==11)throw new Error();
-        const list=document.createElement('ul');
-        for(const position of ['PT','DF','MC','DL']){
-          for(const player of players.filter(p=>p.position===position)){
-            const item=document.createElement('li');
-            const role=document.createElement('span');
-            const name=document.createElement('strong');
-            const owner=document.createElement('small');
-            const points=document.createElement('b');
-            role.textContent=position;
-            name.textContent=player.playerName;
-            owner.textContent=player.participants.length ? player.participants.join(' · ') : 'Sin coincidencia en los XI publicados';
-            points.textContent=player.points+' pts';
-            item.append(role,name,owner,points);
-            list.append(item);
-          }
-        }
-        body.replaceChildren(list);
+        body.replaceChildren(officialXiPitch(players,matchday));
       }
       loaded=true;
     }catch{
