@@ -44,13 +44,25 @@ function pageExtended(before, after) {
   if (new Set(ids).size !== ids.length) fail('duplicate_page_row');
   return true;
 }
-async function paginate(initial, { read, next, maxPages = 40, wait = waitStable }) {
+async function paginate(initial, { read, next, maxPages = 40, wait = waitStable, progress = () => {} }) {
   let state = initial;
   for (let page = 1; state.hasMore; page++) {
     if (page >= maxPages) fail('pagination_limit');
     const before = state;
+    const summary = s => ({ rows: s.rows.length, ready: !!s.ready, popupOpen: !!s.popupOpen,
+      hasMore: !!s.hasMore, prefixMatches: before.rows.every((p, i) => p.id === s.rows[i]?.id) });
+    let last = before;
+    progress({ phase: 'market', step: 'pagination_before', page, ...summary(before) });
     await next();
-    state = await wait(read, s => s.ready && !s.popupOpen && pageExtended(before, s), { stableFor: 2000, label: 'market_pagination' });
+    try {
+      state = await wait(async () => { last = await read(); return last; },
+        s => s.ready && !s.popupOpen && pageExtended(before, s),
+        { stableFor: 2000, label: 'market_pagination' });
+      progress({ phase: 'market', step: 'pagination_after', page, beforeRows: before.rows.length, ...summary(state) });
+    } catch (error) {
+      progress({ phase: 'market', step: 'pagination_failed', page, beforeRows: before.rows.length, ...summary(last) });
+      throw error;
+    }
   }
   return state;
 }
@@ -125,7 +137,7 @@ async function collect(page, config = DEFAULTS, { wait = waitStable, progress = 
     // Closing the modal is not evidence of new data: wait for a different, stable list.
     const first = await wait(readMarket, s => s.ready && !s.popupOpen && s.rows.length > 0
       && fingerprint(s) !== fingerprint(old), { stableFor: 2000, label: 'market_partition' });
-    const full = await paginate(first, { read: readMarket, wait,
+    const full = await paginate(first, { read: readMarket, wait, progress,
       next: () => page.locator('.search-players-more').click() });
     await openFilters();
     verifyFilters(await checked(readFilterDocument), owner, resetRanges);
