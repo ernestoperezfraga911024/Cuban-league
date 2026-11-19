@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,576);
+    assert.equal(c.recordCount,577);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -123,4 +123,17 @@ test('Burcio roster insertion is idempotent, preserves earlier players and rejec
   await assert.rejects(db.exec(sql),/Conflicto de identidad/);
   assert.equal((await db.query('select count(*)::int n from forecast_league.roster')).rows[0].n,3);
  }finally{await db.close();}
+});
+
+test('Dani Díaz retains his verified Real Sociedad identity without an inferred Mister ID', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const player = c.resolve({playerId: 'dani-diaz'});
+    assert.equal(player.clubId, 'real-sociedad');
+    assert.equal(c.search('Daniel Díaz Gándara')[0].id, player.id);
+    assert.ok(!player.misterId);
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    const refs = identityReference(player.clubId, [{id:player.id, name:'Dani Díaz', team:player.clubId}], ['Daniel Díaz Gándara']);
+    assert.equal(refs.candidates[0].verified_alias.id, player.id);
+  } finally { dom.window.close(); }
 });
