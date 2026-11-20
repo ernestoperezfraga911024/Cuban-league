@@ -3,6 +3,14 @@
   "updated_on": "2026-11-20",
   "incidents": [
     {
+      "code": "espanyol-official-fortuno-profile",
+      "status": "guarded",
+      "failure": "El enlace de FutbolFantasy ngel-fortuno dejó pendiente al Espanyol pese a existir el portero en su plantilla.",
+      "prevention": "Asociar el perfil verificado https://www.futbolfantasy.com/jugadores/ngel-fortuno/laliga-26-27 a a-fortuno y comprobar los once IDs del club.",
+      "production_evidence": "Athletic–Espanyol J13, 20/11/2026 a las 15:14 de Miami. Historial visible con 11 titulares, Ángel Fortuño y 9 aciertos sobre la probable de las 06:18.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
+    {
       "code": "shared-alternative-source-duplicate",
       "status": "guarded",
       "failure": "Dos grafías de Beñat Gerenabarrena vinculadas a distintos puestos en Comuniate impedían preparar el once del Athletic.",

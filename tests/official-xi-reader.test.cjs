@@ -26,3 +26,9 @@ test('only confirmed starting shirts from the registered match can enter history
   assert.equal(parse(html.replace('osasuna-10/laliga','desconocido/laliga')).teams.osasuna.reason,'identidad_pendiente_desconocido');
   assert.throws(()=>parse(html.replace('18:30h','19:00h')),/calendario_distinto/);
 });
+
+test('the confirmed Espanyol keeper profile resolves only to Ángel Fortuño',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const owners=Object.keys(profiles).filter(id=>profiles[id].includes('ngel-fortuno'));
+  assert.deepEqual(owners,['a-fortuno']);
+});
