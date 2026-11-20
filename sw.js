@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v253-clause-performance';
+const CACHE_NAME = 'cuban-league-v254-lineup-stages';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,9 +17,9 @@ const APP_SHELL = [
   './profile-chart.css?v=247-20261118-profile-chart',
   './ideal-xi.css?v=246-20261118-ideal-xi',
   './player-points.js?v=242-20261117-player-points',
-  './market-core.js?v=253-20261119-clause-performance',
-  './market.js?v=253-20261119-clause-performance',
-  './market.css?v=253-20261119-clause-performance',
+  './market-core.js?v=254-20261119-lineup-stages',
+  './market.js?v=254-20261119-lineup-stages',
+  './market.css?v=254-20261119-lineup-stages',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',

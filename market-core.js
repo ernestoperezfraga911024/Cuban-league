@@ -93,10 +93,62 @@
   }
   return [...owners.values()].sort((a,b)=>Number(b.current)-Number(a.current)||(b.matchdays.at(-1)||0)-(a.matchdays.at(-1)||0)||(b.lastMovement||'').localeCompare(a.lastMovement||'')||a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
  }
- // The public ledger contains clauses, not every sale. Do not infer a sale or
- // assign lifetime owner points to an individual purchase (including rebuys).
+ // XI ownership is the primary clock. Missing appearances are not transfers.
+ // Attribution is based on observed stages, not an assertion of full tenure.
+ function lineupStages(pointsPlayer,byParticipant){
+  const stages=[],ambiguous=new Set();let current=null;
+  for(const day of [...(pointsPlayer?.matchdays||[])].sort((a,b)=>a.matchday-b.matchday)){
+   const owners=new Map();
+   for(const a of day.appearances){
+    const id=byParticipant.get(String(a.participantId));if(!id)continue;
+    if(owners.has(id))ambiguous.add(id);
+    owners.set(id,{...a,matchday:day.matchday});
+   }
+   if(owners.size!==1){
+    // Real contributions for simultaneous owners remain in the owner subtotal,
+    // but their order cannot delimit a purchase stage.
+    for(const id of owners.keys())ambiguous.add(id);
+    current=null;continue;
+   }
+   const [id,appearance]=[...owners][0];
+   if(!current||current.owner!==id){current={owner:id,appearances:[]};stages.push(current);}
+   current.appearances.push(appearance);
+  }
+  return {stages,ambiguous};
+ }
+ const contributionTotal=(appearances,field)=>appearances.length&&appearances.every(a=>Number.isFinite(a[field]))?appearances.reduce((n,a)=>n+a[field],0):null;
+ function attributeStages(events,pointsPlayer,byParticipant){
+  const {stages,ambiguous}=lineupStages(pointsPlayer,byParticipant),result=new Map(),byOwner=new Map();
+  for(const event of events){if(!byOwner.has(event.to))byOwner.set(event.to,[]);byOwner.get(event.to).push(event);}
+  for(const [owner,purchases] of byOwner){
+   const owned=stages.filter(s=>s.owner===owner);
+   let reason=!pointsPlayer?'no_lineups':ambiguous.has(owner)?'shared_round':!owned.length?'no_appearances':owned.length!==purchases.length?'stage_count':null;
+   const ordered=[...purchases].sort((a,b)=>(a.date||'').localeCompare(b.date||'')||a.reference.localeCompare(b.reference));
+   if(!reason&&purchases.length>1&&(ordered.some(e=>!e.date)||new Set(ordered.map(e=>e.date)).size!==ordered.length))reason='purchase_order';
+   for(let i=0;i<ordered.length;i++){
+    const event=ordered[i],stage=owned[i],index=stages.indexOf(stage),previous=stages[index-1];
+    // A different observed seller signals an omitted intermediate movement.
+    const mismatch=!reason&&previous&&previous.owner!==event.from;
+    result.set(event.reference,{reason:reason||(mismatch?'seller_mismatch':null),stage:reason||mismatch?null:stage});
+   }
+  }
+  const mapped=events.map(event=>({event,match:result.get(event.reference)})).filter(x=>x.match.stage);
+  // A purchase after a known outgoing clause cannot fund the initial XI stage.
+  // Cross-check purchase order without using edited matchday/calendar dates.
+  const conflicts=new Set();
+  for(let i=0;i<mapped.length;i++)for(let j=i+1;j<mapped.length;j++){
+   const a=mapped[i],b=mapped[j];if(!a.event.date||!b.event.date||a.event.date===b.event.date)continue;
+   const dayOrder=a.match.stage.appearances[0].matchday-b.match.stage.appearances[0].matchday;
+   if(dayOrder*a.event.date.localeCompare(b.event.date)<0){conflicts.add(a.event.reference);conflicts.add(b.event.reference);}
+  }
+  for(const reference of conflicts)result.set(reference,{reason:'movement_order',stage:null});
+  return result;
+ }
  function performance(p,model=null){
   const players=new Map(p.players.map(player=>[player.id,player]));
+  const byParticipant=new Map(p.managers.map(m=>[String(m.participantId),m.id])),byPlayer=new Map(),assignments=new Map();
+  for(const event of p.history.events){if(!byPlayer.has(event.playerId))byPlayer.set(event.playerId,[]);byPlayer.get(event.playerId).push(event);}
+  for(const [id,events] of byPlayer)assignments.set(id,attributeStages(events,model?.playersByMisterId.get(id),byParticipant));
   const rows=new Map(p.managers.map(m=>[m.id,{...m,spent:0,events:[]}]));
   for(const event of p.history.events){
    const manager=rows.get(event.to),player=players.get(event.playerId);
@@ -111,13 +163,16 @@
     const appearances=(pointsPlayer?.matchdays||[]).flatMap(day=>day.appearances
      .filter(a=>String(a.participantId)===String(manager.participantId))
      .map(a=>({...a,matchday:day.matchday})));
-    const total=field=>appearances.length&&appearances.every(a=>Number.isFinite(a[field]))?appearances.reduce((n,a)=>n+a[field],0):null;
+    const total=field=>contributionTotal(appearances,field),attribution=assignments.get(event.playerId).get(event.reference);
+    const operationAppearances=attribution.stage?.appearances||[];
     return {...event,purchases:manager.events.filter(e=>e.playerId===event.playerId).length,
      ownerPoints:total('contributionPoints'),ownerBase:total('points'),ownerBonus:total('captainBonus'),
      appearances,partial:!!model?.partial,provisional:appearances.some(a=>a.provisional),
-     // No reliable historical round windows in the existing public projection.
-     operationPoints:null};
-   })})).sort((a,b)=>a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
+     attribution:attribution.reason?'pending':'lineup_sequence',reason:attribution.reason,operationAppearances,
+     operationPoints:contributionTotal(operationAppearances,'contributionPoints'),
+     operationBase:contributionTotal(operationAppearances,'points'),operationBonus:contributionTotal(operationAppearances,'captainBonus'),
+     operationProvisional:operationAppearances.some(a=>a.provisional)};
+   }).sort((a,b)=>Number(b.operationPoints!==null)-Number(a.operationPoints!==null)||(b.operationPoints??0)-(a.operationPoints??0)||(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference))})).sort((a,b)=>a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
  }
  const api={validate,select,stats,rank,clauseRivals,topClauses,playerOwners,performance,positions};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CubanLeagueMarketCore=api;

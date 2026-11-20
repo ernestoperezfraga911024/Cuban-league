@@ -11,6 +11,8 @@
 .market-performance-people strong,.market-performance-events strong{display:block;overflow-wrap:anywhere}
 .market-performance-people small,.market-performance-events small{display:block;font-size:.875rem;line-height:1.5;color:var(--market-muted);font-weight:400}
 .market-performance-spent{margin-left:auto;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:.875rem}
+.market-performance-spent .market-performance-points{color:#b9ccbd;font-size:1.125rem}
+.market-performance-events .market-event-player>span{min-width:0;overflow-wrap:anywhere}
 .market-performance-title{display:flex;align-items:center;gap:12px;margin:20px 0}
 .market-performance-title img{object-fit:contain;flex-shrink:0}
 #market .market-performance-back,#market .market-performance-close{background:transparent;border:1px solid var(--market-line);border-radius:6px;color:var(--market-ink);padding:10px 14px;box-shadow:none;font-size:.875rem;cursor:pointer;min-height:44px}
