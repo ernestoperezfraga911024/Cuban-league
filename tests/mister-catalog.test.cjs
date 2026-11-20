@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,586);
+    assert.equal(c.recordCount,588);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -286,6 +286,29 @@ test('Manuel González Pallarés se resuelve como Manu González del Betis', asy
     const roster = [{id: player.id, name: 'Manu González', team: player.clubId}];
     const {candidates} = identityReference(player.clubId, roster, names);
     assert.deepEqual(candidates.map(row => row.verified_alias.id), [player.id, player.id]);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test('Blázquez y Córdoba resuelven a dos jugadores distintos del Valencia', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    for (const [id, name, fullName, short, position] of [
+      ['aimar-blazquez', 'Aimar Blázquez', 'Aimar Blázquez Labraca', 'Blázquez', 'DL'],
+      ['iker-cordoba', 'Iker Córdoba', 'Iker Córdoba Sánchez', 'Córdoba', 'DF']
+    ]) {
+      const player = c.search(fullName)[0];
+      assert.equal(player.id, id);
+      assert.equal(player.clubId, 'valencia');
+      assert.equal(player.position, position);
+      assert.ok(!player.misterId);
+      const names = [short, name, fullName];
+      const roster = [{id, name, team: 'valencia'}];
+      const {candidates} = identityReference('valencia', roster, names);
+      assert.deepEqual(candidates.map(row => row.verified_alias.id), [id, id, id]);
+    }
   } finally {
     dom.window.close();
   }
