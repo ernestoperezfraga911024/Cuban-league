@@ -67,5 +67,19 @@
     "profile_url": "https://www.futbolfantasy.com/jugadores/hugo-perez-2/laliga-26-27",
     "verified_at": "2026-11-20T13:09:16Z",
     "reason": "LaLiga y FutbolFantasy identifican al centrocampista del Racing, nacido el 12/06/2007. FutbolFantasy aporta el nombre completo y lo menciona en el entrenamiento del 20/11/2026 (noticia 155087)."
+  },
+  {
+    "team": "osasuna",
+    "id": "rafa-fernandez-osasuna",
+    "names": [
+      "Rafa Fernández",
+      "Rafa Fernández Rodríguez",
+      "Rafael Fernández Rodríguez"
+    ],
+    "catalog_url": "https://www.osasuna.es/rafafernandez-osasuna-2028",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/rafa-fernandez-1",
+    "verified_at": "2026-11-20T13:08:36.292Z",
+    "profile_sha256": "a60a6ad2aa67e4cc9ffacbd2e16ca3d5e93df7e1e70021b8c808826e317daa0f",
+    "reason": "Osasuna confirma su contrato como portero del Promesas y ocho convocatorias del primer equipo. FutbolFantasy confirma el nombre completo y el nacimiento el 02/05/2004. Comuniate lo cita como segundo portero ante el Málaga."
   }
 ]
