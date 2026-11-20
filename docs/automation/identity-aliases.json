@@ -151,5 +151,18 @@
     "verified_at": "2026-11-20T19:26:14.901Z",
     "profile_sha256": "8e95a40426d9906ba561cd559021d5f9abd4561db1f3a05146fd2714247bbc6b",
     "reason": "El Levante UD y LaLiga identifican a Álex Primo como portero del club. LaLiga y FutbolFantasy coinciden en el nacimiento el 10/07/2004. FutbolFantasy muestra Primo, Alejandro Primo y su nombre completo, Alejandro Primo Hernández."
+  },
+  {
+    "team": "real-betis",
+    "id": "manu-gonzalez",
+    "names": [
+      "Manu González",
+      "Manuel González Pallarés"
+    ],
+    "catalog_url": "https://www.realbetisbalompie.es/cantera/jugador/m-gonzalez-3313954",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/manu-gonzalez/laliga-26-27",
+    "verified_at": "2026-11-20T19:38:06.461Z",
+    "profile_sha256": "1dc997659098eceee6936a9b90b793dfc42c55f518d160292d20c1082e435d36",
+    "reason": "El Real Betis identifica a su portero Manu González como Manuel González Pallarés. LaLiga y FutbolFantasy confirman el club, la posición y el nacimiento el 18/04/2007."
   }
 ]
