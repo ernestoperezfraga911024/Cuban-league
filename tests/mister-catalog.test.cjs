@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,580);
+    assert.equal(c.recordCount,581);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -194,6 +194,23 @@ test('Rafa Fernández resolves to the Osasuna goalkeeper independently of the Es
     const roster = [{id: player.id, name: 'Rafa Fernández', team: player.clubId}];
     const {candidates} = identityReference(player.clubId, roster, names);
     assert.deepEqual(candidates.map(row => row.verified_alias.id), [player.id, player.id]);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test('Óscar González Campos del filial del Málaga tiene ficha y alias propios', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const player = c.search('Óscar González Campos')[0];
+    assert.equal(player.id, 'oscar-gonzalez-malaga');
+    assert.equal(player.clubId, 'malaga');
+    assert.equal(player.position, 'DF');
+    assert.ok(!player.misterId);
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    const roster = [{id: player.id, name: 'Óscar González', team: player.clubId}];
+    const {candidates} = identityReference(player.clubId, roster, ['Óscar González Campos']);
+    assert.equal(candidates[0].verified_alias.id, player.id);
   } finally {
     dom.window.close();
   }
