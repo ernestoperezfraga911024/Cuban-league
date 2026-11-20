@@ -81,5 +81,18 @@
     "verified_at": "2026-11-20T13:08:36.292Z",
     "profile_sha256": "a60a6ad2aa67e4cc9ffacbd2e16ca3d5e93df7e1e70021b8c808826e317daa0f",
     "reason": "Osasuna confirma su contrato como portero del Promesas y ocho convocatorias del primer equipo. FutbolFantasy confirma el nombre completo y el nacimiento el 02/05/2004. Comuniate lo cita como segundo portero ante el Málaga."
+  },
+  {
+    "team": "malaga",
+    "id": "oscar-gonzalez-malaga",
+    "names": [
+      "Óscar González",
+      "Óscar González Campos"
+    ],
+    "catalog_url": "https://www.malagacf.com/jugadores/oscar-gonzalez",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/oscar-gonzalez-1",
+    "verified_at": "2026-11-20T14:09:16.079Z",
+    "profile_sha256": "29c795fb1f8fe3861d7d587066cd27ee2497055caccb9d22db664310e20e6321",
+    "reason": "El Málaga CF identifica a Óscar González Campos como defensa del Atlético Malagueño. FutbolFantasy confirma nombre y fecha de nacimiento y recoge que Funes valora convocarlo ante Osasuna."
   }
 ]
