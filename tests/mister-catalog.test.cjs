@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,578);
+    assert.equal(c.recordCount,579);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -163,4 +163,19 @@ test('Unai Santos roster insertion is idempotent and preserves prior identities'
     await db.exec("insert into forecast_league.roster values('other','osasuna','Unai Santos');");
     await assert.rejects(db.exec(sql),/Conflicto de identidad/);
   } finally { await db.close(); }
+});
+
+test('Hugo Pérez Sañudo resuelve en el Racing con la identidad de LaLiga y FutbolFantasy', async () => {
+  const {dom,catalog:c} = await catalog();
+  try {
+    const player = c.resolve({playerId:'hugo-perez-sanudo'});
+    assert.equal(player.clubId, 'racing-santander');
+    assert.equal(player.position, 'MC');
+    assert.ok(!player.misterId);
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    const names = ['Hugo Pérez', 'Hugo Pérez Sañudo'];
+    const refs = identityReference(player.clubId, [{id:player.id, name:'Hugo Pérez', team:player.clubId}], names);
+    assert.deepEqual(refs.candidates.map(row => row.observed_name), names);
+    assert.ok(refs.candidates.every(row => row.id === player.id && row.verified_alias));
+  } finally { dom.window.close(); }
 });

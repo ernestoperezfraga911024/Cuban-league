@@ -55,5 +55,17 @@
     "profile_url": "https://www.osasuna.es/en/osasuna-rayo-squadlist-26-27",
     "verified_at": "2026-11-19T19:38:00Z",
     "reason": "LaLiga confirma Unai Santos, defensa de Osasuna, nacido el 03/11/2005. Osasuna lo incluye como defensa del primer equipo y documenta su contrato con Osasuna Promesas. No se atribuye ID Mister ni perfil Mister no verificado."
+  },
+  {
+    "team": "racing-santander",
+    "id": "hugo-perez-sanudo",
+    "names": [
+      "Hugo Pérez",
+      "Hugo Pérez Sañudo"
+    ],
+    "catalog_url": "https://www.laliga.com/jugador/hugo-perez-2",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/hugo-perez-2/laliga-26-27",
+    "verified_at": "2026-11-20T13:09:16Z",
+    "reason": "LaLiga y FutbolFantasy identifican al centrocampista del Racing, nacido el 12/06/2007. FutbolFantasy aporta el nombre completo y lo menciona en el entrenamiento del 20/11/2026 (noticia 155087)."
   }
 ]
