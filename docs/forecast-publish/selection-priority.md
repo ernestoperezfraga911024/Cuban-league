@@ -22,12 +22,14 @@ evaluación intacta y puede quedar como alternativa. Por debajo de70 se exige
 una alternativa evaluada; desde70 no se muestra. Los candidatos se recomputan
 con los once finales, no con los once iniciales.
 
-Sigue siendo válido que un titular sea alternativa de otro jugador. Si el mayor
-porcentaje exigiría colocarlo en dos puestos, se debe revisar la distribución
-táctica compatible antes de publicar: nunca duplicarlo, bajar su porcentaje,
-ocultar esa opción ni mantener una pareja invertida. La revisión dispone del
-único intento de corrección existente. Una relación consigo mismo se ignora
-conservando su aparición titular; no se inventa otra alternativa.
+Si un jugador gana dos puestos, el productor elige la combinación de once
+identidades distintas con mayor suma de porcentajes dentro de los puestos
+revisados. A igualdad de suma prefiere conservar más titulares en sus plazas
+iniciales. El revisor debe comprobar las parejas en los dos sentidos sobre el
+dibujo observado. Por ejemplo, si Jornada Perfecta sitúa a Canales como relevo
+de Galarreta en la izquierda, comparar a ambos para esa plaza aun cuando otra
+fuente proponga a Canales de inicio. Conservar todos los vínculos en la revisión
+y comprobar las alternativas bajo 70 después de repartir los puestos.
 
 La salud no participa: los símbolos proceden exclusivamente del estado directo
 de FutbolFantasy y no cambian cálculo, orden ni disponibilidad en el pronóstico.

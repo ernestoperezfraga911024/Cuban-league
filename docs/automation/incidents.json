@@ -1,7 +1,15 @@
 {
   "methodology_version": "ops-v2",
-  "updated_on": "2026-11-19",
+  "updated_on": "2026-11-20",
   "incidents": [
+    {
+      "code": "shared-alternative-source-duplicate",
+      "status": "guarded",
+      "failure": "Dos grafías de Beñat Gerenabarrena vinculadas a distintos puestos en Comuniate impedían preparar el once del Athletic.",
+      "prevention": "Conservar ambas relaciones, resolver la identidad, emitir una sola señal y repartir los titulares entre los puestos compatibles.",
+      "production_evidence": "Athletic–Espanyol, 20/11/2026 10:21 Miami. La publicación coincidió con la proyección validada y contenía 11 IDs titulares distintos, incluidos Canales (63%) y Gerenabarrena (68%).",
+      "tests": ["tests/forecast-review-preflight.test.cjs"]
+    },
     {
       "code": "unfinished-as-blocked",
       "status": "guarded",

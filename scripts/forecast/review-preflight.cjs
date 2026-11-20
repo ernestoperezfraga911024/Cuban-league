@@ -40,9 +40,13 @@ function reviewPreflight(packet, review, roster) {
       if(!grouped.has(id))grouped.set(id,[]);
       grouped.get(id).push(p);
     }
-    // Exactly one primary starter plus secondary alternatives is valid. The
-    // compiler keeps the starter signal once; two starter identities still fail.
-    for(const [id,rows] of grouped)if(rows.length>1&&rows.filter(p=>p.kind==='starter').length!==1)add('source_duplicate',`${source}: observación duplicada de ${rows.map(p=>p.name+' ('+p.kind+')').join(', ')}`,{source,id,names:rows.map(p=>p.name)});
+    for (const [id, rows] of grouped) {
+      const starters = rows.filter(p => p.kind === 'starter');
+      const conflictingAlternatives = !starters.length && new Set(rows.map(p => p.probability)).size > 1;
+      if (starters.length > 1 || conflictingAlternatives) {
+        add('source_duplicate', `${source}: observaciones incompatibles de ${rows.map(p => p.name).join(', ')}`, {source, id, names: rows.map(p => p.name)});
+      }
+    }
   }
   if(review.predicted11?.fixture_verified===true)for(const prediction of packet.predictions||[]){
     if(prediction.status==='complete_unvalidated')for(const p of prediction.data?.participacion||[])inspectName(p.nombre?.trim(),'predicted11');

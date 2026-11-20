@@ -59,3 +59,25 @@ test('all missing alternatives are reported together without raising probabiliti
    assert.match(error.message,/Test player 1 \(64%\)/);assert.match(error.message,/Test player 2 \(64%\)/);return true;
  });
 });
+
+test('Athletic keeps both tactical links and counts one alternative per source',()=>{
+ for (const probability of [null,0,35]) {
+   const x=example(), player=x.roster[11], source=x.review.sources.comuniate;
+   const names=['Gerenebarrena','Gerenabarrena'];
+   source.alternatives=names.map(name=>({name,probability}));
+   x.packet.comuniate_alternatives.players=structuredClone(source.alternatives);
+   x.review.identities=Object.fromEntries(names.map(name=>[name,player.id]));
+   for (const starter of x.packet.observations.comuniate.slice(0,2)) starter.probability=0;
+   const before=structuredClone(x);
+   assert.deepEqual(reviewPreflight(x.packet,x.review,x.roster),[]);
+   const {payload}=compile(x.packet,x.review,x.roster,x.window);
+   assert.deepEqual(payload.proposal.players.slice(0,2).map(p=>p.alternative.id),[player.id,player.id]);
+   const signals=payload.sources.find(s=>s.id==='comuniate').player_observations.filter(o=>o.player_id===player.id);
+   assert.deepEqual(signals,[{player_id:player.id,prediction:'alternative',probability}]);
+   assert.deepEqual(x,before);
+   source.alternatives[1].probability=40;
+   x.packet.comuniate_alternatives.players=structuredClone(source.alternatives);
+   assert.ok(reviewPreflight(x.packet,x.review,x.roster).some(i=>i.code==='source_duplicate'));
+   assert.throws(()=>compile(x.packet,x.review,x.roster,x.window),/incompatibles/);
+ }
+});

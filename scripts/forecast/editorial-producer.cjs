@@ -90,6 +90,11 @@ function compile(packet, review, roster, window) {
         source_roles.push({source:id,player_id,starter_probability:observations.find(o=>o.player_id===player_id).probability,alternative_probability:alt.probability});
         continue;
       }
+      const previous = observations.find(o => o.player_id === player_id);
+      if (previous) {
+        requireThat(previous.probability === alt.probability, id + ': porcentajes de alternativa incompatibles para ' + alt.name);
+        continue;
+      }
       observations.push({player_id, prediction:'alternative', probability:alt.probability});
     }
     requireThat(new Set(observations.map(o => o.player_id)).size === observations.length && observations.every(o => probability(o.probability)), id + ': observación duplicada o porcentaje inválido');
