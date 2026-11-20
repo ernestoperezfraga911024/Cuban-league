@@ -144,7 +144,37 @@
   for(const reference of conflicts)result.set(reference,{reason:'movement_order',stage:null});
   return result;
  }
- function performance(p,model=null){
+ // League rates supplied by the owner in the Mister bonus settings screenshot.
+ // Fixed matchday money belongs to the manager, never to each footballer.
+ const incomeRates=Object.freeze({point:100000,goal:250000,idealXi:1000000});
+ function officialXiIds(players){
+  if(!Array.isArray(players)||players.length!==11||players.some(p=>!/^\d+$/.test(String(p?.misterPlayerId||''))))return null;
+  const ids=new Set(players.map(p=>String(p.misterPlayerId)));return ids.size===11?ids:null;
+ }
+ function playingIncome(appearances,playerId,officialXiByDay=new Map()){
+  if(!appearances.length)return null;
+  const points=contributionTotal(appearances,'contributionPoints');
+  if(points===null)return null;
+  const missingGoals=[],missingIdeal=[];let goals=0,ideal=0;
+  for(const a of appearances){
+   if(Number.isSafeInteger(a.goals)&&a.goals>=0)goals+=a.goals;else missingGoals.push(a.matchday);
+   const ids=officialXiByDay.get(a.matchday);
+   if(ids instanceof Set)ideal+=Number(ids.has(String(playerId)));else missingIdeal.push(a.matchday);
+  }
+  const pointIncome=points*incomeRates.point,goalIncome=goals*incomeRates.goal,idealIncome=ideal*incomeRates.idealXi;
+  return {points,goals,ideal,pointIncome,goalIncome,idealIncome,knownTotal:pointIncome+goalIncome+idealIncome,
+   complete:!missingGoals.length&&!missingIdeal.length,missingGoals,missingIdeal};
+ }
+ function recordedExit(event,events){
+  // Only a directly consecutive, distinctly dated clause can be linked as an exit.
+  // Undated movements or same-day ties cannot establish that order.
+  if(events.some(e=>!e.date))return null;
+  const ordered=[...events].sort((a,b)=>a.date.localeCompare(b.date)),index=ordered.findIndex(e=>e.reference===event.reference),next=ordered[index+1];
+  if(!next||next.from!==event.to||next.to===event.to||next.date<=event.date
+   ||ordered.filter(e=>e.date===event.date).length!==1||ordered.filter(e=>e.date===next.date).length!==1)return null;
+  return {reference:next.reference,amount:next.amount,date:next.date,to:next.to};
+ }
+ function performance(p,model=null,officialXiByDay=new Map()){
   const players=new Map(p.players.map(player=>[player.id,player]));
   const byParticipant=new Map(p.managers.map(m=>[String(m.participantId),m.id])),byPlayer=new Map(),assignments=new Map();
   for(const event of p.history.events){if(!byPlayer.has(event.playerId))byPlayer.set(event.playerId,[]);byPlayer.get(event.playerId).push(event);}
@@ -171,9 +201,10 @@
      attribution:attribution.reason?'pending':'lineup_sequence',reason:attribution.reason,operationAppearances,
      operationPoints:contributionTotal(operationAppearances,'contributionPoints'),
      operationBase:contributionTotal(operationAppearances,'points'),operationBonus:contributionTotal(operationAppearances,'captainBonus'),
-     operationProvisional:operationAppearances.some(a=>a.provisional)};
+     operationProvisional:operationAppearances.some(a=>a.provisional),
+     income:playingIncome(operationAppearances,event.playerId,officialXiByDay),exit:recordedExit(event,byPlayer.get(event.playerId))};
    }).sort((a,b)=>Number(b.operationPoints!==null)-Number(a.operationPoints!==null)||(b.operationPoints??0)-(a.operationPoints??0)||(b.date||'').localeCompare(a.date||'')||a.reference.localeCompare(b.reference))})).sort((a,b)=>a.name.localeCompare(b.name,'es')||a.id.localeCompare(b.id));
  }
- const api={validate,select,stats,rank,clauseRivals,topClauses,playerOwners,performance,positions};
+ const api={validate,select,stats,rank,clauseRivals,topClauses,playerOwners,performance,playingIncome,officialXiIds,incomeRates,positions};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CubanLeagueMarketCore=api;
 })(typeof globalThis==='object'?globalThis:this);

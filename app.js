@@ -4104,7 +4104,7 @@ function leagueStatsPlayerKey(player){
   return `legacy:${name}|${club}`;
 }
 
-async function fetchPublishedLeagueStatsRows(signal){
+async function fetchPublishedLeagueStatsRows(signal,includeGoals=true){
   await PLAYER_CATALOG_PROMISE;
   const config=window.CUBAN_LEAGUE_SUPABASE;
   if(!config?.url||!config?.publishableKey)throw new Error('Supabase no está configurado');
@@ -4113,7 +4113,7 @@ async function fetchPublishedLeagueStatsRows(signal){
   const rows=[];
   for(let offset=0;offset<10000;offset+=pageSize){
     const endpoint=new URL(`${config.url.replace(/\/$/,'')}/rest/v1/matchday_stats`);
-    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,negative_balance_no_score,has_postponed_matches,lineup,updated_at');
+    endpoint.searchParams.set('select','participant_name,matchday,points,goals,clean_sheets,negative_balance_no_score,has_postponed_matches,lineup,updated_at'+(includeGoals?',player_goals':''));
     endpoint.searchParams.set('season',`eq.${season}`);
     endpoint.searchParams.set('published','eq.true');
     endpoint.searchParams.set('order','matchday.asc,participant_name.asc');
@@ -4130,6 +4130,7 @@ async function fetchPublishedLeagueStatsRows(signal){
     });
     if(!response.ok){
       const errorText=await response.text().catch(()=>'');
+      if(includeGoals&&(response.status===400||response.status===404)&&/player_goals/i.test(errorText))return fetchPublishedLeagueStatsRows(signal,false);
       if((response.status===400||response.status===404)&&/lineup|schema cache|column/i.test(errorText)){
         const error=new Error('La base de datos todavía no expone las alineaciones V116');
         error.code='LINEUP_SCHEMA_MISSING';

@@ -17,7 +17,7 @@
   for(const group of groups.values()){
    const latest=Math.max(...group.map(r=>Date.parse(r.updated_at)||0));
    const candidates=group.filter(r=>(Date.parse(r.updated_at)||0)===latest);
-   if(new Set(candidates.map(r=>JSON.stringify([r.points,r.lineup,r.negative_balance_no_score,r.has_postponed_matches]))).size>1){diagnostics.ambiguousRows++;continue;}
+   if(new Set(candidates.map(r=>JSON.stringify([r.points,r.lineup,r.player_goals,r.negative_balance_no_score,r.has_postponed_matches]))).size>1){diagnostics.ambiguousRows++;continue;}
    const r=candidates[0],day=number(r.matchday),person=people.get(text(r.participant_name));
    if(r.negative_balance_no_score===true&&number(r.points)===0)continue;
    let lineup=r.lineup;
@@ -39,7 +39,8 @@
     const player=playersById.get(id),captain=p.is_captain===true||p.is_captain==='true';
     const bonus=captain?captainAdjustment?.(p):0,points=number(p.displayed_points);
     const appearance={participantId:person.id,participantName:person.name,points:Number.isFinite(bonus)?points-bonus:null,
-     contributionPoints:points,captainBonus:Number.isFinite(bonus)?bonus:null,provisional:r.has_postponed_matches===true};
+     contributionPoints:points,captainBonus:Number.isFinite(bonus)?bonus:null,provisional:r.has_postponed_matches===true,
+     goals:Number.isSafeInteger(r.player_goals?.[id])&&r.player_goals[id]>=0?r.player_goals[id]:null};
     if(!player.matchdays.has(day))player.matchdays.set(day,[]);player.matchdays.get(day).push(appearance);
    }
   }

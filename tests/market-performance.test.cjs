@@ -51,6 +51,34 @@ const transfer=(reference,from,to,date='2026-08-15',playerId='1')=>({reference,f
 const appearance=(participantId,points,bonus=0)=>({participantId,points,captainBonus:bonus,contributionPoints:points+bonus,provisional:false});
 function modelFor(days){return {partial:false,playersByMisterId:new Map([['1',{matchdays:days.map(([matchday,...appearances])=>({matchday,appearances}))}]])};}
 const eventsFor=(p,model,id='2')=>core.performance(p,model).find(m=>m.id===id).events;
+test('income applies the photographed rates, counts captain points once, and excludes the team fixed bonus',()=>{
+ const appearances=[{matchday:1,contributionPoints:30,goals:2},{matchday:2,contributionPoints:-2,goals:0}];
+ const xi=new Map([[1,new Set(['1'])],[2,new Set(['9'])]]),before=JSON.stringify(appearances);
+ const income=core.playingIncome(appearances,'1',xi);
+ assert.equal(income.pointIncome,2800000);assert.equal(income.goalIncome,500000);assert.equal(income.idealIncome,1000000);
+ assert.equal(income.knownTotal,4300000);assert.equal(income.complete,true);assert.equal(JSON.stringify(appearances),before);
+ assert.equal(core.playingIncome([],'1',xi),null);
+ const zero=core.playingIncome([{matchday:2,contributionPoints:0,goals:0}],'1',xi);
+ assert.equal(zero.knownTotal,0);assert.equal(zero.complete,true);
+});
+test('unknown goals and unverified XI produce a labeled partial subtotal, not a complete zero',()=>{
+ const income=core.playingIncome([{matchday:1,contributionPoints:7.5,goals:null},{matchday:2,contributionPoints:0,goals:1}],'1',new Map([[1,new Set(['1'])]]));
+ assert.equal(income.knownTotal,2000000);assert.equal(income.complete,false);
+ assert.deepEqual(income.missingGoals,[1]);assert.deepEqual(income.missingIdeal,[2]);
+ const xi=Array.from({length:11},(_,i)=>({misterPlayerId:String(i+1)}));
+ assert.equal(core.officialXiIds(xi).size,11);assert.equal(core.officialXiIds(null),null);assert.equal(core.officialXiIds(xi.slice(1)),null);
+ xi[1].misterPlayerId='1';assert.equal(core.officialXiIds(xi),null);
+});
+test('income follows separate purchase stages and links only a distinctly dated consecutive exit',()=>{
+ const p=fixture();p.history.events=[transfer('buy','1','2'),{...transfer('exit','2','3','2026-09-01'),amount:4000000},transfer('rebuy','3','2','2026-10-01')];
+ const model=modelFor([[1,{...appearance(2,10,20),goals:2}],[2,{...appearance(3,4),goals:0}],[3,{...appearance(2,2),goals:0}]]);
+ const result=core.performance(p,model,new Map([[1,new Set(['1'])],[2,new Set()],[3,new Set()]]));
+ const events=result.find(m=>m.id==='2').events,first=events.find(e=>e.reference==='buy'),second=events.find(e=>e.reference==='rebuy');
+ assert.equal(first.income.knownTotal,4500000);assert.equal(second.income.knownTotal,200000);assert.equal(first.exit.amount,4000000);assert.equal(second.exit,null);
+ for(const mutate of [()=>p.history.events[1].date=null,()=>p.history.events[1].date='2026-08-15',()=>{p.history.events[1].date='2026-09-01';p.history.events[1].from='5';}]){
+  mutate();assert.equal(eventsFor(p,model).find(e=>e.reference==='buy').exit,null);
+ }
+});
 test('single purchase uses its XI stage, ignores bench gaps and other owners, and separates captain without calendar dates',()=>{
  const p=fixture();p.history.events=[transfer('buy','1','2',null)];
  const model=modelFor([[1,appearance(1,8)],[2,appearance(2,10,20)],[5,appearance(2,-2)],[6,appearance(3,9)]]);
@@ -116,5 +144,36 @@ test('an asynchronous points refresh reorders the list and updates an open detai
   assert.equal(d.querySelector('[data-performance-operation]').dataset.performanceOperation,'first');assert.equal(d.querySelector('[data-performance-rounds]').open,true);assert.equal(d.activeElement.tagName,'SUMMARY');
   assert.match(d.querySelector('.market-performance-scores').textContent,/40/);assert.equal(reads,1);
   model=null;status='error';callback();assert.match(d.getElementById('marketPerformance').textContent,/No se pudieron cargar/);assert.equal(d.querySelector('.market-performance-scores'),null);
+ }finally{w.close();}
+});
+
+test('income UI loads each official XI once, updates an open detail and preserves partial income on errors',async()=>{
+ const p=fixture();p.schemaVersion=2;p.history.source='reconciled';p.history.reconciliation='minimum_confirmed';p.history.events=[transfer('buy','1','2'),{...transfer('out','2','3','2026-10-01'),amount:9000000}];
+ let model=modelFor([[1,{...appearance(2,10,20),goals:2}]]);model.matchdays=[1];model.season='2026/27';
+ const dom=new JSDOM('<body data-section="home"><section id="market"><button data-market-view="history">Clausulazos</button><div id="marketBody"></div></section></body>',{runScripts:'outside-only',url:'https://example.test'});
+ const w=dom.window,d=w.document;let resolveXi,calls=0,callback,failXi=false;
+ w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
+ w.CubanLeaguePlayerPoints={store:{snapshot:()=>({model,status:'ready'}),subscribe:fn=>callback=fn,readRows:()=>Promise.resolve([])}};
+ w.CUBAN_LEAGUE_SUPABASE={url:'https://db.example',publishableKey:'test'};
+ w.fetch=async(url,options)=>{
+  if(String(url).includes('get_published_official_xi')){calls++;assert.equal(JSON.parse(options.body).p_matchday,1);if(failXi)return {ok:false};return new Promise(resolve=>resolveXi=resolve);}
+  return {ok:true,json:async()=>[{payload:structuredClone(p)}]};
+ };
+ for(const file of ['market-core.js','market.js'])w.eval(read(file));
+ try{
+  d.body.dataset.section='market';await tick();await tick();d.querySelector('[data-market-view="history"]').click();d.querySelector('[data-market-history="performance"]').click();
+  d.querySelector('[data-performance-person="2"]').click();d.querySelector('[data-performance-operation="buy"]').click();
+  const body=d.getElementById('performanceDialogBody');assert.match(body.textContent,/Subtotal conocido/);assert.match(body.textContent,/Consultando los onces/);
+  const details=d.querySelector('[data-performance-rounds]');details.open=true;details.querySelector('summary').focus();
+  const xi=Array.from({length:11},(_,i)=>({misterPlayerId:String(i+1)}));resolveXi({ok:true,json:async()=>xi});await tick();await tick();
+  assert.match(body.textContent,/Total generado jugando/);assert.doesNotMatch(body.textContent,/Subtotal conocido/);
+  assert.equal(d.querySelector('.market-performance-income-value').textContent,'4.500.000 €');
+  assert.match(body.textContent,/Por puntos \(incluido capitán\)/);assert.match(body.textContent,/Por goles/);assert.match(body.textContent,/Por once ideal oficial/);
+  assert.match(body.textContent,/\+13.499.000 €/);assert.equal(d.querySelector('[data-performance-rounds]').open,true);assert.equal(d.activeElement.tagName,'SUMMARY');
+  callback();await tick();assert.equal(calls,1);
+  // A new published model invalidates the XI cache; failures leave the known points/goals visible.
+  failXi=true;model={...model};callback();await tick();await tick();
+  assert.equal(calls,2);assert.match(body.textContent,/Subtotal conocido/);assert.match(body.textContent,/reintentar/);
+  assert.equal(d.querySelector('.market-performance-income-value').textContent,'3.500.000 €');assert.doesNotMatch(body.textContent,/Balance/);
  }finally{w.close();}
 });
