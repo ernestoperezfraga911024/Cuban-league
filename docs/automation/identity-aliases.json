@@ -164,5 +164,34 @@
     "verified_at": "2026-11-20T19:38:06.461Z",
     "profile_sha256": "1dc997659098eceee6936a9b90b793dfc42c55f518d160292d20c1082e435d36",
     "reason": "El Real Betis identifica a su portero Manu González como Manuel González Pallarés. LaLiga y FutbolFantasy confirman el club, la posición y el nacimiento el 18/04/2007."
+  },
+  {
+    "team": "valencia",
+    "id": "aimar-blazquez",
+    "names": [
+      "Blázquez",
+      "Aimar Blázquez",
+      "Aimar Blázquez Labraca"
+    ],
+    "catalog_url": "https://www.laliga.com/es-GB/jugador/aimar-blazquez",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/aimar-blazquez/laliga-26-27",
+    "verified_at": "2026-11-20T19:47:35.881Z",
+    "profile_sha256": "5b58f0f209121dd805a05da3b0d1909fdc35f3789eb2951da55e9912bcf3a4f7",
+    "reason": "LaLiga identifica a Aimar Blázquez como delantero del Valencia CF en 2026/27. FutbolFantasy enlaza «Blázquez» con la ficha de Aimar Blázquez Labraca."
+  },
+  {
+    "team": "valencia",
+    "id": "iker-cordoba",
+    "names": [
+      "Córdoba",
+      "Iker Córdoba",
+      "Iker Córdoba Sánchez",
+      "I. Córdoba"
+    ],
+    "catalog_url": "https://www.laliga.com/jugador/iker-cordoba",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/iker-cordoba/laliga-26-27",
+    "verified_at": "2026-11-20T19:47:36.213Z",
+    "profile_sha256": "6d1aea43c11b6b445bdec3a462be274ecb088d542d530b2c5f797b341c8e737e",
+    "reason": "LaLiga identifica a Iker Córdoba como defensa del Valencia CF en 2026/27. FutbolFantasy enlaza «Córdoba» con la ficha de Iker Córdoba Sánchez."
   }
 ]
