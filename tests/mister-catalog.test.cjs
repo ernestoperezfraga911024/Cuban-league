@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,584);
+    assert.equal(c.recordCount,585);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -248,6 +248,24 @@ test('Diallo y Selu Diallo corresponden al mismo centrocampista del Alavés', as
     const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
     const names = ['Diallo', 'Selu Diallo', 'Mamadou Selu Diallo'];
     const roster = [{id: player.id, name: 'Selu Diallo', team: player.clubId}];
+    const {candidates} = identityReference(player.clubId, roster, names);
+    assert.deepEqual(candidates.map(row => row.verified_alias.id), names.map(() => player.id));
+  } finally {
+    dom.window.close();
+  }
+});
+
+test('Primo resuelve al portero del Levante también por su nombre completo', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const player = c.search('Alejandro Primo Hernández')[0];
+    assert.equal(player.id, 'alejandro-primo');
+    assert.equal(player.clubId, 'levante');
+    assert.equal(player.position, 'PT');
+    assert.ok(!player.misterId);
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    const names = ['Primo', 'Alejandro Primo', 'Álex Primo', 'A. Primo', 'Alejandro Primo Hernández'];
+    const roster = [{id: player.id, name: 'Álex Primo', team: player.clubId}];
     const {candidates} = identityReference(player.clubId, roster, names);
     assert.deepEqual(candidates.map(row => row.verified_alias.id), names.map(() => player.id));
   } finally {

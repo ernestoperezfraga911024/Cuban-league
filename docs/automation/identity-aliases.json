@@ -135,5 +135,21 @@
     "verified_at": "2026-11-20T19:13:00.236Z",
     "profile_sha256": "5fa5d4de39461972fd7c657f562e3559d8bfd467f0807e54007bcb394b87fd26",
     "reason": "FutbolFantasy enlaza «Diallo» con el perfil de Mamadou Selu Diallo. LaLiga confirma que Selu Diallo es centrocampista del Deportivo Alavés en 2026/27 y nació el 01/10/2003."
+  },
+  {
+    "team": "levante",
+    "id": "alejandro-primo",
+    "names": [
+      "Primo",
+      "Alejandro Primo",
+      "Álex Primo",
+      "A. Primo",
+      "Alejandro Primo Hernández"
+    ],
+    "catalog_url": "https://www.levanteud.com/jugadores/primo",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/alejandro-primo/laliga-26-27",
+    "verified_at": "2026-11-20T19:26:14.901Z",
+    "profile_sha256": "8e95a40426d9906ba561cd559021d5f9abd4561db1f3a05146fd2714247bbc6b",
+    "reason": "El Levante UD y LaLiga identifican a Álex Primo como portero del club. LaLiga y FutbolFantasy coinciden en el nacimiento el 10/07/2004. FutbolFantasy muestra Primo, Alejandro Primo y su nombre completo, Alejandro Primo Hernández."
   }
 ]
