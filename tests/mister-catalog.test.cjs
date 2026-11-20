@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,581);
+    assert.equal(c.recordCount,583);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -211,6 +211,27 @@ test('Óscar González Campos del filial del Málaga tiene ficha y alias propios
     const roster = [{id: player.id, name: 'Óscar González', team: player.clubId}];
     const {candidates} = identityReference(player.clubId, roster, ['Óscar González Campos']);
     assert.equal(candidates[0].verified_alias.id, player.id);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test('Makar Kotovshchikov y Ángel Arcos resuelven con su club y sus alias verificados', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    for (const [fullName, name, id, team, position] of [
+      ['Makar Vladislavovich Kotovshchikov', 'Makar Kotovshchikov', 'makar-kotovshchikov', 'espanyol', 'DL'],
+      ['Ángel Arcos Cadilla', 'Ángel Arcos', 'angel-arcos', 'celta-vigo', 'MC']
+    ]) {
+      const player = c.search(fullName)[0];
+      assert.equal(player.id, id);
+      assert.equal(player.clubId, team);
+      assert.equal(player.position, position);
+      assert.ok(!player.misterId);
+      const {candidates} = identityReference(team, [{id, name, team}], [name, fullName]);
+      assert.deepEqual(candidates.map(row => row.verified_alias.id), [id, id]);
+    }
   } finally {
     dom.window.close();
   }
