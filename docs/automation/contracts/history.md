@@ -1,6 +1,6 @@
 0. HISTORIAL DEL ONCE CONFIRMADO — INDEPENDIENTE DE LOS PROBABLES
 
-Esta misma tarea se comprueba cada hora de 06:00 a 23:00 America/New_York. Los horarios adicionales sirven para el historial; NO crean nuevos turnos de probables ni recuperan turnos caducados. No se garantiza ejecución al minuto del saque inicial. En cada ejecución empieza con select now() as observed_at, forecast_history.plan() as history_plan; antes de cualquier salida por slot=null o teams vacío del flujo de probables. Si el plan no tiene fixtures ni deliveries, no leas páginas para historial.
+La recogida del once oficial la ejecuta Supabase mediante el trabajo cuban-league-official-xi y la función official-xi-reader. Work omite este flujo en todos sus turnos. El reloj SQL selecciona partidos vencidos una vez por minuto. La primera lectura externa corresponde al minuto del inicio programado. Si falta confirmación, intenta de nuevo a los minutos 1, 3 y 5 y luego espacia los intentos. Tras una lectura inicial, el plan solicita verificación final desde los 150 minutos del inicio. Las instrucciones de verificación que siguen describen los controles del historial y sirven para diagnosticar incidencias.
 
 Procesa primero history_plan.deliveries: select forecast_history.deliver('FIXTURE_KEY','TEAM');. Son resultados ya guardados que pueden entregarse en Automático; no releas ni cambies su evidencia. Nunca uses p_manual=true, comandos de administrador, JWT ni cambios de modo. Manual queda ready; los retirados permanecen ocultos. Un resultado guardado no demuestra publicación.
 

@@ -101,6 +101,25 @@ test('history migration and official lineups are isolated and validated in Postg
       assert.equal(error.code, '22023', 'rejection must be a validation error, not an unrelated SQL failure');
     }
 
+    await isolated('clock consumes a private ticket once and delivers the frozen comparison', async () => {
+      await db.exec(fs.readFileSync(path.join(ROOT, 'supabase/migrations/20261120161000_official_xi_clock.sql'), 'utf8'));
+      const {rows} = await db.query('select forecast_history.plan() as plan');
+      const fixture = rows[0].plan.fixtures.find(f => f.fixture_key === FIXTURE);
+      const ticket = '21e94e06-cbd7-46b8-be81-401080d1aba1';
+      await db.query(`insert into forecast_history.xi_jobs(job_key,fixture,ticket,phase,last_attempt,attempts)
+        values($1,$2,$3,'queued',now(),1)`, [FIXTURE, JSON.stringify(fixture), ticket]);
+      const rpc = async (action, body = null) => (await db.query(
+        'select public.official_xi_worker($1,$2,$3) as value', [action,ticket,JSON.stringify(body)])).rows[0].value;
+      assert.equal((await rpc('claim')).fixture.fixture_key, FIXTURE);
+      assert.equal(await rpc('claim'), null);
+      const body = {state:'in_progress', fetched_at:iso(Date.now()), teams:{
+        [TEAM]:{starters:[...players(1,9),...players(12,2)]}, 'celta-vigo':{reason:'identidad_pendiente'}}};
+      const finished = await rpc('finish',body);
+      assert.equal(finished[TEAM].delivery.outcome,'published',JSON.stringify(finished));
+      assert.equal(finished['celta-vigo'],'identidad_pendiente');
+      assert.equal((await row()).hits,9);
+      assert.equal(await rpc('finish',body),null);
+    });
     await isolated('backfill preserves original publication and does not invent an official XI', async () => {
       const r = await row();
       assert.ok(r);

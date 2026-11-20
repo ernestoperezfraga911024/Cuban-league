@@ -1,3 +1,7 @@
+# Alcance de Work desde el 20/11/2026
+
+Supabase ejecuta el historial oficial por su cuenta. Work omite sus planes, lecturas y entregas en todos los turnos.
+
 PROTOCOLO DE ALINEACIONES E HISTORIAL (CONSERVADO)
 
 Actualiza las alineaciones probables y el historial de aciertos frente al once confirmado de los 20 clubes autorizados de Cuban League, exclusivamente LaLiga 2026/27, jornadas 13 a 38. Ernesto autorizó comenzar el 12/11/2026 y continuar con el próximo partido de cada club. Respeta el modo Automático/Manual y las retiradas elegidos por el usuario. Esta tarea sustituye al piloto del Madrid; NO ejecutes su protocolo anterior ni escribas en sus tablas.
@@ -11,7 +15,7 @@ Esta comprobación va ANTES de cualquier plan o salida global. No sustituye ning
 1. Lee select forecast_season.dispatch_gate(SCHEDULED_FOR::timestamptz); usando el instante ISO con zona del contexto Run/scheduled_for de esta ejecución. Si el contexto no lo proporciona, pasa NULL; nunca inventes la fecha. Usa SOLO dispatch_gate, no el auxiliar dispatch_gate_at.
 2. state=wait significa arranque anticipado, NO ausencia de trabajo. Espera poll_seconds (máximo45) fuera de una transacción SQL y vuelve a consultar dispatch_gate con el scheduled_for devuelto. Repite hasta ready/late; no termines ni marques completada la ejecución por un plan del turno anterior. No uses pg_sleep, transacciones abiertas, relojes simulados ni fechas futuras de lectura. Si no existe una capacidad de espera, informa bloqueo de ejecución anticipada; no declares éxito.
 3. state=ready: consulta de nuevo los planes reales de alineaciones Y noticias y sigue sus contratos. No reutilices planes obtenidos antes de esperar. state=late: consulta también ambos planes y sus mecanismos de recuperación instalados; nunca reabras un turno ni inventes sus claves. state=invalid: informa el contexto de programación inválido sin escribir publicaciones.
-4. Una salida anticipada de alineaciones (sin partido, turno terminado, cero equipos o recuperación ocupada) NO termina Noticias, Salud ni Historial. Evalúa cada flujo por separado. El estado completed del programador no acredita ninguna publicación: informa los resultados reales de la base de datos, los pendientes y las limitaciones.
+4. Una salida anticipada de alineaciones (sin partido, turno terminado, cero equipos o recuperación ocupada) NO termina Noticias ni Salud. Evalúa cada flujo por separado. El estado completed del programador no acredita ninguna publicación: informa los resultados reales de la base de datos, los pendientes y las limitaciones.
 5. Mantén los horarios lógicos actuales en America/New_York. Esta comprobación es privada, de lectura, sin llamadas desde la página pública y sin servicios nuevos.
 FIN RELOJ DE ARRANQUE
 
