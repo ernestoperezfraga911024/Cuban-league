@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,585);
+    assert.equal(c.recordCount,586);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -268,6 +268,24 @@ test('Primo resuelve al portero del Levante también por su nombre completo', as
     const roster = [{id: player.id, name: 'Álex Primo', team: player.clubId}];
     const {candidates} = identityReference(player.clubId, roster, names);
     assert.deepEqual(candidates.map(row => row.verified_alias.id), names.map(() => player.id));
+  } finally {
+    dom.window.close();
+  }
+});
+
+test('Manuel González Pallarés se resuelve como Manu González del Betis', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const player = c.search('Manuel González Pallarés')[0];
+    assert.equal(player.id, 'manu-gonzalez');
+    assert.equal(player.clubId, 'real-betis');
+    assert.equal(player.position, 'PT');
+    assert.ok(!player.misterId);
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    const names = ['Manu González', 'Manuel González Pallarés'];
+    const roster = [{id: player.id, name: 'Manu González', team: player.clubId}];
+    const {candidates} = identityReference(player.clubId, roster, names);
+    assert.deepEqual(candidates.map(row => row.verified_alias.id), [player.id, player.id]);
   } finally {
     dom.window.close();
   }
