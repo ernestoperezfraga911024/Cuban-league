@@ -65,6 +65,12 @@ su porcentaje original (también cero o null); no suma, promedia ni duplica la
 señal de su segunda aparición. El cuerpo, las parejas y la revisión originales
 se conservan; `source_roles` deja constancia de las apariciones secundarias.
 
+Cuando un suplente cubra dos puestos, conservar ambas parejas tácticas en la
+revisión y su identidad verificada. Las apariciones con el mismo porcentaje
+(incluidos cero y null) aportan una sola señal por fuente. Si los valores de
+dos apariciones como alternativa difieren, revisar la evidencia antes de usar
+un valor único. Los once titulares siempre tienen identidades distintas.
+
 Bajo70 se mantiene la alternativa evaluada, que puede ser otro titular o un
 candidato. Nunca puede ser el mismo jugador. Si la única relación observada era
 consigo mismo, se descarta esa relación; no se inventa otro relevo ni se altera

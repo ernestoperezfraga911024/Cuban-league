@@ -332,8 +332,13 @@ test('slot priority handles ties, multiple compatible options, cycles and occupi
  assert.equal(prioritizeSlots([{id:'b',alternative_id:'d'}],evaluated,fail).players[0].id,'b');
  assert.equal(prioritizeSlots([{id:'a',alternative_id:'b',alternative_ids:['c','e']}],evaluated,fail).players[0].id,'c');
  assert.equal(prioritizeSlots([{id:'a',alternative_id:'a'}],evaluated,fail).players[0].alternative_id,null);
- assert.throws(()=>prioritizeSlots([{id:'a',alternative_id:'b'},{id:'b',alternative_id:'e'}],evaluated,fail),/distribución táctica/);
- assert.throws(()=>prioritizeSlots([{id:'a',alternative_id:'b'},{id:'b',alternative_id:'a'}],evaluated,fail),/dos puestos/);
+ for(const secondAlternative of ['e','a']){
+   const joint=prioritizeSlots([{id:'a',alternative_id:'b'},{id:'b',alternative_id:secondAlternative}],evaluated,fail);
+   assert.deepEqual(joint.players.map(p=>p.id),['a','b']);
+ }
+ const shared=prioritizeSlots([{id:'a',alternative_ids:['c','e']},{id:'b',alternative_ids:['c','e']}],evaluated,fail);
+ assert.deepEqual(shared.players.map(p=>p.id),['c','b']);
+ assert.equal(shared.players[1].alternative_id,'e');
  const valid=prioritizeSlots([{id:'c',alternative_id:'b'},{id:'b',alternative_id:'e'}],evaluated,fail);assert.deepEqual(valid.players.map(p=>p.id),['c','b']);
  assert.throws(()=>prioritizeSlots([{id:'a',alternative_ids:'bad'}],evaluated,fail),/lista/);
 });
