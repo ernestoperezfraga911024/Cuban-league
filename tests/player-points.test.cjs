@@ -13,7 +13,7 @@ const tick=()=>new Promise(resolve=>setImmediate(resolve));
 test('the shared points module loads before app initialization and every changed asset is available offline',()=>{
  const html=read('index.html'),sw=read('sw.js');
  for(const name of ['app.js','player-points.js','market.js','market.css','market-core.js']){
-  const asset=name+'?v='+(name.startsWith('market')?'254-20261119-lineup-stages':name==='app.js'?'252-20261119-player-goals':'242-20261117-player-points');assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
+  const asset=name+'?v='+'255-20261119-clause-income';assert.ok(html.includes(asset));assert.ok(sw.includes(asset));
  }
  assert.ok(html.indexOf('<script src="player-points.js')<html.indexOf('<script src="app.js'));
  assert.doesNotMatch(html,/<script src="player-points[^>]+defer/);
@@ -29,6 +29,18 @@ test('links by stable ID across owners and renames; separates the exact captain 
  assert.equal(p.playerId,'p10');assert.equal(p.points,6);assert.equal(p.captainBonus,12);assert.equal(p.contributionPoints,18);
  assert.deepEqual(p.matchdays.map(d=>[d.matchday,d.points,d.appearances[0].participantId]),[[1,8,1],[2,-2,2]]);
  assert.equal(JSON.stringify(rows),before);assert.equal(m.playersByMisterId.get('999'),undefined);
+});
+test('income retains individual published goals including zero, never infers them from team totals',()=>{
+ const r=row();r.goals=8;r.player_goals={p0:0,p1:2,p2:-1,p3:'2',p4:null,p5:1.5};
+ const before=JSON.stringify(r),model=build({...options,rows:[r]});
+ const goals=id=>model.playersById.get(id).matchdays[0].appearances[0].goals;
+ assert.equal(goals('p0'),0);assert.equal(goals('p1'),2);
+ for(const id of ['p2','p3','p4','p5','p6'])assert.equal(goals(id),null);
+ assert.equal(JSON.stringify(r),before);
+ const fixed=structuredClone(r);fixed.player_goals.p1=3;
+ assert.equal(build({...options,rows:[r,fixed]}).diagnostics.ambiguousRows,1);
+ fixed.updated_at='2026-11-19T20:00:00Z';
+ assert.equal(build({...options,rows:[r,fixed]}).playersById.get('p1').matchdays[0].appearances[0].goals,3);
 });
 test('only catalog IDs join to Mister; names, missing identities, homonyms and duplicate provider IDs cannot guess a link',()=>{
  const r=row();r.lineup[0].player_id='legacy';r.lineup[0].player_name='Jugador 1';

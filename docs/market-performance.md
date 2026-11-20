@@ -39,8 +39,39 @@ pueden no dejar huella en los XI. Por ello la interfaz dice «según las etapas
 observadas» y explica que nuevos movimientos pueden modificar la atribución.
 No se confunde una etapa observada con todas las fechas de propiedad.
 
-No se generan ingresos monetarios ni balances hasta definir los pagos y disponer
-de las salidas necesarias. No se cambia ningún dato, catálogo, tabla ni recolector.
+## Bonificaciones y balance
+
+Tarifas confirmadas por Ernesto en la captura de Bonificaciones de Mister
+adjunta el 19/11/2026 (Miami): 100.000 por punto de jornada, 250.000 por gol,
+1.000.000 por jugador en el once ideal, sin premio por clasificación y
+1.000.000 fijo por jornada. El fijo es del participante y no se reparte entre
+futbolistas. La captura no configura un premio por portería a cero.
+
+El dinero generado jugando suma los puntos aportados (capitán incluido una sola
+vez), los goles individuales publicados en `player_goals` y las apariciones en
+el once ideal oficial de las jornadas atribuidas a la operación. Goles y once
+ideal no se multiplican por capitán. Se conservan ceros y contribuciones negativas.
+El XI ideal histórico del perfil y los MVP internos no sirven como fuente.
+
+Si faltan goles o un once oficial, aparece «Subtotal conocido» con las jornadas
+pendientes. No se sustituye lo desconocido por cero ni se presenta un total
+completo. Los aplazados mantienen la marca provisional; es un cálculo según
+las reglas, no una comprobación de un ingreso bancario en Mister.
+
+Una salida solo se vincula si es el siguiente clausulazo del futbolista, sale
+del comprador, tiene fecha posterior distinguible y no hay movimientos sin fecha
+ni empates en las fechas de compra/salida. Las ventas normales no están cubiertas.
+Con ingresos completos y esa salida se muestra el balance:
+generado jugando + importe de salida − precio pagado. Sin salida vinculable no
+se inventa su precio ni se calcula un balance final. Persiste la limitación del
+historial parcial indicada arriba.
+
+Los goles viajan en la lectura compartida existente de los XI, con degradación
+si el campo no está disponible. El once oficial se lee solo al abrir Rendimiento,
+una vez por jornada y modelo publicado, con hasta tres solicitudes concurrentes.
+Todas las personas y operaciones comparten la caché; una corrección publicada
+invalida el cálculo. Los fallos conservan los importes conocidos y permiten
+reintentar con Actualizar mercado. No se cambia ningún dato, tabla ni recolector.
 
 ## Actualización y eficiencia
 
@@ -58,6 +89,8 @@ y 2 con recompras sin orden distinguible. Estas cantidades son una instantánea,
 no una medida de exactitud contra una verdad externa.
 
 Ejemplo: Mbappé con Ernesto, J4–J12, 99 base + 19 extra de capitán = 118 puntos.
+Dinero generado con las tarifas confirmadas: 118 × 100.000 + 9 goles × 250.000
++ 4 onces ideales × 1.000.000 = 18.050.000. J8 conserva su marca provisional.
 Cálculo en el entorno local: aproximadamente 20 ms para esa instantánea; no es
 una medición de velocidad en teléfonos.
 
@@ -65,7 +98,10 @@ una medición de velocidad en teléfonos.
 
 `node --test tests/market-performance.test.cjs tests/market-public.test.cjs tests/player-points.test.cjs tests/service-worker.test.cjs`
 
-38 pruebas: etapa única, huecos sin alineación, recompras, reparto sin duplicar,
+Pruebas: etapa única, huecos sin alineación, recompras, reparto sin duplicar,
 ambigüedades, orden contradictorio, cero, negativos, bonus desconocido,
 provisionalidad, identidad, escape HTML, ordenación, carga asíncrona, correcciones,
-foco, diálogo y PWA.
+foco, diálogo y PWA. La ampliación económica comprueba tarifas, capitán sin
+duplicar, exclusión del fijo, goles desconocidos, XI oficiales incompletos,
+salidas ambiguas, caché compartida y fallos de carga. 78 pruebas locales pasan
+incluyendo las suites de instalación, navegación, perfiles y XI oficial.

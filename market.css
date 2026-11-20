@@ -12,6 +12,16 @@
 .market-performance-people small,.market-performance-events small{display:block;font-size:.875rem;line-height:1.5;color:var(--market-muted);font-weight:400}
 .market-performance-spent{margin-left:auto;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:.875rem}
 .market-performance-spent .market-performance-points{color:#b9ccbd;font-size:1.125rem}
+.market-performance-income-label{display:block;color:var(--market-muted);font-size:.875rem;margin-top:8px}
+.market-performance-income-value{color:var(--market-ink);font-size:1rem}
+.market-income-breakdown{margin:16px 0;font-variant-numeric:tabular-nums}
+.market-income-breakdown>div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--market-line)}
+.market-income-breakdown dt{font-size:.875rem;min-width:0}
+.market-income-breakdown dd{margin:0;text-align:right;flex-shrink:0;font-size:1rem;font-weight:600}
+.market-income-breakdown small,.market-income-total small{display:block;font-size:.875rem;font-weight:400;color:var(--market-muted)}
+.market-income-total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:18px 0;font-variant-numeric:tabular-nums}
+.market-income-total strong{font-size:1.375rem;text-align:right;white-space:nowrap}
+.market-income-total .is-positive{color:#b9ccbd}.market-income-total .is-negative{color:#edaaa4}
 .market-performance-events .market-event-player>span{min-width:0;overflow-wrap:anywhere}
 .market-performance-title{display:flex;align-items:center;gap:12px;margin:20px 0}
 .market-performance-title img{object-fit:contain;flex-shrink:0}
@@ -33,7 +43,7 @@
 .market-performance-context summary{cursor:pointer;padding:12px 0;font-size:.875rem}
 .market-performance-rounds{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:right;font-size:.875rem;font-variant-numeric:tabular-nums}
 .market-performance-rounds>*:nth-child(4n+1){text-align:left}
-@media(max-width:640px){.market-performance-people{grid-template-columns:1fr}.market-performance-events .market-event-player{gap:8px;min-width:0}.market-performance-events .market-event-player img{width:32px;height:40px}.market-performance-events .market-performance-spent{max-width:100px}#market .market-performance-dialog{padding:18px}.market-performance-facts{gap:12px}.market-history-toolbar{flex-wrap:wrap}}
+@media(max-width:640px){.market-performance-people{grid-template-columns:1fr}.market-performance-events .market-event-player{gap:8px;min-width:0}.market-performance-events .market-event-player img{width:32px;height:40px}.market-performance-events .market-performance-spent{max-width:130px}#market .market-performance-dialog{padding:18px}.market-performance-facts{gap:12px}.market-history-toolbar{flex-wrap:wrap}.market-income-total{flex-wrap:wrap}.market-income-breakdown>div{gap:8px}}
 body.f05-theme[data-section="market"]{background:#111a1b;color:#f0f0e9}
 body.f05-theme[data-section="market"]::before{background:#111a1b!important;background-image:none!important}
 body.f05-theme[data-section="market"] :is(.topbar,.main-nav,.editorial-mobile-nav){background:#111a1b;border-color:#374143;box-shadow:none}

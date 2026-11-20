@@ -138,23 +138,72 @@
   return `<div class="market-rivals-intro"><h4>Top 10 operaciones más caras</h4><p>Los mayores importes pagados por cláusula en el historial registrado. Los empates comparten puesto.</p></div>${events.length?`<ol class="market-expensive" aria-label="Operaciones de mayor importe">${events.map(event=>`<li><span class="market-rank" aria-label="Puesto ${event.rank}">${event.rank}</span><div class="market-expensive-main"><div class="market-expensive-heading"><div class="market-event-player">${photo(players.get(event.playerId))}<div><strong>${escape(players.get(event.playerId).name)}</strong>${event.date?`<time datetime="${event.date}">${event.date.split('-').reverse().join('/')}</time>`:'<span>Fecha no disponible</span>'}</div></div><div class="market-expensive-amount">${price(event.amount)}</div></div><div class="market-expensive-parties">${party('Pagó',managers.get(event.to))}${party('Cobró',managers.get(event.from))}</div></div></li>`).join('')}</ol>`:'<p class="market-empty">Todavía no hay clausulazos registrados.</p>'}`;
  }
  let performanceCache=null;
+ const incomeSources=new WeakMap();
+ function incomeSource(model){
+  if(!model)return null;
+  if(!incomeSources.has(model))incomeSources.set(model,{days:new Map(),revision:0,started:false,loading:false,failed:0});
+  return incomeSources.get(model);
+ }
+ async function loadIncomeSources(){
+  const model=pointStore?.snapshot().model,source=incomeSource(model),c=window.CUBAN_LEAGUE_SUPABASE;
+  if(!source||source.started||!c?.url||!c?.publishableKey)return;
+  source.started=true;source.loading=true;
+  const days=[...(model.matchdays||[])];let cursor=0;
+  // One request per published round, shared by every participant and operation.
+  // Bounded concurrency; a failed XI never removes points or goals already known.
+  await Promise.all([0,1,2].map(async()=>{
+   while(cursor<days.length){
+    const day=days[cursor++],controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+    try{
+     const response=await fetch(c.url.replace(/\/$/,'')+'/rest/v1/rpc/get_published_official_xi',{
+      method:'POST',cache:'no-store',signal:controller.signal,
+      headers:{apikey:c.publishableKey,'Content-Type':'application/json'},
+      body:JSON.stringify({p_season:model.season,p_matchday:day})});
+     if(!response.ok)throw Error('xi_unavailable');
+     const players=await response.json(),ids=core.officialXiIds(players);
+     if(players!==null&&!ids)throw Error('xi_invalid');
+     source.days.set(day,ids);
+    }catch{source.failed++;}finally{clearTimeout(timer);}
+   }
+  }));
+  source.loading=false;source.revision++;
+  if(pointStore?.snapshot().model===model)refreshPerformance();
+ }
  function performanceRows(p){
-  const model=pointStore?.snapshot().model;
-  if(performanceCache?.capture!==p||performanceCache.model!==model)performanceCache={capture:p,model,rows:core.performance(p,model)};
+  const model=pointStore?.snapshot().model,source=incomeSource(model),revision=source?.revision||0;
+  if(performanceCache?.capture!==p||performanceCache.model!==model||performanceCache.revision!==revision)performanceCache={capture:p,model,revision,rows:core.performance(p,model,source?.days)};
   return performanceCache.rows;
  }
  const performanceReasons={no_lineups:'Sin XI publicados para este futbolista.',no_appearances:'No hay apariciones con este participante en los XI disponibles.',shared_round:'El jugador aparece en más de un equipo en una misma jornada; falta separar esas etapas.',stage_count:'Las etapas observadas no coinciden con las compras registradas.',purchase_order:'Falta distinguir el orden de las recompras.',seller_mismatch:'El cambio de equipo observado no coincide con el vendedor; puede faltar un movimiento.',movement_order:'El orden de las compras no coincide con las etapas observadas.'};
  const fullDate=value=>value?value.split('-').reverse().join('/'):'Fecha pendiente';
+ const incomeLabel=income=>income?.complete?'Generado jugando':'Generado conocido';
+ function incomeList(event){return event.income?`<span class="market-performance-income-label">${incomeLabel(event.income)}</span><strong class="market-performance-income-value">${escape(money(event.income.knownTotal))}</strong>`:'';}
  function performanceList(p){
   const managers=performanceRows(p),selected=managers.find(m=>m.id===performanceParticipant);
   if(!selected)return `<div class="market-performance-intro"><h3>Rendimiento</h3><p>Elige un participante para consultar sus compras por clausulazo.</p></div><ul class="market-performance-people">${managers.map(m=>`<li><button type="button" data-performance-person="${m.id}">${participantPhoto(m)}<span><strong>${escape(m.name)}</strong><small>${m.events.length} ${m.events.length===1?'clausulazo':'clausulazos'}</small></span><span class="market-performance-spent"><small>Invertido</small>${escape(money(m.spent))}</span></button></li>`).join('')}</ul>`;
   const names=new Map(p.managers.map(m=>[m.id,m.name]));
   const snapshot=pointStore?.snapshot(),attributed=selected.events.filter(e=>e.operationPoints!==null).length;
-  return `<button type="button" class="market-performance-back" data-performance-back>Todos los participantes</button><div class="market-performance-title">${participantPhoto(selected)}<div><h3 tabindex="-1" id="performanceHeading">${escape(selected.name)}</h3><p>${selected.events.length} clausulazos · ${escape(money(selected.spent))} invertidos</p></div></div><p class="market-performance-note" role="status">${snapshot?.model?`Mayor aporte en los XI primero, incluido capitán. ${attributed} de ${selected.events.length} compras atribuidas según las etapas observadas. Las pendientes aparecen al final.`:snapshot?.status==='error'?'No se pudieron cargar los puntos. Pulsa Actualizar para reintentar.':'Consultando puntos de los XI publicados…'}</p>${selected.events.length?`<ul class="market-performance-events">${selected.events.map(event=>`<li><button type="button" data-performance-operation="${escape(event.reference)}" aria-haspopup="dialog"><span class="market-event-player">${photo(event.player)}<span><strong>${escape(event.player.name)}</strong><small>De ${escape(names.get(event.from))} · ${fullDate(event.date)}</small>${event.purchases>1?`<small>${event.purchases} compras · etapas separadas</small>`:''}</span></span><span class="market-performance-spent"><strong class="market-performance-points">${event.operationPoints===null?'—':averageFormat.format(event.operationPoints)+' pts'}</strong><small>${event.operationPoints===null?(snapshot?.model?'Etapa pendiente':'Puntos pendientes'):event.operationAppearances.length+' jornadas'+(event.operationProvisional?' · Provisional':'')}</small><small>${escape(money(event.amount))}</small></span></button></li>`).join('')}</ul>`:'<p class="market-empty">Este participante no tiene compras por clausulazo en el historial registrado.</p>'}`;
+  return `<button type="button" class="market-performance-back" data-performance-back>Todos los participantes</button><div class="market-performance-title">${participantPhoto(selected)}<div><h3 tabindex="-1" id="performanceHeading">${escape(selected.name)}</h3><p>${selected.events.length} clausulazos · ${escape(money(selected.spent))} invertidos</p></div></div><p class="market-performance-note" role="status">${snapshot?.model?`Mayor aporte en los XI primero, incluido capitán. ${attributed} de ${selected.events.length} compras atribuidas según las etapas observadas. Las pendientes aparecen al final.`:snapshot?.status==='error'?'No se pudieron cargar los puntos. Pulsa Actualizar para reintentar.':'Consultando puntos de los XI publicados…'}</p>${selected.events.length?`<ul class="market-performance-events">${selected.events.map(event=>`<li><button type="button" data-performance-operation="${escape(event.reference)}" aria-haspopup="dialog"><span class="market-event-player">${photo(event.player)}<span><strong>${escape(event.player.name)}</strong><small>De ${escape(names.get(event.from))} · ${fullDate(event.date)}</small>${event.purchases>1?`<small>${event.purchases} compras · etapas separadas</small>`:''}</span></span><span class="market-performance-spent"><strong class="market-performance-points">${event.operationPoints===null?'—':averageFormat.format(event.operationPoints)+' pts'}</strong><small>${event.operationPoints===null?(snapshot?.model?'Etapa pendiente':'Puntos pendientes'):event.operationAppearances.length+(event.operationAppearances.length===1?' jornada':' jornadas')+(event.operationProvisional?' · Provisional':'')}</small><small>Compra ${escape(money(event.amount))}</small>${incomeList(event)}</span></button></li>`).join('')}</ul>`:'<p class="market-empty">Este participante no tiene compras por clausulazo en el historial registrado.</p>'}`;
  }
  function performanceScores(base,bonus,total,appearances){
   const score=n=>n===null?'—':averageFormat.format(n);
-  return `<dl class="market-performance-scores"><div><dt>Base</dt><dd>${score(base)}</dd></div><div><dt>Extra capitán</dt><dd>${score(bonus)}</dd></div><div><dt>Total aportado</dt><dd>${score(total)}</dd></div></dl>${appearances.length?`<details data-performance-rounds><summary>Ver ${appearances.length} jornadas en su XI</summary><div class="market-performance-rounds"><span>Jornada</span><span>Base</span><span>Capitán</span><span>Total</span>${appearances.map(a=>`<span>J${a.matchday}${a.provisional?' *':''}</span><span>${score(a.points)}</span><span>${score(a.captainBonus)}</span><strong>${score(a.contributionPoints)}</strong>`).join('')}</div></details>`:''}`;
+  return `<dl class="market-performance-scores"><div><dt>Base</dt><dd>${score(base)}</dd></div><div><dt>Extra capitán</dt><dd>${score(bonus)}</dd></div><div><dt>Total aportado</dt><dd>${score(total)}</dd></div></dl>${appearances.length?`<details data-performance-rounds><summary>Ver ${appearances.length} ${appearances.length===1?'jornada':'jornadas'} en su XI</summary><div class="market-performance-rounds"><span>Jornada</span><span>Base</span><span>Capitán</span><span>Total</span>${appearances.map(a=>`<span>J${a.matchday}${a.provisional?' *':''}</span><span>${score(a.points)}</span><span>${score(a.captainBonus)}</span><strong>${score(a.contributionPoints)}</strong>`).join('')}</div></details>`:''}`;
+ }
+ function incomeContent(event,p){
+  const income=event.income,source=incomeSource(pointStore?.snapshot().model);
+  const incomplete=missing=>missing.length?` · Falta ${missing.map(d=>'J'+d).join(', ')}`:'';
+  const row=(label,quantity,rate,amount,missing=[])=>`<div><dt>${label}<small>${quantity} × ${escape(money(rate))}${incomplete(missing)}</small></dt><dd>${escape(money(amount))}</dd></div>`;
+  let detail='<p>El importe se calculará cuando se pueda atribuir esta etapa.</p>';
+  if(income){
+   detail=`<dl class="market-income-breakdown">${row('Por puntos (incluido capitán)',averageFormat.format(income.points),core.incomeRates.point,income.pointIncome)}${row('Por goles',income.goals,core.incomeRates.goal,income.goalIncome,income.missingGoals)}${row('Por once ideal oficial',income.ideal,core.incomeRates.idealXi,income.idealIncome,income.missingIdeal)}</dl><div class="market-income-total"><span>${income.complete?'Total generado jugando':'Subtotal conocido'}</span><strong>${escape(money(income.knownTotal))}</strong></div>`;
+   if(!income.complete)detail+=`<p role="status">${source?.loading?'Consultando los onces ideales oficiales…':source?.failed?'Falta cargar algún once ideal. Pulsa Actualizar mercado para reintentar.':'Faltan los datos indicados para completar el total.'} El subtotal incluye solo los conceptos disponibles.</p>`;
+  }
+  if(event.exit){
+   const buyer=p.managers.find(m=>m.id===event.exit.to),balance=income?.complete?income.knownTotal+event.exit.amount-event.amount:null;
+   detail+=`<dl class="market-income-breakdown"><div><dt>Cobrado por clausulazo de salida<small>${fullDate(event.exit.date)} · ${escape(buyer?.name||'')}</small></dt><dd>${escape(money(event.exit.amount))}</dd></div></dl>`;
+   if(balance!==null)detail+=`<div class="market-income-total"><span>Balance${event.operationProvisional?' provisional':''}<small>Generado jugando + salida − compra</small></span><strong class="${balance<0?'is-negative':'is-positive'}">${balance>0?'+':''}${escape(money(balance))}</strong></div>`;
+  }else detail+='<p>Salida sin vincular: el balance de compra y venta queda pendiente.</p>';
+  return `<section class="market-performance-context market-performance-economics" aria-label="Rendimiento económico"><h4>Dinero generado</h4>${detail}<p>Calculado con las bonificaciones de la liga y las jornadas de esta etapa. El millón fijo por jornada corresponde al participante y queda fuera de este cálculo.</p></section>`;
  }
  function operationContent(p){
   const manager=performanceRows(p).find(m=>m.id===performanceParticipant),event=manager?.events.find(e=>e.reference===performanceOperation);
@@ -163,11 +212,12 @@
   const heading=`<header class="market-performance-title">${photo(event.player)}<div><small>Detalle del clausulazo</small><h3 id="performanceDialogTitle">${escape(event.player.name)}</h3><p>${escape(manager.name)} · ${fullDate(event.date)}</p></div></header><dl class="market-performance-facts"><div><dt>Comprador</dt><dd>${escape(manager.name)}</dd></div><div><dt>Vendedor</dt><dd>${escape(seller?.name)}</dd></div><div><dt>Precio pagado</dt><dd>${escape(money(event.amount))}</dd></div><div><dt>Fecha</dt><dd>${fullDate(event.date)}</dd></div></dl>`;
   const loading=`<p role="status">${snapshot?.status==='error'?'No se pudieron cargar los puntos. Cierra el detalle y pulsa Actualizar para reintentar.':'Consultando puntos publicados…'}</p>`;
   const detail=attributed?`<section class="market-performance-context" aria-label="Puntos atribuidos según los XI"><h4>Aporte en esta etapa</h4><p>Según los XI publicados con ${escape(manager.name)}: ${event.operationAppearances.map(a=>'J'+a.matchday).join(', ')}.</p>${performanceScores(event.operationBase,event.operationBonus,event.operationPoints,event.operationAppearances)}<p>La secuencia de equipos y las compras registradas vinculan esta etapa con el clausulazo. Solo se cuentan las jornadas alineado; el historial incompleto puede cambiar la atribución.</p></section>`:`<div class="market-performance-pending"><strong>Puntos de esta operación: pendientes de atribuir</strong><p>${performanceReasons[event.reason]||'Falta distinguir esta etapa.'}</p></div><section class="market-performance-context" aria-label="Referencia de puntos con el participante"><h4>Puntos con ${escape(manager.name)}</h4><p>Todas sus etapas con este participante. Estos puntos no se atribuyen a la compra seleccionada.</p>${performanceScores(event.ownerBase,event.ownerBonus,event.ownerPoints,event.appearances)}${event.appearances.length?'':'<p>Sin apariciones verificadas en los XI publicados.</p>'}</section>`;
-  return heading+(snapshot?.model?detail:loading)+`${event.partial||(attributed?event.operationProvisional:event.provisional)?'<p class="market-performance-note">Datos parciales o provisionales; pueden cambiar al actualizar las jornadas. * Jornada con partidos aplazados.</p>':''}<p class="market-performance-note">La salida, el dinero generado y el balance quedan pendientes de verificar; no se muestran como cero.</p>`;
+  return heading+(snapshot?.model?detail+incomeContent(event,p):loading)+`${event.partial||(attributed?event.operationProvisional:event.provisional)?'<p class="market-performance-note">Datos parciales o provisionales; pueden cambiar al actualizar las jornadas. * Jornada con partidos aplazados.</p>':''}`;
  }
  function performanceView(p){return `<div id="marketPerformance">${performanceList(p)}</div><p class="market-performance-note">Solo compras por cláusula registradas. Las compras repetidas se conservan por separado.</p><dialog id="performanceDialog" class="market-performance-dialog" aria-labelledby="performanceDialogTitle"><button type="button" class="market-performance-close" data-performance-close aria-label="Cerrar detalle">Cerrar</button><div id="performanceDialogBody"></div></dialog>`;}
  function refreshPerformance(){
   const target=document.getElementById('marketPerformance');if(!target||!cached)return;
+  void loadIncomeSources();
   const focus=document.activeElement,reference=focus?.dataset.performanceOperation;
   target.innerHTML=performanceList(cached);
   if(reference)[...target.querySelectorAll('[data-performance-operation]')].find(b=>b.dataset.performanceOperation===reference)?.focus({preventScroll:true});
@@ -200,6 +250,7 @@
   if(!cached){host.innerHTML='<p class="market-empty">El mercado todavía no tiene una captura publicada.</p>';return;}
   section.querySelectorAll('[data-market-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.marketView===state.view)));
   host.innerHTML=(state.view==='players'?playerView(cached):historyView(cached))+(state.view==='players'&&Date.now()-Date.parse(cached.capturedAt)>86400000?'<p class="market-stale">Datos de hace más de 24 horas. Los valores pueden haber cambiado.</p>':'');
+  if(state.view==='history'&&state.historyView==='performance')void loadIncomeSources();
   if(state.view==='players'){document.getElementById('marketOwner').value=state.owner;document.getElementById('marketSort').value=state.sort;playerResults();}
  }
  async function load(force=false){
@@ -251,7 +302,7 @@
   if(b.hasAttribute('data-performance-close')){document.getElementById('performanceDialog').close();return;}
   if(b.dataset.marketAction==='reload'){load(true);return;}
   if(b.dataset.marketView){state.view=b.dataset.marketView;if(state.view==='players')loadPoints();render();return;}
-  if(b.dataset.marketHistory){state.historyView=b.dataset.marketHistory;state.info=false;if(state.historyView==='performance')loadPoints();render();(section.querySelector(`[data-market-history="${state.historyView}"]`)||section.querySelector('[data-market-history]'))?.focus();return;}
+  if(b.dataset.marketHistory){state.historyView=b.dataset.marketHistory;state.info=false;if(state.historyView==='performance'){loadPoints();void loadIncomeSources();}render();(section.querySelector(`[data-market-history="${state.historyView}"]`)||section.querySelector('[data-market-history]'))?.focus();return;}
   if(b.dataset.marketAction==='info'){state.info=!state.info;document.getElementById('marketHistoryInfo').hidden=!state.info;b.setAttribute('aria-expanded',String(state.info));return;}
   if(b.dataset.marketPosition){state.position=b.dataset.marketPosition;state.limit=40;section.querySelectorAll('[data-market-position]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.marketPosition===state.position)));playerResults();return;}
   if(b.dataset.marketMetric){state.metric=b.dataset.marketMetric;render();section.querySelector(`[data-market-metric="${state.metric}"]`)?.focus();return;}

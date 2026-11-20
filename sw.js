@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v254-lineup-stages';
+const CACHE_NAME = 'cuban-league-v255-clause-income';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,14 +12,14 @@ const APP_SHELL = [
   './brand-f05.css?v=182-20261018-f05-2',
   './mobile-navigation.css?v=178-20261015',
   './editorial-ui.js?v=176-20261015',
-  './app.js?v=252-20261119-player-goals',
+  './app.js?v=255-20261119-clause-income',
   './ideal-xi.js?v=246-20261118-ideal-xi',
   './profile-chart.css?v=247-20261118-profile-chart',
   './ideal-xi.css?v=246-20261118-ideal-xi',
-  './player-points.js?v=242-20261117-player-points',
-  './market-core.js?v=254-20261119-lineup-stages',
-  './market.js?v=254-20261119-lineup-stages',
-  './market.css?v=254-20261119-lineup-stages',
+  './player-points.js?v=255-20261119-clause-income',
+  './market-core.js?v=255-20261119-clause-income',
+  './market.js?v=255-20261119-clause-income',
+  './market.css?v=255-20261119-clause-income',
   './install-welcome.js?v=229-20261114',
   './install-welcome.css?v=229-20261114',
   './site-analytics.js?v=219-20261113',
