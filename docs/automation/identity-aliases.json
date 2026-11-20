@@ -121,5 +121,19 @@
     "verified_at": "2026-11-20T16:06:39.221Z",
     "profile_sha256": "31a8d2ecced2d5811305a60193dc30f801bd3b07f9e2cb80b0b1f48c49712e1a",
     "reason": "LaLiga identifica a Ángel Arcos como centrocampista del Celta Fortuna. FutbolFantasy confirma el nombre completo y su vinculación al filial."
+  },
+  {
+    "team": "alaves",
+    "id": "selu-diallo",
+    "names": [
+      "Diallo",
+      "Selu Diallo",
+      "Mamadou Selu Diallo"
+    ],
+    "catalog_url": "https://www.laliga.com/jugador/selu-diallo",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/selu-diallo/laliga-26-27",
+    "verified_at": "2026-11-20T19:13:00.236Z",
+    "profile_sha256": "5fa5d4de39461972fd7c657f562e3559d8bfd467f0807e54007bcb394b87fd26",
+    "reason": "FutbolFantasy enlaza «Diallo» con el perfil de Mamadou Selu Diallo. LaLiga confirma que Selu Diallo es centrocampista del Deportivo Alavés en 2026/27 y nació el 01/10/2003."
   }
 ]
