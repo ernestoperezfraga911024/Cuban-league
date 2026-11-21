@@ -193,5 +193,48 @@
     "verified_at": "2026-11-20T19:47:36.213Z",
     "profile_sha256": "6d1aea43c11b6b445bdec3a462be274ecb088d542d530b2c5f797b341c8e737e",
     "reason": "LaLiga identifica a Iker Córdoba como defensa del Valencia CF en 2026/27. FutbolFantasy enlaza «Córdoba» con la ficha de Iker Córdoba Sánchez."
+  },
+  {
+    "team": "sevilla",
+    "id": "carlos-toscano",
+    "names": [
+      "Carlos Toscano",
+      "Carlos Armando Toscano Mota",
+      "Toscano"
+    ],
+    "catalog_url": "https://prod.sevillafc.es/en/actualidad/noticias/convocatoria-derbi-sevilla-betis-laliga-2026-2027",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/carlos-toscano",
+    "verified_at": "2026-11-21T13:09:03.936997+00:00",
+    "profile_sha256": "df3572b91351213a9fc9765263be643963085efd37aa194cfccad8b44c6c7d62",
+    "reason": "Convocatoria del Sevilla FC del 20/11/2026 para el derbi, contrastada con la ficha de FutbolFantasy y los datos de Transfermarkt."
+  },
+  {
+    "team": "sevilla",
+    "id": "tamiou-kpebane",
+    "names": [
+      "Tamiou Kpebane",
+      "Tamiou Miguel Kpebane",
+      "Kpebane",
+      "Tamiou K."
+    ],
+    "catalog_url": "https://prod.sevillafc.es/en/actualidad/noticias/convocatoria-derbi-sevilla-betis-laliga-2026-2027",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/tamiou-kpebane",
+    "verified_at": "2026-11-21T13:09:03.895823+00:00",
+    "profile_sha256": "b72e7080040f30a4738157c0a01418c83e22b1e07cb583d33a16a983704bb923",
+    "reason": "Convocatoria del Sevilla FC del 20/11/2026 para el derbi, contrastada con la ficha de FutbolFantasy y los datos de BDFutbol."
+  },
+  {
+    "team": "sevilla",
+    "id": "marc-scuri",
+    "names": [
+      "Marc Scuri",
+      "Marc Scuri Martí",
+      "Scuri"
+    ],
+    "catalog_url": "https://prod.sevillafc.es/en/actualidad/noticias/convocatoria-derbi-sevilla-betis-laliga-2026-2027",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/marc-scuri",
+    "verified_at": "2026-11-21T13:09:04.076234+00:00",
+    "profile_sha256": "3045bc38f9e25be5ae23d9dd72538ec9706b9c226aba21d6c80fad034361a4d0",
+    "reason": "Convocatoria del Sevilla FC del 20/11/2026 para el derbi, contrastada con la ficha de FutbolFantasy y los datos de BDFutbol."
   }
 ]

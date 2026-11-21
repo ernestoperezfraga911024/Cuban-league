@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,588);
+    assert.equal(c.recordCount,591);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -312,4 +312,26 @@ test('Blázquez y Córdoba resuelven a dos jugadores distintos del Valencia', as
   } finally {
     dom.window.close();
   }
+});
+
+test('Los tres debutantes convocados por el Sevilla tienen identidades distintas', async () => {
+  const {dom, catalog: c} = await catalog();
+  try {
+    const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+    for (const [alias, fullName, id, position] of [
+      ['Toscano', 'Carlos Armando Toscano Mota', 'carlos-toscano', 'PT'],
+      ['Tamiou K.', 'Tamiou Miguel Kpebane', 'tamiou-kpebane', 'DF'],
+      ['Scuri', 'Marc Scuri Martí', 'marc-scuri', 'DL']
+    ]) {
+      const player = c.search(fullName)[0];
+      assert.equal(player.id, id);
+      assert.equal(player.clubId, 'sevilla');
+      assert.equal(player.position, position);
+      assert.ok(!player.misterId);
+      const roster = [{id, team: player.clubId, name: player.displayName}];
+      const {candidates} = identityReference(player.clubId, roster, [alias]);
+      assert.equal(candidates.length, 1);
+      assert.equal(candidates[0].verified_alias.id, id);
+    }
+  } finally { dom.window.close(); }
 });
