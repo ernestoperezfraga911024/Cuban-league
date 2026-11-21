@@ -12,7 +12,9 @@ const verified={
   'j-otto':['jonny-castro'], 't-martinez':['antonio-martinez'], 'a-perez-alaves':['angel-perez-1'],
   'g-tsitaishvili':['georgiy-tsitaishvili'], 'a-ratiu':['andrei-florin'],
   'j-copete':['jose-manuel-copete'], 'j-guerra':['javi-guerra-1'], 'd-raba':['daniel-raba'],
-  'n-souza':['natan'], 'isco':['isco-alarcon']
+  'n-souza':['natan'], 'isco':['isco-alarcon'],
+  'a-guler':['arda-gler'], 'a-carreras':['lvaro-fernandez-1'],
+  'h-alvarez':['hugo-lvarez-'], 'i-radu':['andrei-radu']
 };
 const profiles={};
 for(const p of catalog){
