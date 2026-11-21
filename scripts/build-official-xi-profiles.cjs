@@ -11,7 +11,8 @@ const verified={
   'a-calatrava':['lex-calatrava'], 'a-fortuno':['ngel-fortuno'],
   'j-otto':['jonny-castro'], 't-martinez':['antonio-martinez'], 'a-perez-alaves':['angel-perez-1'],
   'g-tsitaishvili':['georgiy-tsitaishvili'], 'a-ratiu':['andrei-florin'],
-  'j-copete':['jose-manuel-copete'], 'j-guerra':['javi-guerra-1'], 'd-raba':['daniel-raba']
+  'j-copete':['jose-manuel-copete'], 'j-guerra':['javi-guerra-1'], 'd-raba':['daniel-raba'],
+  'n-souza':['natan'], 'isco':['isco-alarcon']
 };
 const profiles={};
 for(const p of catalog){

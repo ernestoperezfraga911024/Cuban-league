@@ -3,6 +3,14 @@
   "updated_on": "2026-11-21",
   "incidents": [
     {
+      "code": "betis-official-j13-profile-variants",
+      "status": "guarded",
+      "failure": "El once del Betis quedó pendiente tras ocho intentos por el perfil natan. La verificación del once completo detectó también isco-alarcon.",
+      "prevention": "Vincular los dos perfiles verificados con N. Souza e Isco y comprobar la unicidad dentro de su plantilla.",
+      "production_evidence": "Sevilla–Betis J13, 21/11/2026 a las 15:01 de Miami. Once final del Betis visible con 11 titulares y 10 aciertos.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
+    {
       "code": "rayo-valencia-official-j13-profile-variants",
       "status": "guarded",
       "failure": "Los onces de Rayo y Valencia quedaron pendientes al no reconocer los perfiles de Tsitaishvili y Copete. El cotejo completo detectó también los enlaces de Rațiu, Guerra y Raba.",

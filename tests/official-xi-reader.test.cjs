@@ -55,3 +55,11 @@ test('Rayo and Valencia J13 profile variants have exactly one owner on their tea
     }
   }
 });
+
+test('verified Betis profiles for Natan and Isco identify one starter each',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players.filter(p=>p.club_id==='real-betis');
+  for(const [slug,id] of [['natan','n-souza'],['isco-alarcon','isco']]){
+    assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[id]);
+  }
+});
