@@ -40,3 +40,18 @@ test('the three Alavés J13 profile variants resolve within the authorized club 
     assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[id]);
   }
 });
+
+test('Rayo and Valencia J13 profile variants have exactly one owner on their team',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players;
+  const mappings={
+    'rayo-vallecano':{'georgiy-tsitaishvili':'g-tsitaishvili','andrei-florin':'a-ratiu'},
+    valencia:{'jose-manuel-copete':'j-copete','javi-guerra-1':'j-guerra','daniel-raba':'d-raba'}
+  };
+  for(const [team,slugs] of Object.entries(mappings)){
+    for(const [slug,id] of Object.entries(slugs)){
+      const owners=roster.filter(p=>p.club_id===team && profiles[p.id]?.includes(slug));
+      assert.deepEqual(owners.map(p=>p.id),[id]);
+    }
+  }
+});

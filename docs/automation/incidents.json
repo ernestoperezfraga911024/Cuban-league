@@ -3,6 +3,14 @@
   "updated_on": "2026-11-21",
   "incidents": [
     {
+      "code": "rayo-valencia-official-j13-profile-variants",
+      "status": "guarded",
+      "failure": "Los onces de Rayo y Valencia quedaron pendientes al no reconocer los perfiles de Tsitaishvili y Copete. El cotejo completo detectó también los enlaces de Rațiu, Guerra y Raba.",
+      "prevention": "Relacionar cada uno de los cinco perfiles verificados con su jugador del catálogo y comprobar la unicidad de los titulares dentro de cada club.",
+      "production_evidence": "Rayo–Valencia J13, 21/11/2026 a las 11:42 de Miami. Ambos onces visibles con 11 titulares, Rayo 9 aciertos y Valencia 11 en la lectura inicial.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
+    {
       "code": "alaves-official-profile-variants",
       "status": "guarded",
       "failure": "El once confirmado del Alavés quedó pendiente al encontrar jonny-castro. La revisión de los once identificó también antonio-martinez y angel-perez-1.",
