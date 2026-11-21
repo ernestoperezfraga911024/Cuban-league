@@ -63,3 +63,16 @@ test('verified Betis profiles for Natan and Isco identify one starter each',()=>
     assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[id]);
   }
 });
+
+test('Madrid and Celta confirmed profile variants resolve within the correct club',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players;
+  const teams={'real-madrid':{'arda-gler':'a-guler','lvaro-fernandez-1':'a-carreras'},
+    'celta-vigo':{'hugo-lvarez-':'h-alvarez','andrei-radu':'i-radu'}};
+  for(const [team,mappings] of Object.entries(teams)){
+    for(const [slug,id] of Object.entries(mappings)){
+      const owners=roster.filter(p=>p.club_id===team && profiles[p.id]?.includes(slug));
+      assert.deepEqual(owners.map(p=>p.id),[id]);
+    }
+  }
+});
