@@ -8,7 +8,8 @@ const verified={
   'r-fernandez':['roberto-fernandez-1'], 'mister-5521760':['alejandro-santiago'],
   'j-hernandez':['javier-hernandez'], 'r-bauza':['rafel-bauza'],
   'm-fernandez-espanyol':['marcos-fernandez-1'], 'u-gonzalez':['urko-gonzalez-de-zarate'],
-  'a-calatrava':['lex-calatrava'], 'a-fortuno':['ngel-fortuno']
+  'a-calatrava':['lex-calatrava'], 'a-fortuno':['ngel-fortuno'],
+  'j-otto':['jonny-castro'], 't-martinez':['antonio-martinez'], 'a-perez-alaves':['angel-perez-1']
 };
 const profiles={};
 for(const p of catalog){

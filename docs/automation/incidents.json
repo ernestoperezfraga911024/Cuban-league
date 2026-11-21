@@ -1,7 +1,15 @@
 {
   "methodology_version": "ops-v2",
-  "updated_on": "2026-11-20",
+  "updated_on": "2026-11-21",
   "incidents": [
+    {
+      "code": "alaves-official-profile-variants",
+      "status": "guarded",
+      "failure": "El once confirmado del Alavés quedó pendiente al encontrar jonny-castro. La revisión de los once identificó también antonio-martinez y angel-perez-1.",
+      "prevention": "Relacionar los tres perfiles verificados con J. Otto, T. Martínez y Á. Pérez dentro de la plantilla del Alavés. Comprobar el once completo al recuperar el partido.",
+      "production_evidence": "Alavés–Deportivo J13, 21/11/2026 a las 08:41 de Miami. Historial visible con 11 titulares y 8 aciertos en la comprobación inicial.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
     {
       "code": "espanyol-official-fortuno-profile",
       "status": "guarded",
