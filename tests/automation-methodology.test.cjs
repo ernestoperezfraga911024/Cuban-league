@@ -54,7 +54,7 @@ test('active forecasts contract uses source-only v6 without medical exclusions o
  assert.match(text,/no uses salud como filtro de disponibilidad/);
  assert.doesNotMatch(text,/No propongas bajas confirmadas|Excluye[^.]*bajas confirmadas|"confirmed_out"\s*:|"availability"\s*:|"rotation"\s*:|"context"\s*:|"horizon"\s*:/);
  assert.doesNotMatch(text,/method_version[=:][" ]*editorial-v[1-5]|ASSESSMENT_COMPLETO_EDITORIAL_V[1-5]|Método vigente editorial-v[1-5]/);
- for(const requirement of [/Pesos FF30\/JP20\/Comuniate20\/P1130/,/incluido 0/,/starter50,alternative40,not_listed25 para Comuniate/,/primeros siete del ranking GENERAL/,/primeros siete del ranking GLOBAL/,/probability<70 exige alternativa/,/Redondea solo al final; mínimo5 y máximo95/])assert.match(text,requirement);
+ for(const requirement of [/Pesos FF30\/JP20\/Comuniate20\/P1130/,/incluido 0/,/starter50,alternative40,not_listed25 para Comuniate/,/primeros tres del ranking GENERAL/,/primeros tres del ranking GLOBAL/,/exactamente tres autores, posiciones 1\.\.3/,/posiciones 4 en adelante/,/top3-global-top3-club-v1/,/nunca reutilizar votos/i,/probability<70 exige alternativa/,/Redondea solo al final; mínimo5 y máximo95/])assert.match(text,requirement);
 });
 test('runner consumes large file responses end to end with short stdin messages',async()=>{
  const {spawn}=require('node:child_process');

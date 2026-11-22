@@ -102,13 +102,13 @@ test('uncertain optional candidate is explicitly excluded; mandatory identity st
 });
 test('complete P11 votes, missing, failed and incomplete authors have distinct denominators',()=>{
  const x=example(),at=x.window.notBefore;
- const authors=Array.from({length:7},(_,i)=>({id:String(i+1),rank:i+1,url:'https://www.predicted11.com/es/usuario/'+(i===0?'FutbolFantasy':'author'+i)}));
- x.packet.rankings=['club','global'].map(kind=>({kind,url:'https://www.predicted11.com/es/laliga/'+(kind==='club'?'ranking-equipo/test-home':'ranking-global'),fetched_at:at,authors}));
+ const authors=Array.from({length:6},(_,i)=>({id:String(i+1),rank:i+1,url:'https://www.predicted11.com/es/usuario/'+(i===0?'FutbolFantasy':'author'+i)}));
+ x.packet.rankings=['club','global'].map(kind=>({kind,url:'https://www.predicted11.com/es/laliga/'+(kind==='club'?'ranking-equipo/test-home':'ranking-global'),fetched_at:at,authors:authors.slice(kind==='club'?0:3,kind==='club'?3:6).map((a,i)=>({...a,rank:i+1}))}));
  x.packet.docs.p11match={url:'https://www.predicted11.com/es/laliga/partido/test',fetched_at:at,sha256:'b'.repeat(64)};
  x.review.predicted11={fixture_verified:true,fixture_sha256:'b'.repeat(64),season:'2026-27',observed_fixture:fixtureOf(x.review.fixture)};
  x.packet.predictions=authors.slice(1).map((a,i)=>({author_id:a.id,url:a.url,fetched_at:at,ballot_fetched_at:at,status:i===0?'complete_unvalidated':i===1?'incomplete':i===2?'unavailable':'not_created',data:{participacion:x.roster.slice(0,11).map(p=>({nombre:p.name}))}}));
  const {payload}=produce(x),p11=payload.sources[3];
- assert.equal(p11.predictions.length,6);assert.equal(p11.player_observations[0].ballots,1);assert.equal(p11.player_observations[0].votes,1);
+ assert.equal(p11.predictions.length,5);assert.equal(p11.player_observations[0].ballots,1);assert.equal(p11.player_observations[0].votes,1);
  assert.equal(payload.proposal.players[0].probability,85);assert.equal(p11.player_observations.at(-1).votes,0);
  const candidateBallot=structuredClone(x),candidate=candidateBallot.roster[11];
  candidateBallot.packet.predictions[0].data.participacion[10]={nombre:candidate.name};

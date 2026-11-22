@@ -541,6 +541,20 @@
       ],
       "evidence": "Diagnóstico 44608939846: 50→100→150→200→250; clic 5 conserva 250, hasMore=false, lista visible e íntegra. Captura publicada de las 09:01 Miami del 19/11 tenía 253 libres y 276 con dueño; la corregida tiene 250 libres y 279 con dueño. El fallo aparece al acabar en lote exacto de 50.",
       "production_evidence": "Run 44611412265:1 con SHA 7a416c010a0f7d112c99d7c16d0396c28893024b: clic 5 aceptó 250→250 estable, hasMore=false. Publicó 19/11/2026 15:45:22 Miami, 529 jugadores, 20 equipos, 9 movimientos nuevos, 461 cláusulas documentadas, coverageGaps=0, aiCalls=0. Conserva 1 fecha de perfil pendiente preexistente. Revisión 98848716b1737e1988fc8a70f60918a80ebfbb891ef7e49f6acac1e52e45d8c6."
+    },
+    {
+      "code": "predicted11-match-not-linked",
+      "status": "regression-tested-awaiting-run",
+      "flow": "forecasts",
+      "failure": "21/11 06:00 Miami: la portada P11 mostraba J14; dieciocho clubes J13 quedaron sin P11, aunque había URLs de partido verificadas en capturas anteriores.",
+      "cause": "El descubrimiento dependía exclusivamente de enlaces visibles en la portada.",
+      "prevention": "Localizador verificado de la misma fixture desde snapshots; nunca copiar votos ni fechas. Relectura fresca y revisión completa. Alternativas de descubrimiento por enlaces FF/club. Nueva selección 3 global + 3 club, IDs únicos, sin rellenar desde rank4; guardado SQL obligatorio y compatibilidad de saved/históricos.",
+      "tests": [
+        "tests/forecast-collector.test.cjs",
+        "tests/forecast-predicted11.test.cjs",
+        "tests/forecast-producer-db.test.cjs"
+      ],
+      "evidence": "Pruebas de portada avanzada, enlace directo/club, fixture ajena, jornada incorrecta, descarga fallida, máximo top3 y deduplicación. La próxima publicación programada verifica producción; una lectura de diagnóstico no cuenta como publicación."
     }
   ]
 }

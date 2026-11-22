@@ -67,7 +67,16 @@ class SeasonGateway {
       'draft',(SELECT to_jsonb(d) FROM forecast_season.drafts d WHERE team=${literal(team)}),
       'public',(SELECT to_jsonb(p) FROM public.forecast_season_public p WHERE team=${literal(team)})) AS result;`,{phase:'state',team});
   }
-  plan() { return this.query('SELECT forecast_season.plan() AS result;',{phase:'plan'}); }
+  plan(team=null) { return this.query(`WITH plan AS MATERIALIZED (SELECT forecast_season.plan() p)
+    SELECT p || jsonb_build_object('teams',coalesce((SELECT jsonb_agg(item ||
+      jsonb_build_object('predicted11_locator',(SELECT jsonb_build_object('fixture_key',h.fixture_key,
+        'team',h.team,'url',s->>'url','published_at',h.published_at)
+        FROM forecast_history.snapshots h CROSS JOIN LATERAL jsonb_array_elements(h.projection->'sources') s
+        WHERE ${team===null?'true':`item->>'team'=${literal(team)}`} AND h.fixture_key=item->'fixture'->>'key' AND h.team IN (item->'fixture'->>'home',item->'fixture'->>'away')
+          AND s->>'id'='predicted11' AND s->>'status' IN ('read','pending')
+          AND s->>'url' ~ '^https://www\\.predicted11\\.com/es/laliga/partido/[0-9]+-[a-z0-9-]+$'
+        ORDER BY h.published_at DESC,h.id DESC LIMIT 1)) ORDER BY ord)
+      FROM jsonb_array_elements(p->'teams') WITH ORDINALITY t(item,ord)),'[]'::jsonb)) AS result FROM plan;`,{phase:'plan'}); }
   roster(team) { return this.query(`SELECT coalesce(jsonb_agg(jsonb_build_object('id',id,'name',name,'team',team) ORDER BY id),'[]'::jsonb) AS result FROM forecast_league.roster WHERE team=${literal(team)};`,{phase:'roster',team}); }
   guard(team, allowed='missing') {
     if (!/^[a-z0-9-]+$/.test(team)) throw Error('Invalid team ID');

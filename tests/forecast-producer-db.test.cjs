@@ -51,6 +51,9 @@ test('producer and gateway run against PostgreSQL v6 with the installed legacy h
  assert.equal(roles.source_roles.length,1);assert.equal(verified.projection.players[1].alternative.id,x.roster[2].id);
  assert.equal(verified.projection.players[2].probability,64);assert.equal(verified.projection.candidates.length,1);
  await db.exec(read('docs/forecast-publish/selection-priority.sql'));
+ const season=read('docs/forecast-publish/season.sql'),saveStart=season.indexOf('create function forecast_season.save_draft');
+ await db.exec(season.slice(saveStart,season.indexOf('$body$;',saveStart)+8));
+ await db.exec(read('docs/forecast-publish/predicted11-top3.sql'));
  const regression=require('./fixtures/forecast-producer.cjs').priorityExample();
  // Use the already registered fixture with the same instant (test creation can cross a second).
  regression.review.fixture=structuredClone(x.review.fixture);
@@ -60,6 +63,41 @@ test('producer and gateway run against PostgreSQL v6 with the installed legacy h
  const prioritized=compile(regression.packet,regression.review,regression.roster,regression.window);
  const proof=await gateway.validate(regression.packet.team,prioritized.fixture,prioritized.payload);
  assert.equal(proof.projection.players[6].probability,55);assert.equal(proof.projection.players[6].alternative.id,x.roster[6].id);
+ // SQL enforces the declared policy but can still read old 7+7 evidence.
+ const build=async p=>(await db.query('select forecast_season.build_team($1::jsonb) p',[JSON.stringify(p)])).rows[0].p;
+ const legacy=structuredClone(prioritized.payload),ls=legacy.sources[3];delete ls.selection_policy;
+ const seven=[...ls.rankings[0].authors,...ls.rankings[1].authors,{id:'7',url:'https://www.predicted11.com/es/usuario/author6'}].map((a,i)=>({...a,rank:i+1}));
+ ls.rankings.forEach(r=>r.authors=structuredClone(seven));
+ ls.predictions.push({...ls.predictions[0],author_id:'7',url:seven[6].url,status:'not_created',starters:[],starter_ids:[]});
+ assert.deepEqual(await build(legacy),proof.projection);
+ for(const change of [p=>p.sources[3].selection_policy='unknown',p=>p.sources[3].rankings[0].authors[2].rank=4,p=>p.sources[3].rankings[0].authors.push(seven[3]),p=>p.sources[3].predictions.push(p.sources[3].predictions[0])]){
+  const bad=structuredClone(prioritized.payload);change(bad);await assert.rejects(build(bad),e=>e.code==='22023');
+ }
+ const wrongPolicy=structuredClone(legacy);wrongPolicy.sources[3].selection_policy='top3-global-top3-club-v1';
+ await assert.rejects(build(wrongPolicy),/Ranking/);
+ await db.exec('alter table forecast_season.attempts add column input_hash text;');
+ await assert.rejects(db.query('select forecast_season.save_draft($1,$2::jsonb)',['season-test',JSON.stringify(legacy)]),/nuevas lecturas requieren Predicted11 top3/);
+ await db.query("insert into forecast_season.attempts(key,run_key,team,outcome,input_hash) values('season-test-test-home','season-test','test-home','saved',md5($1::jsonb::text))",[JSON.stringify(legacy)]);
+ const saved=(await db.query('select forecast_season.save_draft($1,$2::jsonb) result',['season-test',JSON.stringify(legacy)])).rows[0].result;
+ assert.equal(saved.already_saved,true);assert.deepEqual(await build(legacy),proof.projection);
+ await db.exec('delete from forecast_season.attempts');
+ await db.exec(`alter table forecast_season.fixtures add column verified_at timestamptz default now();
+ alter table forecast_season.control add column version int default 0;
+ alter table forecast_season.attempts add column fixture_key text;
+ create table forecast_season.drafts(team text primary key,run_key text,fixture_key text,payload jsonb,projection jsonb,checked_at timestamptz,outcome text,reason text);
+ create table public.forecast_season_public(team text primary key,payload jsonb,checked_at timestamptz,status text,attempted_fixture_key text);
+ insert into forecast_season.drafts(team) values('test-home');insert into public.forecast_season_public(team,status) values('test-home','pending');`);
+ const newSaved=(await db.query('select forecast_season.save_draft($1,$2::jsonb) result',['season-test',JSON.stringify(prioritized.payload)])).rows[0].result;
+ assert.equal(newSaved.outcome,'saved');assert.deepEqual((await db.query('select payload from forecast_season.drafts')).rows[0].payload,prioritized.payload);
+ await db.exec('delete from forecast_season.attempts');
+ // The gateway picks only a verified link from the exact fixture, even if a newer
+ // unavailable snapshot has replaced it. It returns no ballots or old bodies.
+ await db.exec(`create schema forecast_history;create table forecast_history.snapshots(id int,fixture_key text,team text,published_at timestamptz,projection jsonb);
+ create function forecast_season.plan() returns jsonb language sql as $$select jsonb_build_object('run_key','season-test','teams',jsonb_build_array(jsonb_build_object('team',t.team,'fixture',to_jsonb(f)))) from forecast_league.teams t join forecast_season.fixtures f on t.team=f.home$$;`);
+ const matchUrl='https://www.predicted11.com/es/laliga/partido/999-test';
+ for(const [id,key,team,status,url]of [[1,f.key,f.away,'read',matchUrl],[2,f.key,f.home,'unavailable','https://www.predicted11.com/es/laliga/'],[3,'other-fixture',f.home,'read',matchUrl+'-wrong'],[4,f.key,'other-team','read',matchUrl+'-wrong']])await db.query('insert into forecast_history.snapshots values($1,$2,$3,now()+$4*interval \'1 minute\',$5)',[id,key,team,id,JSON.stringify({sources:[{id:'predicted11',status,url}],players:['must-not-be-copied']})]);
+ const plan=await gateway.plan(f.home);assert.equal(plan.teams[0].predicted11_locator.url,matchUrl);assert.equal(plan.teams[0].predicted11_locator.fixture_key,f.key);
+ assert.deepEqual(Object.keys(plan.teams[0].predicted11_locator).sort(),['fixture_key','published_at','team','url']);
  // Restore the old inverted selection without changing any percentage or observation.
  const inverted=structuredClone(prioritized.payload),winner=inverted.proposal.players[6],loser=inverted.proposal.candidates[0];
  inverted.proposal.players[6]={...loser,slot:7,position:'MF',alternative:{id:winner.id,name:winner.name}};
