@@ -16,6 +16,7 @@ const verified={
   'a-guler':['arda-gler'], 'a-carreras':['lvaro-fernandez-1'],
   'h-alvarez':['hugo-lvarez-'], 'i-radu':['andrei-radu'],
   'jeanuel-belocian':['jeanul-belocian'], 'o-oskarsson':['orri-steinn-skarsson'],
+  'a-pastor':['lex-pastor'],
   'pedri':['pedri-gonzalez']
 };
 const profiles={};
