@@ -14,7 +14,8 @@ const verified={
   'j-copete':['jose-manuel-copete'], 'j-guerra':['javi-guerra-1'], 'd-raba':['daniel-raba'],
   'n-souza':['natan'], 'isco':['isco-alarcon'],
   'a-guler':['arda-gler'], 'a-carreras':['lvaro-fernandez-1'],
-  'h-alvarez':['hugo-lvarez-'], 'i-radu':['andrei-radu']
+  'h-alvarez':['hugo-lvarez-'], 'i-radu':['andrei-radu'],
+  'pedri':['pedri-gonzalez']
 };
 const profiles={};
 for(const p of catalog){
