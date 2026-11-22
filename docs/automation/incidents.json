@@ -3,6 +3,14 @@
   "updated_on": "2026-11-21",
   "incidents": [
     {
+      "code": "racing-sociedad-official-j13",
+      "status": "guarded",
+      "failure": "La fuente mostraba ambos onces confirmados con el partido todavía en fase de previa. Al cotejar los 22 titulares se detectaron dos enlaces de perfil sin correspondencia.",
+      "prevention": "Mantener la comprobación del inicio real y reconocer los perfiles contrastados de Jeanuël Belocian y Orri Óskarsson en sus clubes.",
+      "production_evidence": "Racing–Real Sociedad J13, 22/11/2026, 10:23 de Miami. Ambos onces visibles tras confirmar el inicio. Racing 11 aciertos y Real Sociedad 9.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
+    {
       "code": "madrid-celta-official-j13-profile-variants",
       "status": "guarded",
       "failure": "Arda Güler y Hugo Álvarez bloquearon ambos onces. El cotejo de los titulares identificó también las variantes de Carreras y Radu.",

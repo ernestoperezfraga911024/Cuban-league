@@ -84,3 +84,12 @@ test('Madrid and Celta confirmed profile variants resolve within the correct clu
     }
   }
 });
+
+test('Racing and Real Sociedad J13 profile aliases identify their own starters',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players;
+  for(const [team,slug,id] of [['racing-santander','jeanul-belocian','jeanuel-belocian'],['real-sociedad','orri-steinn-skarsson','o-oskarsson']]){
+    const owners=roster.filter(p=>p.club_id===team && profiles[p.id]?.includes(slug));
+    assert.deepEqual(owners.map(p=>p.id),[id]);
+  }
+});
