@@ -33,6 +33,14 @@ test('the confirmed Espanyol keeper profile resolves only to Ángel Fortuño',()
   assert.deepEqual(owners,['a-fortuno']);
 });
 
+test('both Barcelona profiles for Pedri resolve to the existing player',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players.filter(p=>p.club_id==='fc-barcelona');
+  for(const slug of ['pedri','pedri-gonzalez']){
+    assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),['pedri']);
+  }
+});
+
 test('the three Alavés J13 profile variants resolve within the authorized club roster',()=>{
   const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
   const roster=require('../catalog/players.json').players.filter(p=>p.club_id==='alaves');
