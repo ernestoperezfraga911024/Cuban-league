@@ -2,7 +2,7 @@
 // Mechanical assembly only. The reviewer must inspect current captured bodies for
 // fixture, probable/official status, identities and source-supported alternatives.
 // Medical status belongs to the independent FF icon feed, never this calculation.
-const {evaluate, selectAuthors, aggregate} = require('../../forecast-predicted11-method.js');
+const {evaluate, selectAuthors, aggregate, SELECTION_POLICY} = require('../../forecast-predicted11-method.js');
 const {isDeepStrictEqual: same} = require('node:util');
 const {orderSelection} = require('./lineup-layout.cjs');
 const {prioritizeSlots} = require('./selection-priority.cjs');
@@ -139,7 +139,7 @@ function compile(packet, review, roster, window) {
   requireThat(times.length > 0, 'Predicted11 no consultado');
   times.forEach(checkTime);
   const p11time = new Date(Math.min(...times.map(Date.parse))).toISOString();
-  sources.push({id:'predicted11',url:packet.docs.p11match?.url || 'https://www.predicted11.com/es/laliga/',
+  sources.push({id:'predicted11',selection_policy:SELECTION_POLICY,url:packet.docs.p11match?.url || 'https://www.predicted11.com/es/laliga/',
     status:verified ? votes.ballots ? 'read' : 'pending' : 'unavailable',fetched_at:p11time,source_updated_at:null,
     fixture_verified:verified,observed_fixture:expected,rankings,predictions,player_observations:[]});
   const chosen = review.selection;

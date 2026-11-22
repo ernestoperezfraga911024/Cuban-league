@@ -2,6 +2,7 @@
 // Source collection only: no Supabase client, scores, drafts or delivery calls.
 const {JSDOM, VirtualConsole} = require('jsdom');
 const {performance} = require('node:perf_hooks');
+const {RANKING_SIZE} = require('../../forecast-predicted11-method.js');
 const text = node => node?.textContent.replace(/\s+/g, ' ').trim() || '';
 const direct = node => [...(node?.childNodes || [])].filter(n => n.nodeType === 3).map(text).join(' ').trim();
 const percentage = value => /^\d+%?$/.test(value) ? Number(value.replace('%', '')) : null;
@@ -68,13 +69,13 @@ function layout(body, source, side) {
   });
 }
 function ranking(page, kind) {
-  const authors = document(page.body, d => [...d.querySelectorAll('a.ranking-link-block')].slice(0, 7).map((n, i) => ({
+  const authors = document(page.body, d => [...d.querySelectorAll('a.ranking-link-block')].slice(0, RANKING_SIZE).map((n, i) => ({
     id: n.querySelector('[data-user-id]')?.getAttribute('data-user-id'), rank: i + 1,
     url: new URL(n.getAttribute('href'), page.url).href,
   })));
-  if (authors.length !== 7 || new Set(authors.map(a => a.id)).size !== 7 ||
+  if (authors.length !== RANKING_SIZE || new Set(authors.map(a => a.id)).size !== RANKING_SIZE ||
       authors.some(a => !/^\d+$/.test(a.id) || !/^https:\/\/www\.predicted11\.com\/es\/usuario\/[^/?]+(?:\?campeonato=laliga)?$/.test(a.url))) {
-    throw Error('Ranking does not expose seven distinct public authors');
+    throw Error('Ranking does not expose three distinct public authors');
   }
   return {kind, url: page.url, fetched_at: page.fetched_at, authors};
 }
@@ -96,6 +97,19 @@ function classifyBallot(data, {teamId, seasonId, matchday}) {
   if (data.participacion.length === 0) return 'not_created';
   const names = data.participacion.map(p => p.nombre?.trim());
   return names.length === 11 && names.every(Boolean) && new Set(names).size === 11 ? 'complete_unvalidated' : 'incomplete';
+}
+
+function matchLink(value, base, matchId) {
+  try {
+    const u = new URL(value, base);
+    return u.origin === 'https://www.predicted11.com' && !u.username && !u.password && !u.search && !u.hash &&
+      /^\d+$/.test(matchId) && u.pathname.startsWith('/es/laliga/partido/' + matchId + '-') &&
+      /^\/es\/laliga\/partido\/\d+-[a-z0-9-]+$/.test(u.pathname) ? u.href : null;
+  } catch { return null; }
+}
+function linkedMatch(page, matchId) {
+  return document(page.body, d => [...d.querySelectorAll('a[href]')]
+    .map(n => matchLink(n.getAttribute('href'), page.url, matchId)).find(Boolean));
 }
 
 class TeamCollector {
@@ -161,12 +175,23 @@ class TeamCollector {
       teamUrl: d.querySelectorAll('a[href*="predicted11.com/es/laliga/equipo/"]')[side === 'local' ? 0 : 1]?.href,
     }));
     if (!/^\d+$/.test(meta.teamId) || !meta.teamUrl) throw Error('Missing public P11 team link/identity');
-    const home = await read('p11home', 'https://www.predicted11.com/es/laliga/');
     const matchId = new URL(ff.url).pathname.split('/').pop().split('-')[0];
-    const matchUrl = document(home.body, d => [...d.querySelectorAll('a[href]')].map(n => n.getAttribute('href'))
-      .find(url => url.includes('/partido/' + matchId + '-')));
-    if (!matchUrl) throw Error('Next match not linked on public P11 LaLiga page');
-    const match = await read('p11match', new URL(matchUrl, home.url).href);
+    // Old evidence supplies only a verified locator, never votes or read dates.
+    // It is scoped to this exact fixture and team by the gateway and rechecked here.
+    const locator = team.predicted11_locator;
+    let matchUrl = linkedMatch(ff, matchId);
+    if (!matchUrl && locator && locator.fixture_key === team.fixture.key &&
+        [team.fixture.home, team.fixture.away].includes(locator.team)) {
+      matchUrl = matchLink(locator.url, 'https://www.predicted11.com', matchId);
+      if (matchUrl) result.p11_locator = {...locator, use:'url_only_fresh_read_required'};
+    }
+    if (!matchUrl) {
+      const home = await read('p11home', 'https://www.predicted11.com/es/laliga/');
+      matchUrl = linkedMatch(home, matchId);
+      if (!matchUrl) matchUrl = linkedMatch(await read('p11team', meta.teamUrl), matchId);
+    }
+    if (!matchUrl) throw Error('P11 fixture link unavailable after direct, verified-history, home and club lookup');
+    const match = await read('p11match', matchUrl);
     const matchday = document(match.body, d => Number(text(d.body).match(/para la jornada\s+(\d+)\s+de LaLiga/i)?.[1]));
     if (matchday !== team.fixture.matchday) throw Error('P11 match page does not expose the expected matchday');
     const slug = new URL(meta.teamUrl).pathname.split('/').pop();
@@ -221,4 +246,4 @@ class TeamCollector {
   }
 }
 
-module.exports = {TeamCollector, starters, comuniateAlternatives, layout, ranking, eligible, classifyBallot};
+module.exports = {TeamCollector, starters, comuniateAlternatives, layout, ranking, eligible, classifyBallot, matchLink, linkedMatch};

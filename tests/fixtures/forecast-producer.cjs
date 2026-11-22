@@ -30,8 +30,8 @@ function priorityExample(){
   x.review.sources[source].alternatives[0].probability=alternative;
  }
  x.packet.comuniate_alternatives.players=structuredClone(x.review.sources.comuniate.alternatives);
- const authors=Array.from({length:7},(_,i)=>({id:String(i+1),rank:i+1,url:'https://www.predicted11.com/es/usuario/'+(i===0?'FutbolFantasy':'author'+i)}));
- x.packet.rankings=['club','global'].map(kind=>({kind,url:'https://www.predicted11.com/es/laliga/'+(kind==='club'?'ranking-equipo/test-home':'ranking-global'),fetched_at:at,authors}));
+ const authors=Array.from({length:6},(_,i)=>({id:String(i+1),rank:i+1,url:'https://www.predicted11.com/es/usuario/'+(i===0?'FutbolFantasy':'author'+i)}));
+ x.packet.rankings=['club','global'].map(kind=>({kind,url:'https://www.predicted11.com/es/laliga/'+(kind==='club'?'ranking-equipo/test-home':'ranking-global'),fetched_at:at,authors:authors.slice(kind==='club'?0:3,kind==='club'?3:6).map((a,i)=>({...a,rank:i+1}))}));
  x.packet.docs.p11match={url:'https://www.predicted11.com/es/laliga/partido/test',fetched_at:at,sha256:'b'.repeat(64)};
  x.review.predicted11={fixture_verified:true,fixture_sha256:'b'.repeat(64),season:'2026-27',observed_fixture:fixtureOf(x.review.fixture)};
  x.packet.predictions=authors.slice(1).map((a,i)=>({author_id:a.id,url:a.url,fetched_at:at,ballot_fetched_at:at,status:i<5?'complete_unvalidated':'not_created',data:{participacion:x.roster.slice(0,11).map((p,j)=>({nombre:j===6&&i<4?x.roster[11].name:p.name}))}}));

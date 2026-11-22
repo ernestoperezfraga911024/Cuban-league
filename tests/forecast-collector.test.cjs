@@ -46,7 +46,7 @@ test('parallel evidence writes cannot collide, and concurrent captures of the sa
   } finally { await fs.rm(dir, {recursive: true, force: true}); }
 });
 
-test('integrated two-club collection reuses pages/profiles but fetches each team ballot separately', async () => {
+for(const discovery of ['homepage','verified-history','direct-link','club-link','wrong-fixture','wrong-round','download-failure'])test('two-club top3 collection: '+discovery, async () => {
   const now = Date.now(), calls = [];
   const ff = 'https://www.futbolfantasy.com/partidos/999-test';
   const jp = 'https://www.jornadaperfecta.com/partido/999/test';
@@ -55,7 +55,7 @@ test('integrated two-club collection reuses pages/profiles but fetches each team
   const p11match = home + 'partido/999-test';
   const teams = ['home-test','away-test'];
   const rows = side => Array.from({length: 11}, (_, i) => side + '-' + i);
-  const ffHTML = teams.map((team, i) => `<a href="${home}equipo/${team}"></a><div class="match-p11-side row-${i ? 'visitante' : 'local'}" data-match-p11-team="${i + 1}">` +
+  const ffHTML = (discovery==='direct-link'?`<a href="${p11match}">match</a>`:'') + teams.map((team, i) => `<a href="${home}equipo/${team}"></a><div class="match-p11-side row-${i ? 'visitante' : 'local'}" data-match-p11-team="${i + 1}">` +
     rows(team).map(n => `<div data-onceff="titular"><a data-probabilidad="80"><span class="truncate-name">${n}</span></a></div>`).join('') + '</div>').join('');
   const jpHTML = teams.map(team => '<div class="campo-futbol">' + rows(team).map(n => `<div class="campo-fila"><div class="player-name-pintar"><a>${n}</a></div></div>`).join('') + '</div>').join('');
   const rankHTML = Array.from({length: 7}, (_, i) => `<a class="ranking-link-block" href="https://www.predicted11.com/es/usuario/${i ? 'author-' + i : 'FutbolFantasy'}?campeonato=laliga"><span data-user-id="${i + 10}"></span></a>`).join('');
@@ -68,8 +68,9 @@ test('integrated two-club collection reuses pages/profiles but fetches each team
     else if (url.startsWith('https://www.comuniate.com/equipos/')) {
       const team = url.split('/').pop();
       body = '<div class="cuerpo_campo">' + rows(team).map(n => `<div class="jugador_campo"><div class="nombre_jugador">${n}</div></div>`).join('') + '</div>';
-    } else if (url === home) body = `<a href="${p11match}">match</a>`;
-    else if (url === p11match) body = '<p>Consulta las alineaciones para la jornada 13 de LaLiga.</p>' + teams.map(t => `<a href="${home}ranking-equipo/${t}">club</a>`).join('');
+    } else if (url === home) body = discovery==='homepage'?`<a href="${p11match}">match</a>`:'<a href="/es/laliga/partido/1000-next-round">J14</a>';
+    else if(url.includes('/equipo/'))body=discovery==='club-link'?`<a href="${p11match}">match</a>`:'<main>J14</main>';
+    else if (url === p11match) {if(discovery==='download-failure')throw Error('Fresh match download failed');body = `<p>Consulta las alineaciones para la jornada ${discovery==='wrong-round'?14:13} de LaLiga.</p>` + teams.map(t => `<a href="${home}ranking-equipo/${t}">club</a>`).join('');}
     else if (url.includes('/ranking-')) body = rankHTML;
     else if (url.includes('/usuario/author-')) {
       const id = Number(url.match(/author-(\d+)/)[1]) + 10;
@@ -85,21 +86,30 @@ test('integrated two-club collection reuses pages/profiles but fetches each team
     return new Response(body, {headers: {'content-type': type}});
   }});
   const collector = new TeamCollector(reader, async page => ({url: page.url, fetched_at: page.fetched_at}));
-  const fixture = {home: teams[0], away: teams[1], season:'2026-27', matchday: 13, source_urls: {futbolfantasy:ff,jornadaperfecta:jp,comuniate:co}};
+  const fixture = {key:'fixture-j13-test',home: teams[0], away: teams[1], season:'2026-27', matchday: 13, source_urls: {futbolfantasy:ff,jornadaperfecta:jp,comuniate:co}};
   const results = [];
-  for (const team of teams) results.push(await collector.collect({team,fixture,comuniate_team_url:'https://www.comuniate.com/equipos/' + team}));
+  for (const team of teams) results.push(await collector.collect({team,fixture,predicted11_locator:['verified-history','wrong-fixture','wrong-round','download-failure'].includes(discovery)?{fixture_key:discovery==='wrong-fixture'?'another':fixture.key,team,url:p11match,published_at:'2026-11-19T00:00:00Z'}:null,comuniate_team_url:'https://www.comuniate.com/equipos/' + team}));
+  if(['wrong-fixture','wrong-round','download-failure'].includes(discovery)){
+    for(const r of results){assert.equal(r.predictions.length,0);assert.ok(r.errors.some(e=>e.source==='predicted11'));}
+    assert.equal(calls.filter(u=>u.includes('/usuario/')).length,0);
+    if(discovery==='wrong-fixture')assert.ok(!calls.includes(p11match));
+    return;
+  }
+  if(discovery==='verified-history'){assert.ok(!calls.includes(home));assert.ok(calls.includes(p11match));assert.equal(results[0].p11_locator.use,'url_only_fresh_read_required');}
   for (let i = 0; i < 2; i++) {
     assert.equal(results[i].publication_ready, false);
+    assert.ok(results[i].rankings.every(r=>r.authors.length===3&&r.authors.every(a=>a.rank<=3)));
+    assert.ok(results[i].predictions.every(p=>Date.parse(p.fetched_at)>=now));
     assert.deepEqual(results[i].errors, []);
-    assert.equal(results[i].predictions.length, 6);
+    assert.equal(results[i].predictions.length, 2);
     assert.ok(results[i].predictions.every(p => p.status === 'complete_unvalidated'));
     assert.equal(results[i].predictions[0].data.participacion[0].nombre, rows(teams[i])[0]);
     for (const observations of Object.values(results[i].observations)) assert.equal(observations.length, 11);
   }
   assert.equal(calls.filter(u => u === ff).length, 1);
-  assert.equal(calls.filter(u => u.includes('/usuario/')).length, 6);
+  assert.equal(calls.filter(u => u.includes('/usuario/')).length, 2);
   assert.equal(calls.filter(u => u.includes('/js/profile-show.js')).length, 1);
-  assert.equal(calls.filter(u => u.includes('/participacion-criterios/')).length, 12);
+  assert.equal(calls.filter(u => u.includes('/participacion-criterios/')).length, 4);
   assert.ok(calls.filter(u => u.includes('/participacion-criterios/')).every(u => u.includes('/16/13/get/')));
   assert.equal(results[0].docs.futbolfantasy.fetched_at, results[1].docs.futbolfantasy.fetched_at);
 });
@@ -113,4 +123,12 @@ test('editorial review can follow only links present in a current public body',a
  await collector.follow(packet,'futbolfantasy',Object.keys(pages)[1]);assert.equal(Object.keys(packet.docs).length,2);
  await assert.rejects(collector.follow(packet,'futbolfantasy','https://www.futbolfantasy.com/guessed'),/not linked/);
  assert.equal(calls.filter(u=>u.includes('guessed')).length,0);
+});
+
+test('match locators require exact origin and numeric fixture ID; no guessed URL',()=>{
+ const {matchLink,linkedMatch}=require('../scripts/forecast/collect-team.cjs'),base='https://www.predicted11.com';
+ const valid=base+'/es/laliga/partido/999-test';
+ assert.equal(matchLink(valid,base,'999'),valid);
+ for(const url of [valid.replace('999','9999'),valid.replace('.com','.com.evil.test'),'http:'+valid.slice(6),valid+'?q=1',valid+'#x',valid.replace('www.','user@www.'),'https://www.comuniate.com/es/laliga/partido/999-test'])assert.equal(matchLink(url,base,'999'),null);
+ assert.equal(linkedMatch({url:base,body:'<main>999 test</main>'},'999'),undefined);
 });

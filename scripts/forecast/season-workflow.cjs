@@ -40,7 +40,7 @@ async function runSeason({gateway,makeCollector,reviewTeam,onEvent=()=>{}}) {
         if (terminalRun) { rows.push({team,outcome:attempt?.outcome || 'missing',reason:'Run already closed'}); continue; }
         if (attempt && attempt.outcome !== 'saved') throw Error('Unknown attempt state: '+attempt.outcome);
         if (!attempt) {
-          const plan = await gateway.plan();
+          const plan = await gateway.plan(team);
           if (plan.run_key !== gateway.runKey) throw Error('Plan no longer matches run');
           const item = plan.teams.find(t => t.team === team);
           if (!item?.fixture) throw Error('Missing next fixture: requires public calendar review');

@@ -4,6 +4,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const METHOD='editorial-v6';
+  const SELECTION_POLICY='top3-global-top3-club-v1';
+  const RANKING_SIZE=3;
   const WEIGHTS={futbolfantasy:30,jornadaperfecta:20,comuniate:20,predicted11:30};
   const SIGNALS={starter:90,alternative:40,not_listed:25};
   const ADJUSTMENTS={availability:{clear:0,concern:-8,unknown:-4},rotation:{low:0,possible:-3,high:-8},horizon:{near:0,medium:-1,distant:-2}};
@@ -11,12 +13,12 @@
   const referenced=s=>s&&typeof s.reason==='string'&&s.reason.trim()&&Array.isArray(s.refs)&&s.refs.length&&s.refs.every(r=>typeof r==='string'&&r.startsWith('https://'));
   const integer=(v,max)=>Number.isInteger(v)&&v>=0&&v<=max;
   function selectAuthors(club,global){
-    if(!Array.isArray(club)||!Array.isArray(global)||club.length!==7||global.length!==7)throw Error('Se requieren los siete primeros de cada ranking.');
+    if(!Array.isArray(club)||!Array.isArray(global)||club.length!==RANKING_SIZE||global.length!==RANKING_SIZE)throw Error('Se requieren los tres primeros de cada ranking.');
     const authors=new Map();
     for(const list of [club,global]){
-      if(new Set(list.map(a=>a.id)).size!==7||new Set(list.map(a=>a.rank)).size!==7)throw Error('Ranking duplicado.');
+      if(new Set(list.map(a=>a.id)).size!==RANKING_SIZE||new Set(list.map(a=>a.rank)).size!==RANKING_SIZE)throw Error('Ranking duplicado.');
       for(const a of list){
-        if(!/^[1-9][0-9]*$/.test(a.id)||!integer(a.rank,7)||a.rank<1||!validRef(a.url,'predicted11')||!/^\/es\/usuario\//.test(new URL(a.url).pathname))throw Error('Autor o posición de ranking inválidos.');
+        if(!/^[1-9][0-9]*$/.test(a.id)||!integer(a.rank,RANKING_SIZE)||a.rank<1||!validRef(a.url,'predicted11')||!/^\/es\/usuario\//.test(new URL(a.url).pathname))throw Error('Autor o posición de ranking inválidos.');
         if(decodeURIComponent(new URL(a.url).pathname).toLowerCase().replace(/\/$/,'')==='/es/usuario/futbolfantasy')continue;
         if(!authors.has(a.id))authors.set(a.id,a);
       }
@@ -70,6 +72,6 @@
     for(const t of trace)t.effective_weight=t.signal===null?0:100*t.nominal_weight/denominator;
     return {method:e.method,probability:Math.max(5,Math.min(e.method==='editorial-v3'&&e.horizon.value==='distant'?90:95,Math.round(score))),probability_kind:'editorial_uncalibrated',trace};
   }
-  return {METHOD,WEIGHTS,selectAuthors,aggregate,evaluate};
+  return {METHOD,WEIGHTS,SELECTION_POLICY,RANKING_SIZE,selectAuthors,aggregate,evaluate};
 });
 
