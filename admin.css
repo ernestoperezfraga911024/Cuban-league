@@ -4219,3 +4219,9 @@ body.backup-restore-open{overflow:hidden}
 .mister-rank-option{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);flex-wrap:wrap}
 .mister-rank-option input{width:64px;padding:6px 8px;border:1px solid #ffffff30;border-radius:8px;background:#10243b;color:#fff;font-size:16px}
 .mister-rank-option input:disabled{opacity:.6}
+
+/* Touch-friendly, explicit alternative to the desktop extension. */
+.mobile-mister-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:100%; }
+.mobile-mister-actions a, .mobile-mister-actions label { font-size:14px; }
+.mobile-mister-actions input { width:100%; max-width:320px; min-height:44px; font-size:16px; }
+@media(max-width:600px) { .mobile-mister-actions { width:100%; } }

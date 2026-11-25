@@ -14,6 +14,12 @@ on:
       - 'viewer-profile.js'
       - 'mister-extension/**'
       - 'mister-import-core.js'
+      - 'mister-mobile*'
+      - 'scripts/*mobile-mister*'
+      - 'second-division-admin.js'
+      - 'tests/second-division.test.cjs'
+      - 'admin.html'
+      - 'admin.css'
       - 'admin.js'
       - 'tests/mister-*.test.cjs'
       - 'supabase/migrations/*_mister_official_xi.sql'
@@ -37,6 +43,12 @@ on:
       - 'viewer-profile.js'
       - 'mister-extension/**'
       - 'mister-import-core.js'
+      - 'mister-mobile*'
+      - 'scripts/*mobile-mister*'
+      - 'second-division-admin.js'
+      - 'tests/second-division.test.cjs'
+      - 'admin.html'
+      - 'admin.css'
       - 'admin.js'
       - 'tests/mister-*.test.cjs'
       - 'supabase/migrations/*_mister_official_xi.sql'
@@ -60,4 +72,4 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - run: node --test tests/install-welcome.test.cjs tests/viewer-profile.test.cjs tests/navigation-motion.test.cjs tests/public-loading.test.cjs tests/forecast-player-sheet.test.cjs tests/player-points.test.cjs tests/ideal-xi.test.cjs tests/profile-chart.test.cjs
-      - run: node --test tests/mister-pipeline.test.cjs tests/mister-transport.test.cjs tests/mister-official-xi-*.test.cjs
+      - run: node --test tests/mister-pipeline.test.cjs tests/mister-transport.test.cjs tests/mister-mobile.test.cjs tests/second-division.test.cjs tests/mister-official-xi-*.test.cjs

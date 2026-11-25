@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cuban-league-v255-clause-income';
+const CACHE_NAME = 'cuban-league-v256-mobile-import';
 const APP_SHELL = [
   './',
   './index.html',
@@ -51,14 +51,17 @@ const APP_SHELL = [
   './second-division.js?v=190-20261022',
   './second-division.css?v=190-20261022',
   './second-division-core.js?v=190-20261022',
-  './second-division-admin.js?v=190-20261022',
+  './second-division-admin.js?v=256-20261125-mobile',
   './data.json?v=174-20261014-mister-j8-catalog',
   './catalog/players.json?v=174-20261014-mister-j8-catalog',
   './player-catalog.js?v=168-20260905-mister-catalog-audit',
   './supabase-config.js?v=161-20260902',
   './admin.html',
-  './admin.css?v=176-20261015-classic-navigation',
-  './admin.js?v=252-20261119-player-goals',
+  './mister-mobile.html',
+  './mister-mobile.js?v=256-20261125-mobile',
+  './mister-mobile-bookmarklet.txt',
+  './admin.css?v=256-20261125-mobile',
+  './admin.js?v=256-20261125-mobile',
   './mister-import-core.js?v=249-20261119-official-xi',
   './admin-manifest.json',
   './supabase.js',

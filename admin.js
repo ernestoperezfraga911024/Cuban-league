@@ -260,6 +260,7 @@
       || state.copyingPreviousLineup || isChampionsMode() || !state.catalog || !state.lineupSchemaReady || !state.catalogSchemaReady;
     button.querySelector('span').textContent = (state.misterImportBusy ? 'Importando Jornada ' : 'Importar Jornada ')
       + state.matchday + (state.misterImportBusy ? '…' : ' desde Mister');
+    $('mobileMisterFile').disabled = button.disabled;
     if (state.misterImportBusy) {
       $('matchdaySelect').disabled = true;
       $('publishButton').disabled = true;
@@ -275,6 +276,7 @@
     const request = state.misterImportRequest;
     state.misterImportRequest = null;
     state.misterImportPending = null;
+    state.misterMobilePayload = null;
     state.misterImportBusy = false;
     sessionStorage.removeItem(MISTER_SESSION_KEY);
     $('misterImportReview').hidden = true;
@@ -282,7 +284,7 @@
     syncPublicationUI();
     if (!keepPanel) $('misterImportPanel').hidden = true;
     if (!silent) setMisterImportStatus('Lectura cancelada. Se conserva el borrador que ya estuviera guardado.');
-    if (request?.requestId) await extensionCall('CANCEL', {id:request.requestId}).catch(() => {});
+    if (request?.requestId && !request.mobile) await extensionCall('CANCEL', {id:request.requestId}).catch(() => {});
   }
   function copyMisterHelper() { window.open('./mister-extension-install.html', '_blank', 'noopener'); }
   function validateIntegerStat(value, label, managerName) {
@@ -320,7 +322,7 @@
       const boundName = bindings[String(manager?.misterManagerId || '')];
       const participant = boundName
         ? state.participants.find(p => p.name === boundName)
-        : participantByKey.get(misterManagerKey(manager?.name));
+        : resolveMisterParticipant({id:String(manager?.misterManagerId || ''),name:manager?.name});
       if (!participant) throw new Error('El participante de Mister “' + String(manager?.name || 'sin nombre') + '” no existe en Cuban League.');
       if (managerByParticipant.has(participant.name)) throw new Error('Mister devolvió dos veces a ' + participant.name + '.');
       managerByParticipant.set(participant.name, manager);
@@ -595,7 +597,7 @@
     if (!isCurrentImport(request) || state.misterImportFinishing) return;
     state.misterImportFinishing = true;
     try {
-      if (!(await flushAutoSave())) throw new Error('Primero guarda los cambios actuales. La captura sigue disponible en la extensión.');
+      if (!(await flushAutoSave())) throw new Error('Primero guarda los cambios actuales. La captura sigue disponible para volver a cargarla.');
       if (!isCurrentImport(request)) return;
       const rows = normalizeMisterPayload(payload, request.gameweekId);
       if (!decisions && !displayMisterReview(payload,rows,request)) return;
@@ -627,10 +629,11 @@
       chosen.forEach(row => { baseline[row.participant.name] = importedRowData(row); });
       // Bookkeeping failure must never turn a confirmed draft save into a false error.
       try { localStorage.setItem(misterBaselineKey(),JSON.stringify(baseline)); } catch {}
-      await extensionCall('CONSUME',{id:request.requestId}).catch(() => {});
+      if (!request.mobile) await extensionCall('CONSUME',{id:request.requestId}).catch(() => {});
       sessionStorage.removeItem(MISTER_SESSION_KEY);
       state.misterImportRequest = null;
       state.misterImportPending = null;
+      state.misterMobilePayload = null;
       state.misterImportBusy = false;
       clearMisterImportPoll();
       $('misterImportReview').hidden = true;
@@ -654,6 +657,10 @@
   }
   async function pollMisterImport(request) {
     if (!isCurrentImport(request)) return;
+    if (request.mobile) {
+      if (state.misterMobilePayload) await finishMisterImport(state.misterMobilePayload, request);
+      return;
+    }
     try {
       const {job} = await extensionCall('STATUS',{id:request.requestId});
       if (!isCurrentImport(request)) return;
@@ -726,7 +733,46 @@
       setMisterImportStatus(String(error.message || error),'error');
     }
   }
+  async function loadMobileMisterFile(file) {
+    if ($('importMisterButton').disabled) return;
+    const matchday = state.matchday, season = currentSeasonKey();
+    const attempt = crypto.randomUUID();
+    state.misterImportAttempt = attempt;
+    state.misterImportBusy = true;
+    syncMisterImportUI();
+    $('misterImportPanel').hidden = false;
+    $('misterImportReview').hidden = true;
+    $('retryMisterImportButton').hidden = true;
+    $('cancelMisterImportButton').textContent = 'Cancelar';
+    setMisterImportStatus('Validando la captura del celular…');
+    try {
+      const payload = await window.CubanMobileImport.readFile(file);
+      if (state.misterImportAttempt !== attempt) return;
+      if (state.matchday !== matchday || currentSeasonKey() !== season || isChampionsMode()) throw new Error('La jornada cambió. Vuelve a cargar la captura.');
+      if (!Number.isSafeInteger(payload.gameweekId) || payload.gameweekId < 1) throw new Error('Identificador de jornada inválido.');
+      // Validate everything before creating a request or touching the current draft.
+      normalizeMisterPayload(payload, payload.gameweekId);
+      if (!(await flushAutoSave())) throw new Error('Guarda los cambios actuales antes de importar.');
+      if (state.misterImportAttempt !== attempt) return;
+      const request = {mobile:true,requestId:attempt,matchday,season,gameweekId:payload.gameweekId,
+        protectExisting:state.hasDraft,startFingerprint:importFingerprint()};
+      state.misterImportRequest = request;
+      state.misterMobilePayload = payload;
+      await finishMisterImport(payload, request);
+    } catch (error) {
+      if (state.misterImportAttempt !== attempt) return;
+      state.misterImportBusy = false;
+      setMisterImportStatus(String(error.message || error), 'error');
+    } finally {
+      $('mobileMisterFile').value = '';
+      syncMisterImportUI(); syncPublicationUI();
+    }
+  }
+
   function setupMisterImportControls() {
+    $('mobileMisterFile').addEventListener('change', event => {
+      if (event.target.files[0]) loadMobileMisterFile(event.target.files[0]);
+    });
     $('saveMisterImportDecisions').addEventListener('click', () => {
       const pending = state.misterImportPending;
       if (pending && !state.saving) finishMisterImport(pending.payload,pending.request,true);
