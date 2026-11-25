@@ -9,7 +9,7 @@ const core=read('mister-import-core.js');
 const league=JSON.parse(read('data.json'));
 const roster=league.participants.filter(p=>p.active!==false);
 function escape(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-async function captureFixture({officialView=null,pending=false,missingStats=false,negative=false,sourceLineup=null,matchday=3,gameweekId=4044}={}) {
+async function captureFixture({mobile=false,officialView=null,pending=false,missingStats=false,negative=false,sourceLineup=null,matchday=3,gameweekId=4044}={}) {
   const ids=roster.map((p,i)=>String(100+i));
   const html=`<a class="active" href="https://mister.mundodeportivo.com/action/change?id_community=649733">1ra div Cubanleague</a>
     <button data-tab="gameweek" class="active">Jornada</button><a data-partial class="selected" href="/standings?gw=${gameweekId}">J${matchday}</a>
@@ -64,7 +64,17 @@ async function captureFixture({officialView=null,pending=false,missingStats=fals
       w.Date.now=()=>time+(Date.now()-time)*12;
     });
   }
-  w.eval(core);w.eval(read('mister-extension/collector.js'));
+  if (mobile) {
+    const answers = [String(matchday),'2026/27']; w.prompt = () => answers.shift();
+    w.alert = message => done({error:message});
+    delete w.chrome;
+    w.URL.createObjectURL = file => {
+      const reader = new w.FileReader(); reader.onload = () => done({payload:JSON.parse(reader.result)}); reader.readAsText(file);
+      return 'blob:test';
+    };
+    w.URL.revokeObjectURL = () => {};
+    w.eval(decodeURIComponent(read('mister-mobile-bookmarklet.txt').slice('javascript:'.length)));
+  } else { w.eval(core);w.eval(read('mister-extension/collector.js')); }
   const timer=setTimeout(()=>done({error:'fixture timeout'}),4000);
   const result=await completed;clearTimeout(timer);dom.window.close();
   assert.equal(result.error,undefined);return result.payload;
@@ -246,7 +256,7 @@ test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conser
   const inject=`
     refreshRestoreState = async () => true;
     extensionCall = async () => ({ok:true});
-    window.testImport={state,renderPlayerRows,finishMisterImport,gatherRows,importFingerprint};
+    window.testImport={state,renderPlayerRows,finishMisterImport,loadMobileMisterFile,gatherRows,importFingerprint};
   `;
   w.eval(read('admin.js').replace('  boot();',inject));
   const api=w.testImport;const state=api.state;
@@ -258,8 +268,16 @@ test('J8 con Mayol y Olaiz: guardado usa exclusivamente RPC de borrador y conser
   state.client={rpc:async(name,params)=>{calls.push({name,params});assert.equal(name,'save_matchday_draft_with_player_goals');return{data:{rows:params.p_rows,writeRevision:'revision-'+calls.length},error:null};}};
   api.renderPlayerRows([]);
   const request={requestId:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',matchday:8,season:'2026/27',gameweekId:8008,protectExisting:false,startFingerprint:api.importFingerprint()};
-  state.misterImportRequest=request;state.misterImportBusy=true;
-  await api.finishMisterImport(payload,request);
+  w.eval(read('mister-mobile.js'));
+  state.lineupSchemaReady = true; state.catalogSchemaReady = true;
+  const initial = api.importFingerprint();
+  for (const invalid of [{...payload,matchday:7},{...payload,league:{id:'978196'}},{...payload,season:'2025/26'}, {...payload,gameweekId:null}]) {
+    await api.loadMobileMisterFile({size:100,text:async()=>JSON.stringify(invalid)});
+    assert.equal(calls.length,0,'invalid files never write data');
+    assert.equal(api.importFingerprint(),initial);
+  }
+  // File import must enter the exact same conflict / revision-checked draft pipeline.
+  await api.loadMobileMisterFile({size:JSON.stringify(payload).length,text:async()=>JSON.stringify(payload)});
   assert.equal(calls.length,1,w.document.getElementById('misterImportStatus').textContent);
   assert.equal(calls[0].params.p_player_goals.matchday,8);
   assert.equal(calls[0].params.p_player_goals.players['mister-5340038'],0);
@@ -435,3 +453,12 @@ for(const [name,change] of [
     assert.match(payload.warnings.join(' '),/Once ideal pendiente/);
   });
 }
+
+test('mobile bookmark runs the unchanged reader without Chrome, preserving the desktop capture',async()=>{
+  const desktop=await captureFixture({pending:true}), mobile=await captureFixture({pending:true,mobile:true});
+  for(const payload of [desktop,mobile]) { delete payload.capturedAt; delete payload.capturedStartedAt; }
+  assert.deepEqual(mobile,JSON.parse(JSON.stringify(desktop)));
+  const {dom,rows}=await adminFor(mobile);
+  try { assert.equal(rows.length,20); assert.ok(rows.every(row=>row.lineup.length===11)); }
+  finally { dom.window.close(); }
+});

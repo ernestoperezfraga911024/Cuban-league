@@ -15,7 +15,7 @@
   <link rel="manifest" href="admin-manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-f05-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon-f05.png">
-  <link rel="stylesheet" href="admin.css?v=176-20261015-classic-navigation">
+  <link rel="stylesheet" href="admin.css?v=256-20261125-mobile">
   <link rel="stylesheet" href="brand-f05.css?v=182-20261018-f05-2">
   <link rel="stylesheet" href="second-division.css?v=190-20261022">
   <link rel="stylesheet" href="forecast-review.css?v=201-20261111">
@@ -403,6 +403,11 @@
             <a href="mister-extension-install.html" target="_blank" rel="noopener">Actualizar extensión</a>
             <a href="index.html?section=second-division" target="_blank" rel="noopener">Ver Segunda</a>
           </div>
+          <div class="mobile-mister-actions">
+            <a href="mister-mobile.html" target="_blank" rel="noopener">Desde el celular · guía</a>
+            <label for="secondMobileFile">Cargar captura de Segunda del celular</label>
+            <input id="secondMobileFile" type="file" accept=".json,application/json" aria-label="Cargar captura de Segunda del celular">
+          </div>
           <p id="secondSavedDays" class="second-note"></p>
           <p id="secondAdminStatus" class="second-status" role="status" aria-live="polite"></p>
           <div id="secondReview" hidden>
@@ -458,6 +463,11 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 19h14"/><path d="M4 7V5a2 2 0 0 1 2-2h3m11 4V5a2 2 0 0 0-2-2h-3"/></svg>
           <span>Importar Jornada <b id="importMisterMatchday">1</b> desde Mister</span>
         </button>
+        <div class="mobile-mister-actions">
+          <a href="mister-mobile.html" target="_blank" rel="noopener">Desde el celular · guía</a>
+          <label for="mobileMisterFile">Cargar captura del celular</label>
+          <input id="mobileMisterFile" type="file" accept=".json,application/json" aria-label="Cargar captura de Primera del celular">
+        </div>
         <div class="matchday-meta">
           <span id="publicationBadge" class="publication-badge draft"><i></i><b>Borrador</b></span>
           <span id="savedAt" class="saved-at">Todavía no guardada</span>
@@ -474,7 +484,7 @@
           </div>
         </header>
         <div class="mister-import-steps">
-          <div><span>1</span><p><b>Instala la extensión una vez</b><small>Chrome en computadora. La guía explica cómo cargarla y abrir tu sesión de Mister.</small></p></div>
+          <div><span>1</span><p><b>Elige PC o celular</b><small>En PC usa la extensión. En celular abre «Desde el celular · guía», lee Mister y carga el archivo de captura.</small></p></div>
           <div><span>2</span><p><b>Selecciona la jornada e importa</b><small>Se abre Mister y se leen los 20 participantes. Mantén ambas pestañas abiertas hasta ver «Borrador guardado».</small></p></div>
           <div><span>3</span><p><b>Revisa el borrador</b><small>Incluye XI, capitanes, puntos, goles, clean sheets y rojas. Se señalan pendientes y diferencias con tus correcciones.</small></p></div>
         </div>
@@ -490,7 +500,7 @@
           <div id="misterImportConflicts"></div>
           <button id="saveMisterImportDecisions" class="primary-button" type="button">Guardar decisiones en borrador</button>
         </div>
-        <p class="mister-import-privacy">La extensión lee datos deportivos con tu sesión de Mister. Tu contraseña no se envía al panel. La publicación siempre la decides tú.</p>
+        <p class="mister-import-privacy">El lector usa tu sesión de Mister para leer datos deportivos. Tu contraseña no se envía al panel. La publicación siempre la decides tú.</p>
       </section>
 
       <section id="championsAutomationNotice" class="champions-automation-notice" aria-labelledby="championsAutomationTitle" hidden>
@@ -873,9 +883,10 @@
   <script src="supabase.js"></script>
   <script src="supabase-config.js?v=161-20260902"></script>
   <script src="player-catalog.js?v=168-20260905-mister-catalog-audit"></script>
+  <script src="mister-mobile.js?v=256-20261125-mobile"></script>
   <script src="mister-import-core.js?v=249-20261119-official-xi"></script>
   <script src="second-division-core.js?v=190-20261022"></script>
-  <script src="second-division-admin.js?v=190-20261022"></script>
+  <script src="second-division-admin.js?v=256-20261125-mobile"></script>
   <script src="forecast-source-method.js?v=204-20261111"></script>
   <script src="forecast-review-core.js?v=204-20261111"></script>
   <script src="forecast-publish-core.js?v=239-20261117-alternative-roles"></script>
@@ -889,7 +900,7 @@
   <script src="forecast-season-admin.js?v=212-20261112"></script>
   <script src="forecast-review.js?v=207-20261111"></script>
   <script src="audience-admin.js?v=219-20261113"></script>
-  <script src="admin.js?v=252-20261119-player-goals"></script>
+  <script src="admin.js?v=256-20261125-mobile"></script>
 </body>
 </html>
 

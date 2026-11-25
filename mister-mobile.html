@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Importar desde el celular · Cuban League</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071626;color:#edf5ff;font:16px/1.6 system-ui,-apple-system,sans-serif}main{max-width:740px;margin:auto;padding:28px 20px 60px}h1{font-size:30px;line-height:1.2}h2{font-size:21px}section{background:#10283f;border:1px solid #28445e;border-radius:18px;padding:20px;margin:20px 0}a{color:#7ce8bc}button{font:inherit;font-weight:700;background:#52dfab;color:#071626;border:0;border-radius:12px;padding:14px 20px;min-height:48px}button:disabled{opacity:.5}li{margin:12px 0}ol{padding-left:22px}textarea{width:100%;font:12px monospace;min-height:100px;margin-top:12px}small{color:#b7cade}code{overflow-wrap:anywhere}
+</style></head><body><main>
+<a href="admin.html">← Administración</a>
+<p><small>CUBAN LEAGUE · PRIMERA Y SEGUNDA</small></p>
+<h1>Actualiza la jornada desde tu celular</h1>
+<p>Lee Mister en el navegador, guarda la captura y cárgala en administración. En Primera se guarda un borrador; en Segunda revisas la tabla. <strong>Publicar siempre lo decides tú.</strong></p>
+<section><h2>1. Prepara el ayudante una sola vez</h2>
+<p>En iPhone, abre esta guía en <strong>Safari</strong>. Si estás dentro de la app de Cuban League, abre la misma dirección en Safari.</p>
+<ol><li>Guarda esta página como marcador con el nombre <b>Leer Cuban League</b> (Compartir → Añadir marcador).</li><li>Pulsa <b>Copiar ayudante</b>.</li><li>Abre tus marcadores, edita <b>Leer Cuban League</b> y sustituye su dirección por el código copiado completo. Debe empezar por <code>javascript:</code>. Guarda.</li></ol>
+<button id="copyMobileBookmark" disabled type="button">Copiar ayudante</button>
+<p id="mobileBookmarkStatus" role="status" aria-live="polite"></p>
+<details><summary>Ver o copiar el código manualmente</summary><label for="mobileBookmarkCode">Dirección del marcador</label><textarea id="mobileBookmarkCode" readonly spellcheck="false"></textarea></details>
+<small>El ayudante contiene el lector: no necesita instalar una extensión ni cargar scripts externos dentro de Mister. En otros navegadores, usa un marcador que permita direcciones javascript.</small>
+</section>
+<section><h2>2. Lee la jornada en Mister</h2>
+<ol><li>Abre <a href="https://mister.mundodeportivo.com/standings" target="_blank" rel="noopener">Mister en Safari</a>, inicia tu sesión y selecciona Primera o Segunda de Cuban League.</li><li>Desde los marcadores, toca <b>Leer Cuban League</b>. Indica la jornada y confirma la temporada. En Segunda, 0 corresponde a General; para una jornada te pedirá el nombre de la cuenta de administrador que no compite.</li><li>Mantén Mister visible y el celular desbloqueado mientras lee. Al terminar, toca <b>Compartir / Guardar en Archivos</b> o <b>Guardar archivo de captura</b>. Conserva el archivo JSON.</li></ol>
+<p>Si aparece un error, conserva el borrador existente, cierra los anuncios y vuelve a ejecutar el marcador. Si el navegador recarga Mister, inicia de nuevo la lectura.</p></section>
+<section><h2>3. Carga, revisa y publica</h2>
+<ol><li>Vuelve a <a href="admin.html">Administración</a> e inicia tu sesión.</li><li>Selecciona la misma jornada y división. Pulsa <b>Cargar captura del celular</b> y elige el archivo guardado.</li><li>Revisa las advertencias y decide qué datos conservar si ya había cambios. En Primera espera <b>Borrador guardado</b>; después usa el botón habitual para publicar.</li></ol>
+<p>El archivo contiene datos deportivos. No incluye tu contraseña ni tus cookies. No se publica nada desde Mister.</p></section>
+</main><script src="mister-mobile.js?v=256-20261125-mobile"></script></body></html>

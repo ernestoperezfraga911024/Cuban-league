@@ -5,12 +5,14 @@
   const $ = id => document.getElementById(id);
   let client, season, call, blocked, initialized = false;
   let current = null, excludedId = '', revision = 0, payload = null, jobId = null;
+  let mobile = false;
   let timer, generation = 0, stateRequest = 0, busy = false, saving = false, baseline = [];
   const scope = () => Number($('secondImportScope').value);
   const label = () => scope() ? 'Jornada ' + scope() : 'General';
   function message(value) { $('secondAdminStatus').textContent = value; }
   function buttons() {
     $('secondImport').disabled = busy || saving;
+    $('secondMobileFile').disabled = busy || saving || Boolean(payload);
     $('secondImportScope').disabled = busy || saving || Boolean(payload);
     $('secondCancel').hidden = !busy && !payload;
     $('secondCancel').disabled = saving;
@@ -109,7 +111,7 @@
     const old = jobId; jobId = null; payload = null; busy = false;
     $('secondReview').hidden = true;
     buttons();
-    if (old) await call('SECOND_CANCEL', { id:old }).catch(() => {});
+    if (old && !mobile) await call('SECOND_CANCEL', { id:old }).catch(() => {});
     message('Lectura descartada. La clasificación publicada se conserva.');
   }
   async function start() {
@@ -122,6 +124,7 @@
       await state();
       if (token !== generation) return;
       if (scope() && !excludedId) throw new Error('Publica primero General e identifica tu cuenta de administrador. Después podrás importar jornadas.');
+      mobile = false;
       const hello = await call('HELLO');
       if (token !== generation) return;
       if (hello.secondDivision !== true || hello.secondHistory !== true || hello.secondEmptySlots !== true) throw new Error('Actualiza la extensión a 1.1.2 y recarga Mister y este panel. Usa «Actualizar extensión».');
@@ -133,6 +136,27 @@
     } catch (error) {
       if (token !== generation) return;
       busy = false; message(error.message || String(error)); buttons();
+    }
+  }
+  async function loadMobileFile(file) {
+    if (busy || saving || payload || blocked?.()) return;
+    const token = ++generation;
+    busy = true; buttons(); message('Validando captura de Segunda…');
+    try {
+      const capture = await window.CubanMobileImport.readFile(file);
+      if (token !== generation) return;
+      await state();
+      if (token !== generation) return;
+      const validated = core.validate(capture, season);
+      if (validated.matchday !== scope()) throw new Error('La captura corresponde a otra jornada.');
+      if (scope() && (!excludedId || validated.excludedManagerId !== excludedId))
+        throw new Error('La cuenta de administrador no coincide. Publica primero General o repite la captura con la cuenta configurada.');
+      mobile = true; jobId = crypto.randomUUID();
+      review(validated);
+    } catch (error) {
+      if (token === generation) { payload = null; jobId = null; message(error.message || String(error)); }
+    } finally {
+      if (token === generation) { busy = false; $('secondMobileFile').value = ''; buttons(); }
     }
   }
   async function publish() {
@@ -151,7 +175,7 @@
       if (error) throw error;
       const savedJob = jobId; payload = null; jobId = null;
       $('secondReview').hidden = true;
-      await call('SECOND_CONSUME', { id:savedJob }).catch(() => {});
+      if (!mobile) await call('SECOND_CONSUME', { id:savedJob }).catch(() => {});
       message(label() + ' guardada. Ya se puede consultar desde Más. Las otras jornadas se conservan.');
       // A refresh failure must not misreport an already completed publication.
       await state().catch(() => {});
@@ -166,6 +190,7 @@
     for (let day = 1; day <= 38; day++) $('secondImportScope').add(new Option('Jornada ' + day + ' · tabla y alineaciones', String(day)));
     $('secondImportScope').addEventListener('change', () => { generation++; stateRequest++; current = null; baseline = []; revision = 0; message('Seleccionada ' + label() + '. Pulsa importar para leerla desde Mister.'); });
     $('secondImport').addEventListener('click', start);
+    $('secondMobileFile').addEventListener('change', event => { if (event.target.files[0]) loadMobileFile(event.target.files[0]); });
     $('secondCancel').addEventListener('click', cancel);
     $('secondPublish').addEventListener('click', publish);
     $('secondExcluded').addEventListener('change', renderReview);
@@ -184,7 +209,7 @@
   function reset() {
     generation++; clearTimeout(timer);
     const old = jobId; jobId = null; payload = null; busy = false; current = null; excludedId = ''; revision = 0;
-    if (old && call) call('SECOND_CANCEL', { id:old }).catch(() => {});
+    if (old && call && !mobile) call('SECOND_CANCEL', { id:old }).catch(() => {});
     if (initialized) { $('secondReview').hidden = true; $('secondAdmin').open = false; buttons(); }
   }
   window.CubanSecondAdmin = { init, reset };

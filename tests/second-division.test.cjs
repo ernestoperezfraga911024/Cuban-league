@@ -129,7 +129,7 @@ test('empty calendar and unavailable XI show honest states; refreshing a changed
   }finally{dom.window.close();}
 });
 
-test('Mister DOM to historical XI reads the chosen day, keeps no-play/captain and never opens statistics',async()=>{
+for (const mobile of [false,true]) test('Mister DOM to historical XI reads the chosen day, keeps no-play/captain; mobile='+mobile,async()=>{
   const source=read('tests/fixtures/mister-j5-yovany-lineup-20260917.html');
   const html='<a class="active" href="/action/change?id_community=978196">2da Cubanleague</a><button data-tab="gameweek" class="active">Jornada</button>'
     +'<a data-partial class="selected" href="/standings?gw=4046">J5</a>'
@@ -156,7 +156,12 @@ test('Mister DOM to historical XI reads the chosen day, keeps no-play/captain an
     }
   });
   try {
-    w.eval(read('mister-import-core.js'));w.eval(read('second-division-core.js'));w.eval(read('mister-extension/second-division-collector.js'));
+    if (mobile) {
+      delete w.chrome; const answers=['5',season,'Ernesto']; w.prompt=()=>answers.shift(); w.alert=error=>resolve({error});
+      w.URL.createObjectURL=file=>{const reader=new w.FileReader();reader.onload=()=>resolve({payload:JSON.parse(reader.result)});reader.readAsText(file);return 'blob:test';};
+      w.URL.revokeObjectURL=()=>{};
+      w.eval(decodeURIComponent(read('mister-mobile-bookmarklet.txt').slice('javascript:'.length)));
+    } else { w.eval(read('mister-import-core.js'));w.eval(read('second-division-core.js'));w.eval(read('mister-extension/second-division-collector.js')); }
     const timer=setTimeout(()=>resolve({error:'Fixture timeout'}),5000);
     const result=await finished;clearTimeout(timer);await tick();
     assert.equal(result.error,undefined);assert.equal(stats,0);
@@ -168,7 +173,7 @@ test('Mister DOM to historical XI reads the chosen day, keeps no-play/captain an
   }finally{dom.window.close();}
 });
 
-test('admin publishes only reviewed Second Division data and passes the exact day, revision and stable exclusion',async()=>{
+for (const mobile of [false,true]) test('admin publishes only reviewed Second data with revision/exclusion; mobile='+mobile,async()=>{
   const dom=new JSDOM(read('admin.html'),{url:'https://example.test/admin.html',runScripts:'outside-only'});
   const w=dom.window, calls=[], jobs=[];const $=id=>w.document.getElementById(id);
   const id='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
@@ -188,19 +193,26 @@ test('admin publishes only reviewed Second Division data and passes the exact da
     w.eval(read('second-division-core.js'));w.eval(read('second-division-admin.js'));
     w.CubanSecondAdmin.init({client,season,extensionCall,isBlocked:()=>false});
     $('secondImportScope').value='5';$('secondImportScope').dispatchEvent(new w.Event('change'));
-    $('secondImport').click();await tick();await tick();
+    if (mobile) {
+      w.eval(read('mister-mobile.js'));
+      const file={size:100,text:async()=>JSON.stringify(payload(5))};
+      Object.defineProperty($('secondMobileFile'),'files',{value:[file]});
+      $('secondMobileFile').dispatchEvent(new w.Event('change'));
+    } else $('secondImport').click();
+    await tick();await tick();
     assert.match($('secondSavedDays').textContent,/J1, J5/);
     assert.match($('secondImportScope').selectedOptions[0].textContent,/Guardada/);
     assert.equal($('secondReview').hidden,false);assert.equal($('secondExcluded').value,'999');assert.equal($('secondExcluded').disabled,true);
     assert.equal(calls.some(c=>c.name==='publish_second_division'),false);
-    assert.equal(jobs.find(c=>c.type==='SECOND_START').input.matchday,5);
+    if (!mobile) assert.equal(jobs.find(c=>c.type==='SECOND_START').input.matchday,5);
     assert.doesNotMatch($('secondPreviewRows').textContent,/Ernesto/);
     $('secondPublish').click();await tick();
     const publish=calls.find(c=>c.name==='publish_second_division');
     assert.equal(publish.args.p_expected_revision,2);assert.equal(publish.args.p_payload.matchday,5);
-    assert.equal(publish.args.p_excluded_manager_id,'999');assert.equal(publish.args.p_import_id,id);
+    assert.equal(publish.args.p_excluded_manager_id,'999');if (!mobile) assert.equal(publish.args.p_import_id,id);
     assert.ok(calls.every(c=>c.name.includes('second_division')));
-    assert.ok(jobs.some(c=>c.type==='SECOND_CONSUME'));
+    if (mobile) assert.equal(jobs.length,0,'mobile never calls the Chrome extension');
+    else assert.ok(jobs.some(c=>c.type==='SECOND_CONSUME'));
   }finally{dom.window.close();}
 });
 
