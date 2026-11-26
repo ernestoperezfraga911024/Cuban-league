@@ -236,5 +236,48 @@
     "verified_at": "2026-11-21T13:09:04.076234+00:00",
     "profile_sha256": "3045bc38f9e25be5ae23d9dd72538ec9706b9c226aba21d6c80fad034361a4d0",
     "reason": "Convocatoria del Sevilla FC del 20/11/2026 para el derbi, contrastada con la ficha de FutbolFantasy y los datos de BDFutbol."
+  },
+  {
+    "team": "fc-barcelona",
+    "id": "alex-campos",
+    "names": [
+      "Àlex Campos",
+      "Álex Campos",
+      "Alex Campos",
+      "Àlex Campos Camí"
+    ],
+    "catalog_url": "https://www.fcbarcelona.es/es/futbol/barca-b/jugadores/4551822/alex-campos",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/alex-campos-1",
+    "verified_at": "2026-11-26T13:12:15.878029+00:00",
+    "profile_sha256": "96c0e6bb2566c9915ac41dd104187643a92eec9de07f3da42bf4d3a27d7390c7",
+    "reason": "El Barça y UEFA identifican al defensa nacido el 02/02/2008. BDFutbol confirma el nombre completo y FutbolFantasy lo observa ante el Sabah."
+  },
+  {
+    "team": "getafe",
+    "id": "marcos-pachon",
+    "names": [
+      "Marcos Pachón",
+      "Marcos Pachon",
+      "Marcos Pachón Sánchez"
+    ],
+    "catalog_url": "https://www.uefa.com/uefaconferenceleague/clubs/87960/squad/",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/marcos-pachon",
+    "verified_at": "2026-11-26T13:12:25.111979+00:00",
+    "profile_sha256": "6526cfd0828f19d64c592e416a5ccab215bc9fcd235719e214c3e519b51b3770",
+    "reason": "UEFA lo incluye como delantero de la lista B del Getafe. BDFutbol confirma el nombre completo y FutbolFantasy su presencia en el grupo que prepara la visita al Iberia."
+  },
+  {
+    "team": "racing-santander",
+    "id": "jorge-castellanos",
+    "names": [
+      "Jorge Castellanos",
+      "Jorge Castellanos del Olmo",
+      "Castellanos"
+    ],
+    "catalog_url": "https://www.laliga.com/en-ID/player/jorge-castellanos",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/jorge-castellanos",
+    "verified_at": "2026-11-26T13:12:24.978302+00:00",
+    "profile_sha256": "6060b48c742a09348b0179d472acdfeb8e99b19bcc80e25cd833fdc86aa67705",
+    "reason": "LaLiga lo identifica con el Racing. El club confirma su posición de centrocampista y la federación registra su nombre completo en el Rayo Cantabria."
   }
 ]
