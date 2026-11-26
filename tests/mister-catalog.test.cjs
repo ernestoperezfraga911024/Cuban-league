@@ -41,7 +41,7 @@ test('identidad Mister distingue homónimos y conserva los identificadores del h
     assert.equal(c.resolve({misterPlayerId:'999999',playerName:'C. Romero'}),null);
     assert.equal(c.search('Cristian Romero')[0].clubId,'atletico-madrid');
     assert.equal(c.search('Carlos Romero')[0].clubId,'villarreal');
-    assert.equal(c.recordCount,591);
+    assert.equal(c.recordCount,594);
     assert.equal(c.resolve({misterPlayerId:'1396108'}).id,'mister-1396108');
     assert.equal(c.resolve({misterPlayerId:'61009'}).id,'a-ortiz');
     assert.equal(c.resolve({misterPlayerId:'2586746'}).id,'mister-2586746');
@@ -333,5 +333,27 @@ test('Los tres debutantes convocados por el Sevilla tienen identidades distintas
       assert.equal(candidates.length, 1);
       assert.equal(candidates[0].verified_alias.id, id);
     }
+  } finally { dom.window.close(); }
+});
+
+test('Campos, Pachón y Castellanos resuelven con las identidades verificadas de sus clubes', async () => {
+  const {dom, catalog: players} = await catalog();
+  const {identityReference} = require('../scripts/forecast/identity-reference.cjs');
+  try {
+    for (const [id, team, observed, fullName, position] of [
+      ['alex-campos', 'fc-barcelona', 'Álex Campos', 'Àlex Campos Camí', 'DF'],
+      ['marcos-pachon', 'getafe', 'Marcos Pachón', 'Marcos Pachón Sánchez', 'DL'],
+      ['jorge-castellanos', 'racing-santander', 'Castellanos', 'Jorge Castellanos del Olmo', 'MC'],
+    ]) {
+      const player = players.resolve({playerId: id});
+      assert.equal(player.clubId, team);
+      assert.equal(player.position, position);
+      assert.ok(!player.misterId);
+      assert.equal(players.search(fullName)[0].id, id);
+      const refs = identityReference(team, [{id, team, name: player.name}], [observed]);
+      assert.equal(refs.candidates.length, 1);
+      assert.equal(refs.candidates[0].verified_alias.id, id);
+    }
+    assert.equal(players.resolve({misterPlayerId: '64458'}).id, 'p-campos');
   } finally { dom.window.close(); }
 });
