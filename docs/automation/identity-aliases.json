@@ -279,5 +279,18 @@
     "verified_at": "2026-11-26T13:12:24.978302+00:00",
     "profile_sha256": "6060b48c742a09348b0179d472acdfeb8e99b19bcc80e25cd833fdc86aa67705",
     "reason": "LaLiga lo identifica con el Racing. El club confirma su posición de centrocampista y la federación registra su nombre completo en el Rayo Cantabria."
+  },
+  {
+    "team": "villarreal",
+    "id": "cheikh-thiam",
+    "names": [
+      "Cheikh Thiam",
+      "Cheikh Tidiane Thiam"
+    ],
+    "catalog_url": "https://villarrealcf.es/es/player/cheikh/",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/cheikh-thiam",
+    "verified_at": "2026-11-27T16:08:45.054380+00:00",
+    "profile_sha256": "ffdc3b984db6bb68932ab769f0cb32bd3d76a40ac221431c539878dc87c74971",
+    "reason": "Villarreal identifica al centrocampista senegalés por su nombre completo. LaLiga y FutbolFantasy confirman su identidad en el club."
   }
 ]
