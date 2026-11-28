@@ -93,3 +93,12 @@ test('Racing and Real Sociedad J13 profile aliases identify their own starters',
     assert.deepEqual(owners.map(p=>p.id),[id]);
   }
 });
+
+test('Levante J14 confirmed profiles resolve uniquely within its roster',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players.filter(p=>p.club_id==='levante');
+  const aliases={'mat-ryan':'m-ryan','dani-requena':'d-requena','nacho-perez-1':'n-perez','victor-garcia-1':'v-garcia'};
+  for(const [slug,expected] of Object.entries(aliases)){
+    assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[expected]);
+  }
+});
