@@ -292,5 +292,73 @@
     "verified_at": "2026-11-27T16:08:45.054380+00:00",
     "profile_sha256": "ffdc3b984db6bb68932ab769f0cb32bd3d76a40ac221431c539878dc87c74971",
     "reason": "Villarreal identifica al centrocampista senegalés por su nombre completo. LaLiga y FutbolFantasy confirman su identidad en el club."
+  },
+  {
+    "team": "alaves",
+    "id": "ruben-montero",
+    "names": [
+      "Rúben Montero",
+      "Rubén Montero Fernández",
+      "Rubén Montero",
+      "Montero"
+    ],
+    "catalog_url": "https://www.laliga.com/es-ID/jugador/ruben-montero",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/ruben-montero",
+    "verified_at": "2026-11-28T16:06:16.089103+00:00",
+    "profile_sha256": "7c9adf664534a52eff5e529232b9ec4316c6f6c48c6004e3fc208d177d78aa20",
+    "reason": "LaLiga y la convocatoria del Alavés confirman al portero. FutbolFantasy aporta el nombre completo."
+  },
+  {
+    "team": "real-sociedad",
+    "id": "aitor-fraga",
+    "names": [
+      "Aitor Fraga",
+      "Aitor Fraga Torres"
+    ],
+    "catalog_url": "https://www.laliga.com/es-FR/jugador/aitor-fraga",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/aitor-fraga",
+    "verified_at": "2026-11-28T16:06:16.553421+00:00",
+    "profile_sha256": "b0332ffc2e7b67bcbc0a88dca0a02341c9b08090dd3adf365243412b24a5c809",
+    "reason": "LaLiga y FutbolFantasy coinciden en el nombre, el club, la posición y Hernani. Se omite la fecha de nacimiento por discrepancia entre las fuentes."
+  },
+  {
+    "team": "real-sociedad",
+    "id": "alex-lebarbier",
+    "names": [
+      "Alex Lebarbier",
+      "Alex Douma Johan Lebarbier",
+      "Álex Lebarbier"
+    ],
+    "catalog_url": "https://www.realsociedad.eus/es/noticias/detalle/renueva-hasta-2028-5",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/alex-lebarbier",
+    "verified_at": "2026-11-28T16:06:15.808632+00:00",
+    "profile_sha256": "dcec7e01229b388bd10c5522f10f5dee98d188d005097ea33158ce2d8bb03981",
+    "reason": "El club confirma la renovación del centrocampista del Sanse. FutbolFantasy confirma nombre completo y posición."
+  },
+  {
+    "team": "fc-barcelona",
+    "id": "ebrima-tunkara",
+    "names": [
+      "Ebrima Tunkara",
+      "Ebrima Tunkara Yataberreh"
+    ],
+    "catalog_url": "https://www.fcbarcelona.es/es/futbol/barca-b/jugadores/4586895/ebrima-tunkara",
+    "profile_url": "https://www.futbolfantasy.com/jugadores/ebrima-tunkara",
+    "verified_at": "2026-11-28T16:06:15.689793+00:00",
+    "profile_sha256": "31f0a69d3d4a17285b05147080ab1a472023394158b6f95ef1c5b7b9fbaa4ab3",
+    "reason": "El Barcelona identifica al jugador del filial y FutbolFantasy registra su nombre completo y posición."
+  },
+  {
+    "team": "sevilla",
+    "id": "adrian-perez-monreal",
+    "names": [
+      "Adrián Pérez",
+      "Adrián Francisco Pérez Monreal"
+    ],
+    "catalog_url": "https://rfef.es/sites/default/files/sanciones/Segunda_Federacion_-_J12.pdf",
+    "profile_url": "https://www.estadiodeportivo.com/futbol/sevilla-fc/adrian-perez-la-solucion-de-emergencia-para-el-lateral-derecho-del-sevilla-20261127-551499.html",
+    "verified_at": "2026-11-28T16:09:39.583545+00:00",
+    "profile_sha256": "6af362213f92dd79aa1023cec6bea4c6942e70b5a67416ef7dc37cf89a3e834a",
+    "reason": "La RFEF identifica al jugador en el Sevilla Atlético. Estadio Deportivo documenta su incorporación al trabajo del primer equipo como lateral derecho."
   }
 ]
