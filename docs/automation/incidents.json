@@ -1,7 +1,15 @@
 {
   "methodology_version": "ops-v2",
-  "updated_on": "2026-11-21",
+  "updated_on": "2026-11-28",
   "incidents": [
+    {
+      "code": "levante-official-j14-profile-variants",
+      "status": "guarded",
+      "failure": "El lector dejó pendiente al Levante frente al Racing al encontrar mat-ryan. El once confirmado de la jornada 14 contenía otros tres enlaces que tampoco reconocía.",
+      "prevention": "Comprobar los perfiles de Mathew Ryan, Dani Requena, Nacho Pérez y Víctor García en la plantilla del Levante y mantener la validación de once titulares distintos.",
+      "production_evidence": "Levante–Racing J14. El 28/11/2026 a las 08:50 de Miami, Supabase publicó el resultado final del Levante. La vista pública devolvió los once titulares, incluido M. Ryan, y 10 aciertos.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
     {
       "code": "racing-sociedad-official-j13",
       "status": "guarded",
