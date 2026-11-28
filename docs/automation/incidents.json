@@ -3,6 +3,14 @@
   "updated_on": "2026-11-28",
   "incidents": [
     {
+      "code": "malaga-official-j14-profile-variants",
+      "status": "guarded",
+      "failure": "El Málaga quedó pendiente en la jornada 14 por el enlace de Dani Lorenzo. La revisión de los once confirmó otro enlace sin resolver, el de Jens Cajuste.",
+      "prevention": "Asociar cada perfil verificado con su ficha del Málaga y comprobar la unicidad dentro de la plantilla.",
+      "production_evidence": "Málaga–Athletic, 28/11/2026 a las 10:26 de Miami. El historial público mostró los once titulares iniciales del Málaga y siete aciertos. Lector desplegado con ambas equivalencias.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
+    {
       "code": "levante-official-j14-profile-variants",
       "status": "guarded",
       "failure": "El lector dejó pendiente al Levante frente al Racing al encontrar mat-ryan. El once confirmado de la jornada 14 contenía otros tres enlaces que tampoco reconocía.",

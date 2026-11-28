@@ -19,6 +19,7 @@ const verified={
   'a-pastor':['lex-pastor'],
   'm-ryan':['mat-ryan'], 'd-requena':['dani-requena'],
   'n-perez':['nacho-perez-1'], 'v-garcia':['victor-garcia-1'],
+  'd-lorenzo':['dani-lorenzo-1'], 'jens-lys-cajuste':['jens-cajuste'],
   'pedri':['pedri-gonzalez']
 };
 const profiles={};
