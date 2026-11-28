@@ -3,6 +3,14 @@
   "updated_on": "2026-11-28",
   "incidents": [
     {
+      "code": "elche-atletico-official-j14-profile-variants",
+      "status": "guarded",
+      "failure": "Los enlaces de Fernando Niño y Álex Grimaldo bloquearon los dos onces. La revisión encontró otras cuatro variantes entre los titulares.",
+      "prevention": "Verificar las seis correspondencias por perfil y club, y exigir once titulares distintos por equipo.",
+      "production_evidence": "El 28/11/2026 a las 13:49 de Miami se verificaron los 22 titulares en la vista pública. Comparación inicial de cierre: 10 aciertos del Elche y 11 del Atlético.",
+      "tests": ["tests/official-xi-reader.test.cjs"]
+    },
+    {
       "code": "malaga-official-j14-profile-variants",
       "status": "guarded",
       "failure": "El Málaga quedó pendiente en la jornada 14 por el enlace de Dani Lorenzo. La revisión de los once confirmó otro enlace sin resolver, el de Jens Cajuste.",

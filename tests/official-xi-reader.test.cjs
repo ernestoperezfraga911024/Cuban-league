@@ -110,3 +110,18 @@ test('Málaga J14 confirmed profiles identify Lorenzo and Cajuste in its roster'
     assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[id]);
   }
 });
+
+test('Elche and Atlético J14 confirmed profiles resolve uniquely in the correct club',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players;
+  const teams={
+    elche:{'fernando-nino':'f-nino','federico-redondo':'f-redondo'},
+    'atletico-madrid':{'alex-grimaldo':'a-grimaldo','lee-kang-in':'k-lee','lex-baena':'a-baena','julian-lvarez':'j-alvarez'}
+  };
+  for(const [team,aliases] of Object.entries(teams)){
+    for(const [slug,id] of Object.entries(aliases)){
+      const owners=roster.filter(p=>p.club_id===team && profiles[p.id]?.includes(slug));
+      assert.deepEqual(owners.map(p=>p.id),[id]);
+    }
+  }
+});

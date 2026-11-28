@@ -20,6 +20,9 @@ const verified={
   'm-ryan':['mat-ryan'], 'd-requena':['dani-requena'],
   'n-perez':['nacho-perez-1'], 'v-garcia':['victor-garcia-1'],
   'd-lorenzo':['dani-lorenzo-1'], 'jens-lys-cajuste':['jens-cajuste'],
+  'f-nino':['fernando-nino'], 'f-redondo':['federico-redondo'],
+  'a-grimaldo':['alex-grimaldo'], 'k-lee':['lee-kang-in'],
+  'a-baena':['lex-baena'], 'j-alvarez':['julian-lvarez'],
   'pedri':['pedri-gonzalez']
 };
 const profiles={};
