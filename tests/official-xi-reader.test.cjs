@@ -102,3 +102,11 @@ test('Levante J14 confirmed profiles resolve uniquely within its roster',()=>{
     assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[expected]);
   }
 });
+
+test('Málaga J14 confirmed profiles identify Lorenzo and Cajuste in its roster',()=>{
+  const profiles=require('../supabase/functions/official-xi-reader/profiles.json');
+  const roster=require('../catalog/players.json').players.filter(p=>p.club_id==='malaga');
+  for(const [slug,id] of [['dani-lorenzo-1','d-lorenzo'],['jens-cajuste','jens-lys-cajuste']]){
+    assert.deepEqual(roster.filter(p=>profiles[p.id]?.includes(slug)).map(p=>p.id),[id]);
+  }
+});
